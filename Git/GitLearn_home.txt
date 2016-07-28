@@ -902,20 +902,36 @@ git stash pop 恢复文件的同时 也删除文件
 git remote 查看远程库的信息
 git remote –v 查看远程库的详细信息
 git push origin master  Git会把master分支推送到远程库对应的远程分支上
-//--
-删除远程分支，但是删除之后在GitHub上还能看到远程仓
+
+//--删除远程分支，但是删除之后在GitHub上还能看到远程仓
 Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
 $ git branch -r -d origin/dev
 Deleted remote-tracking branch origin/dev (was 1628f7e).
 
-查看所有分支
+//查看所有分支
 Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
 $ git branch -a
   dev
 * master
   remotes/origin/dev
   remotes/origin/master
-//--
+
+  //--回退删除的文件，git check .或指定完整文件路径git checkout C++/littleProgram_home.cpp
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository/CodeFiles (master)
+$ git status
+On branch master
+Your branch is up-to-date with 'origin/master'.
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        deleted:    C++/littleProgram_Windows Socket.cpp
+        deleted:    C++/littleProgram_home.cpp
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository/CodeFiles (master)
+$ git checkout .
 
 //--
 
