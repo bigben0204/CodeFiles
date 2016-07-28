@@ -1,0 +1,931 @@
+参考文档：http://blog.jobbole.com/78960/
+
+//--设置用户名
+Ben@DESKTOP-18O9S0P MINGW64 ~
+$ git config --global user.name "dingben"
+
+//--设置用户邮箱
+Ben@DESKTOP-18O9S0P MINGW64 ~
+$ git config --global user.email "464754973@qq.com"
+
+//--进入目录
+Ben@DESKTOP-18O9S0P MINGW64 /d
+$ cd e:
+
+//--查看路径
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files
+$ pwd
+/e/Program Files
+
+//--初始化版本库
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository
+$ git init
+Initialized empty Git repository in E:/Program Files/GitRepository/.git/
+
+//--添加文件
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git add JavaLearn_home.java
+
+//--git commit -m "JavaLearn_home.java提交" 注释内容提交变更
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git commit -m "JavaLearn_home.java提交"
+[master (root-commit) 94ee868] JavaLearn_home.java提交
+ 1 file changed, 11471 insertions(+)
+ create mode 100644 JavaLearn_home.java
+
+//--查看git状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+nothing to commit, working directory clean
+
+//--改过文件之后查看状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   JavaLearn_home.java
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+//--查看修改内容
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git diff JavaLearn_home.java
+diff --git a/JavaLearn_home.java b/JavaLearn_home.java
+index a99ae2c..a18e71e 100644
+--- a/JavaLearn_home.java
++++ b/JavaLearn_home.java
+@@ -1,4 +1,7 @@
+ //------------------------------------------------------------------------------------------------
++
++
++//------------------------------------------------------------------------------------------------
+ //Javaֵ<B4><AB><B5>ݣ<AC><BC><B4><B4><AB><C8><EB><B5><C4><CA><C7><D2><FD><D3>õĸ<B1><B1><BE><A3><AC><D4>ں<AF><CA><FD><C0><EF><BB><E1><B0>Ѹ<C3><D2><FD>
+<D3><C3>ָ<CF><F2><B5><BD><D0>µĶ<D4><CF><F3><C9>ϣ<AC><B5><AB><B2><BB><BB><E1>Ӱ<CF>쵽<BA><AF><CA><FD><C8><EB><BF>ڴ<A6><B6><D4><CF><F3>
+ public class Test {
+        public static void swap(int a, int b) {
+
+//--添加文件到版本提交控制中，可以指定所有修改过的文件.
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git add JavaLearn_home.java //git add .
+
+//--此时再查看状态，可以看到变成了to be committed
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   JavaLearn_home.java
+
+//--可以reset回退add状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git reset JavaLearn_home.java // git reset HEAD readme.txt
+Unstaged changes after reset:
+M       JavaLearn_home.java
+
+//--还原修改内容到版本控制的最后一个版本，所有修改内容将丢失
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout JavaLearn_home.java //git checkout .
+
+//--显示日志修改内容
+$ git log readme.txt
+commit 2a9f2079d5a31236a46aa725dc01d3163920321c
+Author: dingben <464754973@qq.com>
+Date:   Sat Apr 9 21:22:34 2016 +0800
+
+    增加33333333333333333
+
+commit cc11753d4bff2dccfe33960d3458ab7f516f939b
+Author: dingben <464754973@qq.com>
+Date:   Sat Apr 9 21:18:24 2016 +0800
+
+    modified How are you To 222222222222
+
+commit c245deec64a709f27d8b6adaaf06e3fd346f805e
+Author: dingben <464754973@qq.com>
+Date:   Sat Apr 9 21:16:13 2016 +0800
+
+    new added of readme.txt
+
+//--增加参数--pretty=oneline 在一行显示
+$ git log --pretty=oneline readme.txt
+2a9f2079d5a31236a46aa725dc01d3163920321c 增加33333333333333333
+cc11753d4bff2dccfe33960d3458ab7f516f939b modified How are you To 222222222222
+c245deec64a709f27d8b6adaaf06e3fd346f805e new added of readme.txt
+
+//--回退一个版本对git reset增加参数--hard HEAD^，几个版本就加几个^，如果想回退到最后一个版本就git reset --hard HEAD
+$ git reset --hard HEAD^ //回退到前100个版本，git reset  –hard HEAD~100
+HEAD is now at cc11753 modified How are you To 222222222222
+
+//--查看所有的版本操作记录
+$ git reflog //git reflog readme.txt
+cc11753 HEAD@{0}: reset: moving to HEAD^
+80f5aa9 HEAD@{1}: commit: add 4444 delete 2nd line
+cc11753 HEAD@{2}: reset: moving to HEAD^
+2a9f207 HEAD@{3}: commit: 增加33333333333333333
+cc11753 HEAD@{4}: commit: modified How are you To 222222222222
+c245dee HEAD@{5}: commit: new added of readme.txt
+94ee868 HEAD@{6}: commit (initial): JavaLearn_home.java提交
+
+//--版本回退到特定版本号内容
+$ git reset --hard 80f5aa9
+HEAD is now at 80f5aa9 add 4444 delete 2nd line
+
+//--
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        test.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git add .
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   readme.txt
+        new file:   test.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git commit -m "修改readme.txt增加4444444444，新增test.txt"
+[master 35bd88d] 修改readme.txt增加4444444444，新增test.txt
+ 2 files changed, 1 insertion(+)
+ create mode 100644 test.txt
+
+//--回退文件修改内容
+1.手工修改回原内容
+
+2.使用reset回退到最后一个版本
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git reset --hard HEAD
+HEAD is now at 35bd88d 修改readme.txt增加4444444444，新增test.txt
+
+3.使用git checkout -- filename方式
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout -- readme.txt
+
+命令 git checkout –readme.txt 意思就是，把readme.txt文件在工作区做的修改全部撤销，这里有2种情况，如下：
+1. readme.txt自动修改后，还没有放到暂存区，使用 撤销修改就回到和版本库一模一样的状态。
+2. 另外一种是readme.txt已经放入暂存区了，接着又作了修改，撤销修改就回到添加暂存区后的状态。
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git add readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   readme.txt
+
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout -- readme.txt //回退到加入暂存区的状态
+
+注意：命令git checkout -- readme.txt 中的 -- 很重要，如果没有 -- 的话，那么命令变成创建分支了。
+
+
+//--删除文件，rm filename，就是手工删除
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ rm test.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        deleted:    test.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+//再使用git checkout 可以回退文件删除状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout test.txt
+
+
+//如果使用git rm filename，删除文件就可以直接提交commit提交
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git rm test.txt
+rm 'test.txt'
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        deleted:    test.txt
+
+//此时可以使用reset --hard HEAD回退状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git reset --hard HEAD
+HEAD is now at 35bd88d 修改readme.txt增加4444444444，新增test.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+nothing to commit, working directory clean
+
+
+//一步一步回退
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git rm test.txt
+rm 'test.txt'
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        deleted:    test.txt
+
+//回退到rm filename状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git reset HEAD test.txt
+Unstaged changes after reset:
+D       test.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        deleted:    test.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+//使用checkout 回复rm filename状态
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout test.txt
+
+//删除文件并提交
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git rm test.txt
+rm 'test.txt'
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git commit -m "删除test.txt"
+[master edf048e] 删除test.txt
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ delete mode 100644 test.txt
+
+//当删除文件之后，git rm test.txt和git add test.txt可以同样完成test.txt文件的暂存删除状态
+
+//--创建SSH密钥
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ ssh-keygen -t rsa -C "bigben0204@163.com"
+Generating public/private rsa key pair.
+Enter file in which to save the key (/c/Users/Ben/.ssh/id_rsa):
+Created directory '/c/Users/Ben/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /c/Users/Ben/.ssh/id_rsa.
+Your public key has been saved in /c/Users/Ben/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:XHpObuIIInGPYISDgkMmhdA4YhbN7I5cmbOWD4/5bd8 bigben0204@163.com
+The key's randomart image is:
++---[RSA 2048]----+
+|+O*              |
+|%o.+             |
+|@o. o     .      |
+|oo *   . o       |
+|+.= +   S o      |
+|.* O     =       |
+|. + O   . +      |
+| . + +.+ o.      |
+|    ..o.o. E     |
++----[SHA256]-----+
+
+//--远程增加github仓库
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git remote add origin https://github.com/bigben0204/testgit.git
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git push -u origin master
+Counting objects: 19, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (14/14), done.
+Writing objects: 100% (19/19), 82.50 KiB | 0 bytes/s, done.
+Total 19 (delta 1), reused 0 (delta 0)
+To https://github.com/bigben0204/testgit.git
+ * [new branch]      master -> master
+Branch master set up to track remote branch master from origin.
+
+//之后在本地修改了内容之后，就会提示本地分支比远程的新
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+nothing to commit, working directory clean
+
+//使用git push推送内容到github
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git push //git push origin master
+Counting objects: 3, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 318 bytes | 0 bytes/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+To https://github.com/bigben0204/testgit.git
+   5c0519f..e7157e1  master -> master
+
+//--将github内容克隆到本地
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git clone https://github.com/bigben0204/hello-world
+Cloning into 'hello-world'...
+remote: Counting objects: 7, done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 7 (delta 1), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (7/7), done.
+Checking connectivity... done.
+
+//--查看分支
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git branch
+* master
+
+//--创建分支
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout -b dev
+Switched to a new branch 'dev'
+
+git checkout 命令加上 –b参数表示创建并切换，相当于如下2条命令
+git branch dev //创建分支
+git checkout dev //切换分支
+
+//切换到master
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git checkout master
+Switched to branch 'master'
+Your branch is up-to-date with 'origin/master'.
+
+//合并dev的内容到master
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git merge dev
+Updating e7157e1..35b3524
+Fast-forward
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+注意到上面的Fast-forward信息，Git告诉我们，这次合并是“快进模式”，也就是直接把master指向dev的当前提交，所以合并速度非常快。
+
+//合并之后删除dev分支
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git branch -d dev
+Deleted branch dev (was 35b3524).
+
+总结创建与合并分支命令如下：
+查看分支：git branch
+创建分支：git branch name
+切换分支：git checkout name
+创建+切换分支：git checkout –b name
+合并某分支到当前分支：git merge name
+删除分支：git branch –d name
+
+//--处理冲突
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git merge branch1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master|MERGING)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+        both modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+//手工修改掉冲突文件后，再add,commit
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master|MERGING)
+$ git add readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master|MERGING)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+nothing to commit, working directory clean
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master|MERGING)
+$ git commit -m "conflict fixed"
+[master 0961cdf] conflict fixed
+
+//查看分支合并情况
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git log
+commit 0961cdf99717877f3b19c31eaa732cd49d0ac741
+Merge: 77e144f 7c1edeb
+Author: dingben <464754973@qq.com>
+Date:   Wed Apr 13 20:47:44 2016 +0800
+
+    conflict fixed
+
+commit 77e144f015e0d0b1357fb65413b3d4cd492fc8bd
+Author: dingben <464754973@qq.com>
+Date:   Wed Apr 13 20:41:23 2016 +0800
+
+    在master主干上新增内容999999999
+
+commit 7c1edeb9c12cd09e6a9531e87b8e92d7641b3153
+Author: dingben <464754973@qq.com>
+Date:   Wed Apr 13 20:32:00 2016 +0800
+
+    添加内容888888到branch1
+
+commit 35b35240d86769ec03622f140875dc2592da7786
+Author: dingben <464754973@qq.com>
+Date:   Wed Apr 13 20:20:27 2016 +0800
+
+    dev分支上增加内容7777
+
+//--分支管理策略
+通常合并分支时，git一般使用”Fast forward”模式，在这种模式下，删除分支后，会丢掉分支信息，现在我们来使用带参数 –no-ff来禁用”Fast forward”模式。首先我们来做demo演示下：
+--创建一个dev分支。
+--修改readme.txt内容。
+--添加到暂存区。
+--切换回主分支(master)。
+--合并dev分支，使用命令 git merge –no-ff  -m “注释” dev
+--查看历史记录
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git checkout -b dev
+Switched to a new branch 'dev'
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ vim readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git add readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git commit -m "在dev分支上试验-no-ff选项"
+[dev 875b4ac] 在dev分支上试验-no-ff选项
+ 1 file changed, 1 insertion(+)
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 4 commits.
+  (use "git push" to publish your local commits)
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git merge --no-ff -m "merge with --no-ff" dev
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git branch -d dev
+Deleted branch dev (was 875b4ac).
+
+//可以看到分支信息875b4ac
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git log --graph --pretty=oneline --abbrev-commit
+*   eb6bdd6 merge with --no-ff
+|\
+| * 875b4ac 在dev分支上试验-no-ff选项
+|/
+*   0961cdf conflict fixed
+|\
+| * 7c1edeb 添加内容888888到branch1
+* | 77e144f 在master主干上新增内容999999999
+|/
+* 35b3524 dev分支上增加内容7777
+* e7157e1 增加test.txt内容
+* 5c0519f 再次增加test.txt
+* edf048e 删除test.txt
+* 35bd88d 修改readme.txt增加4444444444，新增test.txt
+* 80f5aa9 add 4444 delete 2nd line
+* cc11753 modified How are you To 222222222222
+* c245dee new added of readme.txt
+* 94ee868 JavaLearn_home.java提交
+
+分支策略：首先master主分支应该是非常稳定的，也就是用来发布新版本，一般情况下不允许在上面干活，干活一般情况下在新建的dev分支上干活，干完后，比如上要发布，或者说dev分支代码稳定后可以合并到主分支master上来。
+
+//--bug分支
+如果在某个分支上的修改没有提交，则所有的分支上都能看到该文件的状态为修改的
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git branch
+* dev
+  master
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git status
+On branch dev
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+//工作现场隐藏起来
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git stash
+Saved working directory and index state WIP on dev: eb6bdd6 merge with --no-ff
+HEAD is now at eb6bdd6 merge with --no-ff
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git status
+On branch dev
+nothing to commit, working directory clean
+
+//省略部分步骤，在issue404分支上修改内容后merge到master上
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git merge --no-ff -m "merge bug fix 404" issue404
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 8 commits.
+  (use "git push" to publish your local commits)
+nothing to commit, working directory clean
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git branch -d issue404
+Deleted branch issue404 (was 180cc4a).
+
+//解决完bug后再切换到dev分支来继续干活
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git stash list
+stash@{0}: WIP on dev: eb6bdd6 merge with --no-ff
+
+//通过git stash apply stash@{0}来恢复
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git stash apply stash@{0} //不指定stash编号则默认恢复编号最小的一个
+On branch dev
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+//再drop掉无用的stash
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git stash drop //git stash drop stash@{0} 可以指定删除特定的stash，不指定则默认删除编号最小的一个
+Dropped refs/stash@{0} (5bff77c803216387298231fd9d27ce65f4c04f8a)
+
+工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，可以使用如下2个方法：
+git stash apply恢复，恢复后，stash内容并不删除，你需要使用命令git stash drop来删除。
+另一种方式是使用git stash pop,恢复的同时把stash内容也删除了。
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git stash pop
+On branch dev
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (8f8e436cd940d40c462e150e7f2974ef32eb060c)
+
+//--多人协作
+当你从远程库克隆时候，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且远程库的默认名称是origin。
+
+要查看远程库的信息 使用 git remote
+要查看远程库的详细信息 使用 git remote –v
+
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git remote -v
+origin  https://github.com/bigben0204/testgit.git (fetch)
+origin  https://github.com/bigben0204/testgit.git (push)
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git remote
+origin
+
+
+一：推送分支：
+推送分支就是把该分支上所有本地提交到远程库中，推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+使用命令 git push origin master
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git push origin master
+Counting objects: 18, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (18/18), done.
+Writing objects: 100% (18/18), 1.97 KiB | 0 bytes/s, done.
+Total 18 (delta 6), reused 0 (delta 0)
+To https://github.com/bigben0204/testgit.git
+   e7157e1..8dfdaa3  master -> master
+
+如果我们现在要推送到其他分支，比如dev分支上，我们还是那个命令 git push origin dev
+那么一般情况下，那些分支要推送呢？
+master分支是主分支，因此要时刻与远程同步。
+一些修复bug分支不需要推送到远程去，可以先合并到主分支上，然后把主分支master推送到远程去。
+
+//可以在本地dev分支把内容推送到远程的dev分支上
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git push origin dev
+Total 0 (delta 0), reused 0 (delta 0)
+To https://github.com/bigben0204/testgit.git
+ * [new branch]      dev -> dev
+
+//但是之后在本地master推送到远程dev，是不会修改dev文件的
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git push origin dev
+Everything up-to-date
+
+//在本地dev推送到远程master，也不会更新文件
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git push origin master
+Everything up-to-date
+
+//--抓取分支
+//git clone时，可以把整个版本信息克隆下来，不过此时只会把master克隆下来
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2 (master)
+$ git clone https://github.com/bigben0204/testgit
+Cloning into 'testgit'...
+remote: Counting objects: 40, done.
+remote: Compressing objects: 100% (27/27), done.
+remote: Total 40 (delta 9), reused 39 (delta 8), pack-reused 0
+Unpacking objects: 100% (40/40), done.
+Checking connectivity... done.
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2 (master)
+$ cd testgit/
+
+//可以看到只把master分支克隆下来了
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (master)
+$ git branch
+* master
+
+//可以把创建一个dev分支，并且以远程服务器上的版本内容为蓝本
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (master)
+$ git checkout -b dev origin/dev
+Branch dev set up to track remote branch dev from origin.
+Switched to a new branch 'dev'
+
+
+//在testgit2/testgit的dev分支下修改readme.txt内容（新增最后一行内容）
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (dev)
+$ cat readme.txt
+It is a nice day.
+Fine, thank you.
+4444
+444444444
+777777777777777
+99999999999999
+-no-ff learning test
+I am developing in testgit2/testgit dev branch.
+
+//提交并推送到远程版本库中
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (dev)
+$ git add readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (dev)
+$ git commit -m "在testgit2/testgit文件夹下的dev分支修改readme.txt内容"
+[dev da74350] 在testgit2/testgit文件夹下的dev分支修改readme.txt内容
+ 1 file changed, 1 insertion(+)
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (dev)
+$ git log --pretty=oneline readme.txt
+da743506bd2dac9bc22101a35ec53062e752a8d8 在testgit2/testgit文件夹下的dev分支修改readme.txt内容
+875b4ac59040f0b24bc4914c78f6e6eb9a529332 在dev分支上试验-no-ff选项
+77e144f015e0d0b1357fb65413b3d4cd492fc8bd 在master主干上新增内容999999999
+35b35240d86769ec03622f140875dc2592da7786 dev分支上增加内容7777
+35bd88d3712f2fb929a8fa08301420b639396db5 修改readme.txt增加4444444444，新增test.txt
+80f5aa945b8456da7a4019d399a675de3fda1964 add 4444 delete 2nd line
+cc11753d4bff2dccfe33960d3458ab7f516f939b modified How are you To 222222222222
+c245deec64a709f27d8b6adaaf06e3fd346f805e new added of readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (dev)
+$ git push origin dev
+Counting objects: 3, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 443 bytes | 0 bytes/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+To https://github.com/bigben0204/testgit
+   eb6bdd6..da74350  dev -> dev
+
+//用git pull来将最新的github代码拉到本地
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/testgit2/testgit (dev)
+$ git pull
+remote: Counting objects: 3, done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 3 (delta 1), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From https://github.com/bigben0204/testgit
+   da74350..9aba562  dev        -> origin/dev
+Updating da74350..9aba562
+Fast-forward
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+//在本地另一个人修改同样文件
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ vim readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git add readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git commit -m "我在自己分支dev上同样提交readme.txt"
+[dev 6dda61b] 我在自己分支dev上同样提交readme.txt
+ 1 file changed, 1 insertion(+)
+
+//推送到github失败，提示有冲突，同样文件被修改
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git push origin dev
+To https://github.com/bigben0204/testgit.git
+ ! [rejected]        dev -> dev (fetch first)
+error: failed to push some refs to 'https://github.com/bigben0204/testgit.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+//git pull也失败，没有设置远程库关联
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git pull
+remote: Counting objects: 6, done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 6 (delta 1), reused 3 (delta 1), pack-reused 0
+Unpacking objects: 100% (6/6), done.
+From https://github.com/bigben0204/testgit
+   eb6bdd6..9aba562  dev        -> origin/dev
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/<branch> dev
+
+//先设置
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git branch --set-upstream dev origin/dev
+The --set-upstream flag is deprecated and will be removed. Consider using --track or --set-upstream-to
+Branch dev set up to track remote branch dev from origin.
+
+//git pull成功，但是有冲突
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git pull
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+
+//查看状态，发现有冲突文件
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev|MERGING)
+$ git status
+On branch dev
+Your branch and 'origin/dev' have diverged,
+and have 1 and 2 different commits each, respectively.
+  (use "git pull" to merge the remote branch into yours)
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+        both modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev|MERGING)
+$ vim readme.txt
+
+//修改完之后再次提交
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev|MERGING)
+$ git add readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev|MERGING)
+$ git commit -m "merge & fix readme.txt"
+[dev 1628f7e] merge & fix readme.txt
+
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git status
+On branch dev
+Your branch is ahead of 'origin/dev' by 2 commits.
+  (use "git push" to publish your local commits)
+nothing to commit, working directory clean
+
+//再次push
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (dev)
+$ git push origin dev
+Counting objects: 6, done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 766 bytes | 0 bytes/s, done.
+Total 6 (delta 2), reused 0 (delta 0)
+To https://github.com/bigben0204/testgit.git
+   9aba562..1628f7e  dev -> dev
+
+因此：多人协作工作模式一般是这样的：
+首先，可以试图用git push origin branch-name推送自己的修改.
+如果推送失败，则因为远程分支比你的本地更新早，需要先用git pull试图合并。
+如果合并有冲突，则需要解决冲突，并在本地提交。再用git push origin branch-name推送。
+
+//--
+Git基本常用命令如下：
+mkdir：         XX (创建一个空目录 XX指目录名)
+pwd：          显示当前目录的路径。
+git init          把当前的目录变成可以管理的git仓库，生成隐藏.git文件。
+git add XX       把xx文件添加到暂存区去。
+git commit –m “XX”  提交文件 –m 后面的是注释。
+git status        查看仓库状态
+git diff  XX      查看XX文件修改了那些内容
+git log          查看历史记录
+git reset  –hard HEAD^ 或者 git reset  –hard HEAD~ 回退到上一个版本
+                     (如果想回退到100个版本，使用git reset –hard HEAD~100 )
+cat XX         查看XX文件内容
+git reflog       查看历史记录的版本号id
+git checkout — XX  把XX文件在工作区的修改全部撤销。
+git rm XX          删除XX文件
+git remote add origin https://github.com/tugenhua0707/testgit 关联一个远程库
+git push –u(第一次要用-u 以后不需要) origin master 把当前master分支推送到远程库
+git clone https://github.com/tugenhua0707/testgit  从远程库中克隆
+git checkout –b dev  创建dev分支 并切换到dev分支上
+git branch  查看当前所有的分支
+git checkout master 切换回master分支
+git merge dev    在当前的分支上合并dev分支
+git branch –d dev 删除dev分支
+git branch –D dev 强制删除dev分支
+git branch name  创建分支
+git stash 把当前的工作隐藏起来 等以后恢复现场后继续工作
+git stash list 查看所有被隐藏的文件列表
+git stash apply 恢复被隐藏的文件，但是内容不删除
+git stash drop 删除文件
+git stash pop 恢复文件的同时 也删除文件
+git remote 查看远程库的信息
+git remote –v 查看远程库的详细信息
+git push origin master  Git会把master分支推送到远程库对应的远程分支上
+//--
+删除远程分支，但是删除之后在GitHub上还能看到远程仓
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git branch -r -d origin/dev
+Deleted remote-tracking branch origin/dev (was 1628f7e).
+
+查看所有分支
+Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository (master)
+$ git branch -a
+  dev
+* master
+  remotes/origin/dev
+  remotes/origin/master
+//--
+
+//--
+
+//--
+
+//--
+
+//--
+
+//--
+
+//--
+
