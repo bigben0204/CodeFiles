@@ -916,7 +916,7 @@ $ git branch -a
   remotes/origin/dev
   remotes/origin/master
 
-  //--回退删除的文件，git check .或指定完整文件路径git checkout C++/littleProgram_home.cpp
+//--回退删除的文件，git checkout .或指定完整文件路径git checkout C++/littleProgram_home.cpp
 Ben@DESKTOP-18O9S0P MINGW64 /e/Program Files/GitRepository/CodeFiles (master)
 $ git status
 On branch master

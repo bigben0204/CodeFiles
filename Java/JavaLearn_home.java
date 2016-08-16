@@ -15315,14 +15315,1130 @@ public class TextEditor extends WindowAdapter implements ActionListener {
 
 //------------------------------------------------------------------------------------------------
 //Java核心编程技术 第17课 AWT多媒体编程 P535
-略过没看？
+17.1 图像处理——java.awt.image P535
+17.1.1 加载图像
+AWT可以很简单地两种格式的图像：GIF和JPEG。Toolkit类提供了两个getImage()方法来加载图像。
+--Image getImage(URL url);
+--Image getImage(String filename);
+Toolkit是一个组件类，取得Toolkit的方法是：
+Toolkit toolkit = Toolkit.getDefaultToolkit();
+对于继承了Frame的类来说，可以直接使用下面的方法取得：
+Toolkit toolkit = getToolkit();
+下面是两个加载图片的实例：
+Toolkit toolkit = Toolkit.getDefaultToolkit();
+Image image1 = toolkit.getImage("imageFile.gif");
+Image image2 = toolkit.getImage(new URL("http://.../people.gif"));
+如果你的类是Applet，可以使用Applet的两个getImage()方法来直接加载图片：
+Image getImage(URL url);
+Image getImage(URL url, String name);
+
+17.1.2 显示图像 P536
+通过传递到paint()方法的Graphics对象可以很容易地显示图像。Graphics类声明了下面的4个drawImage()方法。它们都返回一个boolean值，虽然这个值很少被使用。如果图像已经被完全加载并且因此被完全绘制，返回值是true，否则，返回值是false。
+组件可以指定this作为图像观察者的原因是，Component类实现了ImageObserver接口。当图像数据被加载时，它的实现会调用repaint()方法。
+例如下面代码在组件区域的左上角(0, 0)以原始大小显示一个图像。
+g.drawImage(myImage, 0, 0, this);
+下面的代码在坐标(90, 0)处显示一个被缩放为宽300像素高62像素的图像。
+g.drawImage(myImage, 90, 0, 300, 62, this);
+
+17.1.3 实例一：显示图片 P536
+编写一个窗体，用来加载图像并进行显示。该类继承自Frame，可以直接使用getToolkit()方法来取得Toolkit对象，然后使用getImage()来取得一张本地图片文件，最后在paint()中使用Graphics的drawImage()即可显示该图像。
+package test;
+
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class ShowImage extends Frame {
+    private String fileName;
+
+    public ShowImage(String fileName) {
+        setSize(470, 350);
+        setVisible(true);
+        this.fileName = fileName;
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        //取得图片对象
+        Image image = getToolkit().getImage(fileName);
+        //画图
+        g.drawImage(image, 50, 50, this);
+    }
+
+    public static void main(String[] args) {
+        new ShowImage("src/image/1.jpg");
+    }
+}
+
+17.1.4 实例二：缩放图片 P537
+通过getImage()方法取得的是java.awt.Image类型的对象，也可以使用javax.imageio.ImageIO类的read()取得一个图像，返回的是BufferedImage对象。
+BufferedImage ImageIO.read(Url);
+BufferedImage是Image的子类，它描述了具有可访问图像数据缓存区的Image，可以通过该类来实现图片的缩放。
+//
+package test;
+
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
+
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+
+public class ZoomImage {
+    public void zoom(String file1, String file2) {
+        try {
+            File file = new File(file1);
+            Image src = javax.imageio.ImageIO.read(file);//构造Image对象，返回的BufferedImage对象，是Image的子类
+            int width = src.getWidth(null);
+            int height = src.getHeight(null);
+
+            BufferedImage tag = new BufferedImage(width / 2, height / 2, BufferedImage.TYPE_INT_RGB);
+            tag.getGraphics().drawImage(src, 0, 0, width / 2, height / 2, null);//绘制缩小的图
+
+            //写入图片
+            FileOutputStream out = new FileOutputStream(file2);//输出到文件流
+            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+            encoder.encode(tag);
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        String file1 = "src/image/1.jpg";
+        String file2 = "src/image/half1.jpg";
+        new ZoomImage().zoom(file1, file2);
+    }
+}
+运行该程序，即可生成一个长宽为原图一半的新图片。如果大家对图像处理有更高的要求，可以关注一下开源项目。如JMagick，可以使用JMagick实现图片的复制、信息获取、斜角、特效、组合、改变大小、加边框、旋转、切片、改变格式、去色等功能。
+
+17.2 二维图像绘制——Java2D P538
+Java2D的绘图过程：
+（1）取得Graphics2D对象。
+（2）设置Graphics2D属性。
+（3）创建绘制对象。
+（4）绘制对象。
+17.2.1 Java2D简介
+
+17.2.2 取得Graphics2D对象 P540
+绘制图形时，可以在Graphics对象或者Graphics2D对象上进行，它们都代表了需要绘图的区域，选择哪个取决于是否要使用所增加的Java2D的图形功能。但要注意，所有的Java2D图形操作都必须在Graphics2D对象上调用。Graphics2D是Graphics的子类。
+绘图的第一个步骤是创建Graphics2D对象，可以将Graphics转换为该对象：
+public void paintComponent(Graphics g) {
+    Graphics2D g2 = (Graphics2D) g;
+}
+或者
+public void paint(Graphics g) {
+    Graphics2D g2 = (Graphics2D) g;
+}
+
+17.2.3 设置Graphics2D属性 P540
+
+（1）设置填充方式 P541
+如果需要对图像显示渐层式的颜色，可以设定Paint为GradientPaint的实例。
+GradientPaint gp = new GradientPaint(180, 190, Color.yellow, 220, 210, Color.red, true);
+g2.setPaint(gp);
+（2）设置画笔颜色
+BasicStroke pen = new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND);
+g2.setStroke(pen);
+
+17.2.4 创建绘制对象 P541
+Java2D中进行绘图时，不是采用对应的方法来袜，而是为要实现某种形状创建出相应的形状对象。这可以通过使用java.awt.geom包中的类来定义所要创建的形状。如线条Line2D.Float类、矩形Rectangle2D.Float或者Rectangle2D.Double类、椭圆Ellipse2D.Float、圆弧Arc2D.Float类等。
+如下例所示：
+Line2D.Float line = new Line2D.Float(20, 300, 200, 300);//直线
+CubicCurve2D.Float cubic = new CubicCurve2D.Float(40, 100, 120, 50, 170, 270, 220, 100);//曲线
+Ellipse2D.Float shape = new Ellipse2D.Float(200, 200, 60, 60);//椭圆
+
+17.2.5 绘制对象 P542
+针对不同的对象，可以使用不同的方法进行绘制。
+--可以使用Graphics2D类中的方法draw()用于绘制轮廓，用fill()方法用于填充。它们都以前面所创建的图形对象作为参数。
+--Java2D中的字符串的绘制仍然采用drawString()方法，有如下两个方法：
+drawString(String s, float x, float y);
+drawString(String str, int x, int y);
+--绘制轮廓：draw(Shape s)。其中的Shape接口在Graphics2D中被定义。
+
+新的Java2D Shape类都有“2D”后缀。这些新的形状使用浮点值（而不是整数）来描述其几何形状。
+--Polygon类（int[] xpoints, int[] ypoints, int npoints）;
+--RectangularShape抽象类，其子类有Arc2D、Ellipse2D、Rectangle2D。
+--QuadCurve2D（二次贝塞尔样条曲线）。
+--CubicCurve2D（三次贝塞尔样条曲线）。
+--Area（区域）。
+--GeneralPath（由直线、二次样条曲线、三次样条曲线所构成）。
+--Line2D。
+
+17.2.6 实例一：绘制图形 P542
+//绘制直线、曲线及椭圆图形的实例：
+package test;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Panel;
+import java.awt.geom.CubicCurve2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+
+public class DrawShape {
+    public DrawShape() {
+        Frame f = new Frame("Test Graphics2D");
+        f.setSize(500, 500);
+        f.setVisible(true);
+
+        Panel p = new MyPanel();
+        f.add(p);
+    }
+
+    private class MyPanel extends Panel {
+        @Override
+        public void paint(Graphics g) {
+            //取得Graphics2D对象
+            Graphics2D g2 = (Graphics2D) g;
+
+            //设置渐进色
+            GradientPaint gp = new GradientPaint(180, 190, Color.yellow, 220, 210, Color.red, true);
+            g2.setPaint(gp);
+            g2.setStroke(new BasicStroke(2.0f));//设定粗细
+
+            //创建直线
+            Line2D.Float line = new Line2D.Float(20, 300, 200, 300);
+            g2.draw(line);
+
+            //创建曲线
+            CubicCurve2D.Float cubic = new CubicCurve2D.Float(70, 100, 120, 50, 170, 270, 220, 100);
+            g2.draw(cubic);
+
+            //创建椭圆
+            Ellipse2D.Float shape = new Ellipse2D.Float(200, 200, 60, 60);
+            g2.fill(shape);//g2.draw(shape);
+        }
+    }
+
+    public static void main(String[] args) {
+        new DrawShape();
+    }
+}
+
+17.2.7 实例二：显示文字 P543
+通过Java2D可以显示更细致的文字，下面程序显示出外边为淡蓝色的字符串：
+package test;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Panel;
+import java.awt.Shape;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
+
+public class DrawString {
+    public DrawString() {
+        Frame f = new Frame("Test Graphics2D");
+        f.setSize(500, 500);
+        f.setVisible(true);
+
+        Panel p = new MyPanel();
+        f.add(p);
+    }
+
+    private class MyPanel extends Panel {
+        @Override
+        public void paint(Graphics g) {
+            //取得Graphics2D对象
+            Graphics2D g2 = (Graphics2D) g;
+
+            //显示文字
+            FontRenderContext fontRenderContext = g2.getFontRenderContext();
+            TextLayout textLayout = new TextLayout("Test Characters", new Font("Modern", Font.BOLD + Font.ITALIC, 20), fontRenderContext);
+
+            //线形
+            Shape shape = textLayout.getOutline(AffineTransform.getTranslateInstance(50, 180));
+            g2.setColor(Color.blue);
+            g2.setStroke(new BasicStroke(2.0f));
+            g2.draw(shape);
+            g2.setColor(Color.red);//g2.setColor(Color.white);
+            g2.fill(shape);
+        }
+    }
+
+    public static void main(String[] args) {
+        new DrawString();
+    }
+}
+
+17.2.8 实例三：显示图像 P544
+通常希望图形有滤镜的效果，必须使用可以处理图形的绘图软件。在2D API中则提供了一些简单的方法，可以直接用程式码来对图形进行滤镜效果的控制。
+//没看到效果？
+package test;
+
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Panel;
+import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
+
+public class DrawImage {
+
+    public void draw() {
+        Frame f = new Frame("Test Graphics2D");
+        f.setSize(500, 500);
+        f.setVisible(true);
+
+        String filename = "src/image/1.jpg";
+        //Panel p = new MyPanel();
+        f.add(new Panel() {
+            @Override
+            public void paint(Graphics g) {
+                //取得Graphics2D对象
+                Graphics2D g2 = (Graphics2D) g;
+
+                float[] elements = {0.0f, -1.0f, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f};
+
+                //加载图片
+                Image img = Toolkit.getDefaultToolkit().getImage(filename);
+                int w = img.getWidth(this);
+                int h = img.getHeight(this);
+                BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+                //创建Graphics2D对象
+                Graphics2D big = bi.createGraphics();
+                big.drawImage(img, 0, 0, this);
+
+                //阴影处理
+                BufferedImageOp biop = null;
+                AffineTransform at = new AffineTransform();
+                BufferedImage bimg = new BufferedImage(img.getWidth(this), img.getHeight(this), BufferedImage.TYPE_INT_RGB);
+                Kernel kernel = new Kernel(3, 3, elements);
+                ConvolveOp cop = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+                cop.filter(bi, bimg);
+                biop = new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+
+                //显示图像
+                g2.drawImage(bimg, biop, 0, 0);
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        new DrawImage().draw();
+    }
+}
+
+17.3 音频录制与播放——JavaSound P545
+暂时没有看？
+
+17.4 视频拍照与播放——JMF多媒体库 P563
+暂时没有看？
 //------------------------------------------------------------------------------------------------
 //Java核心编程技术 第18课 Swing图形界面开发 P577
+18.1 Swing界面组件 P577
+Swing组件有如下几个特点：
+--所有的Swing组件都继承自AWT的组件Component，都是AWT的派生类。
+--所有的Swing件件都以字母“J”形状，以与AWT中的组件相区分。
+--Swing组件对AWT的功能进行了扩展，包括容器、容器、工具栏、菜单栏、组件。
 
+18.1.2 窗口与对话框 P579
+（1）窗体JFame
+package test;
+
+import javax.swing.JFrame;
+
+public class TestJFrame extends JFrame {
+
+    public TestJFrame() {
+        setTitle("Test JFrame");
+        setLocation(20, 20);
+        // Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();//获得屏幕大小
+        // setLocation(screenSize.width / 2 - 300 / 2, screenSize.height / 2 - 200 / 2);//定位的位置是窗体的左上角，用屏幕长宽减去窗体的一半长宽，定位在屏幕正中央
+        setSize(300, 200);
+        setVisible(true);
+        
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//设置该属性，关闭窗口时退出程序
+        // this.addWindowListener(new WindowAdapter() { //添加窗口关闭处理事件，实现一个WindowAdapter的匿名类
+            // @Override
+            // public void windowClosing(WindowEvent e) {
+                // System.out.println("Procedure exit.");
+                // System.exit(0);
+            // }
+        // });
+        
+        //设置跨平台的感观，没看到有什么效果
+        String strLookFeel = UIManager.getCrossPlatformLookAndFeelClassName();
+        try {
+            UIManager.setLookAndFeel(strLookFeel);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        new TestJFrame();
+    }
+}
+
+（2）内部窗体JInternalFrame P580
+JInternalFrame是轻量级组件，不能单独出现，必须依附在顶层组件上。能够利用Java提供的Look and Feel功能做出完全不同于原有操作系统所提供的窗口外形，比JFrame更具有弹性。
+JInternalFrame构造函数：
+--title：窗口标题。
+--resizable：可改变窗口大小。
+--closable：可关闭窗口。
+--maximizable：可最大化不可最小化窗口。
+--iconifiable：可最大最小化的窗口。
+如果某一个参数不存在，表示不具有该项功能。
+package test;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TestJInternalFrame extends JFrame implements ActionListener {
+    public TestJInternalFrame() {
+        super("Test JInternalFrame");
+        JButton b = new JButton("Open JInternalFrame");
+        b.addActionListener(this);
+        add(b, BorderLayout.SOUTH);
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JInternalFrame internalFrame = new JInternalFrame("JInternalFrame", true, true, true, true);
+        internalFrame.setLocation(20, 20);
+        internalFrame.setSize(100, 100);
+        internalFrame.setVisible(true);
+        add(internalFrame);
+        try {
+            internalFrame.setSelected(true);
+        } catch (java.beans.PropertyVetoException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        new TestJInternalFrame();
+    }
+}
+
+（3）图层容器 JLayeredPane P582
+JLayeredPane图层允许组件在需要时互相重叠，它将该深度范围分成几个不同的层。
+
+（4）虚拟桌面容器JDesktopPane P583
+JDesktopPane用于创建多文档界面或虚拟桌面的容器。用户可创建JInternalFrame对象并将其添加到JDesktopPane。JDesktopPane扩展了JLayeredPane，以管理可能的重叠内部窗体。
+package test;
+
+import javax.swing.JButton;
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TestJDesktopPane extends JFrame implements ActionListener {
+    private JDesktopPane desktopPane = new JDesktopPane();
+    int count = 1;
+
+    public TestJDesktopPane() {
+        super("Test JInternalFrame");
+        JButton b = new JButton("Open JInternalFrame");
+        b.addActionListener(this);
+
+        Container contentPane = getContentPane();
+        contentPane.add(b, BorderLayout.SOUTH);
+        contentPane.add(desktopPane, BorderLayout.CENTER);//这里不用getContentPane没看到有什么不同，为什么要获取到contentPane？
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        JInternalFrame internalFrame = new JInternalFrame("JInternalFrame" + count, true, true, true, true);
+        ++count;
+
+        internalFrame.setLocation(20, 20);
+        internalFrame.setSize(200, 200);
+        internalFrame.setVisible(true);
+        desktopPane.add(internalFrame);
+        try {
+            internalFrame.setSelected(true);
+        } catch (java.beans.PropertyVetoException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        new TestJDesktopPane();
+    }
+}
+
+（5）对话框JDialog P584
+对话框与框架（JFrame）有一些相似。对话框出现时，可以设定禁止其他窗口的输入，直到这个对话框被关闭。
+
+package test;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TestJDialog extends JFrame implements ActionListener {
+    public TestJDialog() {
+        super("Test JDialog");
+        JButton b = new JButton("Open JDialog");
+        b.addActionListener(this);
+
+        Container contentPane = getContentPane();
+        contentPane.add(b, BorderLayout.SOUTH);
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Open JDialog")) {
+            JDialog jDialog1 = new JDialog(this, "Dialog", true);//设置为false，则可以互相切换
+            jDialog1.setSize(200, 200);
+            jDialog1.setLocation(450, 450);
+            jDialog1.setVisible(true);
+        }
+    }
+
+    public static void main(String[] args) {
+        new TestJDialog();
+    }
+}
+
+（6）文件选择对话框 JFileChooser P585
+package test;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+
+public class TestJFileChooser extends JFrame implements ActionListener {
+    public TestJFileChooser() {
+        super("Test JFileChooser");
+        JButton b = new JButton("Open JFileChooser");
+        b.addActionListener(this);
+
+        Container contentPane = getContentPane();
+        contentPane.add(b, BorderLayout.SOUTH);
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Open JFileChooser")) {
+            JFileChooser jFileChooser = new JFileChooser();
+            jFileChooser.setMultiSelectionEnabled(true);
+
+            //图片过滤器
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & GIF Images", "jpg", "gif");//这是个可变参数构造函数，可以传递多个后缀参数
+            jFileChooser.setFileFilter(filter);
+            jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);//选择文件
+            jFileChooser.setDialogTitle("Open JPEG file");//设置窗口标题
+            int result = jFileChooser.showOpenDialog(this);//打开“打开文件”对话框
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File[] fileList = jFileChooser.getSelectedFiles();
+                for (File file : fileList) {
+                    System.out.println(file.getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new TestJFileChooser();
+    }
+}
+
+（7）颜色选择对话框 P586
+JColorChooser提供一个用于允许用户操作和选择颜色的控制器窗格。
+//
+package test;
+
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TestJColorChooser extends JFrame implements ActionListener {
+    public TestJColorChooser() {
+        super("Test JColorChooser");
+        JButton b = new JButton("Open JColorChooser");
+        b.addActionListener(this);
+
+        Container contentPane = getContentPane();
+        contentPane.add(b, BorderLayout.SOUTH);
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Open JColorChooser")) {
+            Color color = JColorChooser.showDialog(this, "Choose Color", Color.red);
+            System.out.println(color.getRGB());
+        }
+    }
+
+    public static void main(String[] args) {
+        new TestJColorChooser();
+    }
+}
+
+18.1.3 基本组件 P587
+Tips：以下输入组件都可以使用getText()取得组件的内容。
+（1）文本JLabel
+显示一段文本，创建如下：
+Label label = new Label("this is a label");
+调用容器的add()方法即可将label添加到容器中。
+（2）按钮JButton
+（3）复选框JCheckBox
+（4）单选框JRadioButton
+（5）文本框JTextField P588
+（6）密码框JPasswordField
+（7）文本域JTextArea
+（8）文本文件域JTextPane
+JTextPane可以编辑文本和图标，可以使用如下方法将编辑器与一个文本文档关联：
+void setDocument(Document doc);
+也可以将一个图标插入文档中，以替换当前选择的内容：
+void insertIcon(Icon g);
+（9）HTML编辑域JEditorPane
+可以编纯文本、HTML和RTF内容，可以调用下面的方法来设置显示一个HTML页面：
+pane.setPage(e.getURL());
+也可以向下面这样取得其中的HTML内容：
+HTMLDocument doc = (HTMLDocument) pane.getDocument();
+（10）列表JList
+String[] data = {"one", "two", "three"};
+JList list = JList(data);
+（11）滚动条JScrollBar P588
+滚动条可以添加到任何的容器中，如下：
+Container mainPane = this.getContentPane();
+JScrollBar vscroll = new JScrollBar(JScrollBar.VERTICAL);
+mainPane.add(vscroll, BordreLayout.EAST);
+
+（12）进度条JProgressBar P589
+创建进度条示例：
+progressBar = new JProgressBar(0, task.getLengthOfTask());
+progressBar.setValue(0);
+progressBar.setStringPainted(true);
+
+更新进度条值：
+progressBar.setValue(task.getCurrent());
+
+下面示例将进度条设置为不确定模式，然后在知道任务长度后切换回确定模式：
+progressBar = new JProgressBar();
+progressBar.setIndeterminate(true);//设置为不确定模式
+progressBar.setMaximum(newLength);//设置最大值
+progressBar.setValue(newValue);//设置当前值
+progressBar.setIndeterminate(false);//设置为确定模式
+
+（13）滑标组件 JSlider P589
+滑块可以显示主刻度标记及主刻度之间的次刻度标记。刻度标记之间的值的个数由setMajorTickSpacing()和setMinorTickSpacing()来控制。刻度标记和绘制由setPaintTicks()控制。滑块可以在固定时间间隔（或在任意位置）沿滑块刻度打印文本标签。标签的绘制由setLabelTable()来setPaintLabels()控制。
+package test;
+
+import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.BorderLayout;
+import java.awt.Container;
+
+public class TestJSlider extends JFrame {
+    public TestJSlider() {
+        super("Test JSlider");
+        JSlider jSlider = new JSlider(0, 100, 0);
+        //主刻度
+        jSlider.setMajorTickSpacing(10);
+        //次刻度
+        jSlider.setMinorTickSpacing(5);
+        jSlider.setPaintTicks(true);
+        jSlider.setPaintLabels(true);
+        jSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (e.getSource() instanceof JSlider) {
+                    System.out.println("Tick: " + ((JSlider) e.getSource()).getValue());
+                }
+            }
+        });
+
+        Container contentPane = getContentPane();
+        contentPane.add(jSlider, BorderLayout.SOUTH);
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new TestJSlider();
+    }
+}
+
+（14）表格组件 JTable P590
+暂时没看？
+
+（15）树形组件 JTree P593
+JTree是Swing里面比较复杂的组件之一，这个类的实例代表一整棵树，而一棵树由许多节点组成。JTree中的每一个节点都必须实现TreeNode这个Interface，我们可以自己来实现，当然Swing也为我们提供了一个DefaultMutableTreeNode的实现。
+package test;
+
+import javax.swing.JFrame;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.BorderLayout;
+import java.awt.Container;
+
+public class TestJTree extends JFrame {
+    public TestJTree() {
+        super("Test JSlider");
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("China");
+        DefaultMutableTreeNode child1 = new DefaultMutableTreeNode("Beijing");
+        DefaultMutableTreeNode child2 = new DefaultMutableTreeNode("Shanghai");
+        DefaultMutableTreeNode cc = new DefaultMutableTreeNode("Haiding");
+
+        JTree jt = new JTree(root);
+        root.add(child1);
+        root.add(child2);
+        child1.add(cc);
+
+        jt.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode n = (DefaultMutableTreeNode) jt.getLastSelectedPathComponent();
+                if (n == null) {
+                    return;
+                }
+
+                String content = (String) n.getUserObject();
+                System.out.println(content);
+            }
+        });
+
+        Container contentPane = getContentPane();
+        contentPane.add(jt, BorderLayout.CENTER);
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new TestJTree();
+    }
+}
+
+18.1.4 菜单栏组件 P594
+（1）菜单栏 JMenuBar
+添加菜单组件，首先需要添加菜单栏JMenuBar。MenuBar只能被添加到JFrame对象中，作为整个菜单树的根基。如下：
+JMenuBar mb = new JMenuBar();
+setJMenuBar(mb);
+
+（2）菜单JMenu
+JMenu m1 = new JMenu("File");
+JMenu m2 = new JMenu("Edit");
+JMenu m3 = new JMenu("Help");
+mb.add(m1);
+mb.add(m2);
+mb.add(m3);
+
+（3）菜单选项 JMenuItem
+JMenuItem mi1 = new JMenuItem("Open");
+JMenuItem mi2 = new JMenuItem("Save");
+JMenuItem mi3 = new JMenuItem("Exit");
+m1.add(mi1);
+m1.add(mi2);
+m1.addSeparator();
+m1.add(mi3);
+
+除此之外，还可以添加复选框和单选按钮选项：
+JCheckBoxMenuItem mi4 = new JCheckBoxMenuItem("Modify");
+JRadioButtonMenuItem mi5 = new JRadioButtonMenuItem("Bold");
+m2.add(mi4);
+m2.add(mi5);
+
+JMenuItem对象可以添加ActionListener事件，例其能够完成相应的监听操作。如下：
+mi1.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+        System.out.println("Open event");
+    }
+});
+
+//
+package test;
+
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TestJMenu extends JFrame {
+    public TestJMenu() {
+        super("Test JMenu");
+        JMenuBar mb = new JMenuBar();
+        setJMenuBar(mb);
+
+        JMenu m1 = new JMenu("File");
+        JMenu m2 = new JMenu("Edit");
+        JMenu m3 = new JMenu("Help");
+        mb.add(m1);
+        mb.add(m2);
+        mb.add(m3);
+
+        JMenuItem mi1 = new JMenuItem("Open");
+        JMenuItem mi2 = new JMenuItem("Save");
+        JMenuItem mi3 = new JMenuItem("Exit");
+        m1.add(mi1);
+        m1.add(mi2);
+        m1.addSeparator();
+        m1.add(mi3);
+
+        JCheckBoxMenuItem mi4 = new JCheckBoxMenuItem("Modify");
+        JRadioButtonMenuItem mi5 = new JRadioButtonMenuItem("Bold");
+        m2.add(mi4);
+        m2.add(mi5);
+
+        mi1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Open event");
+            }
+        });
+
+        setSize(350, 350);
+        setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new TestJMenu();
+    }
+}
+
+（4）弹出菜单 JPopupMenu P595
+JPopupMenu是弹出菜单的实现。
+下面代码创建一个JPopupMenu：
+JPopupMenu jp = new JPopupMenu();
+创建带有标题的JPopupMenu：
+JPopupMenu jp = new JPopupMenu("Popup menu");
+
+与JMenu一样，可以使用add()方法和insert()方法向JPopupMenu中添加或者插入JMenuItem与JComponent。JPopupMenu对添加到其中的每一个菜单项都赋予一个整数索引，并根据弹出式菜单的布局管理器调整菜单项显示的顺序。还可以使用addSeparator()方法添加分隔线，并且JPopupMenu也会为该分隔线指定一个整数索引。
+通过调用弹出式菜单触发器对应的show()方法来显示弹出式菜单，show()方法会在菜单显示之前对其location和invoker属性加以设定。因此，应该检查所有的MouseEvent事件，看其是否是弹出式菜单触发器，然后在合适的时候显示弹出式菜单，下面的showJPopupMenu方法在收到适当的触发器事件时就会显示弹出式菜单，如下：
+
+//
+package test;
+
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class TestJPopupMenu extends JFrame {
+    public TestJPopupMenu() {
+        super("Test JPopupMenu");
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem copy = new JMenuItem("Copy");
+        JMenuItem paste = new JMenuItem("Paste");
+        JMenuItem exit = new JMenuItem("Exit");
+        popupMenu.add(copy);
+        popupMenu.add(paste);
+        popupMenu.addSeparator();
+        popupMenu.add(exit);
+
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                //if (e.isPopupTrigger()) {//这个不知道如何触发
+                    //如果当前事件与鼠标事件相关，则弹出菜单
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                //}
+            }
+        });
+
+        this.setBounds(100, 100, 250, 150);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //this.setSize(350, 350);
+        this.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new TestJPopupMenu();
+    }
+}
+
+18.1.5 工具栏组件 JToolBar P596
+JToolBar提供了一个用来显示常用的Action或控件的组件。用户可以将工具栏拖到单独的窗口中（除非floatable属性被设置为false）。为了正确执行拖动，建议将JToolBar实例添加到容器的四“边”中的一边（其中容器的布局管理器为BorderLayout）。并且不在其他四“边”中添加任何子级。
+下面实例实现了一个工具栏，包含3个按钮，并设置为可以拖动的，如下：
+package test;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+public class TestJToolBar extends JFrame {
+    public TestJToolBar() {
+        JToolBar bar = new JToolBar();
+        JButton button1 = new JButton("New");
+        JButton button2 = new JButton("Print");
+        JButton button3 = new JButton("Exit");
+        bar.add(button1);
+        bar.add(button2);
+        bar.addSeparator();
+        bar.add(button3);
+
+        bar.setFloatable(true);//可拖动
+        bar.setToolTipText("Tool Bar");//提示
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        panel.add(bar);
+        this.add(panel, BorderLayout.NORTH);
+
+        this.setTitle("Test JToolBar");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setSize(300, 200);
+        this.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new TestJToolBar();
+    }
+}
+
+18.2 Swing 布局管理器 P597
+（1）BoxLayout
+允许垂直或水平布置多个组件的布局管理器。垂直排列的组件在重新调整框架的大小时仍然被垂直排列。
+BoxLayout管理器是用axis参数构造的，该参数指定了将进行的布局类型。
+BoxLayout(Container target, int axis);
+axis有以下4个选择：
+--X_AXIS：从左到右水平布置组件
+--Y_AXIS：从上到下垂直布置组件
+--LINE_AXIS：根据容器的CompnentOrientation属性，按照文字在一行中的排列方式布置组件。如果容器的ComponentOrientation表示水平，则将组件水平放置，否则将它们垂直放置。对于水平方向，如果容器的ComponentOrientation表示从左到右，则组件从左到右放置，否则将它们从右到左放置。对于垂直方向，组件总是从上到下放置的。
+--PAGE_AXIS：上LINE_AXIS相反
+对于所有方向，组件按照将它们添加到容器中的顺序排列。
+
+（2）GroupLayout P598
+（3）OverlayLayout P598
+（4）JScrollPaneLayout P598
+（5）SpringLayout P598
+（6）ViewportLayout P598
+
+18.3 Swing事件处理 P598
+
+18.4.3 Java文件编辑器 P600
+package test;
+
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
+public class JTextEditor extends WindowAdapter implements ActionListener {
+    private JFrame frame;//主窗体
+    private JTextArea textArea;//文件输入区域
+    private String fileName;//打开的文件名
+
+    public void createEditor() {
+        //建立文件菜单
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menuFile = new JMenu("File");
+        //新建菜单
+        JMenuItem menuNew = new JMenuItem("New");
+        menuNew.addActionListener(this);
+        menuFile.add(menuNew);
+        //打开菜单
+        JMenuItem menuOpen = new JMenuItem("Open");
+        menuOpen.addActionListener(this);
+        menuFile.add(menuOpen);
+        //保存菜单
+        JMenuItem menuSave = new JMenuItem("Save");
+        menuSave.addActionListener(this);
+        menuFile.add(menuSave);
+        //另存为菜单
+        JMenuItem menuSaveAs = new JMenuItem("Save as...");
+        menuSaveAs.addActionListener(this);
+        menuFile.add(menuSaveAs);
+        //退出菜单
+        JMenuItem menuExit = new JMenuItem("Exit");
+        menuExit.addActionListener(this);
+        menuFile.add(menuFile);
+
+        menuBar.add(menuFile);
+
+        JMenu menuHelp = new JMenu("Help");
+        JMenuItem menuAbout = new JMenuItem("About");
+        menuAbout.addActionListener(this);
+        menuHelp.add(menuAbout);
+        menuBar.add(menuHelp);
+
+        //主窗口
+        frame = new JFrame("Java Text Editor");
+        frame.setJMenuBar(menuBar);
+        textArea = new JTextArea();
+        frame.add("Center", textArea);
+        frame.addWindowListener(this);//frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);？
+        frame.setSize(600, 400);
+        frame.setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        JTextEditor te = new JTextEditor();
+        te.createEditor();
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        System.exit(0);
+    }
+
+    //菜单选择事件
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try {
+            if (e.getActionCommand() == "New") {
+                textArea.setText("");
+            } else if (e.getActionCommand() == "Open") {
+                //选择文件
+                JFileChooser dlg = new JFileChooser();
+                int result = dlg.showOpenDialog(frame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = dlg.getSelectedFile();
+                    fileName = file.getAbsolutePath();
+
+                    //读取文件
+                    FileReader fr = new FileReader(fileName);
+                    BufferedReader br = new BufferedReader(fr);
+                    String str = "";
+                    while (br.ready()) {
+                        int c = br.read();
+                        str += (char) c;
+                    }
+                    textArea.setText(str);
+                    br.close();
+                    fr.close();
+                    frame.setTitle("Java Text Editor - " + fileName);
+                }
+            } else if (e.getActionCommand() == "Save") {
+                //写入文件
+                File file = new File(fileName);
+                FileWriter fos = new FileWriter(file, true);
+                BufferedWriter bos = new BufferedWriter(fos);
+                PrintWriter pos = new PrintWriter(bos);
+                pos.print(textArea.getText());
+
+                pos.close();
+                bos.close();
+                fos.close();
+            } else if (e.getActionCommand() == "Save as...") {
+                JFileChooser dlg = new JFileChooser();
+                int result = dlg.showOpenDialog(frame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File file = dlg.getSelectedFile();
+                    //写入文件
+                    FileWriter fos = new FileWriter(file, true);
+                    BufferedWriter bos = new BufferedWriter(fos);
+                    PrintWriter pos = new PrintWriter(bos);
+                    pos.print(textArea.getText());
+
+                    pos.close();
+                    bos.close();
+                    fos.close();
+                }
+            } else if (e.getActionCommand() == "Exit") {
+                System.exit(0);
+            } else if (e.getActionCommand() == "About") {
+                final JDialog dialog = new JDialog(frame, "About", true);
+                dialog.setSize(267, 117);
+                dialog.setLayout(new GridLayout(1, 1));
+
+                dialog.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        dialog.dispose();
+                    }
+                });
+
+                JPanel topPanel = new JPanel();
+                JLabel label = new JLabel("Java Text Editor - Author: DingBen");
+                topPanel.add(label, BorderLayout.CENTER);
+                dialog.add(topPanel);
+                dialog.setVisible(true);
+            }
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+    }
+}
 //------------------------------------------------------------------------------------------------
-
+//Java核心编程技术 第19课 SWT图形界面开发 P607
+暂时没看？
 //------------------------------------------------------------------------------------------------
-
+//Java核心编程技术 第20课 SWT增强组件库 P643
+暂时没看？
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
