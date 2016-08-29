@@ -16440,17 +16440,916 @@ public class JTextEditor extends WindowAdapter implements ActionListener {
 //Java核心编程技术 第20课 SWT增强组件库 P643
 暂时没看？
 //------------------------------------------------------------------------------------------------
-
+//Java核心编程技术 第21课 Applet组件编程 P661
+暂时没看？
 //------------------------------------------------------------------------------------------------
-
+//Java核心编程技术 第22课 Java网络编程 P681
+暂时没看？
 //------------------------------------------------------------------------------------------------
-
+//Java核心编程技术 第23课 NIO非阻塞编程 P741
+暂时没看？
 //------------------------------------------------------------------------------------------------
-
+//Java核心编程技术 第24课 RMI分布式网络编程 P801
+暂时没看？
 //------------------------------------------------------------------------------------------------
+//Java核心编程技术 第25课 Corba分布式网络编程 P821
+25.2 使用Java编写CORBA程序——HelloWorld实例 P827
+使用Java编写CORBA程序主要依赖于IDL接口的编程与编译，共包括如下的5个过程。
+（1）定义远程接口
+（2）编译远程接口
+（3）实现服务器
+（4）实现客户机
+（5）启动应用程序
 
+25.2.1 创建IDL接口Hello.idl P828
+编写IDL接口文件，放在src目录下：
+module helloworld
+{
+    interface Hello
+    {
+        string sayHello(in string world);
+    };
+};
+指定模块名为helloworld，接口名为Hello，定义了一个接口函数sayHello()，输入参数为string类型，并返回一个string类型的结果。
+
+25.2.2 编译IDL接口产生6个文件
+最新的JDK 1.3 以上版本中，提供了新的IDL编辑器idlj，位于JDK的bin\idlj.exe。
+进入Hello.idl文件的目录，执行如下编译命令来编译IDL接口：
+E:\Program Files\JetBrains\JavaProject\src\Hello.idl
+编译后在当前目录下生成helloworld子目录，其中包括一些支持文件，如下：
+--Hello.java：标记接口文件。CORBA规范指定这个文件必须扩展IDLEntity，并且与IDL接口同名。这个文件提供类型标记，从而使这个接口能用于其他接口的方法声明。内容如下：
+package helloworld;
+public interface Hello extends HelloOperations, org.omg.CORBA.Object, org.omg.CORBA.portable.IDLEntity 
+{
+} // interface Hello
+
+--HelloOperations.java：内含Java公共接口——HelloOperations。规范指出，这个文件应该与具有Operations后缀的IDL接口同名，并且这个文件内含此接口映射的操作标记，上面定义的标记接口（Hello.java）可扩展这个接口。内容如下：
+package helloworld;
+public interface HelloOperations 
+{
+  String sayHello (String world);
+} // interface HelloOperations
+
+--HelloHelper.java：设计helper类的目的是，让所需要的许多内务处理功能脱离我们的接口，但又随时可用到实现过程。帮助程序文件含有重要的静态narrow方法，这种方法使org.omg.CORBA.Object收缩为一种更具体的类型的对象引用，在这种情况下，将是一个计算程序类型。内容如下：
+package helloworld;
+abstract public class HelloHelper
+{
+  private static String  _id = "IDL:helloworld/Hello:1.0";
+
+  public static void insert (org.omg.CORBA.Any a, helloworld.Hello that)
+  {
+    org.omg.CORBA.portable.OutputStream out = a.create_output_stream ();
+    a.type (type ());
+    write (out, that);
+    a.read_value (out.create_input_stream (), type ());
+  }
+
+  public static helloworld.Hello extract (org.omg.CORBA.Any a)
+  {
+    return read (a.create_input_stream ());
+  }
+
+  private static org.omg.CORBA.TypeCode __typeCode = null;
+  synchronized public static org.omg.CORBA.TypeCode type ()
+  {
+    if (__typeCode == null)
+    {
+      __typeCode = org.omg.CORBA.ORB.init ().create_interface_tc (helloworld.HelloHelper.id (), "Hello");
+    }
+    return __typeCode;
+  }
+
+  public static String id ()
+  {
+    return _id;
+  }
+
+  public static helloworld.Hello read (org.omg.CORBA.portable.InputStream istream)
+  {
+    return narrow (istream.read_Object (_HelloStub.class));
+  }
+
+  public static void write (org.omg.CORBA.portable.OutputStream ostream, helloworld.Hello value)
+  {
+    ostream.write_Object ((org.omg.CORBA.Object) value);
+  }
+
+  public static helloworld.Hello narrow (org.omg.CORBA.Object obj)
+  {
+    if (obj == null)
+      return null;
+    else if (obj instanceof helloworld.Hello)
+      return (helloworld.Hello)obj;
+    else if (!obj._is_a (id ()))
+      throw new org.omg.CORBA.BAD_PARAM ();
+    else
+    {
+      org.omg.CORBA.portable.Delegate delegate = ((org.omg.CORBA.portable.ObjectImpl)obj)._get_delegate ();
+      helloworld._HelloStub stub = new helloworld._HelloStub ();
+      stub._set_delegate(delegate);
+      return stub;
+    }
+  }
+
+  public static helloworld.Hello unchecked_narrow (org.omg.CORBA.Object obj)
+  {
+    if (obj == null)
+      return null;
+    else if (obj instanceof helloworld.Hello)
+      return (helloworld.Hello)obj;
+    else
+    {
+      org.omg.CORBA.portable.Delegate delegate = ((org.omg.CORBA.portable.ObjectImpl)obj)._get_delegate ();
+      helloworld._HelloStub stub = new helloworld._HelloStub ();
+      stub._set_delegate(delegate);
+      return stub;
+    }
+  }
+  
+}
+
+--HelloHolder.java：holder类是一个专门化类，是为了需要通过引用来传递参数的任意数据类型而生成的。这个示例中将不使用holder类，将会在以后的栏目中经常见到它。内容如下：
+package helloworld;
+public final class HelloHolder implements org.omg.CORBA.portable.Streamable
+{
+  public helloworld.Hello value = null;
+
+  public HelloHolder ()
+  {
+  }
+
+  public HelloHolder (helloworld.Hello initialValue)
+  {
+    value = initialValue;
+  }
+
+  public void _read (org.omg.CORBA.portable.InputStream i)
+  {
+    value = helloworld.HelloHelper.read (i);
+  }
+
+  public void _write (org.omg.CORBA.portable.OutputStream o)
+  {
+    helloworld.HelloHelper.write (o, value);
+  }
+
+  public org.omg.CORBA.TypeCode _type ()
+  {
+    return helloworld.HelloHelper.type ();
+  }
+
+}
+
+--HelloPOA.java：skeleton类为CORBA功能提供了请求——响应探测的一大部分。生成HelloPOA.java，是因为默认方式下的实现是基于继承的，如果我们选择基于委托的方式，输出就会不一样。内容如下：
+package helloworld;
+public abstract class HelloPOA extends org.omg.PortableServer.Servant
+ implements helloworld.HelloOperations, org.omg.CORBA.portable.InvokeHandler
+{
+
+  // Constructors
+
+  private static java.util.Hashtable _methods = new java.util.Hashtable ();
+  static
+  {
+    _methods.put ("sayHello", new java.lang.Integer (0));
+  }
+
+  public org.omg.CORBA.portable.OutputStream _invoke (String $method,
+                                org.omg.CORBA.portable.InputStream in,
+                                org.omg.CORBA.portable.ResponseHandler $rh)
+  {
+    org.omg.CORBA.portable.OutputStream out = null;
+    java.lang.Integer __method = (java.lang.Integer)_methods.get ($method);
+    if (__method == null)
+      throw new org.omg.CORBA.BAD_OPERATION (0, org.omg.CORBA.CompletionStatus.COMPLETED_MAYBE);
+
+    switch (__method.intValue ())
+    {
+       case 0:  // helloworld/Hello/sayHello
+       {
+         String world = in.read_string ();
+         String $result = null;
+         $result = this.sayHello (world);
+         out = $rh.createReply();
+         out.write_string ($result);
+         break;
+       }
+
+       default:
+         throw new org.omg.CORBA.BAD_OPERATION (0, org.omg.CORBA.CompletionStatus.COMPLETED_MAYBE);
+    }
+
+    return out;
+  } // _invoke
+
+  // Type-specific CORBA::Object operations
+  private static String[] __ids = {
+    "IDL:helloworld/Hello:1.0"};
+
+  public String[] _all_interfaces (org.omg.PortableServer.POA poa, byte[] objectId)
+  {
+    return (String[])__ids.clone ();
+  }
+
+  public Hello _this() 
+  {
+    return HelloHelper.narrow(
+    super._this_object());
+  }
+
+  public Hello _this(org.omg.CORBA.ORB orb) 
+  {
+    return HelloHelper.narrow(
+    super._this_object(orb));
+  }
+
+
+} // class HelloPOA
+
+--_HelloStub.java：这是一个stub类。客户机将需要这个类来进行工作。内容如下：
+package helloworld;
+public class _HelloStub extends org.omg.CORBA.portable.ObjectImpl implements helloworld.Hello
+{
+
+  public String sayHello (String world)
+  {
+            org.omg.CORBA.portable.InputStream $in = null;
+            try {
+                org.omg.CORBA.portable.OutputStream $out = _request ("sayHello", true);
+                $out.write_string (world);
+                $in = _invoke ($out);
+                String $result = $in.read_string ();
+                return $result;
+            } catch (org.omg.CORBA.portable.ApplicationException $ex) {
+                $in = $ex.getInputStream ();
+                String _id = $ex.getId ();
+                throw new org.omg.CORBA.MARSHAL (_id);
+            } catch (org.omg.CORBA.portable.RemarshalException $rm) {
+                return sayHello (world        );
+            } finally {
+                _releaseReply ($in);
+            }
+  } // sayHello
+
+  // Type-specific CORBA::Object operations
+  private static String[] __ids = {
+    "IDL:helloworld/Hello:1.0"};
+
+  public String[] _ids ()
+  {
+    return (String[])__ids.clone ();
+  }
+
+  private void readObject (java.io.ObjectInputStream s) throws java.io.IOException
+  {
+     String str = s.readUTF ();
+     String[] args = null;
+     java.util.Properties props = null;
+     org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init (args, props);
+   try {
+     org.omg.CORBA.Object obj = orb.string_to_object (str);
+     org.omg.CORBA.portable.Delegate delegate = ((org.omg.CORBA.portable.ObjectImpl) obj)._get_delegate ();
+     _set_delegate (delegate);
+   } finally {
+     orb.destroy() ;
+   }
+  }
+
+  private void writeObject (java.io.ObjectOutputStream s) throws java.io.IOException
+  {
+     String[] args = null;
+     java.util.Properties props = null;
+     org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init (args, props);
+   try {
+     String str = orb.object_to_string (this);
+     s.writeUTF (str);
+   } finally {
+     orb.destroy() ;
+   }
+  }
+} // class _HelloStub
+
+上面生成的6个文件位于src目录下的helloworld中，正好是我们当前的开发目录。
+
+25.2.3 创建IDL接口实现类HelloImpl.java P829
+生成的文件在服务器上开始工作，必须编写实现接口的实现类HelloImpl。继承自HelloPOA类，从客户机发来一个请求时，该请求通过 ORB进入HelloPOA，最终调用HelloImpl来完成请求并启动响应。如下：
+package corba;
+
+import helloworld.HelloPOA;
+
+/**
+ * Created by Ben on 2016/8/18.
+ */
+public class HelloImpl extends HelloPOA {
+    @Override
+    public String sayHello(String world) {
+        return "Hello " + world + "!";
+    }
+}
+
+25.2.4 实现服务器 HelloServer.java P829
+package corba;
+
+import helloworld.Hello;
+import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NameComponent;
+import org.omg.CosNaming.NamingContext;
+import org.omg.CosNaming.NamingContextHelper;
+
+/**
+ * Created by Ben on 2016/8/18.
+ */
+public class HelloServer {
+    public static void main(String args[]) {
+        try {
+            //根据端口创建ORB实例
+            String str[] = {"-ORBInitialPort", "1050"};
+            ORB orb = ORB.init(str, null);
+            org.omg.CORBA.Object objRef = orb.resolve_initial_references("RootPOA");
+
+            //创建服务对象
+            org.omg.PortableServer.POA rootPOA = org.omg.PortableServer.POAHelper.narrow(objRef);
+            org.omg.PortableServer.POAManager manager = rootPOA.the_POAManager();
+
+            //具体实现类
+            HelloImpl helloImpl = new HelloImpl();
+            Hello hello = helloImpl._this(orb);
+
+            //创建命名并注册
+            NamingContext ncRef = NamingContextHelper.narrow(orb.resolve_initial_references("NameService"));
+            NameComponent nc = new NameComponent("Hello", "");
+            NameComponent path[] = {nc};
+            ncRef.rebind(path, hello);
+            manager.activate();
+            System.out.println("Service is running...");
+
+            //等待客户端调用
+            orb.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+25.2.5 实现客户端 HelloClient.java P830
+考虑一下正在发生的事件的机制，就会明白客户端和服务器实现上是互为映像的。客户端将所有的参数打包以创建一个请求，然后以它自己的方式来发送这个请求。服务器只是将请求中的参数解包、执行运行，将返回值和输出参数打包，然后向客户端发回响应。客户端则将返回值和输出参数解包，然后继续处理。这样，客户端打包什么，服务器就解包什么，反之亦然。这意味着将会看到客户端和服务器具有相似的结构。客户端还必须创建并初始化一个ORB。
+（1）创建一个ORB。
+（2）获取一个指向命名上下文的引用。
+（3）在命名上下文中查找“Hello”并获得指向该CORBA对象的引用。
+（4）调用对象的sayHello()操作并打印结果。
+客户端程序如下：
+package corba;
+
+import helloworld.Hello;
+import helloworld.HelloHelper;
+import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NameComponent;
+import org.omg.CosNaming.NamingContext;
+import org.omg.CosNaming.NamingContextHelper;
+
+/**
+ * Created by Ben on 2016/8/18.
+ */
+public class HelloClient {
+    public static void main(String args[]) {
+        try {
+            //根据端口创建ORB实例
+            String str[] = {"-ORBInitialPort", "1050"};
+            ORB orb = ORB.init(str, null);
+            org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+
+            //获取一个指向命名上下文的引用
+            NamingContext ncRef = NamingContextHelper.narrow(objRef);
+            NameComponent nc = new NameComponent("Hello", "");
+            NameComponent path[] = {nc};
+
+            //查找Hello对象
+            Hello hello = HelloHelper.narrow(ncRef.resolve(path));
+
+            //调用函数
+            String show = hello.sayHello("World");
+            System.out.println(show);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+25.2.6 运行程序 P831
+（1）启动一个MS-DOS命令解释器：
+tnameserv -ORBInitialPort 1050
+
+运行后会初始化引用端口为1050，输出的窗口如下：
+C:\Users\Ben>tnameserv -ORBInitialPort 1050
+初始的命名上下文:
+IOR:000000000000002b49444c3a6f6d672e6f72672f436f734e616d696e672f4e616d696e67436f6e746578744578743a312e30000000000001000000000000009a000102000000000e3139322e3136382e312e31323100041a00000045afabcb0000000020000f424000000001000000000000000200000008526f6f74504f41000000000d544e616d65536572766963650000000000000008000000010000000114000000000000020000000100000020000000000001000100000002050100010001002000010109000000010001010000000026000000020002
+TransientNameServer: 将初始对象引用端口设置为: 1050
+准备就绪。
+
+（2）运行HelloServer服务器：
+看到Service is running...
+
+（3）启动HelloClient应用程序客户端：
+屏幕上会出现“Hello World!”的字样，说明实验成功了。
+
+与传统的客户/服务应用开发完全不同，使用CROBA后，开发人员再不必关心客户和服务之间的通信问题，也不必处理客户和服务之间的协调问题，客户系统和服务系统可以在不同的机器系统中运行，并且可以用不同的语言来实现（如本例中的服务器程序完全可以用C++来编写），这些都由CORBA负责解决，对应用开发者来说都是透明的。
+
+25.2.7 补充：IDL的语法规则 P832
+接口描述语言即Interface Description Language或者缩写为IDL，是用来描述软件组件接口的一种计算机语言。IDL通过一种中立的方式来描述接口，使得在不同平台上运行的对象和用不同语言编写的程序可以相互通信交流，如，一个组件用C++写，另一个用Java写成。
+1. OMG IDL文件结构
+IDL文件以module开始命名模块名，相当于Java程序中的包名。然后在模块中定义数据类型和接口。如下：
+module Compute
+{
+    typedef double radius;
+    typedef long times;
+    interface PI
+    {double getResult(in radius aRadius, in times time);}
+}
+
+2. OMG IDL语法规则
+采用ASCII字符集构成接口定义的所有标识符。标识符由字母、数字和下画线的任意组合构成，但第一个字符必须是ASCII字母。IDL认为大写字母和小写字母具有相同的含义，如anExample和AnExample是相同的。
+程序设计人员不能将关键字用做变量或方法名。需要注意的是关键字的大小写，如：
+typedef double context;//错误，变量context是关键字
+typedef double CONTEXT;//错误，CONTEXT与关键字context冲突
+
+3. 数据类型
+--基本数据类型：OMG IDL基本数据类型包括short、long和相应的无符号（unsigned）类型，表示的字长分别为16、32位。
+--浮点数类型：OMG IDL浮点数类型包括float、double和long double类型。
+--字符和超大字符类型：OMG IDL定义字符类型char为面向字节的码集中编码的单字节字符；定义类型wchar为从任意字符集中编码的超大字符。
+--逻辑类型：用boolean关键字定义的一个变量，聚会只有true和false。
+--八进制类型：用octet关键字定义，在网络传输过程中不进行高低位转换的位元序列。
+--any数据类型：引入该类型用于表示OMG IDL中任意数据类型。
+
+4. 常量
+const double PI = 3.1415926;
+在IDL中，可以定义long、unsigned long、string等类型的常量。
+
+5. 构造数据类型 P834
+OMG IDL中构造数据类型包括结构、联合、枚举等形式，如下例。
+结构类型：
+typedef long GoodsNumber;
+struct
+{
+    GoodsNumber number;
+    string name;
+    float price;
+}
+
+联合类型：
+union stockIn switch(short)
+{
+    case 1: stocker: long;
+    case 2: goodsName1: string;
+    case 3: goodsName2: string;
+}
+
+枚举类型：
+enum GoodsNumber{GOODS_SAILED, GOODS_INSTOCK};
+
+6. 数组类型 P834
+typedef long ADimension[20][100];
+
+7. 模板(template)类型
+OMG IDL提供两种类型的模板。
+（1）序列（sequence）类型
+用该方法可以定义长度可变的任意数值类型的存储序列，通常在定义时可以指定长度，也可以不指定，如：
+typedef sequence<80> aSequence;//长度定义为80
+typedef sequence anotherSequence;//长度不定
+
+（2）字符串（string）序列
+同样对于字符串序列类型，也有两种定义方式：
+typedef string<80> aName;
+typedef string anotherName;
+
+8. 接口(interface)
+接口作为服务对象功能的详细描述，封装了服务对象提供服务方法的全部信息，客户对象利用该接口获取服务对象的属性、访问服务对句中的方法。接口用关键字interface声明，其中包含的属性和方法对所有提出服务请求的客户对象是公开的，如下：
+interface JobManager
+{
+    readonly attribute string FirstName;
+    attribute string status;
+    string QueryJobStatus(in long Number, out string property);
+}
 //------------------------------------------------------------------------------------------------
+//Java核心编程技术 第26课 Java反射编程与动态代码 P845
+Java反射（Reflection）机制是在运行状态中，对于 任意一个类，都能够查找这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法；这种动态获取的信息及动态调用对象的方法的功能称为Java语言的反射机制。
+Java反射机制主要提供了以下功能。
+--在运行时判断任意一个对象所属的类。
+--在运行时判断任意一个类所具有的成员变量和方法。
+--在运行时构造任意一个类的对象。
+--在运行时调用任意一个对象的方法和变量。
+--生成动态代理（Dynamic Proxy）。
 
+26.1 Java反射机制 P845
+26.1.1 反射的概念 P845
+开放性和原因连接是反射系统的两在基本要素。
+
+26.1.2 Java中的反射 P846
+Reflection是Java程序开发语言的特征之一，它允许运行中的Java程序对自身进行检查，或者说“自审”，并能直接操作程序的内部属性。例如，使用它能够获得Java类中各成员的名称并显示出来。
+
+26.1.3 第一个反射的例子 P846
+
+package test;
+
+import java.lang.reflect.Method;//是用来描述某个类中单个方法的一个类
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class c = Class.forName("java.lang.System");//载入指定的类
+            Method m[] = c.getDeclaredMethods();//获取这个类中的定义了的方法列表
+            for (Method method : m) {
+                System.out.println(method.toString());
+            }
+        } catch (Exception e) {
+        }
+    }
+}
+输出：
+public static void java.lang.System.exit(int)
+public static void java.lang.System.runFinalization()
+public static void java.lang.System.runFinalizersOnExit(boolean)
+private static void java.lang.System.initializeSystemClass()
+public static java.lang.String java.lang.System.setProperty(java.lang.String,java.lang.String)
+public static java.lang.String java.lang.System.getProperty(java.lang.String)
+public static java.lang.String java.lang.System.getProperty(java.lang.String,java.lang.String)
+public static native int java.lang.System.identityHashCode(java.lang.Object)
+public static native long java.lang.System.currentTimeMillis()
+public static native long java.lang.System.nanoTime()
+public static native void java.lang.System.arraycopy(java.lang.Object,int,java.lang.Object,int,int)
+private static native void java.lang.System.registerNatives()
+public static java.lang.SecurityManager java.lang.System.getSecurityManager()
+public static void java.lang.System.load(java.lang.String)
+public static void java.lang.System.loadLibrary(java.lang.String)
+public static native java.lang.String java.lang.System.mapLibraryName(java.lang.String)
+private static void java.lang.System.checkIO()
+private static void java.lang.System.checkKey(java.lang.String)
+public static java.lang.String java.lang.System.clearProperty(java.lang.String)
+public static java.io.Console java.lang.System.console()
+public static void java.lang.System.gc()
+public static java.util.Properties java.lang.System.getProperties()
+public static java.lang.String java.lang.System.getenv(java.lang.String)
+public static java.util.Map java.lang.System.getenv()
+public static java.nio.channels.Channel java.lang.System.inheritedChannel() throws java.io.IOException
+private static native java.util.Properties java.lang.System.initProperties(java.util.Properties)
+public static java.lang.String java.lang.System.lineSeparator()
+private static java.io.PrintStream java.lang.System.newPrintStream(java.io.FileOutputStream,java.lang.String)
+public static void java.lang.System.setErr(java.io.PrintStream)
+private static native void java.lang.System.setErr0(java.io.PrintStream)
+public static void java.lang.System.setIn(java.io.InputStream)
+private static native void java.lang.System.setIn0(java.io.InputStream)
+private static void java.lang.System.setJavaLangAccess()
+public static void java.lang.System.setOut(java.io.PrintStream)
+private static native void java.lang.System.setOut0(java.io.PrintStream)
+public static void java.lang.System.setProperties(java.util.Properties)
+public static void java.lang.System.setSecurityManager(java.lang.SecurityManager)
+private static synchronized void java.lang.System.setSecurityManager0(java.lang.SecurityManager)
+
+26.1.4 Java反射API P847
+Class是Java反射中的一个核心类，它代表了内存中的一个Java类。通过它可以取得类的各种操作属性，这些属性是通过java.lang.reflect包中的反射API来描述的。
+--Constructor：描述一个类的构造方法
+--Field：描述一个类的成员变量
+--Method：描述一个类的方法
+--Modifer：描述类内各元素的修饰符
+--Array：用来对数组进行操作
+
+对于任何一个类来说，都可以通过Class提供的反射调用以不同的方式来获得类的信息。除了可以使用newInstance()创建该类的实例外，可以使用Class取得类的包和类名：
+Package getPackage();
+String getName();
+
+Class最重要的功能是提供了一组反射调用，用以取得该类的构造函数、变量及方法。
+1. 取得构造函数——返回类型 Constructor P848
+
+2. 取得变量——返回类型 Field P848
+
+3. 取得方法——返回类型 Method P849
+--使用特定的参数类型获得命名的方法
+Method getMethod(String name, Class<?>...parameterTypes);
+--获得所有方法列表：
+Method[] getMethods();
+--获取本地或匿名类的方法：
+Method getEnclosingMethod();
+
+4. Array类 P850
+提供了动态创建和访问Java数组的方法，这些方法对应了8个Java的基本数据类型，形如：
+static boolean getBoolean(Object array, int index);
+static void setBoolean(Object array, int index, boolean z);
+
+5. Modifier类 P850
+提供了static方法和常量，对类和成员访问修符符进行解码。修饰符集被表示为整数，用不同的位置（bit position）表示不同的修饰符。
+static int ABSTRACT;//表示abstract修饰符的int的值
+
+26.2 Java反射应用——检测类 P850
+package test.reflection;
+
+public class MyObject {
+    public int a;
+    public int b;
+
+    public MyObject(int a, int b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    public int sum() {
+        return a + b;
+    }
+
+    public int minus() {
+        return a - b;
+    }
+
+    public int multiply() {
+        return a * b;
+    }
+
+    public int divide() {
+        return a / b;
+    }
+
+    public String longer(String s1, String s2) {
+        return s1.length() > s2.length() ? s1 : s2;
+    }
+}
+
+
+26.2.1 获取类 P851
+在运行的Java程序中，用java.lang.Class类来描述类和接口等。
+下面就是获得一个Class对象的方法之一：
+Class cls = Class.forName("test.MyObject");
+还有另一种方法，如下：
+Class cls = test.MyObject.class;
+
+26.2.2 获取类的方法
+package test;
+
+import java.lang.reflect.Method;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class cls = Class.forName("test.reflection.MyObject");
+            Method m[] = cls.getDeclaredMethods();
+            for (Method method : m) { //for (int i = 0; i < methods.length; ++i)
+                System.out.println("方法名：" + method.getName());
+                System.out.println("修饰符：" + method.getModifiers());
+                System.out.println("返回值：" + method.getReturnType());
+
+                Class parameters[] = method.getParameterTypes();
+                for (int j = 0; j < parameters.length; ++j) {
+                    System.out.println("参数：" + j + "：" + parameters[j]);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+方法名：sum
+修饰符：1
+返回值：int
+方法名：divide
+修饰符：1
+返回值：int
+方法名：minus
+修饰符：1
+返回值：int
+方法名：longer
+修饰符：1
+返回值：class java.lang.String
+参数：0：class java.lang.String
+参数：1：class java.lang.String
+方法名：multiply
+修饰符：1
+返回值：int
+
+修饰符public是1，private是2
+getDeclaredMethods()来获取一系列的Method对象，分别描述了定义在类中的每一个访求，包括public方法、protected方法和private方法等。如果在程序中使用getMethods()，还勇气获得继承来的各个方法的信息。
+
+26.2.3 获取类的构造器 P852
+获取类构造器的用法与上述获取方法的用法类似，如下：
+package test;
+
+import java.lang.reflect.Constructor;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class cls = Class.forName("test.reflection.MyObject");
+            Constructor constructors[] = cls.getDeclaredConstructors();
+            for (Constructor constructor : constructors) { //for (int i = 0; i < methods.length; ++i)
+                System.out.println("方法名：" + constructor.getName());
+                System.out.println("修饰符：" + constructor.getModifiers());
+
+                Class parameters[] = constructor.getParameterTypes();
+                for (int j = 0; j < parameters.length; ++j) {
+                    System.out.println("参数：" + j + "：" + parameters[j]);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+方法名：test.reflection.MyObject
+修饰符：1
+参数：0：int
+参数：1：int
+
+26.2.4 获取类的变量 P852
+找出一个类中定义了哪些数据字段也是可能的，如下：
+package test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class cls = Class.forName("test.reflection.MyObject");
+            Field fields[] = cls.getDeclaredFields();
+            for (Field field : fields) { //for (int i = 0; i < methods.length; ++i)
+                System.out.println("方法名：" + field.getName());
+                System.out.println("修饰符：" + field.getModifiers());
+                System.out.println("变量类型：" + field.getType());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+方法名：a
+修饰符：1
+变量类型：int
+方法名：b
+修饰符：1
+变量类型：int
+
+和获取方法的情况一样，获取字段的时候也可以只取得在当前类中申明了的字段信息（使用getDeclaredFields()方法），或者也可以取得父类中定义的字段（使用getFields()方法）。
+
+26.3 Java反射应用——处理对象 P853
+可以分所构造器来实例化一个对象。由于类MyObject构造函数有两个int类型的参数，因此需要先创建一个类型数组，再根据类型数组取得构造函数：
+
+package test;
+
+import java.lang.reflect.Constructor;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class cls = Class.forName("test.reflection.MyObject");
+            //设置参数类型数组
+            Class paramTypes[] = new Class[2];
+            paramTypes[0] = int.class;
+            paramTypes[1] = int.class;
+
+            //根据参数类型取得构造函数
+            Constructor constructor = cls.getConstructor(paramTypes);
+            Object object =   constructor.newInstance(3, 4);
+
+            //调用默认构造函数，不过此例中MyObject没有默认构造函数，运行报错
+//            constructor = cls.getConstructor();
+//            object = constructor.newInstance();
+            //System.out.println("3 + 4 = " + ((MyObject) object).sum());//应该不是这样调用函数？
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+26.3.2 改变变量的值 P853
+package test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class cls = Class.forName("test.reflection.MyObject");
+            //设置参数类型数组
+            Class paramTypes[] = new Class[2];
+            paramTypes[0] = int.class;
+            paramTypes[1] = int.class;
+
+            Constructor constructor = cls.getConstructor(paramTypes);
+            Object object = constructor.newInstance(3, 4);
+
+            //改变字段的值
+            Field fieldA = cls.getField("a");
+            System.out.println("改变前：" + fieldA.get(object));
+            fieldA.setInt(object, 100);
+            System.out.println("改变后：" + fieldA.get(object));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+改变前：3
+改变后：100
+
+26.3.3 执行类的方法 P854
+与构造方法的调用过程相似，需要首先根据需要调用方法的参数类型创建一个参数类型数组，然后再创建一个输入值数组，执行方法的调用。如果函数没有参数，则直接调用即可。
+package test;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class cls = Class.forName("test.reflection.MyObject");
+            //设置参数类型数组
+            Class paramTypes[] = new Class[2];
+            paramTypes[0] = int.class;
+            paramTypes[1] = int.class;
+
+            Constructor constructor = cls.getConstructor(paramTypes);
+            Object object = constructor.newInstance(3, 4);
+
+            //执行无入参方法
+            Method sumMethod = cls.getMethod("sum");
+            Object sumRet = sumMethod.invoke(object);
+            System.out.println("3 + 4 = " + sumRet);
+
+            //执行带入参的方法
+            Class paraStringTypes[] = new Class[] {String.class, String.class};//这里的new数组里，如果后面跟了数组对象，则不能带数字new Class[2] {String.class, String.class}将编译错误
+            Method longerMethod = cls.getMethod("longer", paraStringTypes);//这里必须将函数名与参数类型都传入
+            String stringParam[] = {"Hello", "World"};
+            Object longerRet = longerMethod.invoke(object, stringParam);//这里传入要触发的对象和参数值
+            System.out.println("Longer of Hello and World is " + longerRet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+假如一个程序在执行的某处时才知道需要执行的某个方法，这个方法的名称是在程序的运行过程中指定的（如，JavaBean开发环境中就会做这样的事），上面的程序演示了如何做到。
+
+26.3.4 使用数组 P854
+package test;
+
+import java.lang.reflect.Array;
+
+public class ReflectionTest {
+
+    public static void main(String[] args) {
+        try {
+            Class str = Class.forName("java.lang.String");//取得类
+            Object arr = Array.newInstance(str, 10);//创建该类的数组
+            Array.set(arr, 5, "this is a test");
+            String str5 = (String) Array.get(arr, 5);
+            System.out.println(str5);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+this is a test
+
+上例创建了10个单位长度的String数组，为第5个位置的字符串赋了值，最后将这个字符串从数组中取出并打印。
+
+//
+package test;
+
+import java.lang.reflect.Array;
+
+public class ReflectionTest {
+    public static void main(String[] args) {
+        try {
+            int dims[] = new int[]{5, 10, 15};
+            Object arr = Array.newInstance(Integer.TYPE, dims);//创建一个5*10*15的整型数组
+            Object arrObj = Array.get(arr, 3);//第一个Array.get()之后，arrObj是一个10*15的数组
+            Class cls = arrObj.getClass().getComponentType();
+            System.out.println(cls);
+            arrObj = Array.get(arrObj, 5);//再次Array.get()，取得其中一个元素，长度为15的数组
+            Array.setInt(arrObj, 10, 37);//使用Array.setInt()为第10个元素赋值
+
+            int arrCast[][][] = (int[][][]) arr;
+            System.out.println(arrCast[3][5][10]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+Tips：创建数组时的类型是动态的，在编译时并不知道其类型。
+
+26.4 Java动态代理 P855
+
+Tips：创建数组时的类型是动态的，在编译时并不知道其类型。
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
