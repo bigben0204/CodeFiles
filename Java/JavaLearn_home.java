@@ -1,6 +1,17 @@
 //------------------------------------------------------------------------------------------------
+//http://blog.sina.com.cn/s/blog_48c0812c0101alaz.html
+由于interface中的数据成员会自动成为public static final，所以我们可以利用此性质把需要的常量归结到一个接口中，如下：
+public interface Months{
+int JANURAUY = 1;
+int FEBRUARY = 2;                   
+int MARCH =3;
+}
+然后要用的话，就直接Months. JANURAUY＊10类似的直接用就行了
+//------------------------------------------------------------------------------------------------
+java 一个类不能同时继承多个类，一个类只能继承一个类(class)，但是可以实现多个接口(interface);一个接口(interface)能够继承多个接口(interface)
+//------------------------------------------------------------------------------------------------
 ? extends T 
-?表示某个泛型类型，该类型继承于T，是T的子类。所以声明一个List<? extends T> list，表示声明一个对象类型?是T子类的List，是无法加入基类T。list.add(T)不行。
+?表示某个泛型类型，该类型继承于T（上限是T），是T的子类。所以声明一个List<? extends T> list，表示声明一个对象类型?是T子类的List，是无法加入基类T。list.add(T)不行。
 ? super T
 ?表示某个泛型类型，该类型下限为T，是T的基类。所以声明一个List<? super T> list，表示声明一个对象类型?是T基类的List，可以加入基类T。list.add(T)可以。
 //------------------------------------------------------------------------------------------------
@@ -17348,9 +17359,637 @@ public class ReflectionTest {
 Tips：创建数组时的类型是动态的，在编译时并不知道其类型。
 
 26.4 Java动态代理 P855
+26.4.1 动态代理机制 P855
+所谓动态代理，即通过代理类Proxy的代理，接口和实现类之间可以不直接发生联系，而可以在运行期（Runtime）实现动态关联。
+Java动态代理类Java.lang.reflect包下，一般主要涉及到以下两个类：
+（1）接口InvocationHandler：该接口仅定义一个方法。
+Object invoke(Object obj, Method method, Object[] args);
+第一个参数obj一般是指代理类，method是被代理的方法，args是该方法的参数数组。
 
-Tips：创建数组时的类型是动态的，在编译时并不知道其类型。
+（2）Proxy：该类即为动态代理类，作用类实现了InvocationHandler接口的代理类，其中主要包含以下函数：
+--protected Proxy(InvocationHandler h)：构造函数，用于给内部的h赋值。
+--static Class getProxyClass (ClassLoader loader, Class[] interfaces)：获得一个代理类，其中loader是类装载器，interfaces是真实类所拥有的全部接口的数组。
+--static Object newProxyInstance(ClassLoader loader, Class[] interfaces, InvocationHandler h)：返回代理类的一个实例，返回后的代理类可以当做被代理类使用。
+所谓Dynamic Proxy是这样一种类：它是在运行时生成的class，在生成它时你必须提供一组Interface给它，然后该class就宣称它实现了这些interface。你当然可以把该class的实例当做这些interface中的任何一个来用。当然，这个Dynamic Proxy其实就是一个Proxy，它不会替你做实质性的工作，在生成它的实现时你必须提供一个handler，由它接管实际的工作。
+
+26.4.2 动态代理应用 P856
+Java 1.3 引入了名为“动态代理类”（Dynamic Proxy Class）的新特性，利用它可为“已知接口的实现”动态地创建包装器（wrapper）类。
+先从非动态代理的实现说起。
+1. 定义接口和实现类直接调用
+为了实现一系列的不同实现，首先我们定义了一个接口类Hello：
+//Hello 接口
+public interface Hello {
+    void say();
+}
+分别定义两个实现类HelloWorld和HelloChina，分别执行不同的say()代码：
+public class HelloWorld implements Hello {
+    public void say() {
+        System.out.println("Hello World!");
+    }
+}
+
+public class HelloChina implements Hello {
+    public void say() {
+        System.out.println("Hello China!");
+    }
+}
+
+创建它们的实例，调用其中方法：
+Hello world = new HelloWorld();
+world.say();
+Hello china = new HelloChina();
+china.say();
+
+2. 使用包装类进行包装 P857 （即装饰模式）
+假定我们现在想拦截对HelloWorld和HelloChina类发出的方法say()的调用，比如在调用前和调用后分别输出字符串"start to say:"和"end say!"，需要定义一个对它们的共有接口类Hello的包装类HelloWrapper：
+//包装类HelloWrapper
+public class HelloWrapper implements Hello {
+    private Hello wrapped;//包装对象
+    
+    public HelloWrapper(Hello hello) {
+        this.wrapped = hello;
+    }
+    
+    //包装函数
+    public void say() {
+        System.out.println("start to say:");
+        wrapped.say()
+        System.out.println("end say!");
+    }
+}
+Tips：该包装类也实现了接口Hello，目的是要求该包装类实现对Hello中所有接口函数的包装。
+
+此时可以使用包装类对上面的实现world和china进行包装：
+//包装调用
+HelloWrapper wrapper1 = new HelloWrapper(world);
+wrapper1.say();
+HelloWrapper wrapper2 = new HelloWrapper(china);
+wrapper2.say();
+
+对于这种包装风格的HelloWrapper来说，一旦想修改Hello接口，缺点就会暴露无遗。为Hello接口添加一个方法，就得为HelloWrapper类添加一个包装器方法。为Hello添加10个方法，就得为HelloWrapper添加10个方法。这显示是效率极差的一种方案。
+
+如果将HelloWrapper继承自HelloWorld，即为实现类HelloWorld实现包装器：
+//包装类HelloWrapper，类似WindowAdapter
+public class HelloWrapper extends HelloWorld {
+    private Hello wrapped;
+    
+    public HelloWrapper(Hello hello) {
+        this.wrapped = hello;
+    }
+
+    public void say() {
+        System.out.println("start to say:");
+        wrapped.say();
+        System.out.println("end say!");
+    }
+}
+
+这种方式在修改接口方法时不必修改包装器，但是又出现了新问题，只有HelloWorld对象才能使用包装器HelloWrapper。而在此之前，实现了Hello接口的任何对象都可以使用HelloWrapper。现在，由Java施加的“线性类出身限制”禁止我们将任意Hello变成一个HelloWrapper。
+
+3. 使用动态代理 P858
+动态代理则综合了以上两种方案的优点。使用动态代理，你创建的包装器类不要求为所有方法都使用显式的包装器。
+
+Tips：动态代理仍然有一个限制。当你使用动态代理时，要包装/扩展的对象必须实现一个接口，该接口定义了准备在包装器中使用的所有方法。这一限制的宗旨是鼓励良好的设计，而不是为你带来更多的麻烦。根据经验，每个类都至少应该实现一个接口（nonconstant接口）。良好的接口用法不仅使动态代理成为可能，还有利于程序的模块化。
+
+下面的代码演示了用动态代理来创建一个代理类HelloHandler。创建的这个HelloHandler类不需要实现Hello接口，而是实现了java.lang.reflect.InvocationHandler，只提供了一个invoke()方法，代理对象上的任何方法调用都要通过这一方法进行。观察invoke()的主体，它包含了被调用方法的反射参数Method，可以使用该参数确定当前执行方法的属性。
+我们得到的仍然只是一个具有invoke()方法的InvocationHandler，而不是真正想要的Hello对象。动态代理真正的魅力要到创建实现的Hello实例时才能反映出来，通过调用HelloHandler的构造方法初始化了被包装的对象proxyed，代码如下：
+//
+package test.proxy;
+
+public interface Hello { //接口也不需要加abstract，默认就是abstract
+   void say();//接口方法无需加public修饰符，在类实现接口的方法时必须加上public修饰符。
+}
+
+//
+package test.proxy;
+
+//同一个包中不需要引用
+public class HelloWorld implements Hello {
+    @Override
+    public void say() {
+        System.out.println("Hello World!");
+    }
+}
+
+//
+package test.proxy;
+
+public class HelloChina implements Hello {
+    @Override
+    public void say() {
+        System.out.println("Hello China!");
+    }
+}
+
+//
+package test.proxy;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+public class HelloHandler implements InvocationHandler {
+    private Object proxyed;
+
+    public HelloHandler(Object proxyed) {
+        this.proxyed = proxyed;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Object result;
+        //方法调用之前
+        System.out.println("start to say!");
+
+        //调用原始对象的方法
+        result = method.invoke(this.proxyed, args);
+
+        //方法调用之后
+        System.out.println("end say!");
+        return result;
+    }
+
+    public static void main(String[] args) {
+        //代理调用world
+        Hello world = new HelloWorld();
+        InvocationHandler handler1 = new HelloHandler(world);
+        Hello proxy1 = (Hello) Proxy.newProxyInstance(world.getClass().getClassLoader(), world.getClass().getInterfaces(), handler1);
+        proxy1.say();
+
+        //代理调用china
+        Hello china = new HelloChina();
+        InvocationHandler handler2 = new HelloHandler(china);
+        Hello proxy2 = (Hello) Proxy.newProxyInstance(china.getClass().getClassLoader(), china.getClass().getInterfaces(), handler2);
+        proxy2.say();
+    }
+}
+输出：
+start to say!
+Hello World!
+end say!
+start to say!
+Hello China!
+end say!
+
+这段代码实现了对目标对象world和china的代理调用。
+--首先根据被代理对象创建一个代理类handler1， 此处是HelloHandler对象。
+--创建动态代理对象proxy1，它的第一个参数为world类的加载器， 第二个参数为该类的接口，第三个对象为代理对象handler1。
+--通过动态代理对象proxy1调用say()方法，此时会在原始对象HelloWorld.say()方法前后输出两句字符串。
+
+上面代码作用简单，就是告诉Proxy类用一个指定的类加载器来动态创建一个对象，该对象要实现指定的接口（本例为Hello），并用提供的InvocationHandler来代替传统的方法主体。结果对象在一个instanceof Hello测试中返回true，并提供了在实现了Hello接口的任何类中都能找到的方法。
+在HelloHandler类的invoke()方法中，完全不存在对Hello接口的引用。在本例中，以构造函数参数的形式，为HelloHandler提供了Hello的一个实例。代理Hello实例上的任何方法调用最终都由HelloHandler委托给这个“包装的”Hello。但是，虽然这是最常见的设计，但必须了解，InvocationHandler不一定非要委托给被代理的接口的另一个实例。事实上，InvocationHandler完全能自行提供方法主体，而无须一个委托目标。
+最后注意，如果Hello接口中发生改变，那么HelloWorld中的invoke()方法将仍然可移植。如假定say()方法被重命名，那么新的方法名依然会被拦截。
+
+26.4.3 基于动态代理的AOP实现 P860
+上面的动态代理对实现类HelloWorld和HelloChina都实现了拦截，这实际上是实现了AOP的功能。AOP（Aspect Oriented Programming）面向切片编程，其中的一种实现方法便是用Proxy来实现的。
+AOP的好处是，可以对类的实例统一实现拦截操作，通常应用在日志、权限、缓存、连接池中等。上面的代理拦截器在函数执行前后分别输出字符串，实际上就是一种日志拦截。但它的形式还不太节省，使用代理类进行拦截的代码需要重复编写。为了进行更好的拦截，将该代码抽象出来，通过要拦截的实例对象来创建拦截类实例，即AOP容器类：
+//
+package test.proxy;
+
+import java.lang.reflect.Proxy;
+
+public class AOPContainer {
+    public static Object getBean(Object object) {
+        HelloHandler handler = new HelloHandler(object);
+        return Proxy.newProxyInstance(object.getClass().getClassLoader(), object.getClass().getInterfaces(), handler);
+    }
+}
+
+//HelloHandler修改如下，main函数的位置不太好
+package test.proxy;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+public class HelloHandler implements InvocationHandler {
+    private Object proxyed;
+
+    public HelloHandler(Object proxyed) {
+        this.proxyed = proxyed;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Object result;
+        //方法调用之前
+        System.out.println("start to say!");
+
+        //调用原始对象的方法
+        result = method.invoke(this.proxyed, args);
+
+        //方法调用之后
+        System.out.println("end say!");
+        return result;
+    }
+
+    public static void main(String[] args) {
+        //代理调用world
+        Hello world = new HelloWorld();
+        Hello aop1 = (Hello) AOPContainer.getBean(world);
+        aop1.say();
+
+        //代理调用china
+        Hello china = new HelloChina();
+        Hello aop2 = (Hello) AOPContainer.getBean(china);
+        aop2.say();
+    }
+}
+这就通过Java Proxy实现了一个简单的AOP容器。也简单展示了AOP的基本实现原理，可以以此为基础实现一个功能完善的AOP容器。
+Tips：详细的AOP的应用知识请参见另一本AOP专题图书《开发者突击：精通AOP整合应用开发（AspectWerkz+AspectJ+Spring）》。
+
+26.4.4 基于动态代理的字节码库 P861
+
+26.5.3 课后上机作业 P863
+实现一个反射任务工厂类TaskFactory。
+//task.properties
+login=test.task.impl.LoginTask
+register=test.task.impl.RegisterTask
+logout=test.task.impl.LogoutTask
+
+//TaskException.java
+package test.task;
+
+/**
+ * 处理器异常类
+ */
+public class TaskException extends Exception {
+    private static final long serialVersionUID = 1L;
+    private static final String COMMAND_NOTFOUND = "无法找到类：";
+    private static final String FILE_NOTFOUND = "无法找到文件：";
+    private static final String PROFILE_LOADFAIL = "加载property文件失败：";
+
+    public TaskException(String message) {
+        super(message);
+    }
+
+    public TaskException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public static TaskException loadPropFileFailed(String fileName) {
+        return new TaskException(PROFILE_LOADFAIL + fileName);
+    }
+
+    public static TaskException fileNotFound(String fileName) {
+        return new TaskException(FILE_NOTFOUND + fileName);
+    }
+
+    public static TaskException taskNotFound(String clzName) {
+        return new TaskException(COMMAND_NOTFOUND + clzName);
+    }
+}
+
+//ITask.java
+package test.task;
+
+public interface ITask {
+    String process(String value) throws TaskException;
+}
+
+//TaskFactory.java
+package test.task;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.Properties;
+
+public class TaskFactory {
+    private Properties properties = new Properties();
+
+    /**
+     * 单态工厂实例
+     */
+    private static TaskFactory m_instance = null;
+
+    /**
+     * 工厂构造函数，用于加载处理器组件配置文件
+     *
+     * @throws TaskException
+     */
+    public TaskFactory() throws TaskException {
+        String fileName = "tasks.properties";
+        try {
+            InputStream in = getClass().getResourceAsStream(fileName);//快速读取文件内容到输入流的方法
+            this.properties.load(in);
+        } catch (FileNotFoundException e) {
+            throw TaskException.fileNotFound(fileName);
+        } catch (IOException e) {
+            throw TaskException.loadPropFileFailed(fileName);
+        }
+    }
+
+    /**
+     * 创建工厂的唯一实例
+     *
+     * @return
+     * @throws TaskException
+     */
+    public static TaskFactory getInstance() throws TaskException {
+        if (m_instance == null) {
+            m_instance = new TaskFactory();
+        }
+        return m_instance;
+    }
+
+    /**
+     * 根据用户请求的地址，取得处理器对象
+     * @param taskType
+     * @return
+     * @throws TaskException
+     */
+    public ITask getTask(String taskType) throws TaskException {
+        return createTask(taskType);
+    }
+
+    /**
+     * 根据用户请求的地址，取得处理器对象
+     * @param taskType
+     * @return
+     * @throws TaskException
+     */
+    private ITask createTask(String taskType) throws TaskException {
+        ITask task = null;
+
+        //取得处理器类名
+        String handlerName = this.properties.getProperty(String.valueOf(taskType));
+
+        //未配置实现类
+        if (handlerName == null) {
+            throw TaskException.taskNotFound(String.valueOf(taskType));
+        }
+
+        //未找到实现类
+        try {
+            //加载类的实例
+            Class<?> cls = Class.forName(handlerName);
+            Constructor<?> ct = cls.getConstructor();
+            task = (ITask) ct.newInstance();
+        } catch (Exception e) {
+            throw TaskException.taskNotFound(e.getMessage());
+        }
+
+        return task;
+    }
+}
+
+//LoginTask.java
+package test.task.impl;
+
+import test.task.ITask;
+import test.task.TaskException;
+
+public class LoginTask implements ITask {
+    @Override
+    public String process(String value) throws TaskException {
+        return value + "登录成功";
+    }
+}
+
+//RegisterTask.java
+package test.task.impl;
+
+import test.task.ITask;
+import test.task.TaskException;
+
+public class RegisterTask implements ITask {
+    @Override
+    public String process(String value) throws TaskException {
+        return value + "注册成功";
+    }
+}
+
+//LogoutTask.java
+package test.task.impl;
+
+import test.task.ITask;
+import test.task.TaskException;
+
+public class LogoutTask implements ITask {
+    @Override
+    public String process(String value) throws TaskException {
+        return value + "已注销";
+    }
+}
+
+//Test.java
+package test.task;
+
+import java.util.Scanner;
+
+public class Test {
+    public static void main(String args[]) {
+        try {
+            while (true) {
+                String str = getDataFromConsole();
+                String[] arr = str.split(" ");
+
+                String cmd = arr[0];
+                String value = arr[1];
+
+                //反射调用
+                TaskFactory factory = TaskFactory.getInstance();
+                ITask task = factory.getTask(cmd);
+
+                String out = task.process(value);
+                System.out.println(out);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String getDataFromConsole() {
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextLine();
+    }
+}
+输出：
+register hello
+hello注册成功
+login admin
+admin登录成功
+logout admin
+admin已注销
+abc
+java.lang.ArrayIndexOutOfBoundsException: 1
+	at test.task.Test.main(Test.java:13)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144)
+    
+基于该框架可以实现更多的实现类，这就是面向接口编程的好处，它的核心是使用了Java的反射机制来动态加载类，在加载前的类名是动态的。
+Tips：这种模式是一种经典的工厂模式，在类似的任务处理模型中都可以拿过来直接使用。希望可以学会、理解并记住这个案例。
 //------------------------------------------------------------------------------------------------
+//Java核心编程技术 第27课 Java泛型编程 P871
+27.1 了解Java泛型 P871
+泛型是为了解决Java中的强制类型转换错误而产生的。
+27.1.1 数据类型转换错误 P871
+27.1.2 用泛型消除类型转换 P871
+简单的定义Hashtable：
+Hashtable h = new Hashtable();
+h.put(new Integer(1), "admin");
+String s = (String) h.get(new Integer(1));
+System.out.println(s);
+
+下例中，真正想要做的是创建Hashtable实例，它只将Integer映射为String，可以用新的Hashtable类来完成这件事：
+Hashtable<Integer, String> h = new Hashtable<Integer, String>();
+h.put(new Integer(1), "admin");
+String s = h.get(new Integer(1));
+System.out.println(s);
+现在不再需要数据类型转换了。
+这里使用泛型版本的Hashtable，就不用编写类型转换的代码了，类型转换的过程交给编译器来处理，方便而且安全。
+
+
+package test.task;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TestGeneric {
+    public static void main(String args[]) {
+        List l = new ArrayList();//不声明泛型类型，则可以加入任意类型
+        l.add("abc");
+        l.add(3);
+        for (Object o : l) {
+            System.out.println(o);
+        }
+
+        List<String> strList = new ArrayList<>(10);//声明了泛型类型，则只能加入特定类型
+        strList.add("hello");
+        strList.add("world");
+//        strList.add(1);
+        for (String s : strList) {//编译器提示可以使用foreach流来代替
+            System.out.println(s);
+        }
+    }
+}
+
+27.2 泛型类的开发与使用 P872
+27.2.1 定义泛型类 P873
+public class TestGeneric<K, V> {
+}
+
+定义泛型接口的方法类似，可以为接口添加泛型参数：
+public interface TestInterface<T> {
+    void func(T t);
+}
+
+//
+package test.task;
+
+import java.util.Hashtable;
+
+public class TestGeneric<K, V> {
+    private Hashtable<K, V> hash = new Hashtable<>();//写成这个形式new Hashtable<K, V>();，会提示<K, V>可以被隐式转换的<>代替
+
+    public void put(K k, V v) {
+        hash.put(k, v);
+    }
+
+    public V get(K k) {
+        return hash.get(k);
+    }
+
+    public static void main(String args[]) {
+        TestGeneric<String, String> testGeneric = new TestGeneric<>();
+        testGeneric.put("001", "admin");
+        testGeneric.put("002", "ben");
+        String str = testGeneric.get("001");
+        System.out.println(str);
+    }
+}
+输出：
+admin
+
+在主函数中即可定义该类的实例，反省类型参数分别使用String和String，在使用get()方法时就不需要进行类型转换了。
+Tips：泛型类使得类的使用更加方便，只需要在使用时来确定泛型参数的类型，大大增加了程序的通用性，就像是C++中的模板。目前Java中集合框架都已经被泛型化了。
+
+27.2.2 无界通配符“?”
+上面在使用泛型类型时指定了参数的类型，有时候也许我们并不能提前知道参数的类型，这时候可以使用无界通配符“?”。如下所示，定义的类型泛型使用问号表示，表示test的类型是未知的：
+TestGeneric<?, ?> test = new TestGeneric<String, String>();
+此进的test中不能加入任何元素，因为这不是类型安全的。这种做法通常用在面向接口编程中，无界通配符通常用做函数的返回参数，用以在不同的函数中实现不同类型的返回结果。
+
+如下的两个实现函数所示，它们返回的都是ArrayList类型，使用的泛型参数分别是String和Integer，此时的接口函数返回值就可以使用无界通配符“?”来表示。
+public List<?> getList() {
+    return new ArrayList<String>();
+}
+
+public List<?> getList() {
+    return new ArrayList<Integer>();
+}
+
+27.2.3 上限通配符extends P874
+有时候想限制可能出现的泛型类的类型。在上面的示例中，类Hashtable的类型参数可以用想用的任何类型参数进行实例化，但时对于其他某些类，想将可能的类型参数集限定为给定类型范围内的子类型。
+ 
+可能想定义泛型类TestGenericExtend，实现的功能与TestGeneric相似，只不过要求键的泛型参数必须是Number的子类。这时就可以使用extends关键字来限制K，用法如下：
+public class TestGenericExtend<K extends Number, V> {
+}
+只需要在类的泛型参数中指定该泛型的父类即可，类中的代码不变。如果有多个接口的上限，可以使用&符号增加接口。如可以为K增加一个Serializable接口限制：
+//实现java.io.Serializable 接口的类是可序列化的。没有实现此接口的类将不能使它们的任一状态被序列化或逆序列化。
+public class TestGenericExtend<K extends Number & Serializable, V> {
+}
+
+//
+package test.task;
+
+import java.io.Serializable;
+import java.util.Hashtable;
+
+public class TestGenericExtend<K extends Number & Serializable, V> {
+    private Hashtable<K, V> hash = new Hashtable<>();
+
+    public void put(K k, V v) {
+        hash.put(k, v);
+    }
+
+    public V get(K k) {
+        return hash.get(k);
+    }
+
+    public static void main(String args[]) {
+        TestGenericExtend<Integer, String> test = new TestGenericExtend<>();
+        test.put(1, "admin");
+        test.put(2, "ben");
+        String str = test.get(1);
+        System.out.println(str);
+    }
+}
+使用该泛型的类时，K的类型必须是Number的子类，如果使用String代替K，将出现类型匹配异常。
+当然可以完全不使用显式的范围，只要能确保没有使用不适当的类型来实例化类型参数。使用类型参数设定范围的两个原因：
+--范围增加了静态类型检查功能。有了静态类型检查，就能保证泛型类型的每次实例化都符合所设定的范围。
+--我们知道类型参数的每次实例化都是这个范围之内的子类，所以可以放心地调用类型参数实例出现在这个范围之内的任何方法。如果没有对参数设定显式的范围，那么默认情况下范围是Object，这意味着我们不能调用实例在Object中未曾出现的任何方法。
+
+27.2.4 下限通配符super P875
+通常所谈的主要的是关于上限通配符，还有一个下限通配符super，用来限制泛型最小的范围。
+如，对于List<? super Number>是一个“元素类型”未知的列表，但是可能是Number或者Object的超类型，所以它可能是一个List<Number>或一个List<Object>。
+//使用下限通配符
+List<? super Number> l = new ArrayList<Object>();
+l.add(new Integer(5));
+由于Integer是Number类型，因此l的下限是Number类。下限通配符远没有上限通配符那样常见，但当需要它们的时候，它们就是必需的。
+//
+package test.task;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TestGenericExtend {
+
+    public static void main(String args[]) {
+        List<? super Number> l = new ArrayList<Object>();
+        l.add(new Integer(10));
+        //l.add("abc");
+
+        List<? super Number> l2 = new ArrayList<>();//new ArrayList<Integer>();编译错误，类型下限是Number，即必须是Number的基类或者Number
+        l2.add(new Integer(10));
+        //l2.add("abc");//编译错误，不是特别懂？？？，表明l是一个下限为Number的类型List，那List<Object>为什么不让加入String
+    }
+}
+
+27.2.5 定义多态方法 P876 即类不是泛型的，成员函数是泛型的
 
 //------------------------------------------------------------------------------------------------
 
