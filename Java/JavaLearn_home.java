@@ -1,4 +1,40 @@
 //------------------------------------------------------------------------------------------------
+//Java中的Pair结构
+package test;
+
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+public class TestPair {
+    public static void main(String args[]) {
+        Map.Entry<String, Integer> strIntPair1 = new AbstractMap.SimpleEntry<>("DingBen", 1);
+        Map.Entry<String, Integer> strIntPair2 = new AbstractMap.SimpleEntry<>("LiLei", 2);
+        System.out.println(strIntPair1);
+        System.out.println(strIntPair2);
+
+        Map<Map.Entry<String, Integer>, String> map = new HashMap<>();//这里如果换成TreeMap，将会有运行错误，提示AbstractMap.SimpleEntry无法比较，可以参考http://blog.csdn.net/litoupu/article/details/9335007进行自定义排序
+        map.put(strIntPair2, "hello");
+        map.put(strIntPair1, "world");
+
+        Set<Map.Entry<String, Integer>> set = map.keySet();
+        Iterator<Map.Entry<String, Integer>> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Integer> key = iterator.next();
+            String value = map.get(key);
+            System.out.println("Key:" + key + ", Value:" + value);
+        }
+    }
+}
+输出：
+DingBen=1
+LiLei=2
+Key:LiLei=2, Value:hello
+Key:DingBen=1, Value:world
+
+//------------------------------------------------------------------------------------------------
 //http://blog.sina.com.cn/s/blog_48c0812c0101alaz.html
 由于interface中的数据成员会自动成为public static final，所以我们可以利用此性质把需要的常量归结到一个接口中，如下：
 public interface Months{
@@ -17990,14 +18026,762 @@ public class TestGenericExtend {
 }
 
 27.2.5 定义多态方法 P876 即类不是泛型的，成员函数是泛型的
+除了用类型参数对类进行参数化之外，用类型参数对方法进行参数化往往也同样很有用。泛型在Java编译用语中，用类型进行参数化的方法被称为多态方法（Polymorphic method）。
+定义的形式为，在函数名前定义泛型参数，该参数可以在函数的返回值类型、参数类型、函数体代码中引用，如下：
+public <T> List<T> getList<T obj> {
+    return new ArrayList<T>();
+}
+
+//
+package test;
+
+public class TestGenericMethod {
+    public <T> String getString(T obj) {
+        return obj.toString();
+    }
+
+    public static void main(String args[]) {
+        TestGenericMethod test = new TestGenericMethod();
+        String s = "Hello";
+        Integer i = 100;
+        Float f = 95.1f;
+        System.out.println(test.getString(s));
+        System.out.println(test.getString(i));
+        System.out.println(test.getString(f));
+    }
+}
+输出：
+Hello
+100
+95.1
+
+同样，也可以进行类型范围的限制，如，要求T是Number的子类：
+public <T extends Number> String getString(T obj) {
+    return obj.toString();
+}
+此时函数只能输入Number的子类型函数，上例中的String类型参数，将会产生类型匹配异常。
+Tips：多态方法这所以有用，是因为有时候在一些我们想执行的操作中，参数与返回值之间的类型相关性原本就是泛型的，但是这个泛型性质不依赖于任何类级的类型信息，而且对于各个方法调用都不同相同。
+
+27.2.6 定义泛型异常 P877
+在定义接口时，可以像定义类一样指定一个泛型异常，可以使用extends指定异常的类型为Exception，或者更小的范围。然后在接口的方法中可以抛出该异常。如：
+//
+package test;
+
+public interface TestGenericException<E extends Exception> {
+    void execute(int i) throws E;
+}
+
+//
+package test;
+
+import java.io.IOException;
+
+public class TestGenericExceptionMain implements TestGenericException<IOException> {
+
+    @Override
+    public void execute(int i) throws IOException {
+        if (i < 10) {
+            throw new IOException();
+        }
+    }
+
+    public static void main(String args[]) {
+        try {
+            TestGenericExceptionMain test = new TestGenericExceptionMain();
+            test.execute(2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+java.io.IOException
+	at test.TestGenericExceptionMain.execute(TestGenericExceptionMain.java:10)
+	at test.TestGenericExceptionMain.main(TestGenericExceptionMain.java:17)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144)
+
+Tips：泛型异常只能在接口中定义，在实现类中指定具体的异常。这种做法的好处是，可以根据不同的异常类型定义不同的实现类。
 
 //------------------------------------------------------------------------------------------------
+//Java核心编程技术 第28课 Java注释符编程 P881
+28.1 JDK内置注释 P881
+28.1.1 注释的格式与分类 P881
+可以将注释分为3个基本种类。
+--标记注释没有变量。注释显示简单，有名称标识，没有提供其他数据。如，@MarkerAnnotation是标记注释，它不包含数据，仅有注释名称。
+@Deprecated
 
-//------------------------------------------------------------------------------------------------
+--单一值注释与标记注释类似，但提供一段数据。因为仅提供很少的一点数据，所以可以使用快捷语法（除了@标记外，这应该与普通的Java方法调用很像）：
+@SingleValueAnnotation("my data")
+如，下面的注释有一个参数：
+@SuppressWarnings("deprecation")
+public static void selfDestruct() {
+    Thread.currentThread().stop();
+}
 
-//------------------------------------------------------------------------------------------------
+--完整注释有多个数据成员。因此，必须使用更完整的语法（注释不再像普通的Java方法）：
+@FullAnnotation(var1="data value 1", var2="data value 2", var3="data value 3")
 
+28.1.2 覆盖注释@Override P882
+第一个内置注释类型是@Override。仅用于方法（不用于类、包声明或其他构造），指明注释的方法将覆盖超类中的方法。
+使用@Override的作用如下：
+（1）它能够强制该函数的代码必须符合超类中该方法的定义格式
+函数的参数、抛出异常等必须符合父类的函数，不会让你犯错。
+（2）检查该方法必须是父类中的方法
+如果使用了@Override，那么该方法必须是其父类中的方法。
+在覆盖父类的方法时最好使用@Override，可以为函数形式做正确性检查，也能够标志该方法是被覆盖的方法。
+
+28.1.3 过时注释@Deprecated P883
+下一个标准注释类型是@Deprecated。与@Override一样，@Deprecated是标记注释，用来对不应再使用的方法进行注释，这通常用在对新版本代码的修改。如旧版本中提供的方法，在新版本中有了更好的方法，将提示用户可以放弃旧的方法的使用。
+//
+package test;
+
+public class TestDeprecated {
+    //把@Deprecated删掉，调用方法时就没有删除线了
+    @Deprecated
+    public void oldShow() {
+        System.out.println("This is deprecated oldShow()");
+    }
+
+    public void newShow() {
+        System.out.println("This is newShow()");
+    }
+
+    public static void main(String args[]) {
+        TestDeprecated testDeprecated = new TestDeprecated();
+        testDeprecated.oldShow();//编译器会自动将标注为@Deprecated的方法显示一条删除线
+        testDeprecated.newShow();
+    }
+}
+Tips：过时的函数不建议你爱我吗，但不是不可使用，只能说是该函数在新的版本中性能、安全性等方法不是那么完美了，因此才建议使用新的方法。
+
+28.1.4 警告注释@SuppressWarnings P883
+最后一个注释类型是@SuppressWarnings，作用是用来消除代码的警告。
+
+@SuppressWarnings("unchecked")
+
+@SuppressWarnings是具有变量的，可以将单一注释类型与该变量一起使用。
+也可以以值数组的形式来提供变量，其中每个值指明要阻止的一种特定警告类型。@SuppressWarnings中变量的值采用数组，可以在同一注释中阻止多个警告。例如，@SuppressWarnings(value={"unchecked", "fallthrough"})使用两个值的数组。
+
+28.2 自定义注释 P885
+28.2.1 定义注释类型@interface P885
+@interface声明：定义新的注释类型与创建接口有很多类似之处，只不过interface关键字之前要有一个@符号，最简单的注释类型示例：
+public @interface TestInterface {
+}
+
+注释类与普通类文件一样，可以以注释类名作为文件名，如果编译这个注释类型，并将其放在类路径中，那么就可以在源代码方法中使用它，如下：
+@TestInterface
+public void test() {
+}
+
+28.2.2 添加成员变量 P885
+注释类型可能有成员变量，用以添加更加复杂的元数据。注释类型中的数据成员被设置成使用有限的信息进行工作，定义数据成员后不需要分别定义访问和修改的方法。只需要定义一个方法，以成员的名称命名它，数据类型应该是该方法返回值的类型。
+下面示例，为注释类型@TestInterface添加了3个成员变量，第一个为整型，第二和第三个为字符串型：
+//
+package test;
+
+public @interface TestInterface {
+    int number();
+    String value();
+    String description();
+}
+
+//
+package test;
+
+public class TestDeprecated {
+    //这里无法省略number=
+    @TestInterface(number = 10, value = "v", description = "d")
+    public static void main(String args[]) {
+        System.out.println("@TestInterface");
+    }
+}
+
+//只有一个数据成员时
+package test;
+
+public @interface TestInterface {
+    int number();
+}
+//
+package test;
+
+public class TestDeprecated {
+    //这里编译不过，为什么？
+    @TestInterface(10)
+    public static void main(String args[]) {
+        System.out.println("@TestInterface");
+    }
+}
+
+28.2.3 设置默认值 P886
+在成员变量后使用default指定默认值，默认值的类型必须与成员变量声明的类型完全相同。
+package test;
+
+public @interface TestInterface {
+    int number() default 1;
+    String value() default "hello";
+    String description() default "world";
+}
+//
+package test;
+
+public class TestDeprecated {
+    @TestInterface(value = "abc")
+    public static void main(String args[]) {
+        System.out.println("@TestInterface");
+    }
+}
+
+28.2.4 设置目标范围@Target P886
+对于自定义的注释类型，可以限定引用它的时机，可以在注释类前使用JDK 5.0 内置的注释@Target来指定注释的目标范围。
+ElementType这个枚举定义了注释类型可应用的不同程序元素。
+
+//演示@Target的用法
+package test;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.ANNOTATION_TYPE})//如果把ElementType.METHOD注释掉，则会报编译错误，无法在main方法前使用
+public @interface TestInterface {
+    int number() default 1;
+    String value() default "hello";
+    String description() default "world";
+}
+
+Java编译器将把@TestInterface应用于类型、方法、构造函数和其他注释类型，这样有助于避免他人误用你的注释类型。
+
+28.2.5 设置保持性@Retention P887
+这个注释和Java编译器处理注释的注释类型的方式有关，编译器有以下几种不同的选择。
+--将注释保留在编译后的类文件中，并在第一次加载类时读取它。
+--将注释保留在编译后的类文件中，但是在运行时忽略它。
+--按照规定使用注释，但是并不将它保留到编译后的类文件中。
+这3种选项用java.lang.annotation.RetentionPolicy枚举表示。
+
+@Retention注释类型使用枚举中的一个作为唯一的参数，将该元注释用于注释，如下：
+
+package test;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.SOURCE)
+public @interface TestInterface {
+    int number() default 1;
+    String value() default "hello";
+    String description() default "world";
+}
+这将使得@TestInterface注释符只能够保持在Java源代码中。
+
+28.2.6 添加公共文档@Documented P888
+这是一个标记注释，没有成员变量，表示注释应该出现在类的Javadoc中，在默认情况下，注释不包括在Javadoc中。
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface TestInterface {
+    int number() default 1;
+    String value() default "hello";
+    String description() default "world";
+}
+@Documented的一个实用技巧是保持性策略。上例中规定注释的保持性（retention）是RUNTIME，这是使用@Documented注释类型所必需的。Javadoc使用虚拟机从其类文件（而非源文件）中加载信息。确保JVM从这些类文件中获得生成Javadoc所需信息的唯一方法是将保持性规定为RetentionPolicy.RUNTIME。这样，注释就会保留在编译后的类文件中并且由虚拟机加载，然后Javadoc可以从抽取出来添加到类的HTML文件中。
+
+28.2.7 设置继承@Inherited P888
+添加@Inherited后，将看到@TestInterface出现在注释类的子类中。
+当然，并不希望所有的注释类型都具有这种行为（因为默认值是不继承的）。如，TODO注释就不会（也不应该）被传播。
 //------------------------------------------------------------------------------------------------
+//Java核心编程技术 第29课 Java 5.0 语言新特性 P891
+JDK 5.0 的11个特征中的两个重要特性——泛型和注释符。
+
+29.1 自动装箱和拆箱（Boxing/Unboxing）P891
+实现了基本数据类型与对象数据类型之间的隐式转换。
+--基本数据类型至对象数据类型的转换称为自动装箱。
+--对象数据类型至基本数据类型的转换称为自动拆箱。
+这些类包括：
+byte--Byte
+short--Short
+int--Integer
+long--Long
+float--Float
+double--Double
+char--Character
+boolean--Boolean
+
+//
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TestAnnotation {
+    public static void main(String args[]) {
+        //旧的代码
+        Integer intObject = new Integer(20);
+        int intPrimitive = 10;
+        List<Integer> list = new ArrayList<>();//int将提示primitive(原始)数据不能成为数据类型
+        list.add(intObject);
+        list.add(new Integer(intPrimitive));
+
+        //如果将Integer类型转换为int，需要使用转换函数
+        int intPrimitive2 = intObject.intValue();
+
+        //新的代码
+        list.add(intPrimitive);//自动装箱int-->Integer
+        int intPrimitive3 = intObject;//自动拆箱Integer-->int
+    }
+}
+该功能让我们在编码时不再需要进行显示转换，代码编写简单，符合编程思维。
+
+29.2 枚举类（Enumeration Class） P892
+通常在定义一些常用的键值时，会使用一些public static final int类型的常量来定义。
+1. public static final int 的常量
+如，要定义一系列颜色值：
+public class Constants {
+    public static final int RED = 1;
+    public static final int YELLOW = 2;
+    public static final int BLUE = 3;
+    public static final int ORANGE = 4;
+}
+
+这种方法有一个隐患，就是这些常量的整型值不能相等。如，像下面这样引用这些变量：
+public void paint(int color) {
+    switch (color) {
+    case Constants.RED:
+        ;
+    case Contants.YEELOW;
+        ;
+    case Constants.BLUE;
+        ;
+    case Constants.ORANGE;
+        ;
+    default:
+        ;
+    }
+}
+对于case分支，如果其中的颜色值有相等，则会出现错乱。为了解决这个问题，出现了枚举类。
+
+2. 定义枚举类 P893
+枚举类（enum）非常像public static final int声明，对int所做的最大也是最明显的改进是类型安全，你不能错误地用枚举的一种类型代替另一种类型，这和int不同，所有的int对编译器来说都是一样的。大部分情况下，可以使用enum对代码中所有的public static final int 做插入替换。它们是可比的，并且可以静态导入，所以对它们的引用看起来是等同的，即便是对于内部类（或内部枚举类型）。
+可以像下面这样定义颜色列表：
+enum Color {
+    Red, Yellow, Blue, Orange;
+}
+
+像引用变量一样引用枚举变量：
+Color color = Color.Red;//引用变量
+
+对于以上paint()函数，枚举类这样使用：
+public void paint(Color color) {
+    switch (color) {
+    case Red:
+        ;
+    case Yellow:
+        ;
+    default:
+        ;
+    }
+}
+
+case标签中的值可以引用自switch()中参数的枚举值，并可以使用values()取得枚举列表数组，遍历枚举值：
+//
+package test;
+
+enum Color {
+    Red, Green, Yellow, Orange;
+}
+
+public class TestEnum {
+    public static void main(String args[]) {
+        Color color = Color.Orange;
+
+        switch (color) {
+            case Red:
+                System.out.println("Red");
+                break;//需要加break来跳出switch
+            case Green:
+                System.out.println("Green");
+                break;
+            case Yellow:
+                System.out.println("Yellow");
+                break;
+            default:
+                System.out.println("Default color: " + color);
+        }
+
+        Color[] colors = Color.values();
+        for (int i = 0; i < colors.length; ++i) {
+            System.out.println(colors[i]);
+        }
+    }
+}
+
+3. 为枚举值添加参数 P894
+枚举的变量名可以附带一个参数，用来表示一个附加的属性，如缩写等。参数类型可以是String、int等各种Java类型，形式为：
+public enum Name {types(参数值), ...;}
+如果附带了参数，必须为该参数添加一个变量名、构造函数和get函数，如下：
+//枚举类型可以理解为就是一个类，可以有构造函数等各种函数
+package test;
+
+enum Color {
+    Red("R"), Green("G"), Yellow("Y"), Orange;//如果这里Orange不提供参数，则需要有无参的构造函数Color()
+
+    private String shortName;
+    //这里会提示private是冗余的，可以不带限定符。但是如果使用public则报错public不允许
+    private Color(String shortName) {
+        this.shortName = shortName;
+    }
+
+    Color() {
+
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+}
+
+public class TestEnum {
+    public static void main(String args[]) {
+        Color[] colors = Color.values();
+        for (int i = 0; i < colors.length; ++i) {
+            System.out.println(colors[i]);
+            System.out.println(colors[i].getShortName());
+        }
+    }
+}
+输出：
+Red
+R
+Green
+G
+Yellow
+Y
+Orange
+null
+
+也可以用整数值来表示参数
+enum Day {
+    SUNDAY(0), MONDAY(1), ...;
+    
+    private int day;
+    Day(int day) {
+        this.day = day;
+    }
+    public int getDay() {
+        return day;
+    }
+}
+
+4. 枚举的映射（Map） P894
+枚举提供了一些附加的特性，EnumMap和EnumSet这两个实用类是专门为枚举优化的标准集合实现。如果知道集合只包含枚举类型，应该使用这些专门的集合来代替HashMap或HashSet。
+//
+package test;
+
+import java.util.EnumMap;
+
+enum Color {
+    Red, Green, Yellow, Orange;
+}
+
+public class TestEnum {
+    public static void main(String args[]) {
+        EnumMap<Color, String> map = new EnumMap<Color, String>(Color.class);
+        map.put(Color.Red, "this is Red");
+        map.put(Color.Yellow, "this is Yellow");
+        map.put(Color.Green, "this is Green");
+        map.put(Color.Orange, "this is Orange");
+
+        Color[] colors = Color.values();
+        for (int i = 0; i < colors.length; ++i) {
+            System.out.println(map.get(colors[i]));
+        }
+    }
+}
+输出：
+this is Red
+this is Green
+this is Yellow
+this is Orange
+这种做法好处是，可以保证Map列表中的键在枚举值的范围内，而不超出枚举值范围，EnumSet也是如此。
+Tips：通常都应用用enum实例替换全部的枚举风格的public static final int结构，因为枚举是安全的。
+
+29.3 可变参数（Variable Arguments） P895
+使用3个点号表示一系列的同类型的参数，如下：
+void func(Object... args)
+3 个点号紧跟在对象类型Object后面，其中的Object可以是任意类型，包括Java基础数据类型和对象数据类型。
+在引用该函数时，可以使用逗号分隔传递多个参数，同类型的参数都将作为该参数的一个值传入，如下所示：
+func(arg1, arg2,..., argn);
+传入的参数args实现上是一个Object类型的数组：
+Object[] args;
+因此可以像使用数组一样使用args变量。
+Tips：由于可变参数的数量不定，因此可变参数只能作为函数的最后一个参数出现，因此函数最多只能有一个可变参数。
+
+//
+package test;
+
+public class TestVarargs {
+    public static int add(int... args) {
+        int total = 0;
+        for (int i = 0; i < args.length; ++i) {
+            total += args[i];
+        }
+        return total;
+    }
+
+    public static void main(String args[]) {
+        System.out.println(TestVarargs.add(1, 2));
+        System.out.println(TestVarargs.add(1, 2, 3));
+    }
+}
+输出：
+3
+6
+Tips：正确地使用可变参数确实可以清理一些垃圾代码，它避免了往函数中传递一个长度不固定的数组，可以将待传递的数组中的各个值直接当做参数传递。
+
+//可以参数也可以使用不同类型的参数，此时需要用Object来表示入参，并且需要对参数类型做判断
+package test;
+
+public class TestVarargs {
+    public static void add(Object... args) {
+        int total = 0;
+        for (int i = 0; i < args.length; ++i) {
+            Object o = args[i];
+            if (o instanceof Integer) {
+                int argInt = (int) o;
+                System.out.println("Int: " + argInt);
+            } else if (o instanceof String) {
+                String argStr = (String) o;
+                System.out.println("String: " + argStr);
+            }
+
+        }
+    }
+
+    public static void main(String args[]) {
+        TestVarargs.add(1, 2);
+        TestVarargs.add(3, "hello", "world");
+    }
+}
+输出：
+Int: 1
+Int: 2
+Int: 3
+String: hello
+String: world
+
+29.4 可变返回类型（Covariant Return Types） P896
+JDK5中可以改变被覆盖方法的返回类型。Covariant的意思是，在子类的重载方法中，其方法的返回值的范围比父类的对应类型缩小了，可以是父亲对应类型的子类型。
+如下，B类继承自Number，其重载方法whoAreYou()返回的类型不再是Number，而是Number的子类型Integer，这样就缩小了重载方法的范围。
+package test;
+
+class Number {
+    public Number whoAreYou() {
+        return new Number();
+    }
+}
+
+class Integer extends Number {
+    @Override
+    public Number whoAreYou() {
+        return new Integer();
+    }
+}
+
+class Float extends Number {
+    @Override
+    public Number whoAreYou() {
+        return new Float();
+    }
+}
+
+public class TestConvariant {
+    public static void main(String args[]) {
+        Float f = new Float();
+        System.out.println(f.whoAreYou());
+    }
+}
+Tips：这种做法的用意是，允许子类缩小返回类型的范围，使得各实现子类能够更加符合自身的意义。如对于父类Number，它的子类Integer、Float分别用于处理整型和浮点型数据，如果它们返回的值都是Number类型，那么对这两个子类来说，显示是不合适的，子类不应该提及父类，而是只处理自身范围内的数据才是合理的。
+
+29.5 增强循环 Enhanced for Loop P897
+通常对于数据列表：
+List<String> list = new ArrayList<>();
+list.add("how");
+list.add("are");
+list.add("you");
+可以使用for语句来循环该列表：
+for (int i = 0; i < list.size(); ++i) {
+    String str = list.get(i);
+    System.out.println(str);
+}
+或使用while语句来输出迭代对象：
+Iterator<String> iter = list.iterator();
+while (iter.hasNext()) {
+    String str = iter.next();
+    System.out.println(str);
+}
+
+JDK 5.0 中提供了增强的for循环功能，可以使用如下形式输出：
+for (Object o : c) {
+    //
+}
+
+此时可以如下输出：
+for (String str : list) {
+    System.out.println(str);
+}
+与旧的for循环相比，str对象不需要从list中使用get()取得了，不需要进行指针的累加；与while循环相比，不需要生成迭代对象，也不需要使用next()来循环指针。这样做的好处很显然，只需要理解str是list集合中的对象即可，也完全符合我们的正常思维过程。
+将这种特殊的for语句格式称之为“foreach”语句，foreach并不是一个关键字。从英文字面理解foreach也就是“for 每一个”的意思。
+
+foreach语句是for语句的特殊简化版本，但是foreach语句并不能完全取代for语句，然而，任何的foreach语句都可以改写为for语句版本。对于数组、列表、集合类型的数据对象都可以使用这种简化方式。上面的例子可以发现，如果要引用数组或者集合的索引，则foreach语句无法做到，foreach仅仅老老实实的遍历数组或者集合一遍。
+Tips：foreach语句是for语句特殊情况下的增强版本，简化了编程，提高了代码的可读性和安全性（不用怕数组越界）。相对老的for语句来说是个很好的补充。提供能用foreach的地方就不要用for了。在用到对集合或者数组索引的情况下，foreach显得力不从心，这个时候是用for语句的时候了。
+
+20.6 静态导入 Static Import P898
+Java编程中，通常将固定的函数和变量写成静态的，可以直接通过类名来引用该函数和变量，不需要通过构造类的实现来实现它。如对于Math类的静态方法，可能这样引用：
+//旧的方式
+package test;
+
+public class TestVarargs {
+    public static void main(String args[]) {
+        double d = Math.sqrt(Math.pow(3, 2) + Math.pow(4, 2));
+        System.out.println(d);
+    }
+}
+
+对于每一个方法，都需要使用类名来引用，在JDK 5.0 中可以使用静态导入一次性引入，语法格式如下：
+import static java.lang.Math.*;
+该语句放在类文件的import区域，使用关键字为“import static”，类名后需要添加“.*”，表示引入了所有的静态函数，也可以指定具体的函数名。
+package test;
+
+import static java.lang.Math.pow;
+import static java.lang.Math.*;
+
+public class TestVarargs {
+    public static void main(String args[]) {
+        double d = Math.sqrt(Math.pow(3, 2) + Math.pow(4, 2));
+        System.out.println(d);
+
+        //新的方式
+        double d2 = sqrt(pow(1, 2) + pow(1, 2));
+        System.out.println(d2);
+    }
+}
+需要注意的是，默认包无法用静态导入，另外如果导入的类中有重复的方法和属性则需要写出类名，否则编译时无法通过。
+
+29.7 控制台输入 （Console Input） P898
+JDK 5.0 中可以通过java.utils.Scanner在控制台进行输入操作。
+Scanner是一个可以使用正则表达式来解析基本类型和字符串的简单文本扫描器。Scanner使用分隔符模式将其输入分解为标记，在默认情况下该分隔符模式与空白匹配。然后可以使用不同的next方法将得到的标记转换为不同类型的值。
+1. 读取控制台
+以下代码使用户能够从System.in中读取一个数：
+package test;
+
+import java.util.Scanner;
+
+public class TestVarargs {
+    public static void main(String args[]) {
+        Scanner sc = new Scanner(System.in);//输入非数字的字符将抛异常
+        int i = sc.nextInt();
+        System.out.println(i);
+    }
+}
+
+2. 读取文件
+//test.txt
+123
+456
+abc
+789
+
+//
+package test;
+
+import java.io.File;
+import java.util.Scanner;
+
+public class TestVarargs {
+    public static void main(String args[]) {
+        try {
+            Scanner sc = new Scanner(new File("src/test/test.txt"));//路径一定要从src下开始指定
+            while (sc.hasNextLong()) {//读到不是long的对象后就退出
+                long l = sc.nextLong();
+                System.out.println(l);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+123
+456
+
+3. 读取字符串
+扫描器还可以使用不同于空白的分隔符，下面是从一个字符串读取若干项的例子：
+package test;
+
+import java.util.Scanner;
+
+public class TestVarargs {
+    public static void main(String args[]) {
+        String input = "1 fish   2 fish   red fish blue fish  ";
+        Scanner s = new Scanner(input).useDelimiter("\\s*fish\\s*");//\s匹配任何不可见字符，包括空格、制表符、换页符等等。等价于[ \f\n\r\t\v]。
+        System.out.println(s.nextInt());
+        System.out.println(s.nextInt());
+        System.out.println(s.next());
+        System.out.println(s.next());
+    }
+}
+输出
+1
+2
+red
+blue
+
+以下代码使用正则表达式同时解析所有的4个标记，并可以产生与上例相同的输出结果：
+package test;
+
+import java.util.Scanner;
+import java.util.regex.MatchResult;
+
+public class TestVarargs {
+    public static void main(String args[]) {
+        String input = "1 fish   2 fish   red fish blue fish  ";
+        Scanner s = new Scanner(input);
+        s.findInLine("(\\d+)\\s*fish\\s*(\\d+)\\s*fish\\s*(\\w+)\\s*fish\\s*(\\w+)");
+        MatchResult result = s.match();
+        for (int i = 1; i <= result.groupCount(); ++i) {
+            System.out.println(result.group(i));
+        }
+    }
+}
+
+Tips：该类为java.utils.Scanner，更多使用可以参数Java API文档。
+
+29.8 StringBuilder类 P900
+
+29.9 格式化I/O （Formatted I/O） P900
+//------------------------------------------------------------------------------------------------
+//Effective Java 第1章 引言 P1
+不严格地讲，一个包的导出的API是由该包中的每个公有（public）类或者接口中所有公有的或者受保护的（protected）成员和构造器组成。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+
+//第1条：考虑用静态工厂方法代替构造器 P4
+获取一个实例，类可以提供一个公有的静态工厂方法（static factory method），它只是一个返回类的实例的静态方法。下面是一个Boolean（基本类型boolean的包装类）的简单示例，这个方法将boolean基本类型值转换成了一个Boolean对象引用：
+public static Boolean valueOf(boolean b) {
+    return b ? Boolean.TRUE : Boolean.FALSE;
+}
+
+类可以通过静态工厂方法来提供它的客户端，而不是通过构造器。提供静态工厂方法而不是公有的构造器，这样做具有几大优势。
+--静态工厂方法与构造器不同的第一大优势在于，它们有名称。如果构造器的参数本身没有确切地描述正被返回的对象，那么具有适当名称的静态工厂会更容易使用，产生的客户端代码也更易于阅读。
+一个类只能有一个带有指定签名的构造器。
+由于静态工厂方法有名称，所以它们不受上述的限制。当一个类需要多个带有相同签名的构造器时，就用静态工厂方法代替构造器，并且慎重地选择名称以便突出它们之间的区别。
+--静态工厂方法与构造器不同的第二大优势在于，不必每次调用它们的时候都创建一个新对象。
+
 
 //------------------------------------------------------------------------------------------------
 
