@@ -1,4 +1,380 @@
 //------------------------------------------------------------------------------------------------
+//junit4 assert类中的assert方法总结
+http://blog.sina.com.cn/s/blog_44d19b500102vf5f.html
+
+junit中的assert方法全部放在Assert类中，总结一下junit类中assert方法的分类。
+1.assertTrue/False([String message,]boolean condition);
+判断一个条件是true还是false。感觉这个最好用了，不用记下来那么多的方法名。
+2.fail([String message,]);
+失败，可以有消息，也可以没有消息。
+3.assertEquals([String message,]Object expected,Object actual);
+判断是否相等，可以指定输出错误信息。
+第一个参数是期望值，第二个参数是实际的值。
+这个方法对各个变量有多种实现。在JDK1.5中基本一样。
+但是需要主意的是float和double最后面多一个delta的值，可能是误差范围，不确定这个 单词什么意思，汗一个。
+4.assertNotNull/Null([String message,]Object obj);
+判读一个对象是否非空(非空)。
+5.assertSame/NotSame([String message,]Object expected,Object actual);
+判断两个对象是否指向同一个对象。看内存地址。
+7.failNotSame/failNotEquals(String message, Object expected, Object actual)
+当不指向同一个内存地址或者不相等的时候，输出错误信息。
+注意信息是必须的，而且这个输出是格式化过的。
+
+
+//------------------------------------------------------------------------------------------------
+//JUnit4单元测试
+http://www.blogjava.net/jnbzwm/archive/2010/12/15/340801.html
+JUnit4的用法介绍：
+1. 在 JUnit4 中，测试是由 @Test 注释来识别的，如下所示
+2. JUnit4 中，我们仍然可以在每个测试方法运行之前初始化字段或准备数据。然而，完成这些操作的方法不再需要叫做 setUp()，只要用 @Before 注释来指示该方法即可。
+JUnit4允许我们使用 @Before 来注释多个方法，这些方法都在每个测试之前运行
+3. 清除方法与初始化方法类似。在 JUnit3 中，我们要将方法命名为 tearDown() 才可以实现清除方法，但在JUnit4中，只要给方法添加@After标注即可。
+测试方法结束后清除为此测试用例准备的一些数据。
+与 @Before 一样，也可以用 @After 来注释多个清除方法，这些方法都在每个测试之后运行。 
+最后，我们不再需要显式调用在超类中的初始化和清除方法，只要它们不被覆盖，测试运行程序将根据需要自动为您调用这些方法。
+超类中的 @Before 方法在子类中的 @Before 方法之前被调用（这反映了构造函数调用的顺序）。
+@After 方法以反方向运行：子类中的方法在超类中的方法之前被调用。否则，多个 @Before 或 @After 方法的相对顺序就得不到保证。
+
+浅谈TDD
+测试驱动开发，它是敏捷开发的最重要的部分。方法主要是先根据客户的需求编写测试程序，然后再编码使其通过测试。在敏捷开发实施中，开发人员主要从两个方面去理解测试驱动开发。
+a)在测试的辅助下，快速实现客户需求的功能。通过编写测试用例，对客户需求的功能进行分解，并进行系统设计。我们发现从使用角度对代码的设计通常更符合后期开发的需求。可测试的要求，对代码的内聚性的提高和复用都非常有益。 
+b)在测试的保护下，不断重构代码，提高代码的重用性，从而提高软件产品的质量。可见测试驱动开发实施的好坏确实极大的影响软件产品的质量，贯穿了软件开发的始终。 
+在测试驱动开发中，为了保证测试的稳定性，被测代码接口的稳定性是非常重要的。否则，变化的成本就会急剧的上升。所以，自动化测试将会要求您的设计依赖于接口，而不是具体的类。进而推动设计人员重视接口的设计，体现系统的可扩展性和抗变性。 
+
+则Before、After方法的执行流程如图所示：
+这种方法有明显的缺陷，如果要初始化的是数据库的链接，或者是一个大的对象的话，而这些资源恰恰是整个测试用例类可以共用的，每次都去申请，确实是种浪费。所以JUnit4引入了@BeforeClass和@AfterClass。
+
+这个特定虽然很好，但是一定要小心对待这个特性。它有可能会违反测试的独立性，并引入非预期的混乱。如果一个测试在某种程度上改变了 @BeforeClass 所初始化的一个对象，那么它有可能会影响其他测试的结果。也就是说，由BeforeClass申请或创建的资源，如果是整个测试用例类共享的，那么尽量不要让其中任何一个测试方法改变那些共享的资源，这样可能对其他测试方法有影响。它有可能在测试套件中引入顺序依赖，并隐藏 bug。
+
+--测试异常@Test(expected=XXXException.class)
+
+--参数化测试
+为了保证单元测试的严谨性，我们经常要模拟很多种输入参数，来确定我们的功能代码是可以正常工作的，为此我们编写大量的单元测试方法。可是这些测试方法都是大同小异：代码结构都是相同的，不同的仅仅是测试数据和期望输出值。
+JUnit4 的参数化测试方法给我们提供了更好的方法，将测试方法中相同的代码结构提取出来，提高代码的重用度，减少复制粘贴代码的痛苦。
+
+很明显，代码简单且很清晰了。在静态方法 words 中，我们使用二维数组来构建测试所需要的参数列表，其中每个数组中的元素的放置顺序并没有什么要求，只要和构造函数中的顺序保持一致就可以了。现在如果再增加一种测试情况，只需要在静态方法 words 中添加相应的数组即可，不再需要复制粘贴出一个新的方法出来了。
+这种参数化的测试用例写法，很适用于一些共用的功能方法。
+//------------------------------------------------------------------------------------------------
+//JUnit进行单元测试
+//FizzBuzz
+package fizzbuzz;
+
+import static java.lang.String.*;
+
+public class FizzBuzz {
+    public static String convert(int i) {
+        if (i % 15 == 0) {
+            return "FizzBuzz";
+        } else if (i % 3 == 0) {
+            return "Fizz";
+        } else if (i % 5 == 0) {
+            return "Buzz";
+        } else {
+            return format("%d", i);
+        }
+    }
+}
+
+//哪种风格更好？
+package fizzbuzz;
+
+import static java.lang.String.*;
+
+public class FizzBuzz {
+    public static String convert(int i) {
+        if (i % 15 == 0) {
+            return "FizzBuzz";
+        }
+
+        if (i % 3 == 0) {
+            return "Fizz";
+        }
+
+        if (i % 5 == 0) {
+            return "Buzz";
+        }
+
+        return format("%d", i);
+    }
+}
+
+
+//FizzBuzzTest
+package fizzbuzz;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class FizzBuzzTest {
+    @Test
+    public void test_return_normal_when_input_normal() {
+        assertEquals("1", FizzBuzz.convert(1));
+        assertEquals("2", FizzBuzz.convert(2));
+    }
+
+    @Test
+    public void test_return_fizz_when_input_fizz() {
+        assertEquals("Fizz", FizzBuzz.convert(3));
+        assertEquals("Fizz", FizzBuzz.convert(6));
+    }
+
+    @Test
+    public void test_return_buzz_when_input_buzz() {
+        assertEquals("Buzz", FizzBuzz.convert(5));
+        assertEquals("Buzz", FizzBuzz.convert(10));
+    }
+
+    @Test
+    public void test_return_fizzbuzz_when_input_fizzbuzz() {
+        assertEquals("FizzBuzz", FizzBuzz.convert(15));
+    }
+}
+
+//--
+http://tonl.iteye.com/blog/1948869
+package calculator;
+
+public class Calculator {
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    public int minus(int a, int b) {
+        return a - b;
+    }
+
+    public int square(int n) {
+        return n * n;
+    }
+
+    public void squareRoot(int n) {
+        for (; ;) {
+            ;
+        }
+    }
+
+    public int multiply(int a, int b) {
+        return a * b;
+    }
+
+    public int divide(int a, int b) throws Exception {
+        if (0 == b) {
+            throw new Exception("除数不能为零");
+        }
+        return a / b;
+    }
+}
+
+//
+package calculator;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class CalculatorTest {
+    private Calculator calculator = new Calculator();
+
+    @BeforeClass
+    public static void before() {
+        System.out.println("global before");
+    }
+
+    @AfterClass
+    public static void after() {
+        System.out.println("global after destory");
+    }
+
+    @Before
+    public void setUp() {
+        System.out.println("一个测试开始：");
+    }
+
+    @After
+    public void tearDown() {
+        System.out.println("一个测试结束");
+    }
+
+    @Test
+    @Ignore //@Ignore("该方法还未实现")
+    public void test_return_addValue_when_add() {
+        int result = calculator.add(1, 2);
+        assertEquals(3, result);
+    }
+
+    @Test
+    public void test_return_minusValue_when_minus() {
+        int result = calculator.minus(5, 2);
+        assertEquals(3, result);
+    }
+
+    @Test
+    public void test_return_multiplyValue_when_multiply() {
+        int result = calculator.multiply(4, 2);
+        assertEquals(8, result);
+    }
+
+    @Test(timeout = 1000) //单位为毫秒
+    public void test_return_outoftime_when_runingSquareRoot() {
+        calculator.squareRoot(4);
+    }
+
+    @Test(expected = Exception.class)
+    public void test_throw_exception() throws Exception {
+        System.out.println("test divide 4 / 0");
+        calculator.divide(4, 0);
+    }
+
+    @Test
+    public void test_return_divideValue_when_divide() {
+        int result = 0;
+        try {
+            result = calculator.divide(10, 5);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(); //如果这行没有执行，说明这部分正确
+        }
+        assertEquals(2, result);
+    }
+}
+输出：
+一个测试开始：
+一个测试结束
+
+org.junit.runners.model.TestTimedOutException: test timed out after 1000 milliseconds
+
+	at calculator.Calculator.squareRoot(Calculator.java:17)
+	at calculator.CalculatorTest.test_return_outoftime_when_runingSquareRoot(CalculatorTest.java:57)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.lang.Thread.run(Thread.java:745)
+
+一个测试开始：
+一个测试结束
+一个测试开始：
+test divide 4 / 0
+一个测试结束
+一个测试开始：
+一个测试结束
+
+Test ignored.一个测试开始：
+一个测试结束
+global before
+global after destory
+
+
+//assertThat
+package calculator;
+
+import org.junit.Test;
+
+import java.util.ArrayList;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.junit.Assert.assertThat;
+
+public class CalculatorTest {
+
+    @Test
+    public void test_that() {
+        String s = "hello, world";
+        assertThat(s, is(s));
+        assertThat(s, containsString("hello"));
+
+        //assertThat(16, greaterThan(10)); //没有在hamcrest找到greaterThan方法
+
+        //String[] stringArray = new String[]{"hello", "world"};//数组不是可迭代的对象
+        //可以如下转化为List
+        //List<String> stringList = Arrays.asList(stringArray);
+        
+        ArrayList<String> stringList = new ArrayList<String>();
+        stringList.add("hello");
+        stringList.add("world");
+        assertThat(stringList, hasItem("hello"));
+    }
+}
+
+//同样的用例，多组测试数据，参数化测试
+package calculator;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
+
+@RunWith(Parameterized.class)
+public class CalculatorTest2 {
+    private Calculator calculator = new Calculator();
+    private int param;
+    private int result;
+
+    //构造函数，对变量进行初始化
+    //定义一个待测试的类，并且定义两个变量，一个用于存放参数，一个用于存放期待的结果
+    public CalculatorTest2(int param, int result) {
+        this.param = param;
+        this.result = result;
+    }
+
+    @Parameters
+    public static Collection data() {
+        return Arrays.asList(new Object[][] {
+                {2, 4}, {0, 0}, {-3, 9}
+        });
+    }
+
+    @Test
+    public void test_return_multiTestValue_when_inputMultiTest() {
+        int temp = calculator.square(param);
+        assertEquals(result, temp);
+    }
+}
+
+测试代码提交给JUnit框架后，框架如何来运行代码呢?答案就是——Runner。在JUnit中有很多个 Runner，他们负责调用测试代码，每一个Runner都有各自的特殊功能，要根据需要选择不同的Runner来运行测试代码。JUnit中有一个默认Runner，如果没有指定，那么系统自动使用默认 Runner来运行你的代码。这里参数化测试就没有再用默认的Runner了。
+//--自定义Runner
+package calculator;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+/**
+ * 大家可以看到，这个功能也需要使用一个特殊的Runner，
+ * 因此我们需要向@RunWith标注传递一个参数Suite.class。
+ * 同时，我们还需要另外一个标注@Suite.SuiteClasses，
+ * 来表明这个类是一个打包测试类。我们把需要打包的类作为参数传递给该标注就可以了。
+ * 有了这两个标注之后，就已经完整的表达了所有的含义，因此下面的类已经无关紧要，
+ * 随便起一个类名，内容全部为空既可
+ */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({CalculatorTest.class, CalculatorTest2.class})
+public class AllCalculatorTests {
+}
+
+这个测试类包含了上面的CalculatorTest.class和CalculatorTest2.class里面所有的测试函数，它的目的就是进行打包所有的测试。
+
+//------------------------------------------------------------------------------------------------
 //Java中的Pair结构
 package test;
 
@@ -33,6 +409,29 @@ DingBen=1
 LiLei=2
 Key:LiLei=2, Value:hello
 Key:DingBen=1, Value:world
+
+//用mapEntry进行遍历是最高效的
+package test;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class TestMapIteration {
+
+    public static void main(String args[]) {
+        Map<String, Integer> stringIntegerMap = new LinkedHashMap<>();
+        stringIntegerMap.put("abc", 1);
+        stringIntegerMap.put("def", 2);
+        stringIntegerMap.put("opq", 3);
+
+        for (Map.Entry<String, Integer> mapEntry : stringIntegerMap.entrySet()) {
+            System.out.println("key: " + mapEntry.getKey() + ", value: " + mapEntry.getValue());
+        }
+    }
+}
+key: abc, value: 1
+key: def, value: 2
+key: opq, value: 3
 
 //------------------------------------------------------------------------------------------------
 //http://blog.sina.com.cn/s/blog_48c0812c0101alaz.html
@@ -18769,7 +19168,6 @@ Tips：该类为java.utils.Scanner，更多使用可以参数Java API文档。
 不严格地讲，一个包的导出的API是由该包中的每个公有（public）类或者接口中所有公有的或者受保护的（protected）成员和构造器组成。
 //------------------------------------------------------------------------------------------------
 //Effective Java 第2章 创建和销毁对象 P4
-
 //第1条：考虑用静态工厂方法代替构造器 P4
 获取一个实例，类可以提供一个公有的静态工厂方法（static factory method），它只是一个返回类的实例的静态方法。下面是一个Boolean（基本类型boolean的包装类）的简单示例，这个方法将boolean基本类型值转换成了一个Boolean对象引用：
 public static Boolean valueOf(boolean b) {
@@ -18780,17 +19178,549 @@ public static Boolean valueOf(boolean b) {
 --静态工厂方法与构造器不同的第一大优势在于，它们有名称。如果构造器的参数本身没有确切地描述正被返回的对象，那么具有适当名称的静态工厂会更容易使用，产生的客户端代码也更易于阅读。
 一个类只能有一个带有指定签名的构造器。
 由于静态工厂方法有名称，所以它们不受上述的限制。当一个类需要多个带有相同签名的构造器时，就用静态工厂方法代替构造器，并且慎重地选择名称以便突出它们之间的区别。
---静态工厂方法与构造器不同的第二大优势在于，不必每次调用它们的时候都创建一个新对象。
 
+--静态工厂方法与构造器不同的第二大优势在于，不必每次调用它们的时候都创建一个新对象。如果程序经常请求创建相同的对象，并且创建对象的代价很高，则这项技术可以极大地提升性能。
+静态工厂方法能够为重复的调用返回相同对象，这样有助于类总能严格控制在某个时刻哪些实例应该存在。这种类被称作实例受控的类（instance-controlled）。编写实例受控的类有几个原因。可以确认它是一个Singleton（见第3条）或者是不可实例化的（见第4条）。它还使得不可变的类（见第15条）可以确保不会存在两个相等的实例，即当且仅当a==b时才有a.equals(b)为true。如果类保证了这一点，它的客户端就可以使用==操作符来代替equals(Object)方法，这样可以提升性能。枚举（enum）类型（见第30条）保证了这一点。
+
+--静态工厂方法与构造器不同的第三大优势在于，它们可以返回原返回类型的任何子类型的对象。这样我们在选择返回对象的类时就有了更大的灵活性。
+
+服务提供者框架模式有着无数种变体。如，服务访问API可以利用适配器（Adapter）模式，返回比提供者需要的更丰富的服务接口。下面是一个简单的袜，包含一个服务提供者接口和一个默认提供者：
+//
+package test;
+
+public interface Service {
+    String name();
+}
+
+class ServiceA implements Service {
+    private String name = "ServiceA";
+
+    @Override
+    public String name() {
+        return name;
+    }
+}
+
+class ServiceB implements Service {
+    private String name = "ServiceB";
+
+    @Override
+    public String name() {
+        return name;
+    }
+}
+
+//
+package test;
+
+public interface Provider {
+    Service newService();
+}
+
+class ProviderA implements Provider {
+    @Override
+    public Service newService() {
+        return new ServiceA();
+    }
+}
+
+class ProviderB implements Provider {
+    @Override
+    public Service newService() {
+        return new ServiceB();
+    }
+}
+
+//
+package test;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class Services {
+    private Services() {
+    }
+
+    private static final Map<String, Provider> providers = new ConcurrentHashMap<>();
+    public static final String DEFAULT_PROVIDER_NAME = "<default>";
+
+    //Provider registration API
+    public static void registerDefaultProvider(Provider p) {
+        registerDefaultProvider(DEFAULT_PROVIDER_NAME, p);
+    }
+
+    public static void registerDefaultProvider(String name, Provider p) {
+        providers.put(name, p);
+    }
+
+    //Service access API
+    public static Service newInstance() {
+        return newInstance(DEFAULT_PROVIDER_NAME);
+    }
+
+    public static Service newInstance(String name) {
+        Provider p = providers.get(name);
+        if (p == null) {
+            throw new IllegalArgumentException("No provider registered with name: " + name);
+        }
+        return p.newService();
+    }
+}
+
+//
+package test;
+
+public class TestServices {
+    public static void main(String args[]) {
+        Services.registerDefaultProvider("A", new ProviderA());
+        Services.registerDefaultProvider("B", new ProviderB());
+
+        Service s = Services.newInstance("A");
+        System.out.println(s.name());
+    }
+}
+输出：
+ServiceA
+
+--静态工厂方法的第四大优势在于，在创建参数化类型实例的时候，它们使代码变得更加简洁。在调用参数化类的构造器时，即便类型参数很明显，也必须指明。这通常要求接连两次提供类型参数：
+Map<String, List<String>> m = new HashMap<String, List<String>>();//在1.8中已经可以省略第二个参数了
+有了静态工厂方法，编译器就可以替你找到类型参数。这被称作类型推导（type inference）。如，假设HashMap提供了这个静态工厂：
+public static <K, V> HashMap<K, V> newInstance() {
+    return new HashMap<K, V>();
+}
+就可以用下面这句简洁的代码代替上面这段繁琐的声明：
+Map<String, List<String>> m = HashMap.newInstance();//当前1.8中还未添加此静态方法
+
+--静态方法的主要缺点在于，类如果不含公有的或者受保护的构造器，就不能被子类化。对于公有的静态工厂所返回的非公有类，也同样如此。如，想要将Collections Framework中的任何方便的实现类子类化，这是不可能的。这样也因祸得福，因为它鼓励程序员使用复合（composition），而不是继承（见第16条）。
+
+--静态工厂方法的第二个缺点在于，它们与其他的静态方法实际上没有任何区别。在API文档中，它们没有像构造器那样在API文档中明确标识出来，因此，对于提供了静态工厂方法而不是构造器的类来说，要想查明如何实例化一个类，这是非常困难的。
+
+简而言之，静态工厂方法和公有构造器都各有用处，需要理解它们各自的长处。静态工厂通常更加合适，因此切忌第一反应就是提供公有的构造器，而不先考虑静态工厂。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+//第2条：遇到多个构造器参数时要考虑用构建器 P9
+静态工厂和构造器有个共同的局限性：它们都不能很好地扩展到大量的可选参数。考虑用一个类表示包装食品外面显示的营养成份标签。有大量的域。
+对于这样的类，应该用哪种构造器或者静态方法来编写？程序员一向习惯采用重叠构造器（telescoping constructor）模式，在这种模式下，提供第一个只有必要参数的构造器，第二个构造器有一个可选参数，第三个有两个可选参数，依此类推，最后一个构造器包含所有可选参数。下面示例，为简单起见，只显示四个可选域：
+//
+package test;
+//Telescoping constructor pattern - does not scale well!
+public class NutritionFacts {
+    private final int servingSize;
+    private final int servings;
+    private final int calories;
+    private final int fat;
+    private final int sodium;
+    private final int carbohydrate;
+
+    public NutritionFacts(int servingSize, int servings) {
+        this(servingSize, servings, 0);
+    }
+
+    public NutritionFacts(int servingSize, int servings, int calories) {
+        this(servingSize, servings, calories, 0);
+    }
+
+    public NutritionFacts(int servingSize, int servings, int calories, int fat) {
+        this(servingSize, servings, calories, fat, 0);
+    }
+
+    public NutritionFacts(int servingSize, int servings, int calories, int fat, int sodium) {
+        this(servingSize, servings, calories, fat, sodium, 0);
+    }
+
+    public NutritionFacts(int servingSize, int servings, int calories, int fat, int sodium, int carbohydrate) {
+        this.servingSize = servingSize;
+        this.servings = servings;
+        this.calories = calories;
+        this.fat = fat;
+        this.sodium = sodium;
+        this.carbohydrate = carbohydrate;
+    }
+
+    @Override
+    public String toString() {
+        return "[ServingSize:" + servingSize + "]@[Serving:" + servings + "]@[Calories:" + calories
+                + "]@[Fat:" + fat + "]@[Sodium:" + sodium + "]@[Carbohydrate:" + carbohydrate + "]";
+    }
+
+    public static void main(String args[]) {
+        NutritionFacts cocacola = new NutritionFacts(240, 8, 100, 0, 35, 27);
+        System.out.println("Cocacola:" + cocacola);
+
+        NutritionFacts bread = new NutritionFacts(100, 20);
+        System.out.println("Bread:" + bread);
+    }
+}
+输出：
+Cocacola:[ServingSize:240]@[Serving:8]@[Calories:100]@[Fat:0]@[Sodium:35]@[Carbohydrate:27]
+Bread:[ServingSize:100]@[Serving:20]@[Calories:0]@[Fat:0]@[Sodium:0]@[Carbohydrate:0]
+
+这个构造器调用通常需要许多你本不想设置的参数，但还是不得不为它们传递值。这个例子中，我们给fat传递了一个值为0。随着参数数目的增加，它很快就失去了控制。
+一句话：重叠构造器模式可行，但是当有许多参数的时候，客户端代码会很难编写，并且仍然较难以阅读。
+
+遇到很多构造器参数的时候，还有第二种代替方法，即JavaBeans模式，在这种模式下，调用一个无参构造器来创建对象，然后调用setter方法来设置每个必要的参数，以及每个相关的可选参数：
+//
+package test;
+//JavaBeans Pattern - allows inconsistency, mandates mutability
+public class NutritionFacts {
+    private int servingSize = -1;//如果用setter，则这里不能有final了，final同C++里的const一样，是不能修改的，只能在构造函数初始化
+    private int servings = -1;
+    private int calories;
+    private int fat;
+    private int sodium;
+    private int carbohydrate;
+
+    public NutritionFacts() {
+    }
+
+    //Setters
+    public void setServingSize(int servingSize) {
+        this.servingSize = servingSize;
+    }
+
+    public void setServings(int servings) {
+        this.servings = servings;
+    }
+
+    public void setCalories(int calories) {
+        this.calories = calories;
+    }
+
+    public void setFat(int fat) {
+        this.fat = fat;
+    }
+
+    public void setSodium(int sodium) {
+        this.sodium = sodium;
+    }
+
+    public void setCarbohydrate(int carbohydrate) {
+        this.carbohydrate = carbohydrate;
+    }
+
+    @Override
+    public String toString() {
+        return "[ServingSize:" + servingSize + "]@[Serving:" + servings + "]@[Calories:" + calories
+                + "]@[Fat:" + fat + "]@[Sodium:" + sodium + "]@[Carbohydrate:" + carbohydrate + "]";
+    }
+
+    public static void main(String args[]) {
+        NutritionFacts cocacola = new NutritionFacts();
+        cocacola.setCalories(100);
+        System.out.println("Cocacola:" + cocacola);
+
+        NutritionFacts bread = new NutritionFacts();
+        System.out.println("Bread:" + bread);
+    }
+}
+输出：
+Cocacola:[ServingSize:-1]@[Serving:-1]@[Calories:100]@[Fat:0]@[Sodium:0]@[Carbohydrate:0]
+Bread:[ServingSize:-1]@[Serving:-1]@[Calories:0]@[Fat:0]@[Sodium:0]@[Carbohydrate:0]
+
+这种模式弥补了重叠构造器模式的不足。创建实例很容易，产生的代码读起来也容易。
+但是，JavaBeans模式自身有着很严重的缺点。因为构造过程被分到了几个调用中，在构造过程中JavaBean可能处于不一致和状态。类无法仅仅通过检验构造器参数的有效性来保证一致性。试图使用处于不一致状态的对象，将会导致失败，这种失败与包含错误的代码大相径庭，因此它调试起来十分困难。另一点不足在于，JavaBeans模式阻止了把类做成不可变的可能（见第15条），这就需要程序员付出额外的努力来确保它的线程安全。
+
+幸运的是，还有第三种替代方法，既能保证像重叠构造器模式那样的安全性，也能保证像JavaBeans模式那么好的可读性。这就是Builder模式。不直接生成想要的对象，而是让客户端利用所有必要的参数调用构造器（或者静态工厂），得到一个builder对象。然后客户端在builder对象上调用类似于setter方法，来设置每个相关的可选参数。最后，客户端调用无参的builder方法来生成不可变的对象。这个builder是它构建的类的静态成员类（见第22条）。下面示例：
+package test;
+
+//Builder Pattern
+public class NutritionFacts {
+    private final int servingSize;
+    private final int servings;
+    private final int calories;
+    private final int fat;
+    private final int sodium;
+    private final int carbohydrate;
+
+    //静态内部类，可以不依赖于外部类实例存在 StaticInnerClass staticInnerClass = new OuterClass.StaticInnerClass();
+    //非静态内部类，必须依赖外部类实例对象初始化。NoneStaticInnerClass noneStaticInnerClass = outerClass.new NoneStaticInnerClass();
+    public static class Builder {
+        //Required parameters
+        private final int servingSize;
+        private final int servings;
+
+        //Optional parameters - initialized to default values
+        private int calories = 0;
+        private int fat = 0;
+        private int sodium = 0;
+        private int carbohydrate = 0;
+
+        public Builder(int servingSize, int servings) {
+            this.servingSize = servingSize;
+            this.servings = servings;
+        }
+
+        public Builder calories(int val) {
+            this.calories = val;
+            return this;
+        }
+
+        public Builder fat(int val) {
+            this.fat = val;
+            return this;
+        }
+
+        public Builder carbohydrate(int val) {
+            this.carbohydrate = val;
+            return this;
+        }
+
+        public Builder sodium(int val) {
+            sodium = val;
+            return this;
+        }
+
+        public NutritionFacts build() {
+            return new NutritionFacts(this);
+        }
+    }
+
+    private NutritionFacts(Builder builder) {
+        servingSize = builder.servingSize;
+        servings = builder.servings;
+        calories = builder.calories;
+        fat = builder.fat;
+        sodium = builder.sodium;
+        carbohydrate = builder.carbohydrate;
+    }
+
+    @Override
+    public String toString() {
+        return "[ServingSize:" + servingSize + "]@[Serving:" + servings + "]@[Calories:" + calories
+                + "]@[Fat:" + fat + "]@[Sodium:" + sodium + "]@[Carbohydrate:" + carbohydrate + "]";
+    }
+
+    public static void main(String args[]) {
+        NutritionFacts cocacola = new NutritionFacts.Builder(240, 0).calories(100).sodium(35).carbohydrate(27).build();
+        System.out.println("Cocacola:" + cocacola);
+
+        NutritionFacts bread = new Builder(100, 30).build();//这里可以直接new Builder()
+        System.out.println("Bread:" + bread);
+    }
+}
+输出：
+Cocacola:[ServingSize:240]@[Serving:0]@[Calories:100]@[Fat:0]@[Sodium:35]@[Carbohydrate:27]
+Bread:[ServingSize:100]@[Serving:30]@[Calories:0]@[Fat:0]@[Sodium:0]@[Carbohydrate:0]
+
+注意NutritionFacts是不可变的，所有的默认参数值都单独放在一个地方。builder的setter方法返回builder本身，以便可以把调用连接起来。
+这样的客户端代码很容易编写，更为重要的是，易于阅读。builder模式模拟了具名的可选参数。
+
+builder像个构造器一样，可以对其参数强加约束条件。build()方法可以检验这些约束条件。将参数从builder拷贝到对象中后，并在对象域而不是builder域（见第39条）中对它们进行校验，这一点很重要。如果违反了任何约束条件，build()方法就应该抛出IllegalStateException（见第60条）。异常的详细信息应该显示出违反了哪个约束条件（见第63条）。
+对多个参数强加约束条件的另一种方法是，用多个setter方法对某个约束条件必须持有的所有参数进行检查。如果该约束条件没有得到满足，setter方法就会抛出IllegalArgumentException。这有个好处，就是一旦传递了无效的参数，立即就会发现约束条件失败，而不是等着调用build()方法。
+与构造器相比，builder的微略优势在于，builder可以有多个可变（varargs）参数。构造器就像方法一样，只能有一个可变参数。因为builder利用单独的方法来设置每个参数，想要多少个可变参数，就可以有多少个，直到每个setter方法都有一个可变参数。
+Builder模式十分灵活，可以利用单个builder构造多个对象。builder的参数可以在创建对象期间进行调整，也可以随着不同的对象而改变。builder可以自动填充某些域，例如每次创建对象时自动增加序列号。
+
+设置了参数的builder生成了一个很好的抽象工厂（Abstract Factory）。客户端可以将这样一个builder传给方法，使该方法能够为客户端创建一个或者多个对象。要使用这种用法，需要有个类型来表示builder。1.5 及之后版本，只要一个泛型（见第26条）就能满足所有builder，无论它们在构造哪种类型的对象：
+//A builder for objects of type T
+public interface Builder<T> {
+    public T build();
+}
+可以声明NutritionFacts.Builder类来实现Builder<NutritionFacts>。
+
+Class.newInstance破坏了编译时的异常检查。上面讲过的Builder接口弥补了这些不足。
+
+Builder模式的确也有不足。为了创建对象，必须先创建它的构造器。虽然创建构建器的开销在实践中可能不那么明显，但是在某些十分注意性能的情况下，可能就成问题了。Builder模式还比重叠构造器模式更加冗长，因此它只在有很多参数的时候才使用，比如4个或者更多个参数。但是记住，将来你可能需要添加参数。如果一开始就使用构造器或者静态工厂，等到类需要多个参数时才添加构建器，就会无法控制，那些过时的构造器或者静态工厂显得十分不协调。因此，通常最好一开始就使用构建器。
+
+简而言之，如果类的构造器或者静态工厂中具有多个参数，设计这种类时Builder模式就是种不错的选择，特别是当大多数参数都是可选的时候。与使用传统的重叠构造器模式相比，使用Builder模式的客户端代码将更易于阅读和编写，构建器也比JavaBeans更加安全。
 
 //------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+//第3条：用私有构造器或者枚举类型强化Singleton属性 P14
+Singleton指仅仅被实例化一次的类。Singleton通常被用来代表那些本质上唯一的系统组件，比如窗口管理器或者文件系统。使类成为Singleton会使它的客户端测试变得十分困难，因为无法给Singleton替换模拟实现，除非它实现一个充当其类型的接口。
+//Singleton with public final field
+public class Elvis {
+    public static final Elvis INSTANCE = new Elvis();
+    private Elvis() {}
 
+    public void leaveTheBuilding() {}
+}
+
+私有构造器仅被调用一次，用来实例化公有的静态final域Elvis.INSTANCE。要提醒一点：享有特权的客户端可以借助AccessibleObject.setAccessible方法，通过反射机制（见第53条）调用私有构造器。如果需要抵御这种苏南，可以修改构造器，让它在被要求创建第二个实例的时候抛出异常。
+
+在实现Singleton的第二种方法中，公有的成员是个静态工厂方法：
+//Singleton with static factory
+public class Elvis {
+    private static final Elvis INSTANCE = new Elvis();
+    private Elvis() {}
+    public static Elvis getInstance() { return INSTANCE;}
+
+    public void leaveTheBuilding() {}
+}
+对于静态方法Elvis.getInstance的所有调用，都会返回同一个对象引用，所以，永远不会创建其他的Elvis实例（上述提醒依然适用）。
+
+公有域方法的主要好处在于，组成类的成员的声明很清楚地表明了这个类是一个Singleton：公有的静态域是final的，所以该域将总是包含相同的对象引用。公有域方法在性能不上再有任何优势：现代的JVM实现几乎都能够将静态工厂方法的调用内联化。
+工厂方法的优势之一在于，它提供了灵活性：在不改变其API的前提下，可以改变该类是否应该为Singleton的想法。工厂方法返回该类的唯一实例，但是，它可以很容易被修改，如改成每个调用该方法的线程返回一个唯一的实例。第二个优势与泛型（见第27条）有关。这些执行之间通常都不相关，public域（public-field）的方法比较简单。
+
+为了使用利用这其中一种方法实现的Singleton类变成可序列化的，必须声明所有实例域都是瞬时（transient）的，并提供一个readResolve方法（见第77条）。否则，每次反序列化一个序列化的实例时，都会创建一个新的实例，在我们的例子中，会导致“假冒的Elvis”。为防止这种情况，要在Elvis类中加入下面这个readResolve方法：
+private Object readResolve() {
+    return INSTANCE;
+}
+
+从Java 1.5 发行版本起，实现Singleton还有第三种方法。只需编写一个包含单个元素的枚举类型：
+//
+package test;
+
+public enum Elvis {
+    INSTANCE;
+
+    private int i = 3;
+
+    public void set(int i) {
+        this.i = i;
+    }
+
+    public int get() {
+        return i;
+    }
+}
+
+//
+package test;
+
+public class TestSingleton {
+    public static void main(String args[]) {
+        Elvis elvis = Elvis.INSTANCE;
+        System.out.println(elvis.get());
+
+        Elvis elvis1 = Elvis.INSTANCE;
+        elvis1.set(5);
+
+        System.out.println(elvis.get());
+    }
+}
+输出：
+3
+5
+
+这种方法在功能上与公有域方法相近，但是它更加简洁，无偿地提供了序列化机制，绝对防止多次实例化，即便是在面对复杂的序列化或者反射攻击的时候。虽然还没有广泛采用，但是元素的枚举类型已经成为实现Singleton的最佳方法。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+//第4条：通过私有构造器强化不可实现化的能力 P16
 
+企图通过将类做成抽象类来强制该类不可被实例化，这是行不通的。该类可以被子类化，并且该子类也可以被实例化。这样做甚至会误导用户，以为这种类是专门为了继承而设计的（见第17条）。由于只有当类不包含显式的构造器时，编译器才会生成缺省的构造器，因此只要让这个类包含私有构造器，它就不能被实例化了：
+//Noninstantiable utility class
+public class UtilityClass {
+    //Suppress default constructor for noninstantiability
+    private UtilityClass() {
+        throw new AssertionError();
+    }
+}
+
+显式构造器是私有的，所以不可以在该类的外部访问它。AssertionError不是必需的，但是它可以避免不小心在类的内部调用构造器。它保证该类在任何情况下都不会被实例化。这种习惯用法有点违背直觉，好像构造器专门设计成不能被调用一样。因此，明智的做法就是在代码中增加一条注释，如上。
+这种习惯用法也有副作用，它使得一个类不能被子类化。所有的构造器都必须显式或隐式地调用超类（superclass）构造器，在这种情况下，子类就没有可访问的超类构造器可调用了。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+//第5条：避免创建不必要的对象 P17
+String s = new String("stringette");//不要这样写！
+该语句每次执行的时候都创建一个新的String实例，但是这些创建对象的动作都是不必要的。传递给String构造器的参数（“stringette”）本身就是一个String实例，功能方面等同于构造器创建的所有对象。如果这种用法是在一个循环中，或者是在一个被频繁调用的方法中，就会创建出成千上万不必要的String实例。
 
-//------------------------------------------------------------------------------------------------
+改进后的版本如下：
+String s = "stringette";
+该版本只用了一个String实例，而不是每次执行的时候都创建一个新的实例。而且，它可以保证，对于所有同一台虚拟机中运行的代码，只要它们包含相同的字符串字面常量，该对象就会被重用。
 
+对于同时提供了静态工厂方法（见第1条）和构造器的不可变类，通常可以使用静态工厂方法而不是构造器，以避免创建不必要的对象。如，静态工厂方法Boolean.valueOf(String)几乎总是优先于构造器Boolean(String)。构造器在每次调用的时候都会创建一个新的对象，而静态工厂方法则从来不要求这样做，实际上也不会这样做。
+
+//
+package test;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+public class Person {
+    private final Date birthDate;
+
+    public Person(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    //判断是否是出生峰年，不好的写法
+    public boolean isBabyBoomer() {
+        Calendar gmtCal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+        gmtCal.set(1946, Calendar.JANUARY, 1, 0, 0, 0);
+        Date boomStart = gmtCal.getTime();
+
+        gmtCal.set(1965, Calendar.JANUARY, 1, 0, 0, 0);
+        Date boomEnd = gmtCal.getTime();
+
+        return birthDate.compareTo(boomStart) >= 0 && birthDate.compareTo(boomEnd) < 0;
+    }
+
+    public static void main(String args[]) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+            Date date = simpleDateFormat.parse("1943-01-01");
+            Person xiaoMing = new Person(date);
+            System.out.println("XiaoMing is in boom birth year: " + xiaoMing.isBabyBoomer());
+
+            Date date1 = simpleDateFormat.parse("1947-01-01");
+            Person xiaoLi = new Person(date1);
+            System.out.println("XiaoLi is in boom birth year: " + xiaoLi.isBabyBoomer());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+输出：
+XiaoMing is in boom birth year: false
+XiaoLi is in boom birth year: true
+
+isBabyBoomer每次被调用的时候，都会创建一个Calendar，一个TimeZone和两个Date实例，这是不必要的。下面的版本用一个静态的初始化器（initializer），避免了这种效率低下的情况：
+//
+package test;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+public class Person {
+    private final Date birthDate;
+    private static final Date BOOM_START;
+    private static final Date BOOM_END;
+
+    public Person(Date birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    static {
+        Calendar gmtCal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+        gmtCal.set(1946, Calendar.JANUARY, 1, 0, 0, 0);
+        BOOM_START = gmtCal.getTime();
+
+        gmtCal.set(1965, Calendar.JANUARY, 1, 0, 0, 0);
+        BOOM_END = gmtCal.getTime();
+    }
+
+    //判断是否是出生峰年，好的写法
+    public boolean isBabyBoomer() {
+        return birthDate.compareTo(BOOM_START) >= 0 && birthDate.compareTo(BOOM_END) < 0;
+    }
+
+    public static void main(String args[]) {
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+            Date date = simpleDateFormat.parse("1943-01-01");
+            Person xiaoMing = new Person(date);
+            System.out.println("XiaoMing is in boom birth year: " + xiaoMing.isBabyBoomer());
+
+            Date date1 = simpleDateFormat.parse("1947-01-01");
+            Person xiaoLi = new Person(date1);
+            System.out.println("XiaoLi is in boom birth year: " + xiaoLi.isBabyBoomer());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+改进后的Person类只在初始化的时候创建Calendar、TimeZone和Date实例一次，而不是在每次调用isBabyBoomer的时候都创建这些实例。如果isBabyBoomer方法被频繁地调用，这种方法将会显著地提高性能。代码的含义也更加清晰了。
+
+如果改进后的Person类被初始化了，它的isBabyBoomer方法却永远不会被调用，那就没有必要初始化BOOM_START和BOOM_END域。通过延迟初始化（lazily initializing）（见第71条），即把对这些域的初始化延迟到isBabyBoomer方法第一次被调用的时候进行，则有可能消除这些不必要的初始化工作，但是不建议这样做。正如延迟初始化中常见的情况一样，这样做会使方法的实例更加复杂，从而无法将性能显著提高到超过已经达到的水平（见第55条）。
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
