@@ -1,4 +1,171 @@
 //------------------------------------------------------------------------------------------------
+//学习重构到模式
+//策略模式 猫咪排序
+//CatSortAlg
+package test;
+
+public class CatSortAlg {
+    public static void sortByAge(Cat[] cats) {
+        for (int i = 1; i < cats.length; i++) {
+            for (int j = 0; j < cats.length - i; j++) {
+                if (cats[j].age() > cats[j + 1].age()) {
+                    Cat temp = cats[j];
+                    cats[j] = cats[j + 1];
+                    cats[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    public static void sortByName(Cat[] cats) {
+        for (int i = 1; i < cats.length; i++)
+            for (int j = 0; j < cats.length - i; j++) {
+                if (cats[j].name().compareTo(cats[j + 1].name()) > 0) {
+                    Cat temp = cats[j];
+                    cats[j] = cats[j + 1];
+                    cats[j + 1] = temp;
+                }
+            }
+    }
+}
+
+//
+package test;
+
+public class Cat {
+    private final int age;
+    private final String name;
+    private final int weight;
+
+    public Cat(int age, String name, int weight) {
+        this.age = age;
+        this.name = name;
+        this.weight = weight;
+    }
+
+    public int age() {
+        return age;
+    }
+
+    public String name() {
+        return name;
+    }
+}
+
+
+//测试用例
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class CatSortAlgTest {
+    @Test
+    public void testCatOrderByAge() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(2, "XiaoHei", 3)};
+        CatSortAlg.sortByAge(cats);
+        assertEquals(cats[0].age(), 1);
+        assertEquals(cats[1].age(), 2);
+        assertEquals(cats[2].age(), 3);
+    }
+
+    @Test
+    public void testCatOrderByName() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(2, "XiaoHei", 3)};
+        CatSortAlg.sortByName(cats);
+        assertEquals(cats[0].name(), "DaHuang");
+        assertEquals(cats[1].name(), "MiMi");
+        assertEquals(cats[2].name(), "XiaoHei");
+    }
+}
+
+(1)Ctrl + Alt + M：抽取方法
+(2)Ctrl + Alt + P：抽取到方法参数
+(3)Move：将抽取的方法移到外部类
+(4)删除static方法
+(5)Ctrl + Alt + V：抽取局部变量
+(6)Ctrl + Shift + Up：将比较函数抽取到for循环外
+(7)Ctrl + Shift + Alt + T：抽取Interface
+(8)修改子类为接口
+(9)Ctrl + Alt + M：两个for循环抽取为函数
+(10)Ctrl + Alt + P：Comparator抽取为函数入参
+(11)Ctrl + Alt + N：把sortByName内联，再把sortByAge内联
+
+最终效果如下：
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class CatSortAlgTest {
+    @Test
+    public void testCatOrderByAge() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(2, "XiaoHei", 3)};
+        CatSortAlg.sort(cats, new AgeComparator());
+        assertEquals(cats[0].age(), 1);
+        assertEquals(cats[1].age(), 2);
+        assertEquals(cats[2].age(), 3);
+    }
+
+    @Test
+    public void testCatOrderByName() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(2, "XiaoHei", 3)};
+        CatSortAlg.sort(cats, new NameComparator());
+        assertEquals(cats[0].name(), "DaHuang");
+        assertEquals(cats[1].name(), "MiMi");
+        assertEquals(cats[2].name(), "XiaoHei");
+    }
+}
+
+//
+package test;
+
+public class CatSortAlg {
+
+    public static void sort(Cat[] cats, Comparator comparator) {
+        for (int i = 1; i < cats.length; i++) {
+            for (int j = 0; j < cats.length - i; j++) {
+                if (comparator.compare(cats[j], cats[j + 1])) {
+                    Cat temp = cats[j];
+                    cats[j] = cats[j + 1];
+                    cats[j + 1] = temp;
+                }
+            }
+        }
+    }
+}
+
+
+//
+package test;
+
+public interface Comparator {
+    boolean compare(Cat cat, Cat cat1);
+}
+
+//
+package test;
+
+public class AgeComparator implements Comparator {
+    public boolean compare(Cat cat, Cat cat1) {
+        return cat.age() > cat1.age();
+    }
+}
+
+//
+package test;
+
+public class NameComparator implements Comparator {
+    public boolean compare(Cat cat, Cat cat1) {
+        return cat.name().compareTo(cat1.name()) > 0;
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------
 //junit4 assert类中的assert方法总结
 http://blog.sina.com.cn/s/blog_44d19b500102vf5f.html
 
@@ -374,6 +541,18 @@ public class AllCalculatorTests {
 
 这个测试类包含了上面的CalculatorTest.class和CalculatorTest2.class里面所有的测试函数，它的目的就是进行打包所有的测试。
 
+
+//--
+http://www.cnblogs.com/eggbucket/archive/2012/02/02/2335697.html
+四、Runner (运行器)
+大家有没有想过这个问题，当你把测试代码提交给JUnit框架后，框架如何来运行你的代码呢？答案就是——Runner。在JUnit中有很多个Runner，他们负责调用你的测试代码，每一个Runner都有各自的特殊功能，你要根据需要选择不同的Runner来运行你的测试代码。可能你会觉得奇怪，前面我们写了那么多测试，并没有明确指定一个Runner啊？这是因为JUnit中有一个默认Runner，如果你没有指定，那么系统自动使用默认Runner来运行你的代码。换句话说，下面两段代码含义是完全一样的：
+import org.junit.internal.runners.TestClassRunner;
+import org.junit.runner.RunWith;
+//使用了系统默认的TestClassRunner，与下面代码完全一样
+public class CalculatorTest ...{...} 
+
+@RunWith(TestClassRunner.class)
+public class CalculatorTest ...{...}
 //------------------------------------------------------------------------------------------------
 //Java中的Pair结构
 package test;
@@ -11806,8 +11985,8 @@ long start = System.currentTimeMillis();
 long end = System.currentTimeMillis();
 System.out.print(end - start);
 两个变量start和end，可以计算出执行的时间长度，这两个变量必须在同一个函数中，有时要监控的代码分布在各个类中，这时可以直接使用下面的代码输出该代码执行的时刻时间：
-System.out.println("当前位置……" + System.currentTimeMillis());
-会在程序执行的过程中输出一系列时间，可以看出在哪些代码执行的进户是多少，分析出哪一段代码执行的时间长。
+System.out.println("当前时间……" + System.currentTimeMillis());
+会在程序执行的过程中输出一系列时间，可以看出在哪些代码执行的进度是多少，分析出哪一段代码执行的时间长。
 
 除此之外，还可以使用System.nanoTime()返回最精确的可用系统计时器的当前值，以毫微秒为单位。此方法只能用于测量已过的时间。
 如，测试某些代码执行的时间长度：
@@ -19721,12 +19900,408 @@ public class Person {
 改进后的Person类只在初始化的时候创建Calendar、TimeZone和Date实例一次，而不是在每次调用isBabyBoomer的时候都创建这些实例。如果isBabyBoomer方法被频繁地调用，这种方法将会显著地提高性能。代码的含义也更加清晰了。
 
 如果改进后的Person类被初始化了，它的isBabyBoomer方法却永远不会被调用，那就没有必要初始化BOOM_START和BOOM_END域。通过延迟初始化（lazily initializing）（见第71条），即把对这些域的初始化延迟到isBabyBoomer方法第一次被调用的时候进行，则有可能消除这些不必要的初始化工作，但是不建议这样做。正如延迟初始化中常见的情况一样，这样做会使方法的实例更加复杂，从而无法将性能显著提高到超过已经达到的水平（见第55条）。
-//------------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------------------------
+Java 1.5 发行版本中，有一种创建多余对象的新方法，称作自动装箱（autoboxing），允许程序员将基本类型和装箱基本类型（Boxed Primitive Type）混用。按需要自动装箱和拆箱。自动装箱使得基本类型和装箱基本类型之间的差别变得模糊起来，但是并没有完全消除。在语义上还有着微妙和差别，在性能上也有着比较明显的差别（见第49条）。下面程序，计算所有int正值的总和，程序必须使用long。
+//
+package test;
 
-//------------------------------------------------------------------------------------------------
+public class TestLong {
+    public static void main(String args[]) {
+        Long sum = 0L;
 
+        long startMillisTime = System.currentTimeMillis();
+        System.out.println("startMillisTime=" + startMillisTime);
+
+        for (int i = 0; i < Integer.MAX_VALUE; ++i) {
+            sum += i;
+        }
+        System.out.println("Sum of all integers is:" + sum);
+
+        long endMillisTime = System.currentTimeMillis();
+        System.out.println("endMillisTime=" + endMillisTime);
+        System.out.println("MillisTime(ms): " + (endMillisTime - startMillisTime));
+    }
+}
+输出：
+startMillisTime=1476720305497
+Sum of all integers is:2305843005992468481
+endMillisTime=1476720315801
+MillisTime(ms): 10304
+
+程序算出的答案是正确的，但是慢一些，只因为打错了一个字符。变量sum被声明成Long而不是long，意味着程序构造了大约2^31 个多余的Long实例。将sum的声明从Long改成long，运行时间从10秒减少到1秒。
+
+将Long sum = 0L;修改为long sum = 0L;
+输出：
+startMillisTime=1476720390027
+Sum of all integers is:2305843005992468481
+endMillisTime=1476720391503
+MillisTime(ms): 1476
+
+结论很明显：要优先使用基本类型而不是装箱基本类型，要当心无意识的自动装箱。
+
+不要错误地认为本条目所介绍的内容暗示着“创建对象的代价非常昂贵，我们应该要尽可能地避免创建对象”。相反，由于小对象的构造器只做很少量的显式工作，所以，小对象的创建和回收动作是非常廉价的，特别是在现代的JVM实现上更是如此。通过创建附加的对象，提升程序的清晰性、简洁性和功能性，这通常是件好事。
+
+反之，通过维护自己的对象池（object pool）来避免创建对象并不是一种好的做法，除非池中的对象是非常重量级的。真正正确使用对象池的典型对象示例就是数据库连接池。但是，一般而言，维护自己的对象池改写会把代码弄得很乱，同时增加内存占用（footprint），并且还会损害性能。现代的JVM实现具有高度优化的垃圾回收器，其性能很容易就会超过轻量级对象池的性能。
+
+与本条目对应的是第39条中有关“保护性拷贝（defensive copying）”的内容。本条目提及“当你应该重用现有对象的时候，请不要创建新的对象”，而第39条则说“当你应该创建新对象的时候，请不要重用现有的对象”。注意，在提倡使用保护性拷贝的时候，因重用对象而付出的代价要远远大于因创建重复对象而付出的代价。必要时如果没能实施保护性拷贝，将会导致潜在的错误和安全漏洞，而不必要地创建对象则只会影响程序的风格和性能。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+//第6条：消除过期的对象引用 P21
+转到具有垃圾回收功能的语言，认为自己不再需要考虑内存管理的事情了，其实不然。
+考虑下面简单的栈实现例子：
+//
+package test;
+
+import java.util.Arrays;
+import java.util.EmptyStackException;
+
+public class Stack {
+    private int size = 0;
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+    private Object[] elements;//private Object[] elements = new Object[DEFAULT_INITIAL_CAPACITY];//由于DEFAULT_INITIAL_CAPACITY是static，所以优先于elements初始化好，如果将static去掉，则DEFAULT_INITIAL_CAPACITY必须先于elements定义
+
+    public Stack() {
+        elements = new Object[DEFAULT_INITIAL_CAPACITY];//这里的new初始化可以在上面elements定义的地方直接初始化好
+    }
+
+    public void push(Object o) {
+        ensureCapacity();
+        elements[size++] = o;
+    }
+
+    public Object pop() {
+        if (size == 0) {
+            throw new EmptyStackException();
+        }
+        return elements[--size];
+    }
+
+    public int size() {
+        return size;
+    }
+
+    private void ensureCapacity() {
+        if (elements.length == size) {
+            elements = Arrays.copyOf(elements, 2 * size + 1);
+        }
+    }
+}
+
+测试用例：
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class StackTest {
+    @Test
+    public void testPush_should_returnSize_when_pushElement() {
+        Stack stack = new Stack();
+        stack.push("hello");
+        assertEquals(1, stack.size());
+    }
+
+    @Test
+    public void testPop_should_returnElement_when_pop() {
+        Stack stack = new Stack();
+
+        String hello = "hello";
+        String world = "world";
+
+        stack.push(hello);
+        stack.push(world);
+
+        assertEquals(2, stack.size());
+        assertEquals(world, stack.pop());
+        assertEquals(1, stack.size());
+    }
+}
+
+这段程序（它的泛型版本见第26条）中并没有很明显的错误。但这个程序中隐藏着一个问题，不严格地讲，这段程序有一个“内存泄漏”，随着垃圾回收器活动的增加，或者由于内存占用的不断增加，程序性能的降低会逐渐表现出来。极端的情况下，这种内存泄漏会导致磁盘交换（Disk Paging），甚至导致程序失败（OutOfMemoryError错误），但这种失败情形相对比较少见。
+
+发生内存泄漏的地方是：如果一个栈先增长，然后再收缩，那么从栈中弹出来的对象将不会被当作垃圾回收，即便使用栈的程序不再引用这些对象，它们也不会被回收。这是因为，栈内部维护着对这些对象的过期引用（obsolete reference）。所谓的过期引用，是指永远也不会再被解除的引用。在本例中，凡是在elements数组的“活动部分（active portion）”之外的任何引用都是过期的。活动部分是指elements中下标小于ize的那些元素。
+
+在支持垃圾回收的语言中，内存泄漏是很隐蔽的（称这类内存泄漏为“无意识的对象保持（unintentional object retention）”更为恰当）。如果一个对象引用被无意识地保留起来了，那么，垃圾回收机制不仅不会处理这个对象，而且也不会处理被这个对象所引用的所有其他对象。
+
+修复的方法很简单：一旦对象引用已经过期，只需清空这些引用即可。对于上述例子中的Stack类，只要一个单元被弹出栈，指向它的引用就过期了，pop方法修改如下：
+public Object pop() {
+    if (size == 0) {
+        throw new EmptyStackException();
+    }
+    Object result = elements[--size];
+    elements[size] = null;
+    return result;
+}
+
+清空过期引用的另一个好处是，如果它们以后又被错误地解除引用（这里是不是应该是引用），程序就会立即抛出NullPointerException异常，而不是悄悄地错误运行下去。尽快地检测出程序中的错误总是有益的。
+
+清空对象引用应该是一种例外，而不是一种规范行为。消除过期引用最好的方法是让包含该引用的变量结束其生命周期。如果你是在最紧凑的作用域范围内定义每一个变量（见第45条），这种情形就会自然而然地发生。
+
+一般而言，只是类是自己管理内存，程序员就应该警惕内存泄漏问题。一旦元素被释放掉，则该元素中包含的任何对象引用都应该被清空。
+
+内存泄漏的另一个常见来源是缓存。如果正好要实现这样的缓存：只要在缓存之外存在对某个项的键的引用，该项就有意义，那么就可以用WeakHashMap代表缓存；当缓存中的项过期之后，它们就会自动被删除。记住只有当所要的缓存项的生命周期是由该键的外部引用而不是由值决定时，WeakHashMap才有用处。（是说键被其余地方引用时，WeakHashMap才会保留该项，如果键只是被WeakHashMap引用时，过段时间仍会删除该项？）
+
+缓存应该时不时地清除掉没用的项。这项清除工作可以由一个后台线程（可能是Timer或者ScheduledThreadPoolExcutor）来完成，或者也可以在给缓存添加新条目的时候顺便进行清理。LinkedHashMap类利用它的removeEldestEntry方法可以很容易地实现后一种方案。对于更加复杂的缓存，必须直接使用java.lang.ref。
+
+在内泄漏的第三个常见的来源是监听器和其他回调。如果实现了一个API，客户端在这个API中注册回调，却没有显式地取消注册，那么除非你采取某些动作，否则它们就会积聚。确保回调立即被当作垃圾回收的最佳方法是只保存它们的弱引用（weak reference），如，只将它们保存成WeakHashMap中的键。（学习一下WeakHashMap的功能？）
+//------------------------------------------------------------------------------------------------
+//Effective Java 第2章 创建和销毁对象 P4
+//第7条：避免使用终结方法 P24
+终结方法（finalizer）通常是不可预测的，也是很危险的，一般情况下是不必要的。使用终结方法会导致行为不稳定、降低性能，以及可移植性问题。终结方法也有其可用之处，但是根据经验，应该避免使用终结方法。
+
+C++程序员被告知“不要把终结方法当作是C++中析构器（destructors）的对应物”。在C++中，析构器是回收一个对象所占用资源的常规方法，是构造器所必需的对应物。在Java中，当一个对象变得不可到达的时候，垃圾回收器会回收与该对象相关联的存储空间，并不需要程序员做专门的工作。C++的析构器也可以被用来回收其他的非内存资源。而在Java中，一般用try-finally块来成类似的工作。
+
+终结方法的缺点在于不能保证会被及时地执行。从一个对象变得不可到达开始，到它的终结方法被执行，所花费的这段时间是任意长的。这意味着，注重时间(time-critical)的任务不应该由终结方法来完成。如，用终结方法来关闭已经打开的文件，这是严重错误，因为打开文件的描述符是一种很有限的资源，由于JVM会延迟执行终结方法，所以大量的文件会保留在打开状态，当一个程序再不能打开文件的时候，它可能会运行失败。
+
+及时地执行终结方法正是垃圾回收算法的一个主要功能，这种算法在不同的JVM实现中会大相径庭。如果程序依赖于终结方法被执行的时间点，那么这个程序的行为在不同的JVM中运行的表现可能就会截然不同。
+
+Java语言规范不仅不保证终结方法会被及时地执行，而且根本就不保证它们会被执行。当一个程序终止的时候，某些已经无法访问的对象上的终结方法却根本没有被执行，这是完全有可能的。结论是：不应该依赖终结方法来更新重要的持久状态。如，依赖终结方法来解放共享资源（比如数据库）上的永久锁，很容易让整个分布式系统垮掉。
+
+不要被System.gc和System.runFinalization两个方法所诱惑，它们确实增加了终结方法被执行的机会，但是它们并不保证终结方法一定会被执行。唯一声称保证终结方法被执行的方法是System.runFinalizersOnExit，以及Runtime.runFinalizersOnExit。这两个方法都有致命的缺陷，已经被废弃了。
+
+如果未被捕获的异常在终结过程中被抛出来，那么这种异常可以被忽略，并且该对象的终结过程也会终止。未被捕获的异常会使对象处于破坏的状态（a corrupt state），如果另一个线程企图使用这种被破坏的对象，则可能发生任何不确定的行为。正常情况下，未被捕获的异常将会使线程终止，并打印出栈轨迹（Stack Trace），但是如果异常发生在终结方法之中，则不会如此，甚至连警告都不会打印出来。
+
+还有一点：使用终结方法有一个非常严重的（Severe）性能损失。在作者的机器上，创建和销毁一个简单对象的时间大约为5.6 ns。增加一个终结方法使时间增加到了2400 ns。换句话说，用终结方法创建和销毁对象慢了大约430倍。
+
+如果类的对象中封装的资源（例如文件或者线程）确实需要终止，只需提供一个显式的终止方法，并要求该类的客户端在每个实例不再有用的时候调用这个方法。值得提及的一个细节是，该实例必须记录下自己是否已经被终止了：显式的终止方法必须在一个私有域中记录下“该对象已经不再有效”。如果这些方法是在对象已经终止之后被调用，其他的方法就必须检查这个域，并抛出IllegalStateException异常。（在调用终止方法之后，直接设置对象为null不就可以了吗？）
+
+显式终止方法的典型例子是InputStream、OutputStream和java.sql.Connection上的close()方法。另一个例子是java.util.Timer上的cancel方法，它执行必要的状态改变，使得与Timer实例相关联的该线程温和地终止自己。java.awt中的例子还包括Graphics.dispose和Window.dispose。这些方法通常由于性能不好而不被关注。一个相关的方法是Image.flush，它会释放所有与Image实例相关联的资源，但是该实例仍然处于可用的状态，如果有必要的话，会重新分配资源。
+
+显式的终止方法通常与try-finally结构结合起来使用，以确保及时终止。在finally子句内部调用显式的终止方法，可以保证即使使用对象的时候有异常抛出，该终止方法也会执行：
+//try-finally block guarantees execution of termination method
+Foo foo = new Foo();
+try {
+    //Do what must be done with foo
+    ...
+} finally {
+    foo.terminate();//Explicit termination method
+}
+
+终结方法（即默认的finalizer方法）的好处，有两种合法用途。第一种用途是，当对象的所有者忘记调用前面段落中建议的显式终止方法时，终结方法可以充当“安全网”（safety net）。虽然这样做并不能保证终结方法会被及时地调用，但是在客户端无法通过调用显式的终止方法来正常结束操作情况下（希望这种情形尽可能地少发生），迟一点释放关键资源总比永远不释放要好。（即手工写终结方法，并在该方法是释放关键资源）。但是如果终结方法发现资源还未被终止，则应该在日志中记录一条警告，因为这表示客户端代码中的一个Bug，应该得到修复。如果你正考虑编写这样的安全网终结方法，就要认真考虑清楚，这种额外的保护是否值得你付出这份额外的代价。
+
+显式终止方法模式的示例中所示的四个类（FileInputStream，FileOutputStream、Timer和Connection），都具有终结方法，当它们的终止方法未能被调用的情况下，这些终结方法充当了安全网。
+//查看了FileInputStream类的finalize()方法，确实有调用close()方法
+/**
+ * Ensures that the <code>close</code> method of this file input stream is
+ * called when there are no more references to it.
+ *
+ * @exception  IOException  if an I/O error occurs.
+ * @see        java.io.FileInputStream#close()
+ */
+protected void finalize() throws IOException {
+    if ((fd != null) &&  (fd != FileDescriptor.in)) {
+        /* if fd is shared, the references in FileDescriptor
+         * will ensure that finalizer is only called when
+         * safe to do so. All references using the fd have
+         * become unreachable. We can call close()
+         */
+        close();
+    }
+}
+
+终结方法的第二种合理用途与对象的本地对等体（native peer）有关。本地对等体是一个本地对象（native object），普通对象通过本地方法（native method）委托给一个本地对象。因为本地对等体不是一个普通对象，所以垃圾回收器不会知道它，当它的Java对等体被回收的时候，它不会被回收。在本地对等体并不拥有关键资源的前提下，终结方法正是执行这项任务最合适的工具。如果本地对等体拥有必须被及时终止的资源，那么该类就应该具有一个显式的终止方法，如前所述。终止方法应该完成所有必要的工作以便释放关键的资源。终止方法可以是本地方法，或者它也可以调用本地方法。
+
+注意，“终结方法链（finalizer chaining）”并不会被自动执行。如果类（不是Object）有终结方法，并且子类覆盖了终结方法，子类的终结方法就必须手工调用超类的终结方法。应该在一个try块中终结子类，并在相应的finally块中调用超类的终结方法。这样做可以保证：即便子类的终结过程抛出异常，超类的终结方法也会得到执行。
+
+//Manual finalizer chaining
+@Override
+protected void finalize() throws Throwable {
+    try {
+        ...//Finalize subclass state
+    } finally {
+        super.finalize();
+    }
+}
+
+如果子类实现者覆盖了超类的终结方法，但是忘了手工调用超类的终结方法（或者有意选择不调用超类的终结方法），那么超类的终结方法将永远也不会被调用。要防范这样粗心大意或者恶意的子类是有可能的，代价就是为每个将被终结的对象创建一个附加的对象。不是把终结方法放在要求终结处理的类中，而是把终结方法放在一个匿名的类（见第22条）中，该匿名类的唯一用途就是终结它的外围实例（enclosing instance）。该匿名类的单个实例被称为终结方法守卫者（finalizer guardian），外围类的每个实例都会创建这样一个守卫者。外围实例在它的私有实例域中保存着一个对其终结方法守卫者的唯一引用，因此终结方法守卫者与外围实例可以同时启动终结过程。当守卫者被终结的时候，它执行外围实例所期望的终结行为，就好像它的终结方法是外围对象上的一个方法一样：
+//测试如下
+package test;
+
+public class TestFinalizerGuardian {
+    private final Object finalizerGuardian = new Object() {
+        @Override
+        protected void finalize() throws Throwable {
+            System.out.println("finalizerGuardian releases resource for outer class.");
+        }
+    };
+
+    // @Override
+    // protected void finalize() throws Throwable {
+        // super.finalize();
+        // System.out.println("Outer class releases resource.");
+    // }
+
+    public void sayHello() {
+        System.out.println("hello");
+    }
+
+    public static void main(String args[]) {
+        TestFinalizerGuardian testFinalizerGuardian = new TestFinalizerGuardian();
+        testFinalizerGuardian.sayHello();
+    }
+}
+输出：
+hello
+（并没有调用finalize()终结函数）
+
+注意，外部公有类并没有终结方法（除了它从Object中继承了一个无关紧急的之外），所以子类的终结方法是否调用super.finalize()并不重要，对于每一个带有终结方法的非final公有类，都应该考虑使用这种方法。
+
+总之，除非是作为安全网，或者是为了终止非关键的本地资源，否则请不要使用终结方法。在这些很少见的情况下，既然使用了终结方法，就要记住调用super.finalize。如果用终结方法作为安全网，要记得记录终结方法的非法用法。最后，如果需要把终结方法与公有的非final类关联起来，请考虑使用终结方法守卫者，以确保即使子类的终结方法未能调用super.finalize，该终结方法也会被执行。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第3章 对于所有对象都通用的方法P28
+//第8条：覆盖equals时请遵守通用约定 P28
+最容易避免覆盖equals方法的问题就是不覆盖equals方法，这种情况下，类的每个实例都只与它自身相等。如果满足了以下任何一个条件，就是所期望的结果：
+--类的每个实例本质上都是唯一的。对于代表活动实例而不是值（value）的类来说确实如此，例如Thread。Object提供的equals实现对于这些类来说正是正确的行为。
+//
+package test;
+
+public class MyObject {
+}
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class MyObjectTest {
+    @Test
+    public void testCatOrderByAge() {
+        Integer i = new Integer(1);
+        Integer i2 = new Integer(1);
+        assertTrue(i.equals(i2));
+    }
+
+    @Test
+    public void testEquals_should_equal_when_objectSame() {
+        MyObject myObject = new MyObject();
+        assertTrue(myObject.equals(myObject));
+
+        MyObject myObject1 = new MyObject();
+        assertFalse(myObject.equals(myObject1));
+    }
+}
+
+--不关心类是否提供了“逻辑相等（logical equality）”的测试功能。
+--超类已经覆盖了equals，从超类继承过来的行为对于子类也是合适的。
+--类是私有的或是包级私有的，可以确定它的equals方法永远不会被调用。在这种情况下，应该覆盖equals方法，以防它被意外调用：
+@Override
+public boolean equals(Object c) {
+    throw new AssertionError();//Method is never called
+}
+
+如果类具有自己特有的“逻辑相等”概念（不同于对象等同的概念），而且超类还没有覆盖equals以实现期望的行为，这时就需要覆盖equals方法。这通常属于“值类（value class）”的情形。值类仅仅是一个表示值的类，例如Integer或者Date。程序员在利用equals方法来比较值对象的引用时，希望知道它们在逻辑上是否相等，而不是想了解它们是否指向同一个对象。为了满足这种要求，不仅必需覆盖equals方法，而且这样做也使得这个类的实例可以被用做映射表（map）的键（key），或者集合（set）的元素，使映射或者集合表现出预期的行为。
+
+有一种“值类”不需要覆盖equals方法，即用实例受控（见第1条）确保“每个值至多只存在一个对象”的类。枚举值（见第30条）就属于这种类。对于这样的类而言，逻辑相同与对象等同是一回事，因此Object的equals方法赞同于逻辑意义上的equals方法。
+
+在覆盖equals方法的时候，必须要遵守它的通用约定。下面是约定的内容，来自Object的规范：
+equals方法实现了等价关系（equivalence relation）：
+--自反性（reflexive）。对于任何非null的引用值，x.equals(x)必须返回true。
+--对称性（symmetric）。对于任何非null的引用值x和y，当且仅当y.equals(x)返回true时，x.equals(y)必须返回true。
+--传递性（transitive）。对于任何非null的引用值x、y和z，如果x.equals(y)返回true，并且y.equals(z)也返回true，那么x.equals(z)也必须返回true。
+--一致性（consistent）。对于任何非null的引用值x和y，只要equals的比较操作在对象中所用的信息没有被修改，多次调用x.equals(y)就会一致地返回true，或者一致地返回false。
+--对于任何非null的引用值x，x.equals(null)必须返回false。
+
+如果违反了它们，就会发现程序将会表现不正常，甚至崩溃，而且很难找到失败的根源。没有哪个类是孤立的。一个类的实例通常会被频繁地传递给另一个类的实例。有许多类，包括所有的集合类（collection class）在内，都依赖于传递给它们的对象是否遵守了equals约定。
+
+下面按照顺序逐一查看以下5个要求：
+1. 自反性（reflexivity）————第一个要求仅仅说明对象必须等于其自身。如果违背了这一条，然后把该类的实例添加到集合（collection）中，该集合的contains方法将果断地告诉你，该集合不包含你刚刚添加的实例。
+2. 对称性（symmetry）————第二个要求是说，任何两个对象对于“它们是否相等”的问题都必须保持一致。如下面的类，它实现了一个区分大小写的字符串。字符串由toString保存，但在比较操作中被忽略。
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class CaseInsensitiveStringTest {
+    @Test
+    public void testEquals_should_equal_when_equalsString() {
+        CaseInsensitiveString caseInsensitiveString = new CaseInsensitiveString("Hello");
+        assertEquals(caseInsensitiveString, "Hello");
+        assertEquals(caseInsensitiveString, "hello");
+
+        assertNotEquals("Hello", caseInsensitiveString);//违反了对称性
+        assertNotEquals("hello", caseInsensitiveString);//违反了对称性
+    }
+}
+
+//
+package test;
+
+public class CaseInsensitiveString {
+
+    private final String s;
+
+    public CaseInsensitiveString(String s) {
+        this.s = s;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CaseInsensitiveString) {
+            return s.equalsIgnoreCase(((CaseInsensitiveString) obj).s);
+        }
+
+        if (obj instanceof String) { //One-way interoperability
+            return s.equalsIgnoreCase((String) obj);
+        }
+
+        return false;
+    }
+}
+
+问题在于，虽然CaseInsensitiveString类中的equals方法知道普通字符串（String）对象，但是，String类中的equals方法却不知道不区分大小写的字符串。因此,s.equals(cis)返回false，显然违反了对称性。假设把不区分大小写的字符串对象放到一个集合中：
+List<CaseInsensitiveString> list = new ArrayList<>();
+list.add(cis);
+此时list.contains(s)会返回的结果是什么没人知道。可能返回false，可能返回true，或者抛出一个运行时（runtime）异常。一旦违反了equals约定，当其他对象面对你的对象时，你完全不知道这些对象的行为会怎么样。
+
+为了解决这个问题，只需把企图与String互操作的这段代码从equals方法中去掉就可以了，这样做之后，就可以重构该方法，使它变成一条单独的返回语句：
+//测试用例
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class CaseInsensitiveStringTest {
+    @Test
+    public void testEquals_should_equal_when_equalsString() {
+        CaseInsensitiveString caseInsensitiveString = new CaseInsensitiveString("Hello");
+        assertNotEquals(caseInsensitiveString, "Hello");
+        assertNotEquals(caseInsensitiveString, "hello");
+
+        assertNotEquals("Hello", caseInsensitiveString);
+        assertNotEquals("hello", caseInsensitiveString);
+
+        CaseInsensitiveString caseInsensitiveString1 = new CaseInsensitiveString("hello");
+        assertEquals(caseInsensitiveString, caseInsensitiveString1);
+        assertEquals(caseInsensitiveString1, caseInsensitiveString);
+    }
+}
+
+//
+package test;
+
+public class CaseInsensitiveString {
+
+    private final String s;
+
+    public CaseInsensitiveString(String s) {
+        this.s = s;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof CaseInsensitiveString &&
+                s.equalsIgnoreCase(((CaseInsensitiveString) obj).s);
+    }
+}
+
+3. 传递性（transitivity）————
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
