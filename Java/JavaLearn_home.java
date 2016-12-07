@@ -1,4 +1,14 @@
 //------------------------------------------------------------------------------------------------
+//volatile使用
+http://blog.csdn.net/feier7501/article/details/20001083
+在当前的Java内存模型下，线程可以把变量保存在本地内存（比如机器的寄存器）中，而不是直接在主存中进行读写。这就可能造成一个线程在主存中修改了一个变量的值，而另外一个线程还继续使用它在寄存器中的变量值的拷贝，造成数据的不一致。 
+要解决这个问题，只需要像在本程序中的这样，把该变量声明为volatile（不稳定的）即可，这就指示JVM，这个变量是不稳定的，每次使用它都到主存中进行读取。一般说来，多任务环境下各任务间共享的标志都应该加volatile修饰。 
+volatile修饰的成员变量在每次被线程访问时，都强迫从共享内存中重读该成员变量的值。而且，当成员变量发生变化时，强迫线程将变化值回写到共享内存。这样在任何时刻，两个不同的线程总是看到某个成员变量的同一个值。 
+
+上面的情况，可以使用synchronized来对boolPattern加锁，但是synchronized开销比volatile大，volatile能够胜任上面的工作。
+volatile不保证原子操作，所以，很容易读到脏数据。
+使用建议：在两个或者更多的线程访问的成员变量上使用volatile。当要访问的变量已在synchronized代码块中，或者为常量时，不必使用。 
+//------------------------------------------------------------------------------------------------
 //学习重构到模式
 //策略模式 猫咪排序
 //CatSortAlg
@@ -49,6 +59,10 @@ public class Cat {
 
     public String name() {
         return name;
+    }
+
+    public int weight() {
+        return weight;
     }
 }
 
@@ -118,13 +132,21 @@ public class CatSortAlgTest {
         assertEquals(cats[1].name(), "MiMi");
         assertEquals(cats[2].name(), "XiaoHei");
     }
+    
+    @Test
+    public void testCatOrderByWeight() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(2, "XiaoHei", 3)};
+        CatSortAlg.sort(cats, new WeightComparator());
+        assertEquals(cats[0].weight(), 3);
+        assertEquals(cats[1].weight(), 4);
+        assertEquals(cats[2].weight(), 5);
+    }
 }
 
 //
 package test;
 
 public class CatSortAlg {
-
     public static void sort(Cat[] cats, Comparator comparator) {
         for (int i = 1; i < cats.length; i++) {
             for (int j = 0; j < cats.length - i; j++) {
@@ -143,27 +165,40 @@ public class CatSortAlg {
 package test;
 
 public interface Comparator {
-    boolean compare(Cat cat, Cat cat1);
+    boolean compare(Cat cat1, Cat cat2);
 }
 
 //
 package test;
 
 public class AgeComparator implements Comparator {
-    public boolean compare(Cat cat, Cat cat1) {
-        return cat.age() > cat1.age();
+    @Override
+    public boolean compare(Cat cat1, Cat cat2) {
+        return cat1.age() > cat2.age();
     }
 }
+
 
 //
 package test;
 
 public class NameComparator implements Comparator {
-    public boolean compare(Cat cat, Cat cat1) {
-        return cat.name().compareTo(cat1.name()) > 0;
+    @Override
+    public boolean compare(Cat cat1, Cat cat2) {
+        return cat1.name().compareTo(cat2.name()) > 0;
     }
 }
 
+
+//
+package test;
+
+public class WeightComparator implements Comparator {
+    @Override
+    public boolean compare(Cat cat1, Cat cat2) {
+        return cat1.weight() > cat2.weight();
+    }
+}
 
 //------------------------------------------------------------------------------------------------
 //junit4 assert类中的assert方法总结
@@ -620,7 +655,7 @@ int JANURAUY = 1;
 int FEBRUARY = 2;                   
 int MARCH =3;
 }
-然后要用的话，就直接Months. JANURAUY＊10类似的直接用就行了
+然后要用的话，就直接Months.JANURAUY＊10类似的直接用就行了
 //------------------------------------------------------------------------------------------------
 java 一个类不能同时继承多个类，一个类只能继承一个类(class)，但是可以实现多个接口(interface);一个接口(interface)能够继承多个接口(interface)
 //------------------------------------------------------------------------------------------------
@@ -19363,7 +19398,7 @@ public static Boolean valueOf(boolean b) {
 
 --静态工厂方法与构造器不同的第三大优势在于，它们可以返回原返回类型的任何子类型的对象。这样我们在选择返回对象的类时就有了更大的灵活性。
 
-服务提供者框架模式有着无数种变体。如，服务访问API可以利用适配器（Adapter）模式，返回比提供者需要的更丰富的服务接口。下面是一个简单的袜，包含一个服务提供者接口和一个默认提供者：
+服务提供者框架模式有着无数种变体。如，服务访问API可以利用适配器（Adapter）模式，返回比提供者需要的更丰富的服务接口。下面是一个简单的样例，包含一个服务提供者接口和一个默认提供者：
 //
 package test;
 
@@ -19461,7 +19496,7 @@ public class TestServices {
 输出：
 ServiceA
 
---静态工厂方法的第四大优势在于，在创建参数化类型实例的时候，它们使代码变得更加简洁。在调用参数化类的构造器时，即便类型参数很明显，也必须指明。这通常要求接连两次提供类型参数：
+--静态工厂方法的第四大优势在于，在创建参数化类型实例的时候，它们使代码变得更加简洁。在调用参数化类的构造器时，即便类型参数很明显，也必须指明。这通常要求接续两次提供类型参数：
 Map<String, List<String>> m = new HashMap<String, List<String>>();//在1.8中已经可以省略第二个参数了
 有了静态工厂方法，编译器就可以替你找到类型参数。这被称作类型推导（type inference）。如，假设HashMap提供了这个静态工厂：
 public static <K, V> HashMap<K, V> newInstance() {
@@ -20301,22 +20336,1415 @@ public class CaseInsensitiveString {
     }
 }
 
-3. 传递性（transitivity）————
-//------------------------------------------------------------------------------------------------
+3. 传递性（transitivity）————equals约定的第三个要求是，如果一个对象等于第二个对象，并且第二个对象又等于第三个对象，则第一个对象一定等于第三个对象。无意识地违反这条规则的情形也不难想像。考虑子类的情形，它将一个新的值组件（value component）添加到了超类中。子类增加的信息会影响到equals的比较结果。首先以一个简单的不可变的二维整数型Point类开始：
 
-//------------------------------------------------------------------------------------------------
+//
+package test;
 
-//------------------------------------------------------------------------------------------------
+import org.junit.Test;
 
-//------------------------------------------------------------------------------------------------
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
-//------------------------------------------------------------------------------------------------
+public class PointTest {
+    @Test
+    public void testEquals_should_equal_when_equalsPoint() {
+        Point p = new Point(1, 2);
+        Point p1 = new Point(1, 2);
+        assertEquals(p, p1);
 
-//------------------------------------------------------------------------------------------------
+        Point p2 = new Point(2, 2);
+        assertNotEquals(p, p2);
+    }
+}
 
-//------------------------------------------------------------------------------------------------
+//
+package test;
 
+public class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Point)) {
+            return false;
+        }
+        Point point = (Point) obj;
+        return point.x == x && point.y == y;
+    }
+}
+
+扩展这个类，为一个点添加颜色信息：
+
+//package test;
+
+import org.junit.Test;
+
+import java.awt.Color;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class ColorPointTest {
+    @Test
+    public void testEquals_should_notEqual_when_pointEqualColorPoint() {
+        Point p = new Point(1, 2);
+        ColorPoint cp = new ColorPoint(1, 2, Color.RED);
+        assertEquals(p, cp);
+        assertNotEquals(cp, p);
+    }
+}
+
+//
+package test;
+
+import java.awt.Color;
+
+public class ColorPoint extends Point {
+    private final Color color;
+
+    public ColorPoint(int x, int y, Color color) {
+        super(x, y);
+        this.color = color;
+    }
+
+    //Broken - violates symmetry!
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ColorPoint)) {
+            return false;
+        }
+        return super.equals(obj) && ((ColorPoint) obj).color == color;
+    }
+}
+
+如果完全不提供equals方法，直接从Point继承，在equals做比较时颜色信息就被忽略掉了。虽然不违反equals约定，但是无法接受。假设编写了一个equals方法，只有当它的参数是另一个有色点时，并且具有同样的位置和颜色时，才返回true。见上。
+这个方法问题在于，违反了对称性。p.equals(cp)返回true，cp.equals(p)则返回false。尝试修正这个问题，让ColorPoint.equals在进行“混合比较”时忽略颜色信息：
+//package test;
+
+import java.awt.Color;
+
+public class ColorPoint extends Point {
+    private final Color color;
+
+    public ColorPoint(int x, int y, Color color) {
+        super(x, y);
+        this.color = color;
+    }
+
+    //Broken - violates transitivity!
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Point)) {
+            return false;
+        }
+
+        // If obj is a normal Point, do a color-blind comparison
+        if (!(obj instanceof ColorPoint)) {
+            return obj.equals(this);
+        }
+        return super.equals(obj) && ((ColorPoint) obj).color == color;
+    }
+}
+
+这种方法确实提供了对称性，但是却牺牲了传递性：
+//
+package test;
+
+import org.junit.Test;
+
+import java.awt.Color;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class ColorPointTest {
+    @Test
+    public void testEquals_should_notEqual_when_pointEqualColorPoint() {
+        ColorPoint p1 = new ColorPoint(1, 2, Color.RED);
+        Point p2 = new Point(1, 2);
+        ColorPoint p3 = new ColorPoint(1, 2, Color.BLUE);
+        assertEquals(p1, p2);
+        assertEquals(p2, p3);
+        assertNotEquals(p1, p3);
+    }
+}
+
+此时，前两种比较不考虑颜色信息（“色盲”），而第三种比较则考虑了颜色信息。
+怎么解决呢？事实上，这是面向对象语言中关于等价关系的一个基本问题。我们无法在扩展可实例化的类的同时，既增加新的值组件，同时又保留equals约定，除非愿意放弃面向对象的抽象所带来的优势。
+
+可能听说，在equals方法中用getClass测试代替instanceof测试，可以扩展可实例化的类和增加新的值组件，同时保留equals约定：
+//Broken - violates Liskov substitution principle(page 40)
+@Override
+public boolean equals(Object obj) {
+    if (obj == null || obj.getClass() != getClass()) {
+        return false;
+    }
+    Point point = (Point) obj;
+    return point.x == x && point.y == y;
+}
+这段程序只有当对象具有相同的实现时，才能使对象等同。虽然这样也不算太糟糕，但是结果却是无法接受的。
+假设要编写一个方法，以检验某个整值点是否处在单位圆中，下面是可以采用的其中一个方法：
+//
+package test;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class UnitCircle {
+    private static final Set<Point> unitCircle;
+
+    static {
+        unitCircle = new HashSet<Point>();
+        unitCircle.add(new Point(1, 0));
+        unitCircle.add(new Point(0, 1));
+        unitCircle.add(new Point(-1, 0));
+        unitCircle.add(new Point(0, -1));
+    }
+
+    public static boolean onUnitCircle(Point p) {
+        return unitCircle.contains(p);
+    }
+}
+
+//Point
+package test;
+
+public class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || obj.getClass() != getClass()) {
+            return false;
+        }
+        Point point = (Point) obj;
+        return point.x == x && point.y == y;
+    }
+
+    @Override
+    public int hashCode() {
+        return x + y;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.nio.channels.Pipe;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+public class PointTest {
+    @Test
+    public void testEquals_should_equal_when_equalsPoint() {
+        Point p = new Point(1, 2);
+        Point p1 = new Point(1, 2);
+        assertEquals(p, p1);
+
+        Point p2 = new Point(2, 2);
+        assertNotEquals(p, p2);
+    }
+
+    @Test
+    public void testHashSet_should_contain_when_contain() {
+        Set<Point> points = new HashSet<Point>();
+        points.add(new Point(1, 1));
+        points.add(new Point(1, 3));
+
+        assertTrue(points.contains(new Point(1, 1)));
+        assertTrue(points.contains(new Point(1, 3)));
+        assertFalse(points.contains(new Point(2, 2)));
+    }
+}
+
+//Test
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+
+public class UnitCircleTest {
+    @Test
+    public void testOnUnitCircle_should_contain_when_PointOnUnitCircle() {
+        Point p = new Point(0, 1);
+        assertTrue(UnitCircle.onUnitCircle(p));
+    }
+}
+
+HashSet中contains的判断条件：contains()是根据equals()和hashCode()判断2个对象是否是同一个，没重写hashCode()，系统默认按照地址计算hashCode，2个地址不同，hashCode也不同，返回当然是false。
+equals和hashcode方法要同时重写，并且要在equals为true的时候，hashCode必须要相同。这个已经是一种不成文的规定了，这两个方法要重写就要一起重写，而且IDE里也会只重写一个会视为警告。所以这两个方法要同时重写。
+详细的可以去看HashMap的contains实现，哪里是equals和hashCode两个同时使用了，所以在有Map的时候，必须两个都要验证，但是在ArrayList里不验证hashCode，所以ArrayList里不重新这个hashCode也无所谓。
+
+上述UnitCircle可能不是实现这种功能的最快方式，不过效果很好。但是假设通过某种不添加值组件的方式扩展了Point，例如让它的构造器记录创建了多少个实例：
+//
+package test;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class CounterPoint extends Point {
+
+    private static final AtomicInteger counter = new AtomicInteger();
+
+    public CounterPoint(int x, int y) {
+        super(x, y);
+        counter.incrementAndGet();
+    }
+
+    public int numberCreated() {
+        return counter.get();
+    }
+}
+
+//测试
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class CounterPointTest {
+    @Test
+    public void testCounter_should_equals_when_createCounterPoint() {
+        CounterPoint counterPoint = new CounterPoint(1, 1);
+        assertEquals(1, counterPoint.numberCreated());
+
+        CounterPoint counterPoint1 = new CounterPoint(0, 1);
+        assertEquals(2, counterPoint.numberCreated());
+    }
+    
+    @Test
+    public void testOnUnitCircle_should_contains_when_counterPointIn() {
+        Point cp = new CounterPoint(0, 1);
+        assertFalse(UnitCircle.onUnitCircle(cp)); //把CounterPoint传入contains函数，则无法返回true
+
+        Point p = new Point(0, 1);
+        assertTrue(UnitCircle.onUnitCircle(p));
+    }
+}
+
+里氏替换原则（Liskov substitution principle）认为，一个类型的任何重要属性也将适用于它的子类型，因此为该类类型编写的任何方法，在它的子类型上也应该同样运行得很好。但是将CounterPoint实例传给了onUnitCircle方法，如果Point类使用了基于getClass的equals方法，无论CounterPoint的x和y值是什么，onUnitCircle方法都会返回false。之所以如此，是因为像onUnitCircle方法所用的HashSet这样的集合，利用equals方法检验包含条件，没有任何CounterPoint实例与任何Point对应。但是，如果在Point上使用适当的基于instanceof的equals方法，当遇到CounterPoint时，相同的onUnitCircle方法就会工作得很好。
+
+虽然没有一种满意的办法可以既扩展不可实例化的类，又增加值组件，但还是有一种不错的权宜之计（workaround）。根据第16条的建议：复合优先于继承。我们不再让ColorPoint扩展Point，而是在ColorPoint中加入一个私有的Point域，以及一个公有的视图（view）方法（见么5条），此就去返回一个与该有色点处在相同位置的普通Point对象：
+//
+package test;
+
+import java.awt.Color;
+
+// Adds a value component without violating the equals contract
+public class ColorPoint {
+    private final Point point;
+    private final Color color;
+
+    public ColorPoint(int x, int y, Color color) {
+        if (color == null) {
+            throw new NullPointerException();
+        }
+        point = new Point(x, y);
+        this.color = color;
+    }
+
+    /**
+     * Returns the point-view of this color point
+     */
+    public Point asPoint() {
+        return point;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ColorPoint)) {
+            return false;
+        }
+        ColorPoint cp = (ColorPoint) obj;
+        return cp.point.equals(point) && cp.color.equals(color);
+    }
+}
+
+//
+package test;
+
+public class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Point)) {
+            return false;
+        }
+        Point point = (Point) obj;
+        return point.x == x && point.y == y;
+    }
+
+    @Override
+    public int hashCode() {
+        return x + y;
+    }
+}
+
+
+//Test
+package test;
+
+import org.junit.Test;
+
+import java.awt.Color;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class ColorPointTest {
+    @Test
+    public void testColorPointEquals_should_equals_when_colorPointEqual() {
+        ColorPoint cp = new ColorPoint(1, 1, Color.BLACK);
+        ColorPoint cp1 = new ColorPoint(1, 1, Color.BLACK);
+        ColorPoint cp2 = new ColorPoint(1, 1, Color.RED);
+
+        Point p = new Point(1, 1);
+        assertNotEquals(cp, p);
+        assertEquals(cp, cp1);
+        assertNotEquals(cp, cp2);
+    }
+}
+
+注意，可以一个抽象（abstract）类的子类中增加新的值组件，而不会违反equals约定。对于根据第20条的建议“用类层次（class hierarchies）代替标签类（tagged class）”而得到的那种类层次结构来说，这一点非常重要。如，可能有一个抽象的Shape类，没有任何值组件，Circle子类添加了一个radius域，Rectangle子类添加了length和width域。只要不可能直接创建超类的实例，前面所述的种种问题就不会发生。
+
+4. 一致性（consistency）————equals约定的第四个要求是：如果两个对象相等，它们就必须始终保持相等。当在写一个类的时候，应该仔细考虑它是否应该是不可变的（见第15条）。如果认为它应该是不可变的，就必须保证equals方法满足这样的限制条件：相等的对象永远相等，不相等的对象永远不相等。
+无论类是否是不可变的，都不要使equals方法依赖于不可靠的资源。例如，java.net.URL的equals方法依赖于对URL中主机IP地址的比较。将一个主机名转变成IP地址可能需要访问网络，随着时间的推移，不确保会产生相同的结果。这样会导致URL的equals方法违反equals约定。除了极少娄的例外情况，equals方法都应该对驻留在内存中的对象执行确定性的计算。
+
+//final测试 http://www.importnew.com/7553.html
+final在Java中是一个保留的关键字，可以声明成员变量、方法、类以及本地变量。一旦你将引用声明作final，你将不能改变这个引用了，编译器会检查代码，如果你试图将变量再次初始化的话，编译器会报编译错误。
+
+//
+package test;
+
+public class FinalKeywords {
+    private int i; //如果这里声明为private final int i，则无法修改该值，setI编译错误
+
+    public void setI(int i) {
+        this.i = i;
+    }
+
+    public FinalKeywords(int i) {
+        this.i = i;
+    }
+}
+
+//Test
+package test;
+
+import org.junit.Test;
+
+public class FinalKeywordsTest {
+    @Test
+    public void testFinalClass_should_notAllowedChangeRef_when_declaredFinal() {
+        final FinalKeywords finalKeywords = new FinalKeywords(3);
+        //finalKeywords = new FinalKeywords(4); //声明为final将不能改变引用，所以不能重新new
+        finalKeywords.setI(4); //可以修改值，引用地址没有改变，内存空间上的数据有变化，所以没问题
+    }
+}
+
+5. 非空性（Non-nullity）————最后一个要求没有名称，姑且称它为“非空性（Non-nullity）”，意思是指所有的对象都必须不等于null。
+不需要显示地判断 if (o == null) return false;
+在equals方法中，进行类型转换前，equals方法必须使用instanceof操作符，检查其参数是否为正确的类型：
+@Override public boolean equals(Object o) {
+    if (!(o instanceof MyType)) {
+        return false;
+    }
+    MyType mt = (MyType) o;
+    //...
+}
+如果漏掉了这一步的类型检查，并且传递给equals方法的参数又是错误的类型，那么equals方法将会抛出ClassCastException异常，这就违反了equals约定。但是如果instanceof的第一个操作数为null，那么，不管第二个操作数是哪种类型，instanceof操作符都指定应该返回false。因此，如果把null传给equals方法，类型检查就会返回false，所以不需要单独的null检查。
+
+结果这些要求，得出了实现高质量equals方法的诀窍：
+1. 使用==操作符检查“参数是否为这个对象的引用”。如果是，则返回true。这是一种性能优化，如果比较操作有可能很昂贵，就值得这么做。
+2. 使用instanceof操作符检查“参数是否为正确的类型”。如果不是，则返回false。一般来说，所谓“正确的类型”是指equals方法所在的那个类。有些情况下，是指该类所实现的某个接口。如果类实现 的接口改进了equals约定，允许在实现了该接口的类之间进行比较，那么就使用接口。集合接口（collection interface）如Set、List、Map和Map.Entry具有这样的特性。
+3. 把参数转换成正确的类型。转换之前进行过instanceof测试，所以确保会成功。
+4. 对于该类中的每个“关键（significant）”域，检查参数中的域是否与该对象中对应的域相匹配。如果这些测试全部成功，则返回true，否则返回false。如果第2步中的类型是个接口，就必须通过接口方法访问参数中的域；如果该类型是个类，也许就能够直接访问参数中的域，这要取决于它们的可访问性。
+
+对于既不是float也不是double类型的基本类型域，可以使用==操作符进行比较；
+对于对象引用域，可以递归地调用equals方法；
+对于float域，可以使用Float.compare方法；
+对于double域，则使用Double.compare方法。
+对于float和double域进行特殊的处理是有必要的，因为存在着Float.NaN、-0.0f 以及类似的double常量。
+对于数组域，则要把以上这些指导原则应用到每个元素上。如果数组域中的每个元素都很重要，就可以使用发行版本1.5 中新增的其中一个Array.equals方法。
+
+对于对象引用域包含null可能是合法的，所以，为了避免可能导致NullPointerException异常，则使用下面的习惯用法来比较这样的域：
+(field == null ? o.field == null : field.equals(o.field))
+如果field和o.field通常是相同的对象引用，那么下面的做法就会更快一些：
+(field == o.field || (field != null && field.equals(o.field)))
+
+对于有些类，如前面提到的CaseInsensitiveString类，域的比较要比简单的等同性测试复杂得多。如果是这种情况，可能会希望保存该域的一个“范式（canonical form）”，这样equals方法就可以根据这些范式进行低开销的精确比较，而不是高开销的非精确比较。这种方法对于不可变类（见第15条）是最为合适的；如果对象可能发生变化，就必须使用其范式保持最新。
+
+域的比较顺序可能会影响到equals方法的性能。为了获得最佳的性能，应该最先比较最有可能不一致的域，或者是开销最低的域，最理想的情况是两个条件同时满足的域。不应该去比较那些不属于对象逻辑状态的域，如用于同步操作的Lock域。也不需要比较冗余域（redundant field），因为这些冗余域可以由“关键域”计算获得，但是这样做有可能提高equals方法的性能。如果冗余域代表了整个对象的综合描述，比较这相域可以节省当比较失败时去比较实际数据所需要的开销。如，假设有一个Polygon类，并缓存了该区域。如果两个多边形有着不同的区域，就没有必要去比较它们的边和至高点。
+
+5. 当你编写完成了equals方法之后，应该问自己三个问题：它是否是对称的、传递的、一致的。当然，equals方法也必须满足其他两个特性（自反性和非空性），但是这两种特性通常会自动满足。
+
+根据上面的诀窍构建的equals方法的具体例子，请参看第9条的PhoneNumber.equals。下面是最后一些告诫：
+--覆盖equals时总要覆盖hashCode（见第9条）。
+--不要企图让equals方法过于智能。如果只是简单地测试域中的值是否相等，则不难做到遵守equals约定。如果想过度地寻求各种等价关系，则很容易陷入麻烦之中。把任何一种别名形式考虑到等价的范围内，往往不会是好主意。
+--不要将equals声明中的Object对象替换为其他的类型。如下：
+public boolean equals(MyClass o) {
+    //...
+}
+问题在于，这个方法并没有覆盖Object.equals，因为它的参数应该是Object类型，相反，它重载（overload）了Object.equals（见第41条）。在原有equals方法的基础上，再提供一个“强类型（strongly typed）”的equals方法，只要这两个方法返回同样的结果（没有强制的理由必须这样做），那么这就是可以接受的。在某些特定的情况下，这也许能够稍微改善性能，但是与增加的复杂性相比，这种做法是不值得的（见第55条）。
+@Override注解的用法一致，可以防止这种错误（见第36条）。这个equals方法不能编译，错误消息会告诉你哪里出了问题：
+@Overrid public boolean equals(MyClass o) {
+    //...
+}
 //------------------------------------------------------------------------------------------------
+//Effective Java 第3章 对于所有对象都通用的方法P28
+//第9条：覆盖equals时总要覆盖hashCode P39
+在每个覆盖了equals方法的类中，也必须覆盖hashCode方法。如果不这样做，就会违反Object.hashCode的通用约定，从而导致该类无法结合所有基于散列的集合一起正常动作，这样的集合包括HashMap、HashSet和Hashtable。
+
+约定内容，如下：
+--在应用程序的执行期间，只要对象的equals方法的比较操作所用到的信息没有被修改，那么对这同一个对象调用多次，hashCode方法都必须始终如一地返回同一个整数。在同一个应用程序的多次执行过程中，每次所返回的整数可以不一致。
+--如果两个对象根据equals(Object)方法比较是相等的，那么调用这两个对象中任意一个对象的hashCode方法都必须产生同样的整数结果。
+--如果两个对象根据equals(Object)方法比较是不相等的，那么调用这两个对象中任意一个对象的hashCode方法，则不一定要产生不同的整数结果。但是程序员应该知道，给不相等的对象产生截然不同的整数结果，有可能提高散列表（hash table）的性能。
+
+因没有覆盖hashCode而违反的关键约定是第二条：相等的对象必须具有相等的散列码（hash code）。根据类的equals方法，两个截然不同的实例在逻辑上有可能是相等的，但是根据Object类的hashCode方法，它们仅仅是两个没有任何共同之外的对象。因此，对象的hashCode方法返回两个看起来是随机的整数，而不是要追第二个约定所要求的那样，返回两个相等的整数。
+//
+package test;
+
+public final class PhoneNumber {
+
+    private final int areaCode;
+    private final int prefix;
+    private final int lineNumber;
+
+    public PhoneNumber(int areaCode, int prefix, int lineNumber) {
+        rangeCheck(areaCode, 999, "area code");
+        this.areaCode = areaCode;
+        this.prefix = prefix;
+        this.lineNumber = lineNumber;
+    }
+
+    private static void rangeCheck(int arg, int max, String name) {
+        if (arg < 0 || arg > max) {
+            throw new IllegalArgumentException(name + ": " + arg);
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof PhoneNumber)) {
+            return false;
+        }
+        PhoneNumber pn = (PhoneNumber) obj;
+        return pn.lineNumber == lineNumber
+            && pn.prefix == prefix
+            && pn.areaCode == areaCode;
+    }
+
+    //Broken - no hashCode method!
+}
+
+//Test
+package test;
+
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertNotEquals;
+
+public class PhoneNumberTest {
+    @Test
+    public void testPhoneNumberMap_should_getPhoneNubmerObj_when_get() {
+        Map<PhoneNumber, String> m = new HashMap<>();
+        m.put(new PhoneNumber(707, 867, 5309), "Jenny");
+        assertNotEquals(m.get(new PhoneNumber(707, 867, 5309)), null); //用例执行失败
+    }
+}
+
+map.put和map.get里涉及两个PhoneNumber实例：第一个被用于插入到HashMap中，第二个实例与第一个相等，被用于（试图用于）获取。由于PhoneNumber类没有覆盖hashCode方法，从而导致两个相等的实例具有不相等的散列码，违反了hashCode的约定。因此，put方法把电话号码对象存放在一个散列桶（hash bucket）中，get方法却在另一个散列桶中查找这个电话号码。即便这两个实例下她被放到同一个散列桶中，get方法也必定会返回null，因为HashMap有一项优化，可以将与每个项相关联的散列码缓存起来，如果散列码不匹配，也不必检验对象的等同性。
+修改这个问题非常简单，保需为PhoneNumber类提供一个适当的hashCode方法即可，那么，hashCode方法应该是什么样？编写一个合法但并不好用的hashCode方法没有任何价值。如，下面这个方法总是合法的，但永远都不应该被正式使用：
+//The worst possible legal hash function - never use!
+@Override public int hashCode() {
+    return 42;
+}
+上面这个hashCode方法是合法的，因为它确保了相等的对象总是具有同样的散列码。但它也极为恶劣，因为它使得每个对象都具有同样的散列码。因此，每个对象都被映射到同一个散列桶中，使散列表退化为链表（linked list）。它使得本该线性时间运行的程序变成了以平方级时间在运行。对于规格很大的散列表而言，这会关系到散列表能否正常工作。
+
+一个好的散列函数通常倾向于“为不相等的对象产生不相等的散列码”。这正是hashCode约定中第三条的含义。理想情况下，散列函数应该把集合中不相等的实例均匀地分布到所有可能的散列值上。要想完全达到这种理想的情况是非常困难的。相对接近这种理想情形则并不太困难。下面给出一种简单的解决方法：
+1. 把某个非零的常数值，比如说17，保存在一个名为result的int类型的变量中。
+2. 对于 对象中每个关键域f（指equals方法中涉及的每个域），完成以下步骤：
+    a. 为该域计算int类型的散列码c：
+        i. 如果该域是boolean类型，则计算（f ? 1 : 0） 。
+        ii. 如果该域是byte、char、short或者int类型，则计算(int) f。
+        iii. 如果该域是long类型，则计算(int)(f ^ (f >>> 32))。
+        iv. 如果该域是float类型，则计算Float.floatToIntBits(f)。
+        v. 如果该域是double类型，则计算Double.doubleToLongBits(f)，然后按照步骤2.a.iii，为得到的long类型值计算散列值。
+        vi. 如果该域是一个对象引用，并且该类的equals方法通过递归地调用equals的方式来比较这个域，则同样为这个域递归的调用hashCode。如果需要更复杂的比较，则为这个域计算一个“范式（canonical respresentation）”，然后针对这个范式调用hashCode。如果这个域的值为null，则返回0（或者其他某个常数，但通常是0）。
+        vii. 如果该域是一个数组，则要把每一个元素当做单独的域来处理。也就是说，递归地应用上述规则，对每个重要的元素计算一个散列码，然后根据步骤2.b中的做法把这些散列值组合起来。如果数组域中的每个元素都很重要，可以利用发行版本1.5 中增加的其中一个Arrays.hashCode方法。
+    b. 按照下面的公式，把步骤2.a中计算得到的散列码c合并到result中：
+    result = 31 * result + c;
+3. 返回result。
+4. 写完了hashCode方法之后，问问自己“相等的实例是否都具有相等的散列码”。要编写单元测试来验证你的推断。如果相等的实例有着不相等的散列码，则要找出原因，并修正错误。
+
+在散列码的计算过程中，可以把冗余域（redundant field）排队在外。如果一个域的值可以根据参与计算的其他域值计算出来，则可以把这样的域排队在外。必须排队equals比较计算中没有用到的任何域，否则很有可能违反hashCode约定的第二条。
+
+上述步骤1中用到了一个非零的初始值，因此步骤2.a中计算的散列值为0的那些初始域，会影响到散列值。如果步骤1中的初始值为0，则整个散列值将不受这些初始域的影响，因为这些初始域会增加冲突的可能性。值17则是任选的。
+步骤2.b中的乘法部分使得散列值依赖于域的顺序，如果一个类包含多个相似的域，这样的乘法运算就会产生一个更好的散列函数。例如，如果String散列函数省略了这个乘法部分，那么只是字母顺序不同的所有字符串都会有相同的散列码。之所以选择31，是因为它是一个奇素数。如果乘数是偶数，并且乘法溢出的话，信息会丢失，因为与2相乘等价于移位运算。使用素数的好处并不很明显，但是习惯上都使用素数来计算散列结果。31有个很好的特性，即用移位和减法来代替简洁，可以得到更好的性能：31 * i == (i << 5) - i。现代的VM可以自动完成这种优化。
+
+把上述解决办法用到PhoneNumber类中。它有三个关键域，都是short类型：
+@Override
+public int hashCode() {
+    int result = 17;
+    result = 31 * result + areaCode;
+    result = 31 * result + prefix;
+    result = 31 * result + lineNumber;
+    return result;
+}
+
+用例执行成功。
+因为这个方法返回的结果是一个简单的，确定的计算结果，它的输入只是PhoneNumber实例中的三个关键域，因此相等的PhoneNumber显然都会有相等的散列码。实际上，对于PhoneNumber的hashCode实现而言，上面这个方法是非常合理的，相当于Java平台类库中的实现。它的做法非常简单，也相当快捷，恰当地把不相等的电话号码分散到不同的散列桶中。
+
+如果一个类是不可变的，并且计算散列码的开销也比较大，就应该考虑把散列码缓存在对象内部，而不是每次请求的时候都重新计算散列码。如果你觉得这种类型的大多数对象都会被用做散列键（hash keys），就应该在创建实例的时候计算散列码。否则，可以选择“延迟初始化（lazily initialize）”散列码，一直到hashCode被第一次调用的时候才初始化（见第71条）。现在尚不清楚我们的PhoneNumber类是否值得这样处理，但可以通过它来说明这种方法该如何实现：
+//Lazily initialized, cached hashCode
+private volatile int hashCode; // (See Item 71) volatile可以保证多个线程访问hashCode时，每个线程都会获取该域的最新数据，一定程度上降低重复计算。但是该字段并不能保证原子操作，有可能出现hashCode在一个线程为0时，另一个线程已经计算完成hashCode值，并同步到主内存中，此时在当前线程中，result计算完成后，会再次将结果赋给hashCode。只是重复计算，结果是一样的。
+@Override public int hashCode() {
+    int result = hashCode;
+    if (result == 0) {
+        result = 17;
+        result = 31 * result + areaCode;
+        result = 31 * result + prefix;
+        result = 31 * result + lineNumber;
+        hashCode = result;
+    }
+    return result;
+}
+
+本条目中介绍的方法对于绝大多数应用程序而言已经足够了。
+
+不要试图从散列码计算中排除掉一个对象的关键部分来提高性能。虽然这样得到的散列函数运行起来可能更快，但它的效果不见得会好，可能会导致散列表慢到根本无法使用。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第3章 对于所有对象都通用的方法P28
+//第10条：始终要覆盖toString P44
+java.lang.Object提供了toString方法的一个实现，但它返回的字符串通常并不是类的用户所期望看到的。它包含类的名称，以及一个“@”符号，接着是散列码的无符号十六进制表示法。如“PhoneNumber@163b91”。toString的通用约定指出，被返回的字符串应该是一个“简洁的，但信息丰富，并且易于阅读的表达形式”。toString的约定进一步指出，“建议所有的子类都覆盖个方法。”这是一个很好的建议！
+
+//以第9条中的PhoneNumber为例：
+public class PhoneNumberTest {
+    @Test
+    public void testPhoneNumberMap_should_getPhoneNubmerObj_when_get() {
+        PhoneNumber phoneNumber = new PhoneNumber(707, 867, 5309);
+
+        System.out.println(phoneNumber.hashCode());
+        System.out.println(phoneNumber);
+
+        int i = 0x12960c;
+        System.out.println(i);
+    }
+}
+输出：
+1218060
+test.PhoneNumber@12960c
+1218060
+
+虽然遵守toString的约定并不像遵守equals和hashCode的约定（见第8、9条）那么重要，但是提供好的toString实现可以使类用起来更加舒适。当对象被传递给println、printf、字符串联操作符（+）以及assert或者被调试器打印出来时，toString方法会被自动调用。（Java 1.5 发行版本在平台中增加了printf方法，还提供了包括String.format的相关方法，与C语言中的sprintf相似。）
+
+如果为PhoneNumber提供了好的toString方法，那么，要产生有用的诊断消息会非常容易：
+System.out.println("Failed to connect: " + phoneNumber);
+
+在实际应用中，toString方法应该返回对象中包含的所有值得关注的信息，譬如上述电话号码例子那样。如果对象太大，或者对象中包含的状态信息难以用字符串表达，这样做就有点不切实际。这种情况下，toString应该返回一个摘要信息，如“Manhattan white pages(1487536 listings)”或者"Thread[main, 5, main]"。理想情况下，字符串应该是自描述的（self-explanatory），（Thread例子不满足这样的要求。）
+
+无论是否决定指定格式，都应该在文档中明确地表明你的意图。如果要指定格式，则应该严格地这样去做。如，下面是第9条中PhoneNumber类的toString方法：
+/**
+ * Returns the string representation of this phone number.
+ * The string consists of fourteen characters whose format
+ * is "(XXX) YYY-ZZZZ", where XXX is the area code, YYY is
+ * the prefix, and ZZZZ is the line number. (Each of the
+ * capital letters represents a single decimal digit.)
+ *
+ * If any of the three parts of this phone number is too small
+ * to fill up its field, the field is padded with leading zeros.
+ * For example, if the value of the line number is 123, the last
+ * four characters of the string representation will be "0123".
+ *
+ * Note that there is a single space separating the closing
+ * parenthesis after the area code from the first digit of the
+ * prefix.
+ */
+@Override
+public String toString() {
+    return String.format("(%03d) %03d-%04d", areaCode, prefix, lineNumber);
+}
+
+如果决定不指定格式，那么文档注释部分也应该有如下所示的指示信息：
+/**
+ * Returns a brief description of this potion. The exact details
+ * of the representation are unspecified and subject to change, 
+ * but the following may be regarded as typical:
+ * "[Potion #9: type=love, smell=turpentine, look=india ink]"
+ */
+@Override
+public String toString() {
+    //...
+}
+
+对于那些依赖于格式的细节进行编程或者产生永久数据的程序员，在读到这段注释之后，一旦格式被改变，则只能自己承担后果。
+
+无论是否指定格式，都为toString返回值中包含的所有信息，提供一种编程式的访问途径。如，PhoneNumber类应该包含针对area code、prefix和line number的访问方法。如果不这么做，就会强迫那些需要这些信息的程序员不得不自己去解析这些字符串。除了降低了程序的性能，使得程序员们去做这些不的工作之外，这个解析过程也很容易出错，会导致系统不稳定，如果格式发生变化，还会导致系统崩溃。如果没有提供这些访问方法，即便你已经指明了字符串的格式是可以变化的，这个字符串格式也成了事实上的API。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第3章 对于所有对象都通用的方法P28
+//第11条：谨慎地覆盖clone P46
+clone方法不应该在构造的过程中，调用新对象中任何非final的方法（见第17条）。如果clone调用了一个被覆盖的方法，那么在该方法所在的子类有机会修正它在克隆对象中的状态之前，该方法就会先被执行，这样很有可能会导致克隆对象和原始对象之间的不一致。因此，上一段落中讨论到的put(key, value)方法应该要么是final的，要么是私有的（如果是私有的，它应该算是非final公有方法的“辅助方法”）。
+Object的clone方法被声明为可抛出CloneNotSupportedException异常，但是，覆盖版本的clone方法可能会忽略这个声明。公有的clone方法应该省略这个声明，因为不会抛出受检异常（checked exception）的方法与会抛出异常的方法相比，使用起来更加轻松（见第59条）。如果专门为了继承而设计的类（见第17条）覆盖了clone方法，覆盖版本的clone方法就应该模拟Object.clone的行为：它应该被声明为protected、抛出CloneNotSupportedException异常，并且该类不应该实现Cloneable接口。这样做可以使子类具有实现或不实现Cloneable接口的自由，就仿佛它们直接扩展了Object一样。
+还有一点，如果决定 用线程安全的类实现Cloneable接口，要记得它的clone方法必须得到很好的同步，就像任何其他方法一样（见第66条）。Object的clone方法没有同步，因此即便很满意，可能也必须编写同步的clone方法来调用super.clone()。
+
+简而言之，所有实现了Cloneable接口的类都应该用一个公有的方法覆盖clone。此公有方法首先调用super.clone，然后修正任何需要修正的域。一般情况下，这意味着要拷贝任何包含内部“深层结构”的可变对象，并用指向新对象的引用 代替原来指向这些对象的引用。虽然，这些内部拷贝操作往往可以通过递归地调用clone来完成，但这通常并不是最佳方法。如果该类只包含基本类型的域，或者指向不可变对象的引用，那么多半的情况是没有域需要修正。这条规则也有例外，如代表序列号或其他唯一ID值的域，或者代表对象的创建时间地域，不管这些域是基本类型还是不可变的，它们也都需要被修正。
+
+如果扩展一个实现了Cloneable接口的类，那么除了实现一个行为良好的clone方法外，没有别的选择。否则，最好提供某些其他的途径来代替对象拷贝，或者不提供这样的功能。例如，对于不可变类，支持对象拷贝并没有太大的意义，因为被拷贝的对象与原始对象并没有实质的不同。
+
+另一个实现对象拷贝的好办法是提供一个拷贝构造器（copy constructor）或拷贝工厂（copy factory）。拷贝构造器只是一个构造器，它唯一的参数类型是包含该构造器的类，例如：
+public Yum(Yum yum);
+
+拷贝工厂是类似于拷贝构造器静态工厂：
+public static Yum newInstance(Yum yum);
+
+拷贝构造器的做法，及其静态工厂方法的变形，都比Cloneable/clone方法具有更多的优势：它们不依赖于某一种很有风险的、语言之外的对象创建机制；它们不要求遵守尚未制定好文档的规范；它们不会与final域的正常使用发生冲突；它们不会抛出不必要的受检异常（checked exception）；它们不需要进行类型转换。虽然不可能把拷贝构造器或者静态工厂放到接口中，但是由于Cloneable的接口缺少一个公有的clone方法，所以它也没有提供一个接口该有的功能。因此，使用拷贝构造器或者拷贝工厂来代替clone方法时，并没有放弃接口的功能特性。
+
+更进一步，拷贝构造器或者拷贝工厂可以带一个参数，参数类型是通过该类实现的接口。例如，所有通用集合实现都提供了一个拷贝构造器，它的参数类型为Collection或者Map。基于接口的拷贝构造器和拷贝工厂（更准确的叫法应该是“转换构造器（conversion constructor）”和转换工厂（conversion factory）），允许客户选择拷贝的实现类型，而不是强迫客户接受原始的实现类型。例如，假设有一个HashSet，并且希望把它拷贝成一个TreeSet。clone方法无法提供这样的功能，但是用转换构造器很容易实现：new TreeSet(s)。
+
+既然Cloneable具有上述那么多问题，可以肯定地说，其他的接口都不应该扩展（extend）这个接口，为了继承而设计的类（见第17条）也不应该实现（implement）这个接口。由于它具有这么多缺点，有些专家级的程序员干脆从来不去覆盖clone方法，也从来不去调用它，除非拷贝数组。必须清楚一点，对于一个专门为了继承而设计的类，如果未能提供行为良好的受保护的（protected）clone方法，它的子类就不可能实现Cloneable接口。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第3章 对于所有对象都通用的方法P28
+//第12条：考虑实现Comparable接口 P53
+与本章中讨论的其他方法不同，compareTo方法并没有在Object中声明。它是Comparable接口中唯一的方法。compareTo方法不但允许进行简单的赞同性比较，而且允许执行顺序比较，它与Object的equals方法具有相似的特征，它还是个泛型。类实现了Comparable接口，就表明它的实例具有内存的排序关系（natural ordering）。为实现Comparable接口的对象数组进行排序就这么简单：
+Arrays.sort(a);
+
+Comparator<T>是让一个比较类实现的，要实现compara(T t1, T t2)接口，就成为了一个比较器，可用于作为入参传递给Set、Map等对象（在本文档中搜索Comparator<Student>），类似于C++中的函数对象。
+Comparable<T>是让一个普通的对象类继承的，要实现compareTo(T anotherT)，该类就自动具有了比较功能。
+
+//如Cat类
+package test;
+
+import java.util.Comparator;
+
+public class Cat implements Comparable<Cat>{
+    private final int age;
+    private final String name;
+    private final int weight;
+
+    public Cat(int age, String name, int weight) {
+        this.age = age;
+        this.name = name;
+        this.weight = weight;
+    }
+
+    public int age() {
+        return age;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public int weight() {
+        return weight;
+    }
+
+    @Override
+    public int compareTo(Cat anotherCat) {
+        if (age > anotherCat.age) {
+            return 1;
+        } else if (age < anotherCat.age) {
+            return -1;
+        }
+
+        if (name.compareTo(anotherCat.name) > 0) {
+            return 1;
+        } else if (name.compareTo(anotherCat.name) < 0) {
+            return -1;
+        }
+
+        //return new Integer(weight).compareTo(new Integer(anotherCat.weight));
+        return Integer.compare(weight, anotherCat.weight);
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+
+public class CatSortAlgTest {
+    @Test
+    public void testCatOrderByAge() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(2, "XiaoHei", 3)};
+        Arrays.sort(cats);
+        assertEquals(cats[0].age(), 1);
+        assertEquals(cats[1].age(), 2);
+        assertEquals(cats[2].age(), 3);
+    }
+
+    @Test
+    public void testCatOrderByName() {
+        Cat[] cats = new Cat[]{new Cat(1, "MiMi", 5), new Cat(1, "DaHuang", 4), new Cat(1, "XiaoHei", 3)};
+        Arrays.sort(cats);
+        assertEquals(cats[0].name(), "DaHuang");
+        assertEquals(cats[1].name(), "MiMi");
+        assertEquals(cats[2].name(), "XiaoHei");
+    }
+
+    @Test
+    public void testCatOrderByWeight() {
+        Cat[] cats = new Cat[]{new Cat(1, "MiMi", 5), new Cat(1, "MiMi", 4), new Cat(1, "MiMi", 3)};
+        Arrays.sort(cats);
+        assertEquals(cats[0].weight(), 3);
+        assertEquals(cats[1].weight(), 4);
+        assertEquals(cats[2].weight(), 5);
+    }
+
+    @Test
+    public void testCatOrderBySameAgeWithSome() {
+        Cat[] cats = new Cat[]{new Cat(3, "MiMi", 5), new Cat(5, "DaHuang", 4), new Cat(3, "XiaoHei", 3)};
+        Arrays.sort(cats);
+        assertEquals(cats[0].name(), "MiMi");
+        assertEquals(cats[1].name(), "XiaoHei");
+        assertEquals(cats[2].name(), "DaHuang");
+    }
+}
+
+对存储在集合中的Comparable对象进行搜索、计算极限值以及自动维护也同样简单。如，下面程序依赖于String实现了Comparable接口，去掉了命令行参数列表中的重复参数，并按字母顺序打印出来：
+package test;
+
+import org.junit.Test;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class CatSortAlgTest {
+    @Test
+    public void testCollectionAddAll() {
+        String[] strings = {"world", "hello", "world"};
+        Set<String> stringSet = new TreeSet<>();
+        Collections.addAll(stringSet, strings);
+        System.out.println(stringSet);
+    }
+}
+输出：
+[hello, world]
+
+一旦类实现了Comparable接口，它就可以跟许多泛型算法（generic algorithm）以及依赖于该接口的集合实现（collection implementation）进行协作。付出很小的努力就可以获得非常强大的功能。Java平台类库中的所有值类（value classes）都实现了Comparable接口。如果正在编写一个值类，它具有非常明显的内存排序关系，比如按字母排序、按数值顺序或者按年代顺序，你就应该坚决考虑实现这个接口：
+public interface Comparable<T> {
+    int compareTo(T t);
+}
+
+compareTo方法的通用约定与equals方法的相似：
+将这个对象与指定的对象进行比较。当该对象小于、等于或者大于指定对象的时候，分别返回一个负整数、零或者正整数。如果由于指定对象的类型而无法与该对象进行比较，则抛出ClassCastException异常。
+
+在下面的说明中，符号sgn（表达式）表示数学中的signum函数，它根据表达式（expression）的值为负值、零和正值，分别返回-1 、0或者1。
+--实现者必须确保所有的x和y都满足sgn(x.compareTo(y)) == -sgn(y.compareTo(x))。（这也暗示着，当且仅当y.compareTo(x)抛出异常时，x.compareTo(y)才必须抛出异常。）
+--实现者还必须确保这个比较关系是传递的：(x.compareTo(y) > 0 && y.compareTo(z) > 0)暗示着x.compareTo(z) > 0 。
+--实现者必须确保x.compareTo(y) == 0 暗示着所有的z都满足sgn(x.compareTo(z)) == sgn(y.compareTo(z))。
+--强烈建议(x.compareTo(y) == 0) == (x.equals(y))，但这并非绝对必要。一般来说，任何实现了Comparable接口的类，若违反了这个条件，都应该明确予以说明。推荐使用这样的说法：“注意：该类具有内存的排序功能，但是与equals不一致。”
+
+与equals不同，在跨越不同类的时候，compareTo可以不做比较：如果两个被比较的对象引用不同类的对象，compareTo可以抛出ClassCastException异常。
+
+就好像违反了hashCode约定的类会破坏其他依赖于散列做法的类一样，违反compareTo约定的类也会破坏其他依赖于比较关系的类。依赖于比较关系的类包括有序集合类TreeSet和TreeMap，以及工具类Collections和Arrays，它们内部包含有搜索和排序算法。
+
+回顾一下compareTo约定中的条款。第一条指出，如果颠倒了两个对象引用 之间的比较方法，就会发生下面的情况：如果第一个对象小于第二个对象，则第二个对象一定大于第一个对象；如果第一个对象等于第二个对象，则第二个对象一定等于第一个对象；如果第一个对象大于第二个对象，则第二个对象一定小于第一个对象。第二条指出，如果一个对象大于第二个对象，并且第二个对象又大于第三个对象，那么第一个对象一定大于第三个对象。最后一条指出，在比较时被认为相等的所有对象，它们跟别的对象做比较时一定会产生同样的结果。
+
+这三个条款的一个直接结果是，由compareTo方法施加的等同性测试（equality test），也一定遵守相同于equals约定所施加的限制条件：自反性、对称性和传递性。因此，下面的告诫也同样适用：无法在用新的值组件扩展可实例化的类时，同时保持compareTo约定，除非愿意放弃面向对象的抽象优势（见第8条）。针对equals的权宜之计也同样适用于compareTo方法。如果想为一个实现了Comparable接口的类增加值组件，请不要扩展这个类；而是要编写一个不相关的类，其中包含第一个类的一个实例。然后提供一个“视图（view）”方法返回这个实例。这样既可以让你自由地在第二个类上实现compareTo方法，同时也允许你的客户端在必要的时候，把第二个类的实例视同第一个类的实例。
+
+compareTo约定的最后一段是一个强烈的建议，而不是真正的规则，只是说明了compareTo方法施加的等同性测试，在通常情况下应该返回与equals方法同样的结果。如果遵守了这一条，那么由compareTo方法所施加的顺序关系就认为“与equals一致（consistent with equals）”。如果违反了这条规则，顺序关系就被认为“与equals不一致（inconsistent with equals）”。如果一个类的compareTo方法施加了一个与equals方法不致的顺序关系，它仍然能够正常工作，但是，如果一个有序集合（sorted collection）包含了该类的元素，这个集合就可能无法遵守相应集合接口（Collection、Set或Map）的通用约定。这是因为，对于这些接口的通用约定是按照equals方法来定义的，但是有序集合使用了由compareTo方法而不是equals方法所施加的等同性测试。尽管出现这种情况下不会等成灾难性的后果，但是应该有所了解。
+
+如，考虑BigDecimal类，它的compareTo方法与equals不一致。如果创建了一个HashSet实例，并且添加new BigDecimal("1.0")和new BigDecimal("1.00")，这个集合就将包含两个元素，因为新增到集合中的两个BigDecimal实例，通过equals方法来比较时是不相等的。然而，如果使用TreeSet而不是HashSet来执行同样的过程，集合中将只包含一个元素，因为这两个BigDecimal实例在通过compareTo方法进行比较时是相等的。
+//
+package test;
+
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.TreeSet;
+
+public class BigDecimalTest {
+    @Test
+    public void testCollectionAddAll() {
+        HashSet<BigDecimal> bigDecimalHashSet = new HashSet<>();
+        bigDecimalHashSet.add(new BigDecimal("1.0"));
+        bigDecimalHashSet.add(new BigDecimal("1.00"));
+        System.out.println(bigDecimalHashSet);
+
+        TreeSet<BigDecimal> bigDecimalTreeSet = new TreeSet<>();
+        bigDecimalTreeSet.add(new BigDecimal("1.0"));
+        bigDecimalTreeSet.add(new BigDecimal("1.00"));
+        System.out.println(bigDecimalTreeSet);
+    }
+}
+输出：
+[1.0, 1.00]
+[1.0]
+
+编写compareTo方法与编写equals方法非常相似，也有几处重大差别。因为Comparable接口是参数化的，而且comparable（这里错了吧，感觉应该是compareTo）方法是静态的类型，因此不必进行类型检查，也不必对它的参数进行类型转换。如果参数的类型不合适，这个调用甚至无法编译。如果参数为null，这个调用应该抛出NullPointerException异常，并且一旦该方法试图访问它的成员时就应该抛出。
+
+compareTo方法中域的比较是顺序的比较，而不是等同性的比较。比较对象引用域可以是通过递归地调用compareTo方法来实现。如果一个域并没有实现Comparable接口，或者你需要使用一个非标准的排序关系，就可以使用一个显式的Comparator来代替。或者编写自己的Comparator，或者使用已有的Comparator，譬如针对第8条中CaseInsensitiveString类的这个compareTo方法使用一个已有的Comparator：
+public final class CaseInsensitiveString implements Comparable<CaseInsensitiveString> {
+    public int compareTo(CaseInsensitiveString cis) {
+        return String.CASE_INSENSITIVE_ORDER.compare(s, cis.s);
+    }
+    
+    // Remainder omitted
+}
+
+System.out.println(String.CASE_INSENSITIVE_ORDER.compare("hello", "HELLO"));//0
+System.out.println(String.CASE_INSENSITIVE_ORDER.compare("hello", "IELLO"));//-1
+System.out.println(String.CASE_INSENSITIVE_ORDER.compare("hello", "GELLO"));//1
+
+注意CaseInsensitiveString类实现了Comparable<CaseInsensitiveString>接口。CaseInsensitiveString引用只能与其他的Comparable<CaseInsensitiveString>引用进行比较。在声明类去实现Comparable接口时，这是常见的模式。还要注意compareTo方法的参数是CaseInsensitiveString，而不是Object。这是上述的类声音所要求的。
+
+比较整数型基本类型的域，可以使用关系操作符<和>。如，浮点域用Double.compare和Float.compare，而不用关系操作符，当应用到浮点值时，它们没有遵守compareTo的通用约定。对于数组域，则要把这些指导原则应用到每个元素上。
+
+如果一个类有多个关键域，则按什么样的顺序来比较这些域是非常关键的。必须从最关键的域开始，逐步进行到所有的重要域。如果某个域的比较产生了非零的结果（零代表相等），则整个比较操作结束，并返回该结果。如果最关键的域是相等的，则进一步比较次最关键的域，以此类推。如果所有的域都是相等的，则对象就是相等的，并返回零。通过第9条中的PhoneNumber类的compareTo方法来说明这种方法：
+public int compareTo(PhoneNumber pn) {
+    //compare area codes
+    if (areaCode < pn.areaCode)
+        return -1;
+    if (areaCode > pn.areaCode)
+        return 1;
+    
+    //area codes are equal, compare prefixes
+    if (prefix < pn.prefix)
+        return -1;
+    if (prefix > pn.prefix)
+        return 1;
+    
+    //area codes and prefixes are equal, compare line numbers
+    if (lineNumber < pn.lineNumber)
+        return -1;
+    if (lineNumber > pn.lineNumber)
+        return 1;
+    
+    return 0; //All fields are equal
+}
+
+虽然这个方法可选，但它还可以改进。compareTo方法的约定并没有指定返回值的大小（magnitude），而只是指定了返回值的符号。可以利用这一点来简化代码，或者还能提高运行速度：
+public int compareTo(PhoneNumber pn) {
+    //Compare area codes
+    int areaCodeDiff = areaCode - pn.areaCode;
+    if (areaCodeDiff != 0)
+        return areaCodeDiff;
+    
+    //Area codes are equal, compare prefixes
+    int prefixDiff = prefix - pn.prefix;
+    if (prefixDiff != 0)
+        return prefixDiff;
+    
+    //Area codes and prefixes are equal, compare line numbers
+    return lineNumber - pn.lineNumber;
+}
+
+这项技巧在这里能够工作得很好，但是用起来要非常小心。除非你确信相关的域不会为负值，或者更一般的情况：最小和最大的可能域值之差小于或等于INTEGER.MAX_VALUE(2^32 -1)，否则就不要使用这种方法。这项技巧有时候不能正常工作的原因在于，一个有符号的32位整数还没有大到足以表达任意两个32位整数的差。如果i是一个很大的正整数（int类型），而j是一个很大的负整数（int类型），那么（i - j）将会溢出，并返回一个负值。这样就使得compareTo方法将对某些参数返回错误的结果，违反了compareTo约定的第一条和第二条。这不是一个纯粹的理论问题：它已经在实际的系统中导致了失败。这些失败可能非常难以调试，因为这样的compareTo方法对于大多数的输入值都能正常工作。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第13条：使类和成员的可访问性最小化 P58
+设计良好的模块会隐藏所有的实现细节，把它的API与它的实现清晰地隔离开来。模块之前只通过它们的API进行通信，一个模块不需要知道其他模块的内部工作情况。这个概念被称为信息隐藏（information hiding）或封装（encapsulation），是软件设计的基本原则之一。
+
+信息隐藏的几个重要原因：
+它可以有效地解除组成系统的各模块之间的耦合关系，使得这些模块可以独立地开发、测试、优化、使用、理解和修改。这样可以加快系统开发的速度，因为这些模块可以并行开发。
+它也减轻了维护的负担，程序员可以更快地理解这些模块，并且在调试它们的时候可以不影响其他模块。
+信息隐藏本身无论是对内还是对外，都不会带来更好的性能，但是它可以有效地调节性能：一旦完成一个系统，并通过剖析确定了哪些模块影响了系统的性能（见第55条），那些模块就可以被进一步优化，而不是影响到其他模块的正确性。
+信息隐藏提高了软件的可重用性，因为模块之间并不紧密相连，除了开发这些模块所使用的环境之外，它们在其他的环境中往往也很有用。
+信息隐藏也降低了构建大型系统的风险，因为即便整个系统不可用，但是这些独立的模块却有可能是可用的。
+
+Java程序设计语言提供了许多机制（facility）来协助信息隐藏。访问控制（access control）机制决定了类、接口和成员的可访问性（accessibility）。实体的可访问性是由该实体声音所在的位置，以及该实体声明中所出现的访问修饰符（private、protected和public）共同决定的。正确地使用这些修饰符对于实现信息隐藏是非常关键的。
+
+第一规则很简单：尽可能地使每个类或者成员不被外界访问。换句话说，应该使用与你正在编写的软件的对应功能相一致的、尽可能最小的访问级别。
+
+对于顶层的（非嵌套的）类和接口，只有两种可能的访问级别：包级私有的（package-private）和公有的（public）。如果你用public修饰符声明了顶层类或者接口，那它就是公有的；否则，它将是包级私有的。如果类或者接口能够被做成包级私有的，它就应该被做成包级私有。通过把类或者接口做成包级私有，它实际上成了这个包的实现的一部分，而不是该包导出的API的一部分，在以后的发行版本中，可以对它进行修改、替换，或者删除，而无需担心会影响到现有的客户端程序。如果把它做成公有的，你就有责任永远支持它，以保持它们的兼容性。
+
+如果一个包级私有的顶层类（或者接口）只是在某一个类的内部被用到，就应该考虑使它成为唯一使用它的那个类的私有嵌套类（见第22条）。这样可以将它的可访问范围从包中的所有类缩小到了使用它的那个类。然而，降低不必要公有类的可访问性，比降低包级私有的顶层类的更重要得多：因为公有类是包的API的一部分，而包级私有的顶层类则已经是这个包的实现的一部分。
+
+对于成员（域、方法、嵌套类和嵌套接口）有四种可能的访问级别，下面按照可访问性的递增顺序罗列出来：
+--私有的（private）——只有在声明该成员的顶层类内部才可以访问这个成员。
+--包级私有的（package-private）——声明该成员的包内部的任何类都可以访问这个成员。从技术上讲，它被称为“缺省（default）访问级别”，如果没有为成员指定访问修饰符，就采用这个访问级别。
+--受保护的（protected）——声明该成员的类的子类可以访问这个成员（但有一些限制），并且，声明该成员的包内部的任何类也可以访问这个成员。
+--公有的（public）——在任何地方都可以访问该成员。
+
+当你设计了类的公有API之后，可能觉得应该把所有其他的成员都变成私有的。其实，只有当同一个包内的另一个类真正需要访问一个成员的时候，才应该删除private修饰符，使该成员变成包级私有的。如果你发现自己经常要做这样的事情，就应该重要检查你的系统设计，看看是否另一种分解方案所得到的类，与其他类之间的耦合度会更小。也就是说，私有成员和包级私有成员都是一个类的实现中的一部分，一般不会影响它的导出的API。然而，如果这个类实现了Serializable接口（见第74条和第75条），这些域就可能被“泄露（leak）”到导出的API中。
+
+对于公有类的成员当访问级别从包级私有变成保护级别时，会大大增强可访问性。受保护的成员是类的导出的API的一部分，必须永远得到支持。导出的类的受保护成员也代表了该类对于某个实现细节的公开承诺（见第17条）。受保护的成员应该尽量少用。
+
+有一条规则限制了降低方法的可访问性的能力。如果方法覆盖了超类中的一个方法，子类中的访问级别就不允许低于超类中的访问级别。这样可以确保任何可使用超类的实例的地方也都可以使用子类的实例。如果违反了这条规则，那试图编译该子类的时候，编译器就会产生一条错误消息。这条规则有种特殊的情形：如果一个类实现了一个接口，那么接口中所有的类方法在这个类中也都必须被声明为公有的。之所以如此，是因为接口中的所有方法都隐含着公有访问级别。
+
+为了便于测试，可以试着使类、接口或者成员变得更容易访问。这么做在一定程度上来说是好的。为了测试而将一个公有类的私有成员变成包级私有的，这还可以接受，但是要将访问级别提高到超过它，这就无法接受了。换句话说，不能为了测试，而将类、接口或者成员变成包的导出的API的一部分。幸运的是，也没有必要这么做，因为可以让测试作为被测试的包的一部分来运行，从而能够访问它的包级私有的元素。
+
+实例域决不能是公有的（见第14条）。如果域是非final的，或者是一个指向可变对象的final引用，那么一旦使这个域成为公有的，就放弃了对存储在这个域中的值进行限制的能力；这意味着，你也放弃了强制这个域不可变的能力。同时，当这个域被修改的时候，你也失去了对它采取任何行动的能力。因此，包含公有可变域的类并不是线程安全的。即便域是final的，并且引用不可变的对象，当把这个域变成公有的时候，也就放弃了“切换到一种新的内部数据表示法”的灵活性。
+
+同样的建议也适用于静态域，只是有一种例外情况。假设常量构成了类提供的整个抽象中的一部分，可以通过公有的静态final域来暴露这些常量。按惯例，这种域的名称由大写字母组成，单词之间用下划线隔开（见第56条）。很重要的一点是，这些域要么包含基本类型的值，要么包含指向不可变对象的引用（见第15条）。如果final域包含可变对象的引用 ，它便具有非final域的所有缺点。虽然引用本身不能被修改，但是它所引用的对象却可以被修改——这会导致灾难性的后果。
+
+长度非零的数组总是可变的，所以，类具有公有的静态final数组域，或者返回这种域的访问方法，这几乎总是错误的。如果类具有这样的域或者访问方法，客户端将能够修改数组中的内容。这是安全漏洞的一个常见根源：
+// Potential security hole!
+public static final Thing[] VALUES = {...};
+
+要注意，许多IDE会产生返回指向私有数组域的引用的访问方法，这样就会产生这个问题。修改这个问题有两种方法。可以使用公有数组变成私有的，并增加一个公有的不可变列表：
+private static final Thing[] PRIVATE_VALUES = {...};
+public static final List<Thins> VALUES = Collections.unmodifiableList(Arrays.asList(PRIVATE_VALUES));
+
+另一种方法是，可以使数组变成私有的，并添加一个公有方法，它返回私有数组的一个备份：
+private static final Thing[] PRIVATE_VALUES = {...};
+public static final Thing[] values() {
+    return PRIVATE_VALUES.clone();
+}
+
+要在这两种方法之间做出选择，得考虑客户端可能怎么处理这个结果。哪种返回类型更加方法，哪种会得到更好的性能。
+
+总而言之，应该始终尽可能地降低可访问性。在仔细地设计了一个最小的公有API之后，应该防止把任何散乱的类、接口和成员变成API的一部分。除了公有静态final域特殊情形之外，公有类都不应该包含公有域。并且要确保公有静态final域所引用的对象都是不可变的。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第14条：在公有类中使用访问方法而非公有域 P62
+对于公有类，坚持面向对象程序设计思想的看法是正确的：如果类可以在它所在的包的外部进行访问，就提供访问方法，以保留将来改变该类的内部表示法的灵活性。如果公有类暴露了它的数据域，要想在将来改变其内部表示法是不可能的，因为公有类的客户端代码已经遍布各处了。
+
+然而，如果类是包级私有的，或者是私有的嵌套类，直接暴露它的数据域并没有本质的错误——假设这些数据域确实描述了该类所提供的抽象。这种方法比访问方法的做法更不会产生视觉混乱，无论是在类定义中，还是在使用该类的客户端代码中。虽然客户端代码与该类的内部表示法紧密相连，但是这些代码被限定在包含该类的包中。如有必要，不改变包之外的任何代码而只改变内部数据表示法也是可以的。在私有嵌套类的情况下，改变的作用范围被进一步限制在外围类中。
+
+Java平台类库中有几个类违反了“公有类不应该直接暴露数据域”的告诫。显著的例子包括java.awt包中的Point和Dimension类。它们是反面的示例。如第55条中所述，决定暴露Dimension类的内部数据等成了严重的性能问题，而且，这个问题至今依然存在。
+
+让公有类直接暴露域从来都不是种好办法，但是如果域是不可变的，这种做法的危害就比较小一些。如果不改变类的API，就无法改变这种类的表示法，当域被读取的时候，也无法采取辅助的行动，但是可以强加约束条件。如，这个类确保了每个实例都表示一个有效的时间：
+// Public class with exposed immutable fields - questionable
+public final class Time {
+    private static final int HOURS_PER_DAY = 24;
+    private static final int MINUTES_PER_HOUR = 60;
+    
+    public final int hour;
+    public final int minute;
+    
+    public Time(int hour, int minute) {
+        if (hour < 0 || hour >= HOURS_PER_DAY) {
+            throw new IllegalArgumentException("Hour: " + hour);
+        }
+        if (minute < 0 || minute >= MINUTES_PER_HOUR) {
+            throw new IlleagalArgumentException("Min: " + minute);
+        }
+        this.hour = hour;
+        this.minute = minute;
+    }
+    
+    // Remainder omitted
+}
+
+总之，公有类永远都不应该暴露可变的域。虽然还是有问题，但是让公有类暴露不可变的域其危害比较小。但是有时候会需要用包级私有的或者私有的嵌套类来暴露域，无论这个类是可变还是不可变的。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第15条：使可变性最小化 P58
+不可变类只是其实例不能被修改的类。每个实例中包含的所有信息都必须在创建该实例的时候就提供，并在对象的整个生命周期（lifetime）内固定不变。Java平台类库中包含许多不可变的类，其中有String、基本类型的包装类、BigInteger和BigDecimal。存在不可变的类有许多理由：不可变的类比可变类更加易于设计、实现和使用。它们不容易出错，且更加安全。
+
+为了使类成为不可变，要遵循下面五条规则：
+1. 不要提供任何会修改对象状态的方法（也称为mutator）。
+2. 保证类不会被扩展。这样可以防止粗心或者恶意的子类假装对象的状态已经改变，从而破坏该类的不可变行为。为了防止子类化，一般做法是使这个类成为final的，后面讨论其他的做法。
+3. 使所有的域都是final的。通过系统的强制方式，这可以清楚地表明意图。而且，如果一个指向新创建实例的引用在缺乏同步机制的情况下，从一个线程被传递到另一个线程，就必须确保正确的行为，正如内存模型中所述。
+4. 使所有的域都成为私有的。这样可以防止客户端获得访问被域引用的可变对象的权限，并防止客户端直接修改这些对象。虽然从技术上讲，允许不可变的类具有公有的final域，只要这些域包含基本类型的值或者指向不可变对象的引用，但是不建议这样做，因为这样会使得在以后的版本中无法再改变内部的表示法（见第13条）。
+5. 确认对于任何可变组件的互斥访问。如果类具有指向可变对象的域，则必须确保该类的客户端无法获得指向这些对象的引用。并且，永远不要用客户端提供的对象引用来初始化这样的域，也不要从任何访问方法（accessor）中返回该对象引用。在构造器、访问方法和readObject方法（见第76条）中请使用保护性拷贝（defensive copy）技术（见第39条）。
+
+前面条目中许多例子都是不可变的，其中一个例子是第9条中的PhoneNumber，它针对每个属性都有访问方法（accessor），但是没有对应的设值方法（mutator）。下面是个稍微复杂的例子：
+//
+package test;
+
+public final class Complex {
+    private final double re;
+    private final double im;
+
+    public Complex(double re, double im) {
+        this.re = re;
+        this.im = im;
+    }
+
+    public double realPart() {
+        return re;
+    }
+
+    public double imaginaryPart() {
+        return im;
+    }
+
+    public Complex add(Complex c) {
+        return new Complex(re + c.re, im + c.im);
+    }
+
+    public Complex substract(Complex c) {
+        return new Complex(re - c.re, im - c.im);
+    }
+
+    public Complex multiply(Complex c) {
+        return new Complex(re * c.re - im * c.im,
+            re * c.im + im * c.re);
+    }
+
+    public Complex divide(Complex c) {
+        double tmp = c.re * c.re + c.im * c.im;
+        return new Complex((re * c.re + im * c.im) / tmp,
+            (im * c.re - re * c.im) / tmp);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof Complex)) {
+            return false;
+        }
+
+        Complex c = (Complex) o;
+
+        // See page 43 to find out why we use compare instead of ==. See the 12th Instruction.
+        return Double.compare(re, c.re) == 0 &&
+            Double.compare(im, c.im) == 0;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17 + hashDouble(re);
+        result = 31 * result + hashDouble(im);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + re + " + " + im + "i)";
+    }
+
+    private int hashDouble(double val) {
+        long longBits = Double.doubleToLongBits(val);
+        return (int) (longBits ^ (longBits >>> 32));
+    }
+}
+
+这个类表示一个复数（complex number，具有实部和虚部）。除了标准的Object方法，还提供了针对实部和虚部的访问方法，以及4种基本的算术运算：加法、减法、乘法和除法。
+注意这些算法运算是如何创建并返回新的Complex实例，而不是修改这个实例。大多数重要的不可变类都使用了这种模式。它被称为函数的（functional）做法，因为这引起方法返回了一个函数的结果，这些函数对操作数进行运行但不修改它。与之相对应的更常见的是过程的（procedural）或者命令式的（imperative）做法，使用这些方式时，将一个过程作用在它们的操作数上，会导致它的状态发生改变。
+
+函数方式做法带来了不可变性，具有许多优点。不可变对象比较简单。不可变对象可以只有一种状态，即被创建时的状态。如果能够确保所有的构造器都建立了这个类的约束方法，就可以确保这些约束关系在整个生命周期内永远不再发生变化，你和使用这个类的程序员都无需再做额外的工作来维护这些约束关系。另一方法，可变的对象可以有任意复杂的状态空间。如果文档中没有对mutator方法所执行的状态转换提供精确的描述，要可靠地使用一个可变类是非常困难的，甚至是不可能的。
+
+不可变对象本质上是线程安全的，它们不要求同步。当多个线程并发访问这样的对象时，它们不会遭到破坏。这是获得线程安全最容易的方法。实际上，没有任何线程会注意到其他线程对于不可变对象的影响。所以，不可变对象可以被自由地共享。不可变类应该充分利用这种优势，鼓励客户端尽可能地重用现有的实例。要做到这一点，一个很简便的办法就是，对于频繁用到的值，为它们提供公有的静态final常量。如，Complex类可能会提供下面的常量：
+public static final Complex ZERO = new Complex(0, 0);
+public static final Complex ONE = new Complex(1, 0);
+public static final Complex I = new Complex(0, 1);
+
+这种方法可以被进一步扩展。不可变的类可以提供一些静态工厂（见第1条），它们把频繁被请求的实例缓存起来，从而当现在实例可以符合请求的时候，就不必创建新的实例。所有基本类型的包装类和BigInteger都有这样的静态工厂。使用这样的静态工厂也复合客户端之间可以共享现在的实例，而不用创建新的实例，从而降低内存占用和垃圾回收的成本。在设计新的类时，选择用静态工厂代替公有的构造器可以让你以后有添加缓存的灵活性，而不必影响客户端。
+
+“不可变对象可以被自由地共享”导致的结果是，永远也不需要进行保护性拷贝（见第39条）。实际上，根本无需做任何拷贝，这些拷贝始终等于原始的对象。因为，不需要，也不应该为不可变的类提供clone方法或者拷贝构造器（copy constructor，见第11条）。这一点在Java平台的早期并不好理解，所以String类仍然具有拷贝构造器，但是应该尽量少用它（见第5条）。
+
+不仅可以共享不可变对象，甚至也可以共享它们的内部信息。例如，BigInteger类内部使用了符号数值表示法。符号用一个int类型的值来表示，数值则用一个int数组表示。negate方法产生一个新的BigInteger，其中数值是一样的，符号则是相反的。它并不需要拷贝数组；新建的BigInteger也指向原始实例中的同一个内部数组。
+
+不可变对象为其他对象提供了大量的构造（building blocks），无论是可变的还是不可变的对象。如果知道一个复杂对象内部的组件对象不会改变，要维护它的不变性约束是比较容易的。这条原则的一种特例在于，不可变对象构成了大量的映射键（map key）和集合元素（set element）；一旦不可变对象进入到映射（map）或者集合（set）中，尽管这破坏了映射或者集合的不变性约束，但是也不用担心它们的值会发生变化。（没看懂？？）
+
+不可变类真正唯一的缺点是，对于每个不同的值都需要一个单独的对象。创建这种对象的代价可能很高，特别是对于大型对象的情形。如，假设你有一个上百万位的BigInteger，想要改变它的低位：
+BigInteger moby = ...;
+moby = moby.flipBit(0);
+
+flipBit方法创建了一个新的BigInteger实例，也有上百万位长，它与原来的对象只差一位不同。这项操作所消耗的时间和空间与BigInteger的长度成正比。拿它与java.util.BitSet进行比较。与BigInteger类似，BigSet代表一个任意长度的位序列，但是与BigInteger不同的是，BitSet是可变的。BitSet类提供了一个方法，允许在固定时间（constant time）内改变此“百万位”实例中单个位的状态。
+
+BigInteger有一个包级私有的可变“配套类（companing class）”，它的用途是加速诸如“模指数（modular exponentiation）”这样的多步骤操作。由于前面提到的诸多原因，使用可变的配套类比使用BigInteger要困难得多，但幸运的是，并不需要这样做。因为BigInteger的实现者已经替你完成了所有的困难工作。
+
+如果能够精确地预测出客户端将要在不可变的类上执行哪些复杂的多阶段操作，这种包级私有的可变配套类的方法可以工作得很好。如果无法预测，最好的办法就是提供一个公有的可变配套类。在Java平台类库中，这种方法的主要例子是String类，它的可变配套类是StringBuilder（不是线程安全的，单线程使用速度快）（和基本上已经废弃的StringBuffer，线程安全的）。可以这样认为，在特定的环境下，相对于BigInteger而言，BitSet同样扮演了可变配套类的角色。
+
+为了确保不可变性，类绝对不允许自身被子类化。除了“使类成为final的”这种方法之外，还有另外一种更加灵活的办法可以做到这一点。让不可变的类变成final的另一种办法就是，让类的所有构造器都变成私有的或者包级私有的，并添加公有的静态工厂（static factory）来代替公有的构造器（见第1条）。
+
+以Complex为例：
+// Immutable class with static factories instead of constructors
+public class Complex {
+    private final double re;
+    private final double im;
+
+    private Complex(double re, double im) {
+        this.re = re;
+        this.im = im;
+    }
+    
+    public static Complex valueOf(double re, double im) {
+        return new Complex(re, im);
+    }
+    
+    // Remainder unchanged
+}
+
+虽然这种方法并不常用，但它经常是最好的替代方法。它最灵活，因为它允许使用多个包级私有的实现类。对于处在它的包外部的客户端而言，不可变的类实际上是final的，因为不可能把来自另一个包的类、缺省公有的或受保护的构造器的类进行扩展。除了允许多个实现类的灵活性之外，这种方法还使得有可能通过改善静态工厂的对象的缓存能力，在后续的发行版本中改进该类的性能。
+
+静态工厂与构造器相比具有许多其他的优势，如第1条中所讨论的。如，假设希望提供一种“基于极坐标创建复数”的方式。如果使用构造器来实现这样的功能，可能会使得这个类很零乱，因为这样的构造器与已用的构造器Complex(double, double)具有相同的签名。通过静态工厂，这很容易做到。只需添加第二个静态工厂，并且工厂的名字清楚地表明了它的功能即可：
+public static Complex valueOfPolar(double r, double theta) {
+    return new Complex(r * Math.cos(theta), r * Math.sin(theta));
+}
+
+当BigInteger和BIgDecimal刚被编写出来的时候，对于“不可变的类必须为final的”还没有得到广泛地理解，所以它们的所有方法都有可能会被覆盖。遗憾的是，为了保持向后兼容，这个问题地直无法得以修正。如果在编写一个类，它的安全性依赖于（来自不可信客户端的）BigInteger或者BigDecimal参数的不可变性，就必须进行检查，以确定这个参数是否为“真正的”BigInteger或者BigDecimal，而不是不可信任子类的实例。如果是后者的话，就必须在假设它可能是可变的前提下对它进行保护性拷贝（见第39条）：
+public static BigInteger safeInstance(BigInteger val) {
+    if (val.getClass() != BigInteger.class) {
+        return new BigInteger(val.toByteArray());
+    }
+    return val;
+}
+
+本条目形状处关于不可变类的诸多规则指出：没有方法会修改对象，并且它的所有域都必须是final的。实际上，这些规则比真正的要求更强硬了一点，为了提供性能可以有所放松。事实上应该：没有一个方法能够对对象的状态产生外部可见（externally visible）的改变。然而，许多不可变的类拥有一个或者多个非final的域，它们在第一次被请求执行这些计算的时候，把一些开销昂贵的计算结果缓存在这些域中。如果将来再次请求同样的计算，就直接返回这些缓存的值，从而节约了重新计算所需要的开销。这种技巧可以很好的工作，因为对象是不可变的，它的不可变性保持了这些计算如果被再次执行，就会产生同样的结果。
+如，PhoneNumber类的hashCode方法（见第9条）在第一次被调用的时候，计算出散列码，然后把它缓存起来，以备将来被再次调用时使用。这种方法是延迟初始化（lazy initialization）（见第71条）的一个例子，String类也用到了。
+
+有关序列化功能的一条告诫有必要在这里提出来。如果选择让自己的不可变类实现Serializable接口，并且它包含一个或者多个指向可变对象的域，就必须提供一个显式的readObject或者readResolve方法，或者使用ObjectOutputStream.writeUnshared和ObjectInputStream.readUnshared方法，即便默认的序列化形式是可以接受的，也是如此。否则攻击者可能从不可变的类创建可变的实例。这个话题的详细内容请参见第76条。
+
+总之，坚决不要为每个get方法编写一个相应的set方法。除非有很好的理由要让类成为可变的类，否则就应该是不可变的。不可变的类有许多优点，唯一缺点是在特定的情况下存在潜在的性能问题。应该问题使一些小的值对象，比如PhoneNumber和Complex，成为不可变的（在Java平台类库中，有几个类如java.util.Date和java.awt.Point，它们本应该是不可变的，但实际上却不是）。也应该认真考虑把一些较大的值对象做成不可变的，如String和BigInteger。只能当确认有必要实现令人满意的性能时（见第55条），才应该为不可变的类提供公有的可变配套类。
+
+对于有些类而言，其不可变性是不切实际的。如果类不能被做成是不可变的，仍然应该尽可能地限制它的可变性。降低对象可以存在的状态数，可以更容易地分析该对象的行为，同时降低出错的可能性。因此，除非有令人信服的理由要使域变成是非final的，否则要使每个域都是final。
+
+构造器应该创建完全初始化的对象，并建立起所有的约束关系。不要在构造器或者静态工厂之外再提供公有的初始化方法，除非有令人信服的理由必须这么做。同样的，也不应该提供“重新初始化”方法（它使得对象可以被重用，就好像这个对象是由另一不同的初始状态构造出来一样）。与所增加的复杂性相比，“重新初始化”方法通常并没有带来太多的性能优势。
+
+可以通过TimerTask类来说明这些原则。它是可变的，但是它的状态空间被有意地设计得非常小。你可以创建一个实例，对它进行调度使它执行起来，也可以随意地取消它。一旦一个定时器任务（timer task）已经完成，或者已经被取消，就不可能再对它重新调度。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第16条：复合优先于继承 P71
+继承（inheritance）是实现代码重用的有力手段，但它并非永远是完成这项工作的最佳工具。使用不当会导致软件变得很脆弱。在包的内部使用继承是非常安全的，在那里，子类和超类的实现都处在同一个程序员的控制之下。对于专门为了继承而设计、并且具有很好的文档说明的类来说（见第17条），使用继承也是非常安全的。然而，对普通的具体类（concrete class）进行跨越包边界的继承，则是非常危险的。本书使用“继承”一词，含义是实现继承（implementation inheritance，当一个类扩展另一个类的时候）。本条目中讨论的问题并不适用于接口继承（interface inheritance，当一个类实现一个接口的时候，或者当一个接口扩展另一个接口的时候）。
+
+与方法调用不同的是，继承打破了封装性。子类依赖于其超类的特定功能的实现细节。超类的实现有可能会随着发行版本的同不而有所变化，如果真的发生了变化，子类可能会遭到破坏，即便它的代码完全没有改变。因而，子类必须要跟着其超类的更新而演变，除非超类是专门为了扩展而设计的，并且具有很好的文档说明。
+
+为了明说具体，假设有一个程序使用了HashSet。为了调优该程序的性能，需要查询HashSet，看一看自从它被创建以来曾经添加了多少个元素（不要与它当前的元素混淆起来，元素数目会随着元素的删除而递减）。为了提供这种功能，我们得编写一个HashSet变量，它记录下试图插入的元素数量，并针对该计数值导出一个访问方法。HashSet类包含两个可以增加元素的方法：add和addAll，因此两个方法都要覆盖：
+//
+package test;
+
+import java.util.Collection;
+import java.util.HashSet;
+
+// Broken - Inappropriate use of inheritance!
+public class InstrumentedHashSet<E> extends HashSet<E> {
+    // The number of attempted element insertions
+    private int addCount = 0;
+
+    public InstrumentedHashSet() {
+
+    }
+
+    public InstrumentedHashSet(int initialCapacity, float loadFactor) {
+        super(initialCapacity, loadFactor);
+    }
+
+    @Override
+    public boolean add(E e) {
+        ++addCount;
+        return super.add(e);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        addCount += c.size();
+        return super.addAll(c);
+    }
+
+    public int getAddCount() {
+        return addCount;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.*;
+
+public class InstrumentedHashSetTest {
+    @Test
+    public void testAddAll() {
+        InstrumentedHashSet<String> s = new InstrumentedHashSet<>();
+        s.addAll(Arrays.asList("hello", "world", "good"));
+        assertEquals(3, s.getAddCount());
+    }
+}
+结果：
+java.lang.AssertionError: 
+Expected :3
+Actual   :6
+
+这个类看起来非常合理，但它并不能正常工作。
+我们期望getAddCount方法将会返回3，实际上返回6。HashSet内部，addAll方法是基于它的add方法来实现的，即便HashSet方法中并没有说明这样的实现细节，这也是合理的。
+
+只要去掉被覆盖的addAll方法，就可以“修正”这个子类。虽然这样得到的类可以正常工作，但是它的功能正确性则需要依赖于这样的事实：HashSet的addAll方法是在它的add方法上实现的。这种“自用性（self-use）”是实现细节，不是承诺，不能保证在Java平台的所有实现中都保持不变，不能保证随着发行版本的不同而不发生变化。因此，这样得到的InstrumentedHashSet类将是非常脆弱的。
+
+稍微好一点的做法是，覆盖addAll方法来遍历指定的集合，为每个元素调用一次add方法。这样做可以保证得到正确的结果，不管HashSet的addAll方法是否是在add方法的基础上实现，因为HashSet的addAll实现将不会再被调用到。然而，这项技术并没有解决所有的问题，它相当于重新实现了超类的方法，这些超类的方法可能是自用的（self-use），也可能不是自用的，这种方法很困难，也非常耗时，并且容易出错。
+
+导致子类脆弱的一个相关的原因是，它们的超类在后续的发行版本中可以获得新的方法。假设一个程序的安全性依赖于这样的事实：所有被插入到某个集合中的元素都满足某个先决条件。下面的做法就可以确保这一点：对集合进行子类化，并覆盖所有能够添加元素的方法，以便 确保在加入每个元素之前它是满足这个先决条件的。如果在后续的发行版本中，超类中没有增加能够插入元素的新方法，这种做法就可以正常工作。然而，一旦超类增加了这样的新方法，则很可能仅仅由于调用了这个未被子类覆盖的新方法，而将“非法的”元素添加到子类的实例。
+
+上面两个问题都来源于覆盖（overriding）动作。如果在扩展一个类的时候，仅仅是增加新的方法，而不覆盖现有的方法。虽然这种扩展方式比较安全一些，但是也并非完全没有风险。如果超类在后续的发行版本中获得了一个新的方法，并且不幸的是，你给子类提供了一个签名相同但返回类型不同的方法，那么这样的子类将无法通过编译。如果给子类提供的方法带有与新的超类方法完全相同的签名和返回类型，实际上就覆盖了超类中的方法，因此又回到上述的两个问题上去了。此外，你的方法是否能够遵守新的超类方法的约定，也是很值得怀疑的，因为当你在编写子类方法的时候，这个约定根本8没有面世。
+
+有一种方法可以避免前面提到的所有问题。不用扩展现有的类，而是在新的类中增加一个私有域，它引用现有类的一个实例。这种设计被称做“复合（composition）”，因为现有的类变成了新类的一个组件。新类中的每个实例方法都可以调用被包含的现有类实例中对应的方法，并返回它的结果。这被称为转发（forwarding），新类中的方法被称为转发方法（forwarding method）。这样得到的类将会非常稳固，它不依赖于现有类的实现细节。即便现有的类添加了新的方法，也不会影响新的类。请看下面例子，它用复合/转发的方法来代替InstrumentedHashSet类。这个实现分为两部分：类本身和可重用的转发类（forwarding class），包含了所有的转发方法，没有其他方法：
+//ForwardingSet
+package test;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+//装饰模式
+public class ForwardingSet<E> implements Set<E> {
+    private final Set<E> s;
+
+    public ForwardingSet(Set<E> s) {
+        this.s = s;
+    }
+
+    @Override
+    public int hashCode() {
+        return s.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return s.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return s.toString();
+    }
+
+    @Override
+    public int size() {
+        return s.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return s.isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return s.contains(o);
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return s.iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return s.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return s.toArray(a);
+    }
+
+    @Override
+    public boolean add(E e) {
+        return s.add(e);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return s.remove(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return s.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        return s.addAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return s.retainAll(c);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return s.removeAll(c);
+    }
+
+    @Override
+    public void clear() {
+        s.clear();
+    }
+}
+
+//InstrumentedSet
+package test;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+// Wrapper class - uses composition in place of inheritance
+public class InstrumentedSet<E> extends ForwardingSet<E> {
+    private int addCount = 0;
+
+    public InstrumentedSet(Set<E> s) {
+        super(s);
+    }
+
+    @Override
+    public boolean add(E e) {
+        ++addCount;
+        return super.add(e);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        addCount += c.size();
+        return super.addAll(c);
+    }
+
+    public int getAddCount() {
+        return addCount;
+    }
+}
+
+//测试类
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+
+import static org.junit.Assert.*;
+
+public class InstrumentedSetTest {
+    @Test
+    public void testAddAll() {
+        InstrumentedSet<String> s = new InstrumentedSet<>(new HashSet<String>());//InstrumentedSet<String> s = new InstrumentedSet<>(new HashSet<>());，这里HashSet<>如果不写明String类型，报错Error:(13, 37) java: 不兼容的类型: test.InstrumentedSet<java.lang.Object>无法转换为test.InstrumentedSet<java.lang.String>，为什么不能自动识别？我理解的类型自动识别是只对当前new类型的，而不能对构造函数中的未知入参类型识别
+        s.addAll(Arrays.asList("hello", "world", "good"));
+        assertEquals(3, s.getAddCount());
+    }
+}
+测试通过
 
 //------------------------------------------------------------------------------------------------
 
