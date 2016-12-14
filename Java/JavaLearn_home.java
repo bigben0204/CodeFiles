@@ -1,4 +1,1449 @@
 //------------------------------------------------------------------------------------------------
+//3n+1实现
+package test;
+
+//import java.util.stream.Stream;
+
+public class OneTransformer {
+    private static final int MAX_INPUT_NUMBER = 1000000;
+    private static final int MIN_INPUT_NUMBER = 0;
+    private static final int INVALID_INPUT = -1;
+
+    public static int getMaxStepsOfTransformingToOne(int number1, int number2) {
+        if (checkInputInvalid(number1) || checkInputInvalid(number2)) {
+            return INVALID_INPUT;
+        }
+
+        int stepsOfTransformingToOne1 = getStepsOfTransformingToOne(number1);
+        int stepsOfTransformingToOne2 = getStepsOfTransformingToOne(number2);
+        return Integer.max(stepsOfTransformingToOne1, stepsOfTransformingToOne2);
+    }
+
+    private static int getStepsOfTransformingToOne(int number) {
+        int steps = 0;
+        while (number != 1) {
+            ++steps;
+            if (number % 2 == 0) {
+                number /= 2;
+            } else {
+                number = 3 * number + 1;
+            }
+        }
+        
+        return steps;
+        
+        // int steps = (int) Stream.iterate(number, current -> {
+            // if (current == 1) {
+                // return 0;
+            // }
+
+            // if (current % 2 == 0) {
+                // return current / 2;
+            // }
+
+            // return 3 * current + 1;
+        // }).limit(100).filter(i -> i > 0).count();//这里实现得不好，没办法在得到1时终止操作，只能遍历到第100个元素结束
+
+        // return steps - 1;
+    }
+
+    private static boolean checkInputInvalid(int number) {
+        if (number >= MAX_INPUT_NUMBER || number <= MIN_INPUT_NUMBER) {
+            return true;
+        }
+        return false;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class OneTransformerTest {
+    @Test
+    public void testOneTransformerOfInput_five() {
+        assertEquals(5, OneTransformer.getMaxStepsOfTransformingToOne(5, 2));
+    }
+}
+//------------------------------------------------------------------------------------------------
+//Java8 Stream API
+http://www.liaoxuefeng.com/article/001411309538536a1455df20d284b81a7bfa2f91db0f223000
+
+Java 8 引入了全新的Stream API。这里的Stream和I/O流不同，它更像具有Iterable的集合类，但行为和集合类又有所不同。
+Stream API引入的目的在于弥补Java函数式编程的缺陷。对于很多支持函数式编程的语言，map()、reduce()基本上都内置到语言的标准库中了，不过，Java 8的Stream API总体来讲仍然是非常完善和强大，足以用很少的代码完成许多复杂的功能。
+创建一个Stream有很多方法，最简单的方法是把一个Collection变成Stream。我们来看最基本的几个操作：
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testStream() {
+        List<Integer> integers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Stream<Integer> integerStream = integers.stream();
+        integerStream.filter(i -> i % 2 == 0)
+            .map(i -> i * i)
+            .limit(3) //取流中的前3个
+            .forEach(System.out::println);
+    }
+}
+输出：
+4
+16
+36
+//-----
+为什么不在集合类实现这些操作，而是定义了全新的Stream API？Oracle官方给出了几个重要原因：
+一是集合类持有的所有元素都是存储在内存中的，非常巨大的集合类会占用大量的内存，而Stream的元素却是在访问的时候才被计算出来，这种“延迟计算”的特性有点类似Clojure的lazy-seq，占用内存很少。
+二是集合类的迭代逻辑是调用者负责，通常是for循环，而Stream的迭代是隐含在对Stream的各种操作中，例如map()。
+
+要理解“延迟计算”，不妨创建一个无穷大小的Stream。
+如果要表示自然数集合，显然用集合类是不可能实现的，因为自然数有无穷多个。但是Stream可以做到。
+自然数集合的规则非常简单，每个元素都是前一个元素的值+1 ，因此，自然数发生器用代码实现如下：
+//
+package test;
+
+import java.util.function.Supplier;
+
+public class NaturalSupplier implements Supplier<Long> {
+    private long l = 0;
+
+    @Override
+    public Long get() {
+        return ++l;
+    }
+}
+
+反复调用get()，将得到一个无穷数列，利用这个Supplier，可以创建一个无穷的Stream：
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testNaturalSupplier() {
+        Stream<Long> naturals = Stream.generate(new NaturalSupplier());
+        naturals.map(l -> l * l)
+            .limit(10)
+            .forEach(System.out::println);
+    }
+}
+输出：
+1
+4
+9
+16
+25
+36
+49
+64
+81
+100
+
+对这个Stream做任何map()、filter()等操作都是完全可以的，这说明Stream API对Stream进行转换并生成一个新的Stream并非实时计算，而是做了延迟计算。
+当然，对这个无穷的Stream不能直接调用forEach()，这样会无限打印下去。但是我们可以利用limit()变换，把这个无穷Stream变换为有限的Stream。
+//-----
+利用Stream API，可以设计更加简单的数据接口。例如，生成斐波那契数列，完全可以用一个无穷流表示（受限Java的long型大小，可以改为BigInteger）：
+//
+package test;
+
+import java.util.function.Supplier;
+
+public class FibonacciSupplier implements Supplier<Long> {
+    private long a = 0;
+    private long b = 1;
+
+    @Override
+    public Long get() {
+        long x = a + b;
+        a = b;
+        b = x;
+        return x;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testFibonacciSupplier() {
+        Stream<Long> fibonacci  = Stream.generate(new FibonacciSupplier());
+        fibonacci.limit(10)
+            .forEach(System.out::println);
+    }
+}
+输出：
+1
+2
+3
+5
+8
+13
+21
+34
+55
+89
+
+如果想取得数列的前10项，用limit(10)，如果想取得数列的第20~30 项，用：
+List<Long> list = fibonacci.skip(20).limit(10).collect(Collectors.toList());
+最后通过collect()方法把Stream变为List。该List存储的所有元素就已经是计算出的确定的元素了。
+用Stream表示Fibonacci数列，其接口比任何其他接口定义都要来得简单灵活并且高效。
+
+//-----
+计算π可以利用π的展开式：
+π/4 = 1 - 1/3 + 1/5 - 1/7 + 1/9 - ...
+把π表示为一个无穷Stream如下：
+//
+package test;
+
+import java.util.function.Supplier;
+
+public class PiSupplier implements Supplier<Double> {
+    private double sum = 0.0;
+    private double current = 1.0;
+    private boolean sign = true;
+
+    @Override
+    public Double get() {
+        sum += (sign ? 4 : -4) / current;
+        current += 2.0;
+        sign = !sign;
+        return sum;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testPiSupplier() {
+        Stream<Double> piStream  = Stream.generate(new PiSupplier());
+        piStream.skip(10000).limit(10).forEach(System.out::println); //跳过前1000项，显示10个，可以把pi值确定在3.1416和3.1414之间
+    }
+}
+输出：
+3.1416926435905346
+3.1414926735860353
+3.1416926235985323
+3.141492693574041
+3.1416926036145227
+3.141492713554056
+3.141692583638501
+3.141492733526085
+3.1416925636704622
+3.1414927534901333
+
+这个级数从100项开始可以把π的值精确到3.13~3.15 之间：
+3.1514934010709914
+3.1317889675734545
+3.1513011626954057
+3.131977491197821
+3.1511162471786824
+3.1321589012071183
+3.150938243930123
+3.132333592767332
+3.1507667724908344
+3.1325019323081857
+//-----
+利用欧拉变换对级数进行加速，可以利用下面的公式：
+
+用代码实现就是把一个流变成另一个流：
+//
+package test;
+
+import java.util.function.Function;
+
+public class EulerTransform implements Function<Double, Double> {
+    private double n1 = 0.0;
+    private double n2 = 0.0;
+    private double n3 = 0.0;
+
+    @Override
+    public Double apply(Double t) {
+        n1 = n2;
+        n2 = n3;
+        n3 = t;
+        if (n1 == 0.0) {
+            return 0.0;
+        }
+        return calc();
+    }
+
+    private Double calc() {
+        double d = n3 - n2;
+        return n3 - d * d / (n1 - 2 * n2 + n3);
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testPiSupplier() {
+        Stream<Double> piStream  = Stream.generate(new PiSupplier());
+        piStream.map(new EulerTransform()).skip(10).limit(10).forEach(System.out::println);
+    }
+}
+输出：
+3.1418396189294033
+3.141406718496503
+3.1417360992606667
+3.1414796890042562
+3.1416831892077566
+3.1415189855952774
+3.141653394197428
+3.1415419859977844
+3.14163535667939
+3.141556330284574
+
+可以在10项之内把π的值计算到3.141~3.142 之间：
+
+0.0
+0.0
+3.166666666666667
+3.1333333333333337
+3.1452380952380956
+3.13968253968254
+3.1427128427128435
+3.1408813408813416
+3.142071817071818
+3.1412548236077655
+
+还可以多次应用这个加速器：
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testPiSupplier() {
+        Stream<Double> piStream  = Stream.generate(new PiSupplier());
+        piStream.map(new EulerTransform())
+            .map(new EulerTransform())
+            .map(new EulerTransform())
+            .map(new EulerTransform())
+            .map(new EulerTransform())
+            .limit(20)
+            .forEach(System.out::println);
+    }
+}
+
+20 项之内可以计算出极其精确的值：
+...
+3.14159265359053
+3.1415926535894667
+3.141592653589949
+3.141592653589719
+
+可见用Stream API可以写出多么简洁的代码，用其他的模型也可以写出来，但是代码会非常复杂。
+//------------------------------------------------------------------------------------------------
+//Java 8 中的 Streams API 详解
+http://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/
+Stream API 借助于同样新出现的 Lambda 表达式，极大的提高编程效率和程序可读性。同时它提供串行和并行两种模式进行汇聚操作，并发模式能够充分利用多核处理器的优势，使用 fork/join 并行方式来拆分任务和加速处理过程。通常编写并行代码很难而且容易出错, 但使用 Stream API 无需编写一行多线程的代码，就可以很方便地写出高性能的并发程序。所以说，Java 8 中首次出现的 java.util.stream 是一个函数式语言+多核时代综合影响的产物。
+//清单 1. Java 7 的排序、取值实现
+
+//而在 Java 8 使用 Stream，代码更加简洁易读；而且使用并发模式，程序执行速度更快。
+//清单 2. Java 8 的排序、取值实现
+package test;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
+import static org.junit.Assert.assertEquals;
+
+public class StreamTest {
+
+    private static List<Cat> cats;
+    private static Cat cat2;
+    private static Cat cat3;
+    private static Cat cat1;
+    private static Cat cat4;
+
+    @BeforeClass
+    public static void before() {
+        cat1 = new Cat(1, 10, Color.WHITE);
+        cat2 = new Cat(2, 20, Color.BLACK);
+        cat3 = new Cat(3, 30, Color.BLUE);
+        cat4 = new Cat(4, 40, Color.WHITE);
+        cats = Arrays.asList(cat2, cat3, cat1, cat4);
+    }
+
+    @Test
+    public void testSort() {
+        List<Cat> someCats = new ArrayList<>();
+
+        for (Cat cat : cats) {
+            if (cat.getColor() == Color.WHITE) {
+                someCats.add(cat);
+            }
+        }
+
+        Collections.sort(someCats, new Comparator<Cat>() {
+            @Override
+            public int compare(Cat cat1, Cat cat2) {
+                return Integer.compare(cat2.getAge(), cat1.getAge());
+            }
+        });
+
+        List<Integer> catsId = new ArrayList<>();
+        for (Cat cat : someCats) {
+            catsId.add(cat.getId());
+        }
+
+        assertResult(catsId);
+    }
+
+    @Test
+    public void testSortUsingStream() {
+        List<Integer> catsId = cats.stream() //cats.parallelStream()
+            .filter(cat -> cat.getColor() == Color.WHITE)
+            .sorted(comparing(Cat::getAge).reversed())
+            .map(Cat::getId)
+            .collect(Collectors.toList());
+
+        assertResult(catsId);
+    }
+
+    private void assertResult(List<Integer> catsId) {
+        assertEquals(2, catsId.size());
+        assertEquals(Optional.of(4), Optional.ofNullable(catsId.get(0)));
+        assertEquals(Optional.of(1), Optional.ofNullable(catsId.get(1)));
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//Java Stream 使用详解
+http://www.codeceo.com/article/java-stream-usage.html
+本节翻译整理自 Javadoc ，并对流的这些特性做了进一步的解释。
+
+//-----
+Stream接口还包含几个基本类型的子接口如IntStream, LongStream 和 DoubleStream。
+
+关于流和其它集合具体的区别，可以参照下面的列表：
+--不存储数据 。流是基于数据源的对象，它本身不存储数据元素，而是通过管道将数据源的元素传递给操作。
+--函数式编程 。流的操作不会修改数据源，例如filter不会将数据源中的数据删除。
+--延迟操作 。流的很多操作如filter,map等中间操作是延迟执行的，只有到终点操作才会将操作顺序执行。
+--可以解绑 。对于无限数量的流，有些操作是可以在有限的时间完成的，比如limit(n)或findFirst()，这些操作可是实现”短路”(Short-circuiting)，访问到有限的元素后就可以返回。
+--纯消费 。流的元素只能访问一次，类似Iterator，操作没有回头路，如果你想从头重新访问流的元素，对不起，你得重新生成一个新的流。
+流的操作是以管道的方式串起来的。流管道包含一个数据源，接着包含零到N个中间操作，最后以一个终点操作结束。
+//-----
+并行 Parallelism
+所有的流操作都可以串行执行或者并行执行。除非显示地创建并行流，否则Java库中创建的都是串行流。Collection.stream()为集合创建串行流而Collection.parallelStream()为集合创建并行流。IntStream.range(int, int)创建的是串行流。通过parallel()方法可以将串行流转换成并行流,sequential()方法将流转换成并行流。
+除非方法的Javadoc中指明了方法在并行执行的时候结果是不确定(比如findAny、forEach)，否则串行和并行执行的结果应该是一样的。
+//-----
+不干涉 Non-interference
+流可以从非线程安全的集合中创建，当流的管道执行的时候，非concurrent数据源不应该被改变。下面的代码会抛出java.util.ConcurrentModificationException异常：
+List<String> l = new ArrayList(Arrays.asList("one", "two"));
+Stream<String> sl = l.stream();
+sl.forEach(s -> l.add("three"));
+
+在设置中间操作的时候，可以更改数据源，只有在执行终点操作的时候，才有可能出现并发问题(抛出异常，或者不期望的结果)，比如下面的代码不会抛出异常：
+List<String> l = new ArrayList(Arrays.asList("one", "two"));
+Stream<String> sl = l.stream();
+l.add("three");sl.forEach(System.out::println);
+
+对于concurrent数据源，不会有这样的问题，比如下面的代码很正常：
+List<String> l = new CopyOnWriteArrayList<>(Arrays.asList("one", "two"));
+Stream<String> sl = l.stream();
+sl.forEach(s -> l.add("three"));
+虽然我们上面例子是在终点操作中对非并发数据源进行修改，但是非并发数据源也可能在其它线程中修改，同样会有并发问题。
+//-----
+无状态 Stateless behaviors
+大部分流的操作的参数都是函数式接口，可以使用Lambda表达式实现。它们用来描述用户的行为，称之为行为参数(behavioral parameters)。
+如果这些行为参数有状态，则流的操作的结果可能是不确定的，比如下面的代码:
+List<String> l = new ArrayList(Arrays.asList("one", "two", ……));
+class State {
+    boolean s;
+}
+final State state = new State();
+Stream<String> sl = l.stream().map(e -> {
+    if (state.s)
+        return "OK";    
+    else {
+        state.s = true;
+        return e;
+    } 
+    });
+sl.forEach(System.out::println);
+上面的代码在并行执行时多次的执行结果可能是不同的。这是因为这个lambda表达式是有状态的。
+//-----
+副作用 Side-effects
+有副作用的行为参数是（不？）被鼓励使用的。
+副作用指的是行为参数在执行的时候有输入输入，比如网络输入输出等。
+这是因为Java不保证这些副作用对其它线程可见，也不保证相同流管道上的同样的元素的不同的操作运行在同一个线程中。
+很多有副作用的行为参数可以被转换成无副作用的实现。一般来说println()这样的副作用代码不会有害。
+ArrayList<String> results = new ArrayList<>();
+stream.filter(s -> pattern.matcher(s).matches())      
+    .forEach(s -> results.add(s));  // 副作用代码
+上面的代码可以改成无副作用的。
+List<String>results = stream.filter(s -> pattern.matcher(s).matches())          
+    .collect(Collectors.toList());  // No side-effects!
+//-----
+排序 Ordering
+某些流的返回的元素是有确定顺序的，我们称之为encounter order。这个顺序是流提供它的元素的顺序，比如数组的encounter order是它的元素的排序顺序，List是它的迭代顺序(iteration order)，对于HashSet,它本身就没有encounter order。
+
+一个流是否是encounter order主要依赖数据源和它的中间操作，比如数据源List和Array上创建的流是有序的(ordered)，但是在HashSet创建的流不是有序的。
+
+sorted()方法可以将流转换成有序的，unordered可以将流转换成无序的。除此之外，一个操作可能会影响流的有序,比如map方法，它会用不同的值甚至类型替换流中的元素，所以输入元素的有序性已经变得没有意义了，但是对于filter方法来说，它只是丢弃掉一些值而已，输入元素的有序性还是保障的。
+
+对于串行流，流有序与否不会影响其性能，只是会影响确定性(determinism)，无序流在多次执行的时候结果可能是不一样的。
+
+对于并行流，去掉有序这个约束可能会提供性能，比如distinct、groupingBy这些聚合操作。
+//-----
+结合性 Associativity
+一个操作或者函数op满足结合性意味着它满足下面的条件：
+(a op b) op c == a op (b op c)
+
+对于并发流来说，如果操作满足结合性，我们就可以并行计算：
+a op b op c op d == (a op b) op (c op d)
+比如min、max以及字符串连接都是满足结合性的。
+//-----
+创建Stream
+
+可以通过多种方式创建流：
+
+1、 通过集合的stream()方法或者parallelStream()，比如Arrays.asList(1,2,3).stream()。
+    
+2、 通过Arrays.stream(Object[])方法, 比如Arrays.stream(new int[]{1,2,3})。
+    
+3、 使用流的静态方法，比如Stream.of(Object[]),IntStream.range(int, int)或者Stream.iterate(Object, UnaryOperator)，如Stream.iterate(0, n -> n * 2)，或者generate(Supplier<T> s)如Stream.generate(Math::random)。
+    
+4、 BufferedReader.lines()从文件中获得行的流。
+    
+5、 Files类的操作路径的方法，如list、find、walk等。
+    
+6、 随机数流Random.ints()。
+    
+7、 其它一些类提供了创建流的方法，如BitSet.stream(),Pattern.splitAsStream(java.lang.CharSequence), 和JarFile.stream()。
+    
+8、 更底层的使用StreamSupport，它提供了将Spliterator转换成流的方法。
+package test;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Before
+    public void setUp() {
+        System.out.println("before a test");
+    }
+
+    @After
+    public void tearDown() {
+        System.out.println("after a test");
+    }
+
+    @Test
+    public void testStreamIterate() {
+        Stream<Integer> integerStream = Stream.iterate(0, n -> n + 2);
+        integerStream.limit(10).forEach(System.out::println);
+    }
+
+    @Test
+    public void testStreamGenerate() {
+        Stream<Double> doubleStream = Stream.generate(Math::random);
+        doubleStream.limit(10).forEach(System.out::println);
+    }
+
+    @Test
+    public void testArraysStream() {
+        IntStream integerStream = Arrays.stream(new int[]{3, 5, 7});
+        integerStream.limit(10).forEach(System.out::println); //limit(10)没有作用
+    }
+
+    @Test
+    public void testStreamOf() {
+        Stream<Integer> integerStream = Stream.of(3, 5, 7);
+        integerStream.limit(10).forEach(System.out::println); //limit(10)没有作用
+    }
+}
+输出：
+before a test
+0.6412578001250876
+0.6807637928663443
+0.4643683375012767
+0.9000359460802849
+0.7639279866143656
+0.6827440857975002
+0.32281157764858115
+0.44884674944585
+0.46244218856353414
+0.6012744202148783
+after a test
+before a test
+3
+5
+7
+after a test
+before a test
+3
+5
+7
+after a test
+before a test
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+after a test
+//-----
+中间操作 intermediate operations
+
+中间操作会返回一个新的流，并且操作是延迟执行的(lazy)，它不会修改原始的数据源，而且是由在终点操作开始的时候才真正开始执行。这个Scala集合的转换操作不同，Scala集合转换操作会生成一个新的中间集合，显而易见Java的这种设计会减少中间对象的生成。
+
+下面介绍流的这些中间操作：
+
+--distinct
+distinct保证输出的流中包含唯一的元素，它是通过Object.equals(Object)来检查是否包含相同的元素。
+List<String> l = Stream.of("a","b","c","b")        .distinct()        .collect(Collectors.toList());System.out.println(l); //[a, b, c]
+
+--filter
+filter返回的流中只包含满足断言(predicate)的数据。
+下面的代码返回流中的偶数集合。
+List<Integer> l = IntStream.range(1,10).filter( i -> i % 2 == 0).boxed().collect(Collectors.toList());
+System.out.println(l); //[2, 4, 6, 8]
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class StreamTest {
+
+    @Test
+    public void testIntStreamRange() {
+        List<Integer> l = IntStream.range(1,10)
+            .filter(i -> i % 2 == 0)
+            .boxed() //这里不用装箱操作返回Stream<Integer>，collect操作会编译错误
+            .collect(Collectors.toList());
+        System.out.println(l); //[2, 4, 6, 8]
+    }
+
+    @Test
+    public void testIntStreamRangeForeach() {
+        IntStream.range(1,10).boxed().forEach(System.out::println); //这里加不加boxed都没有关系
+    }
+}
+
+--map
+map方法将流中的元素映射成另外的值，新的值类型可以和原来的元素的类型不同。
+下面的代码中将字符元素映射成它的哈希码(ASCII值)。
+List<Integer> l = Stream.of('a','b','c')
+    .map(c -> c.hashCode())
+    .collect(Collectors.toList());
+System.out.println(l); //[97, 98, 99]
+
+--flatmap
+flatmap方法混合了map+flattern的功能，它将映射后的流的元素全部放入到一个新的流中。它的方法定义如下：
+<R> Stream<R> flatMap(Function<? super T,? extends Stream<? extends R>> mapper)
+可以看到mapper函数会将每一个元素转换成一个流对象，而flatMap方法返回的流包含的元素为mapper生成的流中的元素。
+
+下面这个例子中将一首唐诗生成一个按行分割的流，然后在这个流上调用flatmap得到单词的小写形式的集合，去掉重复的单词然后打印出来。
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void testFlagMap() {
+        String poetry = "Where, before me, are the ages that have gone?/n"
+            + "And where, behind me, are the coming generations?/n"
+            + "I think of heaven and earth, without limit, without end,/n"
+            + "And I am all alone and my tears fall down.";
+        Stream<String> lines = Arrays.stream(poetry.split("/n"));
+        Stream<String> words = lines.flatMap(line -> Arrays.stream(line.split(" "))); //flatMap是把每一个元素映射成一个stream
+        List<String> l = words.map(w -> {
+            if (w.endsWith(",") || w.endsWith(".") || w.endsWith("?"))
+                return w.substring(0, w.length() - 1).trim().toLowerCase();
+            else
+                return w.trim().toLowerCase();
+        })
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+        System.out.println(l); //[ages, all, alone, am, and, are, before, behind, coming, down, earth, end, fall, generations, gone, have, heaven, i, limit, me, my, of, tears, that, the, think, where, without]
+    }
+}
+输出：
+[ages, all, alone, am, and, are, before, behind, coming, down, earth, end, fall, generations, gone, have, heaven, i, limit, me, my, of, tears, that, the, think, where, without]
+
+flatMapToDouble、flatMapToInt、flatMapToLong提供了转换成特定流的方法。
+
+--peek
+peek方法方法会使用一个Consumer消费流中的元素，但是返回的流还是包含原来的流中的元素。
+String[] arr = new String[]{"a","b","c","d"};
+Arrays.stream(arr).peek(System.out::println) //a,b,c,d        .count();
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void testPeek() {
+        String[] arr = new String[]{"a","b","c","d"};
+        Arrays.stream(arr).peek(System.out::println).count(); //如果没有count()，则peek里的Consumer操作不会执行
+
+        Stream.of("one", "two", "three", "four")
+            .filter(e -> e.length() > 3)
+            .peek(e -> System.out.println("Filtered value: " + e))
+            .map(String::toUpperCase)
+            .peek(e -> System.out.println("Mapped value: " + e))
+            .collect(Collectors.toList());//如果没有collect，则peek里的Consumer操作不会执行；还有这里的输出显示流操作是按元素从头到尾，而不是所有元素操作完再进行下一元素
+    }
+}
+输出：
+a
+b
+c
+d
+Filtered value: three
+Mapped value: THREE
+Filtered value: four
+Mapped value: FOUR
+
+--sorted
+sorted()将流中的元素按照自然排序方式进行排序，如果元素没有实现Comparable，则终点操作执行时会抛出java.lang.ClassCastException异常。sorted(Comparator<? super T> comparator)可以指定排序的方式。
+对于有序流，排序是稳定的。对于非有序流，不保证排序稳定。
+String[] arr = new String[]{"b_123","c+342","b#632","d_123"};
+List<String> l  = Arrays.stream(arr)
+    .sorted((s1,s2) -> {
+        if (s1.charAt(0) == s2.charAt(0))
+            return s1.substring(2).compareTo(s2.substring(2));
+        else
+            return s1.charAt(0) - s2.charAt(0);
+    })
+        .collect(Collectors.toList());
+    System.out.println(l); //[b_123, b#632, c+342, d_123]
+//-----
+终点操作 terminal operations
+
+--match
+public boolean allMatch(Predicate<? super T> predicate)
+public boolean anyMatch(Predicate<? super T> predicate)
+public boolean noneMatch(Predicate<? super T> predicate)
+这一组方法用来检查流中的元素是否满足断言。
+allMatch只有在所有的元素都满足断言时才返回true,否则flase,流为空时总是返回true
+anyMatch只有在任意一个元素满足断言时就返回true,否则flase,
+noneMatch只有在所有的元素都不满足断言时才返回true,否则flase,
+
+System.out.println(Stream.of(1,2,3,4,5).allMatch( i -> i > 0)); //true      
+System.out.println(Stream.of(1,2,3,4,5).anyMatch( i -> i > 0)); //true      
+System.out.println(Stream.of(1,2,3,4,5).noneMatch( i -> i > 0)); //false
+
+System.out.println(Stream.<Integer>empty().allMatch( i -> i > 0)); //true      
+System.out.println(Stream.<Integer>empty().anyMatch( i -> i > 0)); //false      
+System.out.println(Stream.<Integer>empty().noneMatch( i -> i > 0)); //true
+
+--count
+count方法返回流中的元素的数量。它实现为：
+mapToLong(e -> 1L).sum();
+
+--collect
+<R,A> R collect(Collector<? super T,A,R> collector)
+<R> R collect(Supplier<R> supplier, BiConsumer<R,? super T> accumulator, BiConsumer<R,R> combiner)
+
+使用一个collector执行mutable reduction操作。辅助类 Collectors 提供了很多的collector，可以满足我们日常的需求，你也可以创建新的collector实现特定的需求。它是一个值得关注的类，你需要熟悉这些特定的收集器，如聚合类averagingInt、最大最小值maxByminBy、计数counting、分组groupingBy、字符串连接joining、分区partitioningBy、汇总summarizingInt、化简reducing、转换toXXX等。
+
+IntStream intStream = Arrays.stream(new int[]{10, 9, 8, 7, 6, 5});
+intStream.boxed().collect(maxBy((i1, i2) -> Integer.compare(i1, i2))); //不太会用？
+
+第二个提供了更底层的功能，它的逻辑类似下面的伪代码：
+R result = supplier.get();
+for (T element : this stream)
+    accumulator.accept(result, element);
+return result;
+
+例子：
+List<String> asList = stringStream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+String concat = stringStream.collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+
+--find
+findAny()返回任意一个元素，如果流为空，返回空的Optional，对于并行流来说，它只需要返回任意一个元素即可，所以性能可能要好于findFirst()，但是有可能多次执行的时候返回的结果不一样。findFirst()返回第一个元素，如果流为空，返回空的Optional。
+
+--forEach、forEachOrdered
+forEach遍历流的每一个元素，执行指定的action。它是一个终点操作，和peek方法不同。这个方法不担保按照流的encounter order顺序执行，如果对于有序流按照它的encounter order顺序执行，你可以使用forEachOrdered方法。
+Stream.of(1,2,3,4,5).forEach(System.out::println);
+
+--最大最小值
+max返回流中的最大值，min返回流中的最小值。
+
+IntStream intStream = Arrays.stream(new int[]{10, 9, 8, 7, 6, 5});
+System.out.println(intStream.max().getAsInt()); //10
+
+--reduce
+reduce是常用的一个方法，事实上很多操作都是基于它实现的。它有几个重载方法：
+
+pubic Optional<T> reduce(BinaryOperator<T> accumulator)
+pubic T reduce(T identity, BinaryOperator<T> accumulator)
+pubic <U> U reduce(U identity, BiFunction<U,? super T,U> accumulator, BinaryOperator<U> combiner)
+
+第一个方法使用流中的第一个值作为初始值，后面两个方法则使用一个提供的初始值。
+Optional<Integer> total = Stream.of(1,2,3,4,5).reduce( (x, y) -> x +y);
+Integer total2 = Stream.of(1,2,3,4,5).reduce(0, (x, y) -> x +y);
+值得注意的是accumulator应该满足结合性(associative)。
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Optional;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void test() {
+        Optional<Integer> total = Stream.of(1, 2, 3, 4, 5).reduce((x, y) -> x + y); //以第1个元素为初始值依次累加，就有可能是NULL，所以返回值是Optional
+        System.out.println(total);
+
+        Optional<Integer> totalNull = Stream.<Integer>empty().reduce((x, y) -> x + y);
+        System.out.println(totalNull.isPresent());
+        System.out.println(totalNull);
+
+        Integer total2 = Stream.of(1, 2, 3, 4, 5).reduce(0, (x, y) -> x + y); //以提供值为初始值，返回值为提供值类型
+        System.out.println(total2);
+
+        Integer total2Null = Stream.<Integer>empty().reduce(0, (x, y) -> x + y);
+        System.out.println(total2Null);
+    }
+}
+输出：
+Optional[15]
+false
+Optional.empty
+15
+0
+
+--toArray()
+将流中的元素放入到一个数组中。
+
+
+--组合
+concat用来连接类型一样的两个流。
+public static <T> Stream<T> concat(Stream<? extends T> a, Stream<? extends T> b)
+
+--转换
+toArray方法将一个流转换成数组，而如果想转换成其它集合类型，西需要调用collect方法，利用Collectors.toXXX方法进行转换：
+public static <T,C extends Collection<T>> Collector<T,?,C> toCollection(Supplier<C> collectionFactory)
+public static …… toConcurrentMap(……)
+public static <T> Collector<T,?,List<T>> toList()
+public static …… 	toMap(……)
+public static <T> Collector<T,?,Set<T>> toSet()
+//-----
+
+//-----
+
+//-----
+
+
+
+
+//------------------------------------------------------------------------------------------------
+//Java 8 Streams API：对Stream分组和分区
+http://www.importnew.com/17313.html
+这篇文章展示了如何使用 Streams API 中的 Collector 及 groupingBy 和 partitioningBy 来对流中的元素进行分组和分区。
+思考一下 Employee 对象流，每个对象对应一个名字、城市和销售数量，如下表所示：
++----------+------------+-----------------+
+| Name     | City       | Number of Sales |
++----------+------------+-----------------+
+| Alice    | London     | 200             |
+| Bob      | London     | 150             |
+| Charles  | New York   | 160             |
+| Dorothy  | Hong Kong  | 190             |
++----------+------------+-----------------+
+1. 分组
+首先，我们利用（lambda表达式出现之前的）命令式风格Java 程序对流中的雇员按城市进行分组：
+Map<String, List<Employee>> result = new HashMap<>();
+for (Employee e : employees) {
+  String city = e.getCity();
+  List<Employee> empsInCity = result.get(city);
+  if (empsInCity == null) {
+    empsInCity = new ArrayList<>();
+    result.put(city, empsInCity);
+  }
+  empsInCity.add(e);
+}
+你可能很熟悉写这样的代码，你也看到了，一个如此简单的任务就需要这么多代码！
+
+而在 Java 8 中，你可以使用 groupingBy 收集器，一条语句就能完成相同的功能，像这样：
+Map<String, List<Employee>> employeesByCity =
+  employees.stream().collect(groupingBy(Employee::getCity));
+结果如下面的 map 所示：
+{New York=[Charles], Hong Kong=[Dorothy], London=[Alice, Bob]}
+
+还可以计算每个城市中雇员的数量，只需传递一个计数收集器给 groupingBy 收集器。第二个收集器的作用是在流分类的同一个组中对每个元素进行递归操作。
+Map<String, Long> numEmployeesByCity =
+  employees.stream().collect(groupingBy(Employee::getCity, counting()));
+结果如下面的 map 所示：
+{New York=1, Hong Kong=1, London=2}
+顺便提一下，该功能与下面的 SQL 语句是等同的：
+select city, count(*) from Employee group by city
+
+另一个例子是计算每个城市的平均年龄，这可以联合使用 averagingInt 和 groupingBy 收集器：
+Map<String, Double> avgSalesByCity =
+  employees.stream().collect(groupingBy(Employee::getCity,
+结果如下 map 所示：
+{New York=160.0, Hong Kong=190.0, London=175.0}
+
+2. 分区
+分区是一种特殊的分组，结果 map 至少包含两个不同的分组——一个true，一个false。例如，如果想找出最优秀的员工，你可以将所有雇员分为两组，一组销售量大于 N，另一组小于 N，使用 partitioningBy 收集器：
+Map<Boolean, List<Employee>> partitioned =
+  employees.stream().collect(partitioningBy(e -> e.getNumSales() > 150));
+输出如下结果：
+{false=[Bob], true=[Alice, Charles, Dorothy]}
+
+你也可以将 groupingBy 收集器传递给 partitioningBy 收集器来将联合使用分区和分组。例如，你可以统计每个分区中的每个城市的雇员人数：
+Map<Boolean, Map<String, Long>> result =
+  employees.stream().collect(partitioningBy(e -> e.getNumSales() > 150,
+                               groupingBy(Employee::getCity, counting())));
+这样会生成一个二级 Map:
+{false={London=1}, true={New York=1, Hong Kong=1, London=1}}
+
+//测试代码如下：
+//Employee.java
+package test;
+
+public class Employee {
+    private String name;
+    private String city;
+    private int sales;
+
+    public Employee(String name, String city, int sales) {
+        this.name = name;
+        this.city = city;
+        this.sales = sales;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public int getSales() {
+        return sales;
+    }
+
+}
+
+//Grouper.java
+package test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.averagingInt;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.partitioningBy;
+
+public class Grouper {
+    public static Map<String, List<Employee>> groupByCityUsingOld(List<Employee> employees) {
+        Map<String, List<Employee>> result = new HashMap<>();
+        for (Employee e : employees) {
+            String city = e.getCity();
+            List<Employee> empsInCity = result.get(city);
+            if (empsInCity == null) {
+                empsInCity = new ArrayList<>();
+                result.put(city, empsInCity);
+            }
+            empsInCity.add(e);
+        }
+        return result;
+    }
+
+    public static Map<String, List<Employee>> groupByCityUsingStream(List<Employee> employees) {
+        Map<String, List<Employee>> result = employees.stream().collect(groupingBy(Employee::getCity));
+        return result;
+        //return employees.stream().collect(groupingBy(Employee::getCity));
+    }
+
+    public static Map<String, Long> groupNumByCity(List<Employee> employees) {
+        Map<String, Long> result = employees.stream().collect(groupingBy(Employee::getCity, counting()));
+        return result;
+    }
+
+    public static Map<String, Double> groupAverageSalesByCity(List<Employee> employees) {
+        Map<String, Double> result = employees.stream().collect(groupingBy(Employee::getCity, averagingInt(Employee::getSales)));
+        return result;
+    }
+
+    public static Map<Boolean, List<Employee>> partitionBySales(List<Employee> employees) {
+        Map<Boolean, List<Employee>> result = employees.stream().collect(partitioningBy(e -> e.getSales() > 150));
+        return result;
+    }
+
+    public static Map<Boolean, Map<String, Long>> partitionBySalseAndThenCountByCity(List<Employee> employees) {
+        Map<Boolean, Map<String, Long>> result = employees.stream().collect(
+            partitioningBy(e -> e.getSales() > 150, groupingBy(Employee::getCity, counting())));
+        return result;
+    }
+}
+
+//GouperTest.java
+package test;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+public class GrouperTest {
+
+    private static List<Employee> employees;
+    private static Employee alice;
+    private static Employee bob;
+    private static Employee charles;
+    private static Employee dorothy;
+
+    @BeforeClass
+    public static void before() {
+        employees = new ArrayList<>();
+        alice = new Employee("Alice", "London", 200);
+        bob = new Employee("Bob", "London", 150);
+        charles = new Employee("Charles", "New York", 160);
+        dorothy = new Employee("Dorothy", "Hong Kong", 190);
+
+        employees.add(alice);
+        employees.add(bob);
+        employees.add(charles);
+        employees.add(dorothy);
+    }
+
+    @Test
+    public void testGroupUsingOldCodeStyle() {
+        Map<String, List<Employee>> result = Grouper.groupByCityUsingOld(employees);
+        assertCityGrouperResult(result);
+    }
+
+    @Test
+    public void testGroupUsingStream() {
+        Map<String, List<Employee>> result = Grouper.groupByCityUsingStream(employees);
+        assertCityGrouperResult(result);
+    }
+
+    private void assertCityGrouperResult(Map<String, List<Employee>> result) {
+        assertEquals(3, result.size());
+
+        List<Employee> empsInLondon = result.get("London");
+        assertThat(empsInLondon, hasItem(alice));
+        assertThat(empsInLondon, hasItem(bob));
+        assertThat(empsInLondon, hasItems(alice, bob));
+        //assertThat(empsInLondon, hasItem(new Employee("Alice", "London", 200))); 这个判断将失败，所以是基于引用的相等？
+
+        List<Employee> empsInNewYork = result.get("New York");
+        assertThat(empsInNewYork, hasItem(charles));
+
+        List<Employee> empsInHongKong = result.get("Hong Kong");
+        assertThat(empsInHongKong, hasItem(dorothy));
+    }
+
+    @Test
+    public void testGroupAndCountUsingSteam() {
+        Map<String, Long> empCityNumberMap = Grouper.groupNumByCity(employees);
+
+        assertEquals(3, empCityNumberMap.size());
+        assertThat(empCityNumberMap, hasEntry("London", 2L));
+        assertThat(empCityNumberMap, hasEntry("New York", 1L));
+        assertThat(empCityNumberMap, hasEntry("Hong Kong", 1L));
+//        Long empsNumInLondon = empCityNumberMap.get("London");
+//        assertEquals(2, empsNumInLondon.longValue());
+//
+//        Long empsNumInNewYork = empCityNumberMap.get("New York");
+//        assertEquals(1, empsNumInNewYork.longValue());
+//
+//        Long empsNumInHongKong = empCityNumberMap.get("Hong Kong");
+//        assertEquals(1, empsNumInHongKong.longValue());
+    }
+
+    @Test
+    public void testGroupAndAverageUsingStream() {
+        Map<String, Double> empCitySalesMap = Grouper.groupAverageSalesByCity(employees);
+        assertEquals(3, empCitySalesMap.size());
+        assertThat(empCitySalesMap, hasEntry("London", 175.0));
+        assertThat(empCitySalesMap, hasEntry("New York", 160.0));
+        assertThat(empCitySalesMap, hasEntry("Hong Kong", 190.0));
+    }
+
+    @Test
+    public void testPartition() {
+        Map<Boolean, List<Employee>> partitioned = Grouper.partitionBySales(employees);
+        assertEquals(2, partitioned.size());
+
+        List<Employee> falseList = partitioned.get(false);
+        assertThat(falseList, hasItem(bob));
+
+        List<Employee> trueList = partitioned.get(true);
+        assertThat(trueList, hasItems(alice, charles, dorothy));
+
+//        //也可以用如下方法测试
+//        List<Employee> toBeTestedList = new ArrayList<>();
+//        toBeTestedList.add(bob);
+//        assertThat(partitioned, hasEntry(false, toBeTestedList));
+//
+//        toBeTestedList.clear();
+//        toBeTestedList.addAll(Arrays.asList(alice, charles, dorothy));
+//        assertThat(partitioned, hasEntry(true, toBeTestedList));
+    }
+
+    @Test
+    public void testPartitionAndGroupCombination() {
+        Map<Boolean, Map<String, Long>> result = Grouper.partitionBySalseAndThenCountByCity(employees);
+        assertEquals(2, result.size());
+
+        Map<String, Long> falseList = result.get(false);
+        assertThat(falseList, hasEntry("London", 1L));
+
+        Map<String, Long> trueList = result.get(true);
+        assertThat(trueList, hasEntry("London", 1L));
+        assertThat(trueList, hasEntry("New York", 1L));
+        assertThat(trueList, hasEntry("Hong Kong", 1L));
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//Stream和Optional
+http://www.jdon.com/idea/java/using-optional-effectively-in-java-8.html
+
+如果不想每次都进行null值判断，Java 8 的Optional就发挥作用了，允许我们返回一个空的对象。
+Optional<T>有方法 isPresent() 和 get() 是用来检查其包含的对象是否为空或不是，然后返回它，如：
+
+Optional<SomeType> someValue = someMethod();
+if (someValue.isPresent()) { // check
+    someValue.get().someOtherMethod(); // retrieve and call
+}
+
+//1. ifPresent()
+//例：将单词流中的第一个以“L”开头的单词取出，并转换为大写字母输出
+package test;
+
+import org.junit.Test;
+
+import java.util.Optional;
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testOptional_NotNull() {
+        Stream<String> names = Stream.of("Large", "Good", "Hello", "Luck");
+        Optional<String> nameWithL = names.filter(name -> name.startsWith("L")).findFirst();
+        nameWithL.ifPresent(name -> {
+            String s = name.toUpperCase();
+            System.out.println("The first word starting with L in upper case is : " + s);
+        });
+    }
+
+    @Test
+    public void testOptional_Null() {
+        Stream<String> names = Stream.of("Large", "Good", "Hello", "Luck");
+        Optional<String> nameWithA = names.filter(name -> name.startsWith("A")).findFirst();//如果不重新定义Stream变量，会编译错误：stream已经被操作过或已经关闭
+        nameWithA.ifPresent(name -> { //找不到，则对象为空，ifPresent将无法进入
+            String s = name.toUpperCase();
+            System.out.println("The first word starting with A in upper case is : " + s);
+        });
+    }
+}
+输出：
+The first word starting with L in upper case is : LARGE
+
+这里ifPresent() 是将一个Lambda表达式作为输入，T值如果不为空将传入这个lambda。那么这个lambda将不为空的单词转为大写输出显示。在前面names单词流寻找结果中，有可能找不到开始字母为L的单词，返回为空，也可能找到不为空，这两种情况都传入lambda中，无需我们打开盒子自己编写代码来判断，它自动帮助我们完成了，无需人工干预。
+
+//2. filter() 过滤
+@Test
+public void testOptional_filter() {
+    Stream<String> names = Stream.of("Large", "Good", "Hello", "Luck");
+    Optional<String> nameWithA = names.filter(name -> name.startsWith("L")).findFirst();
+    //Optional<String> nameWithAFilter = nameWithA.filter(name -> name.equals("Luck"));
+    //Optional<String> nameWithAFilter = nameWithA.filter(name -> true);
+    Optional<String> nameWithAFilter = nameWithA.filter(name -> {
+        String s = name.toUpperCase();
+        return s.equals("LARGE");
+    });
+    nameWithAFilter.ifPresent(name -> {
+        String s = name.toUpperCase();
+        System.out.println("The first word starting with A in upper case is : " + s);
+    });
+}
+输出：
+The first word starting with L in upper case is : LARGE
+
+//3. map() 将value值映射成一个新的Optional<U>对象
+@Test
+public void testOptional_map() {
+    Stream<String> names = Stream.of("Large", "Good", "Hello", "Luck");
+    Optional<String> nameLengthGTFour = names.filter(name -> isLengthGTFour(name)).findFirst();
+    //Optional<String> nameLengthLTFive = names.filter(name -> isLengthLTFive(name)).findFirst();
+    Optional<String> nameMapToUpperCase = nameLengthGTFour.map(String::toUpperCase);
+    nameMapToUpperCase.ifPresent(name -> {
+        System.out.println("Map value: " + name);
+    });
+}
+
+private boolean isLengthGTFour(String s) {
+    return s.length() > 4;
+}
+
+private boolean isLengthLTFive(String s) {
+    return s.length() < 5;
+}
+
+//--http://www.importnew.com/6675.html
+新版本的Java，比如Java 8引入了一个新的Optional类。Optional类的Javadoc描述如下：
+这是一个可以为null的容器对象。如果值存在则isPresent()方法会返回true，调用get()方法会返回该对象。
+本文会逐个探讨Optional类包含的方法，并通过一两个示例展示如何使用。
+
+1. of
+为非null的值创建一个Optional。
+of方法通过工厂方法创建Optional类。需要注意的是，创建对象时传入的参数不能为null。如果传入参数为null，则抛出NullPointerException 。
+//调用工厂方法创建Optional实例
+Optional<String> name = Optional.of("Sanaulla");
+//传入参数为null，抛出NullPointerException.
+Optional<String> someNull = Optional.of(null);
+
+2. ofNullable
+为指定的值创建一个Optional，如果指定的值为null，则返回一个空的Optional。
+ofNullable与of方法相似，唯一的区别是可以接受参数为null的情况。示例如下：
+//下面创建了一个不包含任何值的Optional实例
+//例如，值为'null'
+Optional empty = Optional.ofNullable(null);
+
+3. isPresent
+非常容易理解
+如果值存在返回true，否则返回false。
+类似下面的代码：
+//isPresent方法用来检查Optional实例中是否包含值
+if (name.isPresent()) {
+  //在Optional实例内调用get()返回已存在的值
+  System.out.println(name.get());//输出Sanaulla
+}
+
+4. get
+如果Optional有值则将其返回，否则抛出NoSuchElementException。
+上面的示例中，get方法用来得到Optional实例中的值。下面我们看一个抛出NoSuchElementException的例子：
+//执行下面的代码会输出：No value present 
+try {
+  //在空的Optional实例上调用get()，抛出NoSuchElementException
+  System.out.println(empty.get());
+} catch (NoSuchElementException ex) {
+  System.out.println(ex.getMessage());
+}
+
+5. ifPresent
+如果Optional实例有值则为其调用consumer，否则不做处理
+要理解ifPresent方法，首先需要了解Consumer类。简答地说，Consumer类包含一个抽象方法。该抽象方法对传入的值进行处理，但没有返回值。Java8支持不用接口直接通过lambda表达式传入参数。
+如果Optional实例有值，调用ifPresent()可以接受接口段或lambda表达式。类似下面的代码：
+//ifPresent方法接受lambda表达式作为参数。
+//lambda表达式对Optional的值调用consumer进行处理。
+name.ifPresent((value) -> {
+  System.out.println("The length of the value is: " + value.length());
+});
+
+6. orElse
+如果有值则将其返回，否则返回指定的其它值。
+如果Optional实例有值则将其返回，否则返回orElse方法传入的参数。示例如下：
+//如果值不为null，orElse方法返回Optional实例的值。
+//如果为null，返回传入的消息。
+//输出：There is no value present!
+System.out.println(empty.orElse("There is no value present!"));
+//输出：Sanaulla
+System.out.println(name.orElse("There is some value!"));
+
+7. orElseGet
+orElseGet与orElse方法类似，区别在于得到的默认值。orElse方法将传入的字符串作为默认值，orElseGet方法可以接受Supplier接口的实现用来生成默认值。示例如下：
+//orElseGet与orElse方法类似，区别在于orElse传入的是默认值，
+//orElseGet可以接受一个lambda表达式生成默认值。
+//输出：Default Value
+System.out.println(empty.orElseGet(() -> "Default Value"));
+//输出：Sanaulla
+System.out.println(name.orElseGet(() -> "Default Value"));
+//Supplier接口下：无入参数，返回T类型
+public interface Supplier<T> {
+    /**
+     * Gets a result.
+     *
+     * @return a result
+     */
+    T get();
+}
+
+8. orElseThrow
+如果有值则将其返回，否则抛出supplier接口创建的异常。
+在orElseGet方法中，我们传入一个Supplier接口。然而，在orElseThrow中我们可以传入一个lambda表达式或方法，如果值不存在来抛出异常。示例如下：
+try {
+  //orElseThrow与orElse方法类似。与返回默认值不同，
+  //orElseThrow会抛出lambda表达式或方法生成的异常 
+  empty.orElseThrow(ValueAbsentException::new);
+} catch (Throwable ex) {
+  //输出: No value present in the Optional instance
+  System.out.println(ex.getMessage());
+}
+ValueAbsentException定义如下：
+class ValueAbsentException extends Throwable {
+ 
+  public ValueAbsentException() {
+    super();
+  }
+ 
+  public ValueAbsentException(String msg) {
+    super(msg);
+  }
+ 
+  @Override
+  public String getMessage() {
+    return "No value present in the Optional instance";
+  }
+}
+
+//
+@Test(expected=RuntimeException.class)
+public void testOptional_orElseGet() {
+    Optional<String> empty = Optional.ofNullable(null);
+    System.out.println(empty.orElse("orElse::empty"));
+    System.out.println(empty.orElseGet(() -> "orElseGet::empty"));
+    //System.out.println(empty.orElseThrow(() -> new RuntimeException()));
+    System.out.println(empty.orElseThrow(RuntimeException::new));
+}
+
+9. map
+map方法文档说明如下：
+如果有值，则对其执行调用mapping函数得到返回值。如果返回值不为null，则创建包含mapping返回值的Optional作为map方法返回值，否则返回空Optional。
+map方法用来对Optional实例的值执行一系列操作。通过一组实现了Function接口的lambda表达式传入操作。如果你不熟悉Function接口，可以参考我的这篇博客。map方法示例如下：
+//map方法执行传入的lambda表达式参数对Optional实例的值进行修改。
+//为lambda表达式的返回值创建新的Optional实例作为map方法的返回值。
+Optional<String> upperName = name.map((value) -> value.toUpperCase());
+System.out.println(upperName.orElse("No value found"));
+
+10. flatMap
+如果有值，为其执行mapping函数返回Optional类型返回值，否则返回空Optional。flatMap与map（Funtion）方法类似，区别在于flatMap中的mapper返回值必须是Optional。调用结束时，flatMap不会对结果用Optional封装。
+flatMap方法与map方法类似，区别在于mapping函数的返回值不同。map方法的mapping函数返回值可以是任何类型T，而flatMap方法的mapping函数必须是Optional。
+参照map函数，使用flatMap重写的示例如下：
+//flatMap与map（Function）非常类似，区别在于传入方法的lambda表达式的返回类型。
+//map方法中的lambda表达式返回值可以是任意类型，在map函数返回之前会包装为Optional。 
+//但flatMap方法中的lambda表达式返回值必须是Optionl实例。 
+Optional<String> upperName = name.flatMap((value) -> Optional.of(value.toUpperCase()));
+System.out.println(upperName.orElse("No value found"));//输出SANAULLA
+
+@Test()
+public void testOptional_map_flatMap() {
+    Optional<String> hello = Optional.ofNullable("hello");
+    Optional<String> upperHello = hello.map(String::toUpperCase);
+    System.out.println(upperHello.orElse("No value"));
+
+    Optional<String> upperhello2 = hello.flatMap(name -> Optional.of(name.toUpperCase()));
+    System.out.println(upperhello2.orElse("No value"));
+}
+输出：
+HELLO
+HELLO
+
+@Test()
+public void testOptional_map_flatMap_null() {
+    Optional<String> hello = Optional.ofNullable(null);
+    Optional<String> upperHello = hello.map(String::toUpperCase);
+    System.out.println(upperHello.orElse("No value"));
+
+    Optional<String> upperhello2 = hello.flatMap(name -> Optional.of(name.toUpperCase()));
+    System.out.println(upperhello2.orElse("No value"));
+}
+输出：
+No value
+No value
+
+11. filter
+filter个方法通过传入限定条件对Optional实例的值进行过滤。文档描述如下：
+如果有值并且满足断言条件返回包含该值的Optional，否则返回空Optional。
+读到这里，可能你已经知道如何为filter方法传入一段代码。是的，这里可以传入一个lambda表达式。对于filter函数我们应该传入实现了Predicate接口的lambda表达式。如果你不熟悉Predicate接口，可以参考这篇文章。
+现在我来看看filter的各种用法，下面的示例介绍了满足限定条件和不满足两种情况：
+//filter方法检查给定的Option值是否满足某些条件。
+//如果满足则返回同一个Option实例，否则返回空Optional。
+Optional<String> longName = name.filter((value) -> value.length() > 6);
+System.out.println(longName.orElse("The name is less than 6 characters"));//输出Sanaulla
+ 
+//另一个例子是Optional值不满足filter指定的条件。
+Optional<String> anotherName = Optional.of("Sana");
+Optional<String> shortName = anotherName.filter((value) -> value.length() > 6);
+//输出：name长度不足6字符
+System.out.println(shortName.orElse("The name is less than 6 characters"));
+//------------------------------------------------------------------------------------------------
 //volatile使用
 http://blog.csdn.net/feier7501/article/details/20001083
 在当前的Java内存模型下，线程可以把变量保存在本地内存（比如机器的寄存器）中，而不是直接在主存中进行读写。这就可能造成一个线程在主存中修改了一个变量的值，而另外一个线程还继续使用它在寄存器中的变量值的拷贝，造成数据的不一致。 
@@ -588,6 +2033,9 @@ public class CalculatorTest ...{...}
 
 @RunWith(TestClassRunner.class)
 public class CalculatorTest ...{...}
+//------------------------------------------------------------------------------------------------
+//assertThat断言
+http://langgufu.iteye.com/blog/1893927
 //------------------------------------------------------------------------------------------------
 //Java中的Pair结构
 package test;
@@ -21746,7 +23194,30 @@ public class InstrumentedSetTest {
 }
 测试通过
 
+Set接口的存在使得InstrumentedSet类的设计成为可能，因为Set接口保存了HashSet类的功能特性。除了获得健壮性之外，这种设计也带来了格外的灵活性。InstrumentedSet类实现了Set接口，并且拥有单个构造器，它的参数也是Set类型。从本质上讲，这个类把一个Set转变成了另一个Set，同时增加了计数的功能。这里的包装类（wrapper class）可以被用来包装任何Set实现，并且可以结合任何先前存在的构造器一起工作。如：
+Set<Date> s = new InstrumentedSet<Date>(new TreeSet<Date>(cmp));
+Set<E> s2 = new InstrumentedSet<E>(new HashSet<E>(capacity));
+
+InstrumentedSet类甚至也可以用来临时替换一个原来没有计数特性的Set实例：
+static void walk(Set<Dog> dogs) {
+    InstrumentedSet<Dog> iDogs = new InstrumentedSet<Dog>(dogs);
+    ... // Within this method use iDogs instead of dogs
+}
+
+因为每一个InstrumentedSet实例都把另一个Set实例包装起来了，所以InstrumentedSet类被称为包装类（wrapper class）。这也正是Decorator模式，因为InstrumentedSet类对一个集合进行了修饰，为它增加了计数特性。有时候，复合和转发的结合也被错误地称为“委托（delegation）”。从技术的角度而言，这不是委托，除非包装对象把自身传递给被包装的对象。
+
+包装类几乎没有什么缺点。需要注意的一点是，包装类不适合用在回调框架（callback framework）中，在回调框架中，对象把自身的引用 传递给其他的对象，用于后续的调用（“回调”）。因为被包装起来的对象并不知道它外面的包装对象，所以它传递一个指向自身的引用（this），回调时避开了外面的包装对象。这被称为SELF问题。
+
+只有当子类真正是超类的子类型（subtype）时，才适合用继承。换句话说，对于 两个类A和B，只有当两者之间确实存在“is-a”关系的时候，类B才应该扩展类A。如果打算让类B扩展类A，就应该问问自己：每个B确实也是A吗。如果不能确定这个问题的答案是肯定的，那么B就不应该扩展A。如果答案是否定的，通常情况下，B应该包含A的一个私有实例，并且暴露一个较小的、较简单的API：A本质上不是B的一部分，只是它的实现细节布局。
+
+如果在适合于使用复合的地方使用了继承，则会不必要地暴露实现细节。这样得到的API会把你限制在原始的实现上，永远限定了类的性能。更为严重的是，由于暴露了内部的细节，客户端就有可能直接访问这些内部细节。这样至少会导致语义上的混淆。例如，如果p指向Properties实例，那么p.getProperty(key)就有可能产生与p.get(key)不同的结果：前者考虑了默认的属性表，而后者是继承自Hashtable的，它则没有考虑默认属性列表。最严重的是，客户有可能直接修改超类，从而破坏子类的约束条件。在Properties的情形中，设计者的目标是，只允许字符串作为键（key）和值（value），但是直接访问底层的Hashtable就可以违反这种约束条件。一旦违反了约束条件，就不可能再使用Properties API的其他部分（load和store）了。等到发现这个问题时，要改正它已经太晚了，因为客户端依赖于使用非字符串的键和值了。
+
+在决定使用继承而不是复合之前，还应该问自己最后一组问题。对于正试图扩展的类，它的API中有没有缺陷呢，如果有，是否愿意把那些缺陷传播到类的API中。继承机制会把超类API中的所有缺陷传播到子类中，而复合则允许设计新的API来隐藏这些缺陷。
+
+简而言之，继承的功能非常强大，但是也存在诸多问题，因为它违背了封装原则。只有当子类和超类之间确实存在子类型关系时，使用继承才是恰当的。即便如此，如果子类和超类处在不同的包中，并且超类并不是为了继承而设计的，那么继承将会导致脆弱性（fragility）。为了避免这咱脆弱性，可以用复合和转发机制来代替继承，尤其是当存在适当的接口可以实现包装类时。包装类不仅比子类更加健壮，而且也更加强大。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第17条：要么为继承而设计，并提供文档，要么就禁止继承 P17
 
 //------------------------------------------------------------------------------------------------
 
