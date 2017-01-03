@@ -1,35 +1,406 @@
 //------------------------------------------------------------------------------------------------
-//3n+1ÊµÏÖ
+//¼¼ÄÜ¼ø¶¨3¼¶ ×ÖÄ¸ÂİĞı¾ØÕó
+http://blog.csdn.net/sunmenggmail/article/details/7779651
+
+//AlphaSpiralMatrix.java
 package test;
+
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class AlphaSpiralMatrix {
+    private final int maxRow;
+    private final int maxCol;
+
+    private static final char START_ALPHA = 'A';
+    private static final int MAX_ALPHA_NUM = 26;
+
+    public AlphaSpiralMatrix(int maxRow, int maxCol) {
+        assert (maxRow > 0 && maxCol > 0);
+        this.maxRow = maxRow;
+        this.maxCol = maxCol;
+    }
+
+    String getRowAlpha(int rowIndex) {
+        assert (rowIndex >= 0 && rowIndex < maxRow);
+
+        return IntStream.range(0, maxCol).mapToObj(colIndex -> {
+            long value = getValueByRowAndCol(rowIndex, colIndex);
+            char charByValue = getCharByValue(value);
+            System.out.println(String.format("[%d, %d] <--> %d <--> %c", rowIndex, colIndex, value, charByValue));
+            return String.valueOf(charByValue);
+        }).collect(Collectors.joining());
+
+//        StringBuilder rowAlpha = new StringBuilder();
+//        for (int colIndex = 0; colIndex < maxCol; ++colIndex) {
+//            long value = getValueByRowAndCol(rowIndex, colIndex);
+//            char charByValue = getCharByValue(value);
+//            System.out.println(String.format("[%d, %d] <--> %d <--> %c", rowIndex, colIndex, value, charByValue));
+//            rowAlpha.append(charByValue);
+//        }
+//        return rowAlpha.toString();
+    }
+
+    private long getValueByRowAndCol(int rowIndex, int colIndex) {
+        int level = Math.min(Math.min(rowIndex, colIndex), Math.min(maxRow - 1 - rowIndex, maxCol - 1 - colIndex));
+        int distance = rowIndex + colIndex - 2 * level;
+        int startValue = getStartValue(level);
+
+        //Èç¹ûµ±Ç°×ø±êÎ»ÓÚ¸Ãlevel¾ØĞÎÏòÓÒ¡¢ÏòÏÂµÄ±ß£¬»òÕßÖ»ÓĞÒ»ÌõÖ±Ïß²ãÊ±£¬×ø±êÖµÎªÆğÊ¼Öµ+¾àÀë
+        if (rowIndex == level || colIndex == maxCol - 1 - level || (maxCol < maxRow && level * 2 + 1 == maxCol)) {
+            return startValue + distance;
+        }
+
+        //²»ÔÚÒÔÉÏ³¡¾°Ê±£¬¼´µ±Ç°×ø±êÎ»ÓÚ¸Ãlevel¾ØĞÎÏò×ó¡¢ÏòÉÏµÄ±ß£¬Ôò×ø±êÖµÎªÏÂÒ»level¾ØĞÎÆğÊ¼Öµ-¾àÀë
+        int nextLevelStartValue = getStartValue(level + 1);
+        return nextLevelStartValue - distance;
+    }
+
+    private int getStartValue(int level) {
+        return 2 * level * (maxRow + maxCol - 2 * level) + 1;
+    }
+
+    private char getCharByValue(long value) {
+        int remainder = (int) (value % MAX_ALPHA_NUM);
+        return (char) (remainder - 1 + START_ALPHA);
+    }
+}
+
+//AlphaSpiralMatrixTest.java
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.Assert.assertEquals;
+
+public class AlphaSpiralMatrixTest {
+    @Test
+    public void testGetRowAlphaString_shouldGetAbc_whenRowIsOne() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrix(1, 3);
+        assertEquals("ABC", alphaSpiralMatrix.getRowAlpha(0));
+    }
+
+    @Test
+    public void testCharString() {
+        String s = Stream.of('a', 'b', 'c').map(String::valueOf).collect(Collectors.joining()).toString();//ÕâÀï±ØĞë×ªÎªString£¬ÔÙ×öjoining£¬²»ÄÜÖ±½ÓÓÃchar×öjoiningÂğ£¿
+        System.out.println(s);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//¼¼ÄÜ¼ø¶¨3¼¶ Ê¯Í··Ö¶ÑÇó×îĞ¡²îÖµ
+//StonesGrouper.java
+package test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class StonesGrouper {
+
+    public int getMinDiffValue(List<Integer> integers) {
+        Collections.sort(integers);//Collections.sort(integers, (i1, i2) -> Integer.compare(i2, i1));
+        int sum = integers.stream().mapToInt(x -> x).sum();
+
+        Map<Integer, List<List<Integer>>> integerListMap = pickAllIntegers(integers);
+        return getMinDiffValueFromAllIntegers(integerListMap, sum);
+    }
+
+    private Map<Integer, List<List<Integer>>> pickAllIntegers(List<Integer> integers) {
+        Map<Integer, List<List<Integer>>> integerListMap = new HashMap<>();
+        int size = integers.size();
+        int maxCalculatedInteger = size % 2 == 0 ? size / 2 : (size - 1) / 2;
+
+        for (int i = 1; i <= maxCalculatedInteger; ++i) {
+            List<List<Integer>> groupedIntegers = pickIntegers(integers, i); //ÀûÓÃµİ¹éÇó³öËùÓĞ·Ö×é£¬¿ÉÒÔÍê³ÉÈÎÎñ£¬Ğ§ÂÊ½ÏµÍ
+            integerListMap.put(i, groupedIntegers);
+        }
+        return integerListMap;
+    }
+
+    private List<List<Integer>> pickIntegers(List<Integer> inputIntegers, int index) {
+        if (index == 1) {
+            return inputIntegers.stream().map(i -> Arrays.asList(i)).collect(Collectors.toList());
+        }
+
+        --index;
+        List<List<Integer>> integersList = new ArrayList<>();
+        List<Integer> copyOfInputIntegers = new ArrayList<>(inputIntegers);
+
+        for (int i : inputIntegers) {
+            copyOfInputIntegers.remove(0);//removeÉ¾³ıÊ±ÊÇ°´Ë÷ÒıÉ¾³ı
+            List<List<Integer>> integersWithoutFirst = pickIntegers(copyOfInputIntegers, index);
+            List<List<Integer>> integersCombinationWithFirst = integersWithoutFirst.stream().map(integers -> {
+                List<Integer> copyOfIntegers = new ArrayList<>(integers);
+                copyOfIntegers.add(i);
+                return copyOfIntegers;
+            }).collect(Collectors.toList());
+            integersList.addAll(integersCombinationWithFirst);
+        }
+        return integersList;
+    }
+
+    private int getMinDiffValueFromAllIntegers(Map<Integer, List<List<Integer>>> integerListMap, Integer sum) {
+        int minDiffValue = sum;
+        for (Map.Entry<Integer, List<List<Integer>>> integerListEntry : integerListMap.entrySet()) {
+            int tempMinDiffValue = integerListEntry.getValue().stream()
+                .peek(integers -> System.out.print("One heap of stones: " + integers))
+                .mapToInt(integers -> Math.abs(integers.stream().mapToInt(Integer::intValue).sum() * 2 - sum))
+                .peek(i -> System.out.println(", weight difference: " + i))
+                .min()
+                .getAsInt();
+
+            if (tempMinDiffValue < minDiffValue) {
+                minDiffValue = tempMinDiffValue;
+            }
+        }
+        return minDiffValue;
+    }
+}
+
+//StonesGrouperTest.java
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+
+public class StonesGrouperTest {
+    @Test
+    public void testGroupStones_multiStones() {
+        int diffMinValue = new StonesGrouper().getMinDiffValue(Arrays.asList(5, 8, 13, 27, 14));
+        assertEquals(3, diffMinValue);
+    }
+
+    @Test
+    public void testGroupStones_multiStonesWithSameWeight() {
+        int diffMinValue = new StonesGrouper().getMinDiffValue(Arrays.asList(5, 8, 10, 14, 10));
+        assertEquals(1, diffMinValue);//°´ÕÕÅÅĞòºóµÄ¼òµ¥µş¼ÓÔòµÃµ½²îÖµÎª3
+    }
+
+    @Test
+    public void testGroupStones_1Stones() {
+        int diffMinValue = new StonesGrouper().getMinDiffValue(Arrays.asList(5));
+        assertEquals(5, diffMinValue);
+    }
+
+    @Test
+    public void testGroupStones_2Stones() {
+        int diffMinValue = new StonesGrouper().getMinDiffValue(Arrays.asList(5, 12));
+        assertEquals(7, diffMinValue);
+    }
+}
+Êä³ö£º£¨ÒÔÒ»¸ö²âÊÔÓÃÀıÎªÀı£©
+One heap of stones: [5], weight difference: 57
+One heap of stones: [8], weight difference: 51
+One heap of stones: [13], weight difference: 41
+One heap of stones: [14], weight difference: 39
+One heap of stones: [27], weight difference: 13
+One heap of stones: [8, 5], weight difference: 41
+One heap of stones: [13, 5], weight difference: 31
+One heap of stones: [14, 5], weight difference: 29
+One heap of stones: [27, 5], weight difference: 3
+One heap of stones: [13, 8], weight difference: 25
+One heap of stones: [14, 8], weight difference: 23
+One heap of stones: [27, 8], weight difference: 3
+One heap of stones: [14, 13], weight difference: 13
+One heap of stones: [27, 13], weight difference: 13
+One heap of stones: [27, 14], weight difference: 15
+
+//-----ÁíÔÚStream·¢ÏÖÈçÏÂÎÊÌâ£¬¶ÔÁ÷ÖĞµÄList¶ÔÏó×öadd²Ù×÷»áÅ×³öÒì³££¬ÎªÊ²Ã´£¿
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class ListAddInStreamTest {
+    @Test
+    public void testListAddInStream() {
+        List<List<Integer>> integersList = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5));
+        integersList.stream().mapToInt(integers -> integers.size()).forEach(System.out::println); //ÕâÑùÒ²¿ÉÒÔ£ºi -> System.out.println(i)
+
+        integersList.stream().mapToInt(integers -> {
+            integers.add(1); //ÕâÀïÎªÊ²Ã´add»áÅ×³öÒì³££¿
+            return integers.size();
+        }).forEach(i -> System.out.println(i));
+    }
+}
+Êä³ö£º
+3
+2
+
+java.lang.UnsupportedOperationException
+	at java.util.AbstractList.add(AbstractList.java:148)
+	at java.util.AbstractList.add(AbstractList.java:108)
+	at test.ListAddInStreamTest.lambda$testListAddInStream$2(ListAddInStreamTest.java:15)
+	at java.util.stream.ReferencePipeline$4$1.accept(ReferencePipeline.java:210)
+	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+	at java.util.stream.ForEachOps$ForEachOp$OfInt.evaluateSequential(ForEachOps.java:189)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.util.stream.IntPipeline.forEach(IntPipeline.java:404)
+	at test.ListAddInStreamTest.testListAddInStream(ListAddInStreamTest.java:17)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:68)
+	at com.intellij.rt.execution.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:51)
+	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:237)
+	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:70)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
+
+
+//------------------------------------------------------------------------------------------------
+//ÃüÁîĞĞ±àÒëÔËĞĞjunit
+1. ±àÒëÔ´ÎÄ¼ş£º
+javac -d classes src\com\huawei\demo\Hello.java
+-d£ºÖ¸¶¨Éú³ÉµÄclassÎÄ¼şÄ¿Â¼
+
+2. ½«classÎÄ¼ş´ò³Éjar°ü£º
+jar -cvf Hello.jar -C classes com
+-c£ºÉú³ÉĞÂÎÄ¼ş
+-v£ºÏÔÊ¾´ò°üµÄÏêÏ¸ĞÅÏ¢
+-f£ºÖ¸¶¨jar°üÃû×Ö
+-C£º½øÈëÖ¸¶¨Ä¿Â¼²¢½«Ö¸¶¨ÎÄ¼ş¼ĞÏÂµÄËùÓĞÄÚÈİ´ò°ü
+
+3. ±àÒëTest²âÊÔÎÄ¼ş£º
+javac -d classes -classpath lib\junit.jar;src test\com\huawei\demo\HelloTest.java
+-classpath£ºÖ¸¶¨²éÕÒÓÃ»§ÀàÎÄ¼şºÍ×¢ÊÍ´¦Àí³ÌĞòµÄÎ»ÖÃ£¬ÓÃ;·Ö¸ôÖ¸¶¨¶à¸ö²éÕÒÎ»ÖÃ£¬¿ÉÒÔÓÃ-cpÌæ»»
+-d£ºÖ¸¶¨Éú³ÉµÄclassÎÄ¼şÄ¿Â¼
+ËµÃ÷£º
+--ÕâÀïÒ»¶¨ÒªÖ¸¶¨src£¬ÆäÓàsrc/com¡¢src/com/huawei/demoµÈ¶¼²»ĞĞ£¬±¨´íÎŞ·¨ÕÒµ½Hello£¬ËùÒÔÒª°´°ücom\huawei\demoÀ´Ìá¹©²éÕÒÂ·¾¶
+--ÔÚµ±Ç°libÄ¿Â¼ÏÂ·ÅÖÃjunit.jar°ü
+--;ºÅÂ·¾¶Ç°ºóÃ»ÓĞ²îÒì£¬ÈçÏÂÒ²Ã»ÓĞÎÊÌâ£ºjavac -d classes -classpath src;lib\junit.jar test\com\huawei\demo\HelloTest.java
+--»¹¿ÉÒÔ½«-d²ÎÊıÓë-cp²ÎÊı»¥»»Î»ÖÃ£ºjavac -classpath src;lib\junit.jar -d classes test\com\huawei\demo\HelloTest.java
+
+4. ½«Test.classÎÄ¼ş´ò°ü£º
+jar -cvf HelloTest.jar -C classes com
+ËµÃ÷£ºÓï¾äÍ¬2£¬ËùÒÔµÚ2²½Ã»ÓĞÊ²Ã´ÓÃ£¬Ö»ÊÇÓÃÀ´Ñ§Ï°
+
+5. ÔËĞĞ²âÊÔÓÃÀı£º
+java -classpath lib\junit.jar;HelloTest.jar org.junit.runner.JUnitCore com.huawei.demo.HelloTest
+-classpath£ºÄ¿Â¼ºÍ zip/jar ÎÄ¼şµÄÀàËÑË÷Â·¾¶£¬¿ÉÒÔÓÃ-cpÌæ»»
+org.junit.runner.JUnitCore [your junit test case class]
+ËµÃ÷£ºÔËĞĞµÄ²âÊÔÀàÒªÓÃÍêÕûµÄ°üºÍÀàÃû£¬com\huawei\demo\HelloTest
+//------------------------------------------------------------------------------------------------
+//ÃüÁîĞĞÔËĞĞjar
+http://lj830723.iteye.com/blog/1415766
+http://blog.sina.com.cn/s/blog_98a617c70101jl91.html
+1. ±àÒë°üº¬mainº¯ÊıµÄÀà£º
+javac Hello.java
+
+2. ½«classÎÄ¼ş´ò³Éjar°ü£º
+jar -cvf Hello.jar Hello.class
+
+3. ĞŞ¸Äjar°üÖĞµÄÎÄ¼şMANIFEST.MF£¬Ìí¼Ó¡°Main-Class: XXX¡±£¬ÈçÏÂµÚ¶şĞĞ
+Manifest-Version: 1.0
+Main-Class: Hello
+Created-By: 1.8.0_91 (Oracle Corporation)
+ËµÃ÷£º»òÕß¿ÉÒÔÊÖ¹¤±à¼­MANIFEST.MFÎÄ¼ş£¬ÔÚ´òjar°üÊ±½«¸ÃÎÄ¼ş°üº¬½øÈ¥£¬ÈçÏÂ£ºjar -cvfm Hello.jar MANIFEST.MF Hello.class
+
+4. ÔËĞĞÖ÷º¯Êı£º
+java -jar Hello.jar
+-jar£ºÊ¹ÓÃ-jar²ÎÊıºó, ÏµÍ³µÄClasspath±äÁ¿²»ÔÙÆğ×÷ÓÃ. ĞéÄâ»ú½«È¥MANIFEST.MFÖĞµÄClass-PathÏÂÕÒÏà¹ØµÄ°ü¡£±íÊ¾ºóÃæ¸úµÄjar°üÊÇÓĞmain class¿É¶ÀÁ¢ÔËĞĞ£¬ËùÒÔÒ»¶¨ÒªÔÚµÚ3²½Ìí¼ÓMain-Class: XXX¡£
+ÒòÎªÒÑ¾­ÔÚMANIFEST.MFÎÄ¼şÖĞÖ¸¶¨ÁËÖ÷º¯Êı£¬ËùÒÔÕâÀï²»ÓÃÖ¸¶¨ÔËĞĞÀàHello£¬µ±È»Ò²¿ÉÒÔĞ´³É£ºjava -jar Hello.jar Hello
+
+5. Èç¹û²»²ÉÓÃ3¡¢4²½Öè£¬ÏëÒªÔËĞĞÊ±¶¯Ì¬Ö¸¶¨£º
+java -classpath Hello.jar Hello
+-classpath£º¿ÉÒÔÓÃ-cpÌæ»»
+
+//-----
+Manifest ¼¼ÇÉ
+×ÜÊÇÒÔManifest-VersionÊôĞÔ¿ªÍ·
+Ã¿ĞĞ×î³¤72¸ö×Ö·û£¬Èç¹û³¬¹ıµÄ»¯£¬²ÉÓÃĞøĞĞ
+È·ÈÏÃ¿ĞĞ¶¼ÒÔ»Ø³µ½áÊø£¬·ñÔò¸ÄĞĞ½«»á±»ºöÂÔ
+Èç¹ûClass-Path ÖĞµÄ´æÔÚÂ·¾¶£¬Ê¹ÓÃ"/"·Ö¸ôÄ¿Â¼£¬ÓëÆ½Ì¨ÎŞ¹Ø
+Ê¹ÓÃ¿ÕĞĞ·Ö¸ôÖ÷ÊôĞÔºÍpackageÊôĞÔ
+Ê¹ÓÃ"/"¶ø²»ÊÇ"."À´·Ö¸ôpackage ºÍclass ,±ÈÈç com/example/myapp/
+class ÒªÒÔ.class½áÎ²£¬package ÒªÒÔ / ½áÎ²
+//------------------------------------------------------------------------------------------------
+//3n+1ÊµÏÖ
+//Á½¸öÎÊÌâ£º
+//1. ÊäÈë1ÔõÃ´´¦Àí£¿
+//2. ÊÇ·ñÊ¹ÓÃ¾²Ì¬·½·¨
+
+³ö´íµÄµØ·½£º
+1. ÏÂÏŞ1µÄ´¦Àí·½·¨£¬ÊÇ·ñÓ¦¸Ã°üÀ¨1
+2. ThreeNPlusOneTransformerÀàµÄÁ½¸öº¯ÊıÃ»ÓĞreturn·µ»ØÖµ
+3. ThreeNPlusOneTransformerÀàÊ×´Î¿ª·¢Ê±Ã»ÓĞÊ¹ÓÃ¾²Ì¬·½·¨£¬¶ø²âÊÔÀàÖ±½ÓÊ¹ÓÃ¾²Ì¬·½·¨²âÊÔ
+
+//ThreeNPlusOneTransformer.java
+package com.huawei.demo;
 
 //import java.util.stream.Stream;
 
-public class OneTransformer {
-    private static final int MAX_INPUT_NUMBER = 1000000;
-    private static final int MIN_INPUT_NUMBER = 0;
-    private static final int INVALID_INPUT = -1;
-
-    public static int getMaxStepsOfTransformingToOne(int number1, int number2) {
-        if (checkInputInvalid(number1) || checkInputInvalid(number2)) {
-            return INVALID_INPUT;
-        }
-
-        int stepsOfTransformingToOne1 = getStepsOfTransformingToOne(number1);
-        int stepsOfTransformingToOne2 = getStepsOfTransformingToOne(number2);
-        return Integer.max(stepsOfTransformingToOne1, stepsOfTransformingToOne2);
-    }
-
-    private static int getStepsOfTransformingToOne(int number) {
-        int steps = 0;
-        while (number != 1) {
-            ++steps;
-            if (number % 2 == 0) {
-                number /= 2;
-            } else {
-                number = 3 * number + 1;
-            }
+public class ThreeNPlusOneTransformer {
+    private static final int MAX_INPUT = 1000000;
+    private static final int MIN_INPUT = 0;
+    private static final int INVALID_INPUT_RETURN_VALUE = -1;
+    
+    public static int getMaxStepsOf3NPlus1(int input1, int input2) {
+        int minInput = Integer.min(input1, input2);
+        int maxInput = Integer.max(input1, input2);
+        
+        if (checkInputInvalid(minInput, maxInput)) {
+            return INVALID_INPUT_RETURN_VALUE;
         }
         
+        return getMaxStepsOf3NPlus1OneByOne(minInput, maxInput);
+    }
+    
+    private static boolean checkInputInvalid(int minInput, int maxInput) {
+        return minInput <= MIN_INPUT || maxInput >= MAX_INPUT;
+    }
+    
+    private static int getMaxStepsOf3NPlus1OneByOne(int minInput, int maxInput) {
+        int maxSteps = 0;
+        for (int i = minInput; i <= maxInput; ++i) {
+            maxSteps = Integer.max(maxSteps, getStepsOf3NPlus1(i));
+        }
+        return maxSteps;
+    }
+    
+    private static int getStepsOf3NPlus1(int input) {
+        int steps = 1;
+        while (input != 1) {
+            ++steps;
+            if (input % 2 == 0) {
+                input /= 2;
+            } else {
+                input = 3 * input + 1;
+            }
+        }
         return steps;
         
         // int steps = (int) Stream.iterate(number, current -> {
@@ -46,26 +417,35 @@ public class OneTransformer {
 
         // return steps - 1;
     }
-
-    private static boolean checkInputInvalid(int number) {
-        if (number >= MAX_INPUT_NUMBER || number <= MIN_INPUT_NUMBER) {
-            return true;
-        }
-        return false;
-    }
 }
 
-//
-package test;
+//ThreeNPlusOneTransformerTest.java
+package com.huawei.demo;
 
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class OneTransformerTest {
+public class ThreeNPlusOneTransformerTest {
+    
     @Test
-    public void testOneTransformerOfInput_five() {
-        assertEquals(5, OneTransformer.getMaxStepsOfTransformingToOne(5, 2));
+    public void test_getMaxSteps_differentValidInput() {
+        assertEquals(8, ThreeNPlusOneTransformer.getMaxStepsOf3NPlus1(3, 5));
+    }
+    
+    @Test
+    public void test_getMaxSteps_sameValidInput() {
+        assertEquals(8, ThreeNPlusOneTransformer.getMaxStepsOf3NPlus1(3, 3));
+    }
+    
+    @Test
+    public void test_getMaxSteps_inValidMinInput() {
+        assertEquals(-1, ThreeNPlusOneTransformer.getMaxStepsOf3NPlus1(0, 3));
+    }
+    
+    @Test
+    public void test_getMaxSteps_inValidMaxInput() {
+        assertEquals(-1, ThreeNPlusOneTransformer.getMaxStepsOf3NPlus1(5, 1000000));
     }
 }
 //------------------------------------------------------------------------------------------------
@@ -372,6 +752,36 @@ Stream API ½èÖúÓÚÍ¬ÑùĞÂ³öÏÖµÄ Lambda ±í´ïÊ½£¬¼«´óµÄÌá¸ß±à³ÌĞ§ÂÊºÍ³ÌĞò¿É¶ÁĞÔ¡£Í¬Ê
 
 //¶øÔÚ Java 8 Ê¹ÓÃ Stream£¬´úÂë¸ü¼Ó¼ò½àÒ×¶Á£»¶øÇÒÊ¹ÓÃ²¢·¢Ä£Ê½£¬³ÌĞòÖ´ĞĞËÙ¶È¸ü¿ì¡£
 //Çåµ¥ 2. Java 8 µÄÅÅĞò¡¢È¡ÖµÊµÏÖ
+//Cat.java
+package test;
+
+import java.awt.Color;
+
+public class Cat {
+    private final int id;
+    private final int age;
+    private final Color color;
+
+    public Cat(int id, int age, Color color) {
+        this.id = id;
+        this.age = age;
+        this.color = color;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+}
+
+//StreamTest.java
 package test;
 
 import org.junit.BeforeClass;
@@ -405,6 +815,15 @@ public class StreamTest {
         cat4 = new Cat(4, 40, Color.WHITE);
         cats = Arrays.asList(cat2, cat3, cat1, cat4);
     }
+    
+    //ÔÚ¸ÃBeforeClassÖĞ³õÊ¼»¯µÄstatic±äÁ¿£¬¿ÉÒÔÔÚstatic¿éÖĞ³õÊ¼»¯
+    // static {
+        // cat1 = new Cat(1, 10, Color.WHITE);
+        // cat2 = new Cat(2, 20, Color.BLACK);
+        // cat3 = new Cat(3, 30, Color.BLUE);
+        // cat4 = new Cat(4, 40, Color.WHITE);
+        // cats = Arrays.asList(cat2, cat3, cat1, cat4);
+    // }
 
     @Test
     public void testSort() {
@@ -449,6 +868,742 @@ public class StreamTest {
     }
 }
 
+Stream ×ÜÀÀ
+--Ê²Ã´ÊÇÁ÷
+Stream ²»ÊÇ¼¯ºÏÔªËØ£¬Ëü²»ÊÇÊı¾İ½á¹¹²¢²»±£´æÊı¾İ£¬ËüÊÇÓĞ¹ØËã·¨ºÍ¼ÆËãµÄ£¬Ëü¸üÏñÒ»¸ö¸ß¼¶°æ±¾µÄ Iterator¡£Ô­Ê¼°æ±¾µÄ Iterator£¬ÓÃ»§Ö»ÄÜÏÔÊ½µØÒ»¸öÒ»¸ö±éÀúÔªËØ²¢¶ÔÆäÖ´ĞĞÄ³Ğ©²Ù×÷£»¸ß¼¶°æ±¾µÄ Stream£¬ÓÃ»§Ö»Òª¸ø³öĞèÒª¶ÔÆä°üº¬µÄÔªËØÖ´ĞĞÊ²Ã´²Ù×÷£¬±ÈÈç ¡°¹ıÂËµô³¤¶È´óÓÚ 10 µÄ×Ö·û´®¡±¡¢¡°»ñÈ¡Ã¿¸ö×Ö·û´®µÄÊ××ÖÄ¸¡±µÈ£¬Stream »áÒşÊ½µØÔÚÄÚ²¿½øĞĞ±éÀú£¬×ö³öÏàÓ¦µÄÊı¾İ×ª»»¡£
+Stream ¾ÍÈçÍ¬Ò»¸öµü´úÆ÷£¨Iterator£©£¬µ¥Ïò£¬²»¿ÉÍù¸´£¬Êı¾İÖ»ÄÜ±éÀúÒ»´Î£¬±éÀú¹ıÒ»´Îºó¼´ÓÃ¾¡ÁË£¬¾ÍºÃ±ÈÁ÷Ë®´ÓÃæÇ°Á÷¹ı£¬Ò»È¥²»¸´·µ¡£
+¶øºÍµü´úÆ÷ÓÖ²»Í¬µÄÊÇ£¬Stream ¿ÉÒÔ²¢ĞĞ»¯²Ù×÷£¬µü´úÆ÷Ö»ÄÜÃüÁîÊ½µØ¡¢´®ĞĞ»¯²Ù×÷¡£¹ËÃûË¼Òå£¬µ±Ê¹ÓÃ´®ĞĞ·½Ê½È¥±éÀúÊ±£¬Ã¿¸ö item ¶ÁÍêºóÔÙ¶ÁÏÂÒ»¸ö item¡£¶øÊ¹ÓÃ²¢ĞĞÈ¥±éÀúÊ±£¬Êı¾İ»á±»·Ö³É¶à¸ö¶Î£¬ÆäÖĞÃ¿Ò»¸ö¶¼ÔÚ²»Í¬µÄÏß³ÌÖĞ´¦Àí£¬È»ºó½«½á¹ûÒ»ÆğÊä³ö¡£Stream µÄ²¢ĞĞ²Ù×÷ÒÀÀµÓÚ Java7 ÖĞÒıÈëµÄ Fork/Join ¿ò¼Ü£¨JSR166y£©À´²ğ·ÖÈÎÎñºÍ¼ÓËÙ´¦Àí¹ı³Ì¡£Java µÄ²¢ĞĞ API Ñİ±äÀú³Ì»ù±¾ÈçÏÂ£º
+1. 1.0-1.4 ÖĞµÄ java.lang.Thread
+2. 5.0 ÖĞµÄ java.util.concurrent
+3. 6.0 ÖĞµÄ Phasers µÈ
+4. 7.0 ÖĞµÄ Fork/Join ¿ò¼Ü
+5. 8.0 ÖĞµÄ Lambda
+Stream µÄÁíÍâÒ»´óÌØµãÊÇ£¬Êı¾İÔ´±¾Éí¿ÉÒÔÊÇÎŞÏŞµÄ¡£
+
+--Á÷µÄ¹¹³É
+µ±ÎÒÃÇÊ¹ÓÃÒ»¸öÁ÷µÄÊ±ºò£¬Í¨³£°üÀ¨Èı¸ö»ù±¾²½Öè£º
+»ñÈ¡Ò»¸öÊı¾İÔ´£¨source£©¡ú Êı¾İ×ª»»¡úÖ´ĞĞ²Ù×÷»ñÈ¡ÏëÒªµÄ½á¹û£¬Ã¿´Î×ª»»Ô­ÓĞ Stream ¶ÔÏó²»¸Ä±ä£¬·µ»ØÒ»¸öĞÂµÄ Stream ¶ÔÏó£¨¿ÉÒÔÓĞ¶à´Î×ª»»£©£¬Õâ¾ÍÔÊĞí¶ÔÆä²Ù×÷¿ÉÒÔÏñÁ´ÌõÒ»ÑùÅÅÁĞ£¬±ä³ÉÒ»¸ö¹ÜµÀ£¬ÈçÏÂÍ¼ËùÊ¾¡£
+
+ÓĞ¶àÖÖ·½Ê½Éú³É Stream Source£º
+--´Ó Collection ºÍÊı×é
+    Collection.stream()
+    Collection.parallelStream()
+    Arrays.stream(T array) or Stream.of()
+--´Ó BufferedReader
+    java.io.BufferedReader.lines()
+--¾²Ì¬¹¤³§
+    java.util.stream.IntStream.range()
+    java.nio.file.Files.walk()
+--×Ô¼º¹¹½¨
+    java.util.Spliterator
+--ÆäËü
+    Random.ints()
+    BitSet.stream()
+    Pattern.splitAsStream(java.lang.CharSequence)
+    JarFile.stream()
+
+Á÷µÄ²Ù×÷ÀàĞÍ·ÖÎªÁ½ÖÖ£º
+Intermediate£ºÒ»¸öÁ÷¿ÉÒÔºóÃæ¸úËæÁã¸ö»ò¶à¸ö intermediate ²Ù×÷¡£ÆäÄ¿µÄÖ÷ÒªÊÇ´ò¿ªÁ÷£¬×ö³öÄ³ÖÖ³Ì¶ÈµÄÊı¾İÓ³Éä/¹ıÂË£¬È»ºó·µ»ØÒ»¸öĞÂµÄÁ÷£¬½»¸øÏÂÒ»¸ö²Ù×÷Ê¹ÓÃ¡£ÕâÀà²Ù×÷¶¼ÊÇ¶èĞÔ»¯µÄ£¨lazy£©£¬¾ÍÊÇËµ£¬½ö½öµ÷ÓÃµ½ÕâÀà·½·¨£¬²¢Ã»ÓĞÕæÕı¿ªÊ¼Á÷µÄ±éÀú¡£
+Terminal£ºÒ»¸öÁ÷Ö»ÄÜÓĞÒ»¸ö terminal ²Ù×÷£¬µ±Õâ¸ö²Ù×÷Ö´ĞĞºó£¬Á÷¾Í±»Ê¹ÓÃ¡°¹â¡±ÁË£¬ÎŞ·¨ÔÙ±»²Ù×÷¡£ËùÒÔÕâ±Ø¶¨ÊÇÁ÷µÄ×îºóÒ»¸ö²Ù×÷¡£Terminal ²Ù×÷µÄÖ´ĞĞ£¬²Å»áÕæÕı¿ªÊ¼Á÷µÄ±éÀú£¬²¢ÇÒ»áÉú³ÉÒ»¸ö½á¹û£¬»òÕßÒ»¸ö side effect¡£
+
+ÔÚ¶ÔÓÚÒ»¸ö Stream ½øĞĞ¶à´Î×ª»»²Ù×÷ (Intermediate ²Ù×÷)£¬Ã¿´Î¶¼¶Ô Stream µÄÃ¿¸öÔªËØ½øĞĞ×ª»»£¬¶øÇÒÊÇÖ´ĞĞ¶à´Î£¬ÕâÑùÊ±¼ä¸´ÔÓ¶È¾ÍÊÇ N£¨×ª»»´ÎÊı£©¸ö for Ñ­»·Àï°ÑËùÓĞ²Ù×÷¶¼×öµôµÄ×ÜºÍÂğ£¿ÆäÊµ²»ÊÇÕâÑùµÄ£¬×ª»»²Ù×÷¶¼ÊÇ lazy µÄ£¬¶à¸ö×ª»»²Ù×÷Ö»»áÔÚ Terminal ²Ù×÷µÄÊ±ºòÈÚºÏÆğÀ´£¬Ò»´ÎÑ­»·Íê³É¡£ÎÒÃÇ¿ÉÒÔÕâÑù¼òµ¥µÄÀí½â£¬Stream ÀïÓĞ¸ö²Ù×÷º¯ÊıµÄ¼¯ºÏ£¬Ã¿´Î×ª»»²Ù×÷¾ÍÊÇ°Ñ×ª»»º¯Êı·ÅÈëÕâ¸ö¼¯ºÏÖĞ£¬ÔÚ Terminal ²Ù×÷µÄÊ±ºòÑ­»· Stream ¶ÔÓ¦µÄ¼¯ºÏ£¬È»ºó¶ÔÃ¿¸öÔªËØÖ´ĞĞËùÓĞµÄº¯Êı¡£
+
+»¹ÓĞÒ»ÖÖ²Ù×÷±»³ÆÎª short-circuiting¡£ÓÃÒÔÖ¸£º
+    ¶ÔÓÚÒ»¸ö intermediate ²Ù×÷£¬Èç¹ûËü½ÓÊÜµÄÊÇÒ»¸öÎŞÏŞ´ó£¨infinite/unbounded£©µÄ Stream£¬µ«·µ»ØÒ»¸öÓĞÏŞµÄĞÂ Stream¡£
+    ¶ÔÓÚÒ»¸ö terminal ²Ù×÷£¬Èç¹ûËü½ÓÊÜµÄÊÇÒ»¸öÎŞÏŞ´óµÄ Stream£¬µ«ÄÜÔÚÓĞÏŞµÄÊ±¼ä¼ÆËã³ö½á¹û¡£
+µ±²Ù×÷Ò»¸öÎŞÏŞ´óµÄ Stream£¬¶øÓÖÏ£ÍûÔÚÓĞÏŞÊ±¼äÄÚÍê³É²Ù×÷£¬ÔòÔÚ¹ÜµÀÄÚÓµÓĞÒ»¸ö short-circuiting ²Ù×÷ÊÇ±ØÒª·Ç³ä·ÖÌõ¼ş¡£
+
+Çåµ¥ 3. Ò»¸öÁ÷²Ù×÷µÄÊ¾Àı
+int sum = widgets.stream()
+    .filter(w -> w.getColor() == RED)
+    .mapToInt(w -> w.getWeight())
+    .sum();
+stream() »ñÈ¡µ±Ç°Ğ¡Îï¼şµÄ source£¬filter ºÍ mapToInt Îª intermediate ²Ù×÷£¬½øĞĞÊı¾İÉ¸Ñ¡ºÍ×ª»»£¬×îºóÒ»¸ö sum() Îª terminal ²Ù×÷£¬¶Ô·ûºÏÌõ¼şµÄÈ«²¿Ğ¡Îï¼ş×÷ÖØÁ¿ÇóºÍ¡£
+
+
+--Á÷µÄÊ¹ÓÃÏê½â
+¼òµ¥Ëµ£¬¶Ô Stream µÄÊ¹ÓÃ¾ÍÊÇÊµÏÖÒ»¸ö filter-map-reduce ¹ı³Ì£¬²úÉúÒ»¸ö×îÖÕ½á¹û£¬»òÕßµ¼ÖÂÒ»¸ö¸±×÷ÓÃ£¨side effect£©¡£
+
+--Á÷µÄ¹¹ÔìÓë×ª»»
+ÏÂÃæÌá¹©×î³£¼ûµÄ¼¸ÖÖ¹¹Ôì Stream µÄÑùÀı¡£
+Çåµ¥ 4. ¹¹ÔìÁ÷µÄ¼¸ÖÖ³£¼û·½·¨
+// 1. Individual values
+Stream stream = Stream.of("a", "b", "c");
+// 2. Arrays
+String [] strArray = new String[] {"a", "b", "c"};
+stream = Stream.of(strArray);
+stream = Arrays.stream(strArray);
+// 3. Collections
+List<String> list = Arrays.asList(strArray);
+stream = list.stream();
+
+ĞèÒª×¢ÒâµÄÊÇ£¬¶ÔÓÚ»ù±¾ÊıÖµĞÍ£¬Ä¿Ç°ÓĞÈıÖÖ¶ÔÓ¦µÄ°ü×°ÀàĞÍ Stream£º
+IntStream¡¢LongStream¡¢DoubleStream¡£µ±È»ÎÒÃÇÒ²¿ÉÒÔÓÃ Stream<Integer>¡¢Stream<Long> >¡¢Stream<Double>£¬µ«ÊÇ boxing ºÍ unboxing »áºÜºÄÊ±£¬ËùÒÔÌØ±ğÎªÕâÈıÖÖ»ù±¾ÊıÖµĞÍÌá¹©ÁË¶ÔÓ¦µÄ Stream¡£
+Java 8 ÖĞ»¹Ã»ÓĞÌá¹©ÆäËüÊıÖµĞÍ Stream£¬ÒòÎªÕâ½«µ¼ÖÂÀ©ÔöµÄÄÚÈİ½Ï¶à¡£¶ø³£¹æµÄÊıÖµĞÍ¾ÛºÏÔËËã¿ÉÒÔÍ¨¹ıÉÏÃæÈıÖÖ Stream ½øĞĞ¡£
+
+Çåµ¥ 5. ÊıÖµÁ÷µÄ¹¹Ôì
+IntStream.of(new int[]{1, 2, 3}).forEach(System.out::println);
+IntStream.range(1, 3).forEach(System.out::println); //[1, 3)
+IntStream.rangeClosed(1, 3).forEach(System.out::println); //[1, 3]
+
+
+Çåµ¥ 6. Á÷×ª»»ÎªÆäËüÊı¾İ½á¹¹
+// 1. Array
+String[] strArray1 = stream.toArray(String[]::new);
+// Stream<String> stringStream = Stream.of("a", "b", "c");
+// String[] strings = stringStream.toArray(String[]::new);
+// for (String s : strings) { //²é¿´Êı×éÄÚÈİĞèÒªÊÖ¹¤±éÀú£¬Èç¹ûÓÃSystem.out.println(strings)ÎŞ·¨´ò³öÊı×éÔªËØ
+    // System.out.println(s);
+// }
+
+// 2. Collection
+List<String> list1 = stream.collect(Collectors.toList()); //ÊµÏÖÊÇArrayList::new
+List<String> list2 = stream.collect(Collectors.toCollection(ArrayList::new)); //List<String> list2 = stringStream.collect(Collectors.toCollection(LinkedList::new));//ÕâÀï¿ÉÒÔÖ¸¶¨Éú³ÉCollectionµÄÀàĞÍ£¬Ò²¿ÉÒÔÓÃLinkedListµÈ
+
+Set set1 = stream.collect(Collectors.toSet()); //HashSet::new
+Stack stack1 = stream.collect(Collectors.toCollection(Stack::new));
+// 3. String
+String str = stream.collect(Collectors.joining()).toString();
+
+Ò»¸ö Stream Ö»¿ÉÒÔÊ¹ÓÃÒ»´Î£¬ÉÏÃæµÄ´úÂëÎªÁË¼ò½à¶øÖØ¸´Ê¹ÓÃÁËÊı´Î¡£
+
+//²âÊÔÈçÏÂ
+package test;
+
+import org.junit.Test;
+
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void testToCollection() {
+        Stream<String> stringStream = Stream.of("b", "a", "c");
+        Set set1 = stringStream.collect(Collectors.toCollection(TreeSet::new));
+        System.out.println(set1); //[a, b, c]
+    }
+
+    @Test
+    public void testToString_emptyDelimiter() {
+        Stream<String> stringStream = Stream.of("b", "a", "c");
+        String str = stringStream.collect(Collectors.joining()).toString();
+        System.out.println(str); //bac
+    }
+
+    @Test
+    public void testToString_commaDelimiter() {
+        Stream<String> stringStream = Stream.of("b", "a", "c");
+        String str = stringStream.collect(Collectors.joining(", ")).toString();
+        System.out.println(str); //b, a, c
+    }
+
+    @Test
+    public void testToString_prefixsufixDelimiter() {
+        Stream<String> stringStream = Stream.of("b", "a", "c");
+        String str = stringStream.collect(Collectors.joining(", ", ":", ";")).toString();
+        System.out.println(str); //:b, a, c;
+    }
+}
+
+--Á÷µÄ²Ù×÷
+½ÓÏÂÀ´£¬µ±°ÑÒ»¸öÊı¾İ½á¹¹°ü×°³É Stream ºó£¬¾ÍÒª¿ªÊ¼¶ÔÀïÃæµÄÔªËØ½øĞĞ¸÷Àà²Ù×÷ÁË¡£³£¼ûµÄ²Ù×÷¿ÉÒÔ¹éÀàÈçÏÂ¡£
+Intermediate£º
+map (mapToInt, flatMap µÈ)¡¢ filter¡¢ distinct¡¢ sorted¡¢ peek¡¢ limit¡¢ skip¡¢ parallel¡¢ sequential¡¢ unordered
+Terminal£º
+forEach¡¢ forEachOrdered¡¢ toArray¡¢ reduce¡¢ collect¡¢ min¡¢ max¡¢ count¡¢ anyMatch¡¢ allMatch¡¢ noneMatch¡¢ findFirst¡¢ findAny¡¢ iterator
+Short-circuiting£º
+anyMatch¡¢ allMatch¡¢ noneMatch¡¢ findFirst¡¢ findAny¡¢ limit
+
+ÎÒÃÇÏÂÃæ¿´Ò»ÏÂ Stream µÄ±È½ÏµäĞÍÓÃ·¨¡£
+--map/flatMap
+ÎÒÃÇÏÈÀ´¿´ map¡£Èç¹ûÄãÊìÏ¤ scala ÕâÀàº¯ÊıÊ½ÓïÑÔ£¬¶ÔÕâ¸ö·½·¨Ó¦¸ÃºÜÁË½â£¬ËüµÄ×÷ÓÃ¾ÍÊÇ°Ñ input Stream µÄÃ¿Ò»¸öÔªËØ£¬Ó³Éä³É output Stream µÄÁíÍâÒ»¸öÔªËØ¡£
+Çåµ¥ 7. ×ª»»´óĞ´
+List<String> output = wordList.stream().
+    map(String::toUpperCase).
+    collect(Collectors.toList());
+Õâ¶Î´úÂë°ÑËùÓĞµÄµ¥´Ê×ª»»Îª´óĞ´¡£
+
+Çåµ¥ 8. Æ½·½Êı
+List<Integer> nums = Arrays.asList(1, 2, 3, 4);
+List<Integer> squareNums = nums.stream().
+map(n -> n * n).
+collect(Collectors.toList());
+Õâ¶Î´úÂëÉú³ÉÒ»¸öÕûÊı list µÄÆ½·½Êı {1, 4, 9, 16}¡£
+
+´ÓÉÏÃæÀı×Ó¿ÉÒÔ¿´³ö£¬map Éú³ÉµÄÊÇ¸ö 1:1 Ó³Éä£¬Ã¿¸öÊäÈëÔªËØ£¬¶¼°´ÕÕ¹æÔò×ª»»³ÉÎªÁíÍâÒ»¸öÔªËØ¡£»¹ÓĞÒ»Ğ©³¡¾°£¬ÊÇÒ»¶Ô¶àÓ³Éä¹ØÏµµÄ£¬ÕâÊ±ĞèÒª flatMap¡£
+
+Çåµ¥ 9. Ò»¶Ô¶à
+Stream<List<Integer>> inputStream = Stream.of(
+ Arrays.asList(1),
+ Arrays.asList(2, 3),
+ Arrays.asList(4, 5, 6)
+ );
+Stream<Integer> outputStream = inputStream.
+flatMap((childList) -> childList.stream());
+
+flatMap °Ñ input Stream ÖĞµÄ²ã¼¶½á¹¹±âÆ½»¯£¬¾ÍÊÇ½«×îµ×²ãÔªËØ³é³öÀ´·Åµ½Ò»Æğ£¬×îÖÕ output µÄĞÂ Stream ÀïÃæÒÑ¾­Ã»ÓĞ List ÁË£¬¶¼ÊÇÖ±½ÓµÄÊı×Ö¡£
+//ÑùÀı
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void testToCollection() {
+        Stream<List<String>> listStream = Stream.of(Arrays.asList("a"), Arrays.asList("b", "c"), Arrays.asList("d", "e", "f"));
+        List<String> allLists = listStream.flatMap(lists -> lists.stream()).collect(Collectors.toList());
+        System.out.println(allLists); //[a, b, c, d, e, f]
+    }
+}
+
+--filter
+filter ¶ÔÔ­Ê¼ Stream ½øĞĞÄ³Ïî²âÊÔ£¬Í¨¹ı²âÊÔµÄÔªËØ±»ÁôÏÂÀ´Éú³ÉÒ»¸öĞÂ Stream¡£
+Çåµ¥ 10. ÁôÏÂÅ¼Êı
+Integer[] sixNums = {1, 2, 3, 4, 5, 6};
+Integer[] evens = Stream.of(sixNums).filter(n -> n%2 == 0).toArray(Integer[]::new);
+¾­¹ıÌõ¼ş¡°±» 2 Õû³ı¡±µÄ filter£¬Ê£ÏÂµÄÊı×ÖÎª {2, 4, 6}¡£
+
+Çåµ¥ 11. °Ñµ¥´ÊÌô³öÀ´
+List<String> output = reader.lines().
+ flatMap(line -> Stream.of(line.split(REGEXP))).
+ filter(word -> word.length() > 0).
+ collect(Collectors.toList());
+Õâ¶Î´úÂëÊ×ÏÈ°ÑÃ¿ĞĞµÄµ¥´ÊÓÃ flatMap ÕûÀíµ½ĞÂµÄ Stream£¬È»ºó±£Áô³¤¶È²»Îª 0 µÄ£¬¾ÍÊÇÕûÆªÎÄÕÂÖĞµÄÈ«²¿µ¥´ÊÁË¡£
+
+--forEach
+forEach ·½·¨½ÓÊÕÒ»¸ö Lambda ±í´ïÊ½£¬È»ºóÔÚ Stream µÄÃ¿Ò»¸öÔªËØÉÏÖ´ĞĞ¸Ã±í´ïÊ½¡£
+Çåµ¥ 12. ´òÓ¡ĞÕÃû£¨forEach ºÍ pre-java8 µÄ¶Ô±È£©
+// Java 8
+roster.stream()
+ .filter(p -> p.getGender() == Person.Sex.MALE)
+ .forEach(p -> System.out.println(p.getName()));
+// Pre-Java 8
+for (Person p : roster) {
+ if (p.getGender() == Person.Sex.MALE) {
+ System.out.println(p.getName());
+ }
+}
+¶ÔÒ»¸öÈËÔ±¼¯ºÏ±éÀú£¬ÕÒ³öÄĞĞÔ²¢´òÓ¡ĞÕÃû¡£¿ÉÒÔ¿´³öÀ´£¬forEach ÊÇÎª Lambda ¶øÉè¼ÆµÄ£¬±£³ÖÁË×î½ô´ÕµÄ·ç¸ñ¡£¶øÇÒ Lambda ±í´ïÊ½±¾ÉíÊÇ¿ÉÒÔÖØÓÃµÄ£¬·Ç³£·½±ã¡£µ±ĞèÒªÎª¶àºËÏµÍ³ÓÅ»¯Ê±£¬¿ÉÒÔ parallelStream().forEach()£¬Ö»ÊÇ´ËÊ±Ô­ÓĞÔªËØµÄ´ÎĞòÃ»·¨±£Ö¤£¬²¢ĞĞµÄÇé¿öÏÂ½«¸Ä±ä´®ĞĞÊ±²Ù×÷µÄĞĞÎª£¬´ËÊ± forEach ±¾ÉíµÄÊµÏÖ²»ĞèÒªµ÷Õû£¬¶ø Java8 ÒÔÇ°µÄ for Ñ­»· code ¿ÉÄÜĞèÒª¼ÓÈë¶îÍâµÄ¶àÏß³ÌÂß¼­¡£
+µ«Ò»°ãÈÏÎª£¬forEach ºÍ³£¹æ for Ñ­»·µÄ²îÒì²»Éæ¼°µ½ĞÔÄÜ£¬ËüÃÇ½ö½öÊÇº¯ÊıÊ½·ç¸ñÓë´«Í³ Java ·ç¸ñµÄ²î±ğ¡£
+
+ÁíÍâÒ»µãĞèÒª×¢Òâ£¬forEach ÊÇ terminal ²Ù×÷£¬Òò´ËËüÖ´ĞĞºó£¬Stream µÄÔªËØ¾Í±»¡°Ïû·Ñ¡±µôÁË£¬ÄãÎŞ·¨¶ÔÒ»¸ö Stream ½øĞĞÁ½´Î terminal ÔËËã¡£ÏÂÃæµÄ´úÂëÊÇ´íÎóµÄ£º
+     stream.forEach(element -> doOneThing(element));
+     stream.forEach(element -> doAnotherThing(element));
+Çåµ¥ 13. peek ¶ÔÃ¿¸öÔªËØÖ´ĞĞ²Ù×÷²¢·µ»ØÒ»¸öĞÂµÄ Stream
+Stream.of("one", "two", "three", "four")
+ .filter(e -> e.length() > 3)
+ .peek(e -> System.out.println("Filtered value: " + e))
+ .map(String::toUpperCase)
+ .peek(e -> System.out.println("Mapped value: " + e))
+ .collect(Collectors.toList());
+forEach ²»ÄÜĞŞ¸Ä×Ô¼º°üº¬µÄ±¾µØ±äÁ¿Öµ£¬Ò²²»ÄÜÓÃ break/return Ö®ÀàµÄ¹Ø¼ü×ÖÌáÇ°½áÊøÑ­»·¡£
+
+--findFirst
+ÕâÊÇÒ»¸ö termimal ¼æ short-circuiting ²Ù×÷£¬Ëü×ÜÊÇ·µ»Ø Stream µÄµÚÒ»¸öÔªËØ£¬»òÕß¿Õ¡£
+ÕâÀï±È½ÏÖØµãµÄÊÇËüµÄ·µ»ØÖµÀàĞÍ£ºOptional¡£ÕâÒ²ÊÇÒ»¸öÄ£·Â Scala ÓïÑÔÖĞµÄ¸ÅÄî£¬×÷ÎªÒ»¸öÈİÆ÷£¬Ëü¿ÉÄÜº¬ÓĞÄ³Öµ£¬»òÕß²»°üº¬¡£Ê¹ÓÃËüµÄÄ¿µÄÊÇ¾¡¿ÉÄÜ±ÜÃâ NullPointerException¡£
+Çåµ¥ 14. Optional µÄÁ½¸öÓÃÀı
+String strA = " abcd ", strB = null;
+print(strA);
+print("");
+print(strB);
+getLength(strA);
+getLength("");
+getLength(strB);
+public static void print(String text) {
+    // Java 8
+    Optional.ofNullable(text).ifPresent(System.out::println);
+    // Pre-Java 8
+    if (text != null) {
+        System.out.println(text);
+    }
+}
+public static int getLength(String text) {
+    // Java 8
+    return Optional.ofNullable(text).map(String::length).orElse(-1);
+    // Pre-Java 8
+    return (text != null) ? text.length() : -1;
+};
+
+ÔÚ¸ü¸´ÔÓµÄ if (xx != null) µÄÇé¿öÖĞ£¬Ê¹ÓÃ Optional ´úÂëµÄ¿É¶ÁĞÔ¸üºÃ£¬¶øÇÒËüÌá¹©µÄÊÇ±àÒëÊ±¼ì²é£¬ÄÜ¼«´óµÄ½µµÍ NPE ÕâÖÖ Runtime Exception ¶Ô³ÌĞòµÄÓ°Ïì£¬»òÕßÆÈÊ¹³ÌĞòÔ±¸üÔçµÄÔÚ±àÂë½×¶Î´¦Àí¿ÕÖµÎÊÌâ£¬¶ø²»ÊÇÁôµ½ÔËĞĞÊ±ÔÙ·¢ÏÖºÍµ÷ÊÔ¡£
+Stream ÖĞµÄ findAny¡¢max/min¡¢reduce µÈ·½·¨µÈ·µ»Ø Optional Öµ¡£»¹ÓĞÀıÈç IntStream.average() ·µ»Ø OptionalDouble µÈµÈ¡£
+
+--reduce
+Õâ¸ö·½·¨µÄÖ÷Òª×÷ÓÃÊÇ°Ñ Stream ÔªËØ×éºÏÆğÀ´¡£ËüÌá¹©Ò»¸öÆğÊ¼Öµ£¨ÖÖ×Ó£©£¬È»ºóÒÀÕÕÔËËã¹æÔò£¨BinaryOperator£©£¬ºÍÇ°Ãæ Stream µÄµÚÒ»¸ö¡¢µÚ¶ş¸ö¡¢µÚ n ¸öÔªËØ×éºÏ¡£´ÓÕâ¸öÒâÒåÉÏËµ£¬×Ö·û´®Æ´½Ó¡¢ÊıÖµµÄ sum¡¢min¡¢max¡¢average ¶¼ÊÇÌØÊâµÄ reduce¡£ÀıÈç Stream µÄ sum ¾ÍÏàµ±ÓÚ
+Integer sum = integers.reduce(0, (a, b) -> a+b);
+»ò
+Integer sum = integers.reduce(0, Integer::sum);
+Ò²ÓĞÃ»ÓĞÆğÊ¼ÖµµÄÇé¿ö£¬ÕâÊ±»á°Ñ Stream µÄÇ°ÃæÁ½¸öÔªËØ×éºÏÆğÀ´£¬·µ»ØµÄÊÇ Optional¡£
+Çåµ¥ 15. reduce µÄÓÃÀı
+// ×Ö·û´®Á¬½Ó£¬concat = "ABCD"
+String concat = Stream.of("A", "B", "C", "D").reduce("", String::concat); 
+// Çó×îĞ¡Öµ£¬minValue = -3.0
+double minValue = Stream.of(-1.5, 1.0, -3.0, -2.0).reduce(Double.MAX_VALUE, Double::min); 
+// ÇóºÍ£¬sumValue = 10, ÓĞÆğÊ¼Öµ
+int sumValue = Stream.of(1, 2, 3, 4).reduce(0, Integer::sum);
+// ÇóºÍ£¬sumValue = 10, ÎŞÆğÊ¼Öµ
+sumValue = Stream.of(1, 2, 3, 4).reduce(Integer::sum).get();
+// ¹ıÂË£¬×Ö·û´®Á¬½Ó£¬concat = "ace"
+concat = Stream.of("a", "B", "c", "D", "e", "F").
+ filter(x -> x.compareTo("Z") > 0).
+ reduce("", String::concat);
+ÉÏÃæ´úÂëÀıÈçµÚÒ»¸öÊ¾ÀıµÄ reduce()£¬µÚÒ»¸ö²ÎÊı£¨¿Õ°××Ö·û£©¼´ÎªÆğÊ¼Öµ£¬µÚ¶ş¸ö²ÎÊı£¨String::concat£©Îª BinaryOperator¡£ÕâÀàÓĞÆğÊ¼ÖµµÄ reduce() ¶¼·µ»Ø¾ßÌåµÄ¶ÔÏó¡£¶ø¶ÔÓÚµÚËÄ¸öÊ¾ÀıÃ»ÓĞÆğÊ¼ÖµµÄ reduce()£¬ÓÉÓÚ¿ÉÄÜÃ»ÓĞ×ã¹»µÄÔªËØ£¬·µ»ØµÄÊÇ Optional£¬ÇëÁôÒâÕâ¸öÇø±ğ¡£
+
+--limit/skip
+limit ·µ»Ø Stream µÄÇ°Ãæ n ¸öÔªËØ£»skip ÔòÊÇÈÓµôÇ° n ¸öÔªËØ£¨ËüÊÇÓÉÒ»¸ö½Ğ subStream µÄ·½·¨¸ÄÃû¶øÀ´£©¡£
+Çåµ¥ 16. limit ºÍ skip ¶ÔÔËĞĞ´ÎÊıµÄÓ°Ïì
+package test;
+
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class StreamTest {
+
+    private class Person {
+        public int no;
+        private String name;
+
+        public Person(int no, String name) {
+            this.no = no;
+            this.name = name;
+        }
+
+        public String getName() {
+            System.out.println(name);
+            return name;
+        }
+    }
+
+    @Test
+    public void testLimitAndSkip() {
+        List<Person> persons = new ArrayList();
+        for (int i = 1; i <= 10000; i++) {
+            Person person = new Person(i, "name" + i);
+            persons.add(person);
+        }
+
+        List<String> personList2 = persons.stream().
+            map(Person::getName).limit(10).skip(3).collect(Collectors.toList());
+        System.out.println(personList2);
+    }
+}
+Êä³ö£º
+name1
+name2
+name3
+name4
+name5
+name6
+name7
+name8
+name9
+name10
+[name4, name5, name6, name7, name8, name9, name10]
+
+ÕâÊÇÒ»¸öÓĞ 10£¬000 ¸öÔªËØµÄ Stream£¬µ«ÔÚ short-circuiting ²Ù×÷ limit ºÍ skip µÄ×÷ÓÃÏÂ£¬¹ÜµÀÖĞ map ²Ù×÷Ö¸¶¨µÄ getName() ·½·¨µÄÖ´ĞĞ´ÎÊıÎª limit ËùÏŞ¶¨µÄ 10 ´Î£¬¶ø×îÖÕ·µ»Ø½á¹ûÔÚÌø¹ıÇ° 3 ¸öÔªËØºóÖ»ÓĞºóÃæ 7 ¸ö·µ»Ø¡£
+
+ÓĞÒ»ÖÖÇé¿öÊÇ limit/skip ÎŞ·¨´ïµ½ short-circuiting Ä¿µÄµÄ£¬¾ÍÊÇ°ÑËüÃÇ·ÅÔÚ Stream µÄÅÅĞò²Ù×÷ºó£¬Ô­Òò¸ú sorted Õâ¸ö intermediate ²Ù×÷ÓĞ¹Ø£º´ËÊ±ÏµÍ³²¢²»ÖªµÀ Stream ÅÅĞòºóµÄ´ÎĞòÈçºÎ£¬ËùÒÔ sorted ÖĞµÄ²Ù×÷¿´ÉÏÈ¥¾ÍÏñÍêÈ«Ã»ÓĞ±» limit »òÕß skip Ò»Ñù¡£
+Çåµ¥ 17. limit ºÍ skip ¶Ô sorted ºóµÄÔËĞĞ´ÎÊıÎŞÓ°Ïì
+@Test
+public void testLimitAfterSorted() {
+    List<Person> persons = new ArrayList();
+    for (int i = 1; i <= 5; i++) {
+        Person person = new Person(i, "name" + i);
+        persons.add(person);
+    }
+    
+    List<String> personList2 = persons.stream().sorted((p1, p2) ->
+            p1.getName().compareTo(p2.getName())).limit(2).map(Person::getName).collect(Collectors.toList());
+        System.out.println(personList2);
+}
+Êä³ö£º
+name2
+name1
+name3
+name2
+name4
+name3
+name5
+name4
+name1 --ÕâÁ½¸öÊÇmap(Person::getName)µÄÊä³ö
+name2
+[name1, name2]
+
+ÉÏÃæµÄÊ¾Àı¶ÔÇåµ¥ 13 ×öÁËÎ¢µ÷£¬Ê×ÏÈ¶Ô 5 ¸öÔªËØµÄ Stream ÅÅĞò£¬È»ºó½øĞĞ limit ²Ù×÷¡£Êä³ö½á¹ûÈçÉÏ¡£
+
+×îºóÓĞÒ»µãĞèÒª×¢ÒâµÄÊÇ£¬¶ÔÒ»¸ö parallel µÄ Steam ¹ÜµÀÀ´Ëµ£¬Èç¹ûÆäÔªËØÊÇÓĞĞòµÄ£¬ÄÇÃ´ limit ²Ù×÷µÄ³É±¾»á±È½Ï´ó£¬ÒòÎªËüµÄ·µ»Ø¶ÔÏó±ØĞëÊÇÇ° n ¸öÒ²ÓĞÒ»Ñù´ÎĞòµÄÔªËØ¡£È¡¶ø´úÖ®µÄ²ßÂÔÊÇÈ¡ÏûÔªËØ¼äµÄ´ÎĞò£¬»òÕß²»ÒªÓÃ parallel Stream¡£
+
+--sorted
+¶Ô Stream µÄÅÅĞòÍ¨¹ı sorted ½øĞĞ£¬Ëü±ÈÊı×éµÄÅÅĞò¸üÇ¿Ö®´¦ÔÚÓÚÄã¿ÉÒÔÊ×ÏÈ¶Ô Stream ½øĞĞ¸÷Àà map¡¢filter¡¢limit¡¢skip ÉõÖÁ distinct À´¼õÉÙÔªËØÊıÁ¿ºó£¬ÔÙÅÅĞò£¬ÕâÄÜ°ïÖú³ÌĞòÃ÷ÏÔËõ¶ÌÖ´ĞĞÊ±¼ä¡£ÎÒÃÇ¶ÔÇåµ¥ 14 ½øĞĞÓÅ»¯£º
+Çåµ¥ 18. ÓÅ»¯£ºÅÅĞòÇ°½øĞĞ limit ºÍ skip
+//ÁíÍâ£¬ÊÔÑéÏÈlimitÔÙsorted£¬¿ÉÒÔ¿´µ½Ö»¶ÔÁ½¸öÔªËØ½øĞĞÁËÅÅĞò
+@Test
+public void testLimitBeforeSorted() {
+    List<Person> persons = new ArrayList();
+    for (int i = 1; i <= 5; i++) {
+        Person person = new Person(i, "name" + i);
+        persons.add(person);
+    }
+
+    List<String> personList2 = persons.stream().limit(2).sorted((p1, p2) ->
+        p1.getName().compareTo(p2.getName())).map(Person::getName).collect(Collectors.toList());
+    System.out.println(personList2);
+}
+Êä³ö
+name2
+name1
+name1
+name2
+[name1, name2]
+µ±È»£¬ÕâÖÖÓÅ»¯ÊÇÓĞ business logic ÉÏµÄ¾ÖÏŞĞÔµÄ£º¼´²»ÒªÇóÅÅĞòºóÔÙÈ¡Öµ¡£
+
+--min/max/distinct
+min ºÍ max µÄ¹¦ÄÜÒ²¿ÉÒÔÍ¨¹ı¶Ô Stream ÔªËØÏÈÅÅĞò£¬ÔÙ findFirst À´ÊµÏÖ£¬µ«Ç°ÕßµÄĞÔÄÜ»á¸üºÃ£¬Îª O(n)£¬¶ø sorted µÄ³É±¾ÊÇ O(n log n)¡£Í¬Ê±ËüÃÇ×÷ÎªÌØÊâµÄ reduce ·½·¨±»¶ÀÁ¢³öÀ´Ò²ÊÇÒòÎªÇó×î´ó×îĞ¡ÖµÊÇºÜ³£¼ûµÄ²Ù×÷¡£
+Çåµ¥ 19. ÕÒ³ö×î³¤Ò»ĞĞµÄ³¤¶È
+//abc.txt
+day
+hello
+nice
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+public class StreamTest {
+
+    @Test
+    public void testLimitAndSkip() {
+        try {
+            FileReader fr = new FileReader("src/main/java/test/abc.txt");
+            BufferedReader br = new BufferedReader(fr);
+
+            int longest = br.lines().
+                mapToInt(String::length).
+                max().
+                getAsInt();
+
+            br.close();
+            fr.close();
+            System.out.println(longest);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+Êä³ö£º
+5
+
+ÏÂÃæµÄÀı×ÓÔòÊ¹ÓÃ distinct À´ÕÒ³ö²»ÖØ¸´µÄµ¥´Ê¡£
+Çåµ¥ 20. ÕÒ³öÈ«ÎÄµÄµ¥´Ê£¬×ªĞ¡Ğ´£¬²¢ÅÅĞò
+//abc.txt
+hello what a nice day
+DAY day up GOOD good study
+HELLO
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void testLimitAndSkip() {
+        try {
+            FileReader fr = new FileReader("src/main/java/test/abc.txt"); //ÕâÀïÈç¹ûÂ·¾¶Îªmain/java/test/abc.txt£¬ÔòÕÒ²»µ½ÏàÓ¦ÎÄ¼ş
+            BufferedReader br = new BufferedReader(fr);
+
+            List<String> words = br.lines().
+                flatMap(line -> Stream.of(line.split(" "))).
+                filter(word -> word.length() > 0).
+                map(String::toLowerCase).
+                distinct().
+                sorted().
+                collect(Collectors.toList());
+
+            br.close();
+            fr.close();
+            System.out.println(words);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+Êä³ö£º
+[a, day, good, hello, nice, study, up, what]
+
+
+--Match
+Stream ÓĞÈı¸ö match ·½·¨£¬´ÓÓïÒåÉÏËµ£º
+allMatch£ºStream ÖĞÈ«²¿ÔªËØ·ûºÏ´«ÈëµÄ predicate£¬·µ»Ø true
+anyMatch£ºStream ÖĞÖ»ÒªÓĞÒ»¸öÔªËØ·ûºÏ´«ÈëµÄ predicate£¬·µ»Ø true
+noneMatch£ºStream ÖĞÃ»ÓĞÒ»¸öÔªËØ·ûºÏ´«ÈëµÄ predicate£¬·µ»Ø true
+ËüÃÇ¶¼²»ÊÇÒª±éÀúÈ«²¿ÔªËØ²ÅÄÜ·µ»Ø½á¹û¡£ÀıÈç allMatch Ö»ÒªÒ»¸öÔªËØ²»Âú×ãÌõ¼ş£¬¾Í skip Ê£ÏÂµÄËùÓĞÔªËØ£¬·µ»Ø false¡£¶ÔÇåµ¥ 13 ÖĞµÄ Person ÀàÉÔ×öĞŞ¸Ä£¬¼ÓÈëÒ»¸ö age ÊôĞÔºÍ getAge ·½·¨¡£
+Çåµ¥ 21. Ê¹ÓÃ Match
+List<Person> persons = new ArrayList();
+persons.add(new Person(1, "name" + 1, 10));
+persons.add(new Person(2, "name" + 2, 21));
+persons.add(new Person(3, "name" + 3, 34));
+persons.add(new Person(4, "name" + 4, 6));
+persons.add(new Person(5, "name" + 5, 55));
+boolean isAllAdult = persons.stream().
+ allMatch(p -> p.getAge() > 18);
+System.out.println("All are adult? " + isAllAdult);
+boolean isThereAnyChild = persons.stream().
+ anyMatch(p -> p.getAge() < 12);
+System.out.println("Any child? " + isThereAnyChild);
+Êä³ö½á¹û£º
+ All are adult? false
+ Any child? true
+
+//-----
+½ø½×£º×Ô¼ºÉú³ÉÁ÷
+--Stream.generate
+Í¨¹ıÊµÏÖ Supplier ½Ó¿Ú£¬Äã¿ÉÒÔ×Ô¼ºÀ´¿ØÖÆÁ÷µÄÉú³É¡£ÕâÖÖÇéĞÎÍ¨³£ÓÃÓÚËæ»úÊı¡¢³£Á¿µÄ Stream£¬»òÕßĞèÒªÇ°ºóÔªËØ¼äÎ¬³Ö×ÅÄ³ÖÖ×´Ì¬ĞÅÏ¢µÄ Stream¡£°Ñ Supplier ÊµÀı´«µİ¸ø Stream.generate() Éú³ÉµÄ Stream£¬Ä¬ÈÏÊÇ´®ĞĞ£¨Ïà¶Ô parallel ¶øÑÔ£©µ«ÎŞĞòµÄ£¨Ïà¶Ô ordered ¶øÑÔ£©¡£ÓÉÓÚËüÊÇÎŞÏŞµÄ£¬ÔÚ¹ÜµÀÖĞ£¬±ØĞëÀûÓÃ limit Ö®ÀàµÄ²Ù×÷ÏŞÖÆ Stream ´óĞ¡¡£
+Çåµ¥ 22. Éú³É 10 ¸öËæ»úÕûÊı
+package test;
+
+import org.junit.Test;
+
+import java.util.Random;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+public class StreamTest {
+
+    @Test
+    public void testRandom() {
+        Random seed = new Random();
+        Supplier<Integer> random = seed::nextInt;
+        Stream.generate(random).limit(10).forEach(System.out::println);
+
+        //Another way
+        IntStream.generate(() -> (int) (System.nanoTime() % 100)).
+            limit(10).forEach(System.out::println);
+    }
+}
+Êä³ö£º
+943966293
+2055700156
+-844810453
+817068663
+444598564
+-624756530
+-260647001
+-613986940
+-1579427386
+154983337
+87
+44
+97
+50
+92
+34
+21
+7
+38
+70
+
+Stream.generate() »¹½ÓÊÜ×Ô¼ºÊµÏÖµÄ Supplier¡£ÀıÈçÔÚ¹¹Ôìº£Á¿²âÊÔÊı¾İµÄÊ±ºò£¬ÓÃÄ³ÖÖ×Ô¶¯µÄ¹æÔò¸øÃ¿Ò»¸ö±äÁ¿¸³Öµ£»»òÕßÒÀ¾İ¹«Ê½¼ÆËã Stream µÄÃ¿¸öÔªËØÖµ¡£ÕâĞ©¶¼ÊÇÎ¬³Ö×´Ì¬ĞÅÏ¢µÄÇéĞÎ¡£
+Çåµ¥ 23. ×ÔÊµÏÖ Supplier
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.Random;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testRandom() {
+        Stream.generate(new PersonSupplier()).
+            limit(10).
+            forEach(p -> System.out.println(p.getName() + ", " + p.getAge()));
+    }
+
+    private class PersonSupplier implements Supplier<Person> {
+        private int index = 0;
+        private Random random = new Random();
+
+        @Override
+        public Person get() {
+            return new Person(index++, "StormTestUser" + index, random.nextInt(100));
+        }
+    }
+
+    private class Person {
+        public int no;
+        private String name;
+        private int age;
+
+        public Person(int no, String name, int age) {
+            this.no = no;
+            this.name = name;
+            this.age = age;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+}
+
+--Stream.iterate
+iterate ¸ú reduce ²Ù×÷ºÜÏñ£¬½ÓÊÜÒ»¸öÖÖ×ÓÖµ£¬ºÍÒ»¸ö UnaryOperator£¨ÀıÈç f£©¡£È»ºóÖÖ×ÓÖµ³ÉÎª Stream µÄµÚÒ»¸öÔªËØ£¬f(seed) ÎªµÚ¶ş¸ö£¬f(f(seed)) µÚÈı¸ö£¬ÒÔ´ËÀàÍÆ¡£
+Çåµ¥ 24. Éú³ÉÒ»¸öµÈ²îÊıÁĞ
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class StreamTest {
+    @Test
+    public void testRandom() {
+        Stream.iterate(0, n -> n + 3).limit(10). forEach(x -> System.out.print(x + " "));
+    }
+}
+Êä³ö£º
+0 3 6 9 12 15 18 21 24 27
+Óë Stream.generate Ïà·Â£¬ÔÚ iterate Ê±ºò¹ÜµÀ±ØĞëÓĞ limit ÕâÑùµÄ²Ù×÷À´ÏŞÖÆ Stream ´óĞ¡¡£
+
+//-----
+½ø½×£ºÓÃ Collectors À´½øĞĞ reduction ²Ù×÷
+java.util.stream.Collectors ÀàµÄÖ÷Òª×÷ÓÃ¾ÍÊÇ¸¨Öú½øĞĞ¸÷ÀàÓĞÓÃµÄ reduction ²Ù×÷£¬ÀıÈç×ª±äÊä³öÎª Collection£¬°Ñ Stream ÔªËØ½øĞĞ¹é×é¡£
+groupingBy/partitioningBy
+Çåµ¥ 25. °´ÕÕÄêÁä¹é×é
+@Test
+public void testRandom() {
+    Stream<Person> personStream = Stream.generate(new PersonSupplier());
+    Map<Integer, List<Person>> personGroups = personStream.limit(100).collect(Collectors.groupingBy(Person::getAge));
+    Iterator<Map.Entry<Integer, List<Person>>> iterator = personGroups.entrySet().iterator();
+    while (iterator.hasNext()) {
+        Map.Entry<Integer, List<Person>> persons = iterator.next();
+        System.out.println("Age " + persons.getKey() + " = " + persons.getValue().size());
+    }
+}
+Êä³ö£º
+Age 0 = 3
+Age 2 = 1
+Age 3 = 1
+Age 4 = 4
+Age 5 = 1
+Age 13 = 1
+Age 15 = 1
+Age 17 = 3
+Age 18 = 1
+Age 19 = 1
+Age 20 = 4
+Age 22 = 1
+Age 23 = 3
+Age 24 = 1
+Age 25 = 1
+Age 26 = 1
+Age 28 = 1
+Age 29 = 1
+Age 36 = 5
+Age 37 = 1
+Age 39 = 1
+Age 40 = 3
+Age 42 = 1
+Age 44 = 1
+Age 45 = 1
+Age 47 = 1
+Age 48 = 2
+Age 50 = 1
+Age 51 = 1
+Age 52 = 1
+Age 55 = 1
+Age 56 = 1
+Age 57 = 3
+Age 58 = 1
+Age 59 = 1
+Age 61 = 2
+Age 62 = 2
+Age 63 = 2
+Age 65 = 1
+Age 66 = 2
+Age 70 = 1
+Age 71 = 1
+Age 72 = 1
+Age 75 = 1
+Age 76 = 1
+Age 77 = 1
+Age 78 = 2
+Age 80 = 1
+Age 81 = 2
+Age 83 = 1
+Age 87 = 1
+Age 88 = 3
+Age 89 = 4
+Age 90 = 1
+Age 91 = 1
+Age 93 = 1
+Age 94 = 2
+Age 96 = 4
+Age 97 = 1
+Age 98 = 3
+Age 99 = 2
+
+Çåµ¥ 26. °´ÕÕÎ´³ÉÄêÈËºÍ³ÉÄêÈË¹é×é
+@Test
+public void testRandom() {
+    Map<Boolean, List<Person>> children = Stream.generate(new PersonSupplier()).
+        limit(100).
+        collect(Collectors.partitioningBy(p -> p.getAge() < 18));
+    System.out.println("Children number: " + children.get(true).size());
+    System.out.println("Adult number: " + children.get(false).size());
+}
+Êä³ö£º
+Children number: 13
+Adult number: 87
+ÔÚÊ¹ÓÃÌõ¼ş¡°ÄêÁäĞ¡ÓÚ18¡±½øĞĞ·Ö×éºó¿ÉÒÔ¿´µ½£¬²»µ½ 18 ËêµÄÎ´³ÉÄêÈËÊÇÒ»×é£¬³ÉÄêÈËÊÇÁíÍâÒ»×é¡£partitioningBy ÆäÊµÊÇÒ»ÖÖÌØÊâµÄ groupingBy£¬ËüÒÀÕÕÌõ¼ş²âÊÔµÄÊÇ·ñÁ½ÖÖ½á¹ûÀ´¹¹Ôì·µ»ØµÄÊı¾İ½á¹¹£¬get(true) ºÍ get(false) ÄÜ¼´ÎªÈ«²¿µÄÔªËØ¶ÔÏó¡£
+
+//-----
+½áÊøÓï
+×ÜÖ®£¬Stream µÄÌØĞÔ¿ÉÒÔ¹éÄÉÎª£º
+²»ÊÇÊı¾İ½á¹¹
+ËüÃ»ÓĞÄÚ²¿´æ´¢£¬ËüÖ»ÊÇÓÃ²Ù×÷¹ÜµÀ´Ó source£¨Êı¾İ½á¹¹¡¢Êı×é¡¢generator function¡¢IO channel£©×¥È¡Êı¾İ¡£
+ËüÒ²¾ø²»ĞŞ¸Ä×Ô¼ºËù·â×°µÄµ×²ãÊı¾İ½á¹¹µÄÊı¾İ¡£ÀıÈç Stream µÄ filter ²Ù×÷»á²úÉúÒ»¸ö²»°üº¬±»¹ıÂËÔªËØµÄĞÂ Stream£¬¶ø²»ÊÇ´Ó source É¾³ıÄÇĞ©ÔªËØ¡£
+ËùÓĞ Stream µÄ²Ù×÷±ØĞëÒÔ lambda ±í´ïÊ½Îª²ÎÊı
+²»Ö§³ÖË÷Òı·ÃÎÊ
+Äã¿ÉÒÔÇëÇóµÚÒ»¸öÔªËØ£¬µ«ÎŞ·¨ÇëÇóµÚ¶ş¸ö£¬µÚÈı¸ö£¬»ò×îºóÒ»¸ö¡£²»¹ıÇë²ÎÔÄÏÂÒ»Ïî¡£
+ºÜÈİÒ×Éú³ÉÊı×é»òÕß List
+¶èĞÔ»¯
+ºÜ¶à Stream ²Ù×÷ÊÇÏòºóÑÓ³ÙµÄ£¬Ò»Ö±µ½ËüÅªÇå³şÁË×îºóĞèÒª¶àÉÙÊı¾İ²Å»á¿ªÊ¼¡£
+Intermediate ²Ù×÷ÓÀÔ¶ÊÇ¶èĞÔ»¯µÄ¡£
+²¢ĞĞÄÜÁ¦
+µ±Ò»¸ö Stream ÊÇ²¢ĞĞ»¯µÄ£¬¾Í²»ĞèÒªÔÙĞ´¶àÏß³Ì´úÂë£¬ËùÓĞ¶ÔËüµÄ²Ù×÷»á×Ô¶¯²¢ĞĞ½øĞĞµÄ¡£
+¿ÉÒÔÊÇÎŞÏŞµÄ
+¼¯ºÏÓĞ¹Ì¶¨´óĞ¡£¬Stream Ôò²»±Ø¡£limit(n) ºÍ findFirst() ÕâÀàµÄ short-circuiting ²Ù×÷¿ÉÒÔ¶ÔÎŞÏŞµÄ Stream ½øĞĞÔËËã²¢ºÜ¿ìÍê³É¡£
 //------------------------------------------------------------------------------------------------
 //Java Stream Ê¹ÓÃÏê½â
 http://www.codeceo.com/article/java-stream-usage.html
@@ -888,21 +2043,12 @@ concatÓÃÀ´Á¬½ÓÀàĞÍÒ»ÑùµÄÁ½¸öÁ÷¡£
 public static <T> Stream<T> concat(Stream<? extends T> a, Stream<? extends T> b)
 
 --×ª»»
-toArray·½·¨½«Ò»¸öÁ÷×ª»»³ÉÊı×é£¬¶øÈç¹ûÏë×ª»»³ÉÆäËü¼¯ºÏÀàĞÍ£¬Î÷ĞèÒªµ÷ÓÃcollect·½·¨£¬ÀûÓÃCollectors.toXXX·½·¨½øĞĞ×ª»»£º
+toArray·½·¨½«Ò»¸öÁ÷×ª»»³ÉÊı×é£¬¶øÈç¹ûÏë×ª»»³ÉÆäËü¼¯ºÏÀàĞÍ£¬ĞèÒªµ÷ÓÃcollect·½·¨£¬ÀûÓÃCollectors.toXXX·½·¨½øĞĞ×ª»»£º
 public static <T,C extends Collection<T>> Collector<T,?,C> toCollection(Supplier<C> collectionFactory)
 public static ¡­¡­ toConcurrentMap(¡­¡­)
 public static <T> Collector<T,?,List<T>> toList()
 public static ¡­¡­ 	toMap(¡­¡­)
 public static <T> Collector<T,?,Set<T>> toSet()
-//-----
-
-//-----
-
-//-----
-
-
-
-
 //------------------------------------------------------------------------------------------------
 //Java 8 Streams API£º¶ÔStream·Ö×éºÍ·ÖÇø
 http://www.importnew.com/17313.html
