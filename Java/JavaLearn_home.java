@@ -1,4 +1,1017 @@
 //------------------------------------------------------------------------------------------------
+//Mockito Unit tests with Mockito - Tutorial
+http://www.vogella.com/tutorials/Mockito/article.html
+翻译版：http://www.jianshu.com/p/f6e3ab9719b9
+
+4.3. 配置 mock
+当我们需要配置某个方法的返回值的时候，Mockito 提供了链式的 API 供我们方便的调用
+when(…?.).thenReturn(…?.)可以被用来定义当条件满足时函数的返回值，如果你需要定义多个返回值，可以多次定义。当你多次调用函数的时候，Mockito 会根据你定义的先后顺序来返回返回值。Mocks 还可以根据传入参数的不同来定义不同的返回值。譬如说你的函数可以将anyString 或者 anyInt作为输入参数，然后定义其特定的放回值。
+
+import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+
+@Test
+public void test1()  {
+        //  创建 mock
+        MyClass test = Mockito.mock(MyClass.class);
+
+        // 自定义 getUniqueId() 的返回值
+        when(test.getUniqueId()).thenReturn(43);
+
+        // 在测试中使用mock对象
+        assertEquals(test.getUniqueId(), 43);
+}
+
+// 返回多个值
+@Test
+public void testMoreThanOneReturnValue()  {
+        Iterator i= mock(Iterator.class);
+        when(i.next()).thenReturn("Mockito").thenReturn("rocks");
+        String result=i.next()+" "+i.next();
+        // 断言
+        assertEquals("Mockito rocks", result);
+}
+
+// 如何根据输入来返回值
+@Test
+public void testReturnValueDependentOnMethodParameter()  {
+        Comparable c= mock(Comparable.class);
+        when(c.compareTo("Mockito")).thenReturn(1);
+        when(c.compareTo("Eclipse")).thenReturn(2);
+        // 断言
+        assertEquals(1,c.compareTo("Mockito"));
+}
+
+// 如何让返回值不依赖于输入
+@Test
+public void testReturnValueInDependentOnMethodParameter()  {
+        Comparable c= mock(Comparable.class);
+        when(c.compareTo(anyInt())).thenReturn(-1);
+        // 断言
+        assertEquals(-1 ,c.compareTo(9));
+}
+
+// 根据参数类型来返回值
+@Test
+public void testReturnValueInDependentOnMethodParameter()  {
+        Comparable c= mock(Comparable.class);
+        when(c.compareTo(isA(Todo.class))).thenReturn(0);
+        // 断言
+        Todo todo = new Todo(5);
+        assertEquals(todo ,c.compareTo(new Todo(1)));
+}
+
+对于无返回值的函数，我们可以使用doReturn(…?).when(…?).methodCall来获得类似的效果。例如我们想在调用某些无返回值函数的时候抛出异常，那么可以使用doThrow 方法。如下面代码片段所示
+package test;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+
+public class MockTest {
+
+    @Test(expected = IOException.class)
+    public void testForIOException() throws IOException {
+        // 创建并配置 mock 对象
+        OutputStream mockStream = mock(OutputStream.class);
+        doThrow(new IOException()).when(mockStream).close();
+
+        // 使用 mock
+        OutputStreamWriter streamWriter= new OutputStreamWriter(mockStream);
+        streamWriter.close();
+    }
+}
+
+
+4.4. 验证 mock 对象方法是否被调用
+Mockito 会跟踪 mock 对象里面所有的方法和变量。所以我们可以用来验证函数在传入特定参数的时候是否被调用。这种方式的测试称行为测试，行为测试并不会检查函数的返回值，而是检查在传入正确参数时候函数是否被调用。
+
+import static org.mockito.Mockito.*;
+
+@Test
+public void testVerify()  {
+        // 创建并配置 mock 对象
+        MyClass test = Mockito.mock(MyClass.class);
+        when(test.getUniqueId()).thenReturn(43);
+
+        // 调用mock对象里面的方法并传入参数为12
+        test.testing(12);
+        test.getUniqueId();
+        test.getUniqueId();
+
+        // 查看在传入参数为12的时候方法是否被调用
+        verify(test).testing(Matchers.eq(12));//testing测试方法没有找到在哪个包中？
+
+        // 方法是否被调用两次
+        verify(test, times(2)).getUniqueId();
+
+        // 其他用来验证函数是否被调用的方法
+        verify(mock, never()).someMethod("never called");
+        verify(mock, atLeastOnce()).someMethod("called at least once");
+        verify(mock, atLeast(2)).someMethod("called at least twice");
+        verify(mock, times(5)).someMethod("called five times");
+        verify(mock, atMost(3)).someMethod("called at most 3 times");
+}
+
+
+4.5. 使用 Spy 封装 java 对象
+@Spy或者spy()方法可以被用来封装 java 对象。被封装后，除非特殊声明（打桩 stub），否则都会真正的调用对象里面的每一个方法
+package test;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+public class MockTest {
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testForIOException() throws IOException {
+        // Lets mock a LinkedList
+        List list = new LinkedList();
+        List spy = spy(list);
+
+        // 可用 doReturn() 来打桩
+        doReturn("foo").when(spy).get(0); //如果这里定义doReturn("foo").when(spy).get(anyInt());则不会抛出异常
+        // 或用如下语句打桩
+        //when(spy.get(0)).thenReturn("foo");
+        assertEquals("foo", spy.get(0));
+
+        // 如果某个方法未被打桩，则真正的方法会被调用
+        // 将会抛出 IndexOutOfBoundsException 的异常，因为 List 为空
+        spy.get(1);
+    }
+}
+
+//对于用Spy封装的对象，也是一个Mock对象，不同点就是如果某个方法被打桩，则调用时会调用打桩方法，如果某个方法没有被打桩，调用时会调用真正的对象方法
+//也可以用@Spy注解来标识Spy对象，初始化时同@Mock对象
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+
+public class MockTest {
+
+    @Spy
+    List<String> spyOnStrings = new ArrayList<>();
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testForIOException() {
+        // 可用 doReturn() 来打桩
+        doReturn("foo").when(spyOnStrings).get(0); //如果这里定义doReturn("foo").when(spy).get(anyInt());则不会抛出异常
+        // 或用如下语句打桩
+        //when(spy.get(0)).thenReturn("foo");
+        assertEquals("foo", spyOnStrings.get(0));
+
+        // 如果某个方法未被打桩，则真正的方法会被调用
+        // 将会抛出 IndexOutOfBoundsException 的异常，因为 List 为空
+        spyOnStrings.get(1);
+    }
+}
+
+//-----@Capture注解
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+public class MockTest {
+
+    @Captor
+    private ArgumentCaptor<Integer> integerArgumentCaptor;
+
+    @Mock
+    private List<String> strings;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testForIOException() {
+        assertEquals(null, strings.get(0));
+        verify(strings).get(integerArgumentCaptor.capture());
+        int value = integerArgumentCaptor.getValue();
+        assertEquals(0, value);
+        verifyNoMoreInteractions(strings);
+    }
+}
+
+
+//-----@InjectMocks注解
+http://hotdog.iteye.com/blog/937862
+通过这个注解，可实现自动注入mock对象。当前版本只支持setter的方式进行注入（但是我如下用例试了，只能通过构造函数进行依赖注入，setter函数无法进行自动注入），Mockito首先尝试类型注入，如果有多个类型相同的mock对象，那么它会根据名称进行注入。当注入失败的时候Mockito不会抛出任何异常，所以你可能需要手动去验证它的安全性。 
+例： 
+//
+package test;
+
+import java.util.List;
+import java.util.Map;
+
+public class DataBaseMgr {
+    private List<Integer> userIds;
+    private Map<Integer, String> idNameMap;
+
+    //如果只有一个如下一个参数的构造函数，同时提供了set函数，dataBaseMgr.addIdName(4, "James");方法将抛出空指针异常，idNameMap为空对象
+//    DataBaseMgr(List<Integer> userIds) {
+//        this.userIds = userIds;
+//    }
+
+    //提供了两个参数的构造函数，测试用例可以运行成功
+    DataBaseMgr(List<Integer> userIds, Map<Integer, String> idNameMap) {
+        this.userIds = userIds;
+        this.idNameMap = idNameMap;
+    }
+
+
+    public void setIdNameMap(Map<Integer, String> idNameMap) {
+        this.idNameMap = idNameMap;
+    }
+
+    public void addUserId(int id) {
+        userIds.add(id);
+    }
+
+    public void addIdName(int id, String name) {
+        idNameMap.put(id, name);
+    }
+}
+
+//
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.Mockito.verify;
+
+public class DataBaseMgrTest {
+
+    @Mock
+    private List<Integer> userIds;
+
+    @Mock
+    private Map<Integer, String> idNameMap;
+
+    @InjectMocks
+    private DataBaseMgr dataBaseMgr;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testInjectMocks() {
+        dataBaseMgr.addUserId(3);
+        dataBaseMgr.addIdName(4, "James");
+
+        verify(userIds).add(3);
+        verify(idNameMap).put(4, "James");
+    }
+}
+
+
+4.7. 捕捉参数
+ArgumentCaptor类允许我们在verification期间访问方法的参数。得到方法的参数后我们可以使用它进行测试。
+//
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+
+public class MockTest {
+
+    @Mock
+    private List<String> strings;
+
+    @Captor
+    ArgumentCaptor<List<String>> stringArgumentCaptor;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testCaptor() {
+        strings.addAll(Arrays.asList("hello", "world"));
+        verify(strings).addAll(stringArgumentCaptor.capture());
+
+        List<String> capturedStrings = stringArgumentCaptor.getValue();
+        assertThat(capturedStrings, hasItem("hello"));
+        assertThat(capturedStrings, hasItem("world"));
+    }
+}
+
+4.8. Mockito的限制
+Mockito当然也有一定的限制。而下面三种数据类型则不能够被测试
+final classes
+anonymous classes
+primitive types
+
+8.1. 使用 Powermock 来模拟静态方法
+http://huangyunbin.iteye.com/blog/2176728
+还是以刚才的DataBaseMgr类来做测试，新增了一个getPassword方法，并且调用的是PasswordMgr的静态方法getPassword
+//DataBaseMgr.java
+package test;
+
+import java.util.List;
+import java.util.Map;
+
+public class DataBaseMgr {
+    private List<Integer> userIds;
+    private Map<Integer, String> idNameMap;
+
+    DataBaseMgr(List<Integer> userIds, Map<Integer, String> idNameMap) {
+        this.userIds = userIds;
+        this.idNameMap = idNameMap;
+    }
+
+    public void setIdNameMap(Map<Integer, String> idNameMap) {
+        this.idNameMap = idNameMap;
+    }
+
+    public void addUserId(int id) {
+        userIds.add(id);
+    }
+
+    public void addIdName(int id, String name) {
+        idNameMap.put(id, name);
+    }
+
+    public String getUserPassword(Integer userId) {
+        return PasswordMgr.getPasword(userId);
+    }
+}
+
+//PasswordMgr.java
+package test;
+
+public class PasswordMgr {
+    public static String getPasword(Integer userId) {
+        return userId + "_hello";
+    }
+}
+
+//DataBaseMgrTest.java
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.verify;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(PasswordMgr.class) //如果没有这个@PrepareForTest注解，PowerMockito.when无法无法识别静态方法
+public class DataBaseMgrTest {
+
+    @Mock
+    private List<Integer> userIds;
+
+    @Mock
+    private Map<Integer, String> idNameMap;
+
+    @InjectMocks
+    private DataBaseMgr dataBaseMgr;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void testStaticMethod() {
+        dataBaseMgr.addUserId(3);
+        dataBaseMgr.addIdName(4, "James");
+
+        verify(userIds).add(3);
+        verify(idNameMap).put(4, "James");
+
+        //如果PasswordMgr.getPasword这个静态方法很容易就调用了，没有复杂的依赖，那么可以直接调用其静态方法
+        //assertEquals("101_hello", dataBaseMgr.getUserPassword(101));
+
+        //如果PasswordMgr.getPasword静态方法有很多的依赖，不能很容易的调用，则需要将这个静态方法Mock掉，Mockito无法做到，只能通过PowerMockito
+        PowerMockito.mockStatic(PasswordMgr.class);
+        PowerMockito.when(PasswordMgr.getPasword(any())).thenReturn("password").thenReturn("helloworld");//这里的any()可以用具体的int，也可以用anyInt()
+        assertEquals("password", dataBaseMgr.getUserPassword(100));
+        assertEquals("helloworld", dataBaseMgr.getUserPassword(101));
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//初始化@Mock注解对象的三个方法
+http://blog.csdn.net/hotdust/article/details/51416670
+(1) 在@Before注解中每次初始化mock对象
+(2) 在测试类定义处使用@RunWith(MockitoJUnitRunner.class)注解
+(3) 使用@Rule注解（没有找到合适的MockitoRule定义，不知道是什么问题？）
+
+//
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class) //(2)
+public class MockTest {
+
+    @Mock
+    private List<String> strings;
+
+//    @Rule
+//    public MockitoRule mockitoRule = MockitoJUnit.rule(); //(3)
+
+//    @Before
+//    public void setUp() {
+//        MockitoAnnotations.initMocks(this); //(1)
+//    }
+
+    @Test
+    public void testMockitoJUnitRunner() {
+        when(strings.get(0)).thenReturn("hello");
+        assertEquals("hello", strings.get(0));
+        verify(strings).get(0);
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//Mockito学习
+http://blog.csdn.net/zhoudaxia/article/details/33056093
+Mockito 框架
+Mockito 是一个基于MIT协议的开源java测试框架。 
+Mockito区别于其他模拟框架的地方主要是允许开发者在没有建立“预期”时验证被测系统的行为。对mock对象的一个批评是测试代码与被测系统高度耦合，由于Mockito试图通过移除“期望规范”来去除expect-run-verify模式（期望--运行--验证模式），因此使耦合度降低到最低。这样的突出特性简化了测试代码，使它更容易阅读和修改了。
+//
+package test;
+
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.internal.InOrderImpl;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+public class MockTest {
+    @Test
+    public void testMock() {
+        // 模拟的创建，对接口进行模拟
+        List mockedList = mock(List.class);
+        // 使用模拟对象
+        mockedList.add("one");//mockedList.Add("one")将报错无法解析Add，调用的方法一定是被Mock的类有的方法
+        mockedList.clear();
+        // 选择性地和显式地验证，即验证mock对象的函数调用了几次，可以不用预先设置期待返回，降低耦合
+        verify(mockedList, times(1)).add("one");//同verify(mockedList).add("one");不加次数时默认为1次
+        verify(mockedList, atLeast(1)).clear();//verify(mockedList, atLeastOnce()).clear()
+        verify(mockedList, never()).add("two");//验证从未调用过
+        verifyNoMoreInteractions(mockedList);//验证还有没有verify的交互，如果把verify(mockedList, atLeast(1)).clear();注释掉，则会报错mockedList.clear();未验证
+        verifyZeroInteractions(mockedList);//同verifyNoMoreInteractions(mockedList)一样
+        
+        //初始化一个抓取器，用于抓取入参对象
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mockedList).add(stringArgumentCaptor.capture());//抓取一个String对象
+        String addedString = stringArgumentCaptor.getValue();//获得抓取的对象
+        assertEquals("one", addedString);//验证抓取对象值
+
+        verify(mockedList, times(1)).add("one");//可以重复验证
+        verify(mockedList, atMost(2)).clear();
+        verify(mockedList, timeout(100).times(1)).add("one");//验证someMethod()是否能在指定的100毫秒中执行完毕
+
+//        List<Integer> integers = new ArrayList<>(); //如果不是Mock对象，则verify会报错
+//        integers.add(1);
+//        integers.add(2);
+//        verify(integers).add(3);
+    }
+
+    @Test
+    public void testMockReturn() {
+        // 你不仅可以模拟接口,任何具体类都行
+        LinkedList mockedList = mock(LinkedList.class);
+        // 执行前准备测试数据
+        when(mockedList.get(0)).thenReturn("first");
+        // 接着打印"first"
+        System.out.println(mockedList.get(0));
+        // 因为get(999)未对准备数据,所以下面将打印"null".
+        System.out.println(mockedList.get(999));
+    }
+    
+    @Test
+    public void testInOrder() {
+        List<String> firstMock = mock(List.class);
+        List<String> secondMock = mock(List.class);
+
+        firstMock.add("was called first");
+        firstMock.add("was called first");
+        secondMock.add("was called second");
+        secondMock.add("was called third");
+
+        InOrder inOrder = new InOrderImpl(Arrays.asList(secondMock, firstMock));//如下定义也可以：InOrder inOrder = new InOrderImpl(Arrays.asList(firstMock, secondMock));
+        inOrder.verify(firstMock, times(2)).add("was called first");
+        inOrder.verify(secondMock).add("was called second");
+        inOrder.verify(secondMock).add("was called third");//依次调用这三个顺序，如果不是这三个调用顺序，则报错
+        inOrder.verifyNoMoreInteractions();//如果未验证完，则此校验不过
+    }
+}
+输出：
+first
+null
+
+//-----
+//Person.java
+package mockitodemo;
+
+public class Person {
+    private final Integer personID;
+    private final String personName;
+
+    public Person(Integer personID, String personName) {
+        this.personID = personID;
+        this.personName = personName;
+    }
+
+    public Integer getPersonID() {
+        return personID;
+    }
+
+    public String getPersonName() {
+        return personName;
+    }
+}
+
+//PersonDao.java
+package mockitodemo;
+
+public interface PersonDao {
+    Person fetchPerson(Integer personID);
+
+    void update(Person person);
+}
+
+//PersonService.java
+package mockitodemo;
+
+public class PersonService {
+    private final PersonDao personDao;
+
+    public PersonService(PersonDao personDao) {
+        this.personDao = personDao;
+    }
+
+    public boolean update(Integer personId, String name) {
+        Person person = personDao.fetchPerson(personId);
+        if (person != null) {
+            Person updatedPerson = new Person(person.getPersonID(), name);
+            personDao.update(updatedPerson);
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+//PersonServiceTest.java
+package mockitodemo;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.ArgumentCaptor;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
+
+public class PersonServiceTest {
+
+    @Mock
+    private PersonDao personDao;  // 模拟对象
+    private PersonService personService;  // 被测类
+
+    public PersonServiceTest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+        //如果将personDao和personService改为static变量，并且在@BeforeClass中初始化，则全局所有用例都使用这两个变量
+        //此时，第一个用例调用了personDao.fetchPerson方法后，第二个用例再次调用此方法，将导致此方法调用了2次
+        //如shouldNotUpdateIfPersonNotFound()中的verify(personDao).fetchPerson(1);方法将验证失败
+        //此时修改为verify(personDao, times(2)).fetchPerson(1);，则用例会通过
+        //但是这样的话，就违反了用例测试的FIRST原则，F快速、I独立、R可重复、S自验证、T及时
+        //personDao = mock(PersonDao.class);
+        //personService = new PersonService(personDao);
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    // 在@Test标注的测试方法之前运行
+    @Before
+    public void setUp() throws Exception {
+        // 初始化测试用例类中由Mockito的注解标注的所有模拟对象
+        MockitoAnnotations.initMocks(this);//一定要testClass已经完全生成好，所以无法放在@BeforeClass里
+        // 用模拟对象创建被测类对象
+        personService = new PersonService(personDao);
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    @Test
+    public void shouldUpdatePersonName() {
+        Person person = new Person(1, "Phillip");
+        // 设置模拟对象的返回预期值
+        when(personDao.fetchPerson(1)).thenReturn(person);
+        // 执行测试
+        boolean updated = personService.update(1, "David");
+        // 验证更新是否成功
+        assertTrue(updated);
+        // 验证模拟对象的fetchPerson(1)方法是否被调用了一次
+        verify(personDao).fetchPerson(1);
+        // 得到一个抓取器
+        ArgumentCaptor<Person> personCaptor = ArgumentCaptor.forClass(Person.class);
+        // 验证模拟对象的update()是否被调用一次，并抓取调用时传入的参数值
+        verify(personDao).update(personCaptor.capture());
+        // 获取抓取到的参数值
+        Person updatePerson = personCaptor.getValue();
+        // 验证调用时的参数值
+        assertEquals("David", updatePerson.getPersonName());
+        // asserts that during the test, there are no other calls to the mock object.
+        // 检查模拟对象上是否还有未验证的交互
+        verifyNoMoreInteractions(personDao);
+    }
+
+    @Test
+    public void shouldNotUpdateIfPersonNotFound() {
+        // 设置模拟对象的返回预期值
+        when(personDao.fetchPerson(1)).thenReturn(null);
+        // 执行测试
+        boolean updated = personService.update(1, "David");
+        // 验证更新是否失败
+        assertFalse(updated);
+        // 验证模拟对象的fetchPerson(1)方法是否被调用了一次
+        verify(personDao).fetchPerson(1);
+        // 验证模拟对象是否没有发生任何交互
+        verifyZeroInteractions(personDao);
+        // 检查模拟对象上是否还有未验证的交互
+        verifyNoMoreInteractions(personDao);
+    }
+
+    /**
+     * Test of update method, of class PersonService.
+     */
+    @Test
+    public void testUpdate() {
+        System.out.println("update");
+        Integer personId = null;
+        String name = "Phillip";
+        PersonService instance = new PersonService(new PersonDao() {
+
+            @Override
+            public Person fetchPerson(Integer personID) {
+                System.out.println("Not supported yet.");
+                return null;
+            }
+
+            @Override
+            public void update(Person person) {
+                System.out.println("Not supported yet.");
+            }
+        });
+        boolean expResult = false;
+        boolean result = instance.update(personId, name);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+}
+这里setUpClass()、tearDownClass()、setUp()、tearDown()称为测试夹具（Fixture），就是测试运行程序（test runner）在运行测试方法之前进行初始化、或之后进行回收资源的工作。JUnit 4 之前是通过setUp、tearDown方法完成。在JUnit 4 中，仍然可以在每个测试方法运行之前初始化字段和配置环境，当然也是通过注解完成。在JUnit 4 中，通过@Before标注setUp方法；@After标注tearDown方法。在一个测试类中，甚至可以使用多个@Before来注解多个方法，这些方法都是在每个测试之前运行。说明一点，一个测试用例类可以包含多个打上@Test注解的测试方法，在运行时，每个测试方法都对应一个测试用例类的实例。@Before是在每个测试方法运行前均初始化一次，同理@Ater是在每个测试方法运行完毕后均执行一次。也就是说，经这两个注解的初始化和注销，可以保证各个测试之间的独立性而互不干扰，它的缺点是效率低。另外，不需要在超类中显式调用初始化和清除方法，只要它们不被覆盖，测试运行程序将根据需要自动调用这些方法。超类中的@Before方法在子类的@Before方法之前调用（与构造函数调用顺序一致），@After方法是子类在超类之前运行。
+　　这里shouldUpdatePersonName()、shouldNotUpdateIfPersonNotFound()和testUpdate()都是测试PersonService的update()方法，它依赖于PersonDao接口。前两者使用了模拟测试。testUpdate()则没有使用模拟测试。下面是测试结果：
+
+　　可以看出，使用模拟测试的两个测试成功了，没有使用模拟测试的testUpdate()失败。对于模拟测试，在测试用例类中要先声明依赖的各个模拟对象，在setUp()中用MockitoAnnotations.initMocks()初始化所有模拟对象。在进行模拟测试时，要先设置模拟对象上方法的返回预期值，执行测试时会调用模拟对象上的方法，因此要验证这些方法是否被调用，并且传入的参数值是否符合预期。对于testUpdate()测试，我们需要自己创建测试PersonService.update()所需的所有PersonDao数据，因为我们只知道公开的PersonDao接口，其具体实现类（比如从数据库中拿真实的数据，或写入到数据库中）可能由另一个团队在负责，以适配不同的数据库系统。这样的依赖关系无疑使单元测试比较麻烦，而要拿真正PersonDao实现来进行测试，那也应该是后期集成测试的任务，把不同的组件集成到一起在真实环境中测试。有了模拟测试框架，就可以最大限度地降低单元测试时的依赖耦合性。
+
+//-----学习Mockito - Mock对象的行为验证
+http://hotdog.iteye.com/blog/908827
+
+--验证的基本方法 
+我们已经熟悉了使用verify(mock).someMethod(…)来验证方法的调用。例子中，我们mock了List接口，然后调用了mock对象的一些方法。验证是否调用了mock.get(2)方法可以通过verify(mock).get(2)来进行。verify方法的调用不关心是否模拟了get(2)方法的返回值，只关心mock对象后，是否执行了mock.get(2)，如果没有执行，测试方法将不会通过。 
+
+--验证未曾执行的方法 
+在verify方法中可以传入never()方法参数来确认mock.get(3)方法不曾被执行过。另外还有很多调用次数相关的参数将会在下面提到。 
+
+--查询多余的方法调用 
+verifyNoMoreInteractions()方法可以传入多个mock对象作为参数，用来验证传入的这些mock对象是否存在没有验证过的调用方法。本例中传入参数mock，测试将不会通过，因为我们只verify了mock对象的get(2)方法，没有对get(0)和get(1)进行验证。为了增加测试的可维护性，官方不推荐我们过于频繁的在每个测试方法中都使用它，因为它只是测试的一个工具，只在你认为有必要的时候才用。 
+
+--查询没有交互的mock对象 
+verifyZeroInteractions()也是一个测试工具，源码和verifyNoMoreInteractions()的实现是一样的，为了提高逻辑的可读性，所以只不过名字不同。在例子中，它的目的是用来确认mock2对象没有进行任何交互，但mock2执行了get(0)方法，所以这里测试会报错。由于它和verifyNoMoreInteractions()方法实现的源码都一样，因此如果在verifyZeroInteractions(mock2)执行之前对mock.get(0)进行了验证那么测试将会通过。 
+
+--验证方法调用的次数 
+如果要验证Mock对象的某个方法调用次数，则需给verify方法传入相关的验证参数，它的调用接口是verify(T mock, VerificationMode mode)。如：verify(mock,times(3)).someMethod(argument)验证mock对象someMethod(argument)方法是否调用了三次。times(N)参数便是验证调用次数的参数，N代表方法调用次数。其实verify方法中如果不传调用次数的验证参数，它默认传入的便是times(1)，即验证mock对象的方法是否只被调用一次，如果有多次调用测试方法将会失败。 
+
+Mockito除了提供times(N)方法供我们调用外，还提供了很多可选的方法： 
+never() 没有被调用，相当于times(0) 
+atLeast(N) 至少被调用N次 
+atLeastOnce() 相当于atLeast(1) 
+atMost(N) 最多被调用N次 
+
+--超时验证 
+Mockito提供对超时的验证，但是目前不支持在下面提到的顺序验证中使用。进行超时验证和上述的次数验证一样，也要在verify中进行参数的传入，参数为timeout(int millis)，timeout方法中输入的是毫秒值。下面看例子： 
+验证someMethod()是否能在指定的100毫秒中执行完毕 
+verify(mock, timeout(100)).someMethod(); 
+结果和上面的例子一样，在超时验证的同时可进行调用次数验证，默认次数为1 
+verify(mock, timeout(100).times(1)).someMethod(); 
+在给定的时间内完成执行次数 
+verify(mock, timeout(100).times(2)).someMethod(); 
+给定的时间内至少执行两次 
+verify(mock, timeout(100).atLeast(2)).someMethod(); 
+另外timeout也支持自定义的验证模式， 
+verify(mock, new Timeout(100, yourOwnVerificationMode)).someMethod(); 
+
+--验证方法调用的顺序 
+Mockito同样支持对不同Mock对象不同方法的调用次序进行验证。进行次序验证是，我们需要创建InOrder对象来进行支持。例： 
+
+创建mock对象 
+List<String> firstMock = mock(List.class); 
+List<String> secondMock = mock(List.class); 
+
+调用mock对象方法 
+firstMock.add("was called first"); 
+firstMock.add("was called first"); 
+secondMock.add("was called second"); 
+secondMock.add("was called third"); 
+
+创建InOrder对象 
+inOrder方法可以传入多个mock对象作为参数，这样便可对这些mock对象的方法进行调用顺序的验证InOrder inOrder = inOrder( secondMock, firstMock ); 
+
+验证方法调用 
+接下来我们要调用InOrder对象的verify方法对mock方法的调用顺序进行验证。注意，这里必须是你对调用顺序的预期。 
+
+InOrder对象的verify方法也支持调用次数验证，上例中，我们期望firstMock.add("was called first")方法先执行并执行两次，所以进行了下面的验证inOrder.verify(firstMock,times(2)).add("was called first")。其次执行了secondMock.add("was called second")方法，继续验证此方法的执行inOrder.verify(secondMock).add("was called second")。如果mock方法的调用顺序和InOrder中verify的顺序不同，那么测试将执行失败。 
+
+InOrder的verifyNoMoreInteractions()方法 
+它用于确认上一个顺序验证方法之后，mock对象是否还有多余的交互。它和Mockito提供的静态方法verifyNoMoreInteractions不同，InOrder的验证是基于顺序的，另外它只验证创建它时所提供的mock对象，在本例中只对firstMock和secondMock有效。例如： 
+
+inOrder.verify(secondMock).add("was called second"); 
+inOrder.verifyNoMoreInteractions(); 
+
+在验证secondMock.add("was called second")方法之后，加上InOrder的verifyNoMoreInteractions方法，表示此方法调用后再没有多余的交互。例子中会报错，因为在此方法之后还执行了secondMock.add("was called third")。现在将上例改成： 
+
+inOrder.verify(secondMock).add("was called third"); 
+inOrder.verifyNoMoreInteractions(); 
+
+测试会恢复为正常，因为在secondMock.add("was called third")之后已经没有多余的方法调用了。如果这里换成Mockito类的verifyNoMoreInteractions方法测试还是会报错，它查找的是mock对象中是否存在没有验证的调用方法，和顺序是无关的。 
+
+//-----
+Mock对象时不依赖于类的构造函数，即使一个类没有无参数构造函数，也可以调用mock(SomeClass.class)方法来mock该对象
+//
+package test;
+
+public class Person {
+    private int id;
+    private String name;
+
+    public Person(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class PersonTest {
+    @Test
+    public void testPersonMock() {
+        Person mockedPerson = mock(Person.class);
+
+        when(mockedPerson.getId()).thenReturn(10);
+        assertEquals(10, mockedPerson.getId());
+    }
+}
+
+//-----
+参数捕获器
+http://blog.csdn.net/mergades/article/details/51009631
+
+Mockito - Argument Matcher（参数匹配器）
+http://hotdog.iteye.com/blog/908381
+
+package test;
+
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+public class MockTest {
+    @Test
+    public void testMockCapture() {
+        // 模拟的创建，对接口进行模拟
+        List<String> mockedList = mock(List.class);
+        mockedList.add("a");
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mockedList).add("a");
+        verify(mockedList).add(stringArgumentCaptor.capture());
+        assertEquals("a", stringArgumentCaptor.getValue());
+
+        mockedList.add("b");
+        verify(mockedList, times(2)).add(stringArgumentCaptor.capture());//这里验证了times(2)，捕获器会把两次的值都捕获到，即"a", "b"
+        assertEquals("b", stringArgumentCaptor.getValue());
+
+        assertArrayEquals(new String[] {"a", "a", "b"}, stringArgumentCaptor.getAllValues().toArray());//总共捕获了三次，所以是"a", "b", "c"
+    }
+
+    @Test
+    public void testMockReturn() {
+        // 你不仅可以模拟接口,任何具体类都行
+        LinkedList mockedList = mock(LinkedList.class);
+        // 执行前准备测试数据
+        when(mockedList.get(0)).thenReturn("first");
+        assertEquals("first", mockedList.get(0));
+        assertEquals("first", mockedList.get(0));
+
+        when(mockedList.get(0)).thenReturn("second").thenReturn("third");//所有大于1次的调用都返回third
+        assertEquals("second", mockedList.get(0));
+        assertEquals("third", mockedList.get(0));
+        assertEquals("third", mockedList.get(0));
+    }
+
+    @Test
+    public void testMockAnyArg() {
+        // 你不仅可以模拟接口,任何具体类都行
+        List<String> mockedList = mock(LinkedList.class);
+        when(mockedList.get(anyInt())).thenReturn("hello");
+        assertEquals("hello", mockedList.get(0));
+    }
+
+    //如果使用了参数匹配器，那么所有的参数需要由匹配器来提供，否则将会报错。假如我们使用参数匹配器stubbing了mock对象的方法，那么在verify的时候也需要使用它。如下例
+    //在最后的验证时如果只输入字符串”hello”是会报错的，必须使用Matchers类内建的eq方法。如果将anyInt()换成1进行验证也需要用eq(1)。 
+    @Test
+    public void argumentMatchersTest(){
+        Map mapMock = mock(Map.class);
+        when(mapMock.put(anyInt(), anyString())).thenReturn("world");
+        mapMock.put(1, "hello");
+        verify(mapMock).put(anyInt(), eq("hello"));//verify(mapMock).put(anyInt(), "hello");将报错
+    }
+    
+    @Test
+    public void testIsA() {
+        when(strings.get(isA(Integer.class))).thenReturn("hello");
+        assertEquals("hello", strings.get(0));
+        verify(strings).get(0);
+    }
+}
+
+//-----any()
+package test;
+
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class MockTest {
+
+    @Test
+    public void testForIOException() throws IOException {
+        // Lets mock a LinkedList
+        List<String> strings = mock(List.class);
+
+        //这里用isA或者any都可以通过，个人感觉isA传入一个派生类对象也可以，而any只能是这个类对象
+        when(strings.get(any(Integer.class))).thenReturn("hello");
+        //when(strings.get(isA(Integer.class))).thenReturn("hello");
+        assertEquals("hello", strings.get(any(Integer.class)));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //技能鉴定3级 字母螺旋矩阵
 http://blog.csdn.net/sunmenggmail/article/details/7779651
 
