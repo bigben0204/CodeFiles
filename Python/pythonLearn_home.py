@@ -1905,9 +1905,130 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 #-----------------------------------------------------------------------------------------
+#lambda表达式
+http://www.cnblogs.com/evening/archive/2012/03/29/2423554.html
+# encoding=utf-8
 
+
+def add(a, b):
+    return a + b
+
+
+if __name__ == "__main__":
+    g = lambda x: x + 1
+    print g(1)
+
+    print (lambda x: x + 2)(10)
+
+    foo = [2, 18, 9, 22, 17, 24, 8, 12, 27]
+    listAfterFilter = filter(lambda x: x % 3 == 0, foo)
+    print listAfterFilter
+
+    l1 = [1, 2, 3]
+    l2 = [4, 5, 6]
+    print "one sequence: ", map(lambda x: x + 2, l1)  # 单序列映射
+    print "two sequence: ", map(lambda x, y: x + y, l1, l2)  # 两个或者多序列映射
+    print "three sequences: ", map(lambda x, y, z: x + y + z, l1, l2, [7, 8, 9])
+
+    print reduce(lambda x, y: x + y, l1)  # 无初始值
+    print reduce(lambda x, y: x + y, l1, 10)  # 有初始值
+    print reduce(add, l1, 20)  # 使用函数
+    print reduce(lambda sumLen, s: sumLen + len(s), ["abcd", "de", "f"], 0) #计算迭代对象长度和，需要将起始值（或中间累加值）定义在lambda表达式的第一个参数。如果不提供初始值0，则将报错TypeError: cannot concatenate 'str' and 'int' objects
+输出：
+2
+12
+[18, 9, 24, 12, 27]
+one sequence:  [3, 4, 5]
+two sequence:  [5, 7, 9]
+three sequences:  [12, 15, 18]
+6
+16
+26
+7
+
+#-----字符串的split和join函数
+# encoding=utf-8
+
+
+if __name__ == "__main__":
+    s = "a b   c"
+    print s.split()  # 无参数则使用" "分隔，["a", "b", "c"]
+    print " ".join(s.split()) #用第一个str变量来连接所有对象 a b c
+#-----是否要使用lambda表达式
+# encoding=utf-8
+
+
+def getProcess(collapse):
+    return collapse and (lambda s: " ".join(s.split())) or (lambda s: s)
+
+
+def getStr(collapse, s):
+    if collapse:
+        return " ".join(s.split())
+    else:
+        return s
+
+
+if __name__ == "__main__":
+    # print getProcess(True)("a   b  c")
+    processFunc = lambda collapse: collapse and (lambda s: " ".join(s.split())) or (lambda s: s) #lambda表达式函数，入参是一个bool值，返回值是一个lambda表达式
+    testStr = "a   b  c"
+    print processFunc(True)(testStr) #先传入True，拿到的是一个lambda表达式：lambda s: " ".join(s.split())，给该lambda表达式传入"a   b  c"，将进行压缩空格处理
+    # print getStr(True, testStr) #同样的操作，需要5行定义+实现
+    print processFunc(False)(testStr) #先传入False，拿到是一个lambdag表达式：lambda s: s，返回入参数对象
+
+    
+通过此例子，我们发现，lambda的使用大量简化了代码，使代码简练清晰。但是值得注意的是，这会在一定程度上降低代码的可读性。如果不是非常熟悉python的人或许会对此感到不可理解。
+--lambda 定义了一个匿名函数
+--lambda 并不会带来程序运行效率的提高，只会使代码更简洁。
+--如果可以使用for...in...if来完成的，坚决不用lambda。
+--如果使用lambda，lambda内不要包含循环，如果有，我宁愿定义函数来完成，使代码获得可重用性和更好的可读性。
+总结：lambda 是为了减少单行函数的定义而存在的。
 #-----------------------------------------------------------------------------------------
+#用lambda表达式判断小括号是否匹配
+# encoding=utf-8
 
+
+def balance(chars):
+    def f(cnt, c):
+        if cnt >= 0:
+            if c == '(':
+                cnt += 1
+            elif c == ')':
+                cnt -= 1
+        return cnt
+
+    return 0 == reduce(lambda cnt, c: f(cnt, c), chars, 0)  # 在reduce中所要求的第一个参数function中，要求第一个参数是起始迭代值
+    # return 0 == reduce(lambda c, cnt: f(cnt, c), chars, 0) #如果将lambda表达式定义为 lambda c, cnt，则起始值0会赋值给c，而字符串第一个字符会赋值给cnt
+
+
+def balance_recurse(chars, cnt=0):
+    if len(chars) == 0:
+        return cnt == 0
+
+    if chars[0] == "(":
+        cnt += 1
+    elif chars[0] == ")":
+        cnt -= 1
+    return cnt >= 0 and balance_recurse(chars[1:], cnt)
+
+
+if __name__ == "__main__":
+    print balance(")()(")
+    print balance("(())")
+    print balance("()()")
+
+    print balance_recurse(")()(")
+    print balance_recurse("(())")
+    print balance_recurse("()()")
+
+输出：
+False
+True
+True
+False
+True
+True
 #-----------------------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------------------
