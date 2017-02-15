@@ -1,4 +1,145 @@
 //------------------------------------------------------------------------------------------------
+//深入理解Java的接口和抽象类
+http://www.cnblogs.com/felixzh/p/5938544.html
+三.抽象类和接口的区别
+1. 语法层面上的区别
+　　1）抽象类可以提供成员方法的实现细节，而接口中只能存在public abstract 方法；
+　　2）抽象类中的成员变量可以是各种类型的，而接口中的成员变量只能是public static final类型的；
+　　3）接口中不能含有静态代码块以及静态方法，而抽象类可以有静态代码块和静态方法；
+　　4）一个类只能继承一个抽象类，而一个类却可以实现多个接口。
+2. 设计层面上的区别
+　　1）抽象类是对一种事物的抽象，即对类抽象，而接口是对行为的抽象。抽象类是对整个类整体进行抽象，包括属性、行为，但是接口却是对类局部（行为）进行抽象。举个简单的例子，飞机和鸟是不同类的事物，但是它们都有一个共性，就是都会飞。那么在设计的时候，可以将飞机设计为一个类Airplane，将鸟设计为一个类Bird，但是不能将 飞行 这个特性也设计为类，因此它只是一个行为特性，并不是对一类事物的抽象描述。此时可以将 飞行 设计为一个接口Fly，包含方法fly( )，然后Airplane和Bird分别根据自己的需要实现Fly这个接口。然后至于有不同种类的飞机，比如战斗机、民用飞机等直接继承Airplane即可，对于鸟也是类似的，不同种类的鸟直接继承Bird类即可。从这里可以看出，继承是一个 "是不是"的关系，而 接口 实现则是 "有没有"的关系。如果一个类继承了某个抽象类，则子类必定是抽象类的种类，而接口实现则是有没有、具备不具备的关系，比如鸟是否能飞（或者是否具备飞行这个特点），能飞行则可以实现这个接口，不能飞行就不实现这个接口。
+　　2）设计层面不同，抽象类作为很多子类的父类，它是一种模板式设计。而接口是一种行为规范，它是一种辐射式设计。什么是模板式设计？最简单例子，大家都用过ppt里面的模板，如果用模板A设计了ppt B和ppt C，ppt B和ppt C公共的部分就是模板A了，如果它们的公共部分需要改动，则只需要改动模板A就可以了，不需要重新对ppt B和ppt C进行改动。而辐射式设计，比如某个电梯都装了某种报警器，一旦要更新报警器，就必须全部更新。也就是说对于抽象类，如果需要添加新的方法，可以直接在抽象类中添加具体的实现，子类可以不进行变更；而对于接口则不行，如果接口进行了变更，则所有实现这个接口的类都必须进行相应的改动。
+
+　　下面看一个网上流传最广泛的例子：门和警报的例子：门都有open( )和close( )两个动作，此时我们可以定义通过抽象类和接口来定义这个抽象概念：
+abstract class Door {
+    public abstract void open();
+    public abstract void close();
+}
+或者：
+interface Door {
+    public abstract void open();
+    public abstract void close();
+}
+但是现在如果我们需要门具有报警alarm( )的功能，那么该如何实现？下面提供两种思路：
+　　1）将这三个功能都放在抽象类里面，但是这样一来所有继承于这个抽象类的子类都具备了报警功能，但是有的门并不一定具备报警功能；
+　　2）将这三个功能都放在接口里面，需要用到报警功能的类就需要实现这个接口中的open( )和close( )，也许这个类根本就不具备open( )和close( )这两个功能，比如火灾报警器。
+　　从这里可以看出， Door的open() 、close()和alarm()根本就属于两个不同范畴内的行为，open()和close()属于门本身固有的行为特性，而alarm()属于延伸的附加行为。因此最好的解决办法是单独将报警设计为一个接口，包含alarm()行为,Door设计为单独的一个抽象类，包含open和close两种行为。再设计一个报警门继承Door类和实现Alarm接口。
+interface Alram {
+    void alarm();
+}
+ 
+abstract class Door {
+    void open();
+    void close();
+}
+ 
+class AlarmDoor extends Door implements Alarm {
+    void oepn() {
+      //....
+    }
+    void close() {
+      //....
+    }
+    void alarm() {
+      //....
+    }
+}
+//------------------------------------------------------------------------------------------------
+//括号匹配（没写完）
+//
+package test;
+
+public interface BracketMatcher {
+    boolean match(String s);
+}
+
+//
+package test;
+
+public class BracketRecursivelyMatcher implements BracketMatcher {
+    @Override
+    public boolean match(String s) {
+        return match(s, 0);
+    }
+
+    private boolean match(String s, int count) {
+        if (s.isEmpty()) {
+            return count == 0;
+        }
+
+        if (s.charAt(0) == '(') {
+            ++count;
+        } else if (s.charAt(0) == ')') {
+            --count;
+        }
+        return count >= 0 && match(s.substring(1), count);
+    }
+}
+
+//
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+public class BracketLambdaMatcher implements BracketMatcher {
+    @Override
+    public boolean match(String s) {
+        Character[] chars = new Character[] {'a', 'b', 'c'};
+        List<Character> characters = Arrays.asList(chars);
+        Integer[] ints = {1, 2, 3};
+        //Stream<Integer> integerStream = Stream.of(ints);
+        //Stream<Character> characterStream = Arrays.stream(new char[] {'a', 'b'});
+        return true;
+    }
+}
+
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class BracketMatcherTest {
+    @Test
+    public void testSmallBracket_shouldMatch() {
+        BracketMatcher bracketMatcher = new BracketRecursivelyMatcher();
+        matchBrackets(bracketMatcher, "()()");
+    }
+
+    @Test
+    public void testInterSmallBracket_shouldMatch() {
+        BracketMatcher bracketMatcher = new BracketRecursivelyMatcher();
+        matchBrackets(bracketMatcher, "(())");
+    }
+
+    @Test
+    public void testSmallBracket_shouldNotMatch() {
+        BracketMatcher bracketMatcher = new BracketRecursivelyMatcher();
+        notMatchBrackets(bracketMatcher, ")()(");
+    }
+
+    @Test
+    public void testBracketLambdaMatcher_shouldMatch() {
+        BracketMatcher bracketMatcher = new BracketLambdaMatcher();
+        matchBrackets(bracketMatcher, "()()");
+    }
+
+    private void matchBrackets(BracketMatcher bracketMatcher, String s) {
+        assertTrue(bracketMatcher.match(s));
+    }
+
+    private void notMatchBrackets(BracketMatcher bracketMatcher, String s) {
+        assertFalse(bracketMatcher.match(s));
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 //Mockito Unit tests with Mockito - Tutorial
 http://www.vogella.com/tutorials/Mockito/article.html
 翻译版：http://www.jianshu.com/p/f6e3ab9719b9
@@ -25601,18 +25742,461 @@ Sun Jan 15 21:50:37 CST 2017
 //------------------------------------------------------------------------------------------------
 //Effective Java 第4章 类和接口 P58
 //第18条：接口优于抽象类 P82
+现有的类可以很容易被更新，以实现新的接口。
 
+接口是定义mixin（混合类型）的理想选择。不严格地讲，mixin是指这样的类型：类除了实现它的“基本类型（primary type）”之外，还可以实现这个mixin类型，以表明它提供了某些可供选择的行为。如Comparable是一个mixin接口，它允许类表明它的实例可以与其他的可相互比较的对象进行排序。这样的接口之所以被称为mixin，是因为它允许任选的功能可被混合到类型的主要功能中。抽象类不能被用于定义mixin，同样也是因为它们不能被更新到现有的类中：类不可能有一个以上的父类，类层次结构中也没有适当的地方来插入mixin。
 
+接口允许我们构造非层次结构的类型框架。类型层次对于组织某些事物是非常合适的，但是其他有些事物并不能被整齐地组织成一个严格的层次结构。如，假设有一个接口代表一个singer（歌唱家），另一个接口代表一个songwriter（作曲家）：
+public interface Singer {
+    AudioClip sing(Song s);
+}
+
+public interface Songwriter {
+    Song compose(boolean hit);
+}
+现实生活中，有些歌唱家本身也是作曲家。因为我们使用了接口而不是抽象类来定义这些类型，所以对于单个类而言，它同时实现Singer和Songwriter是完全允许的。实际上，我们可以定义第三个接口，同时扩展了Singer和Songwriter，并添加了一些适合于这种组合的新方法：
+public interface SingerSongwriter extends Singer, Songwriter {
+    AudioClip strum();
+    void actSensitive();
+}
+并不总是需要这种灵活性，但是一旦你这样做了，接口可就成了救世主，能帮助你解决大问题。
+通过第16条中介绍的包装类（wrapper class）模式，接口使得安全地增强类的功能成为可能。如果使用抽象类来定义类型，那么程序员除了使用继承的手段来增加功能，没有其他的选择。这样得到的类与包装类相比，功能更差，也更加脆弱。
+
+虽然接口不允许包含方法的实现，但是，使用接口来定义类型并不妨碍你为程序员提供实现上的帮助。通过对你导出的每个重要接口都提供一个抽象的骨架实现（skeletal implementation）类，把接口和抽象类的优点结合起来。接口的作用仍然是定义类型，但是骨架实现类接管了所有与接口实现相关的工作。
+按照惯例，骨架实现被称为AbstractInterface，这里的Interface是指所实现的接口的名字。
+如，Collections Framework为每个重要的集合接口都提供了一个骨架实现，包括AbstractCollection、AbstractSet、AbstractList和AbstractMap。将它们称为SkeletalCollection、SkeletalSet、SkeletalList和SkeletalMap也是有道理的，但是现在Abstract的用法已经根深蒂固。
+
+如果设计得当，骨架实现可以使程序员很容易提供他们自己的接口实现。如，下面是一个静态工厂方法，它包含一个完整的、功能全面的List实现：
+//
+package test;
+
+import java.util.AbstractList;
+import java.util.List;
+
+public class ListGenerator {
+    static List<Integer> intArrayAsList(final int[] a) {
+        if (a == null) {
+            throw new NullPointerException();
+        }
+
+        return new AbstractList<Integer>() {
+            @Override
+            public Integer get(int index) {
+                return a[index];
+            }
+
+            @Override
+            public Integer set(int index, Integer element) {
+                int oldVal = a[index];
+                a[index] = element;
+                return oldVal;
+            }
+
+            @Override
+            public int size() {
+                return a.length;
+            }
+        };
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
+public class ListGeneratorTest {
+    @Test
+    public void intArrayAsList() throws Exception {
+        List<Integer> integers = ListGenerator.intArrayAsList(new int[]{4, 2, 3});
+        assertEquals(3, integers.size());
+        assertEquals((long) 4, (long) integers.get(0));
+        assertEquals((long) 2, (long) integers.get(1));
+        assertEquals((long) 3, (long) integers.get(2));
+    }
+}
+
+当你考虑一个List实现应该为你完成哪些工作的时候，可以看出，这个例子充分演示了骨架实现的强大功能。这个例子是个Adapter，它允许将int数组看作Integer实现的列表。由于在int值和Integer实例之间来回转换需要开销，它的性能不会很好。注意，这个例子中只提供一个静态工厂，并且这个类还是个不可被访问的匿名类（anonymous class）（见第22条），它被隐藏在静态工厂的内部。
+
+设计公有的接口要非常谨慎。接口一旦被公开发行，并且已被广泛实现，再想改变这个接口几乎是不可能的。你必须在初次设计的时候就保证接口是正确的。如果接口包含微小的瑕疵，它将会一直影响你以及接口的用户。如果接口具有严重的缺陷，它可以导致API彻底失败。在发行新接口的时候，最好的做法是，在接口被“冻结”之前，尽可能让更多的程序员用尽可能多的方式来实现这个新接口。这样有助于在依然可以改正缺陷的时候就发现它们。
+
+简而言之，接口通常是定义允许多个实现的类型的最佳途径。这条规则有个例外，即当演变的容易性比灵活性和功能更为重要的时候，在这种情况下，应该使用抽象类来定义类型，但前提是必须理解并且可以接受这些局限性。如果你导出了一个重要的接口，就应该坚决考虑同时提供骨架实现类。最后，应该尽可能谨慎地设计所有的公有接口，并通过编写多个实现来对它们进行全面的测试。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第19条：接口只用于定义类型 P86
+当类实现接口时，接口就充当可以引用这个类的实例的类型（type）。因此，类实现了接口，就表明客户端可以对这个类的实例实话某些动作。为了任何其他目的而定义的接口是不恰当的。
+有一种接口被称为常量接口（constant interface），它不满足上面的条件。这种接口没有包含任何方法，它只包含静态的final域，每个域都导出一个常量。使用这些常量的类实现这个接口，以避免用类名来修饰常量名。下面是一个例子：
+// Constant interface antipattern - do not use!
+package test;
 
+public interface PhysicalConstants {
+    // Avogadro's number (1/mol)
+    static final double AVOGADROS_NUMBER = 6.02214199e23; //static final is redundant for interface
+
+    // Boltzmann constant (J/K)
+    static final double BOLTZMANN_CONSTANT = 1.3806503e-23;
+
+    // Mass of the electron (kg)
+    static final double ELECTRON_MASS = 9.10938188e-31;
+}
+
+//
+package test;
+
+public class ConcretePhysicalConstants implements PhysicalConstants {
+    public void show() {
+        System.out.println(AVOGADROS_NUMBER); //可以不用加类名，直接使用常量名
+        System.out.println(BOLTZMANN_CONSTANT);
+        System.out.println(ELECTRON_MASS);
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+public class PhysicalConstantsTest {
+
+    @Test
+    public void testConstants() {
+        System.out.println(PhysicalConstants.AVOGADROS_NUMBER);
+        System.out.println(PhysicalConstants.BOLTZMANN_CONSTANT);
+        System.out.println(PhysicalConstants.ELECTRON_MASS);
+    }
+
+    @Test
+    public void testConcretePhysicalConstants() {
+        System.out.println(ConcretePhysicalConstants.AVOGADROS_NUMBER);
+        System.out.println(ConcretePhysicalConstants.BOLTZMANN_CONSTANT);
+        System.out.println(ConcretePhysicalConstants.ELECTRON_MASS);
+    }
+
+    @Test
+    public void testConcreteConstants() {
+        ConcretePhysicalConstants concretePhysicalConstants = new ConcretePhysicalConstants();
+        concretePhysicalConstants.show();
+    }
+}
+输出：
+6.02214199E23
+1.3806503E-23
+9.10938188E-31
+6.02214199E23
+1.3806503E-23
+9.10938188E-31
+6.02214199E23
+1.3806503E-23
+9.10938188E-31
+
+常量接口模式是对接口的不良使用。类在内部使用某些常量，这纯粹是实现细节。实现常量接口，会导致把这样的实现细节泄露到该类的导出API中。类实现常量接口，这对于这个类的用户来讲并没有什么价值。实际上，这样做反而会使他们更加糊涂。更糟糕的提，它代表了一种承诺：如果在将来的发行版本中，这个类被修改了，它不再需要使用这些常量了，它依然必须实现这个接口，以确保二进制兼容性（什么意思？）。如果非final类实现了常量接口，它的所有子类的命名空间也会被接口中的常量所“污染”。
+
+Java平台类库中有几个常量接口，如java.io.ObjectStreamConstants。这些接口应该被认为是反而的典型，不值得效仿。
+
+如果要导出常量，可以有几种合理的选择方案。如果这些常量与某个现有的类或者接口紧密相关，就应该把这些常量添加到这个类或者接口中。如，在Java平台类库中所有的数值包装类，如Integer和Double，都导出了MIN_VALUE和MAX_VALUE常量。如果这些常量最好被看作枚举类型的成员，就应该用枚举类型（enum type）（见第30条）来导出这些常量。否则，应该使用不可实例化的工具类（utility class）（见第4条）来导出这些常量。下面的例子是前面的PhysicalConstants例子的工具类翻版：
+//Constant utility class
+package com.effectivejava.science;
+
+public class PhysicalConstants {
+    private PhysicalConstants() { } //Prevents instantiation
+    public static final double AVOGADROS_NUMBER = 6.02214199e23;
+    public static final double BOLTZMANN_CONSTANT = 1.3806503e-23;
+    public static final double ELECTRON_MASS = 9.10938188e-31;
+}
+
+工具类通常要求客户端要用类名来修饰这些常量名，例如PhysicalConstants.AVOGADROS_NUMBER。如果大量利用工具类导出的常量，可以通过利用静态导入（static import）机制，避免用类名来修饰常量名，不过，静态导入机制是在Java 1.5 才引入的：
+// Use of static import to avoid qualifying contants
+import static com.effectivejava.science.PhysicalConstants.*;
+public class Test {
+    double atoms(double mols) {
+        return AVOGADROS_NUMBER * mols;
+    }
+    // Many more uses of PhysicalConstants justify static import
+}
+
+简而言之，接口应该只被用来定义类型，它们不应该被用来导出常量。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第20条：类层次优于标签类 P88
+有时候，可能会遇到带有两种甚至更多种风格的实例的类，并包含表示实例风格的标签（tag）域。如，考虑下面的类，能够表示圆形或者矩形。
+//
+package test;
 
+// Tagged class - vastly inferior to a class hierarchy
+public class Figure {
+    enum Shape {
+        RECTANGLE, CIRCLE
+    }
+
+    // Tag field - the shape of this figure
+    final Shape shape;
+
+    // These fields are used only if shape is RECTANGLE
+    double length;
+    double width;
+
+    // This field is used only if shape is CIRCLE
+    double radius;
+
+    // Constructor for circle
+
+    public Figure(double radius) {
+        shape = Shape.CIRCLE;
+        this.radius = radius;
+    }
+
+    // Constructor for rectangle
+
+    public Figure(double length, double width) {
+        shape = Shape.RECTANGLE;
+        this.length = length;
+        this.width = width;
+    }
+
+    double area() {
+        switch (shape) {
+            case RECTANGLE:
+                return length * width;
+            case CIRCLE:
+                return Math.PI * (radius * radius);
+            default:
+                throw new AssertionError();
+        }
+    }
+}
+
+这种标签类（tagged class）有着许多缺点。它们中充斥着样板代码，包括枚举声明、标签域以及条件语句。由于多个实现乱七八糟地挤在了单个类中，破坏了可读性。内存占用也增加了，因为实例承担着属于其他风格的不相关的域。域不能做成是final的，除非构造器初始化了不相关的域，产生更多的样板代码。构造器必须不借助编译器，来设置标签域，并初始化正确的数据域：如果初始化了错误的域，程序就会在运行时失败。无法给标签类添加风格，除非可以修改它的源文件。如果一定要添加风格，就必须记得给每个条件语句都添加一个条件，否则类就会在运行时失败。最后，实例的数据类型没有提供任何关于其风格的线索。一句话，标签类过于冗长、容易出错，并且效率低下。
+
+面向对象的语言例如Java，就提供了其他更好的方法来定义能表示多种风格对象的单个数据类型：子类型化（subtyping）。标签类正是类层次的一种简单的效仿。
+为了将标签类转变成类层次，首先要为标签类中的每个方法都定义一个包含抽象方法的抽象类，这每个方法的行为都依赖于标签值。在Figure类中，只有一个这样的方法：area。这个抽象类是类层次的根（root）。如果还有其他的方法其行为不依赖于标签的值，就把这个方法放在这个类中。同样地，如果所有的方法都用到了某些数据域，就应该把它们放在这个类中。在Figure类中，不存在这种类型独立的方法或者数据域。
+
+接下来，为每种原始标签类都定义根类的具体子类。在前面的例子中，这样的类型有两个：圆形（circle）和矩形（rectangle）。在每个子类中都包含特定于该类型的数据域。以下是与原始的Figure类相对应的类层次：
+package test;
+
+abstract class Figure {
+    abstract double area(); //抽象方法缺省情况下默认为public
+}
+
+class Circle extends Figure {
+    final double radius;
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    double area() {
+        return Math.PI * (radius * radius);
+    }
+}
+
+class Rectangle extends Figure {
+    final double length;
+    final double width;
+
+    public Rectangle(double length, double width) {
+        this.length = length;
+        this.width = width;
+    }
+
+    @Override
+    double area() {
+        return length * width;
+    }
+}
+
+这个类层次纠正了前面提到过的标签类的所有缺点。这段代码简单且清楚，没有包含在原来的版本中所见到的所有样板代码。每个类型的实现都配有自己的类，这些类都没有受到不相关的数据域的拖累。所有的域都是final的。编译器确保每个类的构造器都初始化它的数据域，对于根类中声明的每个抽象方法，都确保有一个实现。这样就杜绝了由于遗漏switch case而导致运行时失败的可能性。多个程序员可以独立地扩展层次结构，并且不用访问根类的源代码就能相互操作。每种类型都有一个相关的独立的数据类型，允许程序员指明变量的类型，限制变量，并将参数输入到特殊的类型。
+
+类层次的另一种好处在于，它们可以用来反映类型之间本质上的层次关系，有助于增强灵活性，并进行更好的编译时类型检查。假设上述例子中的标签类也允许表达正方形。类层次可以反映出正方形是一种特殊的矩形这一事实（假设两者都是不可变的）：
+class Square extends Rectangle {
+    Square(double side) {
+        super(side, side);
+    }
+}
+注意，上述层次中的域是被直接访问的，而不是通过访问方法。为了简洁起见才这么做，如果层次结构是公有的（见第14条），则不允许这样做。
+
+简而言之，标签类很少有适用的时候，当你想要编写一个包含显式标签域的类时，应该考虑一下，这个标签是否可以被取消，这个类是否可以用类层次来代替。当你遇到一个包含标签域的现有类时，就要考虑将它重构到一个层次结构中去。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第21条：用函数对象表示策略 P91
+Java没有提供函数指针，但可以用对象引用实现同样的功能。调用对象上的方法通常是执行该对象（that object）上的某项操作。然而，也可能定义这样一种对象，它的方法执行其他对象（other object）（这些对象被显式传递给这些方法）上的操作。如果一个类仅仅导出这样的一个方法，它的实例实际上就等同于一个指向该方法的指针。这样的实例被称为函数（function object）。如，考虑下面的类：
+class StringLengthComparator {
+    public int compare(String s1, String s2) {
+        return s1.length() - s2.length();
+    }
+}
+这个方法是一个比较器，它根据长度来给字符串排序，而不是根据更常用的字典顺序。指向StringLengthComparator对象的引用可以被当作是一个指向该比较器的“函数指针（function pointer）”，可以在任意一对字符串上被调用。换句话说，StringLengthComparator实例是用于字符串比较操作的具体策略（concrete strategy）。
+作为典型的具体策略类，StringLengthComparator类是无状态的（stateless）：它没有域，所以这个类的所有实例在功能上都是相互等价的。因此，它作为一个Singleton是非常合适的，可以节省不必要的对象创建开销（见第3条和第5条）：
+class StringLengthComparator {
+    private StringLengthComparator() {}
+    public static final StringLengthComparator INSTANCE = new StringLengthComparator();
+    public int compare(String s1, String s2) {
+        return s1.length() - s2.length();
+    }
+}
 
+使用StringLengthComparator来传递实例并不好，因为客户端将无法传递任何其他的比较策略。我们需要定义一个Comparator接口，并修改StringLengthComparator来实现这个接口。定义一个策略接口（strategy interface），如下：
+// Stragety interface
+public interface Comparator<T> {
+    public int compare(T t1, T t2);
+}
+Comparator接口的这个定义也出现在java.util包中，这并不神奇，你自己也完全可以定义它。Comparator接口是泛型（见第26条）的，它适合作为任何其他对象的比较器。它的compare方法的两个参数类型为T（它正常的类型参数），而不是String。
+class StringLengthComparator implements Comparator<String> {
+    //... 实现同之前一样
+}
+
+具体的策略类往往使用匿名类声明（见第22条）。下面的语句对一个字符串数组排序：
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Stream;
+
+public class ComparatorTest {
+    @Test
+    public void testDefaultStringCompare() {
+        String[] strings = new String[]{"is", "a", "good", "today", "day"};
+        Arrays.sort(strings);
+        Stream.of(strings).forEach(System.out::println);
+    }
+
+    @Test
+    public void testCustomizedStringCompare() {
+        String[] strings = new String[]{"is", "a", "good", "today", "day"};
+        Arrays.sort(strings, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return s1.length() - s2.length();
+            }
+        });
+
+        //可以用如下方法替换
+        //Arrays.sort(strings, (s1, s2) -> s1.length() - s2.length());
+        //Arrays.sort(strings, Comparator.comparingInt(String::length));
+        Stream.of(strings).forEach(System.out::println);
+    }
+}
+输出：
+a
+day
+good
+is
+today
+a
+is
+day
+good
+today
+
+但是注意，以这种方法使用匿名类，将会在每次执行调用的时候创建一个新的实例。如果它被重复执行，考虑将函数对象存储到一个私有的静态final域里，并重用它。这样做的另一种好处是，可以为这个函数对象取一个有意义的域名称。
+
+因为策略接口被用做所有具体策略实例的类型，所以我们并不需要为了导出具体策略，而把具体策略类做成公有的。相反，“宿主类（host class）”还可以导出公有的静态域（或者静态工厂方法），其类型为策略接口，具体的策略类可以是宿主类的私有嵌套类。下面的例子使用静态成员类，而不是匿名类，以便允许具体的策略类实现第二个接口Serializable：
+package test;
+
+import java.io.Serializable;
+import java.util.Comparator;
+
+public class Host {
+    private static class StrLenCmp implements Comparator<String>, Serializable {
+        @Override
+        public int compare(String s1, String s2) {
+            return s1.length() - s2.length();
+        }
+    }
+
+    public static final Comparator<String> STRING_LENGTH_COMPARATOR = new StrLenCmp(); //如果private static class中无static，则这里不能为静态变量
+
+    // Bulk of class omitted
+}
+//Arrays.sort(strings, Host.STRING_LENGTH_COMPARATOR);
+
+String类利用这种模式，通过它的CASE_INSENSITIVE_ORDER域，导出一个不区分大小写的字符串比较器。如下：
+package test;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+public class ComparatorTest {
+    @Test
+    public void testDefaultStringCompare() {
+        String[] strings = new String[]{"IS", "a", "good", "today", "day"};
+        Arrays.sort(strings);
+        Stream.of(strings).forEach(System.out::println);
+    }
+
+    @Test
+    public void testCustomizedStringCompare() {
+        String[] strings = new String[]{"IS", "a", "good", "today", "day"};
+        Arrays.sort(strings, String.CASE_INSENSITIVE_ORDER);
+        Stream.of(strings).forEach(System.out::println);
+    }
+}
+输出：
+IS
+a
+day
+good
+today
+a
+day
+good
+IS
+today
+
+简而言之，函数指针的主要用途就是实现策略（Strategy）模式。为了在Java中实现这种模式，要声明一个接口来表示该策略，并且为每个具体策略声明一个实现了该接口的类。当一个策略只被使用一次时，通常使用匿名类来声明和实例化这个具体策略类。当一个具体策略是设计用来重复使用的时候，它的类通常就要被实现为私有的静态成员类，并通过公有的静态final域被导出，其类型为该策略接口。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第4章 类和接口 P58
+//第22条：优先考虑静态成员类 P94
+嵌套类（nested class）是指被定义在另一个类的内部的类。嵌套类存在的目的应该只是为它的外围类（enclosing class）提供服务。如果嵌套类将来可能用于其他的某个环境中，它就应该是顶层类（top-level class）。嵌套类有四种：静态成员类（static member class）、非静态成员类（nonstatic member class）、匿名类（anonymous class）和局部类（local class）。除了第一种之外，其他三种都称为内部类（inner class）。
 
+静态成员类是最简单的一种嵌套类。最好把它看作是普通的类，只是碰巧被声明在另一个类的内部而已，它可以访问外围类的所有成员，包括那些声明为私有的成员。静态成员类是外围类的一个静态成员，与其他的静态成员一样，也遵守同样的可访问性规则。如果它被声明为私有的，它就只能在外围类的内部才可以被访问等。
+
+静态成员类的一种常见用法是作为公有的辅助类，仅当与它的外部类一起使用时才有意义。例如，考虑一个枚举，它描述了计算器支持的种操作（见第30条）。Operation枚举应该是Calcutor类的公有静态成员类，然后，Calculator类的客户端就可以用诸如Calculator.Operation.PLUS和Calculator.Operator.MINUS这样的名称来引用这些操作。
+
+从语法上讲，静态成员类和非静态成员类之间唯一的区别是，静态成员类的声明中包含修饰符static。尽管它们的语法非常相似，但是这两种嵌套类有很大的不同。非静态成员类的每个实例都隐含着与外围类的一个外围实例（enclosing instance）相关联。在非静态成员类的实例方法内部，可以调用外围实例上的方法，或者利用修饰过的this构造获得外围实例的引用。如果嵌套类的实例可以在它外围类的实例之外独立存在，这个嵌套类就必须是静态成员类：在没有外围实例的情况下，要想创建非静态成员类的实例是不可能的。
+
+当非静态成员类的实例被创建的时候，它和外围实例之间的关联关系也随之被建立起来；而且，这种关联关系以后不能被修改。通常情况下，当在外围类的某个实例方法的内部调用非静态成员类的构造器时，这种关联关系被自动建立起来。使用表达式enclosingInstance.new MemberClass(args)来手工建立这种关联关系也是有可能的，但是很少使用。这种关联关系需要消耗非静态成员类实例的空间，并且增加了构造的时间开销。
+
+非静态成员类的一种常见用法是定义一个Adapter，它允许外部类的实例被看作是另一个不相关的类的实例。如，Map接口的实例往往使用非静态成员类来实例它们的集合视图（collection view），这些集合视图是由Map的keySet、entrySet和Values方法返回的。同样，如Set和List这种集合接口的实例往往也使用非静态成员类来实现它们的迭代器（iterator）：
+// Typical use of a nonstatic member class
+public class MySet<E> extends Abstract<E> {
+    //... Bulk of the calss ommited
+    
+    public Iterator<E> iterator() {
+        return new MyIterator();
+    }
+    
+    private class MyIterator implements Iterator<E> {
+        //...
+    }
+}
+
+如果声明成员类不要求访问外围实例，就要始终把static修饰符放在它的声明中，使它成员静态成员类，而不是非静态成员类。如果省略了static修饰符，则每个实例都将包含一个额外的指向外围对象的引用。保丰这份引用要消耗时间和空间，并且会导致外围实例在符合垃圾回收（见第6条）时却仍然得以保留。如果在没有外围实例的情况下，也需要分配实例，就不能使用非静态成员类，因为非静态成员类的实例必须要有一个外围实例。
+
+私有静态成员类的一种常见用法是用来代表外围类的对象的组件。如，考虑一个Map实例，它把键（key）和值（value）关联起来。许多Map实例的内部都有一个Entry对象，对应于Map中的每个键-值对。虽然每个entry都与一个Map关系，但是entry上的方法（getKey、getValue和SetValue）并不需要访问该Map。因此，使用非静态成员来表示entry是很浪费的：私有的静态成员类是最佳的选择。如果不小心漏掉了entry声明中的static修饰符，该Map仍然可以工作，但是每个entry中将会包含一个指向该Map的引用，这样就浪费了空间和时间。
+
+如果相关的类是导出类的公有的或者受保护的成员，则在静态和非静态成员类之间做出正确的选择是非常重要的。在这种情况下，该成员类就是导出的API元素，在后续发行版本中，如果不违反二进制兼容性，就不能从非静态成员类变为静态成员类。
+
+匿名类不同于Java程序设计语言中的其他任何语法单元，没有名字。它不是外围类的一个成员。它并不与其他成员一起被声明，而是在使用的同时被声明和实例化。匿名类可以出现在代码中任何允许存在表达式的地方。当且仅当匿名类出现在非静态的环境中时，它才有外围实例。但是即便它们出现在静态的环境中，也不可能拥有任何静态成员。（无法引用，所以静态成员用不到？）
+
+匿名类的适用性受到诸多的限制。除了在它们被声明的时间之外，是无法将它们实例化的。不能执行instanceof测试，或者做任何需要命名类的其他事情。无法声明一个匿名类实现多个接口，或者扩展一个类，并同时扩展类和实现接口。匿名类的客户端无法调用任何成员，除了从它的超类型中继承得到之外。由于匿名类出现在表达式当中，它们必须保持简短——大约10行或者更少些——否则会影响程序的可读性。
+
+匿名类的一种常见用法是动态的创建函数对象（function object，见第21条）。如，第92页中的sort方法调用，利用匿名的Comparator实例，根据一组字符串的长度对它们进行排序。匿名类的另一种常见用法是创建过程对象（process object），比如Runnable、Thread或者TimerTask实例。第三种常见的用法是在静态工厂方法的内部（参见第18条中的intArrayAsList方法）。
+
+局部类是四种嵌套类中用得最少的类。在任何“可以声明局部变量”的地方，都可以声明局部类，并且局部类也遵守同样的作用域规则。局部类与其他三种嵌套类中的每一种都有一些共同的属性。与成员类一样，局部类有名字，可以被重复地使用。与匿名类一样，只有当局部类是在非静态环境中定义的时候，才有外围实例，它们也不能包含静态成员。与匿名类一样，它们必须非常简短，以便不影响到可读性。
+
+简而言之，四种嵌套类，第一种都有自己的用途。如果一个嵌套类需要在单个方法之外仍然是可见的，或者它太长了，不适合于放在方法内部，就应该使用成员类。如果成员类的每个实例都需要一个指向其外围实例的引用，就要把成员类做成非静态的；否则，就做成静态的。假设这个嵌套类属于一个方法的内部，如果只需要在一个地方创建实例，并且已经有了一个预置的类型可以说明这个类特征，就要把它做成匿名类；否则，就做成局部类。
 //------------------------------------------------------------------------------------------------
-
+//Effective Java 第5章 泛型 P97
+//第23条：第不要在新代码中使用原生态类型 P97
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------

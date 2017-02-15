@@ -1934,6 +1934,9 @@ if __name__ == "__main__":
     print reduce(lambda x, y: x + y, l1, 10)  # 有初始值
     print reduce(add, l1, 20)  # 使用函数
     print reduce(lambda sumLen, s: sumLen + len(s), ["abcd", "de", "f"], 0) #计算迭代对象长度和，需要将起始值（或中间累加值）定义在lambda表达式的第一个参数。如果不提供初始值0，则将报错TypeError: cannot concatenate 'str' and 'int' objects
+
+    print all([1, 2, 3]), all([0, 1, 2, 3]) #是否所有的迭代对象都为True
+    print any([1, 2, 3]), any([0, 1, 2, 3]) #是否有任意一个迭代对象为True
 输出：
 2
 12
@@ -1945,6 +1948,8 @@ three sequences:  [12, 15, 18]
 16
 26
 7
+True False
+True True
 
 #-----字符串的split和join函数
 # encoding=utf-8
@@ -1988,7 +1993,6 @@ if __name__ == "__main__":
 #用lambda表达式判断小括号是否匹配
 # encoding=utf-8
 
-
 def balance(chars):
     def f(cnt, c):
         if cnt >= 0:
@@ -2013,20 +2017,35 @@ def balance_recurse(chars, cnt=0):
     return cnt >= 0 and balance_recurse(chars[1:], cnt)
 
 
+PARENS = (("(", ")"), ("[", "]"), ("{", "}"))
+def balance_recurse_mul(chars, cnt=[0] * len(PARENS)):
+    if len(chars) == 0:
+        return all(map(lambda b: b == 0, cnt))
+    for i, paren in enumerate(PARENS):  # 生成index, seq[index]迭代对象
+        if chars[0] == paren[0]:
+            cnt[i] += 1
+        elif chars[0] == paren[1]:
+            cnt[i] -= 1
+    return all(map(lambda b: b >= 0, cnt)) and balance_recurse_mul(chars[1:], cnt)
+
+
 if __name__ == "__main__":
     print balance(")()(")
     print balance("(())")
     print balance("()()")
-
+    
     print balance_recurse(")()(")
     print balance_recurse("(())")
     print balance_recurse("()()")
+
+    print balance_recurse_mul("{([)]}")
 
 输出：
 False
 True
 True
 False
+True
 True
 True
 #-----------------------------------------------------------------------------------------
