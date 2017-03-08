@@ -2814,7 +2814,7 @@ import java.util.stream.Stream;
 public class StreamTest {
     @Test
     public void testRandom() {
-        Stream.iterate(0, n -> n + 3).limit(10). forEach(x -> System.out.print(x + " "));
+        Stream.iterate(0, n -> n + 3).limit(10).forEach(x -> System.out.print(x + " "));
     }
 }
 输出：
@@ -3168,7 +3168,7 @@ System.out.println(l); //[97, 98, 99]
 
 --flatmap
 flatmap方法混合了map+flattern的功能，它将映射后的流的元素全部放入到一个新的流中。它的方法定义如下：
-<R> Stream<R> flatMap(Function<? super T,? extends Stream<? extends R>> mapper)
+<R> Stream<R> flatMap(Function<? super T,? extends Stream<? extends R>> mapper) //解释为入参数为一个Function，消费T，生产R的Stream
 可以看到mapper函数会将每一个元素转换成一个流对象，而flatMap方法返回的流包含的元素为mapper生成的流中的元素。
 
 下面这个例子中将一首唐诗生成一个按行分割的流，然后在这个流上调用flatmap得到单词的小写形式的集合，去掉重复的单词然后打印出来。
@@ -26196,21 +26196,1016 @@ public class MySet<E> extends Abstract<E> {
 简而言之，四种嵌套类，第一种都有自己的用途。如果一个嵌套类需要在单个方法之外仍然是可见的，或者它太长了，不适合于放在方法内部，就应该使用成员类。如果成员类的每个实例都需要一个指向其外围实例的引用，就要把成员类做成非静态的；否则，就做成静态的。假设这个嵌套类属于一个方法的内部，如果只需要在一个地方创建实例，并且已经有了一个预置的类型可以说明这个类特征，就要把它做成匿名类；否则，就做成局部类。
 //------------------------------------------------------------------------------------------------
 //Effective Java 第5章 泛型 P97
-//第23条：第不要在新代码中使用原生态类型 P97
-//------------------------------------------------------------------------------------------------
+Java 1.5 发行版本中增加了泛型（Generic）。
 
-//------------------------------------------------------------------------------------------------
+//第23条：不要在新代码中使用原生态类型 P97
+声明中具有一个或者多个类型参数（type parameter）的类或者接口，就是泛型（generic）类或者接口。泛型类和接口统称为泛型（generic type）。
 
-//------------------------------------------------------------------------------------------------
+每种泛型定义一组参数化的类型（parameterized type），构成格式为：先是类或者接口的名称，接着用尖括号（<>）把对应于泛型形式类型参数的实际参数列表括起来。
 
-//------------------------------------------------------------------------------------------------
+最后，每个泛型都定义一个原生态类型（raw type），即不带任何实际类型参数的泛型名称。如，与List<E>相对应的原生态类型是List。原生态类型就像从类型声明中删除了所有泛型信息一样。实际上，原生态类型List与Java平台没有泛型之前的接口类型List完全一样。
 
-//------------------------------------------------------------------------------------------------
+有了泛型，就可以利用改进后的类型声明来代替集合中的注释，告诉编译器之前的注释中所隐含的信息：
+// Parameterized collection type - typesafe
+private final Collection<Stamp> stamps = ...;
+通过这条声明，编译器知道stamps应该只包含Stamp实例，并给予保证。
 
-//------------------------------------------------------------------------------------------------
+虽然假设不小心将coin插入到stamp集合中可能显得有点牵强，但这类问题却是真实的。如，很容易想像有人会不小心将一个java.util.Date实例放进一个原本只包含java.sql.Date实例的集合中。
 
-//------------------------------------------------------------------------------------------------
+如上所述，如果不提供类型参数，使用集合类型和其他泛型也仍然是合法的，但是不应该这么做。如果使用原生态类型，就失掉了泛型在安全性和表述性方面的所有优势。允许使用原生态类型，是为了提供兼容性。泛型出现的时候，已经存在大量没有使用泛型的Java代码。人们认为让所有这些代码保持合法，并且能够与使用泛型的新代码互用。它必须合法，才能将参数化类型的实例传递给那些被设计成使用普通类型的方法，反之亦然。这种需求被称作移植兼容性（Migration Compatibility），促成了支持原生态类型的决定。
 
+虽然不应该在新代码中使用像List这样的原生态类型，使用参数化的类型以允许插入任意对象，如List<Object>，这还是可以的。原生态类型List和参数化的类型List<Object>之间区别，不严格地说，前者逃避了泛型检查，后者则明确告知编译器，它能够持有任意类型的对象。虽然可以将List<String>传递给类型List的参数，但是不能将它传给类型List<Object>的参数。泛型有子类型化（subtyping）的规则，List<String>是原生态类型List的一个子类型，而不是参数化类型List<Object>的子类型（见第25条）。因此，如果使用像List这样的原生态类型，就会失掉类型安全性，但是如果使用像List<Object>这样的参数化类型，则不会。
+//
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GenericTest {
+    public static void main(String[] args) {
+        List<String> strings = new ArrayList<>();
+        unsafeAdd(strings, new Integer(42));
+        String s = strings.get(0);
+    }
+
+    private static void unsafeAdd(List list, Object o) {
+        list.add(o);
+    }
+}
+
+程序可以进行编译，但是因为它使用了原生态类型List，会收到一条警告：
+E:\Program Files\JetBrains\JavaProject\JUnitProject\src\main\java\test\GenericTest.java
+Information:java: E:\Program Files\JetBrains\JavaProject\JUnitProject\src\main\java\test\GenericTest.java使用了未经检查或不安全的操作。
+Information:java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+
+实际上，如果运行这段程序，在程序试图将strings.get(0)的调用结果转换成一个String时，会收到一个ClassCastException异常。这是一个编译器生成的转换，因此一般保证会成功，但我们在例子中忽略了一条编译器警告，就会为此而付出代价。
+
+如果在unsafeAdd声明中用参数化类型List<Object>代替原生态类型List，并试着重新编译这段程序，会发现它无法再进行编译了。
+    private static void unsafeAdd(List<Object> list, Object o) {
+        list.add(o);
+    }
+Error:(9, 19) java: 不兼容的类型: java.util.List<java.lang.String>无法转换为java.util.List<java.lang.Object>
+
+在不确定或者不在乎集合中的元素类型的情况下，也许会使用原生态类型。如，假设想要编写一个方法，它有两个集合（set），并从中返回它们共有的元素的数量。如果对泛型还不熟悉的话，可以参考以下方式来编写这种方法：
+package test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+public class GenericTest {
+    public static void main(String[] args) {
+        Set<String> strings1 = new HashSet<>();
+        strings1.addAll(Arrays.asList("d", "e", "f"));
+
+        Set<String> strings2 = new HashSet<>();
+        strings2.addAll(Arrays.asList("c", "d", "f", "a"));
+
+        int sameStringCount = numElementsInCommon(strings1, strings2);
+        System.out.println(sameStringCount);
+
+
+        Set<Integer> integers1 = new HashSet<>();
+        integers1.addAll(Arrays.asList(1, 2, 3));
+
+        Set<Integer> integers2 = new HashSet<>();
+        integers2.addAll(Arrays.asList(4, 1, 5));
+
+        int sameIntCount = numElementsInCommon(integers1, integers2);
+        System.out.println(sameIntCount);
+    }
+
+    // Use of raw type for unknown element type - don't do this!
+    private static int numElementsInCommon(Set s1, Set s2) {
+        int result = 0;
+        for (Object o1 : s1) {
+            if (s2.contains(o1)) {
+                ++result;
+            }
+        }
+        return result;
+    }
+}
+输出：
+2
+1
+
+这个方法倒是可以，但它使用了原生态类型，这是很危险的。从Java 1.5 发行版本开始，Java就提供了一种安全的替代方法，称作无限制的通配符类型（unbounded wildcard type）。如果要使用泛型，但不确定或者不关心实际的类型参数，就可以使用一个问号代替。如，泛型Set<E>的无限制通配符类型为Set<?>（读作“某个类型的集合”）。这是最普通的参数化Set类型，可以持有任何集合。下面是numElementsInCommon方便使用无限制通配符类型时的情形：
+    // Unbounded wildcard type - typesafe and flexible
+    private static int numElementsInCommon(Set<?> s1, Set<?> s2) {
+        int result = 0;
+        for (Object o1 : s1) {
+            if (s2.contains(o1)) {
+                ++result;
+            }
+        }
+        return result;
+    }
+    
+无限制通配符类型Set<?>和原生态类型Set之间区别，通配符类型是安全的，原生态类型则不安全。由于可以将任何元素放进使用原生态类型的集合中，因此很容易破坏该集合的类型约束条件；但不能将任何元素（除了null之外）放到Collection<?>中。如果尝试这么做的话，会产生一条像这样的编译错误消息：
+WildCard.java:13: cannot find symbol
+symbol: method add(String)
+location: interface Collection<capture#825 of ?>
+    c.add("verboten");
+      ^
+
+（但是这样写将编译不过：
+Set<?> strings1 = new HashSet<>(); //不能声明为?类型，并且加入对象
+strings1.addAll(Arrays.asList("d", "e", "f"));）
+
+这样的错误消息，编译器已经尽到了它的职责，防止你破坏集合的类型约束条件。不仅无法将任何元素（除了null之外）放进Collection<?>中，而且根本无法猜测你会得到哪种类型的对象。要是无法接受这些限制，就可以使用泛型方法（generic method，见第27条）或者有限制的通配符类型（bounded wildcard type，见第28条）。
+
+不要在新代码中使用原生态类型，这条规则有两个小小的例外，两者源于“泛型信息可以在运行时被擦除”（见第25条）这一事实。在类文字（class literal）中必须使用原生态类型。规范不允许使用参数化类型（虽然允许数组类型和基本类型）。换句话说，List.class， String[].class和int.class都合法，但是List<String>.class和List<?>.class则不合法。
+
+这条规则的第二个例外与instanceof操作符有关。由于泛型信息可以在运行时被擦除，因此在参数化类型而非无限制通配符类型上使用instanceof操作符是非法的。用无限制通配符类型代替原生态类型，对instanceof操作符的行为不会产生任何影响。在这种情况下，尖括号(<>)和问题(?)就显得多余了，下面是利用泛型来使用instanceof操作符的首先方法：
+// Legitimate use of raw type - instanceof operator
+if (o instanceof Set) {     // Raw type
+    Set<?> m = (Set<?>) o;  // Wildcard type
+    //...
+}
+注意，一旦确定这个o是个Set，就必须将它转换成通配符类型Set<?>，而不是转换成原生态类型Set。这是个受检的（checked）转换，因此不会导致编译时警告。
+
+总之，使用原生态类型会在运行时导致异常，因此不要在新代码中使用。原生态类型只是为了与引入泛型之前的遗留代码进行兼容和互用而提供的。做个快速的回顾：Set<Object>是个参数化类型，表示可以包含任何对象类型的一个集合；Set<?>则是一个通配符类型，表示只能包含某种未知对象类型的一个集合；Set则是个原生态类型，它脱离了泛型系统。前两种是安全的，最后一种不安全。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第5章 泛型 P97
+//第24条：消除非受检警告 P103
+有些警告比较难以消除。要尽可能地消除每一个非受检警告。如果消除了所有警告，就可以确保代码是类型安全的。这意味着不会在运行时出现ClassCastException异常，你会更加自信自己的程序可以实现预期的功能。
+
+如果无法消除警告，同时可以证明引起警告的代码是类型安全的，（只有在这种情况下才）可以用一个@SuppressWarnings("unchecked")注解来禁止这条警告。如果在禁止警告之前没有先证实代码是类型安全的，那就只是给你自己一种错误的安全感而已。代码在编译的时候可能没有出现任何警告，但它在运行时仍然会抛出ClassCastException异常。但是如果忽略（而不是禁止）明知道是安全的非受检警告，那么当新出现一条真正有问题的警告时，你也不会注意到。新出现的警告就会淹没在所有的错误警告中。
+
+SuppressWarnings注解可以用在任何粒度的级别中，从单独的局部变量声明到整个类都可以。应该始终在尽可能小的范围中使用SuppressWarnings注解。它通常是个变量声明，或是非常简短的方法或者构造器。永远不要在整个类上使用SuppressWarnings，这可能会掩盖了重要的警告。
+
+如果发现在长度不止一行的方法或者构造器中使用了SuppressWarnings注解，可以将它移到一个局部变量的声明中。虽然必须声明一个新的局部变量，不过这么做还是值得的。如，考虑ArrayList类当中的toArray方法：
+public <T> T[] toArray(T[] a) {
+    if (a.length < size)
+        return (T[]) Arrays.copyOf(elements, size, a.getClass());
+    System.arraycopy(elements, 0, a, 0, size);
+    if (a.length > size)
+        a[size] = null;
+    return a;
+}
+
+如果编译ArrayList，该方法会产生成这条警告：
+ArrayList.java:305: warning: [unchecked] unchecked cast found : Object[], required: T[]
+    return (T[]) Arrays.copyOf(elements, size, a.getClass());
+                              ^
+将SuppressWarnings注解放在return语句中是非法的，因为它不是一个声明。可以试着将注解放在整个方法上，但是在实践中千万不要这么做，而是应该声明一个局部变量来保存返回值，并注解其声明，像这样：
+public <T> T[] toArray(T[] a) {
+    if (a.length < size) {
+        // This cast is correct because the array we're creating is of the same type as the one passed in, which is T[].
+        @SuppressWarnings("unchecked") T[] result = (T[]) Arrays.copyOf(elements, size, a.getClass());
+        return result;
+    }
+    System.arraycopy(elements, 0, a, 0, size);
+    if (a.length > size)
+        a[size] = null;
+    return a;
+}
+这个方法可以正确地编译，禁止非受检警告的范围也减到了最小。
+
+每当使用SuppressWarnings("unchecked")注解时，都要添加一条注释，说明为什么这么做是安全的。这样可以帮助其他人理解代码，更重要的是，可以尽量减少其他人修改代码后导致计算不安全的概率。如果觉得这种注释很难编写，就要多加思考，最终会发现非受检操作是非常不安全的。
+
+总之，非受检警告很重要，不要忽略它们。每一条警告都表示可能在运行时抛出ClassCastException异常。要尽最大的努力消除这些警告。如果无法消除非受检警告，同时可以证明引起警告的代码是类型安全的，就可以在尽可能小的范围中，用@SuppressWarnings("unchecked")注释禁止该警告。要用注释把禁止该警告的原因记录下来。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第5章 泛型 P97
+//第25条：列表优先于数组 P105
+数组与泛型相比，有两个重要不同点。首先，数组是协变的（convariant）。表示如果Sub为Super的子类型，那么数组类型Sub[]就是Super[]的子类型，相反，泛型则是不可变的（invariant）：对于任意两个不同的类型Type1和Type2，List<Type1>既不是List<Type2>的子类型，也不是List<Type2>的超类型。你可能认为，这意味着泛型是有缺陷的，实际上可以说数组才是有缺陷的。
+下面的代码片段是合法的：
+// Fails at runtime!
+Object[] objectArray = new Long[1];
+objectArray[0] = "I don't fit in"; // Throws ArrayStoreException
+
+但下面这段代码则不合法：
+// Won't compile!
+List<Object> o1 = new ArrayList<Long>(); // 编译报错，Incompatible types
+o1.add("I don't fit in");
+这其中无论哪种方法，都不能将String放进Long容器中，但是利用数组，会在运行时发现所犯的错误；利用列表，则可以在编译时发现错误。当然希望在编译时发现错误了。
+
+数组与泛型的第二大区别在于，数组是具体化的（reified）。因此数组会在运行时才知道并检查它们的元素类型约束。如上所述，如果企图将String保存到Long数组中，就会得到一个ArrayStoreException异常。相比之下，泛型则是通过擦除（erasure）来实现的。因此泛型只在编译时强化它们的类型信息，并在运行时丢弃（或者擦除）它们的元素类型信息。擦除就是使泛型可以与没有使用泛型的代码随意进行互用（见第23条）。
+
+由于上述这些根本的区别，因此数组和泛型不能很好的混合使用。如，创建泛型、参数化类型或者类型参数的是非法的。这些数组创建表达式没有一个是合法的：new List<E>[]、new List<String>[]和new E[]。这些在编译时都会导致一个generic array creation（泛型数组创建）错误。
+
+创建泛型数组是非法的，因为它不是类型安全的。要是它合法，编译器在其他正确的程序中民生的转换就会在运行时失败，并出现一个ClassCastException异常。这就违背了泛型系统提供的基本保证。
+
+从技术上角度来说，像E、List<E>和List<String>这样的类型应称作不可具体化的（non-reifiable）类型。不可具体化的（non-reifiable）类型是指其运行时表示法包含的信息比它的编译时表示法包含的信息更少的类型。唯一可具体化的（reifiable）参数化类型是无限制的通配符类型，如List<?>和Map<?, ?>（见第23条）。虽然不常用，但是创建无限制通配符的数组是合法的。
+
+禁止创建泛型数组，这表明泛型一般不可能返回它的元素类型数组（部分解决方案请见第29条）。这也意味着在结合使用可变参数（varargs）方法（见第42条）和泛型时会出现令人费解的警告。这是由于每当调用可变参数方法时，就会创建一个数组来存在varargs参数。如果这个数组的元素类型不是可具体化的（reifiable），就会得到一条警告。关于这些警告，除了把它们禁止（见第24条），并且避免在API中混合使用泛型与可变参数之外，别无他法。
+
+当得到泛型数组创建错误时，最好的解决方法通常是优先使用集合类型List<E>，而不是数组类型E[]。这样可能会损失一些性能或者简洁性，但是换回的却是更高的类型安全性和互用性。
+
+用列表代码数组。下面的reduce方法编译时就没有任何错误或者警告：
+// List-based generic reduction
+static <E> E reduce(List<E> list, Function<E> f, E initVal) {
+    List<E> snapshot;
+    synchronized(list) {
+        snapshot = new ArrayList<E>(list);
+    }
+    E result = initVal;
+    for (E e : snapshot) {
+        result = f.apply(result, e);
+    }
+    return result;
+}
+这个版本的代码比数组版的代码稍微冗长一点，但是可以确定在运行时不会得到ClassCastException异常，为此也值了。
+总之，数组和泛型有着非常不同的类型规则。数组是协变且可以具体化的；泛型是不可变的且可以被擦除的。因此数组提供了运行时的类型安全，但是没有编译时的类型安全，反之，对于泛型提供了编译时的类型安全，没有运行时类型安全。一般来说，数组和泛型不能很好的混合使用。如果你发现自己将它们混合起来使用，并且得到了编译时错误或者警告，第一反应是应该用列表代替数组。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第5章 泛型 P97
+//第26条：优先考虑泛型 P109
+一般来说，将集合声明参数化，以及使用JDK所提供的泛型和泛型方法，这些都不太困难。编写自己的泛型会比较困难一些，但是值得花些时间去学习如何编写。
+考虑第6条的简单的堆栈实现：（搜索public class Stack）
+这个类是泛型化（generification）的主要备选对象，换句话说，可以适当地强化这个类来利用泛型。根据实际情况来看，必须转换从堆栈里弹出的对象，以及可能在运行时失败的那些转换。将类泛型化的第一个步骤是给它的声明添加一个或者多个类型参数。在这个例子中有一个类型参数，它表示堆栈的元素类型，这个参数的名称通常为E（见第44条）。
+
+下一步是用相应的类型参数替换所有的Object类型，然后试着编译最终的程序：
+// Initial attempt to generify Stack = won't compile!
+package test;
+
+import java.util.Arrays;
+import java.util.EmptyStackException;
+
+public class Stack<E> {
+    private E[] elements;
+    private int size = 0;
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+    public Stack() {
+        elements = new E[DEFAULT_INITIAL_CAPACITY];
+    }
+
+    public void push(E o) {
+        ensureCapacity();
+        elements[size++] = o;
+    }
+
+    public E pop() {
+        if (size == 0) {
+            throw new EmptyStackException();
+        }
+        E result = elements[--size];
+        elements[size] = null;
+        return result;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    private void ensureCapacity() {
+        if (elements.length == size) {
+            elements = Arrays.copyOf(elements, 2 * size + 1);
+        }
+    }
+}
+通常将至少得到一个错误或者警告，这个类也不例外。幸运的是，这个类只产生一个错误，如下：
+elements = new E[DEFAULT_INITIAL_CAPACITY];
+Error:(12, 20) java: 创建泛型数组
+
+如第25条所述，不能创建不可具体化的（non-reifiable）类型的数组，如E。每当编写用数组支持的泛型时，都会出现这个问题。解决这个问题的两种方法。第一种，直接绕过创建泛型数组的禁令：创建一个Object的数组，并将它转换成泛型数组类型。现在错误是消除了，但是编译器会产生一条警告。这种用法是合法的，但（整体上而言）不是类型安全的：
+public Stack() {
+    elements = (E[]) new Object[DEFAULT_INITIAL_CAPACITY];
+}
+
+编译器不可能证明你的程序是类型安全的，但是你可以证明。你自己必须确保未受检的转换不会危及到程序的类型安全性。相关的数组（即elements变量）保存在一个私有的域中，永远不会被返回到客户端，或者传给任何其他方法。这个数组中保存的唯一元素，是传给push方法的那些元素，它们的类型为E，因此未受检的转换不会有任何危害。
+
+一旦证明了未受检的转换是安全的，就要在尽可能小的范围中禁止警告（见第24条）。在这种情况下，构造器只包含未受检的数组创建，因此可以在整个构造器中禁止这条警告。通过增加一条注解来完成禁止，Stack能够正确无误地进行编译，就可以使用它了，无需显式的转换，也无需担心会出现ClassCastException异常：
+// The elements array will contain only E instances from push(E).
+// This is sufficient to ensure type safety, but the runtime
+// type of the array won't be E[]: it will always be Objects[]!
+@SuppressWarnings("unchecked")
+public Stack() {
+    elements = (E[]) new Object[DEFAULT_INITIAL_CAPACITY];
+}
+
+消除Stack中泛型数组创建错误的第二种方法是，将elements域的类型从E[]改为Object[]。这么做会得到一条不同的错误：
+E result = elements[--size];
+Error:(24, 28) java: 不兼容的类型: java.lang.Object无法转换为E
+
+通过把从数组中获取到的元素由Object转换成E，可以将这条错误变成一条警告：
+unchecked cast:
+E result = (E) elements[--size];
+
+由于E是一个不可具体化的（non-reifiable）类型，编译器无法在运行时检验转换。你还是可以自己证实未受检的转换是安全的，因此可以禁止该警告。根据第24条建议，只要在包含未受检转换的任务上禁止警告，而不是在整个pop方法上就可以了，如下：
+public E pop() {
+    if (size == 0) {
+        throw new EmptyStackException();
+    }
+
+    @SuppressWarnings("unchecked")
+    E result = (E) elements[--size];
+    
+    elements[size] = null;
+    return result;
+}
+
+具体选择这两种方法中的哪一种来处理泛型数组创建错误，主要看个人偏好。所有其他的东西都一样，但是禁止数组类型的未受检转换比禁止标题类型（scalar type）的更加危险，所以建议采用第二种方案。但是在比Stack更实际的泛型类中，或许代码中会有多个地方需要从数组中读取元素，因此选择第二种方案需要多次转换成E，而不是只转换成E[]，这也是第一种方案之所以更常用的原因。
+
+看来上述的示例与第25条相矛盾了，第25条鼓励优先使用列表而非数组。实际上并不可能总是或者总想在泛型中使用列表。Java并不是生来就支持列表，因此有些泛型如ArrayList，则必须在数组上实现。为了提升性能，其他泛型如HashMap也在数组上实现。
+
+绝大多数泛型就像我们的Stack示例一样，因为它们的类型参数没有限制，可以创建Stack<Object>、Stack<int[]>、Stack<List<String>>，或者任何其他对象引用类型的Stack。注意不能创建基本类型的Stack：企图创建Stack<int>或者Stack<double>会产生一个编译时错误。这是Java泛型系统根本的局限性。可以通过使用基本包装类型（boxed primitive type）来避开这条限制（见第49条）。
+
+有些泛型限制了可允许的类型参数值。如，考虑java.util.concurrent.DelayQueue，其声明如下：
+class DelayQueue<E extends Delayed> implements BlockingQueue<E>;
+
+类型参数列表（<E extends Delayed>）要求实际的类型参数E必须是java.util.concurrent.Delayed的一个子类型。它允许DelayQueue实现及其客户端在DelayQueue的元素上利用Delayed方法，无需显式的转换，也没有出现ClassCastException的风险。类型参数E被称作有限制的类型参数（bounded type parameter）。注意，子类型关系确定了，每个类型都是它自身的子类型，因此创建DelayQueue<Delay>是合法的。
+
+总而言之，使用泛型比使用需要在客户端代码中进行转换的类型来得更加安全，也更加容易。在设计新类型的时候，要确保它们不需要这种转换就可以使用。这通常意味着要把类做成是泛型的。只要时间允许，就把现有的类型都泛型化。这对于这些类型的新用户来说会变得更加轻松，又不会破坏现有的客户端（见第23条）。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第5章 泛型 P97
+//第27条：优先考虑泛型方法 P113
+如类可以从泛型中受益一样，方法也一样。静态工具方法尤其适合于泛型化。Collections中的所有“算法”方法（例如binarySearch和sort）都泛型化了。
+
+编写泛型方法与编写泛型类型相类似。如下面的方法，返回两个集合的联合：
+package test;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class GenericMethodTest {
+    public static Set union(Set s1, Set s2) {
+        Set result = new HashSet(s1);
+        result.addAll(s2);
+        return result;
+    }
+}
+这个方法可以编译，但是有两条警告。
+Information:java: E:\Program Files\JetBrains\JavaProject\JUnitProject\src\main\java\test\GenericMethodTest.java使用了未经检查或不安全的操作。
+Information:java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+
+为了修正这些警告，使方法变成是类型安全的，要将方法声明修改为声明一个类型参数。声明类型参数的类型参数列表，处在方法的修饰符及其返回类型之间。在这个示例中，类型参数列表为<E>，返回类型为Set<E>。类型参数的命名惯例与泛型方法以 及泛型的相同（见第26条和第44条）。
+
+// Generic method
+public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
+    Set<E> result = new HashSet<>(s1);
+    result.addAll(s2);
+    return result;
+}
+
+至少对于简单的泛型方法而言，就这么回事了。现在该方法编译时不会产生任何警告，并提供了类型安全性，也更容易使用。以下是一个执行该方法的简单程序。程序中不包含转换，编译时不会有错误或者警告：
+package test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+public class GenericMethodTest {
+    // Generic method
+    public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
+        Set<E> result = new HashSet<>(s1);
+        result.addAll(s2);
+        return result;
+    }
+
+    // Simple program to exercise generic method
+    public static void main(String[] args) {
+        Set<String> guys = new HashSet<>(Arrays.asList("Tom", "Dick", "Harry"));
+        Set<String> stooges = new HashSet<>(Arrays.asList("Larry", "Moe", "Dick"));
+        Set<String> aflCio = union(guys, stooges);
+        System.out.println(aflCio);
+    }
+}
+输出：
+[Moe, Tom, Harry, Larry, Dick]
+
+union方法的局限性在于，三个集合的类型（两个输入参数和一个返回值）必须全部相同。利用有限制的通配符类型（bounded wildcard type），可以使这个方法变得更加灵活（见第28条）。
+
+泛型方法的一个显著特性是，无需明确指定类型参数的值，不像调用泛型构造器的时候是必须指定的。编译器通过检查方法参数的类型来计算类型参数的值。对于上述的程序而言，编译器发现union的两个参数都是Set<String>类型，因此知道类型参数E必须为String。这个过程称作类型推导（type inference）。
+
+如第1条所述，可以利用泛型方法调用所提供的类型推导，使创建参数化类型实例的过程变得轻松。提醒一下，在调用泛型构造器的时候，要明确传递类型参数的值可能有点麻烦。类型参数出现在了变量声明的左右两边，显得有些冗余：
+// Parameterized type instance creation with constructor
+Map<String, List<String>> anagrams = new HashMap<String, List<String>>(); //当前1.8版本右边参数并不需要提供
+
+为了消除这种冗余，可以编写一个泛型静态工厂方法（generic static factory method），与想要使用的每个构造器相对应。例如，下面是一个与无参的HashMap构造器相对应的泛型静态工厂方法：
+// Generic static factory method
+public static <K, V> HashMap<K, V> newHashMap() {
+    return new HashMap<K, V>();
+}
+
+通过这个泛型静态方法，可以用下面这段简洁的代码来取代上面那个重复的声明：
+// Parameterized type instance creation with static factory
+Map<String, List<String>> anagrams = newHashMap();
+
+在泛型上调用构造器，如果语言所做的类型推导与调用泛型方法时所做的相同，那就好了。截至Java 1.6 发行版本还不行。（Java 1.8 已经可以， 1.7 是否支持不确定）
+
+相关的模式是泛型单例工厂（generic singleton factory）。有时，会需要创建不可变但又适合于许多不同类型的对象。由于泛型是通过擦除（见第25条）实现的，可以给所有必要的类型参数使用单个对象，但是需要编写一个静态工厂方法，重复地给每个必要的类型参数分发对象。这种模式最常用于函数对象（见第21条），如Collection.reverseOrder，但也适用于像Collections.emptySet这样的集合。
+
+假设且个接口，描述了一个方法，该方法接受和返回某个类型T值：
+package test;
+
+public interface UnaryFunction<T> {
+    T apply(T arg);
+}
+
+
+现在假设要提供一个恒等函数（identity function）。如果在每次需要的时候都重新创建一个，这样会很浪费，因为它是无状态的（stateless）。如果泛型被具体化了，每个类型都需要一个恒等函数，但是它们被擦除以后，就只需要一个泛型单例。请看以下示例：
+package test;
+
+import java.util.stream.Stream;
+
+public class GenericSingletonFactory {
+    // Generic singleton factory pattern
+    private static UnaryFunction<Object> IDENTITY_FUNCTION = new UnaryFunction<Object>() {
+        @Override
+        public Object apply(Object arg) {
+            return arg;
+        }
+    };
+
+    // IDENTITY_FUNCTION is stateless and its type parameter is
+    // unbounded so it's safe to share one instance across all types
+    @SuppressWarnings("unchecked")
+    public static <T> UnaryFunction<T> identityFunction() {
+        return (UnaryFunction<T>) IDENTITY_FUNCTION;
+    }
+
+    // Sample program to exercise generic singleton
+    public static void main(String[] args) {
+        String[] strings = {"jute", "hemp", "nylon"};
+        UnaryFunction<String> sameString = identityFunction();
+        Stream.of(strings).map(e -> sameString.apply(e)).forEach(System.out::println);
+
+        UnaryFunction<Number> sameNumber = identityFunction();
+        Stream.of(1, 2.0, 3L).map(e -> sameNumber.apply(e)).forEach(System.out::println);
+    }
+}
+输出：
+jute
+hemp
+nylon
+1
+2.0
+3
+
+IDENTITY_FUNCTION转换成（UnaryFunction<T>），产生了一条未受检的转换警告，因为UnaryFunction<Object>对于每个T来说并非都是个UnaryFunction<T>。但是恒等函数很特殊：它返回未被修改的参数，因此我们知道无论T的值是什么，用它作为UnaryFunction<T>都是类型安全的。因此，可以放心地禁止由这个转换所产生的未受检转换警告。一旦禁止，代码在编译时就会出现任何错误或者警告。
+
+虽然相对少见，但是通过某个包含该类型参数本身的表达式来限制类型参数是允许的。这就是递归类型限制（recursive type bound）。递归类型限制最普遍的用途与Comparable接口有关，它定义类型的自然顺序：
+public interface Comparable<T> {
+    int compareTo(T o);
+}
+
+类型参数T定义的类型，可以与实现Comparable<T>的类型的元素进行比较。实际上，几乎所有的类型都只能与它们自身的类型的元素相比较。因此。例如String实例Comparable<String>，Integer实现Comparable<Integer>，等。
+
+有许多方法都带有一个实现Comparable接口的元素列表，为了对列表进行排序，并在其中进行搜索，计算出它的最小值或者最大值，等等。要完成这其中的任何一项工作，要求列表中的每个元素要都能够与列表中的每个其他元素相比较，换句话说，列表的元素可以互相比较（mutually comparable）。下面是如何表达这种约束条件的一个示例：
+// Using a recursive type bound to express mutual comparability
+public static <T extends Comparable<T>> T max(List<T> list) {...}
+
+类型限制<T extends Comparable<T>>，可以读作“针对可以与自身进行比较的每个类型T”，这与互比性的概念或多或少有些一致。
+
+下面的方法就带有上述声明。它根据元素的自然顺序计算列表的最大值，编译时没有出现错误或者警告：
+package test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+public class GenericTest {
+    public static <T extends Comparable<T>> T max(List<T> list) { //如果把类型限制写为<T>，则编译错误无法解析方法t.compareTo
+        Iterator<T> i = list.iterator();
+        T result = i.next();
+        while (i.hasNext()) {
+            T t = i.next();
+            if (t.compareTo(result) > 0) {
+                result = t;
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        List<String> strings = Arrays.asList("hello", "good", "day");
+        System.out.println(max(strings));
+
+        List<Integer> integers = Arrays.asList(5, 3, 8);
+        System.out.println(max(integers));
+
+        // 未判断List是否为空，会抛出异常
+//        strings = new ArrayList<>();
+//        System.out.println(max(strings));
+    }
+}
+输出：
+hello
+8
+
+递归类型限制可能比这个要复杂得多，幸运的是，这种情况并不经常发生。如果理解了这种习惯用法及其通配符变量（见第28条），就能够处理在实践中遇到的许多递归类型限制了。
+
+总之，泛型方法就像泛型一样，使用起来比要求客户端转换输入参数并返回值的方法来得更加安全，也更加容易。就像类型一样，应该确保新方法可以不用转换就能使用，这通常意味着要将它们泛型化。并且就像类型一样，还应该将现有的方法泛型化，使新用户使用起来更加轻松，且不会破坏现有的客户端。（见第23条）
+//------------------------------------------------------------------------------------------------
+//Effective Java 第5章 泛型 P97
+//第27条：利用有限制通配符来提升API的灵活性 P117
+有时候，我们需要的灵活性要比不可变类型所能提供的更多。考虑第26条中的堆栈，下面是它的公共API：
+public class Stack<E> {
+    public Stack();
+    public void push(E e);
+    public E pop();
+    public boolean isEmpty();
+}
+
+假设想要增加一个方法，让它按顺序将一系列元素全部放到堆栈中。第一次尝试：
+// pushAll method without wildcard type deficient!
+public void pushAll(Iterable<E> src) {
+    for (E e : src) {
+        push(e);
+    }
+}
+
+这个方法编译时正确无误，但是并非尽如人意。如果Iterable src的元素类型与堆栈的完全匹配，就没有问题。但是假如一个Stack<Number>，并且调用了push(intVal)，这里的intVal就是Integer类型，这是可以的，因为Integer是Number的一个子类型。因此从逻辑上来说，下面的这个方法应该也可以：
+Stack<Number> numberStack = new Stack<Number>();
+Iterable<Integer> integers = ...;
+numberStack.pushAll(integers);
+
+如果尝试这么做，就会得到下面的错误消息，如前所述，参数化类型是不可变的：
+pushAll(Iterable<Number>) in Stack<Number> cannot be applied to (Iterable<Integer)
+
+//
+package test;
+
+import java.util.Arrays;
+import java.util.EmptyStackException;
+import java.util.List;
+
+public class Stack<E> {
+    private E[] elements;
+    private int size = 0;
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+    @SuppressWarnings("unchecked")
+    public Stack() {
+        elements = (E[]) new Object[DEFAULT_INITIAL_CAPACITY];
+    }
+
+    public void push(E o) {
+        ensureCapacity();
+        elements[size++] = o;
+    }
+
+    public void pushAll(List<E> src) { // 书中这里写的有问题，Iterable<E>对象，不能用for (E e : src)来遍历
+        for (E e : src) {
+            push(e);
+        }
+    }
+
+    public E pop() {
+        if (size == 0) {
+            throw new EmptyStackException();
+        }
+        E result = elements[--size];
+        elements[size] = null;
+        return result;
+    }
+
+    public int size() {
+        return size;
+    }
+
+    private void ensureCapacity() {
+        if (elements.length == size) {
+            elements = Arrays.copyOf(elements, 2 * size + 1);
+        }
+    }
+
+    public static void main(String[] args) {
+        Stack<Number> numberStack = new Stack<>();
+        numberStack.push(3);
+        List<Integer> integers = Arrays.asList(4, 5, 6);
+        numberStack.pushAll(integers); //编译错误。但是这里如果直接写pushAll(Arrays.asList(4, 5, 6))是可以编译和运行过的，asList中的T参数化为Number类型
+    }
+}
+
+幸运的是，有一种解决办法。Java提供了一种特殊的参数化类型，称作有限制的通配符类型（bounded wildcard type），来处理类似的情况。pushAll的输入参数类型不应该为“E的Iterable接口”，而应该为“E的某个子类型的Iterable接口”，有一个通配符类型正符合此间：Iterable<? extends E>。（使用关键字extends有些误导：回忆一下第26条中的说法，确定了子类型（subtype）后，每个类型都是自身的子类型，即便它没有将自身扩展。）修改pushAll来使用这个类型：
+// Wildcard type for parameter that serves as an E producer
+public void pushAll(List<? extends E> src) {
+    for (E e : src) {
+        push(e);
+    }
+}
+这个函数同样可以写成如下形式，不过T类型在此函数中并无用处，所以可以用?通配符来代替T类型
+public <T extends E> void pushAll(List<T> src) {
+    for (E e : src) {
+        push(e);
+    }
+}
+
+修改了之后，不仅Stack可以正确无误地编译，没有通过初始的pushAll声明进行编译的客户端代码也一样可以。因为Stack及其客户端正确无误地进行了编译，就知道一切都是类型安全的了。
+
+现在假设想要编写一个popAll方法，使之与pushAll方法相呼应。popAll方法从堆栈中弹出每个元素，并将这些元素添加到指定的集合中。
+通配符类型同样提供了一种解决办法。popAll的输入参数类型不应该为“E的集合”，而应该为“E的某种超类的集合”（这里的超类是确定的，因此E是它自身的一个超类型）。仍然有一个通配符类型正是符合此意：Collection<? super E>。修改popAll来使用它：
+package test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EmptyStackException;
+import java.util.List;
+
+public class Stack<E> {
+    private E[] elements;
+    private int size = 0;
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+    @SuppressWarnings("unchecked")
+    public Stack() {
+        elements = (E[]) new Object[DEFAULT_INITIAL_CAPACITY];
+    }
+
+    public void push(E o) {
+        ensureCapacity();
+        elements[size++] = o;
+    }
+
+    public <T extends E> void pushAll(List<T> src) {
+        for (E e : src) {
+            push(e);
+        }
+    }
+
+    public E pop() {
+        if (size == 0) {
+            throw new EmptyStackException();
+        }
+        E result = elements[--size];
+        elements[size] = null;
+        return result;
+    }
+
+    public void popAll(Collection<? super E> dst) {
+        while (!isEmpty()) {
+            dst.add(pop());
+        }
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    private void ensureCapacity() {
+        if (elements.length == size) {
+            elements = Arrays.copyOf(elements, 2 * size + 1);
+        }
+    }
+
+    public static void main(String[] args) {
+        Stack<Number> numberStack = new Stack<>();
+        numberStack.push(3);
+        List<Integer> integers = Arrays.asList(4, 5, 6);
+        numberStack.pushAll(integers);
+
+        List<Object> objects = new ArrayList<>();
+        numberStack.popAll(objects);
+        System.out.println(objects);
+    }
+}
+输出：
+[6, 5, 4, 3]
+
+做了这个变动之后，Stack和客户端代码就都可以正确无误地编译了。
+
+结论很明显。为了获得最大限度的灵活性，在要表示生产者或者消费者的输入参数上使用通配符类型。如果鞯个输入参数既是生产者，又是消费者，那么通配符类型对你就没有什么好处了：因为你需要的是严格的类型匹配，这是不用任何通配符而得到的。
+
+下面的助词符便于让你记住要使用哪种通配符类型：
+PECS表示 producer-extends, consumer-super 。
+
+如果参数化类型表示一个T生产者，就使用<? extends T>；如果它表示一个T消费者，就使用<? super T>。（我的理解是，生产者就是往外出对象；消费者就是往里面进对象。）在Stack示例中，pushAll的src参数产生E实例供Stack使用，因此src相应的类型为Iterable<? extends E>；popAll的dst参数通过Stack消费E实例，因此dst相应的类型为Collection<? super E>。PECS这个助词符突出了使用通配符类型的基本原则。Naftalin和Wadler称之为Get and Put Principle。
+
+记住这个助词符，来看一些之前条目中提到过的方法声明。第25条中的reduce方法有这条声明：
+static <E> E reduce(List<E> list, Function<E> f, E initVal)
+
+虽然列表既可以消费也可以产生值，reduce方法还是只用它的list参数作为E生产者（producer），因此它的声明就应该使用一个extends E的通配符类型。参数f表示既可以消费又可以产生E实例的函数，因此通配符类型不适合它。得到的方法声明如下：
+//Wildcard type for parameter that serves as an E producer
+static <E> E reduce(List<? extends E> list, Function<E> f, E initVal)
+这一变化的区别是，假设你有一个List<Integer>，想通过Function<Number>把它简化。它不能通过初始声明进行编译，但是一旦添加了有限制的通配符类型，就可以了。
+
+看第27条中的union方法，下面是声明：
+public static <E> Set<E> union(Set<E> s1, Set<E> s2)
+
+s1和s2这两个参数都是E消费者，因此根据PECS，这个声明应该是：
+public static <E> Set<E> union(Set<? extends E> s1, Set<? extends E> s2)
+
+注意返回类型仍然是Set<E>。不要用通配符类型作为返回类型。除了为用户提供额外的灵活性之外，它还会强制用户在客户端代码中使用通配符类型。
+
+如果使用得当，通配符类型对于类的用户来说几乎是无形的。它们使方法能够接受它们应该接受的参数，并拒绝那些应该拒绝的参数。如果类的用户必须考虑通配符类型，类的API或许就会出错。
+
+修改过的union声明，你可能会以为可以像这样编写：
+Set<Integer> integers = ...;
+Set<Double> doubles = ...;
+Set<Number> numbers = union(integers, doubles);
+但是这么做会得到下面的错误消息：
+类型不匹配
+
+//但是用Java 1.8可以正常编译
+package test;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+public class GenericMethodTest {
+    // Generic method
+    public static <E> Set<E> union(Set<? extends E> s1, Set<? extends E> s2) {
+        Set<E> result = new HashSet<>(s1);
+        result.addAll(s2);
+        return result;
+    }
+
+    // Simple program to exercise generic method
+    public static void main(String[] args) {
+        Set<Integer> integers = new HashSet<>(Arrays.asList(1, 2, 3));
+        Set<Double> doubles = new HashSet<>(Arrays.asList(4.0, 5.1, 6.2));
+        Set<Number> numbers = union(integers, doubles); //如果写成这种，会提示<Number>不需要，编译器可以自行推断出泛型类型。Set<Number> numbers = GenericMethodTest.<Number>union(integers, doubles); 并且如果要加<Number>，则必须加类GenericMethodTest.
+        System.out.println(numbers);
+    }
+}
+    
+有一种办法可以处理这种错误。如果编译器不能推断你希望它拥有的类型，可以通过一个显式的类型参数（explicit type parameter）来告诉它要使用哪种类型。这种情况不太经常发生，这是好事，因为显式的类型参数不太优雅。增加这个显式的类型参数之后，程序可以正确无误地进行编译：
+Set<Number> numbers = Union.<Number>union(integers, doubles);
+
+看第27条的max方法，以下是初始的声明：
+public static <T extends Comparable<T>> T max(List<T> list) 
+下面是修改过的使用通配符类型的声明：
+public static <T extends Comparable<? super T>> T max(List<? extends T> list)
+
+为了从初始声明中得到修改后的版本，要应用PECS转换两次。最直接的是运用到参数List。它产生T实例，因此将类型从List<T>改成List<? extends T>。更灵活的是运用到类型参数T。这是第一次见到将通配符运用到类型参数。最初T被指定用来扩展Comparable<T>，但是T的comparable消费T实例（并产生表示顺序关系的整值）。因此，参数化类型Comparable<T>被有限制通配符类型Comparable<? super T>取代。comparable始终是消费者，因此使用时始终应该是Comparable<? super T>优先于Comparable<T>。对于comparator也一样，因此使用时始终应该是Comparator<? super T>优先于Comparator<T>。
+
+修改过的max声明可能是整本书中最复杂的方法声明了。所增加的复杂代码确实起作用了。下面是一个简单的列表示例，在初始的声明中不允许这样，修改过的版本则可以：
+List<ScheduledFuture<?>> scheduledFutures = ...;
+
+不能将初始方法声明运用到这个列表的原因在于，java.util.concurrent.ScheduledFuture没有实现Comparable<ScheduledFuturn>接口。相反，它是扩展Comparable<Delayed>接口的Delayed接口的子接口。换句话说，ScheduleFuture实例并非只能与其他ScheduledFuture实例相比较，它可以与任何Delayed实例相比较，这就足以导致初始声明时就会被拒绝。
+
+修改过的max声明有一个小小的问题：它阻止方法进行编译。下面的方法包含了修改过的声明：
+public static <T extends Comparable<? super T>> T max(List<? extends T> list) {
+    Iterator<? extends T> i = list.iterator(); //这里写成Iterator<T>将编译错误
+    T result = i.next();
+    while (i.hasNext()) {
+        T t = i.next();
+        if (t.compareTo(result) > 0) {
+            result = t;
+        }
+    }
+    return result;
+}
+
+意味着list不是一个List<T>，因此它的iterator方法没有返回Iterator<T>。它返回T的某个子类型的一个iterator，因此用它代替iterator声明，它使用了一个有限制的通配符类型：
+Iterator<? extends T> i = list.iterator();
+
+这是必须对方法体所做的唯一修改。迭代器的next方法返回的元素属于T的某个子类型，可以被安全地保存在类型T的一个变量中。
+
+还有一个与通配符有关的话题。类型参数与通配符之间具有双重性，许多方法都可以利用其中一个或者另一个进行声明。如，下面是可能的两种静态方法声明，来交换列表中的两个被索引的项目。第一个使用无限制的类型参数（见第27条），第二个使用无限制的通配符：
+// Two possible declarations for the swap method
+public static <E> void swap(List<E> list, int i, int j);
+public static void swap(List<?> list, int i, int j);
+
+在公共API中，第二种更好一些，因为它更简单。将它传到一个列表中——任何列表——方法就会交换被索引的元素。不用担心类型参数。一般来说，如果类型参数只在方法声明中出现一次，就可以用通配符取代它。如果是无限制的类型参数，就用无限制的通配符取代它；如果是有限制的类型参数，就用有限制的通配符取代它。
+
+将第二种声明用于swap方法会有一个问题，它优先使用通配符而非类型参数：下面这个简单的实现都不能编译：
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class GenericTest {
+    public static void swap(List<?> list, int i, int j) {
+        list.set(i, list.set(j, list.get(i)));
+    }
+
+    public static void main(String[] args) {
+        List<String> strings = Arrays.asList("hello", "good", "day");
+        swap(strings, 0, 1);
+    }
+}
+
+编译会产生这条没有什么用处的错误消息：
+Error:(9, 41) java: 不兼容的类型: java.lang.Object无法转换为capture#1, 共 ?
+
+不能将元素放回到刚刚从中取出的列表中，这似乎不太对劲。问题在于list的类型为List<?>，不能把null之外的任何值放到List<?>中。幸运的是，有一种方式可以实现这个方法，无需求助于不安全的转换或者原生态类型（raw type）。这种想法就是编写一个私有的辅助方法来捕捉通配符类型。为了捕捉类型，辅助方法必须是泛型方法，像下面这样：
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class GenericTest {
+    public static void swap(List<?> list, int i, int j) {
+        swapHelper(list, i, j);
+    }
+
+    // Private help method for wildcard capture
+    private static <E> void swapHelper(List<E> list, int i, int j) {
+        list.set(i, list.set(j, list.get(i)));
+    }
+
+    public static void main(String[] args) {
+        List<String> strings = Arrays.asList("hello", "good", "day");
+        swap(strings, 0, 1);
+        System.out.println(strings);
+    }
+}
+
+swapHelper方法知道list是一个List<E>。因此，它知道从这个列表中取出的任何值均为E类型，并且知道将E类型的任何值放进列表都是安全的。swap这个有些费解的实现编译起来却是正确无误的。它允许我们导出swap这个比较好的基于通配符的声明，同时在内部利用更加复杂的泛型方法。swap方法的客户端不一定要面对更加复杂的swapHelper声明，但是它们的确从中受益。
+
+总而言之，在API中使用通配符类型虽然比较需要技巧，但是使API变得灵活得多。如果编写的是将被广泛使用的类库，则一定要适当地利用通配符类型。记住基本的原则：producer-extends, consumer-super(PECS)。还要记住所有的comparable和comparator都是消费者。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第5章 泛型 P97
+//第29条：优先考虑类型安全的异构容器 P123
+泛型最常用于集合，如Set和Map，以及单元素的容器，如ThreadLocal和AtomicReference。这些用法中，它都充当了被参数化了的容器，这样就限制每个容器只能有固定数目的类型参数。一般来说，这种情况正是你想要的。一个Set只有一个类型参数，表示它的元素类型；一个Map有两个类型参数，表示它的键和值类型；诸如此类。
+
+有时候会需要更多的灵活性。例如，数据库行可以有任意多的列，如果能以类型安全的方式访问所有列就好了。幸运的是，有一种方法可以很容易地做到这一点。这种想法就是将键（key）进行参数化而不是将容器（container）参数化。然后将参数化的键提交给容器，来插入或者获取值。用泛型系统来确保值的类型与它的键相符。
+
+简单地示例一下这种方法：考虑Favorites类，它允许其客户端从任意数量的其他类中，保存并获取一个“最喜爱”的实例。Class对象充当参数化键的部分。之所以可以这样，是因为类Class在Java 1.5 版本中被泛型化了。类的类型从字面上来看不再只是简单的Class，而是Class<T>。如，String.class属于Class<String>类型，Integer.class属于Class<Integer>类型。当一个类的字面文字被用在方法中，来传达编译时和运行时的类型信息时，就被称作type token。
+
+Favorites类的API很简单。它看起来就像一个简单的map，除了键（而不是map）被参数化之外。客户端在设置和获取最喜爱的实例时提交Class对象。下面就是这个API：
+//
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+// Typesafe heterogeneous container pattern - API and implementation
+public class Favorites {
+    private Map<Class<?>, Object> favorites = new HashMap<>();
+
+    public <T> void putFavorite(Class<T> type, T instance) {
+        if (type == null) {
+            throw new NullPointerException("Type is null");
+        }
+        favorites.put(type, instance);
+    }
+
+    public <T> T getFavorite(Class<T> type) {
+        return type.cast(favorites.get(type));
+//        Object obj = favorites.get(type); //用这个方法来判断，输出将是null null test.Favorites。
+//        if (obj.getClass() == type.getClass()) { //以String来例，obj.getClass()将得到String，type.getClass将得到Class，所以判定为false。还没有写出instanceof的代码？
+//            return (T) obj;
+//        }
+//        return null;
+    }
+
+    public static void main(String[] args) {
+        Favorites f = new Favorites();
+        f.putFavorite(String.class, "Java");
+        f.putFavorite(Integer.class, 0xcafebabe); //f.putFavorite(Number.class, 0xcafebabe);
+        f.putFavorite(Class.class, Favorites.class);
+        String favoriteString = f.getFavorite(String.class);
+        int favoriteInteger = f.getFavorite(Integer.class); //Number favoriteInteger = f.getFavorite(Number.class);这样也可以
+        Class<?> faovriteClass = f.getFavorite(Class.class);
+        System.out.printf("%s %x %s%n", favoriteString, favoriteInteger, faovriteClass.getName());
+    }
+}
+输出：
+Java cafebabe test.Favorites
+
+Favorites实例是类型安全（typesafe）的：当你向它请求String的时候，它从来不会返回一个Integer给你。同时它也是异构的（heterogeneous）：不像普通的map，它的所有键都是不同类型的。因此，我们将Favorites称作类型安全的异构容器（typesafe heterogeneous container）。
+
+这里发生了一些微妙的事情。每个Favorites实例都得到一个称作favorites的私有Map<Class<?>, Object>的支持。你可能认为由于无限制通配符类型的关系，将不能把任何东西放进这个Map，但事实正好相反。要注意的是通配符类型是嵌套的：它不是属于通配符类型的Map的类型，而是它的键的类型。由此可见，每个键都可以有一个不同的参数化类型：一个可以是Class<String>，接下来是Class<Integer>等等。异构就是从这里来的。
+
+第二件要注意的事情是，favorites Map的值类型只是Object。换句话说，Map并不能保证键和值之间的类型关系，即不能保证每个值的类型都与键的类型相同。事实上，Java的类型系统还没有强大到足以表达这一点。但我们知道这是事实，并在获取favorite的时候利用了这一点。
+
+putFavorite方法的实现很简单：它只是把（从指定的Class对象到指定favorite实例的）一个映射放到favorites中。如前所述，这是放弃了键和值之间的“类型联系”，因此无法知道这个值是键的一个实例。但是没关系，因为getFavorites方法能够并且的确重新建立了这种联系。
+
+cast方法是Java的cast操作符的动态模拟。它只检验它的参数是否为Class对象所表示的类型的实例。如果是，就返回参数，否则就抛出ClassCastException异常。getFavorite中的cast调用永远不会抛出ClassCastException异常，并假设客户端代码正确无误地进行编译。也就是说，我们知道favorites映射中的值会始终与键的类型相匹配。
+
+假设cast方法只返回它的参数，cast方法的签名充分利用了Class类被泛型化的这个事实。它的返回类型是Class对象的类型参数：
+public class Class<T> {
+    T cast(Object obj);
+}
+这正是getFavorite方法所需要的，也正是让我们不必借助于未受检地转换成T就能确保Favorites类型安全的东西。
+
+Favorites类有两种局限性值得注意。首先，恶意的客户端可以很轻松地破坏Favorites实例的类型安全，只要以它的原生态形式（raw form）使用Class对象。但会造成客户端代码在编译时产生未受检的警告。你可以很容易地利用原生态类型HashSet（见第23条）将String放进HashSet<Integer>中。也就是主产，如果愿意付出一点代价，就可以拥有运行时的类型安全。确保Favorites永远不违背它的类型约束条件的方式是，让putFavorite方法检验instance是否真的是type所表示的类型的实例。只要使用一个动态转换：
+例如，可以通过如下代码破坏类型安全：
+Class stringClass = String.class;
+f.putFavorite(stringClass, 123);
+String favoriteString = f.getFavorite(String.class);
+编译通过，运行时只能在getFavorite时抛出ClassCastException：
+Exception in thread "main" java.lang.ClassCastException: Cannot cast java.lang.Integer to java.lang.String
+
+修改如下：
+// Achieving runtime type safety with a dynamic cast
+public <T> void putFavorite(Class<T> type, T instance) {
+    if (type == null) {
+        throw new NullPointerException("Type is null");
+    }
+    favorites.put(type, type.cast(instance));
+}
+将在f.putFavorite(stringClass, 123);时即运行错误
+
+java.util.Collections中有一些集合包装类采用了同样的技巧。它们称作checkedSet、checkedList、checkedMap，诸如此类。除了一个集合（或者映射）之外，它们的静态工厂还采用一个（或者两个）Class对象。静态工厂属于泛型方法，确保Class对象和集合的编译时类型相匹配。包装类给它们所封装的集合增加了具体化。如果有人试图将Coin放进你的Collection<Stamp>，包装类就会在运行时抛出ClassCastException异常。用这些包装类在混有泛型和遗留代码的应用程序中追溯“谁把错误的类型元素添加到了集合中”很有帮助。
+
+Favorites类的第二种局限性在于它不能用在不可具体化的（non-reifiable）类型中（见第25条）。换句话说，你可以保存最喜爱的String或者String[]，但不能保存最喜爱的List<String>。如果试图保存最喜欢的List<String>，程序就不能进行编译。原因在于你无法为List<String>获得一个Class对象：List<String>.Class是个语法错误，这也是件好事。List<String>和List<Integer>共用一个Class对象，即List.class。如果从“字面（type literal）”上来看，List<String>.class和List<Integer>.class是合法的，并返回了相同的对象引用，就会破坏Favorites对象的内部结构。
+
+对于第二种局限性，还没有完全令人满意的解决办法。有一种办法称作super type token，它在解决这一局限性做了很多努力，但是这种方法仍有它自身的局限性。
+
+注解API（见第35条）广泛利用了有限制的类型令牌。如，这是一个在运行时读取注解的方法。这个方法来自AnnotatedElement接口，它通过 表示类、方法、域及其他程序元素的反射类型来实现：
+public <T extends Annotation> T getAnnotation(Class<T> annotationType);
+参数annotationType是一个表示注解类型的有限制的类型令牌。如果元素有这种类型的注解，该方法就将它返回，如果没有，则返回null。被注解的元素本质上是个类型安全的异构容器，容器的键属于注解类型。
+
+假设有一个类型Class<?>的对象，并且想将它传给一个需要有限制的类型令牌的方法，例如getAnnotation。你可以将对象转换成Class<? extends Annotation>，但是这种转换是非受检的，会产生一条编译时警告（见第24条）。幸运的是，类Class提供了一个安全（且动态）地执行这种转换的实例方法。该方法称作asSubClass，它将调用它的Class对象转换成用其参数表示的类的一个子类。如果转换成功，该方法返回它的参数；如果失败，则抛出ClassCastException异常。
+
+以下示范了如何利用asSubClass方法在编译时读取类型未知的注解。这个方法编译时没有出现错误或者警告：
+// Use of asSubClass to safely cast to a bounded type token
+static Annotation getAnnotation(AnnotatedElement element, String annotationTypeName) {
+    Class<?> annotationType = null; //Unbounded type token
+    try {
+        annotationType = Class.forName(annotationTypeName);
+    } catch (Exception ex) {
+        throw new IllegalArgumentException(ex);
+    }
+    return element.getAnnotation(annotationType.asSubClass(Annotation.class));
+}
+
+总而言之，集合API说明了泛型的一般用法，限制你每个容器只能有固定数目的类型参数。你可以通过将类型参数放在键上而不是容器上来避开这一限制。对这种类型安全的异构容器，可以用Class对象作为键。以这种方式使用的Class对象称作类型令牌。你也可以使用定制的键类型。例如，用一个DatabaseRow类型表示一个数据库行（容器），用泛型Column<T>作为它的键。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+Java 1.5 发行版本中增加了两个新的引用类型：一个新的类型称作枚举类型（enum type），一种新的接口称作注解类型（annotation type）。
+//第30条：用enum代替int常量 P128
+public enum Apple { FUJI, PIPPIN, GRANNY_SMITH }
+public enum Orange { NAVEL, TEMPLE, BLOOD}
+Java的枚举类型是功能十分齐全的类，功能比其他语言中的对待物要强大得多，Java的枚举本质上是int值。
+
+Java枚举类型背后的基本想法非常简单：它们就是通过公有的静态final域为每个枚举常量导出实例的类。因为没有可以访问的构造器，枚举类型是真正的final。因为客户端既不能创建枚举类型的实例，也不能对它进行扩展，因此很可能没有实例，而只有声明过的枚举常量。换句话说，枚举类型是实例受控的。它们是单例（Singleton）的泛型化（见第3条），本质上是单元素的枚举。枚举类型为类型安全的枚举（typesafe enum）框框工提供了语言方面的支持。
+
+枚举提供了编译时的类型安全。如果声明一个参数的类型为Apple，就可以保证，被传到该参数上的任何非null的对象引用一定属于三个有效的Apple值之一。试图传递类型错误的值时，会导致编译时错误，就像试图将某种枚举类型的表达式赋给另一种枚举类型的变量，或者试图利用==操作符比较不同枚举类型的值一样。
+
+包含同名常量的多个枚举类型可以在一个系统中和平共处，因为每个类型都有自己的命名空间。你可以增加或者重新排列枚举类型中的常量，而无需重新编译它的客户端代码，因为导出常量的域在枚举类型和它的客户端之间提供了一个隔离层：常量值并没有被编译到客户端代码中，而是在枚举模式之中。最终，可以通过调用toString方法，将枚举转换成可打印的字符串。
+
+除了完善了int枚举模式的不足之外，枚举类型还允许添加任意的方法和域，并实现任意的接口。它们提供了所有Object方法（见第3章）的高级实现，实现了Comparable（见第12条）和Serializable接口（见第11章），并针对枚举类型的可任意改变性设计了序列化方式。
+
+枚举类型可以利用任何适当的方法来增强枚举类型。枚举类型可以先作为枚举常量的一个简单集合，随着时间推移再演变成为全功能的抽象。
+
+举个有关枚举类型的好例子，比如太阳系中的8颗行星。每颗行星都有质量和半径，通过这两个属性可以计算出它的表面策略。从而给定物体的质量，就可以计算出一个物体在行星表面上的重量。每个枚举常量后面括号中的数值就是传递给构造器的参数。在这个例子中，它们就是行星的质量和半径：
+//
+package test;
+
+public enum Planet {
+    MERCURY(3.302e+23, 2.439e6),
+    VENUS(4.869e+24, 6.052e6),
+    EARTH(5.975e+24, 6.378e6),
+    MARS(6.419e+24, 3.393e6),
+    JUPITER(1.899e+27, 7.149e7),
+    SATURN(5.685e+26, 6.027e7),
+    URANUS(8.683e+25, 2.556e7),
+    NEPTUNE(1.024e+26, 2.477e7),;
+    private final double mass; //In kilograms
+    private final double radius; //In meters
+    private final double surfaceGravity; //In m / s^2
+
+    // Universal gravitational constant in m^3 / kg s^2
+    private static final double G = 6.67300E-11;
+
+    // Constructor
+    Planet(double mass, double radius) {
+        this.mass = mass;
+        this.radius = radius;
+        this.surfaceGravity = G * mass / (radius * radius);
+    }
+
+    public double mass() {
+        return mass;
+    }
+
+    public double radius() {
+        return radius;
+    }
+
+    public double surfaceGravity() {
+        return surfaceGravity;
+    }
+
+    public double surfaceWeight(double mass) {
+        return mass * surfaceGravity; // F = ma
+    }
+}
+
+编写一个像Planet这样的枚举类型并不难。为了将数据与枚举常量关联起来，得声明实例域，并编写一个带有数据并将数据保存在域中的构造器。枚举天生就是不可变的，因此所有的域都应该为final的（见第15条）。它们可以是公有的，但最好将它们做成是私有的，并提供公有的访问方法（见第14条）。在Planet这个示例中，构造器还计算和保存表面重力，但这正是一种优化。每当surfaceWeight方法用到策略时，都会根据质量和半径重新计算，并返回它在该常量所表示的行星上的重量。
+
+虽然Planet枚举很简单。它的功能却强大得出奇。下面是一个简短的程序，根据某个物体在地球上的重量（以任意单位），打印出一张很棒的表格，显示出该物体在所有8颗行星上的重量（用相同的单位）：
+//
+package test;
+
+import java.util.stream.Stream;
+
+public class WeightTable {
+    public static void main(String[] args) {
+        double earthWeight = 175;//Double.parseDouble(args[0]);
+        double mass = earthWeight / Planet.EARTH.surfaceGravity();
+        Stream.of(Planet.values()).forEach(planet -> System.out.printf("Weight on %s is %f%n", planet, planet.surfaceWeight(mass))); //换行用的是%n，C语言中则用\n
+    }
+}
+输出：
+Weight on MERCURY is 66.133672
+Weight on VENUS is 158.383926
+Weight on EARTH is 175.000000
+Weight on MARS is 66.430699
+Weight on JUPITER is 442.693902
+Weight on SATURN is 186.464970
+Weight on URANUS is 158.349709
+Weight on NEPTUNE is 198.846116
+
+Planet有一个静态的values方法，按照声明顺序返回它的值数组。还要注意toString方法返回每个枚举值的声明名称，使得println和printf的打印变得更加容易。如果不满意这种字符串表示法，可以通过覆盖toString方法对它进行修改。
+
+与枚举常量关联的有些行为，可能只需要用在定义了枚举的类或者包中。这种行为最好被实现成私有的或者包级私有的方法。于是，每个枚举常量都带有一组隐蔽的行为，这使得包含该枚举的类或者包在遇到这种常量时都可以做出适当的反应。就像其他的类一样，除非迫不得已要将枚举方法导出至它的客户端，否则都应该将它声明为私有的，如有必要，则声明为包级私有的（见第13条）。
+
+如果一个枚举具有普遍适用性，就应该成为一个顶层类（top-level class）；如果它只是被用在一个特定的顶层类中，它就应该成为该顶层类的一个成员类（见第22条）。例如，java.math.RoundingMode枚举表示十进制小数的舍入模式（rounding mode）。这些舍入模式用于BigDecimal类，但是它们提供了一个非常有用的抽象，这种抽象本质上又不属于BigDecimal类。通过使RoundingMode变成一个顶层类，库的设计者鼓励任何需要舍入模式的程序员重用这个枚举，从而增强API之间的一致性。
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
