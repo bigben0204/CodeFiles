@@ -27206,8 +27206,285 @@ Planet有一个静态的values方法，按照声明顺序返回它的值数组。还要注意toString方法返
 与枚举常量关联的有些行为，可能只需要用在定义了枚举的类或者包中。这种行为最好被实现成私有的或者包级私有的方法。于是，每个枚举常量都带有一组隐蔽的行为，这使得包含该枚举的类或者包在遇到这种常量时都可以做出适当的反应。就像其他的类一样，除非迫不得已要将枚举方法导出至它的客户端，否则都应该将它声明为私有的，如有必要，则声明为包级私有的（见第13条）。
 
 如果一个枚举具有普遍适用性，就应该成为一个顶层类（top-level class）；如果它只是被用在一个特定的顶层类中，它就应该成为该顶层类的一个成员类（见第22条）。例如，java.math.RoundingMode枚举表示十进制小数的舍入模式（rounding mode）。这些舍入模式用于BigDecimal类，但是它们提供了一个非常有用的抽象，这种抽象本质上又不属于BigDecimal类。通过使RoundingMode变成一个顶层类，库的设计者鼓励任何需要舍入模式的程序员重用这个枚举，从而增强API之间的一致性。
-//------------------------------------------------------------------------------------------------
 
+Planet示例中所示的方法对于大多数枚举类型来说就足够了，但有时候会需要更多的方法。每个Planet常量都关联了不同的数据，但有时候需要将本质上不同的行为（behavior）与每个常量关联起来。如，假设在编写一个枚举类型，来表示计算器的四大基本操作（加减乘除），想要提供一个方法来执行每个常量所表示的算术运算。有一种方法是通过启用枚举的值来实现：
+//
+package test;
+
+public enum Operation {
+    PLUS, MINUS, TIMES, DIVIDE,;
+
+    // Do the arithmetic op represented by this constant
+    double apply(double x, double y) {
+        switch (this) {
+            case PLUS: return x + y;
+            case MINUS: return x - y;
+            case TIMES: return x * y;
+            case DIVIDE: return x / y;
+        }
+        throw new AssertionError("Unknown op: " + this);
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class OperationTest {
+    @Test
+    public void testOperationApply() {
+        assertEquals(10, Operation.PLUS.apply(3, 7), 1e-1); //double比较，需要有精度，1 * 10^-1
+        assertEquals(-4, Operation.MINUS.apply(3, 7), 1e-1);
+        assertEquals(21, Operation.TIMES.apply(3, 7), 1e-1);
+        assertEquals(0.4, Operation.DIVIDE.apply(3, 7), 1e-1);
+    }
+}
+
+这段代码可行，但是不太好看。如果没有throw语句，它就不能进行编译，虽然从技术角度来看代码的结束部分是可以执行到的，但是实际上是不可能执行到这行代码的。更糟糕的是，这段代码很脆弱。如果添加了新的枚举常量，却忘记给switch添加相应的条件，枚举仍然可以编译，但是当你试图运用新的运算时，就会运行失败。
+
+有一种更好的方法可以将不同的行为与每个枚举常量关联起来：在枚举类型中声明一个抽象的apply方法，并在特定于常量的类主体（constant-specific class body）中，用具体的方法覆盖每个常量的抽象apply方法。这种方法被称作特定于常量的方法实现（constant-specific method implementation）。
+//
+package test;
+
+// Enum type with constant-specific method implementations
+public enum Operation {
+    PLUS {
+        @Override
+        double apply(double x, double y) {
+            return x + y;
+        }
+    },
+    MINUS {
+        @Override
+        double apply(double x, double y) {
+            return x - y;
+        }
+    },
+    TIMES {
+        @Override
+        double apply(double x, double y) {
+            return x * y;
+        }
+    },
+    DIVIDE {
+        @Override
+        double apply(double x, double y) {
+            return x / y;
+        }
+    };
+
+    abstract double apply(double x, double y);
+}
+
+如果给Operation的第二种版本添加新的常量，你就不可能忘记提供apply方法，因为该方法就紧跟在每个常量声明之后。即便你真的忘记了，编译器也会提醒你，因为枚举类型中的抽象方法必须被它所有常量中的具体方法所覆盖。
+
+特定于常量的方法实现可以与特定于常量的数据结合起来。如，下面的Operation覆盖了toString来返回通常与该操作关联的符号：
+//
+package test;
+
+// Enum type with constant-specific class bodies and data
+public enum Operation {
+    PLUS("+") {
+        @Override
+        double apply(double x, double y) {
+            return x + y;
+        }
+    },
+    MINUS("-") {
+        @Override
+        double apply(double x, double y) {
+            return x - y;
+        }
+    },
+    TIMES("*") {
+        @Override
+        double apply(double x, double y) {
+            return x * y;
+        }
+    },
+    DIVIDE("/") {
+        @Override
+        double apply(double x, double y) {
+            return x / y;
+        }
+    };
+
+    private final String symbol;
+
+    Operation(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+    
+    abstract double apply(double x, double y);
+}
+
+有些情况下，在枚举中覆盖toString非常有用。如，上述的toString实现使得打印算术表达式变得非常容易，如这段小程序所示：
+//
+package test;
+
+import java.util.stream.Stream;
+
+public class OperationMainTest {
+    public static void main(String[] args) {
+        double x = Double.parseDouble(args[0]);
+        double y = Double.parseDouble(args[1]);
+        Stream.of(Operation.values()).forEach(op -> System.out.printf("%f %s %f = %f%n", x, op, y, op.apply(x, y)));
+    }
+}
+输出：
+2.000000 + 4.000000 = 6.000000
+2.000000 - 4.000000 = -2.000000
+2.000000 * 4.000000 = 8.000000
+2.000000 / 4.000000 = 0.500000
+
+枚举类型有一个自动产生的valueOf(String)方法，将常量的名字转变成常量本身。如果在枚举类型中覆盖了toString，要考虑编写一个fromString方法，将定制的字符串表示法变回相应的枚举。下列代码（适当地改变了类型名称）可以为任何枚举完成这一技巧，只要每个常量都有一个独特的字符串表示法：
+//
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+// Implementing a fromString method on an enum type
+public enum Operation {
+    PLUS("+"), MINUS("-"), TIMES("*"), DIVIDE("/");
+
+    private static final Map<String, Operation> STRING_TO_ENUM = new HashMap<>(); //这里应该命名为STRING_TO_ENUM还是stringToEnum？
+
+    static {
+        Stream.of(Operation.values()).forEach(op -> STRING_TO_ENUM.put(op.toString(), op));
+    }
+
+    public static Operation fromString(String symbol) {
+        return STRING_TO_ENUM.get(symbol);
+    }
+
+    private final String symbol;
+
+    Operation(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+}
+
+//
+package test;
+
+import java.util.stream.Stream;
+
+public class OperationMainTest {
+    public static void main(String[] args) {
+        Stream.of(Operation.values()).forEach(op -> System.out.printf("%s represent %s%n", op.toString(), Operation.fromString(op.toString())));
+    }
+}
+输出：
++ represent +
+- represent -
+* represent *
+/ represent /
+
+注意，常量被创建之后，Operation常量从静态代码块中被放入到了stringToEnum的map中，试图使每个常量都从自己的构造器将自身放入到map中，会导致编译时错误。因为如果这是合法的，就会抛出NullPointerException异常。枚举构造器不可以访问枚举的静态域，除了编译时常量域之外。这一限制是有必要的，因为构造器运行的时候，这些静态域还没有被初始化。
+
+特定于常量的方法实现有一个美中不足的地方，它们使得在枚举常量中共享代码变得更加困难了。如，考虑用一个枚举表示薪资包中的工作天数。这个枚举有一个方法，根据给定某工人的基本工资（按小时）以衣当天的工作时间，来计算他当天的报酬。在五个工作日中，超过正常八小时的工作时间都产生加班工资；在双休日中，所有工作都产生加班工资。利用switch语句，很容易通过将多个case标签分别应用到两个代码片断中，来完成这一计算。为了简洁起见，这个示例中使用了double，但是注意double并不是适合薪资应用程序（见第48条）的数据类型。
+//
+package test;
+
+public enum PayrollDay {
+    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+    private static final int HOURS_PER_SHIFT = 8;
+
+    double pay(double hoursWorked, double payRate) {
+        double basePay = hoursWorked * payRate;
+        double overtimePay; //Calculate overtime pay
+        switch (this) {
+            case SATURDAY:
+            case SUNDAY:
+                overtimePay = hoursWorked * payRate / 2;
+            default:
+                overtimePay = hoursWorked <= HOURS_PER_SHIFT ? 0 : (hoursWorked - HOURS_PER_SHIFT) * payRate / 2;
+        }
+        return basePay + overtimePay;
+    }
+}
+不可否认，这段代码十分简洁，但是从维护角度来看，它非常危险。假设将一个元素添加到该枚举中，或者是一个表示假期天数的特殊值，但是忘记给switch语句添加相应的case。程序依然可以编译，但是pay方法会悄悄地将假期的工资计算成与正常工作日的相同。
+
+你真正想要的就是每当添加一个枚举常量时，就强制选择一种加班报酬策略。有一种很好的方法可以实现这一点。这种想法就是将加班工资计算移到一个私有的嵌套枚举中，将这个策略枚举（strategy enum）的实例传到PayrollDay枚举的构造器中。之后PayrollDay枚举将加班工资计算委托给策略枚举，PayrollDay中就不需要switch语句或者特定于常量的方法实现了。虽然这种模式没有switch语句那么简洁，但更加安全，也更加灵活：
+//
+package test;
+
+// The Strategy enum pattern
+public enum PayrollDay {
+    MONDAY(PayType.WEEKDAY), TUESDAY(PayType.WEEKDAY), WEDNESDAY(PayType.WEEKDAY), THURSDAY(PayType.WEEKDAY), FRIDAY(PayType.WEEKDAY),
+    SATURDAY(PayType.WEEKEND), SUNDAY(PayType.WEEKEND);
+
+    private final PayType payType;
+
+    PayrollDay(PayType payType) {
+        this.payType = payType;
+    }
+
+    double pay(double hoursWorked, double payRate) {
+        return payType.pay(hoursWorked, payRate);
+    }
+
+    // The strategy enum type
+    private enum PayType {
+        WEEKDAY {
+            @Override
+            double overtimePay(double hours, double payRate) {
+                return hours <= HOURS_PER_SHIFT ? 0 : (hours - HOURS_PER_SHIFT) * payRate / 2;
+            }
+        },
+        WEEKEND {
+            @Override
+            double overtimePay(double hours, double payRate) {
+                return hours * payRate / 2;
+            }
+        };
+
+        private static final int HOURS_PER_SHIFT = 8;
+
+        abstract double overtimePay(double hours, double payRate);
+
+        double pay(double hourWorked, double payRate) {
+            double basePay = hourWorked * payRate;
+            return basePay + overtimePay(hourWorked, payRate);
+        }
+    }
+}
+
+如果枚举中的switch语句不是在枚举中实现特定于常量的行为的一种很好的选择，那么它们还有什么用处呢？枚举中的switch语句适合于给外部的枚举类型增加特定于常量的行为。例如，假设Operation枚举不受你的控制，你希望它有一个实例方法来返回每个运算的反运算。可以用下列静态方法模拟这种效果：
+// Switch on an enum to simulate a missing method
+public static Operation inverse(Operation op) {
+    switch (op) {
+        case PLUS: return Operation.MINUS;
+        case MINUS: return Operation.PLUS;
+        case TIMES: return Operation.DIVIDE;
+        case DIVIDE: return Operation.TIMES;
+        default: throw new AssertionError("Unknown op: " + op);
+    }
+}
+
+一般来说，枚举会优先使用comparable而非int常量。与int常量相比，枚举有个小小的性能缺点，即装载和初始化枚举时会有空间和时间的成本。除了受资源约束的设备，例如手机和烤面包机之外，在实践中不必在意这个问题。
+
+使用枚举的场景是每当需要一组固定常量的时候。这包括“天然的枚举类型”，例如行星、一周的天数以及棋子的数目等等。但它也包括你在编译时就知道其所有可能值的其他集合，例如菜单的选项、操作代码以及命令行标记等。枚举类型中的常量集并不一定要始终保持不变。专门设计枚举特性是考虑到枚举类型的二进制兼容演变。
+
+总而言之，与int常量相比，枚举类型的优势是很明显的。枚举要易读得多，也更加安全，功能更加强大。许多枚举都不需要显式的构造器或者成员，但许多其他枚举则受益于“每个常量与属性的关联”以及“提供行为受这个属性影响的方法”。只有极少数的枚举受益于将多种行为与单个方法关联。在这种相对少见的情况下，特定于常量的方法要优先于启用自有值的枚举。如果有多个枚举常量同时共享相同的行为，则考虑策略枚举。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第31条：用实例域代替序数 P137
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
