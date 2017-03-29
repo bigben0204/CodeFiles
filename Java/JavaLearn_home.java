@@ -1,4 +1,77 @@
 //------------------------------------------------------------------------------------------------
+//Java格式化输出 http://blog.sina.com.cn/s/blog_416bfbd90101nm0r.html
+从JDK 1.5 版本以后，java.io.PrintWriter类中有以下格式化输出方法：
+PrintWriter format(Locale l, String format, Object… args)
+PrintWriter format(String format, Object… args)
+PrintWriter printf(Locale l, String format, Object… args)
+PrintWriter printf(String format, Object… args)
+
+以下是JDK文档的说明：
+使用指定格式字符串和参数将一个格式化字符串写入此 writer 中。如果启用自动刷新，则调用此方法将刷新输出缓冲区。
+
+【参数】：
+l – 格式化过程中应用的 locale。如果 l 为 null，则不应用本地化。
+format – 在格式字符串的语法中描述的格式字符串。
+args – 格式字符串中的格式说明符引用的参数。如果参数多于格式说明符，则忽略额外的参数。参数的数量是可变的，并且可以为零。参数的最大数量受到 Java Virtual Machine Specification 定义的 Java 数组的最大维数的限制。针对 null 参数的行为依赖于 conversion。
+【注】：format(String format, Object… args) 与printf(String format, Object… args)始终使用的语言环境是由 Locale.getDefault() 返回的语言环境，不管以前在此对象上调用了其他什么样的格式化方法。
+【抛出】：
+IllegalFormatException – 如果格式字符串包含非法语法、与给定参数不兼容的格式说明符、对给定格式字符串而言不够充足的参数或其他非法条件。有关所有可能的格式错误的规范，请参阅 formatter 类规范的详细信息部分。
+NullPointerException – 如果 format 为 null
+以上四个方法中两对相应的调用方法和效果完全相同。
+
+字符串：
+%s表示输出字符串；
+%S将字符串以大写形式输出；
+
+boolean类型：
+%b输出boolean类型，false和null的值为false，其余好像都是true（包括数字0和字符串“false”）；
+%B输出大写的boolean类型TRUE和FALSE。
+ 
+整数类型：
+%d表示将整数格式化为10进制整数，%-d输出带符号位的10进制数；
+%o表示将整数格式化为8进制整数；
+%x表示将整数格式化为16进制整数；
+%X表示将整数格式化为16进制整数，并且字母变成大写形式；
+【注意】以上只有%-d的带符号格式，没有%+d、%+o、%-o等形式，只可转换整数类型（Integer：byte， short， int， long）。
+ 
+浮点类型：
+%f表示以十进制格式化输出浮点数
+%.3f 表示以十进制格式化输出浮点数，不足末尾补0；
+%e表示以科学技术法输出浮点数
+%E表示以科学技术法输出浮点数，并且为大写形式，如-1.5E+03;
+【注意】以上都有形如%+f的形式输出带符号的浮点数值，但是没有%-f的类型，只可转换浮点类型（Floating：float，double）。
+ 
+日期类型：
+%t或%T之后用c（%tc）表示输出时间日期的完整信息；
+%t或%T之后用y（%ty）表示输出日期的年份（2位数的年，如12）；
+%t或%T之后用Y（%tY）表示输出日期的年份（4位数的年，如2012）；
+%t或%T之后用m（%tm）表示输出日期的月份；
+%t或%T之后用M（%tM）表示输出日期的分钟；
+%t或%T之后用d（%td）表示输出日期的日号；
+%t或%T之后用H表示输出时间的时（24进制）；
+%t或%T之后用I表示输出时间的时（12进制）；
+%t或%T之后用M表示输出时间的分；
+%t或%T之后用S表示输出时间的秒；
+%t或%T之后用L表示输出时间的秒中的毫秒；
+%t或%T之后p表示输出时间的上午或下午信息；
+%t或%T之后用A表示得到星期几的全称；
+%t或%T之后用a表示得到星期几的简称；
+%t或%T之后用D表示以 “%tm/%td/%ty”格式化日期；
+%t或%T之后用F表示以”%tY-%tm-%td”格式化日期；
+%t或%T之后用R表示以”%tH:%tM”格式化时间；
+%t或%T之后用T表示以”%tH:%tM:%tS”格式化时间；
+%t或%T之后用r表示以”%tI:%tM:%tS %Tp”格式化时间；
+【注意】以上不可添加符号位（+、-）。
+ 
+换行：
+%n表示换行。
+
+指定长度值输出：
+在格式中间添加数字指定值的输出长度，长用于对齐输出。如 s表示输出长度为20的字符串，不足在前面补空格，%-20d表示输出长度为20的整形数字，不足在后面补空格，没有%+20d的格式。
+
+指定第几个参数：
+多个参数时，可以在格式中间插入变量编号，如%1$s表示第一个字符串，%3$s表示第3个字符串。
+//------------------------------------------------------------------------------------------------
 //深入理解Java的接口和抽象类
 http://www.cnblogs.com/felixzh/p/5938544.html
 三.抽象类和接口的区别
@@ -80,19 +153,19 @@ public class BracketRecursivelyMatcher implements BracketMatcher {
 //
 package test;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
 public class BracketLambdaMatcher implements BracketMatcher {
     @Override
     public boolean match(String s) {
-        Character[] chars = new Character[] {'a', 'b', 'c'};
-        List<Character> characters = Arrays.asList(chars);
-        Integer[] ints = {1, 2, 3};
-        //Stream<Integer> integerStream = Stream.of(ints);
-        //Stream<Character> characterStream = Arrays.stream(new char[] {'a', 'b'});
-        return true;
+        return 0 == s.chars().reduce(0, (count, c) -> {
+            if (count >= 0) {
+                if (c == '(') {
+                    ++count;
+                } else if (c == ')') {
+                    --count;
+                }
+            }
+            return count;
+        });
     }
 }
 
@@ -106,28 +179,38 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class BracketMatcherTest {
+
+    private final BracketMatcher bracketRecursivelyMatcher = new BracketRecursivelyMatcher();
+    private final BracketMatcher bracketLambdaMatcher = new BracketLambdaMatcher();
+
     @Test
-    public void testSmallBracket_shouldMatch() {
-        BracketMatcher bracketMatcher = new BracketRecursivelyMatcher();
-        matchBrackets(bracketMatcher, "()()");
+    public void testBracketRecursivelyBracket_shouldMatchSmallBracket() {
+        matchBrackets(bracketRecursivelyMatcher, "()()");
     }
 
     @Test
-    public void testInterSmallBracket_shouldMatch() {
-        BracketMatcher bracketMatcher = new BracketRecursivelyMatcher();
-        matchBrackets(bracketMatcher, "(())");
+    public void testBracketRecursivelyBracket_shouldMatchInnerSmallBracket() {
+        matchBrackets(bracketRecursivelyMatcher, "(())");
     }
 
     @Test
-    public void testSmallBracket_shouldNotMatch() {
-        BracketMatcher bracketMatcher = new BracketRecursivelyMatcher();
-        notMatchBrackets(bracketMatcher, ")()(");
+    public void testBracketRecursivelyBracket_shouldNotMatch() {
+        notMatchBrackets(bracketRecursivelyMatcher, ")()(");
     }
 
     @Test
-    public void testBracketLambdaMatcher_shouldMatch() {
-        BracketMatcher bracketMatcher = new BracketLambdaMatcher();
-        matchBrackets(bracketMatcher, "()()");
+    public void testBracketLambdaMatcher_shouldMatchSmallBracket() {
+        matchBrackets(bracketLambdaMatcher, "()()");
+    }
+
+    @Test
+    public void testBracketLambdaMatcher_shouldMatchInnerSmallBracket() {
+        matchBrackets(bracketLambdaMatcher, "(())");
+    }
+
+    @Test
+    public void testBracketLambdaBracket_shouldNotMatch() {
+        notMatchBrackets(bracketLambdaMatcher, ")()(");
     }
 
     private void matchBrackets(BracketMatcher bracketMatcher, String s) {
@@ -139,6 +222,17 @@ public class BracketMatcherTest {
     }
 }
 
+//-----
+//String转List<Character>
+String big_data = "big-data";
+ArrayList<Character> chars
+   = new ArrayList<>(
+   big_data.chars()
+       .mapToObj(e -> (char) e)
+       .collect(
+           Collectors.toList()
+       )
+);
 //------------------------------------------------------------------------------------------------
 //Mockito Unit tests with Mockito - Tutorial
 http://www.vogella.com/tutorials/Mockito/article.html
@@ -27485,10 +27579,209 @@ public static Operation inverse(Operation op) {
 //------------------------------------------------------------------------------------------------
 //Effective Java 第6章 枚举和注解 P128
 //第31条：用实例域代替序数 P137
+许多枚举天生就与一个单独的int值相关联。所有的枚举都有一个ordinal方法，它返回每个枚举常量在类型中的数字位置。可以试着从序数中得到关联的int值：
+//
+package test;
+
+// Abuse of ordinal to derive an associated value - DON'T DO THIS
+public enum Ensemble {
+    SOLO, DUET, TRIO, QUARTET, QUINTET,
+    SEXTET, SEPTET, OCTET, NONET, DECTET;
+
+    public int numberOfMusicians() {
+        return ordinal() + 1;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import java.util.stream.Stream;
+
+public class EnsembleTest {
+    @Test
+    public void testEnumOrdinal() {
+        Stream.of(Ensemble.values()).forEach(ensemble -> System.out.printf("Musicians of %s is %d%n", ensemble, ensemble.numberOfMusicians()));
+    }
+}
+输出：
+Musicians of SOLO is 1
+Musicians of DUET is 2
+Musicians of TRIO is 3
+Musicians of QUARTET is 4
+Musicians of QUINTET is 5
+Musicians of SEXTET is 6
+Musicians of SEPTET is 7
+Musicians of OCTET is 8
+Musicians of NONET is 9
+Musicians of DECTET is 10
+
+如果要增加枚举值，并且对应的演奏家不是序数值，则无法完成。
+
+永远不要根据枚举的序数导出与它关联的值，而是要将它保存在一个实例域中：
+package test;
+
+public enum Ensemble {
+    SOLO(1), DUET(2), TRIO(3), QUARTET(4), QUINTET(5),
+    SEXTET(6), SEPTET(7), OCTET(8), DOUBLE_QUARTET(8),
+    NONET(9), DECTET(10), TRIPLE_QUARTET(12);
+
+    private final int numberOfMusicians;
+
+    Ensemble(int size) {
+        this.numberOfMusicians = size;
+    }
+
+    public int numberOfMusicians() {
+        return numberOfMusicians;
+    }
+}
+
+Enum规范中谈到ordinal时这么写道：“大多数程序员都不需要这个方法。它是设计成用于像EnumSet和EnumMap这种基于枚举的通用数据结构的”。除非在编写的是这种数据结构，否则最好完全避免使用ordinal方法。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第32条：用EnumSet代替位域 P138
+如果一个枚举类型的元素主要用于集合中，一般就使用int枚举模式（见第30条），将2的不同位数赋予每个常量：
+//
+package test;
+
+// Bit field enumeration constants - OBSOLETE!
+public class Text {
+    public static final int STYLE_BOLD = 1 << 0; //1
+    public static final int STYLE_ITALIC = 1 << 1; //2
+    public static final int STYLE_UNDERLINE = 1 << 2; //4
+    public static final int STYLE_STRIKETHROUGH = 1 << 3; //8
+
+    // Parameter is bitwise OR of zero or more STYLE_ constants
+    public void applyStyles(int styles) {
+        //...
+    }
+}
+
+这种表示法让你用OR位运算将几个常量合并到一个集合中，称作位域（bit field）：
+text.applyStyles(STYLE_BOLD | STYLE_ITALIC);
+
+位域表示法也允许利用位操作，有效地执行像union（联合）和intersection（交集）这样的集合操作。但位域有着int枚举常量的所有缺点，甚至更多。当位域以数字形式打印时，翻译位域比翻译简单的int枚举常量要困难得多。甚至，要遍历位域表示的所有元素也没有很容易的方法。
+
+有些程序优先使用枚举而非int常量，他们在需要传递多组常量集时，仍然倾向于使用位域。其实没有理由这么做，因为还有更好的替代方法。java.util包提供了EnumSet类来有效地表示从单个枚举类型中提取的多个值的多个集合。这个类实现Set接口，提供了丰富的功能、类型安全性，以及可以从任何其他Set实现中得到的互用性。但是在内部具体的实现上，每个EnumSet内容都表示为位矢量。如果底层的枚举类型有64个或者更少的元素——大多如此——整个EnumSet就是用单个long来表示，因此它的性能比得上位域的性能。批处理，如果removeAll和retainAll，都是利用位算法来实现的，就像手工替位域实现得那样。但是可以避免手工位操作时容易出现的错误以及不太雅观的代码，因为EnumSet替你完成了这项艰巨的工作。
+
+下面是前一个范例改成枚举代替位域后的代码，它更加简短、更加清楚，也更加安全：
+package test;
+
+import java.util.Set;
+
+// EnumSet - a modern replacement for bit fields
+public class Text {
+    public enum Style {BOLD, ITALIC, UNDERLINE, STRIKETHROUGH}
+
+    // Any set could be passed in, but EnumSet is clearly best
+    public void applyStyles(Set<Style> styleSet) {
+        //...
+    }
+}
+
+下面是将EnumSet实例传递给applyStyles方法的客户端代码。EnumSet提供了丰富的静态工厂来轻松创建集合，其中一个如这个代码所示：
+text.applyStyles(EnumSet.of(Style.BOLD, Style.ITALIC));
+
+注意applyStyles方法采用的是Set<Style>而非EnumSet<Style>。虽然看起来好像所有的客户端都可以将EnumSet传到这个方法，但是最好还是接受接口类型而非接受实现类型。这是考虑到可能会有特殊的客户端要传递一些其他的Set实现，并且没有什么明显的缺点。
+
+总而言之，正是因为枚举类型要用在集合（Set）中，所以没有理由用位置来表示它。EnumSet类集位域的简洁和性能优势及第30条中所述的枚举类型的所有优点于一身。实际上EnumSet有个缺点，即截止Java 1.6 发行版本，它都无法创建不可变的EnumSet，但是这一点可能在即将出来的版本中得到修正。同时，可以用Collections.unmodifiableSet将EnumSet封装起来，但是简洁性和性能会受到影响。
+
+Enumset是个虚类，我们只能通过它提供的静态方法来返回Enumset的实现类的实例。
+返回EnumSet的两种不同的实现：如果EnumSet大小小于64，
+就返回RegularEnumSet实例(当然它继承自EnumSet)，这个EnumSet实际上至用了一个long来存储这个EnumSet。
+如果 EnumSet大小大于等于64，则返回JumboEnumSet实例，它使用一个long[]来存储。这样做的好处很明显： 大多数情况下返回的RegularEnumSet效率比JumboEnumSet高很多。
 
 //------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第32条：用EnumMap代替序数索引 P140
+有时候，可能会利用ordinal方法（见第31条）来索引数组的代码。如下这个简化的类，用来表示一种烹饪用的香草：
+package test;
 
+public class Herb {
+    public enum Type {ANNUAL, PERENNIAL, BIENNIAL}
+
+    private final String name;
+    private final Type type;
+
+    public Herb(String name, Type type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
+
+//
+package test;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class HerbCategorier {
+    public static void main(String[] args) {
+        Herb[] garden = new Herb[]{new Herb("A", Herb.Type.ANNUAL),
+            new Herb("B", Herb.Type.BIENNIAL),
+            new Herb("C", Herb.Type.ANNUAL),
+            new Herb("D", Herb.Type.PERENNIAL)};
+
+        Set<Herb>[] herbsByType = (Set<Herb>[]) new Set[Herb.Type.values().length];
+        for (int i = 0; i < herbsByType.length; i++) {
+            herbsByType[i] = new HashSet<>();
+        }
+
+        for (Herb h : garden) {
+            herbsByType[h.getType().ordinal()].add(h);
+        }
+
+        // Print the results
+        for (int i = 0; i < herbsByType.length; i++) {
+            System.out.printf("%s: %s%n", Herb.Type.values()[i], herbsByType[i]);
+        }
+    }
+}
+输出：
+ANNUAL: [C, A]
+PERENNIAL: [D]
+BIENNIAL: [B]
+
+这种方法可行，但是隐藏着许多问题。数组不能与泛型（见第25条）兼容，程序需要进行未受检的转换，并能不能正确无误地进行编译。因为数组不知道它的索引代表着什么，你必须手工标注（label）这些索引的输出。但是这种方法最严重的问题在于，当你访问一个按照枚举的充数进行索引的数组时，使用正确的int值就是你的职责了；int不能提供枚举的类型安全。如果使用了错误的值，程序就会悄悄地完成错误的工作，或者幸运的话，会抛出ArrayIndexOutOfBoundException异常。
+
+有一种更好的方法可以达到同样的效果。数组实际上充当着从枚举到值的映射，因此可能还要用到Map。有一种非常快速的Map实现专门用于枚举键，称作java.util.EnumMap。以下就是用EnumMap改写后的程序：
+package test;
+
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class HerbCategorier {
+    public static void main(String[] args) {
+        Herb[] garden = new Herb[]{new Herb("A", Herb.Type.ANNUAL),
+            new Herb("B", Herb.Type.BIENNIAL),
+            new Herb("C", Herb.Type.ANNUAL),
+            new Herb("D", Herb.Type.PERENNIAL)};
+
+        Map<Herb.Type, Set<Herb>> herbsByType = new EnumMap<>(Herb.Type.class);//这里也可以用HashMap，new HashMap<>()，但是这样就没有枚举存储的序数顺序保证了
+        for (Herb.Type t : Herb.Type.values()) {
+            herbsByType.put(t, new HashSet<>());
+        }
+
+        for (Herb h : garden) {
+            herbsByType.get(h.getType()).add(h);
+        }
+        System.out.println(herbsByType);
+    }
+}
+输出：
+{ANNUAL=[C, A], PERENNIAL=[D], BIENNIAL=[B]}
+
+这段程序更简短、更清楚，也更加安全，运行速度方面可以与使用序数的程序相媲美。它没有不安全的转换；不必手工标注这些索引的输出，因为映射键知道如何将自身翻译成可打印字符串的枚举；计算数组索引时也不可能出错。EnumMap在运行速度方面之所以能与通过序数索引的数组相媲美，是因为EnumMap在内部使用了这种数组。但是它对程序员隐藏了这种实现细节，集Map的丰富功能和类型安全与数组的快速于一身。注意EnumMap构造器采用键类型的Class对象：这是一个有限制的类型令牌（bounded type token），它提供了运行时的泛型信息（见第29条）。
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
