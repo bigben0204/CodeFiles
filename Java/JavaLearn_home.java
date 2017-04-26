@@ -1,4 +1,5 @@
 //------------------------------------------------------------------------------------------------
+//http://blog.csdn.net/lonely_fireworks/article/details/7962171/
 //Java格式化输出 http://blog.sina.com.cn/s/blog_416bfbd90101nm0r.html
 从JDK 1.5 版本以后，java.io.PrintWriter类中有以下格式化输出方法：
 PrintWriter format(Locale l, String format, Object… args)
@@ -119,7 +120,7 @@ class AlarmDoor extends Door implements Alarm {
     }
 }
 //------------------------------------------------------------------------------------------------
-//括号匹配（没写完）
+//括号匹配
 //
 package test;
 
@@ -1425,40 +1426,49 @@ http://blog.csdn.net/sunmenggmail/article/details/7779651
 //AlphaSpiralMatrix.java
 package test;
 
+public interface AlphaSpiralMatrix {
+    String getRowAlpha(int rowIndex);
+}
+
+
+//AlphaSpiralMatrixWithAlg.java
+package test;
+
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class AlphaSpiralMatrix {
+public class AlphaSpiralMatrixWithAlg implements AlphaSpiralMatrix {
     private final int maxRow;
     private final int maxCol;
 
     private static final char START_ALPHA = 'A';
     private static final int MAX_ALPHA_NUM = 26;
 
-    public AlphaSpiralMatrix(int maxRow, int maxCol) {
+    public AlphaSpiralMatrixWithAlg(int maxRow, int maxCol) {
         assert (maxRow > 0 && maxCol > 0);
         this.maxRow = maxRow;
         this.maxCol = maxCol;
     }
 
-    String getRowAlpha(int rowIndex) {
+    @Override
+    public String getRowAlpha(int rowIndex) {
         assert (rowIndex >= 0 && rowIndex < maxRow);
 
         return IntStream.range(0, maxCol).mapToObj(colIndex -> {
             long value = getValueByRowAndCol(rowIndex, colIndex);
             char charByValue = getCharByValue(value);
-            System.out.println(String.format("[%d, %d] <--> %d <--> %c", rowIndex, colIndex, value, charByValue));
+            //System.out.println(String.format("[%d, %d] <--> %d <--> %c", rowIndex, colIndex, value, charByValue));
             return String.valueOf(charByValue);
         }).collect(Collectors.joining());
-
-//        StringBuilder rowAlpha = new StringBuilder();
-//        for (int colIndex = 0; colIndex < maxCol; ++colIndex) {
-//            long value = getValueByRowAndCol(rowIndex, colIndex);
-//            char charByValue = getCharByValue(value);
-//            System.out.println(String.format("[%d, %d] <--> %d <--> %c", rowIndex, colIndex, value, charByValue));
-//            rowAlpha.append(charByValue);
-//        }
-//        return rowAlpha.toString();
+        
+        //        StringBuilder rowAlpha = new StringBuilder();
+        //        for (int colIndex = 0; colIndex < maxCol; ++colIndex) {
+        //            long value = getValueByRowAndCol(rowIndex, colIndex);
+        //            char charByValue = getCharByValue(value);
+        //            System.out.println(String.format("[%d, %d] <--> %d <--> %c", rowIndex, colIndex, value, charByValue));
+        //            rowAlpha.append(charByValue);
+        //        }
+        //        return rowAlpha.toString();
     }
 
     private long getValueByRowAndCol(int rowIndex, int colIndex) {
@@ -1482,32 +1492,171 @@ public class AlphaSpiralMatrix {
 
     private char getCharByValue(long value) {
         int remainder = (int) (value % MAX_ALPHA_NUM);
+        if (remainder == 0) {
+            remainder = MAX_ALPHA_NUM;
+        }
         return (char) (remainder - 1 + START_ALPHA);
     }
 }
+
+//AlphaSpiralMatrixWithTraverse.java
+package test;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+public class AlphaSpiralMatrixWithTraverse implements AlphaSpiralMatrix {
+    private final int maxRow;
+    private final int maxCol;
+    private Character[][] charMatrix;
+
+    private static final char START_ALPHA = 'A';
+    private static final int MAX_ALPHA_NUM = 26;
+
+    public AlphaSpiralMatrixWithTraverse(int maxRow, int maxCol) {
+        assert (maxRow > 0 && maxCol > 0);
+        this.maxRow = maxRow;
+        this.maxCol = maxCol;
+    }
+
+    @Override
+    public String getRowAlpha(int rowIndex) {
+        assert (rowIndex >= 0 && rowIndex < maxRow);
+        initCharMatrix();
+        return Arrays.stream(charMatrix[rowIndex]).map(String::valueOf).collect(Collectors.joining());
+    }
+
+    private enum Direction {
+        RIGHT(0, 1), DOWN(1, 0), LEFT(0, -1), UP(-1, 0);
+
+        private final int rowIncrement;
+
+        private final int columnIncrement;
+        Direction(int rowIncrement, int columnIncrement) {
+            this.rowIncrement = rowIncrement;
+            this.columnIncrement = columnIncrement;
+        }
+
+        public int getRowIncrement() {
+            return rowIncrement;
+        }
+
+        public int getColumnIncrement() {
+            return columnIncrement;
+        }
+    }
+
+    private void initCharMatrix() {
+        if (charMatrix != null) {
+            return;
+        }
+        charMatrix = new Character[maxRow][maxCol];
+
+        long maxNumber = maxRow * maxCol;
+        int rowIndex = 0;
+        int columnIndex = 0;
+        Direction direction = Direction.RIGHT;
+        for (long index = 0; index < maxNumber; ++index) {
+            charMatrix[rowIndex][columnIndex] = getChar(index);
+
+            int nextRowIndex = getNextRowIndex(rowIndex, direction);
+            int nextColumnIndex = getNextColumnIndex(columnIndex, direction);
+
+            if (!isNextPosValid(nextRowIndex, nextColumnIndex)) {
+                direction = getNextDirection(direction);
+            }
+
+            rowIndex += direction.getRowIncrement();
+            columnIndex += direction.getColumnIncrement();
+        }
+
+    }
+
+    private char getChar(long index) {
+        return (char) (index % MAX_ALPHA_NUM + START_ALPHA);
+    }
+
+    private Direction getNextDirection(Direction direction) {
+        if (direction == Direction.RIGHT) {
+            return Direction.DOWN;
+        }
+
+        if (direction == Direction.DOWN) {
+            return Direction.LEFT;
+        }
+
+        if (direction == Direction.LEFT) {
+            return Direction.UP;
+        }
+
+        return Direction.RIGHT;
+    }
+
+    private boolean isNextPosValid(int nextRowIndex, int nextColumnIndex) {
+        return nextRowIndex < maxRow && nextRowIndex >= 0
+            && nextColumnIndex < maxCol && nextColumnIndex >= 0
+            && charMatrix[nextRowIndex][nextColumnIndex] == null;
+    }
+
+    private int getNextRowIndex(int rowIndex, Direction direction) {
+        return rowIndex + direction.getRowIncrement();
+    }
+
+    private int getNextColumnIndex(int columnIndex, Direction direction) {
+        return columnIndex + direction.getColumnIncrement();
+    }
+}
+
 
 //AlphaSpiralMatrixTest.java
 package test;
 
 import org.junit.Test;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.junit.Assert.assertEquals;
 
 public class AlphaSpiralMatrixTest {
     @Test
-    public void testGetRowAlphaString_shouldGetAbc_whenRowIsOne() {
-        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrix(1, 3);
+    public void testAlphaSpiralMatrixWithAlg_oneRow() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrixWithAlg(1, 3);
         assertEquals("ABC", alphaSpiralMatrix.getRowAlpha(0));
     }
 
     @Test
-    public void testCharString() {
-        String s = Stream.of('a', 'b', 'c').map(String::valueOf).collect(Collectors.joining()).toString();//这里必须转为String，再做joining，不能直接用char做joining吗？
-        System.out.println(s);
+    public void testAlphaSpiralMatrixWithAlg_oneColumn() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrixWithAlg(3, 1);
+        assertEquals("B", alphaSpiralMatrix.getRowAlpha(1));
     }
+
+    @Test
+    public void testAlphaSpiralMatrixWithAlg_multiRowMulitColumn() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrixWithAlg(100, 30);
+        assertEquals("CRYXOXYRCFANSPEDKJAJKDORMZEBQX", alphaSpiralMatrix.getRowAlpha(20));
+    }
+
+    @Test
+    public void testAlphaSpiralMatrixWithTraverse_oneRow() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrixWithTraverse(1, 3);
+        assertEquals("ABC", alphaSpiralMatrix.getRowAlpha(0));
+    }
+
+    @Test
+    public void testAlphaSpiralMatrixWithTraverse_oneColumn() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrixWithTraverse(3, 1);
+        assertEquals("B", alphaSpiralMatrix.getRowAlpha(1));
+    }
+
+    @Test
+    public void testAlphaSpiralMatrixWithTraverse_multiRowMulitColumn() {
+        AlphaSpiralMatrix alphaSpiralMatrix = new AlphaSpiralMatrixWithTraverse(100, 30);
+        assertEquals("CRYXOXYRCFANSPEDKJAJKDORMZEBQX", alphaSpiralMatrix.getRowAlpha(20));
+    }
+}
+
+@Test
+public void testCharString() {
+    String s = Stream.of('a', 'b', 'c').map(String::valueOf).collect(Collectors.joining()).toString();//这里必须转为String，再做joining，不能直接用char做joining吗？
+    System.out.println(s);
 }
 //------------------------------------------------------------------------------------------------
 //技能鉴定3级 石头分堆求最小差值
@@ -21800,7 +21949,7 @@ public class ReflectionTest {
 返回值：int
 
 修饰符public是1，private是2
-getDeclaredMethods()来获取一系列的Method对象，分别描述了定义在类中的每一个访求，包括public方法、protected方法和private方法等。如果在程序中使用getMethods()，还勇气获得继承来的各个方法的信息。
+getDeclaredMethods()来获取一系列的Method对象，分别描述了定义在类中的每一个访求，包括public方法、protected方法和private方法等。如果在程序中使用getMethods()，还可以获得继承来的各个方法的信息。
 
 26.2.3 获取类的构造器 P852
 获取类构造器的用法与上述获取方法的用法类似，如下：
@@ -24928,7 +25077,7 @@ map.put和map.get里涉及两个PhoneNumber实例：第一个被用于插入到HashMap中，第二个实
 在散列码的计算过程中，可以把冗余域（redundant field）排队在外。如果一个域的值可以根据参与计算的其他域值计算出来，则可以把这样的域排队在外。必须排队equals比较计算中没有用到的任何域，否则很有可能违反hashCode约定的第二条。
 
 上述步骤1中用到了一个非零的初始值，因此步骤2.a中计算的散列值为0的那些初始域，会影响到散列值。如果步骤1中的初始值为0，则整个散列值将不受这些初始域的影响，因为这些初始域会增加冲突的可能性。值17则是任选的。
-步骤2.b中的乘法部分使得散列值依赖于域的顺序，如果一个类包含多个相似的域，这样的乘法运算就会产生一个更好的散列函数。例如，如果String散列函数省略了这个乘法部分，那么只是字母顺序不同的所有字符串都会有相同的散列码。之所以选择31，是因为它是一个奇素数。如果乘数是偶数，并且乘法溢出的话，信息会丢失，因为与2相乘等价于移位运算。使用素数的好处并不很明显，但是习惯上都使用素数来计算散列结果。31有个很好的特性，即用移位和减法来代替简洁，可以得到更好的性能：31 * i == (i << 5) - i。现代的VM可以自动完成这种优化。
+步骤2.b中的乘法部分使得散列值依赖于域的顺序，如果一个类包含多个相似的域，这样的乘法运算就会产生一个更好的散列函数。例如，如果String散列函数省略了这个乘法部分，那么只是字母顺序不同的所有字符串都会有相同的散列码。之所以选择31，是因为它是一个奇素数。如果乘数是偶数，并且乘法溢出的话，信息会丢失，因为与2相乘等价于移位运算。使用素数的好处并不很明显，但是习惯上都使用素数来计算散列结果。31有个很好的特性，即用移位和减法来代替乘法，可以得到更好的性能：31 * i == (i << 5) - i。现代的VM可以自动完成这种优化。
 
 把上述解决办法用到PhoneNumber类中。它有三个关键域，都是short类型：
 @Override
@@ -27782,6 +27931,760 @@ public class HerbCategorier {
 {ANNUAL=[C, A], PERENNIAL=[D], BIENNIAL=[B]}
 
 这段程序更简短、更清楚，也更加安全，运行速度方面可以与使用序数的程序相媲美。它没有不安全的转换；不必手工标注这些索引的输出，因为映射键知道如何将自身翻译成可打印字符串的枚举；计算数组索引时也不可能出错。EnumMap在运行速度方面之所以能与通过序数索引的数组相媲美，是因为EnumMap在内部使用了这种数组。但是它对程序员隐藏了这种实现细节，集Map的丰富功能和类型安全与数组的快速于一身。注意EnumMap构造器采用键类型的Class对象：这是一个有限制的类型令牌（bounded type token），它提供了运行时的泛型信息（见第29条）。
+
+还可能见到按照序数进行索引（两次）的数组的数组，该序数表示两个枚举值的映射。如，下面的这个程序就是使用这样一个数组将两个阶段映射到一个阶段过滤中（从液体到固定称作凝固，从液体到气体称作沸腾等）。
+//
+package test;
+
+public enum Phase {
+    SOLID, LIQUID, GAS;
+
+    public enum Transition {
+        MELT, FREEZE, BOIL, CONDENSE, SUBLIME, DEPOSIT,;
+        // Rows indexed by src-ordinal, cols by dst-ordinal
+        private static final Transition[][] TRANSITIONS = {
+            {null, MELT, SUBLIME},
+            {FREEZE, null, BOIL},
+            {DEPOSIT, CONDENSE, null}
+        };
+
+        // Returns the phase transition from one phase to another
+        public static Transition from(Phase src, Phase dst) {
+            return TRANSITIONS[src.ordinal()][dst.ordinal()];
+        }
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class PhaseTest {
+    @Test
+    public void testTransition() {
+        assertEquals(Phase.Transition.FREEZE, Phase.Transition.from(Phase.LIQUID, Phase.SOLID));
+        assertEquals(Phase.Transition.MELT, Phase.Transition.from(Phase.SOLID, Phase.LIQUID));
+        //扩展一个新状态的测试：assertEquals(null, Phase.Transition.from(Phase.SOLID, Phase.PLASMA));
+    }
+}
+
+这段程序可行，看起来也比较优雅，但是事实并非如此。编译器无法知道序数和数组索引之间的关系。如果在过滤表中出了错，或者在修改Phase或者Phase.Transition枚举类型的时候忘记将它更新，程序就会在运行时失败。这种失败的形式可能为ArrayIndexOutOfBoundsException、NullPointerException或者（更糟糕的是）没有任何提示的错误行为。这张表的大小是阶段个数的平方，即便非null项的数量比较少。
+
+同样，利用EnumMap依然可以做得更好一些。每个阶段过渡都是通过一对阶段枚举进行索引的，最好将这种关系表示为一个map，这个map的键是一个枚举（起始阶段），值为另一个map，这第二个map的键为第二个枚举（目标阶段），它的值为结果（阶段过渡），即形成了Map（起始阶段，Map（目标阶段，阶段过渡））这种形式。一个阶段过滤所关联的两个阶段，最好通过“数据与阶段过渡枚举之间的关联”来获取，之后用该阶段过渡枚举来初始化嵌套的EnumMap。
+//
+package test;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+public enum Phase {
+    SOLID, LIQUID, GAS; //扩展一个状态：SOLID, LIQUID, GAS, PLASMA;
+
+    public enum Transition {
+        MELT(SOLID, LIQUID), FREEZE(LIQUID, SOLID),
+        BOIL(LIQUID, GAS), CONDENSE(GAS, LIQUID),
+        SUBLIME(SOLID, GAS), DEPOSIT(GAS, SOLID); //扩展两种状态转换：IONIZE(GAS, PLASMA), DEIONIZE(PLASMA, GAS);，其余代码一行不用修改
+
+        private final Phase src;
+        private final Phase dst;
+
+        Transition(Phase src, Phase dst) {
+            this.src = src;
+            this.dst = dst;
+        }
+
+        // Initialize the phase transition map
+        private static final Map<Phase, Map<Phase, Transition>> m = new EnumMap<>(Phase.class);
+
+        static {
+            Stream.of(Phase.values()).forEach(p -> m.put(p, new EnumMap<>(Phase.class)));
+            Stream.of(Transition.values()).forEach(trans -> m.get(trans.src).put(trans.dst, trans));
+        }
+
+        // Returns the phase transition from one phase to another
+        public static Transition from(Phase src, Phase dst) {
+            return m.get(src).get(dst);
+        }
+    }
+}
+
+现在假设想要给系统添加一个新的阶段：plasma（离子）或者电离气体。只有两个过渡与这个阶段关联：电离化，它将气体变成离子，以及消电离化，将离子变成气体。为了更新基于数组的程序，必须给Phase添加一种新常量，给Phase.Transition添加两种新常量，用一种新的16个元素的版本取代原来9个元素的数组的数组。如果给数组添加的元素过多或者过少，或者元素放置不妥当，可就麻烦了：程序可以编译，但是会在运行时失败。为了更新基于EnumMap的版本，所要做的就是必须将PLASMA添加到Phase列表中，并将IONIZE(GAS, PLASMA)和DEIONIZE(PLASMA, GAS)添加到Phase.Transition的列表中。程序会自行处理所有其他的事情，你几乎没有机会出错。从内部来看，Map的Map都实现了数组的数组，因此在提升了清楚性、安全性和易维护性的同时，在空间或者时间上还几乎不用任何开销。
+
+总而言之，最好不要用序数来索引数组，而要使用EnumMap。如果所表示的这种关系是多维的，就使用EnumMap<..., EnumMap<...>>。应用程序的程序员在一般情况下都不使用Enum.ordinal，即使要用也很少，因此这是一种特殊情况（见第31条）。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第34条：用接口模拟可伸缩的枚举 P144
+对于可伸缩的枚举类型而言，至少有一种具有说服力的用例，这就是操作码（operation code），也称作opcode。操作码是指这样的枚举类型：它的元素表示在某种机器上的那些操作，例如第30条中的Operation类型，它表示一个简单的计算器中的某些函数。有时候，要尽可能地让API的用户提供它们自己的操作，这样可以有效地扩展API所提供的操作集。
+
+有一种很好的方法可以利用枚举类型来实现这种效果。由于枚举类型可以通过给操作码类型和（属于接口的标准实现的）枚举定义接口，来实现任意接口，基本的想法就是利用这一事实。如，以下是第30条中的Operation类型的扩展版本：
+//
+package test;
+
+public interface Operation {
+    double apply(double x, double y);
+}
+
+//
+package test;
+
+public enum BasicOperation implements Operation {
+    PLUS("+") {
+        @Override
+        public double apply(double x, double y) {
+            return x + y;
+        }
+    },
+    MINUS("-") {
+        @Override
+        public double apply(double x, double y) {
+            return x - y;
+        }
+    },
+    TIMES("*") {
+        @Override
+        public double apply(double x, double y) {
+            return x * y;
+        }
+    },
+    DIVIDE("/") {
+        @Override
+        public double apply(double x, double y) {
+            return x / y;
+        }
+    };
+
+    private final String symbol;
+
+    BasicOperation(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class OperationTest {
+    @Test
+    public void testBasicOperation_Plus() {
+        Operation plus = BasicOperation.PLUS;
+        assertEquals(10, plus.apply(3, 7), 1e-10);
+    }
+}
+
+虽然枚举类型（BasicOperation）不是可扩展的，但接口类型（Operation）则是可扩展的，它是用来表示API中的操作的接口类型。可以定义另一个枚举类型，它实现这个接口，并用这个新类型的实例代替基本类型。如，假设想要定义一个上述操作类型的扩展，由求幂（exponentiation）和求余（remainder）操作组成。所要做的就是编写一个枚举类型，让它实现Operation接口：
+//
+package test;
+
+public enum ExtendedOperation implements Operation {
+    EXP("^") {
+        @Override
+        public double apply(double x, double y) {
+            return Math.pow(x, y);
+        }
+    },
+    REMAINDER("%") {
+        @Override
+        public double apply(double x, double y) {
+            return x % y;
+        }
+    };
+
+    private final String symbol;
+
+    ExtendedOperation(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+}
+
+//
+@Test
+public void testExtendedOperation_Exp() {
+    Operation exp = ExtendedOperation.EXP;
+    assertEquals(8, exp.apply(2, 3), 1e-10);
+}
+
+在可以使用基础操作的任何地方，都可以使用新的操作，只要API是被写成采用接口类型（Operation）而非实现（BasicOperation）。注意，在枚举中，不必像在不可扩展的枚举中所做的那样，利用特定于实例的方法实现来声明抽象的apply方法。这是因为抽象的方法（apply）是接口（Operation）的一部分。
+
+不仅可以在任何需要“基本枚举”的地方单独传递一个“扩展枚举”的实例，而且除了那些基本类型的元素之外，还可以传递完整的扩展枚举类型，并使用它的元素。如，通过下面的这个测试程序，体验一下定义过的所有扩展过的操作：
+//
+package test;
+
+import java.util.stream.Stream;
+
+public class MainTest {
+    public static void main(String[] args) {
+        double x = Double.parseDouble(args[0]);
+        double y = Double.parseDouble(args[1]);
+        test(BasicOperation.class, x, y);
+        test(ExtendedOperation.class, x, y);
+    }
+
+    private static <T extends Enum<T> & Operation> void test(Class<T> opSet, double x, double y) {
+        Stream.of(opSet.getEnumConstants()).forEach(op -> System.out.printf("%f %s %f = %f%n", x, op, y, op.apply(x, y)));
+    }
+}
+输出：
+10.000000 + 5.000000 = 15.000000
+10.000000 - 5.000000 = 5.000000
+10.000000 * 5.000000 = 50.000000
+10.000000 / 5.000000 = 2.000000
+10.000000 ^ 5.000000 = 100000.000000
+10.000000 % 5.000000 = 0.000000
+
+注意扩展过的操作类型的类的字面文字（ExtendedOperation.class）从main被传递给了test方法，来描述被扩展操作的集合。这个类的字面文字充当有限制的类型令牌（见第29条）。opSet参数中公认很复杂的声明（<T extends Enum<T> & Operation> Class<T>）确保了Class对象既表示枚举又表示Operation的子类型，这正是遍历元素和执行与每个元素相关联的操作时所需要的。
+
+第二种方法是使用Collection<? extends Operation>，这是个有限制的通配符类型（bounded wildcard type）（见第28条），作为opSet参数的类型：
+//
+package test;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+public class MainTest {
+    public static void main(String[] args) {
+        double x = Double.parseDouble(args[0]);
+        double y = Double.parseDouble(args[1]);
+        test(Arrays.asList(BasicOperation.values()), x, y);
+        test(Arrays.asList(ExtendedOperation.values()), x, y);
+    }
+
+    private static void test(Collection<? extends Operation> opSet, double x, double y) {
+        opSet.stream().forEach(op -> System.out.printf("%f %s %f = %f%n", x, op, y, op.apply(x, y)));
+    }
+}
+输出同上
+
+这样得到的代码没有那么复杂，test方法也比较灵活一些：它允许调用者将多个实现类型的操作合并到一起。另一方面，也放弃了在指定操作上使用EnumSet（见第32条）和EnumMap（见第33条）的功能，因此，除非需要灵活地合并多个实现类型的操作，否则可能最好使用有限制的类型令牌。
+
+用接口模拟可伸缩枚举有个小小的不足，即无法将实现从一个枚举类型继承到另一个枚举类型。在上述Operation的示例中，保存和获取与某项操作相关联的符号的逻辑代码，可以复制到BasicOperation和ExtendedOperation中。在这个例子中是可以的，因为复制的代码非常少。如果共享功能比较多，则可以将它封装在一个辅助类或者静态辅助方法中，来避免代码的复制工作。
+
+总而言之，虽然无法编写可扩展的枚举类型，却可以通过编写接口以及实现该接口的基础枚举类型，对它进行模拟。这样允许客户端编写自己的枚举来实现接口。如果API是根据接口编写的，那么在可以使用基础枚举类型的任何地方，也都可以使用这些枚举。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第35条：注解优先于命名模式 P147
+Java 1.5 发行版本之前，一般使用命名模式（naming pattern）表明有些程序元素需要通过某种工具或者框架进行特殊处理。例如，JUnit测试框架原本要求它的用户一定要用test作为测试方法名称的开头。这种方法可行，但有几个严重的缺点。首先，文字拼写错误会导致失败，且没有任何提示。
+命名模式的第二个缺点是，无法确保它们只用于相应的程序元素上。
+命名模式的第三个缺点是，它们没有提供将参数值与程序元素关联起来的好方法。
+
+注解很好地解决了所有的问题。假设想要定义一个注解类型来指定简单的测试，它们自动运行，并在抛出异常时失败。以下就是这样的一个注解类型，命名为Test：
+// Marker annotation type declaration
+package test;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Indicates that the annotated method is a test method.
+ * Use only on parameterless static methods.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Test {
+}
+
+Test注解类型的声明就是它自身通过Retention和Target注解进行了注解。注解类型声明中的这种注解被称作元注解（meta-annotation）。@Retention(RetentionPolicy.RUNTIME)元注解表明，Test注解应该在运行时保留。如果没有保留，测试工具就无法知道Test注解。@Target(ElementType.METHOD)元注解表明，Test注解只在方法声明中才是合法的：它不能运用到类声明、域声明或者其他程序元素上。
+
+注意Test注解声明上方的注释：“Use only on parameterless static methods.（只用于无参的静态方法）”。如果编译器能够强制这一限制最好，但是它做不到。编译器可以替你完成多少错误检查，这是有限制的，即便是利用注解。如果Test注解放在实例方法的声明中，或者放在带有一个或者多个参数的方法中，测试程序还是可以编译，让测试工具在运行时来处理这个问题。
+
+下面是现实应用中的Test注解，称作标记注解（marker annotation），因为它没有参数，只是“标注”被注解的元素。如果程序员拼错了Test，或者将注解应用到程序元素而非方法声明，程序就无法编译：
+//
+package test;
+
+// Program containing marker annotations
+public class Sample {
+    @Test
+    public static void m1() {
+    }
+
+    public static void m2() {
+    }
+
+    @Test
+    public static void m3() {
+        throw new RuntimeException("Boom");
+    }
+
+    public static void m4() {
+    }
+
+    @Test
+    public void m5() {
+    }
+
+    public static void m6() {
+    }
+
+    @Test
+    public static void m7() {
+        throw new RuntimeException("Crash");
+    }
+
+    public static void m8() {
+    }
+}
+
+Sample类有8个静态方法，其中4个被注解为测试。这4个中有两个抛出了异常：m3和m7，另外两个则没有：m1和m5。但是其中一个没有抛出异常的被注解方法：m5，是一个实例方法，因此不属于注解的有效使用。总之，Sample包含4项测试：一项会通过，两项会失败，另一项无效。没有用Test注解进行标注的4个方法会被测试工具忽略。
+
+Test注解对Sample类的语义没有直接的影响。它们只负责提供信息供相关的程序使用。更一般地讲，注解永远不会改变被注解代码的语义，但是使它可以通过工具进行特殊的处理，例如像这样简单的测试运行类：
+//args[0]=test.Sample
+package test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class RunTests {
+    public static void main(String[] args) throws Exception {
+        int tests = 0;
+        int passed = 0;
+        Class testClass = Class.forName(args[0]);
+        for (Method m : testClass.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(Test.class)) {
+                tests++;
+                try {
+                    m.invoke(null); //m5会失败是由于它不是静态方法，不能直接由Method.invoke()来触发，必须绑定在对象上才可以触发，所以抛异常了
+                    passed++;
+                } catch (InvocationTargetException wrappedExc) {
+                    Throwable exc = wrappedExc.getCause();
+                    System.out.println(m + " failed: " + exc);
+                } catch (Exception exc) {
+                    System.out.println("INVALID @Test: " + m);
+                }
+            }
+        }
+        System.out.printf("Passed: %d, Failed: %d%n", passed, tests - passed);
+    }
+}
+输出：
+INVALID @Test: public void test.Sample.m5()
+public static void test.Sample.m7() failed: java.lang.RuntimeException: Crash
+public static void test.Sample.m3() failed: java.lang.RuntimeException: Boom
+Passed: 1, Failed: 3
+
+测试运行工具在命令行上使用完全匹配的类名，通过调用Method.invoke反射式地运行类中所有标注了Test的方法。isAnnotationPresent方法告知该工具要运行哪些方法。如果测试方法抛出异常，反射机制就会它封装在InvocationTargetException中。该工具捕捉到了这个异常，并打印失败报告，包含测试方法抛出的原始异常，这些信息是通过getCause方法从InvocationTargetException中提取出来的。
+
+如果尝试通过反射调用测试方法时抛出InvocationTargetException之外的任何异常，表明编译时没有捕捉到Test注解的无效用法。这种用法包括实例方法的注解，或者带有一个或者多个参数的方法的注解，或者不可访问的方法的注解。测试运行类中的第二个catch块捕捉到了这些Test用法错误，并打印出相应的错误消息。
+
+现在要针对只在抛出特殊异常时才成功的测试添加支持。为此需要一个新的注解类型：
+//
+package test;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ *  Indicates that the annotated method is a test method that
+ *  must throw the designated exception to succeed
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface ExceptionTest {
+    Class<? extends Exception> value();
+}
+
+这个注解的参数类型是Class<? extends Exception>。这个通配符类型无疑很绕口。它在英语中的意思是：某个扩展Exception的类的Class对象，它允许注解的用户指定任何异常类型。这种用法是有限制的类型令牌（见第29条）的一个示例。下面就是实际应用中的这个注解。注意类名称被用作了注解的参数值：
+//
+package test;
+
+// Program containing annotations with a parameter
+public class Sample2 {
+    @ExceptionTest(ArithmeticException.class)
+    public static void m1() {
+        int i = 0;
+        i = i / i;
+    }
+
+    @ExceptionTest(ArithmeticException.class)
+    public static void m2() { // Should fail (wrong exception)
+        int[] a = new int[0];
+        int i = a[0];
+    }
+
+    @ExceptionTest(ArithmeticException.class)
+    public static void m3() { // Should fail (no exception)
+    }
+}
+
+修改一下测试运行工具来处理新的注解，如下：
+//
+package test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class RunTests {
+    public static void main(String[] args) throws Exception {
+        int tests = 0;
+        int passed = 0;
+        Class testClass = Class.forName(args[0]);
+        for (Method m : testClass.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(ExceptionTest.class)) {
+                tests++;
+                try {
+                    m.invoke(null);
+                    System.out.printf("Test %s failed: no exception%n", m);
+                } catch (InvocationTargetException wrappedEx) {
+                    Throwable exc = wrappedEx.getCause();
+                    Class<? extends Exception> excType = m.getAnnotation(ExceptionTest.class).value();
+                    if (excType.isInstance(exc)) {
+                        passed++;
+                    } else {
+                        System.out.printf("Test %s failed: excepted %s, got %s%n", m, excType.getName(), exc);
+                    }
+                } catch (Exception exc) {
+                    System.out.println("INVALID @Test: " + m);
+                }
+            }
+        }
+        System.out.printf("Passed: %d, Failed: %d%n", passed, tests - passed);
+    }
+}
+输出：
+Test public static void test.Sample2.m3() failed: no exception
+Test public static void test.Sample2.m2() failed: excepted java.lang.ArithmeticException, got java.lang.ArrayIndexOutOfBoundsException: 0
+Passed: 1, Failed: 2
+
+这段代码类似于用来处理Test注解的代码，但有一处不同：这段代码提取了注解参数的值，并用它检验测试抛出的异常是否为正确的类型。没有显式的转换，因此没有出现ClassCastException的危险。编译过的测试程序确保它的注解参数表示的是有效的异常类型，需要提醒一点：有可能注解参数在编译时是有效的，但是表示特定异常类型的类文件在运行时却不再存在。在这咱希望很少出现的情况下，测试运行类会抛出TypeNotPresentException异常。
+
+将上面的异常测试示例再深入一点，想像测试可以在抛出任何一种指定异常时都得到通过。注解机制有一种工具，使得支持这种用法变得十分容易。假设将ExceptionTest注解的参数类型改成Class对象的一个数组：
+//
+package test;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+// Annotation type with an array parameter
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface ExceptionTest {
+    Class<? extends Exception>[] value();
+}
+
+注解中数组参数的语法十分灵活。它是进行过优化的单元素数组。使用了ExceptionTest新版的数组参数之后，之前的所有ExceptionTest注解仍然有效，并产生单元素的数组。为了指定多元素的数组，要用花括号（{}）将元素包围起来，并用逗号（,）将它们隔开：
+@ExceptionTest({IndexOutOfBoundsException.class, NullPointerException.class})
+public static void doublyBad() {
+    List<String> list = new ArrayList<>();
+    list.addAll(5, null); // This method throws IndexOutOfBoundsException
+}
+
+修改测试运行工具来处理新的ExceptionTest相当简单。下面的代码代替了原来的代码：
+//
+package test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class RunTests {
+    public static void main(String[] args) throws Exception {
+        int tests = 0;
+        int passed = 0;
+        Class testClass = Class.forName(args[0]);
+        for (Method m : testClass.getDeclaredMethods()) {
+            if (m.isAnnotationPresent(ExceptionTest.class)) {
+                tests++;
+                try {
+                    m.invoke(null);
+                    System.out.printf("Test %s failed: no exception%n", m);
+                } catch (InvocationTargetException wrappedEx) {
+                    Throwable exc = wrappedEx.getCause();
+                    Class<? extends Exception>[] excTypes = m.getAnnotation(ExceptionTest.class).value();
+                    int oldPassed = passed;
+                    for (Class<? extends Exception> excType : excTypes) {
+                        if (excType.isInstance(exc)) {
+                            passed++;
+                            break;
+                        }
+                    }
+                    if (passed == oldPassed) {
+                        System.out.printf("Test %s failed: excepted %s %n", m, exc);
+                    }
+                } catch (Exception exc) {
+                    System.out.println("INVALID @Test: " + m);
+                }
+            }
+        }
+        System.out.printf("Passed: %d, Failed: %d%n", passed, tests - passed);
+    }
+}
+
+本条目中开发的测试框架只是一个试验，但它清楚地示范了注解之于命名模式的优越性。它这还只是揭开了注解功能的冰山一角。如果是在编写一个需要程序员给源文件添加信息的工具，就要定义一组适当的注解类型。既然有了注解，就完全没有理由再使用命名模式了。
+
+也就是说，除了“工具铁匠（toolsmiths——特定的程序员）”之外，大多数程序员都不必定义注解类型。但是所有的程序员都应该使用Java平台提供的预定义的注解类型（见第36条和24条）。还要考虑使用IDE或者静态分析工具所提供的任何注解。这种注解可以提升由这些工具所提供的诊断信息的质量。但是要注意这些注解还没有标准化，因此如果变换工具或者形成标准，就有很多工具要做了。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第36条：坚持使用Override注解 P152
+如果坚持使用这个注解，可以防止一大类的非法错误。
+
+应该在你想覆盖超类声明的每个方法声明中使用Override注解。这一规则有个小小的例外。如果你在编写一个没有标注为抽象的类，并且确信它覆盖了抽象的方法，在这种情况下，就不必将Override注解放在该方法上了。在没有声明为抽象的类中，如果没有覆盖抽象的超类方法，编译器就会发出一条错误消息。但是，你可能希望关注类中所有覆盖超类方法的方法，在这种情况下，也可以放心地标注这些方法。
+
+总而言之，如果在你想要的每个方法声明中使用Override注解来覆盖超类声明，编译器就可以替你防止大量的错误，但是有一个例外。在具体的类中，不必标注你确信覆盖了抽象方法声明的方法（虽然这么做也没有什么坏处）。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第6章 枚举和注解 P128
+//第37条：用标记接口定义类型 P152
+标记接口（marker interface）是没有包含方法声明的接口，而只是指明（或者“标明”）一个类实现了具有某种属性的接口。例如，考虑Serializable接口（见第11章）。通过实现这个接口，类表明它的实例可以被写到ObjectOutputStream（或者“被序列化”）。
+
+package java.io;
+
+public interface Serializable {
+}
+
+可能听说过标记注解（见第35条）使得标记接口过时了。这种断言是不正确的。标记接口有两点胜过标记注解。首先，也是最重要的一点是，标记接口定义的类型是由被标记类的实例实现的；标记注解则没有定义这样的类型。这个类型允许你在编译时捕捉在使用标记注解的情况下要到运行时才能捕捉到的错误。
+
+就Serializable标记接口而言，如果它的参数没有实现该接口，ObjectOutputStream.write(Object)方法将会失败。令人不解的是，ObjectOutputStream API的创建者在声明write方法时并没有利用Serializable接口。该方法的参数类型应该为Serializable而非Object。因此，试着在没有实现Serializable的对象上调用ObjectOutputStream.write，只会在运行时失败，但也并不一定如此。
+
+标记接口胜过标记注解的另一个优点是，它们可以被更加精确地进行锁定。如果注解类型利用@Target(ElementType.TYPE)声明，它就可以被应用到任何类或者接口。假设有一个标记只适用于特殊接口的实现。如果将它定义成一个标记接口，就可以用它将唯一的接口扩展成它适用的接口。
+
+Set接口可以说就是这种有限制的标记接口（restricted marker interface）。它只适用于Collection子类型，但是它不会添加除了Collection定义之外的方法。一般情况下，不把它当作是标记接口，因为它改进了几个Collection方法契约，包括add、equals和hashCode。但是很容易想像只适用于某种特殊接口的子类型的标记接口，它没有改进接口的任何方法的契约。这种标记接口可以描述整个对象的某个约束条件，或者表明实现能够利用其他某个类的方法进行处理（就像Serializable接口表明实现可以通过ObjectOutputStream进行处理一样）。
+
+标记注解胜过标记接口的最大优点在于，它可以通过默认的方式添加一个或者多个注解类型元素，给已被使用的注解类型添加更多的信息。随着时间的推移，简单的标记注解类型可以演变成更加丰富的注解类型。这种演变对于标记接口而言则是不可能的，因为它通过不可能在实现接口之后再给它添加方法（见第18条）。
+
+标记注解的另一个优点在于，它们是更大的注解机制的一部分。因此，标记注解在那些支持注解作为编程元素之一的框架中同样具有一致性。
+
+如果标记是应用到任何程序元素而不是类或者接口，就必须使用注解，因为只有类和接口可以用来实现或者扩展接口。如果标记只应用给类和接口，就要问问自己：要编写一个还是多个只接受有这种标记的方法？如果是这种情况，就应该优先使用标记接口而非注解。这样就可以用接口作为相关方法的参数类型，它真正可以为你提供编译时进行类型检查的好处。
+
+如果对第一个问题的回答是否定的，就要再问问自己：我要永远限制这个标记只用于特殊接口的元素吗？如果是，最好将标记定义成该接口的一个子接口。如果这两个问题的答案都是否定的，或者就应该使用标记注解。
+
+总而言之，标记接口和标记注解都各有用处。如果想要定义一个任何新方法都不会与之关联的类型，标记接口就是最好的选择。如果想要标记程序元素而非类和接口，考虑到未来可能要给标记添加更多的信息，或者标记要适合于已经广泛使用了注解类型的框架，那么标记注解就是正确的选择。如果你发现自己在编写的是目标为ElementType.TYPE的标记注解类型，就要花点时间考虑清楚，它是否真的应该为注解类型，想想标记接口是否会更加适合。
+
+从某种意义上说，本条目与第19条中“如果不想定义类型就不要使用接口”的说法相反。本条目最接近的意思是说：如果想要定义类型，一定要使用接口。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第38条：检查参数的有效性 P156
+如果传递无效的参数值给方法，这个方法在执行之前先对参数进行了检查，那么它很快就会失败，并且清楚地出现适当的异常（exception）。
+
+对于公有的方法，要用Javadoc的@throws标签（tag）在文档中说明违反参数值限制时会抛出的异常（见第62条）。这样的异常通常为IllegalArgumentException、IndexOutOfBoundsException或NullPointerException（见第60条）。一旦在文档中记录了对于方法参数的限制并且记录了一旦违反这些限制将要抛出的异常，强加这些限制就是非常简单的事情了。下面是一个典型的例子：
+
+/**
+ * Returns a BigInteger whose value is (this mod m). This method
+ * differs from the remainder method in that it always returns a 
+ * non-negative BigInteger
+ *
+ * @param m the modulus, whick must be positive
+ * @return this mod m
+ * @throws ArithmeticException if m is less than or equal to 0
+*/
+public BigInteger mod(BigInteger m) {
+    if (m.signum() <= 0) {
+        throw new ArithmeticException("Modulus <= 0: " + m);
+    }
+    //... Do the computation
+}
+
+对于未被导出的方法（unexported method），作为包的创建者，你可以控制这个方法将在哪些情况下被调用，因此你可以，也应该确保只将有效的参数值传递进来。因此，非公有的方法通常应该使用断言（assertion）来检查它们的参数，具体做法如下：
+// Private helper function for a recursive sort
+private static void sort(long a[], int offset, int length) {
+    assert a != null;
+    assert offset >= 0 && offset <= a.length;
+    assert length >= 0 && length <= a.length - offset;
+    // ... Do the computation
+}
+
+从本质上讲，这些断言是在声称被断言的条件将会为真，无论外围包的客户端如何使用它。不同于一般的有效性检查，断言如果失败，将会抛出AssertionError。也不同于一般的有效性检查，如果它们没有起到作用，本质上也不会有成本开销，除非通过将-ea（或者-enableassertions）标记（flag）传递给Java解释器，来启用它们。
+
+对于有些参数，方法本身没有用到，却被保存起来供以后使用，检验这类参数的有效性尤其重要。如，考虑第83页中的静态工厂方法（搜static List<Integer> intArrayAsList(final int[] a) {），它的参数为一个int数组，并返回该数组的List视图。如果这个方法的客户端要传递null，该方法就会抛出一个NullPointerException。因为该方法包含一个显式的条件检查。如果省略了这个条件检查，它就会返回一个指向新建List实例的引用，一旦客户端企图使用这个引用，立即就会抛出NullPointerException。到那时，要想找到List实例的来源可能就非常困难了，从而使得调试工作极大地复杂化了。
+
+如前所述，有些参数被方法保存起来供以后使用，构造器正是代表了这种原则的一种特殊情形。检查构造器参数的有效性是非常重要的，这样可以避免构造出来的对象违反了这个类的约束条件。
+
+在方法执行它的计算任务之前，应该先检查它的参数，这一规则也有例外。一个很重要的例外是，在有些情况下，有效性检查工作非常昂贵，或者根本不切实际的，而且有效性检查已隐含在计算过程中完成。如果Collections.sort(List)。如果这些对象不能相互比较，其中的某个比较操作就会抛出ClassCastException，这正是sort方法所应该做的事情。因此，提前检查列表中的元素是否可以相互比较，这并没有多大意义。然后，请注意，不加选择地使用这种方法将会导致失去失败原子性（failure atomicity）（见第64条）。
+
+有些，某些计算会隐式地执行必要的有效性检查，但是如果检查不成功，就会抛出错误的异常。由于无效的参数值而导致计算过程抛出的异常，与文档中标明这个方法将抛出的异常并不相符。在这种情况下，应该使用第61条中讲述的异常转译（exception translation）技术，将计算过程中抛出的异常转换为正确的异常。
+
+不要从本条目的内容中得出这样的结论：对参数的任何限制都是件好事。相反，在设计方法时，应该使它们尽可能地通用，并符合实际的需要。假如方法对于它能接受的所有参数值都能够完成合理的工作，对参数的限制就应该是越少越好。然后，通常情况下，有些限制对于被实现的抽象来说是固有的。
+
+简而言之，当编写方法或者构造器的时候，应该考虑它的参数有哪些限制。应该把这些限制写到文档中，并且在这个方法体的形状处，通过显式的检查来实话这些限制。养成这样的习惯是非常重要的。只要有效性检查有一次失败，你为必要的有效性检查所付出的努力便都可以连本带利地得到偿还了。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第39条：必要时进行保护性拷贝 P159
+编写一些面对客户的不良行为时仍能保持健壮性的类，是非常值得投入时间去做的事情。
+没有对象的帮助时，虽然另一个类不可能修改对象的内部状态，但是对象很容易在无意识的情况下提供这种帮助。如，考虑下面的类，它声称可以表示一段不可变的时间周期：
+//
+package test;
+
+import java.util.Date;
+
+public final class Period {
+    private final Date start;
+    private final Date end;
+
+    /**
+     * @param start the beginning of the period
+     * @param end the end of the period; must not precede start
+     * @throws IllegalArgumentException if start is after end
+     * @throws NullPointerException if start of end is null
+     */
+    public Period(Date start, Date end) {
+        if (start.compareTo(end) > 0) {
+            throw new IllegalArgumentException(start + " after " + end);
+        }
+
+        this.start = start;
+        this.end = end;
+    }
+
+    public Date start() {
+        return start;
+    }
+
+    public Date end() {
+        return end;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Period from %tF to %tF.", start, end);
+    }
+
+    public static void main(String[] args) {
+        // Attack the internals of a Period instance
+        Date start = new Date();
+        Date end = new Date();
+        Period period = new Period(start, end);
+        System.out.println(period);
+
+        end.setYear(10);// Modifies internals of period!
+        System.out.println(period);
+    }
+}
+输出：
+Period from 2017-04-21 to 2017-04-21.
+Period from 2017-04-21 to 1910-04-21.
+
+乍一看，这个类似乎是不可变的，并且强加了约束条件：周期的起始时间（start）不能在结束时间（end）之后。然后，因为Date类本身是可变的，因此很容易违反这个约束条件，如上。
+
+为了保护Period实例的内部信息避免受到这种攻击，对于构造器的每个可变参数进行保护性拷贝（defensive copy）是必要的，并且使用备份对象作为Period实例的组件，而不使用原始的对象：
+// Repaired constructor - makes defensive copies of parameters
+public Period(Date start, Date end) {
+    this.start = new Date(start.getTime());
+    this.end = new Date(end.getTime());
+
+    if (this.start.compareTo(this.end) > 0) {
+        throw new IllegalArgumentException(start + " after " + end);
+    }
+}
+
+用了新的构造器之后，上述的攻击对于Period实例不再有效。保护性拷贝是在检查参数的有效性（见第38条）之前进行的，并且有效性检查是针对拷贝之后的对象，而不是针对原始的对象。虽然这样做看起来有点不太自然，却是必要的。这样做可以避免在“危险阶段（window of vulnerability）”期间从另一个线程改变类的参数，这里的危险阶段是指从检查参数开始，直到拷贝参数之间的时间段。（在计算机安全社区中，这被称作Time-Of-Check/Time-Of-Use或者TOCTOU攻击。这是否和第38条有些相悖？）
+
+同时也请注意，我们没有用Date的clone方法来进行保护性拷贝。因为Date是非final的，不能保证clone方法一定返回类为java.util.Date的对象：它有可能返回专门出于恶意的目的而设计的不可信子类的实例。例如，这样的子类可以在每个实例被创建的时候，把指向该实例的引用记录到一个私有的静态列表中，并且允许攻击者访问这个列表。这将使得攻击者可以自由地控制所有的实例。为了阻止这种攻击，对于参数类型可以被不可信息方子类化的参数，请不要使用clone方法进行保护性拷贝。
+
+虽然替换构造器就可以成功地避免上述的攻击，但是改变Period实例仍然是有可能的，因为它的访问方法提供了对其可变内部成员的访问能力：
+// Second attack on the internals of a Period instance
+public static void main(String[] args) {
+    Date start = new Date();
+    Date end = new Date();
+    Period period = new Period(start, end);
+    System.out.println(period);
+
+    period.end().setYear(10);
+    System.out.println(period);
+}
+为了防御这第二种攻击，只需修改这两个访问方法，使它返回可变内部域的保护性拷贝即可：
+// Repaired accessors - make defensive copies of internal fields
+public Date start() {
+    return new Date(start.getTime());
+}
+
+public Date end() {
+    return new Date(end.getTime());
+}
+
+采用了新的构造器和新的访问方法之后，Period真正是不可变的了。不管程序员多么恶意，或者多么不合格，都绝对不会违反“周期的起始时间不能落后于结束时间”这个约束条件。因为除了Period类自身之外，其他任何类都无法访问Period实例中的任何一个可变域。这些域被真正封装在对象的内部。
+
+访问方法与构造器不同，它们在进行保护性拷贝的时候允许使用clone方法。之所以如此，是因为我们知道，Period内部的Date对象的类是java.util.Date，而不可能是其他某个潜在的不可信子类。也就是说，基于第11条中所阐述的原因，一般情况下，最好使用构造器或者静态工厂。
+
+参数的保护性拷贝并不仅仅针对不可变类。每当编写方法或者构造器时，如果它要允许客户提供的对象进入内部数据结构中，则有必要考虑一下，客户提供的对象是否有可能是可变的。如果是，就要考虑你的类是否能够容忍对象进入数据结构之后发生变化。如果答案是否定的，就必须对该对象进行保护性拷贝，并且让拷贝之后的对象而不是原始对象进入到数据结构中。如，如果你正在拷贝使用由客户提供的对象引用作为内部Set实例的元素，或者作为内部Map实例的键（key），就应该意识到，如果这个对象在插入之后再被修改，Set或者Map的约束条件就会遭到破坏。
+
+在内部组件被返回给客户端之前，对它们进行保护性拷贝也是同样的道理。不管类是否为不可变的，在把一个指向内部可变组件的引用给客户端之前，也应该加倍认真地考虑。解决方案是，应该返回性拷贝。记住长度非零的数组总是可变的。因此，在把内部数组返回给客户端之前，应该总要进行保护性拷贝。另一种解决方案是：给客户端返回该数组的不可变视图（immutable view）。这两种方法在第13条中都已经演示过了。
+
+可以肯定地说，只要有可能，都应该使用不可变的对象作为对象内部的组件，这样就不必要再为保护性拷贝（见第15条）操心。在前面的Period例子中，值得一提的是，有经验的程序员通常使用Date.getTime()返回的long基本类型作为内部的时间表示法，而不是使用Date对象引用。这样做主要因为Date是可变的。
+
+保护性拷贝可能会带来相关的性能损失，这种说法并不总是正确的。如果类信任它的调用者不会修改内部的组件，可能因为类及其客户端都是同一个包的双方，那么不进行保护性拷贝也是可以的。在这种情况下，类的文档中就必须清楚地，调用者绝不能修改受到影响的参数或者返回值。
+
+即便跨越包的作用范围，也并不总是适合在将可变参数整合到对象中之前，对它进行保护性拷贝。有一些方法和构造器的调用，要求参数所引用的对象必须有个显式的交接（handoff）过程。当客户端调用这样的方法时，它承诺以后不再直接修改该对象。如果方法或者构造器期望接管一个由客户端提供的可变对象，它就必须在文档中明确地指明这一点。
+
+简而言之，如果类具有从客户端得到或者返回到客户端的可变组件，类就必须保护性地拷贝这些组件。如果拷贝的成本受到限制，并且类信任它的客户端不会不恰当地修改组件，就可以在文档中指明客户端的职责是不得修改受到影响的组件，以此来代替保护性拷贝。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第40条：谨慎设计方法签名 P163
+谨慎地选择方法的名称。方法的名称应该始终遵循标准的命名习惯（见第56条）。
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
