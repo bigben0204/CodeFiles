@@ -829,12 +829,21 @@ public class TestClassUnderTest {
     @PrepareForTest(ClassUnderTest.class) 
     public void testCallPrivateMethod() throws Exception { 
        ClassUnderTest underTest = PowerMockito.mock(ClassUnderTest.class); 
-       PowerMockito.when(underTest.callPrivateMethod()).thenCallRealMethod(); 
+       PowerMockito.when(underTest.callPrivateMethod()).thenCallRealMethod();//这里不如果不声明thenCallRealMethod()方法，因为是mock出来的对象，则无法调用其真正方法。并且Public方法可以直接用.调用，也可以用字符串方法调用，私有方法只能用字符串方法调用
        PowerMockito.when(underTest, "isExist").thenReturn(true);
        Assert.assertTrue(underTest.callPrivateMethod());
     }
 }
 说明：和Mock普通方法一样，只是需要加注解@PrepareForTest(ClassUnderTest.class)，注解里写的类是私有方法所在的类。 
+
+//如果不调用thenCallRealMethod()方法，则可以用spy方法
+public void testPrivateMethod() throws Exception {
+    ClassUnderTest underTest = new ClassUnderTest();
+    ClassUnderTest underTestSpy = PowerMockito.spy(underTest);
+    //PowerMockito.when(underTestSpy.callPrivateMethod()).thenCallRealMethod();
+    PowerMockito.when(underTestSpy, "isExist").thenReturn(true);
+    assertTrue(underTestSpy.callPrivateMethod());
+}
 (6) Mock系统类的静态和final方法 
 测试目标代码：   
 public class ClassUnderTest {
@@ -873,6 +882,350 @@ http://code.google.com/p/powermock/wiki/MockitoUsage13
 ?   PowerMock会根据你的mock要求，去修改写在注解@PrepareForTest里的class文件（当前测试类会自动加入注解中），以满足特殊的mock需求。例如：去除final方法的final标识，在静态方法的最前面加入自己的虚拟实现等。
 
 ?   如果需要mock的是系统类的final方法和静态方法，PowerMock不会直接修改系统类的class文件，而是修改调用系统类的class文件，以满足mock需求。
+//------------------------------------------------------------------------------------------------
+//PowerMock
+http://www.w2bc.com/article/111452
+注意PowerMockito.verifyNew的第2个参数支持前面提到的验证模式。
+PowerMockito.whenNew().withArguments(...).thenReturn()是对构造方法的mock模式，PowerMockito.verifyNew().withArguments()是验证模式。
+
+另外其他类似的内置匹配器如下：Mockito.eq、Mockito.matches、Mockito.any(anyBoolean , anyByte , anyShort , anyChar , anyInt ,anyLong , anyFloat , anyDouble , anyList , anyCollection , anyMap , anySet等等)、Mockito.isNull、Mockito.isNotNull、Mockito.endsWith、Mockito.isA
+
+--回答(Answer)
+在某些边缘的情况下不可能通过简单地通过PowerMockito.when().thenReturn()模拟，这时可以使用Answer接口。
+在EmployeeControllerTest类中增加如下方法：
+import org.mockito.stubbing.Answer;
+  
+public class EmployeeControllerTest {
+  
+    @Test
+    public void shouldFindEmployeeByEmailUsingTheAnswerInterface() {
+         
+        final EmployeeService mock = PowerMockito.mock(EmployeeService.class);
+        final Employee employee = new Employee();
+        
+        PowerMockito.when(mock.findEmployeeByEmail(Mockito.anyString())).then(new Answer<Employee>() {
+
+            public Employee answer(InvocationOnMock invocation) throws Throwable {
+                final String email = (String) invocation.getArguments()[0];
+                if(email == null) return null;
+                if(email.startsWith("deep")) return employee;
+                if(email.endsWith("packtpub.com")) return employee;
+                return null;
+            }
+        });
+        
+        final EmployeeController employeeController = new EmployeeController(mock);
+        assertSame(employee, employeeController.findEmployeeByEmail("deep@gitshah.com"));
+        assertSame(employee, employeeController.findEmployeeByEmail("deep@packtpub.com"));
+        assertNull(employeeController.findEmployeeByEmail("hello@world.com"));
+    }
+         
+    @Test
+    public void shouldReturnCountOfEmployeesFromTheServiceWithDefaultAnswer() {
+         
+        EmployeeService mock = PowerMockito.mock(EmployeeService.class, new Answer() {
+            
+            public Object answer(InvocationOnMock invocation) {
+                return 10;
+            }
+        });
+        
+        EmployeeController employeeController = new EmployeeController(mock);
+        assertEquals(12, employeeController.getProjectedEmployeeCount());
+    }
+}
+Answer接口指定执行的action和返回值执。 Answer的参数是InvocationOnMock的实例，支持：
+callRealMethod()：调用真正的方法
+getArguments()：获取所有参数
+getMethod()：返回mock实例调用的方法
+getMock()：获取mock实例
+第一个测试方法根据不同情况构造不同返回。第2个测试方法设定调用返回的默认值。
+
+
+shouldInvokeTheCreateEmployeeMethodWhileSavingANewEmployee：
+@Test
+public void shouldInvokeTheCreateEmployeeMethodWhileSavingANewEmployee() {
+    
+    final EmployeeService spy = PowerMockito.spy(new EmployeeService());
+    final Employee employeeMock = PowerMockito.mock(Employee.class);
+    PowerMockito.when(employeeMock.isNew()).thenReturn(true);
+    PowerMockito.doNothing().when(spy).createEmployee(employeeMock);
+    spy.saveEmployee(employeeMock);
+    Mockito.verify(spy).createEmployee(employeeMock);      
+}
+注意spy只能使用PowerMockito.doNothing()/doReturn()/doThrow()。
+
+模拟私有方法
+现在我们修改EmployeeService.createEmployee为private，在EmployeeServiceTest类添加如下方法：
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+ 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({EmployeeIdGenerator.class, EmployeeService.class})
+public class EmployeeServiceTest {
+    
+    @Test
+    public void shouldInvokeTheCreateEmployeeMethodWhileSavingANewEmployee() throws Exception {
+         
+        final EmployeeService spy = PowerMockito.spy(new EmployeeService());
+        final Employee employeeMock = PowerMockito.mock(Employee.class);
+        PowerMockito.when(employeeMock.isNew()).thenReturn(true);
+        PowerMockito.doNothing().when(spy, "createEmployee", employeeMock);
+        spy.saveEmployee(employeeMock);
+        PowerMockito.verifyPrivate(spy).invoke("createEmployee", employeeMock);
+    }
+}
+
+
+--查看封装内容
+添加 Department类
+//Employee.java
+package test;
+
+public class Employee {
+    private long salary;
+
+    public static int count() {
+        throw new UnsupportedOperationException();
+    }
+
+    public long getSalary() {
+        return salary;
+    }
+
+    public void setSalary(int i) {
+        salary = i;
+    }
+
+    public void save() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static void giveIncrementOf(int percentage) {
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean isNew() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void update() {
+        throw new UnsupportedOperationException();
+    }
+}
+
+
+//Department.java
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Department {
+    private List<Employee> employees = new ArrayList<>();
+    private long maxSalaryOffered;
+    public void addEmployee(final Employee employee) {
+        employees.add(employee);
+        updateMaxSalaryOffered();
+    }
+
+    /**
+     * The private method that keeps track of
+     * max salary offered by this department.
+     */
+    private void updateMaxSalaryOffered() {
+        maxSalaryOffered = 0;
+        for (Employee employee : employees) {
+            if(employee.getSalary() > maxSalaryOffered) {
+                maxSalaryOffered = employee.getSalary();
+            }
+        }
+    }
+}
+
+//EmployeeService.java
+package test;
+
+public class EmployeeService {
+
+    public int getEmployeeCount() {
+        return Employee.count();
+    }
+
+    public void saveEmployee(Employee employee) {
+        if(employee.isNew()) {
+            createEmployee(employee);
+            return;
+        }
+        employee.update();
+    }
+
+    public boolean giveIncrementToAllEmployeesOf(int percentage) {
+        try{
+            Employee.giveIncrementOf(percentage);
+            return true;
+        } catch(Exception e) {
+            return false;
+        }
+    }
+
+    private void createEmployee(Employee employeeMock) {
+        throw new UnsupportedOperationException();
+    }
+}
+
+//DepartmentTest.java
+package test;
+
+import org.junit.Test;
+import org.powermock.reflect.Whitebox;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class DepartmentTest {
+    @Test
+    public void shouldVerifyThatNewEmployeeIsAddedToTheDepartment() {
+        final Department department = new Department();
+        final Employee employee = new Employee();
+        department.addEmployee(employee);
+        final List<Employee> employees = Whitebox.getInternalState(department, "employees");
+
+        assertTrue(employees.contains(employee));
+    }
+
+    @Test
+    public void shouldAddNewEmployeeToTheDepartment() {
+        final Department department = new Department();
+        final Employee employee = new Employee();
+        final ArrayList<Employee> employees = new ArrayList<>();
+        Whitebox.setInternalState(department, "employees", employees);
+        department.addEmployee(employee);
+
+        assertTrue(employees.contains(employee));
+    }
+
+    @Test
+    public void shouldVerifyThatMaxSalaryOfferedForADepartmentIsCalculatedCorrectly() throws Exception {
+        final Department department = new Department();
+
+        final Employee employee1 = new Employee();
+        final Employee employee2 = new Employee();
+        employee1.setSalary(60000);
+        employee2.setSalary(65000);
+
+        final ArrayList<Employee> employees = new ArrayList<Employee>();
+        employees.add(employee1);
+        employees.add(employee2);
+
+        Whitebox.setInternalState(department, "employees", employees);
+        Whitebox.invokeMethod(department, "updateMaxSalaryOffered");
+
+        final long maxSalary = Whitebox.getInternalState(department, "maxSalaryOffered");
+        assertEquals(65000, maxSalary);
+    }
+}
+Whitebox.getInternalState(department, "employees")类似堆栈，查看变量的值。
+Whitebox.setInternalState(department, "employees", employees)设置变量的值。 
+Whitebox.invokeMethod(department, "updateMaxSalaryOffered")调用方法。
+
+
+//EmployeeServiceTest.java
+package test;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Employee.class, EmployeeService.class})
+public class EmployeeServiceTest {
+
+    @Test
+    public void shouldReturnTrueWhenIncrementOf10PercentageIsGivenSuccessfully() {
+        PowerMockito.mockStatic(Employee.class);
+        PowerMockito.doNothing().when(Employee.class);//对于类方法的使用，告诉PowerMock下一个方法调用时什么也不做
+        Employee.giveIncrementOf(10);
+        EmployeeService employeeService = new EmployeeService();
+        assertTrue(employeeService.giveIncrementToAllEmployeesOf(10));
+    }
+
+    @Test
+    public void shouldReturnFalseWhenIncrementOf10PercentageIsNotGivenSuccessfully() {
+        PowerMockito.mockStatic(Employee.class);
+        PowerMockito.doThrow(new IllegalStateException()).when(Employee.class);//对于类方法的使用，告诉PowerMock下一个方法调用时抛出异常
+        Employee.giveIncrementOf(10);
+        EmployeeService employeeService = new EmployeeService();
+        assertFalse(employeeService.giveIncrementToAllEmployeesOf(10));
+    }
+
+//    //如果createEmployee为public方法，则不需要@PrepareForTest(EmployeeService.class)，并且验证public方法为Mockito.verify
+//    @Test
+//    public void shouldInvokeTheCreateEmployeeMethodWhileSavingANewEmployee_verityPublic() {
+//        final EmployeeService spy = PowerMockito.spy(new EmployeeService());
+//        final Employee employeeMock = PowerMockito.mock(Employee.class);
+//        PowerMockito.when(employeeMock.isNew()).thenReturn(true);
+//        PowerMockito.doNothing().when(spy).createEmployee(employeeMock);
+//
+//        spy.saveEmployee(employeeMock);
+//        Mockito.verify(spy).createEmployee(employeeMock);
+//    }
+
+    //测试spy类的私有方法，并且用doNothing来标识调用spy类的私有方法时不做任何事，验证private方法为PowerMockito.verifyPrivate
+    @Test
+    public void shouldInvokeTheCreateEmployeeMethodWhileSavingANewEmployee_verifyPrivate() throws Exception {
+        final EmployeeService spy = PowerMockito.spy(new EmployeeService());
+        final Employee employeeMock = PowerMockito.mock(Employee.class);
+        PowerMockito.when(employeeMock.isNew()).thenReturn(true);
+        PowerMockito.doNothing().when(spy, "createEmployee", employeeMock);
+
+        spy.saveEmployee(employeeMock);
+        PowerMockito.verifyPrivate(spy).invoke("createEmployee", employeeMock);
+    }
+}
+
+//EmployeeTest.java
+package test;
+
+import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
+
+import static org.junit.Assert.fail;
+
+public class EmployeeTest {
+
+    @Test()
+    public void shouldNotDoAnythingIfEmployeeWasSaved() {
+        Employee employee = PowerMockito.mock(Employee.class);
+        PowerMockito.doNothing().when(employee).save();
+        try {
+            employee.save();
+        } catch(Exception e) {
+            fail("Should not have thrown an exception");
+        }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldThrowAnExceptionIfEmployeeWasNotSaved() {
+        Employee employee = PowerMockito.mock(Employee.class);
+        PowerMockito.doThrow(new IllegalStateException()).when(employee).save();
+        employee.save();
+    }
+}
+
+更多参考：http://powermock.googlecode.com/svn/docs/powermock-1.5/apidocs/org/powermock/reflect/Whitebox.html。
 //------------------------------------------------------------------------------------------------
 //初始化@Mock注解对象的三个方法
 http://blog.csdn.net/hotdust/article/details/51416670
@@ -1502,13 +1855,13 @@ public class AlphaSpiralMatrixWithAlg implements AlphaSpiralMatrix {
 //AlphaSpiralMatrixWithTraverse.java
 package test;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AlphaSpiralMatrixWithTraverse implements AlphaSpiralMatrix {
     private final int maxRow;
     private final int maxCol;
-    private Character[][] charMatrix;
+    private char[][] charMatrix;
 
     private static final char START_ALPHA = 'A';
     private static final int MAX_ALPHA_NUM = 26;
@@ -1523,11 +1876,31 @@ public class AlphaSpiralMatrixWithTraverse implements AlphaSpiralMatrix {
     public String getRowAlpha(int rowIndex) {
         assert (rowIndex >= 0 && rowIndex < maxRow);
         initCharMatrix();
-        return Arrays.stream(charMatrix[rowIndex]).map(String::valueOf).collect(Collectors.joining());
+        return Stream.of(charMatrix[rowIndex]).map(String::valueOf).collect(Collectors.joining());
     }
 
     private enum Direction {
-        RIGHT(0, 1), DOWN(1, 0), LEFT(0, -1), UP(-1, 0);
+        RIGHT(0, 1) {
+            @Override
+            Direction getNextDirection() {
+                return DOWN;
+            }
+        }, DOWN(1, 0) {
+            @Override
+            Direction getNextDirection() {
+                return LEFT;
+            }
+        }, LEFT(0, -1) {
+            @Override
+            Direction getNextDirection() {
+                return UP;
+            }
+        }, UP(-1, 0) {
+            @Override
+            Direction getNextDirection() {
+                return RIGHT;
+            }
+        };
 
         private final int rowIncrement;
 
@@ -1544,26 +1917,28 @@ public class AlphaSpiralMatrixWithTraverse implements AlphaSpiralMatrix {
         public int getColumnIncrement() {
             return columnIncrement;
         }
+
+        abstract Direction getNextDirection();
     }
 
     private void initCharMatrix() {
         if (charMatrix != null) {
             return;
         }
-        charMatrix = new Character[maxRow][maxCol];
+        charMatrix = new char[maxRow][maxCol];
 
         long maxNumber = maxRow * maxCol;
         int rowIndex = 0;
         int columnIndex = 0;
         Direction direction = Direction.RIGHT;
         for (long index = 0; index < maxNumber; ++index) {
-            charMatrix[rowIndex][columnIndex] = getChar(index);
+            charMatrix[rowIndex][columnIndex] = (char) (index % MAX_ALPHA_NUM + START_ALPHA);
 
-            int nextRowIndex = getNextRowIndex(rowIndex, direction);
-            int nextColumnIndex = getNextColumnIndex(columnIndex, direction);
+            int nextRowIndex = rowIndex + direction.getRowIncrement();
+            int nextColumnIndex = columnIndex + direction.getColumnIncrement();
 
             if (!isNextPosValid(nextRowIndex, nextColumnIndex)) {
-                direction = getNextDirection(direction);
+                direction = direction.getNextDirection();
             }
 
             rowIndex += direction.getRowIncrement();
@@ -1572,38 +1947,10 @@ public class AlphaSpiralMatrixWithTraverse implements AlphaSpiralMatrix {
 
     }
 
-    private char getChar(long index) {
-        return (char) (index % MAX_ALPHA_NUM + START_ALPHA);
-    }
-
-    private Direction getNextDirection(Direction direction) {
-        if (direction == Direction.RIGHT) {
-            return Direction.DOWN;
-        }
-
-        if (direction == Direction.DOWN) {
-            return Direction.LEFT;
-        }
-
-        if (direction == Direction.LEFT) {
-            return Direction.UP;
-        }
-
-        return Direction.RIGHT;
-    }
-
     private boolean isNextPosValid(int nextRowIndex, int nextColumnIndex) {
         return nextRowIndex < maxRow && nextRowIndex >= 0
             && nextColumnIndex < maxCol && nextColumnIndex >= 0
-            && charMatrix[nextRowIndex][nextColumnIndex] == null;
-    }
-
-    private int getNextRowIndex(int rowIndex, Direction direction) {
-        return rowIndex + direction.getRowIncrement();
-    }
-
-    private int getNextColumnIndex(int columnIndex, Direction direction) {
-        return columnIndex + direction.getColumnIncrement();
+            && charMatrix[nextRowIndex][nextColumnIndex] == 0;
     }
 }
 
@@ -28629,34 +28976,660 @@ public Date end() {
 //Effective Java 第7章 方法 P156
 //第40条：谨慎设计方法签名 P163
 谨慎地选择方法的名称。方法的名称应该始终遵循标准的命名习惯（见第56条）。
-//------------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------------------------
+不要过于追求提供便利的方法。
 
-//------------------------------------------------------------------------------------------------
+避免过长的参数列表。目标是四个参数，或者更少。相同类型的长参数序列格外有害。
+有三种方法可以缩短过长的参数列表。第一种是把方法分解成多个方法，每个方法只需要这些参数的一个子集。如果不小心，这样做会导致方法过多，但是通过提升它们的正交性（orthogonality），还可以减少（reduce）方法的数目。
+缩短长参数列表的第二种方法是创建辅助类（helper class），用来保存参数的分组。这些辅助类一般为静态成员类（见第22条）。如果一个频繁出现的参数序列可以被看作是代表了某个独特的实例，则建议使用这种方法。如，你正在编写一个表示纸牌游戏的类，经常要传递一个两参数的序列来表示纸牌的点数和花色。如果增加辅助类来表示一张纸牌，并且把每个参数序列都换成这个辅助类的单个参数，那么这个纸牌游戏类的API以及它的内部表示都可能会得到改进。
+结合了前两种方法特征的第三种方法是，从对象构建到方法调用都采用Builder模式（见第2条）。如果方法带有多个参数，尤其是当它们中有些是可选的时候，最好定义一个对象来表示所有参数，并允许客户端在这个对象上进行多次“setter”调用，每次调用都设置一个参数，或者设置一个较小的相关的集合。一旦设置了需要的参数，客户端就调用对象的“执行（execute）”方法，它对参数进行最终的有效性检查，并执行实际的计算。
 
-//------------------------------------------------------------------------------------------------
+对于参数类型，要优先使用接口而不是类（请见第52条）。只要有适当的接口可用来定义参数，就优先使用这个接口，而不是使用实现该接口的类。如，没有理由在编写方法时使用HashMap类来作为输入，应当使用Map接口作为参数。如果使用的是类而不是接口，则限制了客户端只能传入特定的实现，如果碰巧输入的数据是以其他的形式存在，就会导致不必要的、可能非常昂贵的拷贝操作。
 
+对于boolean参数，要优先使用两个元素的枚举类型。它使代码更易于阅读和编写，尤其当你在使用支持自动完成功能的IDE的时候。它也使以后更易于添加更多的选项。如，可能会有一个Thermometer类型，它带有一个静态工厂方法，而这个静态工厂方法的签名压根传入这个枚举的值：
+public enum TemperatureScale { FAHRENHEIT, CELSIUS }
+Thermometer.newInstance(TemperatureScale.CELSIUS)不仅比Thermomter.newInstance(true)更有用，而且你也可以在未来的发行版本中将KELVIN添加到TemperatureScale中，无需非得给Thermometer添加新的静态工厂。还可以将依赖于温度刻度单位的代码重构到枚举常量的方法中（见第30条）。例如，每个刻度单位都可以有一个方法，它带有一个double值，并将它规格化成摄氏度。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第41条：慎用重载 P165
+下面这个程序意图是好的，试图根据一个集合（collection）是Set、List，还是其他的集合类型，来对它进行分类：
+//
+package test;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+
+public class CollectionClassifier {
+    public static String classify(Set<?> set) {
+        return "Set";
+    }
+
+    public static String classify(List<?> list) {
+        return "List";
+    }
+
+    public static String classify(Collection<?> collection) {
+        return "Unknown Collection";
+    }
+
+    public static void main(String[] args) {
+        Collection<?>[] collections = {new HashSet<String>(), new ArrayList<BigInteger>(), new HashMap<String, String>().values()};
+        Stream.of(collections).forEach(c -> System.out.println(classify(c)));
+    }
+}
+输出：
+Unknown Collection
+Unknown Collection
+Unknown Collection
+
+可能期望程序会打印出“Set”，“List”以及“Unknown Collection”，实际打印了“Unknown Collection”三次。因为classify方法被重载（overloaded）了，而要调用哪个重载（overloading）方法是在编译时就做出决定 的。对于for循环中的全部三次迭代，参数的编译时类型是相同的：Collection<?>。每次迭代的运行时类型都是不同的，但这并不影响对重载方法的选择。因为该参数的编译时类型是Collection<?>，所以，唯一合适的重载方法是第三个：classify(Collection<?>)，在循环的每次迭代中，都会调用这个重载方法。
+
+这个程序的行为有悖常理，因为对于重载方法（overloaded method）的选择是静态的，而对于被覆盖的方法（overridden method）的选择则是动态的。选择被覆盖的方法是正确版本是在运行时进行的，选择的依据是被调用方法所在对象的运行时类型。当一个子类包含的方法声明与其祖先类中的方法声明具有相同的签名时，方法就被覆盖了。如果实例方法在子类中被覆盖了，并且这个方法是在该子类的实例上被调用的，那么子类中的覆盖方法（overriding method）将会执行，而不管该子类实例的编译时类型是什么。考虑下面的程序：（略）
+
+与重载的情形相比，对象的运行时类型并不影响“哪个重载版本将被执行”；选择工作是在编译时进行的，完全基本参数的编译时类型。
+
+在CollectionClassifier这个示例中，程序的意图是：期望编译器根据参数的运行时类型自动将调用分发给适当的重载方法，以此来识别出参数的类型，就好像Wine的例子中的name方法所做的那样。方法重载机制完全没有提供这样的功能。假设需要有个静态方法，这个程序的最佳修改方案是，用单个方法来替换这三个重载的classify方法，并在这个方法中做一个显式的instanceof测试：
+public static String classify(Collection<?> c) {
+    return c instanceof Set ? "Set" :
+        c instanceof List ? "List" : "Unknown Collection";
+}
+
+因为覆盖机制是规范，而重载机制是例外，所以覆盖机制满足了人们对于方法调用行为的期望。重载机制很容易使这些期望落空。如果API的普通用户根本不知道“对于一组给定的参数，其中的哪个重载方法将会被调用”，那么，使用这样的API就很可能导致错误。这些错误要等到运行时发生了怪异的行为之后才会显现出来，许多程序员无法诊断出这样的错误。因此，应该避免胡乱地使用重载机制。
+
+怎么才算胡乱使用重载机制，这个问题仍胡争议。安全而保守的策略是，永远不要导出两个具有相同参数数目的重载方法。如果方法使用可变参数（varargs），保守的策略是根本不要重载它，除第42条中所述的情形之外。这项限制并不麻烦，因为你始终可以给方法起不同的名称，而不使用重载机制。
+
+如，考虑ObjectOutputStream类。对于每个基本类型，以及几种引用类型，它的write方法都有一种变形。这些变形方法并不是重载write方法，而是具有诸如writeBoolean(boolean)、writeInt(int)和writeLong(long)这样的签名。与重载方法相比较，这种命名模式带来的好处是，有可能提供相应名称的读方法，比如readBoolean()、readInt()和readLong()。实际上，ObjectInputStream类正是提供了这样的读方法。
+
+对于构造器，你没有选择使用不同名称的机会：一个类的多个构造器总是重载的。在许多情况下，可以选择静态工厂，而不是构造器（见第1条）。对于构造器，还不用担心重载和覆盖的相互影响，因为构造器不可能被覆盖。或许你有可能导出多个具有相同参数数目的构造器，所以有必要了解一下如何安全地做到这一点。
+
+在Java 1.5 发行版本之前，所有的基本类型都根本不同于所有的引用类型，但是当自动装箱出现之后，就不再如此了，它会真正的麻烦。考虑如下程序：
+//
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.IntStream;
+
+public class SetList {
+    public static void main(String[] args) {
+        Set<Integer> set = new TreeSet<>();
+        List<Integer> list = new ArrayList<>();
+
+        IntStream.range(-3, 3).forEach(i -> {
+            set.add(i);
+            list.add(i);
+        });
+
+        IntStream.range(0, 3).forEach(i -> {
+            set.remove(i);
+            list.remove(i);
+        });
+
+        System.out.println(set + " " + list);
+    }
+}
+输出：
+[-3, -2, -1] [-2, 0, 2]
+
+像大多数人一样，希望程序从集合和列表中除去非负数值（0，1和2），并打印出[-3, -2, -1] [-3, -2, -1]。事实上，程序从集合中去除了非负数，还从列表中去除了奇数值，打印出[-3, -2, -1] [-2, 0, 2]。将这种行为称之为混乱，已是保守的说法。
+
+实际发生的情况是：set.remove(i)调用选择重载方法remove(E)，这里的E是集合（Integer）的元素类型，将i从int自动装箱到Integer中。这是你所期待的行为，因此程序不会从集合中去除正值。另一方法，list.remove(i)调用选择重载方法remove(int i)，它从列表的指定位置上去除元素。为了解决这个问题，要将list.remove的参数转换成Integer，迫使选择正确的重载方法。另一种方法是，可以调用Integer.valueOf(i)，并将结果传给list.remove。这两种方法都如我们所料，打印出[-3, -2, -1] [-3, -2, -1]：
+IntStream.range(0, 3).forEach(i -> {
+    set.remove(i);
+    list.remove((Integer) i); // or list.remove(Integer.valueOf(i));
+});
+
+这种情形清楚地说明了，自动装箱和泛型成了Java语言的一部分之后，谨慎重载显得更加重要了。
+
+有时候，尤其在更新现有类的时候，可能会被迫违反本条目的指导原则。如，自从Java 1.4 发行版本以来，String类就已经有一个contentEquals(StringBuffer)方法。在Java 1.5 发行版本中，新增了一个称作CharSequence的接口，用来为StringBuffer、StringBuilder、String、CharBuffer以及其他类似的类型提供公有接口，为实现这个接口，对它们全都进行了改造。在Java平台中增加CharSequence的同时，String也配备了重载的contentEquals方法，即contentEquals(CharSequence)方法，这个方法表示，当且仅当此String表示与CharSequence序列相同的char值时，返回true。
+
+尽管这样的重载很显示违反了本条目的指导原则，但是只要当这两个重载方法在同样的参数上被调用时，它们执行相同的功能，重载就不会带来危害。程序员可能并不知道哪个重载函数会被调用，但只要这两个方法返回相同的结果就行。确保这种行为的标准做法是，让更具体化的重载方法把调用转发给更一般化的重载方法：
+public booleam contentEquals(StringBuffer sb) {
+    return contentEquals((CharSequence) sb);
+}
+
+虽然Java平台类库很大程度上遵循了本条目中的建议，但是也有诸多的类违背了。如，String类导出两个重载的静态工厂方法：valueOf(char[])和valueOf(Object)，当这两个方法被传递了同样的对象引用时，它们所做的事情完全不同。没有正当的理由可以解释这一点，它应该被看作是一种反常行为，有可能会造成真正的混淆。
+
+简而言之，“能够重载方法”并不意味着就“应该重载方法”。一般情况下，对于多个具有相同参数数目的方法来说，应该尽量避免重载方法。在某些情况下，特别是涉及构造器的时候，要遵循这条建议也许是不可能的。在这种情况下，至少应该避免这样的情形：同一组参数只需经过类型转换就可以被传递给不同的重载方法。如果不能避免这种情形，如，因为正在改造一个现在的类以实现新的接口，就应该保证：当传递同样的参数时，所有重载方法的行为必须一致。如果不能做到这一点，程序员就很难有效地使用被重载的主就去或者构造器，他们就不能理解它为什么不能正常工作。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第42条：慎用可变参数 P170
+Java 1.5 发行版本中增加了可变参数（varargs）方法，一般称作variable arity method（可匹配不同长度的变量的方法）。可变参数方法接受0个或者多个指定类型的参数。可变参数机制通过先创建一个数组，数组的大小为在调用位置所传递的参数数量，然后将参数值传到数组中，最后将数组传递给方法。
 
+如下面是一个可变参数方法，带有int参数的一个序列，并返回它们的总和：
+//
+package test;
+
+public class VarargsTest {
+    public static void main(String[] args) {
+        System.out.println(sum(1, 2, 3));
+        System.out.println(sum());
+    }
+    
+    // Simple use of varargs
+    private static int sum(int... args) {
+        int sum = 0;
+        for (int arg : args) {
+            sum += arg;
+        }
+        return sum;
+    }
+}
+输出：
+6
+0
+
+有时候，有必要编写需要1个或者多个某种类型参数的方法，而不是需要0个或者多个。例如，假设想要计算多个int参数的最小值。如果客户端没有传递参数，那这个方法的定义就不太好了。你可以在运行时检查数组长度：
+// The WRONG way to use varargs to pass one of more arguments
+private static int min(int... args) {
+    if (args.length == 0) {
+        throw new IllegalArgumentException("Too few arguments");
+    }
+    int min = args[0];
+    for (int i = 1; i < args.length; i++) {
+        if (args[i] < min) {
+            min = args[i];
+        }
+    }
+    return min;
+}
+这种解决方案有几个问题。其中最严重的问题是，如果客户端调用这个方法时，并没有传递参数进去，它就会在运行时而不是编译时失败。另一个问题是，这段代码很不美观。你必须在args中包含显式的有效性检查，除非将min初始化为Integer.MAX_VALUE，否则将无法使用for_each循环，这样的代码也不美观。
+
+幸运的是，有一种更好的方法可以实现想要的这种效果。声明该方法带有两个参数，一个是指定类型的正常参数，另一个是这种类型的varargs参数。这种解决方案解决了前一个示例中的所有不足。
+//
+package test;
+
+public class VarargsTest {
+    public static void main(String[] args) {
+        System.out.println(min(1, 3, 2));
+    }
+
+    // The right way to use varargs to pass one of more arguments
+    private static int min(int firstArg, int... remainingArgs) {
+        int min = firstArg;
+        for (int arg : remainingArgs) {
+            if (arg < min) {
+                min = arg;
+            }
+        }
+        return min;
+    }
+}
+输出：
+1
+
+如你所见，当你真正需要让一个方法带有不定数量的参数时，可变参数就非常有效。可变参数是为printf而设计的，它是在Java 1.5 发行版本中添加到平台中的，为了核心的反射机制（见第53条），在该发行版本中改造成利用可变参数。printf和和反射机制都从可变参数中极大地受益。
+
+可以将以数组当作final参数的现有方法，改造成以可变参数代替，而不影响现有的客户端，但是可以并不意味着应该这么做！考虑Arrays.asList的情形。这个方法从来都不是设计成用来将多个参数集中到一个列表中的，但是当平台中增加了可变参数时，将它改造成这么做似乎是个好办法，因此，可以变成可以这样：
+List<String> homophones = Arrays.asList("to", "too", "two");
+
+这种用法有效，但是这么用就是个大错误。在Java 1.5 发行版本之前，打印数组内容的常见做法如下：
+// Obsolete idiom to print an array!
+System.out.println(Arrays.asList(myArray));
+
+这种做法在当时是必需的，因为数组从Object继承了它们的toString实现，因此直接在数组上调用toString，会产生没有意义的字符串。这种做法只在对象引用类型的数组上才有用，但是如果不小心在基本类型的数组上尝试这么做，程序将无法编译。如：
+int[] ints = {1, 2, 3};
+System.out.println(Arrays.asList(ints));
+
+由于在Java 1.5 发行版本中，令人遗憾地决定 将Arrays.asList改造成可变参数方法，现在这个程序可以通过编译，并且没有错误或者警告。但是运行这个程序时，会输出无意识的也是无意义的结果：[[I@a987ac]。Arrays.asList方法现在“增强”为使用可变参数，将int类型的数组digits的对象引用集中到数组的单个元素数组中，并忠实地将它包装到List<int[]>实例中。打印这个列表会导致在列表中调用toString，从而导致在它唯一的元素int数组上调用toString，产生上述令人遗憾的结果。
+
+//
+package test;
+
+import java.util.Arrays;
+
+public class VarargsTest {
+    public static void main(String[] args) {
+        int[] ints = {1, 2, 3};
+        System.out.println(Arrays.asList(ints));
+
+        String[] strings = {"hello", "world"};
+        System.out.println(Arrays.asList(strings));
+
+        System.out.println(Arrays.asList(1, 2, 3));
+    }
+}
+
+输出：
+[[I@a987ac]
+[hello, world]
+[1, 2, 3]
+
+从好的方法看，将数组转变成字符串的Arrays.asList做法现在是过时的，当前的做法要健壮得多。也是在Java 1.5 发行版本中，Arrays类得到了补充完整的Arrays.toString方法（不是可变参数方法！），专门为了将任何类型的数组转变成字符串而设计的。如果用Arrays.toString代替Arrays.asList，这个程序就会产生想要结果：
+//
+package test;
+
+import java.util.Arrays;
+
+public class VarargsTest {
+    public static void main(String[] args) {
+        int[] ints = {1, 2, 3};
+        // The right way to print an array
+        System.out.println(Arrays.toString(ints));
+
+        String[] strings = {"hello", "world"};
+        System.out.println(Arrays.toString(strings));
+    }
+}
+输出：
+[1, 2, 3]
+[hello, world]
+
+如果不改造Arrays.asList，更好的办法则是给Collections添加一个新的方法，专门用来将它的参数集中到列表中：
+public static <T> List<T> gather(T... args) {
+    return Arrays.asList(args);
+}
+
+这种方法可以提供收集功能，而不会危及对现有Arrays.asList方法的类型检查。
+
+这个教训很显示，不必改造具有final数组参数的每个方法，只当确实是在数量不定的值上执行调用时才使用可变参数。
+
+有两个方法签名特别可疑：
+ReturnType1 suspect1(Object... args) {}
+<T> ReturnType2 suspect2(T... args) {}
+带有上述任何一种签名的方法都可以接受任何参数列表。改造之前进行的任何编译时的类型检查都会丢失，Arrays.asList发生的情形正在说明了这一点。
+
+在重视性能的情况下，使用可变参数机制要特别小心。可变参数方法的每次调用都会导致进行一次数组分配和初始化。如果凭经验确定无法承受这一成本，但又需要可变参数的灵活性，还有一种模式可以让你如愿以偿。假设确定对某个方法95%的调用会有3个或者更少的参数，就声明该方法的5个重载，每个重载方法带有0至3个普通参数，当参数的数目超过3个时，就使用一个可变参数方法：
+public void foo() { }
+public void foo(int a1) { }
+public void foo(int a1, int a2) { }
+public void foo(int a1, int a2, int a3) { }
+public void foo(int a1, int a2, int a3, int... rest) { }
+
+现在你知道了，所有调用中只有5%参数数量超过3个的调用需要创建数组。就像大多数的性能优化一样，这种方法通常不太恰当，但是一旦真正需要它时，它可就帮上大忙了。
+
+EnumSet类对它的静态工厂使用这种方法，最大限度地减少创建枚举集合的成本。当时这么做是必要的，因为枚举集合为位域提供在性能方面有竞争力的替代方法，这是很重要的（见么32条）。
+
+简而言之，在定义参数数目不定的方法时，可变参数方法是一种很方便的方式，但是它们不应该被过度滥用。如果使用不当，会产生混乱的结果。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第43条：返回零长度的数组或者集合，而不是null P174
+对于一个返回null而不是零长度数组或者集合的方法，几乎每次用到该方法时都需要这种曲折的处理方式。这样做很容易出错，因为编写客户端程序的程序员可能会忘记写这种专门的代码来处理null返回值。返回null而不是零长度的数组也会使返回数组或者集合的方法本身变更得更加复杂。
 
+有时候有人认为：null返回值比零长度数组更好，因为它避免了分配数组所需要的开销。这种观点是站不住脚的，原因有两点。第一，在这个级别上担心性能问题是不明智的，除非分析表明这个方法正是造成性能问题的真正源头（见第55条）。第二，对于不返回任何元素的调用，每次返回同一个零长度数组是有可能的，因为零长度数组是不可变的，而不可变对象有可能被自由地共享（见第15条）。实际上，当你使用标准做法（standard idiom）把一些元素从一个集合转存到一个类型化的数组（typed array）中时，它正是这样做的：
+//
+package test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class EmptyStringArrayTest {
+    // The right way to return an array from a collection
+    private final List<String> strings = new ArrayList<>();
+
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    /**
+     * @return an array containing all strings
+     */
+    public String[] getStrings() {
+        return strings.toArray(EMPTY_STRING_ARRAY);
+    }
+
+    public static void main(String[] args) {
+        EmptyStringArrayTest emptyStringArrayTest = new EmptyStringArrayTest();
+        System.out.println(Arrays.toString(emptyStringArrayTest.getStrings()));
+
+        String[] stringArray = {"hello", "world", "good", "luck", "how", "are", "you"};
+        List<String> stringList = Arrays.asList("nice", "weather");
+        String[] anotherStringArrays = stringList.toArray(stringArray);
+        System.out.println(Arrays.toString(anotherStringArrays));
+    }
+}
+输出：
+[]
+[nice, weather, null, luck, how, are, you]
+
+在这种习惯用法中，零长度数组常量被传递给toArray方法，以指明所期望的返回类型。正常情况下，toArray方法分配了返回的数组，但是，如果集合是空的，它将使用零长度的输入数组，Collection.toArray(T[])的规范保证：如果输入数组大到足够容纳这个集合，它就将返回这个输入数组。因此，这种做法永远也不会分配零长度的数组。
+
+同样的，集合值的方法也可以做成在每当需要返回空集合时都返回同一个不可变的空集合。Collections.emptySet、emptyList和emptyMap方法提供的正是你所需要的，如下所示：
+// The right way to return a copy of a collection
+public List<String> getStringList() {
+    if (strings.isEmpty()) {
+        return Collections.emptyList(); // Always returns same list
+    }
+    else {
+        return new ArrayList<String>(strings); //这里只保证新new出来的ArrayList<>是与原来的strings内存不一致，List中存储的每一个String还是原来的对象。
+    }
+}
+
+简而言之，返回类型为数组或集合的方法没理由返回null，而是返回一个零长度的数组或者集合。这种习惯做法（指返回null）很有可能是从C程序设计语言中沿袭过来的，在C语言中，数组长度是与实际的数组分开返回的。在C语言中，如果返回的数组长度为零，再分配一个数组就没有任何好处。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第7章 方法 P156
+//第44条：为所有导出的API元素编写文档注释 P176
+为了正确地编写API文档，必须在每个被导出的类、接口、构造器、方法和域声明之前增加一个文档注释。
+方法的文档注释应该简洁地描述出它和客户端之间的约定。
 
+下面这个简短的文档注释演示了所有这些习惯做法：
+/**
+ * Returns the element at the specified position in this list.
+ * <p>This method is <i>not</i> guaranteed to run in constant
+ * time. In some implementations it may run in time proportional
+ * to the element position.
+ *
+ * @param index of element to return; must be 
+ *        non-negative and less than the size of this list
+ * @return the element at the specified position in this list
+ * @throws IndexOutOfBoundException if the index is out of range
+           ({@code index < 0 || index >= this.size()})
+ */
+E get(int index);
+
+每个文档注释的第一句话（如下所示）成了该注释所属元素的概要描述（summary description）。如，第177页中文档注释中的概要描述为“返回这个列表中指定位置上的元素”。概要描述必须独立地描述目标元素的功能。为了避免混淆，同一个类或者接口中的两个成员或者构造器，不应该具有同样的概要描述。特别要注意重载的情形，在这种情况下，往往很自然地在描述中使用同样的第一句话（但在文档注释中这是不可接受的）。
+
+简而言之，要为API编写文档，文档注释是最好、最有效的途径。对于所有可导出的API元素来说，使用文档注释应该被看作是强制性的。要采用一致的风格来遵循标准的约定。记住，在文档注释内部出现任何HTML标签都是允许的，但是HTML元字符必须要经过转义。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第45条：将局部变量的作用域最小化 P181
+要使局部变量的作用域最小化，最有力的方法就是在第一次使用它的地方声明。
+几乎每个局部变量的声明都应该包含一个初始化表达式。如果你还没有足够的信息来对一个变量进行有意义的初始化，就应该推迟这个声明，直到可以初始化为止。这条规则有个例外的情况与try-catch语句有关。如果一个变量被一个方法初始化，而这个方法可能会抛出一个受检的异常（checked exception），该变量就必须在try块的内部被初始化。如果变量的值必须在try块的外部被使用到，它就必须在try块之前被声明，但是在try块之前，它还不能被“有意义地初始化”。请参照第202页中的例子。
 
+循环中提供了特殊的机会来将变量的作用域最小化。（无论是传统的还是for-each形式的）for循环，都允许声明循环变量（loop variable），它们的作用域被限定在正好需要的范围之内。（这个范围包括循环体，以及循环体之前的初始化、测试、更新部分。）因此，如果在循环终止之后不再需要循环变量的内部，for循环就优先于while循环。
+
+例如，下面是一种遍历集合的首先做法（见第46条）：
+// Preferred idiom for iterating over a collection
+for (Element e : c) {
+    doSomething(e);
+}
+
+在Java 1.5 发行版本之前，首先的做法如下（现在仍然有适用之处）：
+// No for-each loop or generics before release 1.5
+for (Iterator i = c.iterator(); i.hasNext(); ) {
+    doSomething((Element) i.next());
+}
+
+使用for循环，犯这种“剪切-粘贴”错误的可能性就会大大降低，因为通常没有必要在两个循环中使用不同的变量名。循环是完全独立的，所以重用元素（或者迭代器）变量的名称不会有任何危害。实际上，这也是很流行的做法。
+
+使用for循环与使用while循环相比还有另外一个优势：更简短，从而增强了可读性。
+下面是另外一种对局部变量的作用域进行最小化的循环做法：
+for (int i = 0, n = expensiveComputation(); i < n; i++) {
+    doSomething(i);
+}
+
+关于这种做法要关注的一点是，它具有两个循环变量：i和n，两者具有完全相同的作用域。第二个变量n被用来保存第一个变量的极限值，从而避免在每次迭代中执行冗余计算的开销。通常，如果循环测试中涉及方法调用，它可以保证在每次迭代中都会返回同样的结果，就应该使用这种做法。
+
+最后一种“将局部变量的作用域最小化”的方法是使方法小而集中。如果把两个操作（activity）合并到同一个方法中，与其中一个操作相关的局部变量就有可能会出现在执行另一个操作的代码范围之内。为了防止这种情况发生，只要把这个方法分成两个，每个方法各执行一个操作。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第46条：for-each循环优先于传统的for循环 P184
+传统的for循环做法都比while循环（见第45条）更好，但是它们也并不完美。迭代器和索引变量都会造成一些混乱。而且，它们也代表着出错的可能。迭代器和索引变量在每个循环中出现三次，其中有两次让你很容易出错。一旦出错，就无法保证编译器能够发现错误。
 
+Java 1.5 发行版本中引入的for-each循环，通过完全隐藏迭代器或者索引变量，避免了混乱和出错的可能。这种模式同样适用于集合和数组：
+注意，利用for-each循环不会有性能损失，甚至用于数组也一样。实际上，在某些情况下，比起普通的for循环，它还稍有些性能优势，因为它对数组索引的边界值只计算一次。虽然可以手工完成这项工作（见第45条），但程序员并不总会这么做。
+
+在对多个集合进行嵌套式迭代时，for-each循环相对于传统for循环的这种优势还会更加明显。
+
+for-each循环不仅让你遍历集合和数组，还让你遍历任何实现Iterable接口的对象。这个简单的接口由单个方法组成，与for-each循环同时被增加到Java平台中。下面就是这个接口的示例：
+public interface Iterable<E> {
+    // Returns an iterator over the elements in this iterable
+    Iterable<E> iterator();
+}
+
+实现Iterable接口并不难。如果你在编写的类型表示是一组元素，即便你选择不让它实现Collection，也要让它实现Iterable。这样可以允许用户利用for-each循环遍历你的类型，会令用户永远感激不尽的。
+
+总之，for-each循环在简洁性和预防Bug方法有着传统的for循环无法比拟的优势，并且没有性能操作。应该尽可能地使用for-each循环。有三种常见的情况无法使用for-each循环：
+1. 过滤——如果需要遍历集合，并删除选定的元素，就需要使用显式的迭代器，以便可以调用它的remove方法。
+2. 转换——如果需要遍历列表或者数组，并取代它部分或者全部的元素值，就需要列表迭代器或者数组索引，以便设定元素的值。
+3. 平行迭代——如果需要并行地遍历多个集合，就需要显式地控制迭代器或者索引变量，以便所有迭代器或者索引变量都可以得到同步前移（就如上述关于有问题的牌和骰子的示例中无意中所示范的那样）。
+在以上任何一种情况下，就要使用普通的for循环，要警惕本条目中提到的陷阱，并且要确保做到最好。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第47条：了解和使用类库 P187
+假设希望产生位于0和某个上界之间的随机整数。面对这个常见的任务，许多程序员会编写出如下方法：
 
+这个方法看起来不错，但却有三个缺点：第一个缺点是，如果n是一个比较小的2的乘方，经过一段相当短的周期之后，它产生的随机数序列将会重复。第二个缺点是，如果n不是2的乘方，那么平均起来，有些数会比其的数出现得更为频繁。如果n比较大，这个缺点就会非常明显。这可以通过下面的程序直观地体现出来，它会竹一百万个经过细心指定的范围内的随机数，并打印出有多少个数字落在随机数取值范围的前半部分：
+package test;
+
+import java.util.Random;
+
+public class RandomTest {
+    private static final Random rnd = new Random();
+
+    // Common but deeply flawed!
+    static int random(int n) {
+        return Math.abs(rnd.nextInt()) % n;
+    }
+
+    public static void main(String[] args) {
+        int n = 2 * (Integer.MAX_VALUE / 3);
+        int low = 0;
+        for (int i = 0; i < 1000000; i++) {
+            if (random(n) < n / 2) {
+                low++;
+            }
+        }
+        System.out.println(low);
+    }
+}
+输出：
+666877
+
+如果random方法工作正常的话，这个程序打印出来的数将接近于一百万的一半，但是如果真正运行这个程序，就会发现它打印出来的数接近于666666。由random方法产生的数字有2/3 落在随机数取值范围的前半部分。
+
+random方法的第三个缺点是，在极少数情况下，它的失败是灾难性的，返回一个落在指定范围之外的数。这是因为这个方法试图通过调用Math.abs，将rnd.nextInt()返回的值映射为一个非负整数int。如果nextInt()返回Integer.MIN_VALUE，那么Math.abs也会返回Integer.MIN_VALUE，假设n不是2的乘方，那么取模操作符（%）将返回一个负数。这几乎肯定会使程序失败，而且这种失败很难重现。
+
+为了编写能修正这三个缺点的random方法，有必要了解关于伪随机数生成器、数论和2的求补算法的相关知识。已经有现成的成果可以为你所用。它被称为Random.nextInt(int)，自Java 1.2 发行版本以来，它已经成了Java平台的一部分。
+
+使用标准类库的第二个好处是，不必浪费时间为那些与工作不太相关的问题提供特别的解决方案。就像大多数程序员一样，应该把时间花在应用程序上，而不是底层的细节上。
+
+使用标准类库的第三个好处是，它们的性能往往会随着时间的推移而不断提高，无需你做任何努力。
+
+使用标准类库的最后一个好处是，可以使自己的代码融入主流。这样的代码更易读、更易维护、更易被大多数的开发人员重用。
+
+有两种工具值得特别一提。在1.2 发行版本中，Collections Framework（集合框架）被加入到了java.util包中。它应该成为每个程序员基本工具箱中的一部分。Collections Framework是一个统一的体系结构，用来表示和操作集合，允许它们对集合进行独立于表示细节的操作。
+
+1.5 发行版本中，在java.util.concurrent包中增加了一组并发实用工具。这个包既包含高级的并发工具来简化多线程的编程任务，还包含低级别的并发基本类型，允许专家们自己编写更高级的并发抽象。java.util.concurrent的高级部分，也应该是每个程序员基本工具箱中的一部分（见第68条和第69条）。
+
+任何一组类库中所提供的功能总是难免会有遗漏。如果你所需要的功能不存在，那么就只能自己实现这些功能，别无选择。
+
+总而言之，不要重新发明轮子。如果你要做的事情看起来是十分常见的，有可能类库中已经有某个类完成了这样的工作。如果确实是这样，就使用现成的；如果还不清楚是否存在这样的类，就去查一查。一般而言，类库的代码可能比你自己编写的代码更好一些，并且会随着时间的推移而不断改进。这并不是在影射你作为一个程序员的能力。从经济角度的分析表明：类库代码受到的关注远远超过大多数普通程序员在同样的功能上所能够给予的投入。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第48条：如果需要精确的答案，请避免使用float和double P190
+float和double类型尤其不适合于货币计算，因为要让一个float或者double精确地表示0.1 （或者10的任何其他负数次方值）是不可能的。
 
+例如，假设你口袋里有$1，你看到货架上有糖果，票价为10美分，20美分，一直到$1。从标价为10美分的糖果开始，一直到不能支付，可以买多少颗糖果？还会找回多少零头？下面是一个简单的程序，用来解决这个问题：
+package test;
+
+public class DoubleTest {
+    public static void main(String[] args) {
+        double funds = 1.00;
+        int itemBought = 0;
+        for (double price = .10; funds >= price; price += .10) {
+            funds -= price;
+            itemBought++;
+        }
+        System.out.println(itemBought + " items bought.");
+        System.out.println("Change: $" + funds);
+    }
+}
+输出：
+3 items bought.
+Change: $0.3999999999999999
+
+答案是不正确的！解决这个问题的正确办法是使用BigDecimal、int或者long进行货币计算。下面使用BigDecimal类型代替double：
+package test;
+
+import java.math.BigDecimal;
+
+public class DoubleTest {
+    public static void main(String[] args) {
+        final BigDecimal TEN_CENTS = new BigDecimal("0.10");
+
+        int itemBought = 0;
+        BigDecimal funds = new BigDecimal("1.00");
+        for (BigDecimal price = TEN_CENTS; funds.compareTo(price) >= 0; price = price.add(TEN_CENTS)) {
+            itemBought++;
+            funds = funds.subtract(price);
+        }
+        System.out.println(itemBought + " items bought.");
+        System.out.println("Money left over: $" + funds);
+    }
+}
+输出：
+4 items bought.
+Money left over: $0.00
+
+然而，使用BigDecimal有两个缺点：与使用基本运算类型相比，这样做很不方便，而且很慢。对于解决这样的一个简单的问题，后一种缺点并不要紧，但是前一种缺点可能会让你很不舒服。
+
+除了使用BigDecimal之外，还有一种办法是使用int或者long，到底选用int或者long要取决于所涉及数值的大小，同时要自己处理十进制小数点。在这个示例中，最明显的做法是以分为单位进行计算，而不是以元为单位。如下：
+package test;
+
+public class DoubleTest {
+    public static void main(String[] args) {
+        int itemBought = 0;
+        int funds = 100;
+        for (int price = 10; funds >= price; price += 10) {
+            itemBought++;
+            funds -= price;
+        }
+        System.out.println(itemBought + " items bought.");
+        System.out.println("Money left over: " + funds + " cents");
+    }
+}
+输出：
+4 items bought.
+Money left over: 0 cents
+
+总而言之，对于任何需要精确答案的计算任务，请不要使用float或者double。如果想让系统来记录十进制小数点，并且不介意因为不使用基本类型而带来的不便，就请使用BigDecimal。使用BigDecimal还且一些额外的好处，它允许你完全控制舍入，每当一个操作涉及舍入的时候，它允许你从8种舍入模式中选择其一。如果你正通过法定要求的舍入行为进行业务计算，使用BigDecimal是非常方便的。如果性能非常关键，并且你又不介意自己记录十进制小数点，而且所涉及的数值又不太大，就可以使用int或者long。如果数值范围没有超过9位十进制数字，就可以使用int；如果不超过18位数字，就可以使用long。如果数值可能超过18位数字，就必须使用BigDecimal。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第49条：基本类型优先于装箱基本类型 P190
+基本类型和装箱基本类型之间有三个主要区别。第一，基本类型只有值，而装箱基本类型则具有它们的值不同的同一性。换句话说，两个装箱基本类型可以具有相同的值和不同的同一性。第二，基本类型只有功能完备的值，而每个装箱基本类型除了它对应基本类型的所有功能值之外，还有个非功能值：null。最后一点区别是，基本类型通常比装箱基本类型更节省时间和空间。
 
+考虑下面这个比较器：
+package test;
+
+import java.util.Comparator;
+
+public class AutoBoxTest {
+    public static void main(String[] args) {
+        // Broken comparator - can you spot the flaw?
+        //Comparator<Integer> naturalOrder = (first, second) -> first < second ? -1 : (first == second ? 0 : 1);
+        Comparator<Integer> naturalOrder = new Comparator<Integer>() {
+            @Override
+            public int compare(Integer first, Integer second) {
+                return first < second ? -1 : (first == second ? 0 : 1);
+            }
+        };
+
+        System.out.println(naturalOrder.compare(new Integer(42), new Integer(42)));
+    }
+}
+输出：
+1
+
+问题出在执行计算表达式first == second上，它在两个对象引用上执行同一性比较（identity comparison）。两个Integer为不同对象，所以返回false，比较器会错误地返回1，表示第一个Integer值大于第二个。对装箱基本类型运用==操作符几乎总是错误的。
+
+修正这个问题的最清楚做法是添加两个快点变量，来保存first和second的int值，并在这些变量上执行所有的比较操作。这样可以避免大量的同一性比较：
+package test;
+
+import java.util.Comparator;
+
+public class AutoBoxTest {
+    public static void main(String[] args) {
+        Comparator<Integer> naturalOrder = new Comparator<Integer>() {
+            @Override
+            public int compare(Integer first, Integer second) {
+                int f = first;
+                int s = second;
+                return f < s ? -1 : (f == s ? 0 : 1);
+            }
+        };
+
+        System.out.println(naturalOrder.compare(new Integer(42), new Integer(42)));
+    }
+}
+输出：
+0
+
+考虑这个小程序：
+package test;
+
+public class Unbelievable {
+    private static Integer i;
+
+    public static void main(String[] args) {
+        if (i == 42) {
+            System.out.println("Unbelievable");
+        }
+    }
+}
+在计算表达式（i == 42 ）时抛出NullPointerException异常。问题在于，i是个Integer，而不是int，就像所有的对象引用域一样，它的初始值为null。当程序计算表达式(i == 42)时，它会将Integer与int进行比较。几乎在任何一种情况下，当在一项操作中混合使用基本类型和装箱基本类型时，装箱基本类型就会自动拆箱，这种情况无一例外。如果null对象引用被自动白条，就会得到一个NullPointerException异常。修改这个问题很简单，声明i是个int而不是Integer就可以了。
+
+最后，考虑第5条中的这个程序：
+//Hideously slow program! Can you spot the object creation?
+public static void main(String[] args) {
+    Long sum = 0L;
+    for (long i = 0; i < Integer.MAX_VALUE; i++) {
+        sum += i;
+    }
+    System.out.println(sum);
+}
+这个程序运行起来比预计的要慢一些，因为它不小心将一个局部变量（sum）声明为装箱基本类型Long，而不是基本类型long。程序编译起来没有错误或者警告，变量被反复地装箱和拆箱，导致明显的性能下降。
+
+什么时候应该使用装箱基本类型呢？有几个合理的用处。第一个是作为集合中的元素、键和值。不能将基本类型放在集合中，因此必须使用装箱基本类型。这是一种更通用的特例。在参数化类型（见第5章）中，必须使用装箱基本类型作为类型参数，因为Java不允许使用基本类型。例如，你不能将变量声明为ThreadLocal<int>类型，因此必须使用ThreadLocal<Integer>代替。最后，在进行反射的方法调用（见第53条）时，必须使用装箱基本类型。
+
+总之，当可以选择的时候，基本类型要优先于装箱基本类型。基本类型更加简单，也更加快速。如果必须使用装箱基本类型，要特别小心！自动装箱减少了使用装箱基本类型的繁琐性，但是并没有减少它的风险。当程序用==操作符比较两个装箱基本类型时，它做了个同一性比较，这几乎肯定不是你所希望的。当程序进行涉及装箱和拆箱基本类型的混合类型计算时，它会进行拆箱，当程序进行拆箱时，会抛出NullPointerException异常。最后，当程序装箱了基本类型值时，会导致高开销和不必要的对象创建。
 //------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第50条：如果其他类型更合适，则尽量避免使用字符串 P195
+--字符串不适合代替其他的值类型。
+--字符串不适合代替枚举类型。
+--字符串不适合代替聚集类型。
+--字符串也不适合代替能力表（capabilities）。
+总而言之，如果可以使用更加合适的数据类型，或者可以编写更加适当的数据类型，就应该避免用字符串来表示对象。若使用不当，字符串会比其他的类型更加笨拙、更不灵活、速度更慢，也更容易出错。经常被错误地用字符串来代替的类型包括基本类型、枚举类型和聚集类型。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第51条：当心字符串连接的性能 P198
+为连接n个字符串而重复地使用字符串连接操作符，需要n的平方级的时间。这是由于字符串不可变（见第15条）而导致的不幸结果。当两个字符串被连接在一起时，它们的内容都要被拷贝。
+为了获得可以接受的性能，请使用StringBuilder替代String，来存储建造中的对账单。（Java 1.5 发行版本中增加了非同步StringBuilder类，代替了现在已经过时的StringBuffer类。）：
+public String statement() {
+    StringBuilder b = new StringBuilder(numItems() * LINE_WIDTH);
+    for (int i = 0; i < numItems(); i++) {
+        b.append(lineForItem(i));
+    }
+    return b.toString();
+}
+使用StringBuilder比String的做法要快85倍。连接String的做法的开销随项目数量而呈平方级增加，第二种做法则是线性增加，所以，项目数越大，性能的差别会越显著。注意，第二种做法预先分配了一个StringBuilder，使它大到足以容纳结果字符串。即便因为预先不知道字符串长度，使用了默认大小的StringBuilder，它仍然比第一种做法快50倍。
 
+原则很简单：不要使用字符串连接操作符来合并多个字符串，除非性能无关紧要。相反，应该使用StringBuilder的append方法。另一种方法是，使用字符数组，或者每次只处理一个字符串，而不是将它们组合起来
+//------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第52条：通过接口引用对象 P195
+第40条中有一个建议：应该使用接口而不是用类作为参数的类型。更一般地讲，应该优先使用接口而不是类来引用对象。如果有合适的接口类型存在，那么对于参数、返回值、变量和域来说，就都应该使用接口类型进行声明。只有当利用构造器创建某个对象的时候，才真正需要引用这个对象的类。
+考虑Vector的情形，它是List接口的一个实现。在声明变量的时候应该养成这样的习惯：
+// Good - uses interface as tyep
+List<Subscriber> subscribers = new Vector<Subscriber>();
+而不是像这样的声明：
+// Bad - uses class as type
+Vector<Subscriber> subscribers = new Vector<Subscriber>();
+
+如果养成了用接口作为类型的习惯，你的程序将会更加灵活。当决定更换实现时，所要做的就只是改变构造器中类的名称（或者使用一个不同的静态工厂）。如，第一个声明可以被改变为：
+List<Subscriber> subscribers = new ArrayList<Subscriber>();
+
+有一点值得注意：如果原来的实现提供了某种特殊的功能，而这种功能并不是这个接口的通用约定所要求的，并且周围的代码又依赖于这种功能，那么很关键的一点是，新的实现也要提供同样的功能。如，如果第一个声明周围的代码依赖于Vector的同步策略，在声明中用ArrayList代替Vector就是不正确的。如果依赖于实现的任何特殊属性，就要在声明变量的地方给这些需求建立相应的文档说明。
+
+为什么要改变实现呢？因为新的实现提供了更好的性能，或者因为它提供了期望得到的额外功能。有个真实的例子与ThreadLocal类有关。
+如果没有合适的接口存在，完全可以用类而不是接口来引用对象。如，考虑值类（value class），比如String和BigInteger。记住，值类很少会用多个实现编写。它们通常是final的，并且很少有对应的接口。使用这种值类作为参数、变量、域或者返回类型是再合适不过的了。更一般地讲，如果具体类没有相关联的接口，不管它是否表示一个值，你都没有别的选择，只有通过它的类来引用它的对象。Random类就属于这种情形。
+
+不存在适当接口类型的第二种情形是，对象属于一个框架，而框架的基本类型是类，不是接口。如果对象属于这种基于类的框架（class-based framework），就应该用相关的基类（base class）（往往是抽象类）来引用这个对象，而不是用它的实现类。java.util.TimerTask抽象类就属性这种情形。
+
+不存在适当接口类型的最后一种情形是，类实现了接口，但是它提供了接口中不存在的额外方法——如LinkedHashMap。如果程序依赖于这些额外的方法，这种类就应该只被用来引用它的实例。这很少应该被用作参数类型（见第40条）。
+
+以上这些例子并不全面，只是代表了一些“适合于用类来引用对象”的情形。实际上，给定的对象是否具有适当的接口应该是很显然的。如果是，用接口引用对象就会使程序更加灵活；如果不是，则使用类层次结构中提供了必须功能的最基础的类。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第53条：接口优先于反射机制 P201
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
