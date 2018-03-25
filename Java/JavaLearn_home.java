@@ -1,4 +1,398 @@
 //------------------------------------------------------------------------------------------------
+//int数字倒序
+package test;
+
+public class Solution {
+    public int reverse(int x) {
+        boolean positive = x > 0;
+        if (x == Integer.MIN_VALUE) {
+            return 0;
+        }
+
+        int positiveInt = Math.abs(x);
+        String positiveIntStr = String.valueOf(positiveInt);
+        StringBuilder sbOfPositiveIntStr = new StringBuilder(positiveIntStr);
+        if (!positive) {
+            sbOfPositiveIntStr.append('-');
+        }
+        String reverseIntStr = sbOfPositiveIntStr.reverse().toString();
+
+        int reverseInt = 0;
+        try {
+            reverseInt = Integer.valueOf(reverseIntStr);
+        } catch (NumberFormatException e) {
+        }
+        return reverseInt;
+    }
+
+    public static void main(String[] args) {
+        int i = Integer.valueOf("2147483647");
+        System.out.println(Math.abs(-2147483648));
+    }
+}
+
+//优化过的
+public int reverse(int x) {
+    boolean positive = x > 0;
+    if (x == Integer.MIN_VALUE) {
+        return 0;
+    }
+
+    int positiveInt = Math.abs(x);
+    StringBuilder sbOfPositiveInt = new StringBuilder();
+    reverseByStringBuilder(sbOfPositiveInt, positiveInt);
+    if (!positive) {
+        sbOfPositiveInt.insert(0, '-');
+    }
+
+    int reverseInt = 0;
+    try {
+        reverseInt = Integer.valueOf(sbOfPositiveInt.toString());
+    } catch (NumberFormatException e) {
+    }
+    return reverseInt;
+}
+
+private void reverseByStringBuilder(StringBuilder result, int num) {
+    if (num != 0) {
+        result.append(num % 10);
+        reverseByStringBuilder(result, num / 10);
+    }
+}
+
+//Test
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private final Solution solution = new Solution();
+    @Test
+    public void test_should_when() {
+        assertEquals(solution.reverse(1234), 4321);
+        assertEquals(solution.reverse(-1234), -4321);
+        assertEquals(solution.reverse(120), 21);
+        assertEquals(solution.reverse(0), 0);
+        assertEquals(solution.reverse(2147483647), 0);
+        assertEquals(solution.reverse(-2147483648), 0);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//LastCalculator.java
+package test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class LastCalculator {
+
+    private static final int REMOVED_POSITION = -1;
+
+    /**
+     * maxNumber：最大有多少编号的人坐成一桌；
+     * interval：大家从1、2、3。。。开始报数，数到interval编号，则排除此人，其余人再从1、2开始报数，直到剩最后一人
+     * 返回值：剩下的最后一个人编号
+     */
+    public static int getLast(int maxNumber, int interval) {
+        assert maxNumber > 1 && interval > 0 : "Input args wrong";
+
+        List<Integer> numberList = IntStream.range(1, maxNumber + 1).boxed().collect(Collectors.toList());
+        int leftNumber = maxNumber;
+        int index = 0;
+        int countNumber = 0;
+
+        while (leftNumber != 1) {
+            //如果当前位置有人，则将计数加1
+            if (numberList.get(index) > 0) {
+                ++countNumber;
+                //如果计数等于interval，则将此位置删除
+                if (countNumber == interval) {
+                    numberList.set(index, REMOVED_POSITION);
+                    --leftNumber;
+                    countNumber = 0;
+                }
+            }
+
+            ++index;
+            //如果遍历超过了List，则重新从第0个位置开始
+            if (index == maxNumber) {
+                index = 0;
+            }
+        }
+
+        return numberList.stream().filter(e -> e > 0).findFirst().orElse(REMOVED_POSITION);
+    }
+}
+
+//LastCalculatorTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class LastCalculatorTest {
+
+    @Test
+    public void testGetLast_shouldReturn1_whenInput3And1() {
+        assertEquals(3, LastCalculator.getLast(3, 1));
+    }
+
+    @Test
+    public void testGetLast_shouldReturn3_whenInput3And2() {
+        assertEquals(3, LastCalculator.getLast(3, 2));
+    }
+
+    @Test
+    public void testGetLast_shouldReturn2_whenInput3And3() {
+        assertEquals(2, LastCalculator.getLast(3, 3));
+    }
+
+    @Test
+    public void testGetLast_shouldReturn1_whenInput5And4() {
+        assertEquals(1, LastCalculator.getLast(5, 4));
+    }
+
+    @Test
+    public void testGetLast_shouldReturn3_whenInput4And6() {
+        assertEquals(3, LastCalculator.getLast(4, 6));
+    }
+}
+//------------------------------------------------------------------------------------------------
+//Java解析json（依赖fastjson-1.2.28.jar）
+//JsonUtils.java
+package test;
+
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
+public class JsonUtils {
+
+    public static Object select(JSONObject jsonObj, String keyPath, String indexPath) {
+        if (null == jsonObj || null == keyPath) {
+            return null;
+        }
+
+        String[] pathArr = keyPath.split("\\.");
+        String[] indexArr = indexPath.split("\\.");
+
+        if (pathArr.length != indexArr.length) {
+            throw new IndexOutOfBoundsException("Length of keyPath and indexPath is not equal.");
+        }
+
+        JSONObject current = jsonObj;
+        Object retValue = null;
+        for (int i = 0; i < pathArr.length; i++) {
+            String key = pathArr[i];
+            retValue = current.get(key);
+            int index = Integer.valueOf(indexArr[i]) - 1;
+
+            if (retValue instanceof JSONObject) {
+                current = (JSONObject) retValue;
+            } else if (retValue instanceof JSONArray) {
+                JSONArray jsonArrayValue = (JSONArray) retValue;
+                current = jsonArrayValue.getJSONObject(index);
+                retValue = current;
+            }
+        }
+        return retValue;
+    }
+
+    public static void main(String[] args) {
+        String jsonStr = readString3("src/test/fight.json");
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(jsonStr);
+            Object ret = JsonUtils.select(jsonObject, "AppFlightSearchResponse.flightSegmentResult.flightObject", "1.1.1");
+            System.out.println(ret);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String readString3(String filePath) {
+        String str = "";
+        File file = new File(filePath);
+        try {
+            FileInputStream in = new FileInputStream(file);
+            // size  ????????? ??????????????
+            int size = in.available();
+            byte[] buffer = new byte[size];
+            in.read(buffer);
+            in.close();
+            str = new String(buffer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return str;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//使用dom4j解析xml（依赖dom4j-1.6.1.jar、jaxen-1.1.6.jar）
+//Dom4jParseXml.java
+package test;
+
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.List;
+
+public class Dom4jParseXml {
+    // private static final Logger log = LoggingManager.getLoggerForClass();
+    public Document doc;
+    private SAXReader reader = new SAXReader();
+
+    //构造函数
+    public Dom4jParseXml(String xml) throws Exception {
+        InputStream in = new ByteArrayInputStream(xml.getBytes("utf-8"));
+        doc = reader.read(in);
+        in.close();
+    }
+
+    //获取text方法
+    public String getNodeText(String xpath, int index) {
+        String test = "";
+        List nodes = doc.selectNodes(xpath);
+
+        if (nodes.size() > index) {
+            Element node = (Element) nodes.get(index);
+            test = node.getText();
+        }
+
+        return test;
+    }
+}
+
+
+//DomParseData.java
+package test;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class DomParseData {
+    Dom4jParseXml dom;
+
+    public DomParseData(String response) {
+        try {
+            dom = new Dom4jParseXml(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 获取节点的text
+     */
+    public String domParseData(String xpath, int index) throws Exception {
+        //    log.info("传入的路径为："+xpath+"  索引："+index);
+        return dom.getNodeText(xpath, index - 1);
+    }
+
+    public static void main(String[] args) {
+        //String responseXml = readString3("src/test/fight.json");
+        String responseXml = readString3("src/test/ResponseData.xml");
+//        System.out.println(responseXml);
+        try {
+            DomParseData domParseData = new DomParseData(responseXml);
+
+            String ret = domParseData.domParseData("//ns2:policyId", 1);
+            System.out.println(ret);
+            ret = domParseData.domParseData("//ns2:settlement", 1);
+            System.out.println(ret);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String readString3(String filePath) {
+        String str = "";
+        File file = new File(filePath);
+        try {
+            FileInputStream in = new FileInputStream(file);
+            // size  为字串的长度 ，这里一次性读完
+            int size = in.available();
+            byte[] buffer = new byte[size];
+            in.read(buffer);
+            in.close();
+            str = new String(buffer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return str;
+    }
+}
+
+//-----
+package test;
+
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+import java.io.File;
+import java.util.Iterator;
+import java.util.List;
+
+public class ResponseDataParser {
+    public static void main(String[] args) throws Exception {
+        SAXReader saxReader = new SAXReader();
+        Document document = saxReader.read(new File("src/test/ResponseData.xml"));
+        Element root = document.getRootElement();
+        System.out.println("Root:" + root.getName());
+        List<Element> childList = root.elements();
+        // List<Element> litterchildList=childList.elements();
+        for (Element subChild : childList) {
+            printNodes(subChild.elements());
+            printAttribute(subChild);
+        }
+        //printNodes(childList);
+
+        //Element policyId = (Element) root.selectSingleNode("//ns4:policyId[contains(text(),'|0|0|')]");
+        Element policyId = (Element) root.selectSingleNode("//ns2:policyId");
+//        List<Element> policyIds = root.selectNodes("//ns4:policyId");
+        System.out.println(policyId.getText());
+
+        Element policyIdParent = policyId.getParent();
+        System.out.println(policyIdParent.getName());
+
+
+    }
+
+    private static void printAttribute(Element e) {
+        Iterator<Attribute> attributes = e.attributeIterator();
+        while (attributes.hasNext()) {
+            Attribute attribute = attributes.next();
+            System.out.println(attribute.getName() + "<-->" + attribute.getValue());
+        }
+    }
+
+    private static void printNodes(List<Element> childList) {
+        for (Element e : childList) {
+            //if ("wangwu2".equals(e.attributeValue("name"))) {
+            System.out.println(e.getName());
+            //e.sele
+        }
+    }
+}
+//------------------------------------------------------------------------------------------------
 //http://blog.csdn.net/lonely_fireworks/article/details/7962171/
 //Java格式化输出 http://blog.sina.com.cn/s/blog_416bfbd90101nm0r.html
 从JDK 1.5 版本以后，java.io.PrintWriter类中有以下格式化输出方法：
@@ -29630,14 +30024,128 @@ List<Subscriber> subscribers = new ArrayList<Subscriber>();
 //------------------------------------------------------------------------------------------------
 //Effective Java 第8章 通用程序设计 P181
 //第53条：接口优先于反射机制 P201
-//------------------------------------------------------------------------------------------------
+反射机制允许一个类使用另一个类，即便当前者被编译的时候后者还根本不存在。然而，这种能力也要付出代价：
+--丧失了编译时类型检查的好处，包括异常检查。
+--执行反射访问所需要的代码非常笨拙和冗长。
+--性能损失。
 
-//------------------------------------------------------------------------------------------------
+反射功能只是在设计时（design time）被用到。通常，普通应用程序在运行时不应该以反射方式访问对象。
 
-//------------------------------------------------------------------------------------------------
+有些复杂的应用程序需要使用反射机制。这些示例中包括类浏览器、对象监视器、代码分析工具、解释型的内嵌式系统。在RPC（远程过程调用）系统中使用反射机制也是非常合适的，这样可以不再需要存根编译器（stub compiler）。如果对自己的应用程序是否也属于这一类应用程序而感到怀疑，它很有可能就不属于这一类。
 
-//------------------------------------------------------------------------------------------------
+使用只是以非常有限的形式使用反射机制，虽然也要付出少许代码，但是可以获得许多好处。对于有些程序，它们必须用到在编译时无法获取的类，但是在编译时存在适当的接口或者超类，通过它们可以引用这个类（见第52条）。如果是这种情况，就可以以反射方式创建实例，然后通过它们的接口或者超类，以正常的方式访问这些实例。
 
+如，下面程序创建了一个Set<String>实例，它的类是由第一个命令行参数指定的，该程序把其余的命令行参数插入到这个集合中，然后打印该集合。
+//TestReflect.java
+package test;
+
+import java.util.Arrays;
+import java.util.Set;
+
+public class TestReflect {
+    // Reflective instantiation with interface access
+    public static void main(String[] args) {
+        // Translate the class name into a Class object
+        Class<?> cl = null;
+        try {
+            cl = Class.forName(args[0]);
+        } catch (ClassNotFoundException e) {
+            System.err.println("Class not found.");
+            System.exit(1);
+        }
+
+        // Instantiate the class
+        Set<String> s = null;
+        try {
+            s = (Set<String>) cl.newInstance();
+        } catch (IllegalAccessException e) {
+            System.err.println("Class not accessible.");
+            System.exit(1);
+        } catch (InstantiationException e) {
+            System.err.println("Class not instantiable.");
+            System.exit(1);
+        }
+
+        // Exercise the set
+        s.addAll(Arrays.asList(args).subList(1, args.length));
+        System.out.println(s);
+    }
+}
+入参：java.util.HashSet "d" "e" "a"
+输出：[a, d, e]
+
+入参：java.util.TreeSet "d" "e" "a"
+输出：[a, d, e]
+
+这个程序所演示的方法是非常强大的。这个程序可以很容易地变成一个通用的集合测试器，通过侵入式地操作一个或者多个集合实例，并检查是否遵守Set接口的约定，以此来验证指定的Set实现。同样地，它也可以变成一个通用的集合性能分析工具。实际上，它所演示的这种方法足以实现一个成熟的服务提供者框架（service provider framework）（见第1条）。绝大多数情况下，使用反制机制需要的也正是这种方法。
+
+这个示例演示了反射机制的两个缺点。第一，这个例子会产生3个运行时错误，如果不使用反射方式的实例化，这3个错误都会成为编译时错误。第二，根据类名生成它的实例需要20行冗长的代码，而调用一个构造器可以非常简洁地只使用一行代码。然而，这些缺点还仅仅局限于实例化对象的那部分代码。一旦对象被实例化，它与其他的Set实例就难以区分。在实际的程序中，通过这种限定使用反射的方法，绝大部分代码可以不受影响。
+
+编译程序会有警告，与程序中使用了泛型有关，但它并不能说明真正的问题。要了解禁止这种警告的最佳方法，请参见第24条。
+
+另一个值得注意的附带问题是，这个程序使用了System.exit。很少有需要调用这个方法的时候，它会终止整个VM（虚拟机）。但是，它对于命令行有效性的非法终止是很合适的。
+
+简而言之，反射机制是一种功能强大的机制，对于特定的复杂系统编程任务，它是非常必要的，但它也有一些缺点。如果你编写的程序必须要与编译时未知的类一起工作，如有可能，就应该仅仅使用反射机制来实例化对象，而访问对象时则使用编译时已知的某个接口或者超类。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第54条：谨慎地使用本地方法 P204
+Java Native Interface（JNI）允许Java应用程序只可以调用本地方法（native method），所谓本地方法是指用本地程序设计语言（比如C或者C++）来编写的特殊方法。本地方法在本地语言中可以执行任意的计算任务，并返回到Java程序设计语言。
+
+使用本地方法来提高性能的做法不值得提倡。
+
+使用本地方法有一些严重的缺点。因为本地语言不是安全的（见第39条），所以，使用本地方法的应用程序也不再能免受内存毁坏错误的影响。本地语言是与平台相关的，使用本地方法的应用程序也不再是可自由移植的。使用本地方法的应用程序也更难调试。在进入和退出本地代码时，需要相关的固定开销，所以，如果本地代码只是做少量的工作，本地方法就可能降低（decrease）性能。最后一点，需要“胶合代码”的本地方法编写起来单调乏味，并且难以阅读。
+
+总而言之，在使用本地方法之前务必三思。极少数情况下会需要使用本地方法来提高性能。如果你必须要使用本地方法来访问底层资源，或者遗留代码库，也要尽可能少使用本地代码，并且要全面进行测试。本地代码中的一个Bug就有可能破坏整个应用程序。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第55条：谨慎地进行优化 P205
+关于优化的深刻真理：优化的弊大于利，特别是不成熟的优化。
+
+不要因为性能而牺牲合理的结构。要努力编写好的程序而不是快的程序。
+
+必须在设计过程中考虑到性能问题。
+
+努力避免那些限制性能的设计决策。
+
+要考虑API设计决策的性能后果。
+
+一般而言，好的API设计也会带来好的性能。为获得好的性能而对API进行包装，这是一种非常不好的想法。导致你对API进行包装的性能因素可能会在平台未来的发行版本中，或者在将来的底层软件中不复存在，但是被包装的API以及由它引起的问题将永远困扰着你。
+
+回想Jackson的两条优化规则：“不要优化”以及“（仅针对专家）还是不要优化”。可以再增加一条：在每次试图做优化之前和之后，要对性能进行测量。
+
+性能剖析工具有助于你决定应该把优化的重心放在哪里。
+
+如果将要在多个JVM实现和多种硬件平台上运行程序，很重要的一点是，需要在每个Java实现上测量优化效果。有时候，还必须在从不同JVM实现或者硬件平台上得到的性能结果之中进行权衡。
+
+总而言之，不要费力去编写快速的程序——应该努力编写好的程序，速度自然会随之而来。在设计系统的时候，特别是在设计API、线程层协议和永久数据格式的时候，一定要考虑性能的因素。当构建完系统之后，要测量它的性能。如果它足够快，你的任务就完成了。如果不够快，则可以在性能剖析器的帮助下，找到问题的根源，然后设法优化系统中相关的部分。第一个步骤是检查所选择的算法：再多的低层优化也无法弥补算法的选择不当。必要时重复这个过程，在每次改变之后都要测量性能，直到满意为止。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第8章 通用程序设计 P181
+//第56条：遵守普遍接受的命名惯例 P208
+总而言之，把标准的命名惯例当作一种内存的机制来看待，并且学着用它们作为第二特性。字面惯例是非常直接和明确的；语法惯例则更复杂，也更松散。下面这句话引自《The Java Language Specification》：“如果长期养成的习惯用法与此不同，请不要盲目遵从这些命名惯例。”请运用常识。
+//------------------------------------------------------------------------------------------------
+//Effective Java 第9章 异常 P211
+//第57条：只针对异常的情况才使用异常 P211
+在现代的JVM实现上，基于异常的模式比标准模式要慢得多。
+
+异常应该只用于异常的情况下；它们永远不应该用于正常的控制流。更一般地，应该优先使用标准的、容易理解的模式，而不是那些声称可以提供更好性能的、弄巧成拙的方法。
+
+这条原则对于API设计也有启发。设计良好的API不应该强迫它的客户端为了正常的控制流而使用异常。如果类具有“状态相关（state-dependent）”的方法，即只有在特定的不可预知的条件下才可以被调用的方法，这个类往往也应该有个单独的“状态测试（state-testing）”方法，即指示是否要以调用这个状态相关的方法。如，Iterator接口有一个“状态相关”的next方法，和相应的状态测试方法hasNext。这使得利用传统的for循环（以及for-each循环，在这里，是在内部使用hasNext方法）对集合进行迭代的标准模式成为可能：
+for (Iterator<Foo> i = collection.iterator(); i.hasNext(); ) {
+    Foo foo = i.next();
+    //...
+}
+
+如果Iterator缺少hasNext方法，客户端将被迫改用下面的做法：
+// Do not use this hideous code for iteration over a collection!
+try {
+    Iterator<Foo> i = collection.iterator();
+    while(true) {
+        Foo foo = i.next();
+        // ...
+    }
+} catch (NoSuchElementException e) {
+}
+这非常类似于本条目刚开始时对数组进行迭代的例子。除了代码繁琐且令人误解之外，这个基于异常的模式可能执行起来也比标准模式更差，并且还可能掩盖系统中其他不相关部分中的Bug。
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
