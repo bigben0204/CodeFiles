@@ -1,0 +1,3696 @@
+---------------------------------------------------------------------------
+1-2
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Html和CSS的关系</title>
+        <style type="text/css">
+        h1{
+        font-size:12px;
+        color:#930;
+        text-align:center;
+        }
+        </style>
+    </head>
+    <body>
+        <h1>Hello World!</h1>
+    </body>
+</html>
+---------------------------------------------------------------------------
+1-3
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>认识html标签</title>
+    </head>
+
+
+    <body>
+        <h1>勇气</h1>
+        <p>三年级时，我还是一个胆小如鼠的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+        <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+        <img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" >
+    </body>
+</html>
+---------------------------------------------------------------------------
+1-4
+h1、h2、h3。。。各级标题
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>标签的语法</title>
+    </head>
+    <body>
+        <h1>在本教程中，你将学习如何使用 HTML 来创建站点</h1>
+        <h2>在本教程中，你将学习如何使用 HTML 来创建站点</h2>
+        <h3>在本教程中，你将学习如何使用 HTML 来创建站点</h3>
+        <p>当特殊的样式需要应用到个别元素时，就可以使用内联样式。</p> 
+    </body>
+</html>
+---------------------------------------------------------------------------
+1-6
+下面这些标签可用在 head 部分：
+
+<head>
+    <title>...</title>
+    <meta>
+    <link>
+    <style>...</style>
+    <script>...</script>
+</head>
+---------------------------------------------------------------------------
+1-7
+<!--注释文字 -->
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>HTML的代码注释</title>
+    </head>
+    <body>
+        <!--在线咨询 begin-->
+        <div>
+            <p>一站式报名咨询、助学答疑服务，无论是报名、选课、学习、做作业、考试、写论文，毕业，这里都有专业老师为你答疑解惑！<a href="#">向报名顾问咨询</a></p>
+        </div>
+        <!--在线咨询 end-->
+    </body>
+</html>
+---------------------------------------------------------------------------
+2-4
+文章的段落用<p>标签，那么文章的标题用什么标签呢？在本节我们将使用<hx>标签来制作文章的标题。
+标题标签一共有6个，h1、h2、h3、h4、h5、h6分别为一级标题、二级标题、三级标题、四级标题、五级标题、六级标题。并且依据重要性递减。<h1>是最高的等级。
+语法：
+<hx>标题文本</hx> (x为1-6)
+---------------------------------------------------------------------------
+2-5
+加入强调语气，使用<strong>和<em>标签
+       有了段落又有了标题，现在如果想在一段话中特别强调某几个文字，这时候就可以用到<em>或<strong>标签。
+
+       但两者在强调的语气上有区别:<em> 表示强调，<strong> 表示更强烈的强调。并且在浏览器中<em> 默认用斜体表示，<strong> 用粗体表示。两个标签相比，目前国内前端程序员更喜欢使用<strong>表示强调。
+
+语法：
+
+<em>需要强调的文本</em>  
+<strong>需要强调的文本</strong> 
+
+<em>的内容在浏览中显示为斜体，<strong>显示为加粗。如果不喜欢这种样式，没有关系，以后可以使用css样式去改变它。
+---------------------------------------------------------------------------
+2-6
+这一小节讲解<span>标签，我们对<em>、<strong>、<span>这三个标签进行一下总结：
+
+1. <em>和<strong>标签是为了强调一段话中的关键字时使用，它们的语义是强调。
+
+2. <span>标签是没有语义的，它的作用就是为了设置单独的样式用的。
+
+如果现在我们想把上一小节的第一段话“美国梦”三个字设置成blue（蓝色），但注意不是为了强调“美国梦”，而只是想为它设置和其它文字不同的样式（并不想让屏幕阅读器对“美国梦”这三个字加重音读出），所以这样情况下就可以用到<span>标签了。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>了不起的盖茨比</title>
+<style>
+span{
+    color:blue;
+}
+</style>
+</head>
+<body>
+    <p>1922年的春天，一个想要成名名叫尼克•卡拉威（托比•马奎尔Tobey Maguire 饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的<span>美国梦</span>，他搬入纽约附近一海湾居住。</p>
+    <p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+2-7
+<q>标签，短文本引用
+注意这里用<q>标签的真正关键点不是它的默认样式双引号（如果这样我们不如自己在键盘上输入双引号就行了），而是它的语义：引用别人的话。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>q标签</title>
+</head>
+<body>
+<p>周瑜，不可否认，他是历史上一个了不起的英雄人物！确实也配的上那句<q>聪明秀出为之英，胆略过人为之雄。</q></p>
+</body>
+---------------------------------------------------------------------------
+2-8
+<blockquote>的作用也是引用别人的文本。但它是对长文本的引用，如在文章中引入大段某知名作家的文字，这时需要这个标签。
+
+      等等，上一节<q>标签不是也是对文本的引用吗？不要忘记<q>标签是对简短文本的引用，比如说引用一句话就用到<q>标签。
+
+      如想在我的文章中引用李白《关山月》中的诗句，因为引用文本比较长，所以使用<blockquote>。
+
+语法:
+<blockquote>引用文本</blockquote>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>blockquote标签的使用</title>
+</head>
+<body>
+<h2>心似桂花开</h2>
+<p>大家都在忙于自认为最重要的事情，却没能享受到人生的乐趣，反而要吞下苦果？</p>
+<blockquote>暗淡轻黄体性柔，情疏迹远只香留。何须浅碧深红色，自是花中第一流。</blockquote>
+<p>这是李清照《咏桂》中的词句，在李清照看来，桂花暗淡青黄，性情温柔，淡泊自适，远比那些大红大紫争奇斗艳花值得称道。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+2-9
+怎么可以让每一句诗词后面加入一个折行呢？那就可以用到<br />标签了，在需要加回车换行的地方加入<br />，<br />标签作用相当于word文档中的回车。
+语法：
+
+xhtml1.0写法：
+
+<br />
+
+html4.01写法：
+
+<br>
+
+大家注意，现在一般使用 xhtml1.0 的版本的写法（其它标签也是），这种版本比较规范。
+
+      与以前我们学过的标签不一样，<br />标签是一个空标签，没有HTML内容的标签就是空标签，空标签只需要写一个开始标签，这样的标签有<br />、<hr />和<img />。
+
+      讲到这里，你是不是有个疑问，想折行还不好说嘛，就像在 word 文件档或记事本中，在想要折行的前面输入回车不就行了吗？很遗憾，在 html 中是忽略回车和空格的，你输入的再多回车和空格也是显示不出来的。如下边的代码。
+      
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>br标签的使用</title>
+</head>
+<body>
+<h2>《咏桂》</h2>
+<p>暗淡轻黄体性柔，<br/>情疏迹远只香留。<br/>何须浅碧深红色，<br/>自是花中第一流。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+2-10
+在上一节的例子，我们已经讲解过在html代码中输入空格、回车都是没有作用的。要想输入空格，必须写入&nbsp;。
+语法：
+&nbsp;
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>空格讲解</title>
+</head>
+<body>
+<h1>感悟梦想</h1>
+来源：作文网&nbsp;&nbsp;作者：为梦想而飞 
+</body>
+</html>
+---------------------------------------------------------------------------
+2-11
+认识<hr>标签，添加水平横线
+在信息展示时，有时会需要加一些用于分隔的横线，这样会使文章看起来整齐些。如下图所示：
+语法：
+html4.01版本 <hr>
+xhtml1.0版本 <hr />
+注意：
+1. <hr />标签和<br />标签一样也是一个空标签，所以只有一个开始标签，没有结束标签。
+2. <hr />标签的在浏览器中的默认样式线条比较粗，颜色为灰色，可能有些人觉得这种样式不美观，没有关系，这些外在样式在我们以后学习了css样式表之后，都可以对其修改。
+3. 大家注意，现在一般使用 xhtml1.0 的版本（其它标签也是），这种版本比较规范。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>hr标签使用</title>
+</head>
+<body>
+<p>火车飞驰过暗夜里的村庄，月光，总是太容易让思念寂寞，太容易让人觉得孤独。</p>
+<hr />
+<p>每一枚被风吹起的蒲公英，都载满了一双眼睛的深情告别与一个目光的依依不舍。那天，我拿着行李，带上一个背影的祝福与惆怅，挥手告别了这片土地。我不知道，我何时会回来。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+2-12
+<address>标签，为网页加入地址信息
+一般网页中会有一些网站的联系地址信息需要在网页中展示出来，这些联系地址信息如公司的地址就可以<address>标签。也可以定义一个地址（比如电子邮件地址）、签名或者文档的作者身份。
+
+语法：
+
+<address>联系地址信息</address>
+
+如：
+
+<address>文档编写：lilian 北京市西城区德外大街10号</address>
+
+<address>
+本文的作者：<a href="mailto:lilian@imooc.com">lilian</a>
+</address>
+      在浏览器上显示的样式为斜体，如果不喜欢斜体，当然可以，可以在后面的课程中使用 css 样式来修改它<address>标签的默认样式。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>address标签介绍</title>
+</head>
+<body>
+<h2>慕课网</h2>
+<p>超酷的互联网、IT技术免费学习平台，创新的网络一站式学习、实践体验；服务及时贴心，内容专业、有趣易学。专注服务互联网工程师快速成为技术高手!<address>公司地址：北京市西城区德外大街10号</address></p> 
+</body>
+</html>
+---------------------------------------------------------------------------
+2-13
+想加入一行代码吗？使用<code>标签
+在介绍语言技术的网站中，避免不了在网页中显示一些计算机专业的编程代码，当代码为一行代码时，你就可以使用<code>标签了，如下面例子：
+<code>var i=i+300;</code>
+注意：在文章中一般如果要插入多行代码时不能使用<code>标签了。
+
+语法：
+<code>代码语言</code>
+注：如果是多行代码，可以使用<pre>标签。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>code标签介绍</title>
+</head>
+<body>
+<p>我们可能知道水平渐变的实现，类似这样：<code>{background-image:linear-gradient(left, red 100px, yellow 200px);}</code></p>
+</body>
+</html>
+---------------------------------------------------------------------------
+2-14
+使用<pre>标签为你的网页加入大段代码
+在上节中介绍加入一行代码的标签为<code>，但是在大多数情况下是需要加入大段代码的，如下图：
+语法：
+<pre>语言代码段</pre>
+<pre> 标签的主要作用:预格式化的文本。被包围在 pre 元素中的文本通常会保留空格和换行符。
+
+在上面的例子中可以看到代码中的空格，换行符都保留下来。如果用以前的方法，回车需要输入<br>签，空格需要输入&nbsp;
+注意：<pre> 标签不只是为显示计算机的源代码时用的，在你需要在网页中预显示格式时都可以使用它，只是<pre>标签的一个常见应用就是用来展示计算机的源代码。
+---------------------------------------------------------------------------
+3-1
+使用ul，添加新闻信息列表
+这些列表就可以使用ul-li标签来完成。ul-li是没有前后顺序的信息列表。
+
+语法：
+
+<ul>
+  <li>信息</li>
+  <li>信息</li>
+   ......
+</ul>
+举例：
+
+<ul>
+  <li>精彩少年</li>
+  <li>美丽突然出现</li>
+  <li>触动心灵的旋律</li>
+</ul>
+ul-li在网页中显示的默认样式一般为：每项li前都自带一个圆点，如下图所示：
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title> p标签</title>
+</head>
+<body>
+    <ul>
+        <li>我的第一个列表信息</li>
+    </ul>
+
+</body>
+</html>
+
+li 在英文里代表 List
+ol 在英文里代表 ordered list
+ul 在英文里代表 unordered list
+---------------------------------------------------------------------------
+3-2
+使用ol，添加图书销售排行榜
+如果想在网页中展示有前后顺序的信息列表，怎么办呢？如，当当网上的书籍热卖排行榜，如下图所示。这类信息展示就可以使用<ol>标签来制作有序列表来展示。
+语法：
+<ol>
+   <li>信息</li>
+   <li>信息</li>
+   ......
+</ol>
+举例：
+下面是一个热点课程下载排行榜：
+<ol>
+   <li>前端开发面试心法 </li>
+   <li>零基础学习html</li>
+   <li>JavaScript全攻略</li>
+</ol>
+<ol>在网页中显示的默认样式一般为：每项<li>前都自带一个序号，序号默认从1开始，如下图所示：
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title> p标签</title>
+</head>
+<body>
+    <ol>
+       <li>我的第一个列表信息。</li>
+       <li>我的第一个列表信息。</li>
+    </ol>
+
+</body>
+</html>
+---------------------------------------------------------------------------
+3-3
+认识div在排版中的作用
+在网页制作过程过中，可以把一些独立的逻辑部分划分出来，放在一个<div>标签中，这个<div>标签的作用就相当于一个容器。
+语法：
+<div>…</div>
+确定逻辑部分：
+什么是逻辑部分？它是页面上相互关联的一组元素。如网页中的独立的栏目版块，就是一个典型的逻辑部分。如下图所示：图中用红色边框标出的部分就是一个逻辑部分，就可以使用<div>标签作为容器。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>div标签</title>
+</head>
+<body>
+    <div>
+        <h2>热门课程排行榜</h2>
+        <ol>
+            <li>前端开发面试心法 </li>
+            <li>零基础学习html</li>
+            <li>javascript全攻略</li>
+        </ol>
+    </div>
+    <div>
+        <h2>最新课程排行</h2>
+        <ol>
+            <li>版本管理工具介绍—Git篇 </li>
+            <li>Canvas绘图详解</li>
+            <li>QQ5.0侧滑菜单</li>
+        </ol>
+    </div>
+</body>
+</html>
+---------------------------------------------------------------------------
+3-4
+给div命名，使逻辑更加清晰
+在上一小节中，我们把一些标签放进<div>里，划分出一个独立的逻辑部分。为了使逻辑更加清晰，我们可以为这一个独立的逻辑部分设置一个名称，用id属性来为<div>提供唯一的名称，这个就像我们每个人都有一个身份证号，这个身份证号是唯一标识我们的身份的，也是必须唯一的。
+语法：
+<div  id="版块名称">…</div>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>div标签</title>
+</head>
+<body>
+<div id="hotList">
+   <h2>热门课程排行榜</h2>
+    <ol>
+       <li>前端开发面试心法 </li>
+      <li>零基础学习html</li>
+       <li>javascript全攻略</li>
+    </ol>
+</div>
+<div id="learningInstructed">
+    <h2>web前端开发导学课程</h2>
+    <ul>
+       <li>网页专业名词大扫盲 </li>
+       <li>网站职位定位指南</li>
+       <li>为您解密Yahoo网站制作流程</li>
+    </ul>
+</div>
+</body>
+</html>
+---------------------------------------------------------------------------
+3-5
+table标签，认识网页上的表格
+有时候我们需要在网页上展示一些数据，如某公司想在网页上展示公司的库存清单。如下表：
+创建表格的四个元素：
+
+table、tbody、tr、th、td
+1、<table>…</table>：整个表格以<table>标记开始、</table>标记结束。
+2、<tbody>…</tbody>：如果不加<thead><tbody><tfooter> , table表格加载完后才显示。加上这些表格结构， tbody包含行的内容下载完优先显示，不必等待表格结束后在显示，同时如果表格很长，用tbody分段，可以一部分一部分地显示。（通俗理解table 可以按结构一块块的显示，不在等整个表格加载完后显示。）
+3、<tr>…</tr>：表格的一行，所以有几对tr 表格就有几行。
+4、<td>…</td>：表格的一个单元格，一行中包含几对<td>...</td>，说明一行中就有几列。
+5、<th>…</th>：表格的头部的一个单元格，表格表头。
+6、表格中列的个数，取决于一行中数据单元格的个数。
+上述代码在浏览器中显示的默认的样式为：
+总结：
+1、table表格在没有添加css样式之前，在浏览器中显示是没有表格线的
+2、表头，也就是th标签中的文本默认为粗体并且居中显示
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>认识table表标签</title>
+</head>
+<body>
+<table>
+  <tbody>
+    <tr>
+      <th>班级</th>
+      <th>学生数</th>
+      <th>平均成绩</th>
+    </tr>
+    <tr>
+      <td>一班</td>
+      <td>30</td>
+      <td>89</td>
+    </tr>
+    <tr>
+      <td>二班</td>
+      <td>35</td>
+      <td>85</td>
+    </tr>
+    <tr>
+        <td>三班</td>
+        <td>32</td>
+        <td>80</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
+
+tr是“table row（表格行）”的缩写，用于表示一行的开始和结束。这也容易理解。
+td是“table data（表格数据）”的缩写，用于表示行中各个单元格（cell）的开始和结束。
+---------------------------------------------------------------------------
+3-6
+用css样式，为表格加入边框
+Table 表格在没有添加 css 样式之前，是没有边框的。这样不便于我们后期合并单元格知识点的讲解，所以在这一节中我们为表格添加一些样式，为它添加边框。
+
+在右侧代码编辑器中添加如下代码：
+
+<style type="text/css">
+table tr td,th{border:1px solid #000;}
+</style>
+上述代码是用 css 样式代码（后面章节会详细讲解），为th，td单元格添加粗细为一个像素的黑色边框。
+
+结果窗口显示出结果样式：
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>为表格添加边框</title>
+<style type="text/css">
+table tr td,th{border:1px solid #000;}
+</style>
+</head>
+
+<body>
+<table summary="">
+  <tr>
+    <th>班级</th>
+    <th>学生数</th>
+    <th>平均成绩</th>
+  </tr>
+  <tr>
+    <td>一班</td>
+    <td>30</td>
+    <td>89</td>
+  </tr>
+  <tr>
+    <td>二班</td>
+    <td>35</td>
+    <td>85</td>
+  </tr>
+  <tr>
+    <td>三班</td>
+    <td>32</td>
+    <td>80</td>
+  </tr>
+</table>
+
+</body>
+---------------------------------------------------------------------------
+3-7
+caption标签，为表格添加标题和摘要
+表格还是需要添加一些标签进行优化，可以添加标题和摘要。代码如下：
+
+摘要
+摘要的内容是不会在浏览器中显示出来的。它的作用是增加表格的可读性(语义化)，使搜索引擎更好的读懂表格内容，还可以使屏幕阅读器更好的帮助特殊用户读取表格内容。
+    语法：<table summary="表格简介文本">
+标题
+用以描述表格内容，标题的显示位置：表格上方。
+     语法：
+<table>
+    <caption>标题文本</caption>
+    <tr>
+        <td>…</td>
+        <td>…</td>
+        …
+    </tr>
+…
+</table>
+ 
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>认识table表标签</title>
+<style type="text/css">
+table tr td,th{
+    border:1px solid #000;
+}
+</style>
+</head>
+<body>
+<table summary="本表格记录2012年到2013年库存记录，记录包括U盘和耳机库存量">
+  <caption>2012年到2013年库存记录</caption>
+  <tr>
+    <th>产品名称 </th>
+    <th>品牌 </th>
+    <th>库存量（个） </th>
+    <th>入库时间 </th>
+  </tr>
+  <tr>
+    <td>耳机 </td>
+    <td>联想 </td>
+    <td>500</td>
+    <td>2013-1-2</td>
+  </tr>
+  <tr>
+    <td>U盘 </td>
+    <td>金士顿 </td>
+    <td>120</td>
+    <td>2013-8-10</td>
+  </tr>
+  <tr>
+    <td>U盘 </td>
+    <td>爱国者 </td>
+    <td>133</td>
+    <td>2013-3-25</td>
+  </tr>
+</table>
+</body>
+</html>
+---------------------------------------------------------------------------
+4-1
+使用<a>标签，链接到另一个页面
+使用<a>标签可实现超链接，它在网页制作中可以说是无处不在，只要有链接的地方，就会有这个标签。
+
+语法：
+
+<a  href="目标网址"  title="鼠标滑过显示的文本">链接显示的文本</a>
+例如：
+
+<a  href="http://www.imooc.com"  title="点击进入慕课网">click here!</a>
+上面例子作用是单击click here!文字，网页链接到http://www.imooc.com这个网页。
+
+title属性的作用，鼠标滑过链接文字时会显示这个属性的文本内容。这个属性在实际网页开发中作用很大，主要方便搜索引擎了解链接地址的内容（语义化更友好），如右侧案例代码（8-12行）。
+
+注意：还有一个有趣的现象不知道小伙伴们发现了没有，只要为文本加入a标签后，文字的颜色就会自动变为蓝色（被点击过的文本颜色为紫色），颜色很难看吧，不过没有关系后面我们学习了css样子就可以设置过来（a{color:#000}),后面会详细讲解。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>了不起的盖茨比</title>
+</head>
+<body>
+    <ul>
+       <li><a href="#" title="前端开发面试心法">前端开发面试心法</a> </li>
+       <li><a href="#" title="零基础学习html">零基础学习html</a></li>
+       <li><a href="#" title="JavaScript全攻略">JavaScript全攻略</a></li>
+    </ul>
+    <p>1922年的春天，一个想要成名名叫尼克•卡拉威（<a href="http://www.m1905.com/mdb/star/3316/" title="dingben">托比•马奎尔Tobey Maguire</a> 饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的美国梦，他搬入纽约附近一海湾居住。</p>
+    <p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+4-2
+在新建浏览器窗口中打开链接
+<a>标签在默认情况下，链接的网页是在当前浏览器窗口中打开，有时我们需要在新的浏览器窗口中打开。
+
+如下代码：
+<a href="目标网址" target="_blank">click here!</a>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>了不起的盖茨比</title>
+</head>
+<body>
+    <p>1922年的春天，一个想要成名名叫尼克•卡拉威（<a href="http://www.m1905.com/mdb/star/3316/" target="_blank">托比•马奎尔Tobey Maguire </a>饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的美国梦，他搬入纽约附近一海湾居住。</p>
+    <p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+4-3
+使用mailto在网页中链接Email地址
+<a>标签还有一个作用是可以链接Email地址，使用mailto能让访问者便捷向网站管理者发送电子邮件。我们还可以利用mailto做许多其它事情。下面一一进行讲解，请看详细图示：
+
+注意：如果mailto后面同时有多个参数的话，第一个参数必须以“?”开头，后面的参数每一个都以“&”分隔。
+
+下面是一个完整的实例:
+
+在浏览器中显示的结果：
+
+发送
+点击链接会打开电子邮件应用，并自动填写收件人等设置好的信息，如下图：
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>mailto</title>
+</head>
+<body>
+<p>1922年的春天，一个想要成名名叫卡拉威（马奎尔Tobey Maguire 饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的美国梦，他搬入纽约附近一海湾居住。</p>
+    <p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+<a href="mailto:yy@imooc.com?subject=观了不起的盖茨比有感&body=你好，对此评论有些想法">对此影评有何感想，发送邮件给我</a>
+</body>
+</html>
+---------------------------------------------------------------------------
+4-4
+认识<img>标签，为网页插入图片
+在网页的制作中为使网页炫丽美观，肯定是缺少不了图片，可以使用<img>标签来插入图片。
+
+语法：
+<img src="图片地址" alt="下载失败时的替换文本" title = "提示文本">
+
+举例：
+<img src = "myimage.gif" alt = "My Image" title = "My Image" />
+
+讲解：
+1、src：标识图像的位置；
+2、alt：指定图像的描述性文本，当图像不可见时（下载不成功时），可看到该属性指定的文本；
+3、title：提供在图像可见时对图像的描述(鼠标滑过图片时显示的文本)；
+4、图像可以是GIF，PNG，JPEG格式的图像文件。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>了不起的盖茨比</title>
+</head>
+<body>
+    <p>1922年的春天，一个想要成名名叫尼克•卡拉威（<a href="http://www.m1905.com/mdb/star/3316/">托比•马奎尔Tobey Maguire </a>饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的美国梦，他搬入纽约附近一海湾居住。</p>
+  <p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+  <img src="http://img.mukewang.com/52da54ed0001ecfa04120172.jpg" title="电影介绍"> 
+</body>
+</html
+---------------------------------------------------------------------------
+5-1
+使用表单标签，与用户交互
+网站怎样与用户进行交互？答案是使用HTML表单(form)。表单是可以把浏览者输入的数据传送到服务器端，这样服务器端程序就可以处理表单传过来的数据。
+
+语法：
+
+<form   method="传送方式"   action="服务器文件">
+讲解：
+
+1.<form> ：<form>标签是成对出现的，以<form>开始，以</form>结束。
+
+2.action ：浏览者输入的数据被传送到的地方,比如一个PHP页面(save.php)。
+
+3.method ： 数据传送的方式（get/post）。
+
+<form    method="post"   action="save.php">
+        <label for="username">用户名:</label>
+        <input type="text" name="username" />
+        <label for="pass">密码:</label>
+        <input type="password" name="pass" />
+</form>
+注意:
+
+1、所有表单控件（文本框、文本域、按钮、单选框、复选框等）都必须放在 <form></form> 标签之间（否则用户输入的信息可提交不到服务器上哦！）。
+
+2、method : post/get 的区别这一部分内容属于后端程序员考虑的问题。感兴趣的小伙伴可以查看本小节的 wiki，里面有详细介绍。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>表单标签</title>
+</head>
+<body>
+<form method="post" action="save.php">
+      <label for="username">用户名:</label>
+      <input type="text"  name="username" id="username" value="" />
+      <label for="pass">密码:</label>
+      <input type="password"  name="pass" id="pass" value="" />
+      <input type="submit" value="确定"  name="submit" />
+      <input type="reset" value="重置" name="reset" />
+</form>  
+</body>
+</html>
+---------------------------------------------------------------------------
+5-2
+文本输入框、密码输入框
+当用户要在表单中键入字母、数字等内容时，就会用到文本输入框。文本框也可以转化为密码输入框。
+
+语法：
+
+<form>
+   <input type="text/password" name="名称" value="文本" />
+</form>
+1、type：
+
+   当type="text"时，输入框为文本输入框;
+
+   当type="password"时, 输入框为密码输入框。
+
+2、name：为文本框命名，以备后台程序ASP 、PHP使用。
+
+3、value：为文本输入框设置默认值。(一般起到提示作用)
+
+举例：
+
+<form>
+  姓名：
+  <input type="text" name="myName">
+  <br/>
+  密码：
+  <input type="password" name="pass">
+</form>
+在浏览器中显示的结果：
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>文本输入框、密码输入框</title>
+</head>
+<body>
+<form  method="post" action="save.php">
+    账户: 
+	<input type="text" name="myName">
+	<br>
+	密码: 
+    <input type="password" name="pass">
+</form> 
+</body>
+</html>
+---------------------------------------------------------------------------
+5-3
+文本域，支持多行文本输入
+当用户需要在表单中输入大段文字时，需要用到文本输入域。
+
+语法：
+
+<textarea  rows="行数" cols="列数">文本</textarea>
+1、<textarea>标签是成对出现的，以<textarea>开始，以</textarea>结束。
+
+2、cols ：多行输入域的列数。
+
+3、rows ：多行输入域的行数。
+
+4、在<textarea></textarea>标签之间可以输入默认值。
+
+举例：
+
+<form  method="post" action="save.php">
+        <label>联系我们</label>
+        <textarea cols="50" rows="10" >在这里输入内容...</textarea>
+</form>
+注意：代码中的<label>标签在本章5-9中讲解。
+
+在浏览器中显示结果：
+
+注意这两个属性可用css样式的width和height来代替：col用width、row用height来代替。（这两个css样式在以后的章节会讲解）
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>文本域</title>
+</head>
+<body>
+<form action="save.php" method="post" >
+    <label>个人简介：</label>
+    <textarea cols="50" rows="10">在这里输入内容...</textarea>
+    <input type="submit" value="确定"  name="submit" />
+    <input type="reset" value="重置"  name="reset" />
+</form> 
+</body>
+</html>
+
+---------------------------------------------------------------------------
+5-4
+使用单选框、复选框，让用户选择
+在使用表单设计调查表时，为了减少用户的操作，使用选择框是一个好主意，html中有两种选择框，即单选框和复选框，两者的区别是单选框中的选项用户只能选择一项，而复选框中用户可以任意选择多项，甚至全选。请看下面的例子:
+
+语法：
+
+<input   type="radio/checkbox"   value="值"    name="名称"   checked="checked"/>
+1、type:
+   当 type="radio" 时，控件为单选框
+   当 type="checkbox" 时，控件为复选框
+2、value：提交数据到服务器的值（后台程序PHP使用）
+3、name：为控件命名，以备后台程序 ASP、PHP 使用
+4、checked：当设置 checked="checked" 时，该选项被默认选中
+如下面代码：
+
+注意：代码中的<label>标签在本章 5-9 中有讲解。
+在浏览器中显示的结果：
+注意:同一组的单选按钮，name 取值一定要一致，比如上面例子为同一个名称“radioLove”，这样同一组的单选按钮才可以起到单选的作用。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>单选框、复选框</title>
+</head>
+<body>
+<form action="save.php" method="post" >
+    <label>性别:</label>
+    <label>男</label>
+    <input type="radio" value="1"  name="gender" />
+    <label>女</label>
+    <input type="radio" value="2"  name="gender" />
+</form>
+</body>
+</html>
+---------------------------------------------------------------------------
+5-5
+使用下拉列表框，节省空间
+下拉列表在网页中也常会用到，它可以有效的节省网页空间。既可以单选、又可以多选。如下代码：
+
+讲解：
+1、value：
+2、selected="selected"：
+
+设置selected="selected"属性，则该选项就被默认选中。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>下拉列表框</title>
+</head>
+<body>
+<form action="save.php" method="post" >
+    <label>爱好:</label>
+    <select>
+      <option value="看书">看书</option>
+      <option value="旅游" selected="selected">旅游</option>
+      <option value="运动">运动</option>
+      <option value="购物">购物</option>
+    </select>
+</form>
+</body>
+</html>
+---------------------------------------------------------------------------
+5-6
+使用下拉列表框进行多选
+下拉列表也可以进行多选操作，在<select>标签中设置multiple="multiple"属性，就可以实现多选功能，在 windows 操作系统下，进行多选时按下Ctrl键同时进行单击（在 Mac下使用 Command +单击），可以选择多个选项。如下代码：
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>使用下拉列表框进行多选</title>
+</head>
+<body>
+<form action="save.php" method="post" >
+    <label>爱好:</label>
+    <select multiple="multiple">
+      <option value="看书">看书</option>
+      <option value="旅游">旅游</option>
+      <option value="运动">运动</option>
+      <option value="购物">购物</option>
+    </select>
+</form>
+</body>
+</html>
+---------------------------------------------------------------------------
+5-7
+使用提交按钮，提交数据
+在表单中有两种按钮可以使用，分别为：提交按钮、重置。这一小节讲解提交按钮：当用户需要提交表单信息到服务器时，需要用到提交按钮。
+
+语法：
+
+<input   type="submit"   value="提交">
+type：只有当type值设置为submit时，按钮才有提交作用
+
+value：按钮上显示的文字
+---------------------------------------------------------------------------
+5-8
+当用户需要重置表单信息到初始时的状态时，比如用户输入“用户名”后，发现书写有误，可以使用重置按钮使输入框恢复到初始状态。只需要把type设置为"reset"就可以。
+
+语法：
+
+<input type="reset" value="重置">
+
+type：只有当type值设置为reset时，按钮才有重置作用
+
+value：按钮上显示的文字
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>重置按钮</title>
+</head>
+<body>
+<form action="save.php" method="post" >
+    <label>爱好:</label>
+    <select>
+      <option value="看书">看书</option>
+      <option value="旅游" selected="selected">旅游</option>
+      <option value="运动">运动</option>
+      <option value="购物">购物</option>
+    </select>
+    <input type="submit" value="确定"  />
+    <input type="reset" value="重置"  />
+</form>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+5-9
+form表单中的label标签
+小伙伴们，你们在前面学习表单各种控件的时候，有没有发现一个标签--label，这一小节就来揭晓它的作用。
+
+label标签不会向用户呈现任何特殊效果，它的作用是为鼠标用户改进了可用性。如果你在 label 标签内点击文本，就会触发此控件。就是说，当用户单击选中该label标签时，浏览器就会自动将焦点转到和标签相关的表单控件上（就自动选中和该label标签相关连的表单控件上）。
+
+语法：
+
+<label for="控件id名称">
+注意：标签的 for 属性中的值应当与相关控件的 id 属性值一定要相同。
+
+例子：
+
+<form>
+  <label for="male">男</label>
+  <input type="radio" name="gender" id="male" />
+  <br />
+  <label for="female">女</label>
+  <input type="radio" name="gender" id="female" />
+  <label for="email">输入你的邮箱地址</label>
+  <input type="email" id="email" placeholder="Enter email">
+</form>
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>form中的lable标签</title>
+</head>
+
+<body>
+<form>
+   <label for="male">男</label>
+  <input type="radio" name="gender" id="male" />
+  <br />
+  <label for="female">女</label>
+  <input type="radio" name="gender" id="female" />
+  <br />
+  <label for="email">输入你的邮箱地址</label>
+  <input type="email" id="email" placeholder="Enter email">
+  
+</form>
+
+</body>
+</html>
+---------------------------------------------------------------------------
+6-1
+认识CSS样式
+CSS全称为“层叠样式表 (Cascading Style Sheets)”，它主要是用于定义HTML内容在浏览器内的显示样式，如文字大小、颜色、字体加粗等。
+
+如下列代码：
+
+p{
+   font-size:12px;
+   color:red;
+   font-weight:bold;
+}
+使用CSS样式的一个好处是通过定义某个样式，可以让不同网页位置的文字有着统一的字体、字号或者颜色等。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>认识CSS样式</title>
+<style type="text/css">
+p{
+   font-size:20px;/*设置文字字号*/
+   color:red;/*设置文字颜色*/
+   font-weight:bold;/*设置字体加粗*/
+}
+</style>
+</head>
+<body>
+<p>慕课网，超酷的互联网、IT技术免费学习平台，创新的网络一站式学习、实践体验；服务及时贴心，内容专业、有趣易学。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+6-2
+CSS样式的优势
+为什么使用css样式来设置网页的外观样式呢？右边编辑器是一段文字，我们想把“超酷的互联网”、“服务及时贴心”、“有趣易学”这三个短语的文本颜色设置为红色，这时就 可以通过设置样式来设置，而且只需要编写一条css样式语句。
+
+第一步：把这三个短语用<span></span>括起来。（见右边代码编辑器13行）
+
+第二步：写入下列代码：（见右边代码编辑器7-8行）
+
+span{
+    color:red;
+}
+观察结果窗口文字的颜色是否变为红色了。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>CSS样式的优势</title>
+<style type="text/css">
+span{
+   color:blue;
+}
+</style>
+</head>
+<body>
+    <p>慕课网，<span>超酷的互联网</span>、IT技术免费学习平台，创新的网络一站式学习、实践体验；<span>服务及时贴心</span>，内容专业、<span>有趣易学</span>。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+6-3
+CSS代码语法
+css 样式由选择符和声明组成，而声明又由属性和值组成，如下图所示：
+
+
+
+选择符：又称选择器，指明网页中要应用样式规则的元素，如本例中是网页中所有的段（p）的文字将变成蓝色，而其他的元素（如ol）不会受到影响。
+
+声明：在英文大括号“｛｝”中的的就是声明，属性和值之间用英文冒号“：”分隔。当有多条声明时，中间可以英文分号“;”分隔，如下所示：
+
+p{font-size:12px;color:red;}
+注意：
+
+1、最后一条声明可以没有分号，但是为了以后修改方便，一般也加上分号。
+
+2、为了使用样式更加容易阅读，可以将每条代码写在一个新行内，如下所示：
+
+p{
+   font-size:12px;
+   color:red;
+}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>CSS代码语法</title>
+<style type="text/css">
+p{
+   font-size:12px;
+   color:red;
+   font-weight:bold;
+}
+</style>
+</head>
+<body>
+<p>慕课网，超酷的互联网、IT技术免费学习平台，创新的网络一站式学习、实践体验；服务及时贴心，内容专业、有趣易学。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+6-4
+CSS注释代码
+就像在Html的注释一样，在CSS中也有注释语句：用/*注释语句*/来标明（Html中使用<!--注释语句-->)。就像下面代码：
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>CSS注释代码</title>
+<style type="text/css">
+p{
+   font-size:12px;/*设置文字字号为12px*/
+   color:red;/*设置文字颜色为红色*/
+}
+</style>
+</head>
+<body>
+<p>慕课网，超酷的互联网、IT技术免费学习平台，创新的网络一站式学习、实践体验；服务及时贴心，内容专业、有趣易学。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+7-1
+内联式css样式，直接写在现有的HTML标签中
+CSS样式可以写在哪些地方呢？从CSS 样式代码插入的形式来看基本可以分为以下3种：内联式、嵌入式和外部式三种。这一小节先来讲解内联式。
+
+内联式css样式表就是把css代码直接写在现有的HTML标签中，如下面代码：
+
+<p style="color:red">这里文字是红色。</p>
+注意要写在元素的开始标签里，下面这种写法是错误的：
+
+<p>这里文字是红色。</p style="color:red">
+并且css样式代码要写在style=""双引号中，如果有多条css样式代码设置可以写在一起，中间用分号隔开。如下代码：
+
+<p style="color:red;font-size:12px">这里文字是红色。</p>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>认识html标签</title>
+<style type="text/css">
+span{
+   color:red;
+}
+</style>
+</head>
+<body>
+    <p style="color:green">慕课网，<span style="color:blue">超酷的互联网</span>、IT技术免费学习平台，创新的网络一站式学习、实践体验；<span>服务及时贴心</span>，内容专业、<span>有趣易学</span>。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+7-2
+嵌入式css样式，写在当前的文件中
+现在有一任务，把右侧编辑器中的“超酷的互联网”、“服务及时贴心”、“有趣易学”这三个短词文字字号修改为18px。如果用上节课我们学习的内联式css样式的方法进行设置将是一件很头疼的事情（为每一个<span>标签加入sytle="font-size:18px"语句），本小节讲解一种新的方法嵌入式css样式来实现这个任务。
+
+嵌入式css样式，就是可以把css样式代码写在<style type="text/css"></style>标签之间。如下面代码实现把三个<span>标签中的文字设置为红色：
+
+<style type="text/css">
+span{
+color:red;
+}
+</style>
+嵌入式css样式必须写在<style></style>之间，并且一般情况下嵌入式css样式写在<head></head>之间。如右边编辑器中的代码。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>嵌入式css样式</title>
+<style type="text/css">
+span{
+   color:blue;
+}
+p{
+    color:pink;
+}
+</style>
+</head>
+<body>
+    <p>慕课网，<span>超酷的互联网</span>、IT技术免费学习平台，创新的网络一站式学习、实践体验；<span>服务及时贴心</span>，内容专业、<span>有趣易学</span>。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+7-3
+外部式css样式，写在单独的一个文件中
+外部式css样式(也可称为外联式)就是把css代码写一个单独的外部文件中，这个css样式文件以“.css”为扩展名，在<head>内（不是在<style>标签内）使用<link>标签将css样式文件链接到HTML文件内，如下面代码：
+
+<link href="base.css" rel="stylesheet" type="text/css" />
+
+注意：
+
+1、css样式文件名称以有意义的英文字母命名，如 main.css。
+
+2、rel="stylesheet" type="text/css" 是固定写法不可修改。
+
+3、<link>标签位置一般写在<head>标签之内。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>嵌入式css样式</title>
+<link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <p>慕课网，<span>超酷的互联网</span>、IT技术免费学习平台，创新的网络一站式学习、实践体验；<span>服务及时贴心</span>，内容专业、<span>有趣易学</span>。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+
+/*style.css*/
+span{
+   color:red;
+   font-size:20px;
+}
+---------------------------------------------------------------------------
+7-4
+三种方法的优先级
+有的小伙伴问了，如果有一种情况：对于同一个元素我们同时用了三种方法设置css样式，那么哪种方法真正有效呢？在右边编辑器就出现了这种情况
+
+1、使用内联式CSS设置“超酷的互联网”文字为粉色。
+
+2、然后使用嵌入式CSS来设置文字为红色。
+
+3、最后又使用外部式设置文字为蓝色（style.css文件中设置）。
+
+但最终你可以观察到“超酷的互联网”这个短词的文本被设置为了粉色。因为这三种样式是有优先级的，记住他们的优先级：内联式 > 嵌入式 > 外部式
+
+但是嵌入式>外部式有一个前提：嵌入式css样式的位置一定在外部式的后面。如右代码编辑器就是这样，<link href="style.css" ...>代码在<style type="text/css">...</style>代码的前面（实际开发中也是这么写的）。感兴趣的小伙伴可以试一下，把它们调换顺序，再看他们的优先级是否变化。
+
+其实总结来说，就是--就近原则（离被设置元素越近优先级别越高）。
+
+但注意上面所总结的优先级是有一个前提：内联式、嵌入式、外部式样式表中css样式是在的相同权值的情况下，什么是权值呢？在后面的9-2小节中会讲解到。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>嵌入式css样式</title>
+<link href="style.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+span{
+   color:red;
+}
+</style>
+</head>
+<body>
+    <p>慕课网，<span style="color:pink">超酷的互联网</span>、IT技术免费学习平台，<span>创新的网络一站式学习</span>、实践体验；服务及时贴心，内容专业、有趣易学。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+8-1
+什么是选择器？
+每一条css样式声明（定义）由两部分组成，形式如下：
+
+选择器{
+    样式;
+}
+在{}之前的部分就是“选择器”，“选择器”指明了{}中的“样式”的作用对象，也就是“样式”作用于网页中的哪些元素。比如右侧代码编辑器中第7行代码中的“body”就是选择器。
+
+<p></p>里面的样式为p{}定义的，就近原则（离被设置元素越近优先级别越高）
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>选择器</title>
+<style type="text/css">
+body{
+    font-size:12px;
+    color:red;	
+}
+p{
+    font-size:20px;
+    color:red;	
+}
+</style>
+</head>
+<body>
+<p>慕课网（IMOOC）是学习编程最简单的免费平台。慕课网提供了丰富的移动端开发、php开发、web前端、html5教程以及css3视频教程等课程资源。它富有交互性及趣味性，并且你可以和朋友一起编程。</p>
+<ol>
+    <li>abc</li>
+    <li>def</li>
+</ol>
+</body>
+</html>
+---------------------------------------------------------------------------
+8-2
+标签选择器
+标签选择器其实就是html代码中的标签。如右侧代码编辑器中的<html>、<body>、<h1>、<p>、<img>。例如下面代码：
+
+p{font-size:12px;line-height:1.6em;}
+上面的css样式代码的作用：为p标签设置12px字号，行间距设置1.6em的样式。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>认识html标签</title>
+<style type="text/css">
+    h1{
+        font-weight:normal;
+        color:red;
+    }
+
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个胆小如鼠的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    <img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" >
+</body>
+</html>
+---------------------------------------------------------------------------
+8-3
+类选择器
+类选择器在css样式编码中是最常用到的，如右侧代码编辑器中的代码:可以实现为“胆小如鼠”、“勇气”字体设置为红色。
+
+语法：
+
+.类选器名称{css样式代码;}
+注意：
+
+1、英文圆点开头
+
+2、其中类选器名称可以任意起名（但不要起中文噢）
+
+使用方法：
+
+第一步：使用合适的标签把要修饰的内容标记起来，如下：
+
+<span>胆小如鼠</span>
+第二步：使用class="类选择器名称"为标签设置一个类，如下：
+
+<span class="stress">胆小如鼠</span>
+第三步：设置类选器css样式，如下：
+
+.stress{color:red;}/*类前面要加入一个英文圆点*/
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>认识html标签</title>
+<style type="text/css">
+.stress{
+    color:red;
+}
+.setGreen{
+    color:green;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个<span class="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个<span class="stress">勇气</span>来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节<span class="setGreen">公开课</span>，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    <img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" >
+</body>
+</html>
+---------------------------------------------------------------------------
+8-4
+ID选择器
+在很多方面，ID选择器都类似于类选择符，但也有一些重要的区别：
+
+1、为标签设置id="ID名称"，而不是class="类名称"。
+
+2、ID选择符的前面是井号（#）号，而不是英文圆点（.）。
+
+右侧代码编辑器中就是一个ID选择符的完整实例。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>认识html标签</title>
+<style type="text/css">
+#stress{
+    color:red;
+}
+#setGreen{
+    color:green;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个<span id="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节<span id="setGreen">公开课</span>，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+
+</body>
+</html>
+---------------------------------------------------------------------------
+8-5
+类和ID选择器的区别
+学习了类选择器和ID选择器，我们会发现他们之间有很多的相似处，是不是两者可以通用呢？我们不要着急先来总结一下他们的相同点和不同点：
+
+相同点：可以应用于任何元素
+不同点：
+
+1、ID选择器只能在文档中使用一次。与类选择器不同，在一个HTML文档中，ID选择器只能使用一次，而且仅一次。而类选择器可以使用多次。
+
+下面代码是正确的：
+
+ <p>三年级时，我还是一个<span class="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个<span class="stress">勇气</span>来回答老师提出的问题。</p>
+而下面代码是错误的：
+
+ <p>三年级时，我还是一个<span id="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个<span id="stress">勇气</span>来回答老师提出的问题。</p>
+2、可以使用类选择器词列表方法为一个元素同时设置多个样式。我们可以为一个元素同时设多个样式，但只可以用类选择器的方法实现，ID选择器是不可以的（不能使用 ID 词列表）。
+
+下面的代码是正确的(完整代码见右侧代码编辑器)
+
+.stress{
+    color:red;
+}
+.bigsize{
+    font-size:25px;
+}
+<p>到了<span class="stress bigsize">三年级</span>下学期时，我们班上了一节公开课...</p>
+上面代码的作用是为“三年级”三个文字设置文本颜色为红色并且字号为25px。
+
+下面的代码是不正确的(完整代码见右侧代码编辑器)
+
+#stressid{
+    color:red;
+}
+#bigsizeid{
+    font-size:25px;
+}
+<p>到了<span id="stressid bigsizeid">三年级</span>下学期时，我们班上了一节公开课...</p>
+上面代码不可以实现为“三年级”三个文字设置文本颜色为红色并且字号为25px的作用。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>类和ID选择器的区别</title>
+<style type="text/css">
+.stress{
+    color:red;
+}
+.bigsize{
+    font-size:25px;
+}
+#stressid{
+    color:red;
+}
+#bigsizeid{
+    font-size:25px;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个<span class="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个<span class="stress">勇气</span>来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了<span class="stress bigsize">三年级</span>下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+     <p>到了<span id="stressid bigsizeid">三年级</span>下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    
+</body>
+</html>
+---------------------------------------------------------------------------
+8-6
+子选择器
+还有一个比较有用的选择器子选择器，即大于符号(>),用于选择指定标签元素的第一代子元素。
+只能选择第一代子元素，不能选择第二代子元素。
+如右侧代码编辑器中的代码：
+
+.food>li{border:1px solid red;}
+这行代码会使class名为food下的子元素li（水果、蔬菜）加入红色实线边框。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>子选择符</title>
+<style type="text/css">
+.food>li{border:1px solid red;}/*添加边框样式（粗细为1px， 颜色为红色的实线）*/
+.first>span{border:1px solid red;}
+</style>
+</head>
+<body>
+<p class="first">三年级时，<span>我还是一个<span>胆小如鼠</span>的小女孩</span>，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+<h1>食物</h1>
+<ul class="food">
+    <li>水果
+        <ul>
+        	<li>香蕉</li>
+            <li>苹果</li>
+            <li>梨</li>
+        </ul>
+    </li>
+    <li>蔬菜
+    	<ul>
+        	<li>白菜</li>
+            <li>油菜</li>
+            <li>卷心菜</li>
+        </ul>
+    </li>
+</ul>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+8-7
+包含(后代)选择器
+包含选择器，即加入空格,用于选择指定标签元素下的后辈元素。如右侧代码编辑器中的代码：
+
+.first  span{color:red;}
+这行代码会使第一段文字内容中的“胆小如鼠”字体颜色变为红色。
+
+请注意这个选择器与子选择器的区别，子选择器（child selector）仅是指它的直接后代，或者你可以理解为作用于子元素的第一代后代。而后代选择器是作用于所有子后代元素。后代选择器通过空格来进行选择，而子选择器是通过“>”进行选择。
+
+总结：>作用于元素的第一代后代，空格作用于元素的所有后代。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>后代选择器</title>
+<style type="text/css">
+.first span{color:red;}
+
+.food li{
+    border:1px solid red;/*添加边框样式（粗细为1px， 颜色为红色的实线）*/	
+}
+</style>
+</head>
+<body>
+ <p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+<!--下面是本小节任务代码-->
+<ul class="food">
+    <li>水果
+        <ul>
+        	<li>香蕉</li>
+            <li>苹果</li>
+            <li>梨</li>
+        </ul>
+    </li>
+    <li>蔬菜
+    	<ul>
+        	<li>白菜</li>
+            <li>油菜</li>
+            <li>卷心菜</li>
+        </ul>
+    </li>
+</ul>
+
+</body>
+</html>
+---------------------------------------------------------------------------
+8-8
+通用选择器
+通用选择器是功能最强大的选择器，它使用一个（*）号指定，它的作用是匹配html中所有标签元素，如下使用下面代码使用html中任意标签元素字体颜色全部设置为红色：
+
+* {color:red;}
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>* 选择符</title>
+<style type="text/css">
+* {
+    color:red;
+    font-size:20px;
+}
+
+
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个胆小如鼠的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    <img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" >
+</body>
+</html>
+---------------------------------------------------------------------------
+8-9
+伪类选择符
+更有趣的是伪类选择符，为什么叫做伪类选择符，它允许给html不存在的标签（标签的某种状态）设置样式，比如说我们给html中一个标签元素的鼠标滑过的状态来设置字体颜色：
+
+a:hover{color:red;}
+上面一行代码就是为 a 标签鼠标滑过的状态设置字体颜色变红。这样就会使第一段文字内容中的“胆小如鼠”文字加入鼠标滑过字体颜色变为红色特效。
+
+关于伪选择符：
+
+    关于伪类选择符，到目前为止，可以兼容所有浏鉴器的“伪类选择符”就是 a 标签上使用 :hover 了（其实伪类选择符还有很多，尤其是 css3 中，但是因为不能兼容所有浏览器，本教程只是讲了这一种最常用的）。其实 :hover 可以放在任意的标签上，比如说 p:hover，但是它们的兼容性也是很不好的，所以现在比较常用的还是 a:hover 的组合。
+    
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>伪类选择符</title>
+<style type="text/css">
+a:hover{
+    color:red;
+    font-size:20px;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p class="first">三年级时，我还是一个<a href="http://www.imooc.com">胆小如鼠</a>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p id="second">到了三年级下学期时，我们班上了一节公开课，老师提出了一个很<span>简单</span>的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    <img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" >
+</body>
+</html>
+---------------------------------------------------------------------------
+8-10
+分组选择符
+当你想为html中多个标签元素设置同一个样式时，可以使用分组选择符（，），如下代码为右侧代码编辑器中的h1、span标签同时设置字体颜色为红色：
+
+h1,span{color:red;}
+它相当于下面两行代码：
+
+h1{color:red;}
+span{color:red;}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>分组选择符</title>
+<style type="text/css">
+h1,span{color:red;}
+.first,#second>span{
+    color:green;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p id="second">到了三年级下学期时，我们班上了一节公开课，老师提出了一个很<span>简单</span>的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    <img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" >
+</body>
+</html>
+
+---------------------------------------------------------------------------
+9-1
+继承
+CSS的某些样式是具有继承性的，那么什么是继承呢？继承是一种规则，它允许样式不仅应用于某个特定html标签元素，而且应用于其后代。比如下面代码：如某种颜色应用于p标签，这个颜色设置不仅应用p标签，还应用于p标签中的所有子元素文本，这里子元素为span标签。
+
+p{color:red;}
+
+<p>三年级时，我还是一个<span>胆小如鼠</span>的小女孩。</p>
+可见右侧结果窗口中p中的文本与span中的文本都设置为了红色。但注意有一些css样式是不具有继承性的。如border:1px solid red;
+
+p{border:1px solid red;}
+
+<p>三年级时，我还是一个<span>胆小如鼠</span>的小女孩。</p>
+在上面例子中它代码的作用只是给p标签设置了边框为1像素、红色、实心边框线，而对于子元素span是没用起到作用的。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>继承</title>
+<style type="text/css">
+p{color:red;}
+p{border:1px solid red;}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p id="second">到了三年级下学期时，我们班上了一节公开课，老师提出了一个很<span>简单</span>的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+9-2
+特殊性
+有的时候我们为同一个元素设置了不同的CSS样式代码，那么元素会启用哪一个CSS样式呢?我们来看一下面的代码：
+
+p{color:red;}
+.first{color:green;}
+<p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩。</p>
+p和.first都匹配到了p这个标签上，那么会显示哪种颜色呢？green是正确的颜色，那么为什么呢？是因为浏览器是根据权值来判断使用哪种css样式的，权值高的就使用哪种css样式。
+
+下面是权值的规则：
+
+标签的权值为1，类选择符的权值为10，ID选择符的权值最高为100。例如下面的代码：
+
+p{color:red;} /*权值为1*/
+p span{color:green;} /*权值为1+1=2*/
+.warning{color:white;} /*权值为10*/
+p span.warning{color:purple;} /*权值为1+1+10=12*/
+#footer .note p{color:yellow;} /*权值为100+10+1=111*/
+注意：还有一个权值比较特殊--继承也有权值但很低，有的文献提出它只有0.1，所以可以理解为继承的权值最低。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>特殊性</title>
+<style type="text/css">
+p{color:red;}
+.first{color:green;}/*因为权值高显示为绿色*/
+
+span{color:pink;}/*设置为粉色*/
+p span{color:purple;}/*如果只是加span{color:purple;}，则与上一行权值一样，近的选择器有更高优先级*/
+
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p id="second">到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+9-3
+层叠
+我们来思考一个问题：如果在html文件中对于同一个元素可以有多个css样式存在并且这多个css样式具有相同权重值怎么办？好，这一小节中的层叠帮你解决这个问题。
+
+层叠就是在html文件中对于同一个元素可以有多个css样式存在，当有相同权重的样式存在时，会根据这些css样式的前后顺序来决定，处于最后面的css样式会被应用。
+
+如下面代码:
+
+p{color:red;}
+p{color:green;}
+<p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩。</p>
+最后 p 中的文本会设置为green，这个层叠很好理解，理解为后面的样式会覆盖前面的样式。
+
+所以前面的css样式优先级就不难理解了：
+
+内联样式表（标签内部）> 嵌入样式表（当前文件中）> 外部样式表（外部文件中）。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>层叠</title>
+<style type="text/css">
+p{color:red;}
+p{color:green;}
+p{color:pink;}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p id="second">到了三年级下学期时，我们班上了一节公开课，老师提出了一个很<span>简单</span>的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    
+</body>
+</html>
+---------------------------------------------------------------------------
+9-4
+重要性
+我们在做网页代码的时，有些特殊的情况需要为某些样式设置具有最高权值，怎么办？这时候我们可以使用!important来解决。
+
+如下代码：
+
+p{color:red!important;}
+p{color:green;}
+<p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩。</p>
+这时 p 段落中的文本会显示的red红色。
+
+注意：!important要写在分号的前面
+
+这里注意当网页制作者不设置css样式时，浏览器会按照自己的一套样式来显示网页。并且用户也可以在浏览器中设置自己习惯的样式，比如有的用户习惯把字号设置为大一些，使其查看网页的文本更加清楚。这时注意样式优先级为：浏览器默认的样式 < 网页制作者样式 < 用户自己设置的样式，但记住!important优先级样式是个例外，权值高于用户自己设置的样式。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>!important</title>
+<style type="text/css">
+p{color:red!important;}
+p.first{color:green;}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p class="first">三年级时，我还是一个<span>胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p id="second">到了三年级下学期时，我们班上了一节公开课，老师提出了一个很<span class="first">简单</span>的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+    
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-1
+文字排版--字体
+我们可以使用css样式为网页中的文字设置字体、字号、颜色等样式属性。下面我们来看一个例子，下面代码实现：为网页中的文字设置字体为宋体。
+
+body{font-family:"宋体";}
+这里注意不要设置不常用的字体，因为如果用户本地电脑上如果没有安装你设置的字体，就会显示浏览器默认的字体。（因为用户是否可以看到你设置的字体样式取决于用户本地电脑上是否安装你设置的字体。）
+现在一般网页喜欢设置“微软雅黑”，如下代码：
+
+body{font-family:"Microsoft Yahei";}
+或
+
+body{font-family:"微软雅黑";}
+注意：第一种方法比第二种方法兼容性更好一些。
+
+因为这种字体即美观又可以在客户端安全的显示出来（用户本地一般都是默认安装的）。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>认识html标签</title>
+<style type="text/css">
+    body{
+        font-family:"Microsoft Yahei";
+    }
+
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个<span id="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-2
+文字排版--字号、颜色
+可以使用下面代码设置网页中文字的字号为12像素，并把字体颜色设置为#666(灰色)：
+
+body{font-size:12px;color:#666}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>字号、颜色</title>
+<style type="text/css">
+body{font-size:12px;color:#666;}
+span.stress{
+    font-size:20px;
+    color:red;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个<span class="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的<span>问题</span>，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-3
+文字排版--粗体
+我们还可以使用css样式来改变文字的样式：粗体、斜体、下划线、删除线，可以使用下面代码实现设置文字以粗体样式显示出来。
+
+p span{font-weight:bold;}
+在这里大家可以看到，如果想为文字设置粗体是有单独的css样式来实现的，再不用为了实现粗体样式而使用h1-h6或strong标签了。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>粗体签</title>
+<style type="text/css">
+p span{font-weight:bold;}
+a{
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个<span class="stress">胆小如鼠</span>的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会<a href="http://www.imooc.com">批评</a>我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-4
+文字排版--斜体
+以下代码可以实现文字以斜体样式在浏览器中显示：
+
+p a{font-style:italic;}
+
+<p>三年级时，我还是一个<a>胆小如鼠</a>的小女孩。</p>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>斜体样式</title>
+<style type="text/css">
+p {
+    font-style:italic;    
+}
+
+</style>
+</head>
+
+<body>
+<p>三年级时，我还是一个<a>胆小如鼠</a>的小女孩。</p> 
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-5
+文字排版--下划线
+有些情况下想为文字设置为下划线样式，这样可以在视觉上强调文字，可以使用下面代码来实现：
+
+p a{text-decoration:underline;}
+
+<p>三年级时，我还是一个<a>胆小如鼠</a>的小女孩。</p>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>下划线样式</title>
+<style type="text/css">
+a {
+    text-decoration:underline;    
+}
+span{
+    text-decoration:underline;
+}
+</style>
+</head>
+
+<body>
+<p><span>三年级</span>时，我还是一个<a>胆小如鼠</a>的小女孩。</p> 
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-6
+文字排版--删除线
+如果想在网页上设置删除线怎么办，这个样式在电商网站上常会见到：
+
+上图中的原价上的删除线使用下面代码就可以实现：
+
+ .oldPrice{text-decoration:line-through;}
+ 
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>删除样式</title>
+<style type="text/css">
+    .oldPrice{
+        text-decoration:line-through;/*text-decoration:line-through underline 同时实现删除线和下划线*/
+    }
+</style>
+</head>
+<body>
+<p>原价：<span class="oldPrice">300</span>元 现价：230 元</p> 
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-7
+段落排版--缩进
+中文文字中的段前习惯空两个文字的空白，这个特殊的样式可以用下面代码来实现：
+
+p{text-indent:2em;}
+<p>1922年的春天，一个想要成名名叫尼克卡拉威（托比?马奎尔Tobey Maguire 饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的美国梦，他搬入纽约附近一海湾居住。</p>
+
+注意：2em的意思就是文字的2倍大小。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>缩进样式</title>
+<style type="text/css">
+    p{
+        text-indent:2em;
+    }
+</style>
+</head>
+<body>
+    <h1>了不起的盖茨比</h1>
+    <p>1922年的春天，一个想要成名名叫尼克?卡拉威（托比?马奎尔Tobey Maguire 饰）的作家，离开了美国中西部，来到了纽约。那是一个道德感渐失，爵士乐流行，走私为王，股票飞涨的时代。为了追寻他的美国梦，他搬入纽约附近一海湾居住。</p>    
+    <p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+10-8
+段落排版--行间距（行高）
+这一小节我们来学习一下另一个在段落排版中起重要作用的行间距（行高）属性（line-height），如下代码实现设置段落行间距为1.5倍。
+
+p{line-height:1.5em;}
+<p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>行间距</title>
+<style type="text/css">
+    p{
+        line-height:2em;
+    }
+</style>
+</head>
+<body>
+<p>菲茨杰拉德，二十世纪美国文学巨擘之一，兼具作家和编剧双重身份。他以诗人的敏感和戏剧家的想象为"爵士乐时代"吟唱华丽挽歌，其诗人和梦想家的气质亦为那个奢靡年代的不二注解。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+10-9
+段落排版--中文字间距、字母间距
+中文字间隔、字母间隔设置：
+
+如果想在网页排版中设置文字间隔或者字母间隔就可以使用    letter-spacing 来实现，如下面代码：
+
+h1{
+    letter-spacing:50px;
+}
+...
+<h1>了不起的盖茨比</h1>
+注意：这个样式使用在英文单词时，是设置字母与字母之间的间距。
+
+单词间距设置：
+
+如果我想设置英文单词之间的间距呢？可以使用 word-spacing 来实现。如下代码：
+
+h1{
+    word-spacing:50px;
+}
+...
+<h1>welcome to imooc!</h1>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>字间距</title>
+<style type="text/css">
+    h1{
+        letter-spacing:20px;
+    }
+</style>
+</head>
+<body>
+<h1>hello world!你好！</h1>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+10-10
+段落排版--对齐
+想为块状元素中的文本、图片设置居中样式吗？可以使用text-align样式代码，如下代码可实现文本居中显示。(那么什么是块状元素呢？在后面的11-1、11-2小节中会讲到。)
+
+h1{
+    text-align:center;
+}
+<h1>了不起的盖茨比</h1>
+同样可以设置居左：
+
+h1{
+    text-align:left;
+}
+<h1>了不起的盖茨比</h1>
+还可以设置居右：
+
+h1{
+    text-align:right;
+}
+<h1>了不起的盖茨比</h1>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>对齐</title>
+<style type="text/css">
+    div{
+        text-align:center;
+    }
+</style>
+</head>
+<body>
+<div><img src="http://img.mukewang.com/52b4113500018cf102000200.jpg" ></div>
+</body>
+</html>
+---------------------------------------------------------------------------
+11-1
+元素分类
+在讲解CSS布局之前，我们需要提前知道一些知识，在CSS中，html中的标签元素大体被分为三种不同的类型：块状元素、内联元素(又叫行内元素)和内联块状元素。
+
+常用的块状元素有：
+
+<div>、<p>、<h1>...<h6>、<ol>、<ul>、<dl>、<table>、<address>、<blockquote> 、<form>
+
+常用的内联元素有：
+
+<a>、<span>、<br>、<i>、<em>、<strong>、<label>、<q>、<var>、<cite>、<code>
+
+常用的内联块状元素有：
+
+<img>、<input>
+
+---------------------------------------------------------------------------
+11-2
+元素分类--块级元素
+什么是块级元素？在html中<div>、 <p>、<h1>、<form>、<ul> 和 <li>就是块级元素。设置display:block就是将元素显示为块级元素。如下代码就是将内联元素a转换为块状元素，从而使a元素具有块状元素特点。
+
+a{display:block;}
+块级元素特点：
+
+1、每个块级元素都从新的一行开始，并且其后的元素也另起一行。（真霸道，一个块级元素独占一行）
+
+2、元素的高度、宽度、行高以及顶和底边距都可设置。
+
+3、元素宽度在不设置的情况下，是它本身父容器的100%（和父元素的宽度一致），除非设定一个宽度。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>内联块状元素</title>
+<style type="text/css">
+div,p{background:pink;}
+a{display:block;}
+</style>
+</head>
+<body>
+<div>div1</div>
+<div>div2</div>
+<p>段落1段落1段落1<a>段落1</a>段落1</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+11-3
+元素分类--内联元素
+在html中，<span>、<a>、<label>、 <strong> 和<em>就是典型的内联元素（行内元素）（inline）元素。当然块状元素也可以通过代码display:inline将元素设置为内联元素。如下代码就是将块状元素div转换为内联元素，从而使 div 元素具有内联元素特点。
+
+ div{
+     display:inline;
+ }
+
+......
+
+<div>我要变成内联元素</div>
+内联元素特点：
+
+1、和其他元素都在一行上；
+
+2、元素的高度、宽度及顶部和底部边距不可设置；
+
+3、元素的宽度就是它包含的文字或图片的宽度，不可改变。
+
+小伙伴们你们观查一下右侧代码段，有没有发现一个问题，内联元素之间有一个间距问题，这个问题在本小节的 wiki 中有介绍，感兴趣的小伙伴可以去查看。
+内联元素之间的间距其实html文件标签间的缩进或换行或空格被统一看为一个空格的结果，所有距离就是一个空格，与其父元素的font-size，letter-spacing以及word-spacing都有关。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>行内元素标签</title>
+<style type="text/css">
+a,span,em{
+	background:pink;/*设置a、span、em标签背景颜色都为粉色*/
+}
+div{
+    display:inline;
+}
+</style>
+</head>
+<body>
+<a href="http://www.baidu.com">百度</a>
+<a href="http://www.imooc.com">慕课网</a>
+<div>hello</div>
+<span>33333</span>
+<span>44444</span><em>555555</em>
+</body>
+</html>
+---------------------------------------------------------------------------
+11-4
+元素分类--内联块状元素
+内联块状元素（inline-block）就是同时具备内联元素、块状元素的特点，代码display:inline-block就是将元素设置为内联块状元素。(css2.1新增)，<img>、<input>标签就是这种内联块状标签。
+
+inline-block 元素特点：
+
+1、和其他元素都在一行上；
+
+2、元素的高度、宽度、行高以及顶和底边距都可设置。
+
+提示：下一小节是用视频动画来讲解css中的盒模型。
+
+任务：我也来试试，仿分页页码设计
+在右边的代码编辑器中大家可以看到我们为 a 元素设置了宽和高，但都没有起到作用，原因是a在默认的时候是内联元素，内联元素是不可以设置宽和高的。
+1.在右边编辑器的第8行，输入：display:inline-block;
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>内联块状元素</title>
+<style type="text/css">
+a{
+    display:inline-block;
+	width:20px;/*在默认情况下宽度不起作用*/
+	height:20px;/*在默认情况下高度不起作用*/
+	background:pink;/*设置背景颜色为粉色*/
+	text-align:right; /*设置文本靠右显示*/
+}
+</style>
+</head>
+<body>
+<a>1</a>
+<a>2</a>
+<a>3</a>
+<a>4</a>
+</body>
+</html>
+---------------------------------------------------------------------------
+11-5
+什么是盒模型
+
+---------------------------------------------------------------------------
+11-6
+盒模型--边框（一）
+盒子模型的边框就是围绕着内容及补白的线，这条线你可以设置它的粗细、样式和颜色(边框三个属性)。
+
+如下面代码为 div 来设置边框粗细为 2px、样式为实心的、颜色为红色的边框：
+
+div{
+    border:2px  solid  red;
+}
+上面是 border 代码的缩写形式，可以分开写：
+
+div{
+    border-width:2px;
+    border-style:solid;
+    border-color:red;
+}
+注意：
+
+1、border-style（边框样式）常见样式有：
+
+dashed（虚线）| dotted（点线）| solid（实线）。
+
+
+2、border-color（边框颜色）中的颜色可设置为十六进制颜色，如:
+
+border-color:#888;//前面的井号不要忘掉。
+
+3、border-width（边框宽度）中的宽度也可以设置为：
+
+thin | medium | thick（但不是很常用），最常还是用象素（px）。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>边框</title>
+<style type="text/css">
+    p{
+        border:2px dotted #ccc;
+    }
+</style>
+</head>
+<body>
+    <h1>勇气</h1>
+    <p>三年级时，我还是一个胆小如鼠的小女孩，上课从来不敢回答老师提出的问题，生怕回答错了老师会批评我。就一直没有这个勇气来回答老师提出的问题。学校举办的活动我也没勇气参加。</p>
+    <p>到了三年级下学期时，我们班上了一节公开课，老师提出了一个很简单的问题，班里很多同学都举手了，甚至成绩比我差很多的，也举手了，还说着："我来，我来。"我环顾了四周，就我没有举手。</p>   
+</body>
+</html>
+---------------------------------------------------------------------------
+11-7
+盒模型--边框（二）
+现在有一个问题，如果有想为 p 标签单独设置下边框，而其它三边都不设置边框样式怎么办呢？css 样式中允许只为一个方向的边框设置样式：
+
+div{border-bottom:1px solid red;}
+同样可以使用下面代码实现其它三边(上、右、左)边框的设置：
+
+border-top:1px solid red;
+border-right:1px solid red; 
+border-left:1px solid red;
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>边框</title>
+<style type="text/css">
+li{
+    border-bottom:1px dotted #ccc;
+}
+</style>
+</head>
+<body>
+<ul>
+    <li>别让不会说话害了你</li>
+    <li>二十七八岁就应该有的见识</li>
+    <li>别让不好意思害了你</li>
+</ul>
+</body>
+</html>
+---------------------------------------------------------------------------
+11-8
+盒模型--宽度和高度
+盒模型宽度和高度和我们平常所说的物体的宽度和高度理解是不一样的，css内定义的宽（width）和高（height），指的是填充以里的内容范围。
+
+因此一个元素实际宽度（盒子的宽度）=左边界+左边框+左填充+内容宽度+右填充+右边框+右边界。
+
+
+
+元素的高度也是同理。
+
+比如：
+
+css代码：
+
+div{
+    width:200px;
+    padding:20px;
+    border:1px solid red;
+    margin:10px;    
+}
+html代码：
+
+<body>
+   <div>文本内容</div>
+</body>
+元素的实际长度为：10px+1px+20px+200px+20px+1px+10px=262px。在chrome浏览器下可查看元素盒模型，如下图：
+任务
+任务：我也来试试，为列表每一项长度设置为200px
+（上一节中的列表项长度为什么这么长啊，不明白同学是不是应该看一看标签分类那一小节，li是块状元素，块状元素有一个特点之一：在不设置宽度的情况下，显示为父容器的100%。）
+1.在右边编辑器的第9行，输入下列代码：
+width:200px;height:30px;
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>宽度和高度</title>
+<style type="text/css">
+li{
+    border-bottom:1px dotted #ccc;
+    width:200px;
+    height:30px;
+}
+</style>
+</head>
+<body>
+<ul>
+    <li>别让不会说话害了你</li>
+    <li>二十七八岁就应该有的见识</li>
+    <li>别让不好意思害了你</li>
+</ul>
+</body>
+</html>
+---------------------------------------------------------------------------
+11-9
+盒模型--填充
+元素内容与边框之间是可以设置距离的，称之为“填充”。填充也可分为上、右、下、左(顺时针)。如下代码：
+
+div{padding:20px 10px 15px 30px;}
+顺序一定不要搞混。可以分开写上面代码：
+
+div{
+   padding-top:20px;
+   padding-right:10px;
+   padding-bottom:15px;
+   padding-left:30px;
+}
+如果上、右、下、左的填充都为10px;可以这么写
+
+div{padding:10px;}
+如果上下填充一样为10px，左右一样为20px，可以这么写：
+
+div{padding:10px 20px;}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>填充</title>
+<style type="text/css">
+#box1{
+    width:100px;
+    height:100px;
+    padding:10px;
+    border:1px solid red;
+}
+</style>
+</head>
+<body>
+<div id="box1">盒子1</div>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+11-10
+盒模型--边界
+元素与其它元素之间的距离可以使用边界（margin）来设置。边界也是可分为上、右、下、左。如下代码：
+
+div{margin:20px 10px 15px 30px;}
+也可以分开写：
+
+div{
+   margin-top:20px;
+   margin-right:10px;
+   margin-bottom:15px;
+   margin-left:30px;
+}
+如果上右下左的边界都为10px;可以这么写：
+
+div{ margin:10px;}
+如果上下边界一样为10px，左右一样为20px，可以这么写：
+
+div{ margin:10px 20px;}
+总结一下：padding和margin的区别，padding在边框里，margin在边框外。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>边距</title>
+<style type="text/css">
+div{
+    width:300px;
+    height:300px;
+	border:1px solid red;	
+}
+#box1{
+    margin-bottom:30px;
+}
+</style>
+</head>
+<body>
+    <div id="box1">box1</div>
+    <div id="box2">box2</div>   
+</body>
+</html>
+
+---------------------------------------------------------------------------
+12-1
+css布局模型
+清楚了CSS 盒模型的基本概念、 盒模型类型， 我们就可以深入探讨网页布局的基本模型了。布局模型与盒模型一样都是 CSS 最基本、 最核心的概念。 但布局模型是建立在盒模型基础之上，又不同于我们常说的 CSS 布局样式或 CSS 布局模板。如果说布局模型是本，那么 CSS 布局模板就是末了，是外在的表现形式。 
+CSS包含3种基本的布局模型，用英文概括为：Flow、Layer 和 Float。
+在网页中，元素有三种布局模型：
+1、流动模型（Flow）
+2、浮动模型 (Float)
+3、层模型（Layer）
+
+这三个布局模型究竟是什么布局？下面几个小节会详细给大家介绍。
+
+---------------------------------------------------------------------------
+12-2
+流动模型（一）
+先来说一说流动模型，流动（Flow）是默认的网页布局模式。也就是说网页在默认状态下的 HTML 网页元素都是根据流动模型来分布网页内容的。
+
+流动布局模型具有2个比较典型的特征：
+
+第一点，块状元素都会在所处的包含元素内自上而下按顺序垂直延伸分布，因为在默认状态下，块状元素的宽度都为100%。实际上，块状元素都会以行的形式占据位置。如右侧代码编辑器中三个块状元素标签(div，h1，p)宽度显示为100%。
+
+观查一下右侧代码编辑器中的代码，感受一下块状元素的特点：“在默认状态下，块状元素的宽度都为100%”。
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>流动模式下的块状元素</title>
+<style type="text/css">
+#box1{
+    width:300px;
+    height:100px;
+}
+div,h1,p{
+    border:1px solid red;
+}
+</style>
+</head>
+<body>
+    <div id="box2">box2</div><!--块状元素，由于没有设置宽度，宽度默认显示为100%--> 
+    <h1>标题</h1><!--块状元素，由于没有设置宽度，宽度默认显示为100%--> 
+    <p>文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段文本段。</p><!--块状元素，由于没有设置宽度，宽度默认显示为100%--> 
+    
+    <div id="box1">box1</div><!--块状元素，由于设置了width:300px，宽度显示为300px-->
+</body>
+</html>
+---------------------------------------------------------------------------
+12-3
+流动模型（二）
+第二点，在流动模型下，内联元素都会在所处的包含元素内从左到右水平分布显示。（内联元素可不像块状元素这么霸道独占一行）
+
+右侧代码编辑器中内联元素标签a、span、em、strong都是内联元素。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>流动模式下的内联元素</title>
+<style type="text/css">
+
+</style>
+</head>
+<body>
+    <a href="http://www.imooc.com">www.imooc.com</a><span>强调</span><em>重点</em>
+    <strong>强调</strong>
+</body>
+</html>
+---------------------------------------------------------------------------
+12-4
+浮动模型
+块状元素这么霸道都是独占一行，如果现在我们想让两个块状元素并排显示，怎么办呢？不要着急，设置元素浮动就可以实现这一愿望。
+
+任何元素在默认情况下是不能浮动的，但可以用 CSS 定义为浮动，如 div、p、table、img 等元素都可以被定义为浮动。如下代码可以实现两个 div 元素一行显示。
+
+div{
+    width:200px;
+    height:200px;
+    border:2px red solid;
+    float:left;
+}
+<div id="div1"></div>
+<div id="div2"></div>
+效果图
+
+当然你也可以同时设置两个元素右浮动也可以实现一行显示。
+
+div{
+    width:200px;
+    height:200px;
+    border:2px red solid;
+    float:right;
+}
+效果图
+
+又有小伙伴问了，设置两个元素一左一右可以实现一行显示吗？当然可以：
+
+div{
+    width:200px;
+    height:200px;
+    border:2px red solid;
+}
+#div1{float:left;}
+#div2{float:right;}
+效果图
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>浮动模型</title>
+<style type="text/css">
+div{
+	border:2px red solid;
+    width:200px;
+    height:400px;
+	float:left;
+}
+
+</style>
+</head>
+<body>
+<div id="div1">栏目1</div>
+<div id="div2">栏目2</div>
+</body>
+</html> 
+---------------------------------------------------------------------------
+12-5
+什么是层模型？
+什么是层布局模型？层布局模型就像是图像软件PhotoShop中非常流行的图层编辑功能一样，每个图层能够精确定位操作，但在网页设计领域，由于网页大小的活动性，层布局没能受到热捧。但是在网页上局部使用层布局还是有其方便之处的。下面我们来学习一下html中的层布局。
+
+如何让html元素在网页中精确定位，就像图像软件PhotoShop中的图层一样可以对每个图层能够精确定位操作。CSS定义了一组定位（positioning）属性来支持层布局模型。
+
+层模型有三种形式：
+
+1、绝对定位(position: absolute)
+
+2、相对定位(position: relative)
+
+3、固定定位(position: fixed)
+
+---------------------------------------------------------------------------
+12-6
+层模型--绝对定位
+如果想为元素设置层模型中的绝对定位，需要设置position:absolute(表示绝对定位)，这条语句的作用将元素从文档流中拖出来，然后使用left、right、top、bottom属性相对于其最接近的一个具有定位属性的父包含块进行绝对定位。如果不存在这样的包含块，则相对于body元素，即相对于浏览器窗口。
+
+如下面代码可以实现div元素相对于浏览器窗口向右移动100px，向下移动50px。
+
+div{
+    width:200px;
+    height:200px;
+    border:2px red solid;
+    position:absolute;
+    left:100px;
+    top:50px;
+}
+<div id="div1"></div>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>absolute样式</title>
+<style type="text/css">
+div{
+    width:200px;
+    height:200px;
+	border:2px red solid;
+	position:absolute;
+    right:100px;
+    top:20px;
+}
+</style>
+</head>
+<body>
+<div id="div1"></div>
+</body>
+</html>
+---------------------------------------------------------------------------
+12-7
+层模型--相对定位
+如果想为元素设置层模型中的相对定位，需要设置position:relative（表示相对定位），它通过left、right、top、bottom属性确定元素在正常文档流中的偏移位置。相对定位完成的过程是首先按static(float)方式生成一个元素(并且元素像层一样浮动了起来)，然后相对于以前的位置移动，移动的方向和幅度由left、right、top、bottom属性确定，偏移前的位置保留不动。
+
+如下代码实现相对于以前位置向下移动50px，向右移动100px;
+
+#div1{
+    width:200px;
+    height:200px;
+    border:2px red solid;
+    position:relative;
+    left:100px;
+    top:50px;
+}
+
+<div id="div1"></div>
+
+
+什么叫做“偏移前的位置保留不动”呢？
+
+大家可以做一个实验，在右侧代码编辑器的19行div标签的后面加入一个span标签，在标并在span标签中写入一些文字。如下代码：
+
+<body>
+    <div id="div1"></div><span>偏移前的位置还保留不动，覆盖不了前面的div没有偏移前的位置</span>
+</body>
+
+从效果图中可以明显的看出，虽然div元素相对于以前的位置产生了偏移，但是div元素以前的位置还是保留着，所以后面的span元素是显示在了div元素以前位置的后面。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>relative样式</title>
+<style type="text/css">
+#div1{
+    width:200px;
+    height:200px;
+	border:2px red solid;
+	position:relative;
+	left:100px;
+    top:50px;
+}
+
+</style>
+</head>
+<body>
+	<div id="div1"></div><span>偏移前的位置还保留不动，覆盖不了前面的div没有偏移前的位置</span>
+</body>
+</html>
+---------------------------------------------------------------------------
+12-8
+层模型--固定定位
+fixed：表示固定定位，与absolute定位类型类似，但它的相对移动的坐标是视图（屏幕内的网页窗口）本身。由于视图本身是固定的，它不会随浏览器窗口的滚动条滚动而变化，除非你在屏幕中移动浏览器窗口的屏幕位置，或改变浏览器窗口的显示大小，因此固定定位的元素会始终位于浏览器窗口内视图的某个位置，不会受文档流动影响，这与background-attachment:fixed;属性功能相同。以下代码可以实现相对于浏览器视图向右移动100px，向下移动50px。并且拖动滚动条时位置固定不变。
+
+#div1{
+    width:200px;
+    height:200px;
+    border:2px red solid;
+    position:fixed;
+    left:100px;
+    top:50px;
+}
+<p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+....
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>relative样式</title>
+<style type="text/css">
+#div1{
+    width:200px;
+    height:200px;
+	border:2px red solid;
+	position:fixed;
+    bottom:0;
+    right:0;
+}
+
+</style>
+</head>
+<body>
+	<div id="div1"></div>
+	<p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+        <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+12-9
+Relative与Absolute组合使用
+小伙伴们学习了12-6小节的绝对定位的方法：使用position:absolute可以实现被设置元素相对于浏览器（body）设置定位以后，大家有没有想过可不可以相对于其它元素进行定位呢？答案是肯定的，当然可以。使用position:relative来帮忙，但是必须遵守下面规范：
+
+1、参照定位的元素必须是相对定位元素的前辈元素：
+
+<div id="box1"><!--参照定位的元素-->
+    <div id="box2">相对参照元素进行定位</div><!--相对定位元素-->
+</div>
+从上面代码可以看出box1是box2的父元素（父元素当然也是前辈元素了）。
+
+2、参照定位的元素必须加入position:relative;
+
+#box1{
+    width:200px;
+    height:200px;
+    position:relative;        
+}
+3、定位元素加入position:absolute，便可以使用top、bottom、left、right来进行偏移定位了。
+
+#box2{
+    position:absolute;
+    top:20px;
+    left:30px;         
+}
+这样box2就可以相对于父元素box1定位了（这里注意参照物就可以不是浏览器了，而可以自由设置了）。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>相对参照元素进行定位</title>
+<style type="text/css">
+div{border:2px red solid;}
+#box1{
+    width:200px;
+    height:200px;
+    position:relative;
+          
+}
+#box2{
+ 	position:absolute;
+	top:20px;
+	left:30px;
+          
+}
+/*下面是任务部分*/
+#box3{
+    width:200px;
+    height:200px;
+    position:relative;       
+}
+#box4{
+    width:99%;
+ 	position:absolute;
+ 	left:0;
+ 	bottom:0;
+}
+</style>
+</head>
+
+<body>
+<div id="box1">
+	<div id="box2">相对参照元素进行定位</div>
+</div>
+
+<h1>下面是任务部分</h1>
+<div id="box3">
+    <img src="http://img.mukewang.com/541a7d8a00018cf102000200.jpg">
+    <div id="box4">当我还是三年级的学生时是一个害羞的小女生。</div>
+</div>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+13-1
+盒模型代码简写
+还记得在讲盒模型时外边距(margin)、内边距(padding)和边框(border)设置上下左右四个方向的边距是按照顺时针方向设置的：上右下左。具体应用在margin和padding的例子如下：
+
+margin:10px 15px 12px 14px;/*上设置为10px、右设置为15px、下设置为12px、左设置为14px*/
+通常有下面三种缩写方法:
+
+1、如果top、right、bottom、left的值相同，如下面代码：
+
+margin:10px 10px 10px 10px;
+可缩写为：
+
+margin:10px;
+2、如果top和bottom值相同、left和 right的值相同，如下面代码：
+
+margin:10px 20px 10px 20px;
+可缩写为：
+
+margin:10px 20px;
+3、如果left和right的值相同，如下面代码：
+
+margin:10px 20px 30px 20px;
+可缩写为：
+
+margin:10px 20px 30px;
+注意：padding、border的缩写方法和margin是一致的。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>relative样式</title>
+<style type="text/css">
+p{
+    padding:13px;
+    margin:10px 40px;
+}
+</style>
+</head>
+<body>
+	<p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+13-2
+颜色值缩写
+关于颜色的css样式也是可以缩写的，当你设置的颜色是16进制的色彩值时，如果每两位的值相同，可以缩写一半。
+
+例子1：
+
+p{color:#000000;}
+可以缩写为：
+
+p{color: #000;}
+例子2：
+
+p{color: #336699;}
+可以缩写为：
+
+p{color: #369;}
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>relative样式</title>
+<style type="text/css">
+p{
+    color:#369;
+}
+</style>
+</head>
+<body>
+    <p>文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本文本。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+13-3
+
+字体缩写
+网页中的字体css样式代码也有他自己的缩写方式，下面是给网页设置字体的代码：
+
+body{
+    font-style:italic;
+    font-variant:small-caps; 
+    font-weight:bold; 
+    font-size:12px; 
+    line-height:1.5em; 
+    font-family:"宋体",sans-serif;
+}
+这么多行的代码其实可以缩写为一句：
+
+body{
+    font:italic  small-caps  bold  12px/1.5em  "宋体",sans-serif;
+}
+注意：
+
+1、使用这一简写方式你至少要指定 font-size 和 font-family 属性，其他的属性(如 font-weight、font-style、font-variant、line-height)如未指定将自动使用默认值。
+
+2、在缩写时 font-size 与 line-height 中间要加入“/”斜扛。
+
+一般情况下因为对于中文网站，英文还是比较少的，所以下面缩写代码比较常用：
+
+body{
+    font:12px/1.5em  "宋体",sans-serif;
+}
+只是有字号、行间距、中文字体、英文字体设置。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>字体缩写</title>
+<style type="text/css">
+body{
+    font:italic small-caps bold 12px/1.6em "宋体",sans-serif;
+}
+
+</style>
+</head>
+<body>
+    <p>Littering a dark and dreary road lay the past relics of browser-specific tags, incompatible DOMs, broken CSS support, and abandoned browsers.</p>
+    <p>We must clear the mind of the past. Web enlightenment has been achieved thanks to the tireless efforts of folk like the W3C, WaSP, and the major browser creators.</p>
+    <p>The CSS Zen Garden invites you to relax and meditate on the important lessons of the masters. Begin to see with clarity. Learn to use the time-honored techniques in new and invigorating fashion. Become one with the web.</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+14-1
+颜色值
+在网页中的颜色设置是非常重要，有字体颜色（color）、背景颜色（background-color）、边框颜色（border）等，设置颜色的方法也有很多种：
+
+1、英文命令颜色
+
+前面几个小节中经常用到的就是这种设置方法：
+
+p{color:red;}
+2、RGB颜色
+
+这个与 photoshop 中的 RGB 颜色是一致的，由 R(red)、G(green)、B(blue) 三种颜色的比例来配色。
+
+p{color:rgb(133,45,200);}
+每一项的值可以是 0~255 之间的整数，也可以是 0%~100% 的百分数。如：
+
+p{color:rgb(20%,33%,25%);}
+3、十六进制颜色
+
+这种颜色设置方法是现在比较普遍使用的方法，其原理其实也是 RGB 设置，但是其每一项的值由 0-255 变成了十六进制 00-ff。
+
+p{color:#00ffff;}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>颜色值</title>
+<style type="text/css">
+    p{
+        color:#0fc;
+    }
+</style>
+</head>
+
+<body>
+    <p>当我还是三年级的学生时是一个害羞的小女生。</p>
+</body>
+</html>
+---------------------------------------------------------------------------
+14-2
+长度值
+长度单位总结一下，目前比较常用到px（像素）、em、% 百分比，要注意其实这三种单位都是相对单位。
+
+1、像素
+
+像素为什么是相对单位呢？因为像素指的是显示器上的小点（CSS规范中假设“90像素=1英寸”）。实际情况是浏览器会使用显示器的实际像素值有关，在目前大多数的设计者都倾向于使用像素（px）作为单位。
+
+2、em
+
+就是本元素给定字体的 font-size 值，如果元素的 font-size 为 14px ，那么 1em = 14px；如果 font-size 为 18px，那么 1em = 18px。如下代码：
+
+p{font-size:12px;text-indent:2em;}
+上面代码就是可以实现段落首行缩进 24px（也就是两个字体大小的距离）。
+
+下面注意一个特殊情况：
+
+但当给 font-size 设置单位为 em 时，此时计算的标准以 p 的父元素的 font-size 为基础。如下代码：
+
+html:
+
+<p>以这个<span>例子</span>为例。</p>
+css:
+
+p{font-size:14px}
+span{font-size:0.8em;}
+结果 span 中的字体“例子”字体大小就为 11.2px（14 * 0.8 = 11.2px）。
+
+3、百分比
+
+p{font-size:12px;line-height:130%}
+设置行高（行间距）为字体的130%（12 * 1.3 = 15.6px）。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>长度</title>
+  <style type="text/css">
+    p{font-size:14px}
+    span{font-size:2em;}
+  </style>
+</head>
+<body>
+    <p>慕课网，<span>超酷的互联网</span>、IT技术免费学习平台，创新的网络一站式学习、实践体验；<span>服务及时贴心</span>，内容专业、<span>有趣易学</span>。专注服务互联网工程师快速成为技术高手！</p>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+15-1
+水平居中设置-行内元素
+我们在实际工作中常会遇到需要设置水平居中的场景，比如为了美观，文章的标题一般都是水平居中显示的。
+
+这里我们又得分两种情况：行内元素 还是 块状元素 ，块状元素里面又分为定宽块状元素，以及不定宽块状元素。今天我们先来了解一下行内元素怎么进行水平居中？
+
+如果被设置元素为文本、图片等行内元素时，水平居中是通过给父元素设置 text-align:center 来实现的。(父元素和子元素：如下面的html代码中，div是“我想要在父容器中水平居中显示”这个文本的父元素。反之这个文本是div的子元素 )如下代码：
+
+html代码：
+
+<body>
+  <div class="txtCenter">我想要在父容器中水平居中显示。</div>
+</body>
+css代码：
+
+<style>
+  .txtCenter{
+    text-align:center;
+  }
+</style>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>定宽块状元素水平居中</title>
+<style>
+div{
+    border:1px solid red;
+    margin:20px;
+}
+.txtCenter{
+	text-align:center;
+}
+.imgCenter{
+    text-align:right;
+}
+</style>
+</head>
+
+<body>
+<div class="txtCenter">我想要在父容器中水平居中显示。</div>
+
+<!--下面是任务部分-->
+
+<div class="imgCenter"><img src="http://img.mukewang.com/52da54ed0001ecfa04120172.jpg" /></div>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+15-2
+水平居中设置-定宽块状元素
+当被设置元素为 块状元素 时用 text-align：center 就不起作用了，这时也分两种情况：定宽块状元素和不定宽块状元素。
+
+这一小节我们先来讲一讲定宽块状元素。(定宽块状元素：块状元素的宽度width为固定值。)
+
+满足定宽和块状两个条件的元素是可以通过设置“左右margin”值为“auto”来实现居中的。我们来看个例子就是设置 div 这个块状元素水平居中：
+
+html代码：
+
+<body>
+  <div>我是定宽块状元素，哈哈，我要水平居中显示。</div>
+</body>
+css代码：
+
+<style>
+div{
+    border:1px solid red;/*为了显示居中效果明显为 div 设置了边框*/
+    
+    width:200px;/*定宽*/
+    margin:20px auto;/* margin-left 与 margin-right 设置为 auto */
+}
+
+</style>
+也可以写成：
+
+margin-left:auto;
+margin-right:auto;
+注意：元素的“上下 margin” 是可以随意设置的。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>定宽块状元素水平居中</title>
+<style>
+div{
+    border:1px solid red;
+	
+	width:200px;
+	margin:20px auto;
+}
+
+</style>
+</head>
+
+<body>
+<div>我是定宽块状元素，我要水平居中显示。</div>
+</body>
+</html>
+---------------------------------------------------------------------------
+15-3
+水平居中总结-不定宽块状元素方法（一）
+在实际工作中我们会遇到需要为“不定宽度的块状元素”设置居中，比如网页上的分页导航，因为分页的数量是不确定的，所以我们不能通过设置宽度来限制它的弹性。(不定宽块状元素：块状元素的宽度width不固定。)
+
+不定宽度的块状元素有三种方法居中（这三种方法目前使用的都很多）：
+
+加入 table 标签
+设置 display: inline 方法：与第一种类似，显示类型设为 行内元素，进行不定宽元素的属性设置
+设置 position:relative 和 left:50%：利用 相对定位 的方式，将元素向左偏移 50% ，即达到居中的目的
+这一小节我们来讲一下第一种方法：
+
+为什么选择方法一加入table标签? 是利用table标签的长度自适应性---即不定义其长度也不默认父元素body的长度（table其长度根据其内文本长度决定），因此可以看做一个定宽度块元素，然后再利用定宽度块状居中的margin的方法，使其水平居中。
+
+第一步：为需要设置的居中的元素外面加入一个 table 标签 ( 包括 <tbody>、<tr>、<td> )。
+
+第二步：为这个 table 设置“左右 margin 居中”（这个和定宽块状元素的方法一样）。
+
+举例如下：
+
+html代码：
+
+<div>
+ <table>
+  <tbody>
+    <tr><td>
+    <ul>
+        <li>我是第一行文本</li>
+        <li>我是第二行文本</li>
+        <li>我是第三行文本</li>
+    </ul>
+    </td></tr>
+  </tbody>
+ </table>
+</div>
+css代码：
+
+<style>
+table{
+    border:1px solid;
+    margin:0 auto;
+}
+</style>
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>不定宽块状元素水平居中</title>
+<style>
+table{
+    border:1px solid;
+    margin:0 auto;
+}
+
+/*下面是任务区代码*/
+.wrap{
+    background:#ccc;
+    margin:0 auto;/*display:table*/
+}
+</style>
+</head>
+
+<body>
+<div>
+<table>
+  <tbody>
+    <tr><td>
+	<ul>
+    	<li>我是第一行文本</li>
+        <li>我是第二行文本</li>
+        <li>我是第三行文本</li>
+    </ul>
+    </td></tr>
+  </tbody>
+</table>
+</div>
+<table>
+  <tbody>
+    <tr>
+        <td>
+            <div class="wrap">
+              设置我所在的div容器水平居中  
+            </div>
+        </td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>
+---------------------------------------------------------------------------
+15-4
+
+水平居中总结-不定宽块状元素方法（二）
+除了上一节讲到的插入table标签，可以使不定宽块状元素水平居中之外，本节介绍第2种实现这种效果的方法，改变元素的display类型为行内元素，利用其属性直接设置。
+
+第二种方法：改变块级元素的 display 为 inline 类型（设置为 行内元素 显示），然后使用 text-align:center 来实现居中效果。如下例子：
+
+html代码：
+
+<body>
+<div class="container">
+    <ul>
+        <li><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+    </ul>
+</div>
+</body>
+css代码：
+
+<style>
+.container{
+    text-align:center;
+}
+/* margin:0;padding:0（消除文本与div边框之间的间隙）*/
+.container ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:inline;
+}
+/* margin-right:8px（设置li文本之间的间隔）*/
+.container li{
+    margin-right:8px;
+    display:inline;
+}
+</style>
+这种方法相比第一种方法的优势是不用增加无语义标签，但也存在着一些问题：它将块状元素的 display 类型改为 inline，变成了行内元素，所以少了一些功能，比如设定长度值。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>不定宽块状元素水平居中</title>
+<style>
+.container{text-align:center;}
+.container ul{list-style:none;margin:0;padding:0;display:inline;}
+.container li{margin-right:8px;display:inline;}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <ul>
+    	<li><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+    </ul>
+</div>
+</body>
+</html>
+---------------------------------------------------------------------------
+15-5
+水平居中总结-不定宽块状元素方法（三）
+除了前两节讲到的插入table标签，以及改变元素的display类型，可以使不定宽块状元素水平居中之外，本节介绍第3种实现这种效果的方法，设置浮动和相对定位来实现。
+
+方法三：通过给父元素设置 float，然后给父元素设置 position:relative 和 left:50%，子元素设置 position:relative 和 left: -50% 来实现水平居中。
+
+我们可以这样理解：假想ul层的父层（即下面例子中的div层）中间有条平分线将ul层的父层（div层）平均分为两份，ul层的css代码是将ul层的最左端与ul层的父层（div层）的平分线对齐；而li层的css代码则是将li层的平分线与ul层的最左端（也是div层的平分线）对齐，从而实现li层的居中。
+
+ 
+
+代码如下：
+
+<body>
+<div class="container">
+    <ul>
+        <li><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+    </ul>
+</div>
+</body>
+css代码：
+
+<style>
+.container{
+    float:left;
+    position:relative;
+    left:50%
+}
+
+.container ul{
+    list-style:none;
+    margin:0;
+    padding:0;
+    
+    position:relative;
+    left:-50%;
+}
+.container li{float:left;display:inline;margin-right:8px;}
+</style>
+ 
+
+这三种方法使用得都非常广泛，各有优缺点，具体选用哪种方法，可以视具体情况而定。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>不定宽块状元素水平居中</title>
+<style>
+.container{
+    float:left;
+	position:relative;
+	left:50%
+}
+
+.container ul{
+	list-style:none;
+	margin:0;
+	padding:0;
+	
+	position:relative;
+	left:-50%;
+}
+.container li{float:left;display:inline;margin-right:8px;}
+
+
+/*下面是代码任务区*/
+.wrap{
+    float:left;
+    position:relative;
+    left:50%;
+}
+.wrap-center{
+    background:#ccc;
+    position:relative;
+    left:-50%;
+    
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+	<ul>
+    	<li><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+    </ul>
+</div>
+
+<!--下面是代码任务区-->
+<div class="wrap">
+    <div class="wrap-center">我们来学习一下这种方法。</div>
+</div>
+</body>
+</html>
+---------------------------------------------------------------------------
+15-6
+垂直居中-父元素高度确定的单行文本
+我们在实际工作中也会遇到需要设置垂直居中的场景，比如好多报纸的文章标题在左右一侧时，常常会设置为垂直居中，为了用户体验性好。
+
+这里我们又得分两种情况：父元素高度确定的单行文本，以及父元素高度确定的多行文本。
+
+本节我们先来看第一种父元素高度确定的单行文本, 怎么设置它为垂直居中呢？
+
+父元素高度确定的单行文本的竖直居中的方法是通过设置父元素的 height 和 line-height 高度一致来实现的。(height: 该元素的高度，line-height: 顾名思义，行高（行间距），指在文本中，行与行之间的 基线间的距离 )。
+
+line-height 与 font-size 的计算值之差，在 CSS 中成为“行间距”。分为两半，分别加到一个文本行内容的顶部和底部。
+
+这种文字行高与块高一致带来了一个弊端：当文字内容的长度大于块的宽时，就有内容脱离了块。
+
+如下代码：
+
+<div class="container">
+    hi,imooc!
+</div>
+css代码：
+
+<style>
+.container{
+    height:100px;
+    line-height:100px;
+    background:#999;
+}
+</style>
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>垂直居中</title>
+<style>
+
+.wrap h2{
+    margin:0;
+    height:100px;
+    line-height:100px;
+    background:#ccc;
+}
+</style>
+</head>
+
+<body>
+
+<!--下面是代码任务部分-->
+<div class="wrap">
+    <h2>hi,imooc!下面是代码任务部分下面是代码任务部分</h2>
+</div>
+</body>
+</html>
+---------------------------------------------------------------------------
+15-7
+垂直居中-父元素高度确定的多行文本（方法一）
+父元素高度确定的多行文本、图片等的竖直居中的方法有两种：
+
+方法一：使用插入 table  (包括tbody、tr、td)标签，同时设置 vertical-align：middle。
+
+css 中有一个用于竖直居中的属性 vertical-align，在父元素设置此样式时，会对inline-block类型的子元素都有用。下面看一下例子：
+
+html代码：
+
+<body>
+<table><tbody><tr><td class="wrap">
+<div>
+    <p>看我是否可以居中。</p>
+</div>
+</td></tr></tbody></table>
+</body>
+css代码：
+
+table td{height:500px;background:#ccc}
+因为 td 标签默认情况下就默认设置了 vertical-align 为 middle，所以我们不需要显式地设置了。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta  charset="utf-8">
+<title>父元素高度确定的多行文本</title>
+<style>
+  .wrap{height:300px;background:#ccc}
+  .girl{
+      display:table-cell;
+      background:#ccc;
+      height:500px;
+      vertical-align:middle;
+  }
+</style>
+</head>
+
+<body>
+<table><tbody><tr><td class="wrap">
+<div>
+    <p>看我是否可以居中。</p>
+    <p>看我是否可以居中。</p>
+    <p>看我是否可以居中。</p>
+    <p>看我是否可以居中。</p>
+    <p>看我是否可以居中。</p>
+</div>
+</td></tr></tbody></table>
+
+<!--下面是代码任务区-->
+<div class="girl">
+    <img src="http://img.mukewang.com/54ffac56000169c001840181.jpg" title="害羞的小女生"/>
+</div>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+15-8
+垂直居中-父元素高度确定的多行文本（方法二）
+除了上一节讲到的插入table标签，可以使父元素高度确定的多行文本垂直居中之外，本节介绍另外一种实现这种效果的方法。但这种方法兼容性比较差，只是提供大家学习参考。
+
+在 chrome、firefox 及 IE8 以上的浏览器下可以设置块级元素的 display 为 table-cell（设置为表格单元显示），激活 vertical-align 属性，但注意 IE6、7 并不支持这个样式, 兼容性比较差。
+
+html代码：
+
+<div class="container">
+    <div>
+        <p>看我是否可以居中。</p>
+        <p>看我是否可以居中。</p>
+        <p>看我是否可以居中。</p>
+    </div>
+</div>
+css代码：
+
+<style>
+.container{
+    height:300px;
+    background:#ccc;
+    display:table-cell;/*IE8以上及Chrome、Firefox*/
+    vertical-align:middle;/*IE8以上及Chrome、Firefox*/
+}
+</style>
+这种方法的好处是不用添加多余的无意义的标签，但缺点也很明显，它的兼容性不是很好，不兼容 IE6、7而且这样修改display的block变成了table-cell，破坏了原有的块状元素的性质。
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta  charset="utf-8">
+<title>父元素高度确定的多行文本</title>
+<style>
+.container{
+    height:300px;
+	background:#ccc;
+	
+	display:table-cell;/*IE8以上及Chrome、Firefox*/
+	vertical-align:middle;/*IE8以上及Chrome、Firefox*/
+}
+.girl{
+    height:500px;
+    display:table-cell;
+    vertical-align:middle;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <div>
+        <p>看我是否可以居中。</p>
+        <p>看我是否可以居中。</p>
+        <p>看我是否可以居中。</p>
+        <p>看我是否可以居中。</p>
+        <p>看我是否可以居中。</p>
+    </div>
+</div>
+<!--下面是代码任务区-->
+<div class="girl">
+    <img src="http://img.mukewang.com/54ffac56000169c001840181.jpg" title="害羞的小女生"/>
+</div>
+</body>
+</html>
+---------------------------------------------------------------------------
+15-9
+隐性改变display类型
+有一个有趣的现象就是当为元素（不论之前是什么类型元素，display:none 除外）设置以下 2 个句之一：
+
+ 1. position : absolute 
+
+ 2. float : left 或 float:right 
+
+简单来说，只要html代码中出现以上两句之一，元素的display显示类型就会自动变为以 display:inline-block（块状元素）的方式显示，当然就可以设置元素的 width 和 height 了，且默认宽度不占满父元素。
+
+如下面的代码，小伙伴们都知道 a 标签是 行内元素 ，所以设置它的 width 是 没有效果的，但是设置为 position:absolute 以后，就可以了。
+
+<div class="container">
+    <a href="#" title="">进入课程请单击这里</a>
+</div>
+css代码
+
+<style>
+.container a{
+    position:absolute;
+    width:200px;
+    background:#ccc;
+}
+</style>
+想不起 display:inline-block 是做什么的小伙伴们，单击“元素分类--内联块状元素”可返回到前面小节进行复习。
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta  charset="utf-8">
+<title>隐性改变display类型</title>
+<style>
+.container a{
+    
+	width:200px;
+	background:#ccc;
+	float:left;
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+    <a href="#" title="">进入课程请单击这里</a>
+</div>
+</body>
+</html>
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+

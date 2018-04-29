@@ -30171,10 +30171,1373 @@ try {
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
+Spring是什么
+轻量级的控制反转（IoC）和面向切面（AOP）的容器框架
+
+//UnitTestBase.java
+package com.imooc.base;
+
+import org.junit.After;
+import org.junit.Before;
+import org.springframework.beans.BeansException;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.StringUtils;
+
+public class UnitTestBase {
+
+    private ClassPathXmlApplicationContext context;
+
+    private String springXmlpath;
+
+    public UnitTestBase() {
+    }
+
+    public UnitTestBase(String springXmlpath) {
+        this.springXmlpath = springXmlpath;
+    }
+
+    @Before
+    public void before() {
+        if (StringUtils.isEmpty(springXmlpath)) {
+            springXmlpath = "classpath*:spring-*.xml";
+        }
+        try {
+            context = new ClassPathXmlApplicationContext(springXmlpath.split("[,\\s]+"));
+            context.start();
+        } catch (BeansException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @After
+    public void after() {
+        context.destroy();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends Object> T getBean(String beanId) {
+        try {
+            return (T) context.getBean(beanId);
+        } catch (BeansException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    protected <T extends Object> T getBean(Class<T> clazz) {
+        try {
+            return context.getBean(clazz);
+        } catch (BeansException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+}
+
+//InjectionServiceTest.java
+package com.imooc.ioc.injection.service;
+
+import com.imooc.base.UnitTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class InjectionServiceTest extends UnitTestBase {
+
+    public InjectionServiceTest() {
+        super("classpath:spring-injection.xml");
+    }
+
+    @Test
+    public void testSetter() {
+        InjectionService service = super.getBean("injectionService");
+        service.save("这是要保存的数据");
+    }
+
+    @Test
+    public void testCons() {
+        InjectionService service = super.getBean("injectionService");
+        service.save("这是要保存的数据");
+    }
+}
+
+//
+package com.imooc.ioc.injection.service;
+
+public interface InjectionService {
+    void save(String arg);
+}
+
+//
+package com.imooc.ioc.injection.service;
+
+import com.imooc.ioc.injection.dao.InjectionDAO;
+
+public class InjectionServiceImpl implements InjectionService {
+    public void init() {
+        System.out.println("InjectionServiceImpl.init()");
+    }
+
+    private InjectionDAO injectionDAO;
+
+    //构造注入
+    public InjectionServiceImpl(InjectionDAO injectionDAO1) {
+        this.injectionDAO = injectionDAO1;
+    }
+
+    //设值注入
+    public void setInjectionDAO(InjectionDAO injectionDAO) {
+        this.injectionDAO = injectionDAO;
+    }
+
+    public void save(String arg) {
+        //模拟业务操作
+        System.out.println("Service接收参数：" + arg);
+        arg += ":" + this.hashCode();
+        injectionDAO.save(arg);
+    }
+}
+
+//
+package com.imooc.ioc.injection.dao;
+
+public interface InjectionDAO {
+    void save(String arg);
+}
+
+//
+package com.imooc.ioc.injection.dao;
+
+public class InjectionDAOImpl implements InjectionDAO {
+
+    public void save(String arg) {
+        System.out.println("保存数据：" + arg);
+    }
+}
+
+//spring-injection.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd" >
+
+    <!-- 设值注入 -->
+   <!--<bean id="injectionService" class="com.imooc.ioc.injection.service.InjectionServiceImpl">-->
+       <!--<property name="injectionDAO" ref="injectionDAO"></property>-->
+   <!--</bean>-->
+
+    <!-- 构造注入 -->
+    <bean id="injectionService" class="com.imooc.ioc.injection.service.InjectionServiceImpl" init-method="init">
+        <constructor-arg name="injectionDAO1" ref="injectionDAO"></constructor-arg>
+    </bean>
+
+    <bean id="injectionDAO" class="com.imooc.ioc.injection.dao.InjectionDAOImpl"></bean>
+</beans>
+//------------------------------------------------------------------------------------------------
+3-2 Bean的生命周期
+
+//初始化
+package com.imooc.ioc.injection.service;
+
+import com.imooc.ioc.injection.dao.InjectionDAO;
+import org.springframework.beans.factory.InitializingBean;
+
+public class InjectionServiceImpl implements InjectionService, InitializingBean { //第1种，实现InitializingBean方法
+    private InjectionDAO injectionDAO;
+
+    public void init() { //第2种，配置init-method="init"
+        System.out.println("InjectionServiceImpl.init()");
+    }
+
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("InjectionServiceImpl.afterPropertiesSet()");
+    }
+
+    //构造注入
+    public InjectionServiceImpl(InjectionDAO injectionDAO1) {
+        this.injectionDAO = injectionDAO1;
+    }
+
+    //设值注入
+    public void setInjectionDAO(InjectionDAO injectionDAO) {
+        this.injectionDAO = injectionDAO;
+    }
+
+    public void save(String arg) {
+        //模拟业务操作
+        System.out.println("Service接收参数：" + arg);
+        arg += ":" + this.hashCode();
+        injectionDAO.save(arg);
+    }
+}
+
+//销毁
+-实现DisposableBean接口
+-配置destroy-method
+
+//配置全局默认初始化、销毁方法
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+        default-init-method="init" default-destroy-method="destroy"> //类可以不配置方法，则不执行，配置就会执行
+即便方法为private，也可以执行到：private void init()
+
+优先级
+//
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+        default-init-method="start" default-destroy-method="stop">
+
+    <!-- 设值注入 -->
+   <!--<bean id="injectionService" class="com.imooc.ioc.injection.service.InjectionServiceImpl">-->
+       <!--<property name="injectionDAO" ref="injectionDAO"></property>-->
+   <!--</bean>-->
+
+    <!-- 构造注入 -->
+    <bean id="injectionService" class="com.imooc.ioc.injection.service.InjectionServiceImpl" init-method="initMethod" destroy-method="destroyMethod">
+        <constructor-arg name="injectionDAO1" ref="injectionDAO"></constructor-arg>
+    </bean>
+
+    <bean id="injectionDAO" class="com.imooc.ioc.injection.dao.InjectionDAOImpl"></bean>
+</beans>
+
+//
+package com.imooc.ioc.injection.service;
+
+import com.imooc.ioc.injection.dao.InjectionDAO;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+
+public class InjectionServiceImpl implements InjectionService, InitializingBean, DisposableBean {
+    private InjectionDAO injectionDAO;
+
+    private void initMethod() {
+        System.out.println("InjectionServiceImpl.initMethod()");
+    }
+
+    private void destroyMethod() {
+        System.out.println("InjectionServiceImpl.destroyMethod()");
+    }
+
+    private void start() {
+        System.out.println("InjectionServiceImpl.start()");
+    }
+
+    private void stop() {
+        System.out.println("InjectionServiceImpl.stop()");
+    }
+
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("InjectionServiceImpl.afterPropertiesSet()");
+    }
+
+    public void destroy() throws Exception {
+        System.out.println("InjectionServiceImpl.destroy()");
+    }
+
+    //构造注入
+    public InjectionServiceImpl(InjectionDAO injectionDAO1) {
+        this.injectionDAO = injectionDAO1;
+    }
+
+    //设值注入
+    public void setInjectionDAO(InjectionDAO injectionDAO) {
+        this.injectionDAO = injectionDAO;
+    }
+
+    public void save(String arg) {
+        //模拟业务操作
+        System.out.println("Service接收参数：" + arg);
+        arg += ":" + this.hashCode();
+        injectionDAO.save(arg);
+    }
+}
+
+输出：
+四月 28, 2018 10:32:55 下午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@14caa3f: startup date [Sat Apr 28 22:32:55 CST 2018]; root of context hierarchy
+四月 28, 2018 10:32:55 下午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from class path resource [spring-injection.xml]
+InjectionServiceImpl.afterPropertiesSet()
+InjectionServiceImpl.initMethod()
+四月 28, 2018 10:32:55 下午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@14caa3f: startup date [Sat Apr 28 22:32:55 CST 2018]; root of context hierarchy
+InjectionServiceImpl.destroy()
+InjectionServiceImpl.destroyMethod()
+
+可以看到：接口方法>类方法或默认全局方法（类方法如果有会覆盖默认全局方法）
+//------------------------------------------------------------------------------------------------
+3-3 Aware接口
+
+package com.imooc.ioc.injection.service;
+
+import com.imooc.base.UnitTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class InjectionServiceTest extends UnitTestBase {
+
+    public InjectionServiceTest() {
+        super("classpath:spring-injection.xml");
+    }
+
+    @Test
+    public void testSetter() {
+        InjectionService service = super.getBean("injectionService");
+//        System.out.println("testSetter: " + service.hashCode());
+    }
+}
+
+//spring*.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="injectionService" class="com.imooc.ioc.injection.service.InjectionServiceImpl" scope="prototype"></bean> //这里配置为prototype将导致运行错误，有两个对象在同时创建，修改为singleton则正常运行，如果没有scope属性则默认是singleton方式
+
+    <bean id="injectionDAO" class="com.imooc.ioc.injection.dao.InjectionDAOImpl"></bean>
+</beans>
+
+//InjectionServiceImpl
+package com.imooc.ioc.injection.service;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
+public class InjectionServiceImpl implements InjectionService, ApplicationContextAware, BeanNameAware {
+    private String beanName;
+
+    public void save(String arg) {
+        System.out.println("InjectionServiceImpl.save()");
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        System.out.println("InjectionServiceImpl.setApplicationContext(): " + applicationContext.getBean(this.beanName).hashCode());//通过获取的beanName创建对象
+    }
+
+    public void setBeanName(String name) {
+        this.beanName = name;
+        System.out.println("InjectionServiceImpl.setBeanName(): " + name);
+    }
+}
+
+四月 28, 2018 11:17:11 下午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@14caa3f: startup date [Sat Apr 28 23:17:11 CST 2018]; root of context hierarchy
+四月 28, 2018 11:17:11 下午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from class path resource [spring-injection.xml]
+InjectionServiceImpl.setBeanName(): injectionService
+InjectionServiceImpl.setApplicationContext(): 9852548
+四月 28, 2018 11:17:11 下午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@14caa3f: startup date [Sat Apr 28 23:17:11 CST 2018]; root of context hierarchy
+//------------------------------------------------------------------------------------------------
+3-4 AutoWiring
+//AutoWiringServiceTest.java
+package com.imooc.ioc.autowiring.service;
+
+import com.imooc.base.UnitTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class AutoWiringServiceTest extends UnitTestBase {
+
+    public AutoWiringServiceTest() {
+        super("classpath:spring-autowiring.xml");
+    }
+
+    @Test
+    public void testSay() {
+        AutoWiringService service = super.getBean("autoWiringService");
+        service.say("hello");
+    }
+}
+
+//AutoWiringService.java
+package com.imooc.ioc.autowiring.service;
+
+import com.imooc.ioc.autowiring.dao.AutoWiringDAO;
+
+public class AutoWiringService {
+    private AutoWiringDAO autoWiringDAO; //byType是与成员变量类型相匹配，与变量名称没关系
+
+    public void setAutoWiringDAO(AutoWiringDAO autoWiringDAO) {
+        this.autoWiringDAO = autoWiringDAO;
+    }
+
+    public void say(String word) {
+        this.autoWiringDAO.say(word);
+    }
+}
+
+//AutoWiringDAO.java
+package com.imooc.ioc.autowiring.dao;
+
+public class AutoWiringDAO {
+    public void say(String word) {
+        System.out.println("AutoWiringDAO: " + word);
+    }
+}
+
+//spring-autowiring.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+        default-autowire="byName">
+
+    <bean id="autoWiringService" class="com.imooc.ioc.autowiring.service.AutoWiringService"></bean>
+
+    <bean id="autoWiringDAO" class="com.imooc.ioc.autowiring.dao.AutoWiringDAO"></bean> //byName是通过set方法匹配，只要id与set方法名称一样即可
+</beans>
+
+//constructor
+package com.imooc.ioc.autowiring.service;
+
+import com.imooc.ioc.autowiring.dao.AutoWiringDAO;
+
+public class AutoWiringService {
+    private AutoWiringDAO autoWiringDAO;
+    private String str;
+
+    //构造方法是和参数类型匹配，不依赖变量名称
+    public AutoWiringService(AutoWiringDAO autoWiringDAO) { //如果提供了constructor，则在没有默认构造函数的时候，byName和byType两种方法将抛异常，无默认构造函数
+        System.out.println("AutoWiringService()");
+        this.autoWiringDAO = autoWiringDAO;
+    }
+    
+    //优先与多个参数的匹配
+    public AutoWiringService(AutoWiringDAO autoWiringDAO, String str) {
+        System.out.println("AutoWiringService() two parameters");
+        this.str = str;
+        this.autoWiringDAO = autoWiringDAO;
+    }
+
+
+    public void setAutoWiringDAO(AutoWiringDAO autoWiringDAO) {
+        System.out.println("setAutoWiringDAO()");
+        this.autoWiringDAO = autoWiringDAO;
+    }
+
+    public void say(String word) {
+        this.autoWiringDAO.say(word);
+    }
+}
+
+//
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd"
+        default-autowire="constructor">
+
+    <bean id="autoWiringService" class="com.imooc.ioc.autowiring.service.AutoWiringService"></bean>
+
+    <bean id="autoWiringDAO" class="com.imooc.ioc.autowiring.dao.AutoWiringDAO"></bean>
+    <bean class="java.lang.String"></bean>//不配置这行，将与one parameter匹配
+</beans>
+输出：
+四月 29, 2018 12:32:41 上午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@14caa3f: startup date [Sun Apr 29 00:32:41 CST 2018]; root of context hierarchy
+四月 29, 2018 12:32:41 上午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from class path resource [spring-autowiring.xml]
+AutoWiringService() two parameters
+AutoWiringDAO: hello
+四月 29, 2018 12:32:41 上午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@14caa3f: startup date [Sun Apr 29 00:32:41 CST 2018]; root of context hierarchy
+//------------------------------------------------------------------------------------------------
+3-5 Resources https://www.imooc.com/video/3758
+所有的Application都继承于ResourceLoader
+Resource getResource(String s);
+
+入参可以是：
+classpath:config.txt
+file:d:\\config.txt
+url:https://xxx
+config.txt（依赖于ApplicationContext的创建方式）
+
+//------------------------------------------------------------------------------------------------
+4-1 Bean的作用域及定义的注释实现
+//spring-beanannotation.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+        <context:component-scan base-package="com.imooc.ioc.annotation"></context:component-scan>
+</beans>
+
+//
+package com.imooc.ioc.annotation;
+
+import org.springframework.stereotype.Component;
+
+@Scope("prototype")//默认为singleton
+@Component //@Component("myBeanAnnotation")
+public class BeanAnnotation {
+
+    public void say(String word) {
+        System.out.println("BeanAnnotation: " + word);
+    }
+}
+
+//
+package com.imooc.ioc.annotation;
+
+import com.imooc.base.UnitTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class BeanAnnotationTest extends UnitTestBase {
+    public BeanAnnotationTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testSay() {
+        BeanAnnotation bean = super.getBean("beanAnnotation"); //myBeanAnnotation
+        bean.say("This is a test.");
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+4-2 Bean之Autowired注解
+
+//
+package com.imooc.ioc.annotation.injection.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.imooc.ioc.annotation.injection.dao.InjectionDAO;
+
+@Service
+public class InjectionServiceImpl implements InjectionService {
+
+    //要有无参数的构造函数
+    @Autowired
+    private InjectionDAO injectionDAO;
+
+    //构造函数
+    // @Autowired
+    // public InjectionServiceImpl(InjectionDAO injectionDAO) {
+        // this.injectionDAO = injectionDAO;
+    // }
+    
+    //setter
+    // @Autowired
+    // public void setInjectionDAO(InjectionDAO injectionDAO) {
+        // this.injectionDAO = injectionDAO;
+    // }
+
+    public void save(String arg) {
+        //模拟业务操作
+        System.out.println("Service接收参数：" + arg);
+        arg += ":" + this.hashCode();
+        injectionDAO.save(arg);
+    }
+}
+
+//InjectionServiceTest.java
+package com.imooc.ioc.annotation.injection.service;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class InjectionServiceTest extends UnitTestBase {
+    public InjectionServiceTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testAutowired() {
+        InjectionService service = super.getBean("injectionServiceImpl");
+        service.save("hello");
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+4-3 使用Autowired注解众所周知的解析依赖性接口
+如BeanFactory、ApplicationContext
+//
+package com.imooc.ioc.annotation.multibean;
+
+public interface BeanInterface {
+}
+
+//
+package com.imooc.ioc.annotation.multibean;
+
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Order(value=2) //Order顺序只影响List中的排序
+@Component
+public class BeanImplOne implements BeanInterface {
+}
+
+//继承org.springframework.core.Ordered来排序
+// package com.imooc.ioc.annotation.multibean;
+
+// import org.springframework.core.Ordered;
+// import org.springframework.stereotype.Component;
+
+// @Component
+// public class BeanImplOne implements BeanInterface, Ordered {
+    // @Override
+    // public int getOrder() {
+        // return 2;
+    // }
+// }
+
+
+//
+package com.imooc.ioc.annotation.multibean;
+
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Order(value=1)
+@Component
+public class BeanImplTwo implements BeanInterface {
+}
+
+
+
+//
+package com.imooc.ioc.annotation.multibean;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class BeanInvoker {
+
+    @Autowired
+    private List<BeanInterface> list;
+
+    @Autowired
+    private Map<String, BeanInterface> map;
+
+    public void say() {
+        if (null != list) {
+//            list.stream().forEach(e -> System.out.println(e.getClass().getName()));
+            list.forEach(e -> System.out.println(e.getClass().getName()));
+        } else {
+            System.out.println("list is null.");
+        }
+
+        if (null != map && !map.isEmpty()) {
+            for (Map.Entry<String, BeanInterface> entry : map.entrySet()) {
+                System.out.println(String.format("Key: %s, value: %s",  entry.getKey(), entry.getValue()));
+            }
+        }
+    }
+}
+
+
+//test
+package com.imooc.ioc.annotation.injection.service;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+import com.imooc.ioc.annotation.multibean.BeanInvoker;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class InjectionTest extends UnitTestBase {
+    public InjectionTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testMultBean() {
+        BeanInvoker invoker = super.getBean("beanInvoker");
+        invoker.say();
+    }
+}
+输出：
+四月 29, 2018 4:45:58 下午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@a8195f: startup date [Sun Apr 29 16:45:58 CST 2018]; root of context hierarchy
+四月 29, 2018 4:45:58 下午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from URL [file:/E:/Program%20Files/JetBrains/JavaProject/SpringProject/target/classes/spring-beanannotation.xml]
+com.imooc.ioc.annotation.multibean.BeanImplOne
+com.imooc.ioc.annotation.multibean.BeanImplTwo
+Key: beanImplOne, value: com.imooc.ioc.annotation.multibean.BeanImplOne@16856dd
+Key: beanImplTwo, value: com.imooc.ioc.annotation.multibean.BeanImplTwo@1b45159
+四月 29, 2018 4:45:58 下午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@a8195f: startup date [Sun Apr 29 16:45:58 CST 2018]; root of context hierarchy
+
+//------------------------------------------------------------------------------------------------
+4-4 使用Autowired注解 @Qualifier
+package com.imooc.ioc.annotation.multibean;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component
+public class BeanInvoker {
+
+    @Autowired
+    private List<BeanInterface> list;
+
+    @Autowired
+    private Map<String, BeanInterface> map;
+
+    @Autowired
+    @Qualifier("beanImplTwo") //如果不指定，运行报错，不知道自动绑定哪个
+    private BeanInterface beanInterface;
+
+    public void say() {
+        if (null != list) {
+            list.forEach(e -> System.out.println(e.getClass().getName()));
+        } else {
+            System.out.println("list is null.");
+        }
+
+        if (null != map && !map.isEmpty()) {
+            for (Map.Entry<String, BeanInterface> entry : map.entrySet()) {
+                System.out.println(String.format("Key: %s, value: %s",  entry.getKey(), entry.getValue()));
+            }
+        }
+    }
+
+    public void sayBean() {
+        if (null != beanInterface) {
+            System.out.println(beanInterface.getClass().getName());
+        } else {
+            System.out.println("beanInterface is null");
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+4-5 @Bean
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+public interface Store {
+}
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+public class StringStore implements Store {
+
+    public void init() {
+        System.out.println("This is init().");
+    }
+
+    public void destroy() {
+        System.out.println("This is destroy().");
+    }
+}
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class StoreConfig {
+
+    @Bean(name = "myStringStore", initMethod = "init", destroyMethod = "destroy") //init和destroy方法需要在返回的对象StringStore中定义
+    public Store stringStore() {
+        return new StringStore();
+    }
+}
+
+//JavaBasedTest.java
+package com.imooc.ioc.annotation.javabased;
+
+import com.imooc.base.UnitTestBase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class JavaBasedTest extends UnitTestBase {
+    public JavaBasedTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void test() {
+        Store store = super.getBean("myStringStore"); //没有指定@Bean name参数的情况下，id是函数方法名称
+        System.out.println(store.getClass().getName());
+    }
+}
+输出：
+四月 29, 2018 6:30:53 下午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@a8195f: startup date [Sun Apr 29 18:30:53 CST 2018]; root of context hierarchy
+四月 29, 2018 6:30:53 下午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from URL [file:/E:/Program%20Files/JetBrains/JavaProject/SpringProject/target/classes/spring-beanannotation.xml]
+四月 29, 2018 6:30:53 下午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+This is init().
+com.imooc.ioc.annotation.javabased.StringStore
+This is destroy().
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@a8195f: startup date [Sun Apr 29 18:30:53 CST 2018]; root of context hierarchy
+
+//------------------------------------------------------------------------------------------------
+4-5 Bean装配之基于Java的容器注解 @ImportResource和@Value
+
+//用xml配置
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+        <context:annotation-config/>
+        <context:property-placeholder location="classpath:com/acme/jdbc.properties"/>
+        <bean class="com.acme.AppConfig"/>
+        <bean class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+        </bean>
+</beans>
+
+
+//基于java配置
+//MyDriverManager.java
+package com.imooc.ioc.annotation.javabased;
+
+public class MyDriverManager {
+    public MyDriverManager(String url, String userName, String password) {
+        System.out.println("url: " + url);
+        System.out.println("userName: " + userName);
+        System.out.println("password: " + password);
+    }
+}
+
+//StoreConfig.java
+package com.imooc.ioc.annotation.javabased;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+
+@Configuration
+@ImportResource("classpath:config.xml")
+//@ImportResource("classpath:config.properties")//异常，这里导入的资源是Bean配置文件
+public class StoreConfig {
+
+    @Value("${url}")
+    private String url;
+
+    @Value("${jdbc.username}")
+    private String username;
+
+    @Value("${password}")
+    private String password;
+
+    @Bean
+    public MyDriverManager myDriverManager() {
+        return new MyDriverManager(url, username, password);
+    }
+}
+
+//config.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+        <context:property-placeholder location="classpath:config.properties"/>
+</beans>
+
+//config.properties
+password=root
+url=127.0.0.1
+jdbc.username=root
+
+//JavaBasedTest.java
+package com.imooc.ioc.annotation.javabased;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class JavaBasedTest extends UnitTestBase {
+    public JavaBasedTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testMyDriverManager() {
+        MyDriverManager manager = super.getBean("myDriverManager");
+        System.out.println(manager.getClass().getName());
+    }
+}
+
+这里的关系是：
+ImportResource引入的是Bean配置文件
+在Bean配置文件中配置properties资源文件
+在@Configuration类中用${XXX}字符串
+
+
+//------------------------------------------------------------------------------------------------
+4-7 基于Java的Bean配置 @Bean和@Scope
+//
+package com.imooc.ioc.annotation.javabased;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+
+@Configuration
+public class StoreConfig {
+    @Bean
+    @Scope(value = "prototype", proxyMode = ScopedProxyMode.DEFAULT)
+    public Store stringStore() {
+        return new StringStore();
+    }
+}
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class JavaBasedTest extends UnitTestBase {
+    public JavaBasedTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testBeanScope() {
+        Store store = super.getBean("stringStore");
+        System.out.println(store.hashCode());
+
+        store = super.getBean("stringStore");
+        System.out.println(store.hashCode());
+    }
+}
+//------------------------------------------------------------------------------------------------
+4-8 基于泛型的自动装配
+//
+package com.imooc.ioc.annotation.javabased;
+
+public interface Store<T> {
+}
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+public class StringStore implements Store<String> {
+}
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+public class IntegerStore implements Store<Integer> {
+}
+
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class StoreConfig {
+
+    @Autowired
+    private Store<String> stringStore;//根据泛型类型自动获取对应Bean类，则调用stringStore方法获取StringStore类
+
+    @Autowired
+    private Store<Integer> integerStore;
+
+    @Bean
+    public StringStore stringStore() {
+        return new StringStore();
+    }
+
+    @Bean
+    public IntegerStore integerStore() {
+        return new IntegerStore();
+    }
+
+    @Bean(name = "stringStoreTest")
+    public Store stringStoreTest() { //如果这里返回值定义为StringStore，则有两个函数返回为StringStore，在构造private Store<String> stringStore前，会把所有的返回值为StringStore的Bean函数调用一遍，走到下行sout语句时，stringStore还没有构造好，抛出空指针异常
+        //如果这里返回类型为Store，则初始化是按照stringStore(), integerStore(), stringStoreTest()来调用
+        //如果这里返回类型为StringStore，则初始化是按照stringStore(), stringStoreTest()，integerStore()来调用
+        System.out.println("stringStore: " + stringStore.getClass().getName());
+        System.out.println("integerStore: " + integerStore.getClass().getName());
+        return new StringStore();
+    }
+}
+
+//
+package com.imooc.ioc.annotation.javabased;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class JavaBasedTest extends UnitTestBase {
+    public JavaBasedTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testGeneric() {
+        Store store = super.getBean("stringStoreTest");//在调用这个函数时，不会再走到Store stringStoreTest()函数里
+    }
+}
+输出：
+四月 29, 2018 8:28:40 下午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@a8195f: startup date [Sun Apr 29 20:28:40 CST 2018]; root of context hierarchy
+四月 29, 2018 8:28:40 下午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from URL [file:/E:/Program%20Files/JetBrains/JavaProject/SpringProject/target/classes/spring-beanannotation.xml]
+stringStore: com.imooc.ioc.annotation.javabased.StringStore
+integerStore: com.imooc.ioc.annotation.javabased.IntegerStore
+
+四月 29, 2018 8:28:41 下午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@a8195f: startup date [Sun Apr 29 20:28:40 CST 2018]; root of context hierarchy
+
+
+//自定义Autowire类型，CustomAutowireConfigurer是BeanFactoryPostProcessor的子类，通过它可以注册自己的qualifier注解类型。
+//------------------------------------------------------------------------------------------------
+4-9 Bean装配之Spring对JSR支持的说明 
+参考CSDN：https://blog.csdn.net/yizhicxy/article/details/52129585
+
+//
+package com.imooc.ioc.annotation.jsr;
+
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class JsrDAO {
+    public void save() {
+        System.out.println("JsrDAO invoked.");
+    }
+}
+
+//
+package com.imooc.ioc.annotation.jsr;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class JsrService {
+    @Resource
+    private JsrDAO jsrDAO;
+
+//    @Resource
+    public void setJsrDAO(JsrDAO jsrDAO) {
+        this.jsrDAO = jsrDAO;
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("JsrService.init()");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("JsrService.destroy()");
+    }
+
+    public void save() {
+        jsrDAO.save();
+    }
+}
+
+//test
+package com.imooc.ioc.annotation.jsr;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class JsrService {
+    @Resource
+    private JsrDAO jsrDAO;
+
+//    @Resource
+    public void setJsrDAO(JsrDAO jsrDAO) {
+        this.jsrDAO = jsrDAO;
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("JsrService.init()");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("JsrService.destroy()");
+    }
+
+    public void save() {
+        jsrDAO.save();
+    }
+}
+
+
+//Spring 3.0对javax.inject的支持
+//JsrDAO.java
+package com.imooc.ioc.annotation.jsr;
+
+import org.springframework.stereotype.Repository;
+
+//@Repository //定义为接口后将无法Bean实例化JsrDAO
+public interface JsrDAO {
+    default void save() {
+        System.out.println("JsrDAO invoked.");
+    }
+}
+
+@Repository
+class JsrDAOImpl1 implements JsrDAO {
+    @Override
+    public void save() {
+        System.out.println("JsrDAOImpl1 invoked.");
+    }
+}
+
+@Repository
+class JsrDAOImpl2 implements JsrDAO {
+    @Override
+    public void save() {
+        System.out.println("JsrDAOImpl2 invoked.");
+    }
+}
+
+//JsrService.java
+package com.imooc.ioc.annotation.jsr;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+//@Service
+@Named
+public class JsrService {
+//    @Resource
+//    @Inject
+    private JsrDAO jsrDAO;
+
+//    @Resource
+    @Inject
+    public void setJsrDAO(@Named("jsrDAOImpl2") JsrDAO jsrDAO) { //这里用@Named指定用哪个类来自动绑定，功能同@Qualifier
+        this.jsrDAO = jsrDAO;
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("JsrService.init()");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("JsrService.destroy()");
+    }
+
+    public void save() {
+        jsrDAO.save();
+    }
+}
+
+//JsrTest.java
+package com.imooc.ioc.annotation.jsr;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class JsrTest extends UnitTestBase {
+
+    public JsrTest() {
+        super("classpath*:spring-beanannotation.xml");
+    }
+
+    @Test
+    public void testJsr() {
+        JsrService service = super.getBean("jsrService");
+        service.save();
+    }
+}
+输出：
+JsrService.init()
+JsrDAOImpl2 invoked.
+JsrService.destroy()
+//------------------------------------------------------------------------------------------------
+专题三 AOP
 
 //------------------------------------------------------------------------------------------------
 
+
 //------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------------------------
 
