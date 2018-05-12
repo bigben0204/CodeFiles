@@ -31440,6 +31440,4254 @@ JsrService.destroy()
 //------------------------------------------------------------------------------------------------
 专题三 AOP
 
+AOP实现方式
+预编译 --AspectJ
+运行期动态代理（JDK动态代理、CGLib动态代理）--SpringAOP、JbossAOP
+
+//------------------------------------------------------------------------------------------------
+5-4 Advice应用
+
+aop:around对应method的第一个参数必须为ProceedingJoinPoint类型
+//
+package com.imooc.aop.schema.advice.biz;
+
+public class AspectBiz {
+
+    public void biz() {
+        System.out.println("AspectBiz biz.");
+//        throw new RuntimeException();
+    }
+
+    public void init(String bizName, int times) {
+        System.out.println(String.format("AspectBiz init() bizName: %s, times: %s", bizName, times));
+    }
+}
+
+
+//
+package com.imooc.aop.schema.advice;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+
+public class MoocAspect {
+
+    public void before() {
+        System.out.println("MoocAspect before.");
+    }
+
+    public void afterReturning() {
+        System.out.println("MoocAspect afterReturning.");
+    }
+
+    public void afterThrowing() {
+        System.out.println("MoocAspect afterThrowing.");
+    }
+
+    public void after() {
+        System.out.println("MoocAspect after.");
+    }
+
+    public Object around(ProceedingJoinPoint pjp) {
+        Object obj = null;
+        try {
+            System.out.println("MoocAspect around1.");
+            obj = pjp.proceed();
+            System.out.println("MoocAspect around2.");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return obj;
+    }
+
+    public Object aroundInit(ProceedingJoinPoint pjp, String bizName, int times) {
+        System.out.println(String.format("MoocAspect aroundInit() bizName: %s, times: %s", bizName, times));
+        Object obj = null;
+        try {
+            System.out.println("MoocAspect aroundInit1.");
+            obj = pjp.proceed();
+            System.out.println("MoocAspect aroundInit2.");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return obj;
+    }
+}
+
+
+
+//AOPSchemaAdviceTest.java
+package com.imooc.aop.schema.advice;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.aop.schema.advice.biz.AspectBiz;
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class AOPSchemaAdviceTest extends UnitTestBase {
+    public AOPSchemaAdviceTest() {
+        super("classpath:spring-aop-schema-advice.xml");
+    }
+
+    @Test
+    public void testBiz() {
+        AspectBiz biz = super.getBean("aspectBiz");
+        biz.biz();
+    }
+
+    @Test
+    public void testInit() {
+        AspectBiz biz = super.getBean("aspectBiz");
+        biz.init("hello", 3);
+    }
+}
+
+//spring-aop-schema-advice.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+    <bean id="moocAspect" class="com.imooc.aop.schema.advice.MoocAspect"></bean>
+
+    <bean id="aspectBiz" class="com.imooc.aop.schema.advice.biz.AspectBiz"></bean>
+
+    <aop:config>
+        <aop:aspect id="moocAspectAOP" ref="moocAspect">
+            <aop:pointcut expression="execution(* com.imooc.aop.schema.advice.biz.*Biz.*(..))" id="moocPointcut"/>
+            <aop:before method="before" pointcut-ref="moocPointcut"/>
+            <aop:after-returning method="afterReturning" pointcut-ref="moocPointcut"/>
+            <aop:after-throwing method="afterThrowing" pointcut-ref="moocPointcut"/>
+            <aop:after method="after" pointcut-ref="moocPointcut"/>
+            <aop:around method="around" pointcut-ref="moocPointcut"/>
+            <aop:around method="aroundInit" pointcut="execution(* com.imooc.aop.schema.advice.biz.AspectBiz.init(String, int))
+             							and args(bizName, times)"/>
+
+            <!--<aop:declare-parents types-matching="com.imooc.aop.schema.advice.biz.*(+)"-->
+            <!--implement-interface="com.imooc.aop.schema.advice.Fit"-->
+            <!--default-impl="com.imooc.aop.schema.advice.FitImpl"/>-->
+        </aop:aspect>
+    </aop:config>
+
+</beans>
+输出：
+五月 01, 2018 1:03:18 上午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@1444d75: startup date [Tue May 01 01:03:18 CST 2018]; root of context hierarchy
+五月 01, 2018 1:03:18 上午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from class path resource [spring-aop-schema-advice.xml]
+MoocAspect before.
+MoocAspect around1.
+五月 01, 2018 1:03:18 上午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@1444d75: startup date [Tue May 01 01:03:18 CST 2018]; root of context hierarchy
+五月 01, 2018 1:03:18 上午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@1edc48a: startup date [Tue May 01 01:03:18 CST 2018]; root of context hierarchy
+五月 01, 2018 1:03:18 上午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from class path resource [spring-aop-schema-advice.xml]
+AspectBiz biz.
+MoocAspect around2.
+MoocAspect after.
+MoocAspect afterReturning.
+MoocAspect before.
+MoocAspect around1. //这里的顺序和xml中的配置先后有关系
+MoocAspect aroundInit() bizName: hello, times: 3
+MoocAspect aroundInit1.
+AspectBiz init() bizName: hello, times: 3
+MoocAspect aroundInit2.
+MoocAspect around2.
+MoocAspect after.
+MoocAspect afterReturning.
+五月 01, 2018 1:03:18 上午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@1edc48a: startup date [Tue May 01 01:03:18 CST 2018]; root of context hierarchy
+
+Process finished with exit code 0
+
+//------------------------------------------------------------------------------------------------
+5-6 Introduction
+
+//
+package com.imooc.aop.schema.advice;
+
+public interface Fit {
+    void filter();
+}
+
+//
+package com.imooc.aop.schema.advice;
+
+public class FitImpl implements Fit {
+    @Override
+    public void filter() {
+        System.out.println("FitImpl filter()");
+    }
+}
+
+
+//
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+    <bean id="moocAspect" class="com.imooc.aop.schema.advice.MoocAspect"></bean>
+
+    <bean id="aspectBiz" class="com.imooc.aop.schema.advice.biz.AspectBiz"></bean>
+
+    <aop:config>
+        <aop:aspect id="moocAspectAOP" ref="moocAspect">
+            <aop:declare-parents types-matching="com.imooc.aop.schema.advice.biz.*(+)"
+                                 implement-interface="com.imooc.aop.schema.advice.Fit"
+                                 default-impl="com.imooc.aop.schema.advice.FitImpl"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
+输出：
+FitImpl filter()
+
+schema-defined aspects只支持singleton model
+//------------------------------------------------------------------------------------------------
+5-7 Advisors
+
+//Invoke.java
+package com.imooc.aop.schema.advisors.service;
+
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.stereotype.Service;
+
+@Service
+public class InvokeService {
+    public void invoke() {
+        System.out.println("InvokeService ......");
+    }
+
+    public void invokeException() {
+        throw new PessimisticLockingFailureException("");
+    }
+}
+
+
+//ConcurrentOperationExecutor.java
+package com.imooc.aop.schema.advisors;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.springframework.dao.PessimisticLockingFailureException;
+
+public class ConcurrentOperationExecutor {
+
+    private static final int DEFAULT_MAX_RETRIES = 2;
+
+    private int maxRetries = DEFAULT_MAX_RETRIES;
+
+    private int order = 1;
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
+        int numAttempts = 0;
+        PessimisticLockingFailureException lockingFailureException;
+        do {
+            numAttempts++;
+            System.out.println("Try times: " + numAttempts);
+            try {
+                return pjp.proceed();
+            } catch (PessimisticLockingFailureException ex) {
+                lockingFailureException = ex;
+            }
+        } while (numAttempts <= maxRetries);
+
+        System.out.println("Try error: " + numAttempts);
+        throw lockingFailureException;
+    }
+}
+
+
+//AOPSchemaAdvisorsTest.java
+package com.imooc.aop.schema.advisors;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.aop.schema.advisors.service.InvokeService;
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class AOPSchemaAdvisorsTest extends UnitTestBase {
+    public AOPSchemaAdvisorsTest() {
+        super("classpath:spring-aop-schema-advisors.xml");
+    }
+
+    @Test
+    public void testSave() {
+        InvokeService service = super.getBean("invokeService");
+        service.invoke();
+
+        System.out.println();
+        service.invokeException();
+    }
+}
+
+//spring-aop-schema-advisors.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<context:component-scan base-package="com.imooc.aop.schema"></context:component-scan>
+
+	<aop:config>
+		<aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor">
+			<aop:pointcut id="idempotentOperation"
+				expression="execution(* com.imooc.aop.schema.advisors.service.*.*(..)) " />
+<!--      			expression="execution(* com.imooc.aop.schema.service.*.*(..)) and -->
+<!--         						@annotation(com.imooc.aop.schema.Idempotent)" /> -->
+			<aop:around pointcut-ref="idempotentOperation" method="doConcurrentOperation" />
+		</aop:aspect>
+	</aop:config>
+	
+	<bean id="concurrentOperationExecutor" class="com.imooc.aop.schema.advisors.ConcurrentOperationExecutor">
+		<property name="maxRetries" value="3" />
+		<property name="order" value="100" />
+	</bean>
+
+ </beans>
+输出：
+五月 01, 2018 3:22:35 下午 org.springframework.context.support.ClassPathXmlApplicationContext prepareRefresh
+信息: Refreshing org.springframework.context.support.ClassPathXmlApplicationContext@133adc: startup date [Tue May 01 15:22:35 CST 2018]; root of context hierarchy
+五月 01, 2018 3:22:35 下午 org.springframework.beans.factory.xml.XmlBeanDefinitionReader loadBeanDefinitions
+信息: Loading XML bean definitions from class path resource [spring-aop-schema-advisors.xml]
+五月 01, 2018 3:22:35 下午 org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor <init>
+信息: JSR-330 'javax.inject.Inject' annotation found and supported for autowiring
+Try times: 1
+
+五月 01, 2018 3:22:35 下午 org.springframework.context.support.ClassPathXmlApplicationContext doClose
+信息: Closing org.springframework.context.support.ClassPathXmlApplicationContext@133adc: startup date [Tue May 01 15:22:35 CST 2018]; root of context hierarchy
+InvokeService ......
+
+Try times: 1
+Try times: 2
+Try times: 3
+Try times: 4
+Try times: 5
+Try times: 6
+Try error: 6
+//------------------------------------------------------------------------------------------------
+6-1 Spring AOP API 在代码中实现切入点等（第5章介绍的是基于xml的配置）
+
+//------------------------------------------------------------------------------------------------
+6-2 6-3 ProxyFactoryBean
+//https://blog.csdn.net/cpzhong/article/details/6423333 JDK动态代理和CGLIB代码
+
+//
+package com.imooc.aop.api;
+
+public interface BizLogic {
+    String save();
+}
+
+//
+package com.imooc.aop.api;
+
+public class BizLogicImpl implements BizLogic {
+    @Override
+    public String save() {
+        System.out.println("BizLogicImpl: save()");
+        return "BizLogicImpl save";
+//        throw new RuntimeException();
+    }
+}
+
+//
+package com.imooc.aop.api;
+
+import java.lang.reflect.Method;
+
+import org.springframework.aop.AfterReturningAdvice;
+
+public class MoocAfterReturningAdvice implements AfterReturningAdvice {
+
+    @Override
+    public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+        System.out.println("MoocAfterReturningAdvice: " + method.getName() + "     " +
+            target.getClass().getName() + "     " + returnValue);
+    }
+}
+
+//
+package com.imooc.aop.api;
+
+import java.lang.reflect.Method;
+
+import org.springframework.aop.MethodBeforeAdvice;
+
+public class MoocBeforeAdvice implements MethodBeforeAdvice {
+    @Override
+    public void before(Method method, Object[] objects, Object o) throws Throwable {
+        System.out.println("MoocBeforeAdvice: " + method.getName() + "    " + o.getClass().getName());
+    }
+}
+
+//
+package com.imooc.aop.api;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
+public class MoocMethodInterceptor implements MethodInterceptor {
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        System.out.println("MoocMethodInterceptor1: " + invocation.getMethod().getName() +
+            "    " + invocation.getStaticPart().getClass().getName());
+        Object obj = invocation.proceed();
+        System.out.println("MoocMethodInterceptor2 returnValue: " + obj);
+        return obj;
+    }
+}
+
+//
+package com.imooc.aop.api;
+
+import java.lang.reflect.Method;
+
+import org.springframework.aop.ThrowsAdvice;
+
+public class MoocThrowsAdvice implements ThrowsAdvice {
+
+    public void afterThrowing(Exception ex) throws Throwable {
+        System.out.println("MoocThrowsAdvice afterThrowing 1");
+    }
+
+    public void afterThrowing(Method method, Object[] args, Object target, Exception ex) throws Throwable {
+        System.out.println("MoocThrowsAdvice afterThrowing 2: " + method.getName() + "    " + target.getClass().getName());
+    }
+}
+
+//
+package com.imooc.aop.api.introduction;
+
+public interface Lockable {
+    void lock();
+
+    void unlock();
+
+    boolean locked();
+}
+
+//
+package com.imooc.aop.api.introduction;
+
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+
+public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
+    private boolean locked;
+
+    @Override
+    public void lock() {
+        this.locked = true;
+    }
+
+    @Override
+    public void unlock() {
+        this.locked = false;
+    }
+
+    @Override
+    public boolean locked() {
+        return this.locked;
+    }
+
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        if (locked() && invocation.getMethod().getName().startsWith("set")) {
+            throw new RuntimeException();
+        }
+        return super.invoke(invocation);
+    }
+}
+
+//
+package com.imooc.aop.api.introduction;
+
+import org.springframework.aop.support.DefaultIntroductionAdvisor;
+
+public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
+
+    private static final long serialVersionUID = -171332350782163120L;
+
+    public LockMixinAdvisor() {
+        super(new LockMixin(), Lockable.class);
+    }
+}
+
+
+//AOPApiTest.java
+package com.imooc.aop.api;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class AOPApiTest extends UnitTestBase {
+    public AOPApiTest() {
+        super("classpath:spring-aop-api.xml");
+    }
+
+    @Test
+    public void testSave() {
+        BizLogic logic = super.getBean("bizLogicImpl");
+        logic.save();
+    }
+}
+
+//spring-aop-api.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="moocBeforeAdvice" class="com.imooc.aop.api.MoocBeforeAdvice"></bean>
+
+    <bean id="moocAfterReturningAdvice" class="com.imooc.aop.api.MoocAfterReturningAdvice"></bean>
+
+    <bean id="moocMethodInterceptor" class="com.imooc.aop.api.MoocMethodInterceptor"></bean>
+
+    <bean id="moocThrowsAdvice" class="com.imooc.aop.api.MoocThrowsAdvice"></bean>
+
+    <bean id="bizLogicImplTarget" class="com.imooc.aop.api.BizLogicImpl"></bean>
+
+    <!--这种切入点配置方式可以指定特定的方法-->
+    <!--<bean id="pointcutBean" class="org.springframework.aop.support.NameMatchMethodPointcut">-->
+        <!--<property name="mappedNames">-->
+            <!--<list>-->
+                <!--<value>sa*</value>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!--<bean id="defaultAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">-->
+        <!--<property name="advice" ref="moocBeforeAdvice"/>-->
+        <!--<property name="pointcut" ref="pointcutBean"/>-->
+    <!--</bean>-->
+
+    <!--<bean id="bizLogicImpl" class="org.springframework.aop.framework.ProxyFactoryBean">-->
+        <!--<property name="target">-->
+            <!--<ref bean="bizLogicImplTarget"/>-->
+        <!--</property>-->
+        <!--<property name="interceptorNames">-->
+            <!--<list>-->
+                <!--<value>defaultAdvisor</value>-->
+                <!--<value>moocAfterReturningAdvice</value>-->
+                <!--<value>moocMethodInterceptor</value>-->
+                <!--<value>moocThrowsAdvice</value>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+
+    <!--这里创建代理的目的就是为了执行各种Advice，如果不使用代理，则直接获取到的bizLogicImpl类，就无法执行Advice-->
+    <!--<bean id="bizLogicImpl" class="org.springframework.aop.framework.ProxyFactoryBean">-->
+        <!--&lt;!&ndash;proxyInterfaces属性被设置为一个或多个全限定接口名，基于JDK的接口将被创建&ndash;&gt;-->
+        <!--&lt;!&ndash;如果proxyInterfaces属性没有被设置，但是目标类实现了一个（或者多个）接口，那么ProxyFactoryBean将自动检测到这个目标类已经实现了至少一个接口，创建一个基于JDK的代理&ndash;&gt;-->
+        <!--<property name="proxyInterfaces">-->
+            <!--<value>com.imooc.aop.api.BizLogic</value>-->
+        <!--</property>-->
+        <!--<property name="target">-->
+            <!--<bean class="com.imooc.aop.api.BizLogicImpl"></bean>-->
+            <!--&lt;!&ndash;<ref bean="bizLogicImplTarget"/>&ndash;&gt;-->
+        <!--</property>-->
+        <!--<property name="interceptorNames">-->
+            <!--<list>-->
+                <!--<value>moocBeforeAdvice</value>-->
+                <!--<value>moocAfterReturningAdvice</value>-->
+                <!--<value>moocMethodInterceptor</value>-->
+                <!--<value>moocThrowsAdvice</value>-->
+                <!--&lt;!&ndash;<value>mooc*</value> &lt;!&ndash;用*做通配符，只能匹配所有拦截器加入通知链，即Interceptor&ndash;&gt;&ndash;&gt;-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+
+    <bean id="baseProxyBean" class="org.springframework.aop.framework.ProxyFactoryBean"
+          lazy-init="true" abstract="true"></bean>
+
+    <bean id="bizLogicImpl" parent="baseProxyBean">
+        <property name="target">
+            <bean class="com.imooc.aop.api.BizLogicImpl"></bean>
+        </property>
+        <property name="proxyInterfaces">
+            <value>com.imooc.aop.api.BizLogic</value>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <value>moocBeforeAdvice</value>
+                <value>moocAfterReturningAdvice</value>
+                <value>moocMethodInterceptor</value>
+                <value>moocThrowsAdvice</value>
+            </list>
+        </property>
+    </bean>
+
+</beans>
+输出：
+MoocBeforeAdvice: save    com.imooc.aop.api.BizLogicImpl
+MoocMethodInterceptor1: save    java.lang.reflect.Method
+BizLogicImpl: save()
+MoocMethodInterceptor2 returnValue: BizLogicImpl save
+MoocAfterReturningAdvice: save     com.imooc.aop.api.BizLogicImpl     BizLogicImpl save
+//------------------------------------------------------------------------------------------------
+7-2 Advice定义及实例
+
+//
+package com.imooc.aop.aspectj.biz;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class MoocBiz {
+
+    public String save(String arg) {
+        System.out.println("MoocBiz save: " + arg);
+        return "Return value: " + arg;
+//        throw new RuntimeException("Save failed.");
+    }
+}
+
+//
+package com.imooc.aop.aspectj;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+
+@Component
+@Aspect
+public class MoocAspect {
+
+    @Pointcut("execution(* com.imooc.aop.aspectj.biz.*Biz.*(..))")
+    public void pointcut() {
+
+    }
+
+    @Pointcut("within(com.imooc.aop.aspectj.biz.*)")
+    public void bizPointcut() {
+
+    }
+
+//    @Before("execution(* com.imooc.aop.aspectj.biz.*Biz.*(..))")
+    @Before("pointcut()") //使用pointcut()函数对应的切入点
+    public void before() {
+        System.out.println("Before");
+    }
+
+    @AfterReturning(pointcut = "bizPointcut()", returning = "returnValue")
+    public void afterReturning(Object returnValue) { //这里的入参名就是注解中的"returnValue"
+        System.out.println("AfterReturning: " + returnValue);
+    }
+
+    @AfterThrowing(pointcut = "pointcut()", throwing = "e")
+    public void afterThrowing(RuntimeException e) {
+        System.out.println("After throwing: " + e.getMessage());
+    }
+
+    @After("pointcut()")
+    public void after() {
+        System.out.println("After");
+    }
+
+    @Around("pointcut()")
+    public Object around(ProceedingJoinPoint pjp) throws Throwable {
+        System.out.println("Around 1");
+        Object obj = pjp.proceed();
+//        Object obj = pjp.proceed(new Object[] {"hello"}); //可以构造入参，会把原函数的入参修改成新的入参
+        System.out.println("Around 2: " + obj);
+        return obj;
+    }
+}
+
+//spring-aop-aspectj.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="com.imooc.aop.aspectj"/>
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+</beans>
+
+//
+package com.imooc.aop.aspectj;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
+
+import com.imooc.aop.aspectj.biz.MoocBiz;
+import com.imooc.base.UnitTestBase;
+
+@RunWith(BlockJUnit4ClassRunner.class)
+public class AspectJTest extends UnitTestBase {
+    public AspectJTest() {
+        super("classpath:spring-aop-aspectj.xml");
+    }
+
+    @Test
+    public void test() {
+        MoocBiz biz = getBean("moocBiz");
+        biz.save("This is a test.");
+    }
+}
+输出：
+Around 1
+Before
+MoocBiz save: This is a test.
+After
+AfterReturning: Return value: This is a test.
+//------------------------------------------------------------------------------------------------
+7-3 Advice扩展
+//给Advice传递参数
+//
+package com.imooc.aop.aspectj;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface MoocMethod {
+    String value();
+}
+
+//
+package com.imooc.aop.aspectj.biz;
+
+import org.springframework.stereotype.Service;
+
+import com.imooc.aop.aspectj.MoocMethod;
+
+@Service
+public class MoocBiz {
+
+    @MoocMethod(value = "MoocBiz save MoocMethod.")
+    public String save(String arg) {
+        System.out.println("MoocBiz save: " + arg);
+        return "Return value: " + arg;
+//        throw new RuntimeException("Save failed.");
+    }
+}
+
+
+//
+package com.imooc.aop.aspectj;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.AfterThrowing;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+
+@Component
+@Aspect
+public class MoocAspect {
+
+    @Pointcut("execution(* com.imooc.aop.aspectj.biz.*Biz.*(..))")
+    public void pointcut() {
+
+    }
+
+    @Pointcut("within(com.imooc.aop.aspectj.biz.*)")
+    public void bizPointcut() {
+
+    }
+
+//    @Before("execution(* com.imooc.aop.aspectj.biz.*Biz.*(..))")
+    @Before("pointcut()") //使用pointcut()函数对应的切入点
+    public void before() {
+        System.out.println("Before");
+    }
+
+    @Before("pointcut() && args(arg)")
+    public void beforeWithParam(String arg) {
+        System.out.println("BeforeWithParam: " + arg);
+    }
+
+    @Before("pointcut() && @annotation(moocMethod)")
+    public void beforeWithAnnotation(MoocMethod moocMethod) {
+        System.out.println("BeforeWithAnnotation: " + moocMethod.value());
+    }
+
+    @Before("pointcut() && args(arg) && @annotation(moocMethod)")
+    public void beforeWithAnnotationAndParam(String arg, MoocMethod moocMethod) {
+        System.out.println("BeforeWithAnnotationAndParam: " + moocMethod.value() + ", arg: " + arg);
+    }
+
+    @AfterReturning(pointcut = "bizPointcut()", returning = "returnValue")
+    public void afterReturning(Object returnValue) { //这里的入参名就是注解中的"returnValue"
+        System.out.println("AfterReturning: " + returnValue);
+    }
+
+    @AfterThrowing(pointcut = "pointcut()", throwing = "e")
+    public void afterThrowing(RuntimeException e) {
+        System.out.println("After throwing: " + e.getMessage());
+    }
+
+    @After("pointcut()")
+    public void after() {
+        System.out.println("After");
+    }
+
+    @Around("pointcut()")
+    public Object around(ProceedingJoinPoint pjp) throws Throwable {
+        System.out.println("Around 1");
+        Object obj = pjp.proceed();
+//        Object obj = pjp.proceed(new Object[] {"hello"}); //可以构造入参，会把原函数的入参修改成新的入参
+        System.out.println("Around 2: " + obj);
+        return obj;
+    }
+}
+输出：
+Around 1
+Before
+BeforeWithAnnotation: MoocBiz save MoocMethod.
+BeforeWithAnnotationAndParam: MoocBiz save MoocMethod., arg: This is a test.
+BeforeWithParam: This is a test.
+MoocBiz save: This is a test.
+Around 2: Return value: This is a test.
+After
+AfterReturning: Return value: This is a test.
+
+
+@perthis @pertarget
+//------------------------------------------------------------------------------------------------
+Jdbc连接数据库 https://www.cnblogs.com/GarfieldEr007/p/5746137.html
+//
+package jdbc;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class DbHelper {
+    public static final String url = "jdbc:mysql:///hibernate?serverTimezone=UTC";
+//    public static final String url = "jdbc:mysql://127.0.0.1/hibernate?serverTimezone=UTC";
+//    public static final String url = "jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC";
+    public static final String name = "com.mysql.cj.jdbc.Driver";
+    public static final String user = "root";
+    public static final String password = "root123";
+
+    public Connection conn = null;
+    public PreparedStatement pst = null;
+
+    public DbHelper(String sql) {
+        try {
+            Class.forName(name);//指定连接类型
+            conn = DriverManager.getConnection(url, user, password);//获取连接
+            pst = conn.prepareStatement(sql);//准备执行语句
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void close() {
+        try {
+            this.conn.close();
+            this.pst.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+//
+package jdbc;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class JdbcConnection {
+
+    static String sql = null;
+    static DbHelper db1 = null;
+    static ResultSet ret = null;
+
+    public static void main(String[] args) {
+        sql = "select *from t_students_copy1";//SQL语句
+        db1 = new DbHelper(sql);//创建DBHelper对象
+
+        try {
+            ret = db1.pst.executeQuery();//执行语句，得到结果集  
+            while (ret.next()) {
+                String uid = ret.getString(1);
+                String ufname = ret.getString(2);
+                String ulname = ret.getString(3);
+                String udate = ret.getString(4);
+                System.out.println(uid + "\t" + ufname + "\t" + ulname + "\t" + udate );
+            }//显示数据  
+            ret.close();
+            db1.close();//关闭连接  
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+//------------------------------------------------------------------------------------------------
+1-2 ORM
+https://www.imooc.com/video/7702
+
+Object Relationship Mapping：对象/关系映射
+
+//------------------------------------------------------------------------------------------------
+1-11 通过Hibernate API编写
+
+//Students.java
+package entity;
+
+import java.util.Date;
+
+//学生类
+public class Students {
+    //Java Beans类的四个基本原则
+    //1.公有类
+    //2.提供公有的不带参数的默认构造方法
+    //3.属性私有
+    //4.属性setter/getter封装
+
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String address;//地址
+
+    public Students() {
+    }
+
+    public Students(int sid, String sname, String gender, Date birthday, String address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "entity.Students{" +
+            "sid=" + sid +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//Students.hbm.xml 先通过Idea的Database视图建立数据库连接，再通过Persistence视图自动生成 https://blog.csdn.net/xubaifu1997/article/details/66476446
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="entity.Students" table="t_students" schema="hibernate">
+        <id name="sid" type="int" column="sid"/>
+        <property name="sname" type="java.lang.String" column="sname"/>
+        <property name="gender" type="java.lang.String" column="gender"/>
+        <property name="birthday" type="java.util.Date" column="birthday"/>
+        <property name="address" type="java.lang.String" column="address"/>
+    </class>
+
+    <!--<class name="entity.Students" table="t_students">-->
+        <!--<id name="sid" type="int">-->
+            <!--<column name="sid" />-->
+            <!--<generator class="assigned" />--><!--主键生成策略，assigned是程序赋值，native是自动生成-->
+        <!--</id>-->
+        <!--<property name="sname" type="java.lang.String">--><!--开发人员的习惯是先设计数据库，然后再进行映射。因此，length基本上不用配置-->
+            <!--<column name="sname" />-->
+        <!--</property>-->
+        <!--<property name="gender" type="java.lang.String">-->
+            <!--<column name="gender" />-->
+        <!--</property>-->
+        <!--<property name="birthday" type="java.util.Date">-->
+            <!--<column name="birthday" />-->
+        <!--</property>-->
+        <!--<property name="address" type="java.lang.String">-->
+            <!--<column name="address" />-->
+        <!--</property>-->
+    <!--</class>-->
+</hibernate-mapping>
+
+//hibernate.cfg.xml 这个文件名称不能修改，在Hibernate框架加载配置文件Configuration config = new Configuration().configure();时，代码写死的文件名hibernate.cfg.xml，修改会导致无法找到配置文件
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <!--  mysql账户名  -->
+    <property name="connection.username">root</property>
+
+    <!--  mysql密码  -->
+    <property name="connection.password">root123</property>
+
+    <!--  mysql驱动  -->
+    <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+    <!--  mysql连接URL  这里修改mysql-connector-java.jar版本为 8.0.11， 并且安装了MySQL的Connector：MySQL Connector/J-->
+    <property name="connection.url">jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8</property>
+
+    <!--  数据库方言  -->
+    <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+    <!--  显示sql语句  不配置这个参数或者配置为false，就不会在Console显示Sql语句，下面的format_sql参数也没用了-->
+    <property name="show_sql">true</property>
+
+    <!--  格式化sql语句  不配置或者配置为false，则显示在Console中的Sql语句为一行，不方便阅读-->
+    <property name="format_sql">true</property>
+
+    <!--  默认Schema 建表的时候增加前缀Schema 没看到效果-->
+    <!--<property name="default_schema">hibernate</property>-->
+
+    <!--  根据需要创建数据库  如果表存在，则会删除；如果表不存在，则新建；如果不加这个条件，则不会新建或删除表-->
+    <!--  create：每次生成新的表结构  update：表不存在则新建表，表结构不同则增加列，但是无法修改vachar长度，表存在则更新表数据，最常用  create-drop：先创建表再删除表  validate：对表结构验证，如果表结构与定义不同，则会在创建会话工厂buildSessionFactory()时就提前报错出来，如果不使用valiate参数，则会在执行Sql语句时报错-->
+    <!--  https://www.cnblogs.com/feilong3540717/archive/2011/12/19/2293038.html-->
+    <property name="hbm2ddl.auto">create</property>
+
+    <!--使用getCurrentSession()方法获取session时需要设置此参数，本地事务（jdbc事务）用thread参数 全局事务（jta事务）用jta参数-->
+    <property name="hibernate.current_session_context_class">thread</property>
+
+    <mapping resource="entity/Students.hbm.xml"/>
+    <!--<mapping class="entity.Students"/>-->
+  </session-factory>
+</hibernate-configuration>
+
+//StudentsTest.java
+package entity;
+
+import java.util.Date;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.jdbc.Work;
+import org.hibernate.service.ServiceRegistry;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class StudentsTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        //创建配置对象
+        Configuration config = new Configuration().configure();
+        //创建服务注册对象
+//        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(config.getProperties()).build();
+        //创建会话工厂
+//        sessionFactory = new MetadataSources(serviceRegistry).buildMetadata().buildSessionFactory();;
+//        sessionFactory = config.buildSessionFactory(serviceRegistry); //hibernate4.35之前sessionFactory获取方式
+        sessionFactory = config.buildSessionFactory(); //如果不用这种创建方法，会报unknown entity错误。hibernate4.35之后sessionFactory获取方式 https://www.cnblogs.com/jinjiyese153/p/6902785.html
+        //会话对象
+        session = sessionFactory.openSession();
+        //开启事务
+        transaction = session.beginTransaction();
+    }
+
+    @After
+    public void destroy() {
+        transaction.commit();//提交事务，如果没有这行语句，则不会提交插入数据的操作，但是建表的会执行
+        session.close();//关闭会话
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testSaveStudents() {
+        //生成学生对象
+        Students s = new Students(1, "张三丰", "男", new Date(), "武当山");
+        session.save(s);//保存对象进数据库
+
+        // 如果不用transaction提交事务，则需要让jdbc的connection自动提交
+        // session.doWork(new Work() {
+            // @Override
+            // public void execute(Connection connection) throws SQLException {
+                // connection.setAutoCommit(true);
+            // }
+        // });
+        // session.save(s);//保存对象进数据库
+        // session.flush();//需要flush才会提交
+    }
+}
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>hibernate</groupId>
+  <artifactId>hibernate</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>hibernate</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <!-- 添加Junit依赖 -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+
+    <!-- 添加mysql驱动依赖 -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.11</version>
+    </dependency>
+
+    <!-- 添加hibernate依赖包 -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.2.6.Final</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+
+//------------------------------------------------------------------------------------------------
+2-3 session简介 https://www.imooc.com/video/7714
+不建议直接使用jdbc的connection操作数据库，而是通过使用session操作数据库。
+session可以理解为操作数据库的对象。
+session与connection是多对一关系，每个session都有一个与之对应的connection，一个connection不同时刻可以供多个session使用。
+把对象保存在关系数据库中需要调用session的各种方法，如：save()，update()，delete()，createQuery()等。
+//------------------------------------------------------------------------------------------------
+2-4 transaction简介
+hibernate对数据的操作都是封装在事务当中，并且默认是非自动提交的方式。所以用session保存对象时，如果不开启事务，并且手工提交，对象并不会真正保存在数据库中。
+如果想让hibernate像jdbc那样自动提交事务，必须调用session对象的doWork()方法，获得jdbc的connection后，设置其为自动提交事务模式。（注意：通常并不推荐这样做）
+//------------------------------------------------------------------------------------------------
+2-5 session详解
+//SessionTest.java
+package hibernate;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.Test;
+
+public class SessionTest {
+    @Test
+    public void testOpenSession() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.openSession();
+        if (session != null) {
+            System.out.println("openSession创建成功");
+        } else {
+            System.out.println("openSession创建失败");
+        }
+        session.close();//需要手工关闭
+    }
+
+    @Test
+    public void testGetCurrentSession() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        if (session != null) {
+            System.out.println("getCurrentSession创建成功");
+        } else {
+            System.out.println("getCurrentSession创建失败");
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------------------------
+2-6 session详解
+openSession与getCurrentSession区别：
+1. getCurrentSession在事务提交或者回滚之后会自动关闭，而openSession需要手动关闭。如果使用openSession而没有手动关闭，多次之后会导致连接池溢出。
+2. openSession每次创建新的session对象，getCurrentSession使用现有的session对象。
+
+//------------------------------------------------------------------------------------------------
+3-1 Hibernate单表操作 https://www.imooc.com/video/7736
+
+//------------------------------------------------------------------------------------------------
+3-2 单一主键
+assigned 由java应用程序负责生成（手工赋值）
+native 由底层数据库自动生成标示符，如果是MySQL就是increment，如果是Oracle就是sequence，等等
+
+参考https://www.cnblogs.com/hoobey/p/5508992.html
+//Students.hbm.xml
+<id name="sid" type="int">
+    <column name="sid" />
+    <generator class="native" />
+    <!--<generator class="assigned" />-->
+</id>
+
+//StudentsTest.java
+@Test
+public void testSaveStudents() {
+    //生成学生对象
+//        Students s = new Students(3, "张三丰", "男", new Date(), "武当山");
+    Students s = new Students();
+    s.setSid(100); //如果配置了generator为native，即便这里设置了sid，仍使用自动增长的值，这里的设置不起作用
+    s.setSname("张三丰");
+    s.setGender("男");
+    s.setBirthday(new Date());
+    s.setAddress("武当山");
+    session.save(s);//保存对象进数据库
+}
+不设置setSid()，自增
+1	张三丰	男	2018-05-05 17:16:43	武当山
+2	张三丰	男	2018-05-05 17:17:45	武当山
+3	张三丰	男	2018-05-05 17:17:57	武当山
+
+//------------------------------------------------------------------------------------------------
+3-3 单表映射 基本类型
+<property name="birthday" type="date">
+    <column name="birthday" />
+</property>
+修改为date，存储为：
+1	张三丰	男	2018-05-06	武当山
+
+修改为time，存储为：
+1	张三丰	男	07:12:36	武当山
+
+修改为timestamp，存储为：
+1	张三丰	男	2018-05-06 07:13:47	武当山
+
+//------------------------------------------------------------------------------------------------
+3-4 对象类型
+以Blob类型为例：
+//Students.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="entity.Students" table="t_students">
+        <id name="sid" type="int">
+            <column name="sid" />
+            <generator class="native" />
+            <!--<generator class="assigned" />-->
+        </id>
+        <property name="sname" type="string" length="20">
+            <column name="sname" />
+        </property>
+        <property name="gender" type="java.lang.String">
+            <column name="gender" />
+        </property>
+        <property name="birthday" type="timestamp">
+            <column name="birthday" />
+        </property>
+        <property name="address" type="java.lang.String">
+            <column name="address" />
+        </property>
+        <property name="picture" type="java.sql.Blob">
+            <column name="picture" />
+        </property>
+    </class>
+</hibernate-mapping>
+
+//Students.java
+package entity;
+
+import java.sql.Blob;
+import java.util.Date;
+
+//学生类
+public class Students {
+    //Java Beans类的四个基本原则
+    //1.公有类
+    //2.提供公有的不带参数的默认构造方法
+    //3.属性私有
+    //4.属性setter/getter封装
+
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String address;//地址
+    private Blob picture;//照片
+
+    public Students() {
+    }
+
+    public Students(int sid, String sname, String gender, Date birthday, String address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Blob getPicture() {
+        return picture;
+    }
+
+    public void setPicture(Blob picture) {
+        this.picture = picture;
+    }
+
+    @Override
+    public String toString() {
+        return "entity.Students{" +
+            "sid=" + sid +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//hibernate.cfg.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <!--  mysql账户名  -->
+    <property name="connection.username">root</property>
+
+    <!--  mysql密码  -->
+    <property name="connection.password">root123</property>
+
+    <!--  mysql驱动  -->
+    <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+    <!--  mysql连接URL  这里修改mysql-connector-java.jar版本为8.0.11，并且安装了MySQL的Connector：MySQL Connector/J-->
+    <property name="connection.url">jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8</property>
+
+    <!--  数据库方言  -->
+    <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+    <!--  显示sql语句  -->
+    <property name="show_sql">true</property>
+
+    <!--  格式化sql语句  -->
+    <property name="format_sql">true</property>
+
+    <!--<property name="hibernate.default_schema">hibernate</property>-->
+    <!--  根据需要创建数据库  如果表存在，则会删除；如果表不存在，则新建；如果不加这个条件，则不会新建或删除表-->
+    <property name="hbm2ddl.auto">update</property>
+
+    <!--本地事务（jdbc事务）用thread参数 全局事务（jta事务）用jta参数-->
+    <property name="hibernate.current_session_context_class">thread</property>
+    
+    <mapping resource="entity/Students.hbm.xml"/>
+    <!--<mapping class="entity.Students"/>-->
+  </session-factory>
+</hibernate-configuration>
+
+//StudentsTest.java
+package entity;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.sql.Blob;
+import java.util.Date;
+
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class StudentsTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        //创建配置对象
+        Configuration config = new Configuration().configure();
+        //创建会话工厂
+        sessionFactory = config.buildSessionFactory(); //hibernate4.35之后sessionFactory获取方式 https://www.cnblogs.com/jinjiyese153/p/6902785.html
+        //会话对象
+        session = sessionFactory.openSession();
+        //开启事务
+        transaction = session.beginTransaction();
+    }
+
+    @After
+    public void destroy() {
+        transaction.commit();//提交事务
+        session.close();//关闭会话
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testWriteBlob() throws Exception {
+        Students s = new Students(1, "张三丰", "男", new Date(), "武当山");
+        //先获得照片文件
+        URL url = this.getClass().getClassLoader().getResource("pics/boy.gif");//获取resources下文件方法，参考https://www.cnblogs.com/acm-bingzi/p/mavenResources.html
+        File f = new File(url.toURI().getPath());//空格处理成%20，导致路径找不到，需要用toURI方法转换，参考https://blog.csdn.net/hikvision_java_gyh/article/details/44655447
+        //获得照片文件的输入流
+        InputStream input = new FileInputStream(f);
+        //创建一个Blob对象
+        Blob image = Hibernate.getLobCreator(session).createBlob(input, input.available());//输入流和字节长度
+        //设置照片属性
+        s.setPicture(image);
+        //保存学生
+        session.save(s);
+    }
+
+    @Test
+    public void testReadBlob() throws Exception {
+        Students s = session.get(Students.class, 1);
+        //获得Blob对象
+        Blob image = s.getPicture();
+        //获得照片的输入流
+        InputStream input = image.getBinaryStream();
+        //创建输出流
+        File f = new File("e:" + File.separator + "dest.gif");
+        //获得输出流
+        OutputStream output = new FileOutputStream(f);
+        //创建缓冲区
+        byte[] buffer = new byte[input.available()];
+        input.read(buffer);
+        output.write(buffer);
+        input.close();
+        output.close();
+    }
+}
+
+//在resources/pics/boy.gif有个图片
+执行完两个测试用例，在"e:/dest.gif"路径下有个与之前一样的照片文件
+1	张三丰	男	2018-05-06 07:52:39	武当山	(BLOB) 11.74 KB
+//------------------------------------------------------------------------------------------------
+3-5 组件属性
+实例类中的某个属性属于用户自定义的类的对象
+
+//Address.java
+package entity;
+//地址类
+public class Address {
+    private String postcode;//邮编
+    private String phone;//电话
+    private String address;//地址
+
+    public Address() {
+    }
+
+    public Address(String postcode, String phone, String address) {
+        this.postcode = postcode;
+        this.phone = phone;
+        this.address = address;
+    }
+
+    public String getPostcode() {
+        return postcode;
+    }
+
+    public void setPostcode(String postcode) {
+        this.postcode = postcode;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+            "postcode='" + postcode + '\'' +
+            ", phone='" + phone + '\'' +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+
+//Students.java
+package entity;
+
+import java.sql.Blob;
+import java.util.Date;
+
+//学生类
+public class Students {
+    //Java Beans类的四个基本原则
+    //1.公有类
+    //2.提供公有的不带参数的默认构造方法
+    //3.属性私有
+    //4.属性setter/getter封装
+
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private Address address;//地址
+    private Blob picture;//照片
+
+    public Students() {
+    }
+
+    public Students(int sid, String sname, String gender, Date birthday, Address address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public Blob getPicture() {
+        return picture;
+    }
+
+    public void setPicture(Blob picture) {
+        this.picture = picture;
+    }
+
+    @Override
+    public String toString() {
+        return "entity.Students{" +
+            "sid=" + sid +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//Students.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="entity.Students" table="t_students">
+        <id name="sid" type="int">
+            <column name="sid" />
+            <generator class="native" />
+            <!--<generator class="assigned" />-->
+        </id>
+        <property name="sname" type="string" length="20">
+            <column name="sname" />
+        </property>
+        <property name="gender" type="java.lang.String">
+            <column name="gender" />
+        </property>
+        <property name="birthday" type="timestamp">
+            <column name="birthday" />
+        </property>
+        <!--<property name="address" type="java.lang.String">
+            <column name="address" />
+        </property>-->
+        <!--component表示一个用户自定义的组件属性-->
+        <component name="address" class="entity.Address">
+            <property name="postcode" column="postcode"/>
+            <property name="phone" column="phone"/>
+            <property name="address" column="address"/>
+        </component>
+        <property name="picture" type="java.sql.Blob">
+            <column name="picture" />
+        </property>
+    </class>
+</hibernate-mapping>
+
+//StudentsTest.java
+package entity;
+
+import java.util.Date;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class StudentsTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        //创建配置对象
+        Configuration config = new Configuration().configure();
+        //创建会话工厂
+        sessionFactory = config.buildSessionFactory(); //hibernate4.35之后sessionFactory获取方式 https://www.cnblogs.com/jinjiyese153/p/6902785.html
+        //会话对象
+        session = sessionFactory.openSession();
+        //开启事务
+        transaction = session.beginTransaction();
+    }
+
+    @After
+    public void destroy() {
+        transaction.commit();//提交事务
+        session.close();//关闭会话
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testSaveStudents() {
+        //生成学生对象
+//        Students s = new Students(3, "张三丰", "男", new Date(), "武当山");
+        Students s = new Students();
+        s.setSname("张三丰");
+        s.setGender("男");
+        s.setBirthday(new Date());
+        Address address = new Address("266100", "021-55667788", "西安市");
+        s.setAddress(address);
+        session.save(s);//保存对象进数据库
+    }
+}
+数据库：
+1	张三丰	男	2018-05-06 08:30:26	西安市		266100	021-55667788
+
+//------------------------------------------------------------------------------------------------
+3-6 单表操作CRUD实例
+save
+update
+delete
+get/load(查询单个记录)
+
+//StudentsTest.java
+package entity;
+
+import java.util.Date;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class StudentsTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        //创建配置对象
+        Configuration config = new Configuration().configure();
+        //创建会话工厂
+        sessionFactory = config.buildSessionFactory(); //hibernate4.35之后sessionFactory获取方式 https://www.cnblogs.com/jinjiyese153/p/6902785.html
+        //会话对象
+        session = sessionFactory.openSession();
+        //开启事务
+        transaction = session.beginTransaction();
+    }
+
+    @After
+    public void destroy() {
+        transaction.commit();//提交事务
+        session.close();//关闭会话
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testSaveStudents() {
+        //生成学生对象
+//        Students s = new Students(3, "张三丰", "男", new Date(), "武当山");
+        Students s = new Students();
+        s.setSid(100);
+        s.setSname("张三丰");
+        s.setGender("男");
+        s.setBirthday(new Date());
+        Address address = new Address("266100", "021-55667788", "西安市");
+        s.setAddress(address);
+        session.save(s);//保存对象进数据库
+    }
+
+    @Test
+    public void testGetStudents() {
+        Students s = session.get(Students.class, 100);//修改成不存在的sid，打印出null
+        System.out.println(s);//注掉这行代码，也可以看到Console中打出了到数据库中查询的select语句
+        System.out.println(s.getClass().getName());//输出entity.Students
+    }
+
+    @Test
+    public void loadGetStudents() {
+        Students s = session.load(Students.class, 100);//修改成不存在的sid，抛出异常org.hibernate.ObjectNotFoundException
+        System.out.println(s);//注掉这行代码，在Console中看不到查询的select语句
+        System.out.println(s.getClass().getName());//输出entity.Students_$$_jvstb5f_0
+    }
+
+    @Test
+    public void updateGetStudents() {
+        Students s = session.get(Students.class, 100);
+        s.setGender("女");
+        session.save(s);
+    }
+
+    @Test
+    public void deleteGetStudents() {
+        Students s = session.get(Students.class, 100);
+        session.delete(s);
+    }
+}
+
+--get与load的区别
+1. 在不考虑缓存的情况下，get方法会在调用之后立即向数据库发出sql语句，返回持久化对象。
+load方法会在调用后返回一个代理对象。
+该代理对象只保存了实体对象的id，直到使用对象的非主键属性时才会发出sql语句。
+2. 查询数据库中不存在的数据时，get方法返回null
+load方法抛出异常org.hibernate.ObjectNotFoundException
+
+//------------------------------------------------------------------------------------------------
+4-1 Hibernate课程总结 https://www.imooc.com/video/7816
+1. 什么是ORM？为什么要使用Hibernate？
+2. Hibernate开发的基本步骤？
+（1）编写配置文档hibernate.cfg.xml
+（2）编写实体类
+（3）生成对应实体类的映射文件并添加到配置文档中
+（4）调用Hibernte API进行测试
+3. 什么是session？一个jdbc的connection对象
+4. openSession与getCurrentSession
+5. 单表操作常用方法有哪些？
+6. get与load
+//------------------------------------------------------------------------------------------------
+Hibernate注解 https://www.imooc.com/video/10069
+JPA：全称Java Persistence API
+JPA是标准接口，Hibernate是实现，但是其功能是JPA的超集。
+Hibernate如何实现与JPA的关系？
+通过hibernate-annotation、hibernate-entitymanager和hibernate-core三个组件来实现。
+一般在实现开发中，优先考虑使用JPA注解，这样更有利于程序的移植和扩展。
+
+注解的分类：
+--类级别注解
+--属性级别注解
+--映射关系注解
+
+@Entity 实体类
+@Table
+@Embeddable 嵌入类
+//------------------------------------------------------------------------------------------------
+1-3 类级别注解之@Entity注解
+@Entity：映射实体类
+@Entity(name="tableName")
+name:可选，对应数据库中的一个表。若表名与实体类名相同，则可以省略。
+注意：使用@Entity时必须指定实体类的主键属性。
+
+//Students.java
+package com.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.util.Date;
+
+//学生类
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+public class Students {
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private String address;//地址
+
+    public Students() {
+    }
+
+    public Students(int sid, String sname, String gender, Date birthday, String address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    @Id
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//hibernate.cfg.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <!--  mysql账户名  -->
+    <property name="connection.username">root</property>
+
+    <!--  mysql密码  -->
+    <property name="connection.password">root123</property>
+
+    <!--  mysql驱动  -->
+    <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+    <!--  mysql连接URL  这里修改mysql-connector-java.jar版本为8.0.11，并且安装了MySQL的Connector：MySQL Connector/J-->
+    <property name="connection.url">jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8</property>
+
+    <!--  数据库方言  -->
+    <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+    <!--  显示sql语句  -->
+    <property name="show_sql">true</property>
+
+    <!--  格式化sql语句  -->
+    <property name="format_sql">true</property>
+
+    <!--<property name="hibernate.default_schema">hibernate</property>-->
+    <!--  根据需要创建数据库  如果表存在，则会删除；如果表不存在，则新建；如果不加这个条件，则不会新建或删除表-->
+    <property name="hbm2ddl.auto">update</property>
+
+    <!--本地事务（jdbc事务）用thread参数 全局事务（jta事务）用jta参数-->
+    <property name="hibernate.current_session_context_class">thread</property>
+    
+    <mapping class="com.entity.Students"/>
+  </session-factory>
+</hibernate-configuration>
+
+//StudentsTest.java
+package com.entity;
+
+import java.util.EnumSet;
+
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+}
+//------------------------------------------------------------------------------------------------
+1-4 类级别注解之@Table注解
+@Table(name="", catalog="", schema="")
+@Entity配合使用，只能标注在实体的Class定义处，表示实体对应的数据库表的信息。
+name：可选，映射表的名称，默认表名和实体名称一致，只有在不一致的情况下才需要指定表名。
+catelog：可选，表示Catalog名称，默认为Catalog("")。
+schema：可选，表示Schema名称，默认为Schema("")。
+
+//Students.java
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+//------------------------------------------------------------------------------------------------
+1-5 类级别注解之@Embeddable注解
+@Embeddable表示一个非Entity类可以嵌入到另一个Entity类中作为属性而存在。
+
+//Address.java
+package com.entity;
+
+import javax.persistence.Embeddable;
+
+//地址类
+@Embeddable //表示是一个嵌入类，这个类的对象在另一个实体类中充当属性
+public class Address {
+    private String postcode;//邮编
+    private String phone;//电话
+    private String address;//地址
+
+    public Address() {
+    }
+
+    public Address(String postcode, String phone, String address) {
+        this.postcode = postcode;
+        this.phone = phone;
+        this.address = address;
+    }
+
+    public String getPostcode() {
+        return postcode;
+    }
+
+    public void setPostcode(String postcode) {
+        this.postcode = postcode;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Address{" +
+            "postcode='" + postcode + '\'' +
+            ", phone='" + phone + '\'' +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//Students.java
+package com.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
+//学生类
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private Address address;
+
+    public Students() {
+    }
+
+    public Students(int sid, String sname, String gender, Date birthday, Address address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    @Id
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+2-1 属性级别注解
+@Id
+@SequenceGenerator
+@GeneratedValue
+@Colunn
+@Embedded
+@EmbeddedId
+@Lob
+@Version
+@Basic
+@Transient
+
+//------------------------------------------------------------------------------------------------
+2-2 @Id
+必须，定义了映射到数据库表的主键的属性，一个实体类可以有一个或者多个属性被映射为主键，可置于主键属性或者getXxxx()前。
+
+如果有多个属性定义为主键属性，该实例类必须实现serializable接口。
+
+本地测试Hibernate 5.2.6 ，MySQL80不需要实现serializable接口。以下测试都在此版本
+
+如果@Id一个放在get方法上，一个放在另外一个不同的属性上，那么最后生成的主键只有get方法的那一个，属性的就无效。get方法的优先级大于属性
+
+//Students.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
+import java.util.Date;
+
+//学生类
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students /*implements Serializable */{
+    @Id
+    private int sid;//学号
+    @Id
+    @Column(length = 8)//不加@Column注解也可以生成表和主键
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private Address address;
+
+    public Students() {
+    }
+
+    public Students(int sid, String sname, String gender, Date birthday, Address address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+2-3 @GeneratedValue
+@GeneratedValue(strategy=GenerationType, generator="")
+可选，用于定义主键生成策略。
+strategy表示主键生成策略，取值有：
+1. GenerationType.AUTO：根据底层数据库自动选择（默认）
+2. GenerationType.IDENTITY：根据数据库的Identity字段生成
+3. GenerationType.SEQUENCE：使用Sequence来决定主键的取值
+4. GenerationType.TABLE：使用指定表来决定主键取值，结合@TableGenerator使用
+
+如：
+@Id
+@TableGenerator(name="tab_cat_gen", allocationSize=1)
+@GeneratedValue(strategy=GenerationType.Table)
+Generator-表示主键生成器的名称，这个属性通常和ORM框架相关，如：Hibernate可以指定uuid等主键生成方式
+//------------------------------------------------------------------------------------------------
+2-4 @GeneratedValue （二）
+https://www.cnblogs.com/hoobey/p/5508992.html
+
+//
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+    @Id
+    @GeneratedValue //不写默认就是GenerationType.AUTO
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private Address address;
+    //...
+}
+
+当前生成了一个t_students表，又生成了hibernate_sequence表。在hibernate_sequence表中保存了主键增长值。
+有个问题，又定义了一个NewStudents表，会往hibernate_sequence表中插入了两条为1的数据，每次往Students或NewStudents表中任意插入一条数据，都会使hibernate_sequence表中数据增长1。
+
+//
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) //这种定义方式是自动增长的
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private Address address;
+    //...
+}
+建表语句：
+create table t_students (
+   sid integer not null auto_increment,
+    address varchar(255),
+    phone varchar(255),
+    postcode varchar(255),
+    birthday datetime,
+    gender varchar(255),
+    major varchar(255),
+    sname varchar(255),
+    primary key (sid)
+)
+
+String类型定义为主键
+//
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+    @Id
+    //注释掉@GeneratedValue即可正常建表，但是必须手工设置String主键值，如果不手工设置，则第一次插入数据时，int默认为0，可以插入，第二次插入的时候就会主键冲突
+    //@GeneratedValue(strategy = GenerationType.AUTO) //这种形式建表无问题，同时会生成hibernate_sequence表，插入数据时抛异常：org.hibernate.id.IdentifierGenerationException: Unknown integral data type for ids : java.lang.String；IDENTITY这个值建表失败
+    private String sid;//学号
+    //...
+}
+
+//
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        Students students = new Students();
+        students.setSid("10");//手工赋值
+        students.setSname("张三丰");
+        students.setGender("男");
+        students.setBirthday(new Date());
+        students.setMajor("武术");
+        students.setAddress(new Address("200120", "13677778888", "武当山"));
+
+        session.save(students);
+        transaction.commit();
+    }
+}
+
+或者用如下手工赋值方式指定String主键@Id：
+@Id
+@GeneratedValue(generator = "sid")
+@GenericGenerator(name = "sid", strategy = "assigned")
+private String sid;//学号
+
+
+用native方式给int赋值
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+    @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO) //不写默认就是GenerationType.AUTO
+    @GeneratedValue(generator = "sid")
+    @GenericGenerator(name = "sid", strategy = "native") //这里是native，主键必须是数值类型，改成String，则建表失败
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private Address address;
+
+    public Students() {
+    }
+    //...
+}
+//------------------------------------------------------------------------------------------------
+2-6 属性级别注解之@Column
+可将属性映射到列，使用该注解来覆盖默认值，@Column描述了数据库表中该字段的详细定义，这对于根据JAP注解生成数据库表结构的工具非常有作用。
+常用属性：
+name
+nullable
+unique
+length
+insertable
+updateable
+//------------------------------------------------------------------------------------------------
+2-7 属性级别注解之@Embedded
+注释属性的，表示该属性的类是嵌入类。
+注意：同时嵌入类也必须标注@Embeddable注解。
+
+实测在属性address上增加@Embedded后，即便不在嵌入类上增加@Embeddable注解，同时可以建表和插入数据成功，只不过address上会有提示：
+'Embedded' attribute type should not be 'Address'。
+如果在getAddress()方法上增加@Embedded后，如果不在嵌入类上增加@Embeddable注解，就会建表失败。
+但是如果一个注解都没有，就有问题。
+
+@Embedded
+private Address address;
+
+或者加在get方法上。
+//------------------------------------------------------------------------------------------------
+2-8 属性级别注解之EmbeddedId
+使用嵌入式主键类实现复合主键。
+注意：嵌入式主键类必须实现Serializable接口、必须有默认的public无参数的构造方法、必须覆盖equals和hashcode()方法。
+
+实测没有覆盖equals和hashcode()方法，也可以正常建表和插入数据
+//StudentsPK.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import java.io.Serializable;
+
+@Embeddable
+public class StudentsPK implements Serializable {
+
+    private static final long serialVersionUID = -7643136722691461927L; //如果不implements Serializable则建表成功，插入数据报错org.hibernate.MappingException: Composite-id class must implement Serializable: com.entity.StudentsPK
+    @Column(length = 18)
+    private String id;//身份证号
+    @Column(length = 8)
+    private String sid;//学号
+
+    public StudentsPK() {
+    }
+
+    public StudentsPK(String id, String sid) {
+        this.id = id;
+        this.sid = sid;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
+    }
+}
+
+//
+package com.entity;
+
+import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.util.Date;
+
+//学生类
+@Entity//这里生成的数据库表名是全小写的students @Entity(name = "t_students")
+@Table(name = "t_students", schema = "hibernate") //这里加了name属性之后，@Entity注解里就不需要name属性了
+public class Students {
+    @EmbeddedId
+    private StudentsPK pk;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    @Embedded
+    private Address address;
+
+    public Students() {
+    }
+
+    public Students(StudentsPK pk, String sname, String gender, Date birthday, Address address) {
+        this.pk = pk;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    public StudentsPK getPk() {
+        return pk;
+    }
+
+    public void setPk(StudentsPK pk) {
+        this.pk = pk;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + pk +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//StudentsTest.java
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        Students students = new Students();
+        StudentsPK pk = new StudentsPK("123456789012345678", "S0001234");
+        students.setPk(pk);
+        students.setSname("张三丰");
+        students.setGender("男");
+        students.setBirthday(new Date());
+        students.setMajor("武术");
+        students.setAddress(new Address("200120", "13677778888", "武当山"));
+
+        session.save(students);
+        transaction.commit();
+    }
+}
+//------------------------------------------------------------------------------------------------
+2-9 属性级别注解之@Transient
+可选，表示该属性并非一个到数据库表的字段的映射，ORM框架将忽略该属性，如果一个属性并非数据库表的字段映射，就务必将其标示为@Transient，否则ORM框架默认其注解为@Basic
+
+import javax.persistence.Transient;
+
+@Transient
+private double salary;
+//------------------------------------------------------------------------------------------------
+3-1 Hibernate关联映射注解 https://www.imooc.com/video/10083
+1. 一对一单向外键
+2. 一对一双向外键关联
+3. 一对一单向外键联合主键
+4. 多对一单向外键关联
+5. 一对多单向外键关联
+6. 一对多双向外键关联
+7. 多对多单向外键关联
+
+//------------------------------------------------------------------------------------------------
+3-2 实体之间的映射关系
+--一对一：一个公民对应一个身份证号码。
+--一对多（多对一）：一个公民有多个银行账号。
+--多对多：一个学生有多个老师，一个老师有多个学生
+
+//------------------------------------------------------------------------------------------------
+3-3 关联映射注解之一对一单向外键
+@OneToOne(cascade=CascadeType.all)//全级联关系，级联增加，级联删除，级联更新
+@JoinColumn(name="pid", unique=true)//name表示主表中的外键字段名
+注意：保存时应该先保存外键对象，再保存主表对象。
+
+//IdCard.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+public class IdCard {
+    @Id
+    @GeneratedValue(generator = "pid")
+    @GenericGenerator(name = "pid", strategy = "assigned")
+    @Column(length = 18)
+    private String pid;//身份证号码
+    private String sname;//学生的姓名
+
+    public IdCard() {
+    }
+
+    public IdCard(String pid, String sname) {
+        this.pid = pid;
+        this.sname = sname;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+}
+
+//Students.java
+package com.entity;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import java.util.Date;
+
+//学生类
+@Entity(name = "t_students")
+public class Students {
+    private IdCard idCard;//身份证
+    private int sid;//学号
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+
+    public Students() {
+    }
+
+    public Students(IdCard idCard, int sid, String gender, Date birthday, String major) {
+        this.idCard = idCard;
+        this.sid = sid;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.major = major;
+    }
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "pid", unique = true)//在IdCard只有一个主键的情况下，这种定义方式就够了，name就是主控表外键的列名称；如果IdCard有两个主键，则这种定义方式就不够了，建表提示需要有两个外键，见下例
+    public IdCard getIdCard() {
+        return idCard;
+    }
+
+    public void setIdCard(IdCard idCard) {
+        this.idCard = idCard;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            '}';
+    }
+}
+
+//StudentsTest.java
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);//在已经有t_students和idcard表的情况下，如果手工在数据库中删除idcard表，会报被外键引用无法删除的错误。而用程序运行的时候，代码会先删除主控表的外键，再删除两个表，就没有问题了
+        // Hibernate: 
+            // alter table t_students 
+               // drop 
+               // foreign key FKkabunwku3uvmp85vfsuvjk4fh
+        // Hibernate: 
+            // drop table if exists idcard
+        // Hibernate: 
+            // drop table if exists t_students
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        IdCard card = new IdCard("123456789012345678", "张无忌");
+        Students students = new Students(card, "男", new Date(), "太极拳");
+        //先保存身份证类对象
+        session.save(card);
+        session.save(students);
+
+        transaction.commit();
+    }
+    
+    @Test
+    public void testUpdateIdCard() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        IdCard card = session.get(IdCard.class, "123456789012345678");
+        card.setPid("987654321098765432");
+        session.save(card);//主键不能被更新，抛异常：javax.persistence.PersistenceException: org.hibernate.HibernateException: identifier of an instance of com.entity.IdCard was altered from 123456789012345678 to 987654321098765432
+
+        transaction.commit();
+    }
+}
+
+//IdCard有两个主键时：
+//IdCard.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
+import java.io.Serializable;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+public class IdCard implements Serializable { //有多个主键时，必须实现Serializable接口
+    private static final long serialVersionUID = -6668320870961885830L;
+
+    @Id
+    @GeneratedValue(generator = "pid")
+    @GenericGenerator(name = "pid", strategy = "assigned")
+    @Column(length = 18)
+    private String pid;//身份证号码
+    private String sname;//学生的姓名
+    @Id
+    @GeneratedValue(generator = "addr")
+    @GenericGenerator(name = "addr", strategy = "assigned")
+    @Column(length = 18)
+    private String address;
+
+    public IdCard() {
+    }
+
+    public IdCard(String pid, String sname, String address) {
+        this.pid = pid;
+        this.sname = sname;
+        this.address = address;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+3-5 一对一双向外键
+--主控方的配置同一对一单向外键关系
+--被控方 @OneToOne(mappedBy="card") //被控方
+双向关联，必须设置mappedBy属性。因为双向关联只能交给一方去控制，不可能在双方都设置外键保存关联关系，否则双方都无法保存。
+
+//
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+public class IdCard {
+    @Id
+    @GeneratedValue(generator = "pid")
+    @GenericGenerator(name = "pid", strategy = "assigned")
+    @Column(length = 18)
+    private String pid;//身份证号码
+    private String sname;//学生的姓名
+    @OneToOne(mappedBy = "idCard")//这个指Students类的属性名
+    private Students students;
+
+    public IdCard() {
+    }
+
+    public IdCard(String pid, String sname) {
+        this.pid = pid;
+        this.sname = sname;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    public void setPid(String pid) {
+        this.pid = pid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public Students getStudents() {
+        return students;
+    }
+
+    public void setStudents(Students students) {
+        this.students = students;
+    }
+}
+
+//
+package com.entity;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import java.util.Date;
+
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+
+//学生类
+@Entity(name = "t_students")
+public class Students {
+    private IdCard idCard;//身份证
+    private int sid;//学号
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+
+    public Students() {
+    }
+
+    public Students(IdCard idCard, String gender, Date birthday, String major) {
+        this.idCard = idCard;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.major = major;
+    }
+
+    @OneToOne(cascade = CascadeType.ALL)
+    //name表示主控表外键时的字段，referencedColumnName表示引用的被控方属性字段
+    @JoinColumnsOrFormulas(value = {
+        @JoinColumnOrFormula(column = @JoinColumn(name = "fk_pid", referencedColumnName = "pid")),
+        @JoinColumnOrFormula(column = @JoinColumn(name = "fk_address", referencedColumnName = "address"))
+    })
+    public IdCard getIdCard() {
+        return idCard;
+    }
+
+    public void setIdCard(IdCard idCard) {
+        this.idCard = idCard;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            '}';
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-6 一对一双向外键联合主键
+--创建主键类
+--主键类必须实现serializable接口，重写hashCode()和equals()方法。
+
+主键类：@Embeddable
+实体类：@EmbeddedId
+具体实现参考第二章
+
+//------------------------------------------------------------------------------------------------
+3-7 多对一单向外键
+多方持有一方的引用，比如：多个学生对应一个班级（多对一）
+@ManyToOne(cascade = {CascadeType.ALL}, fetch=FetchType.EAGER)
+@JoinColumn(name="cid", referenceColumnName="CID")
+
+//Students.java
+package com.entity;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import java.util.Date;
+
+//学生类
+@Entity(name = "t_students")
+public class Students {
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private ClassRoom classRoom;//班级
+
+    public Students() {
+    }
+
+    public Students(String sname, String gender, Date birthday, String major, ClassRoom classRoom) {
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.major = major;
+        this.classRoom = classRoom;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    @ManyToOne(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER)
+    @JoinColumn(name = "fk_cid", referencedColumnName = "cid")
+    public ClassRoom getClassRoom() {
+        return classRoom;
+    }
+
+    public void setClassRoom(ClassRoom classRoom) {
+        this.classRoom = classRoom;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            '}';
+    }
+}
+
+//ClassRoom.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.GenericGenerator;
+
+//班级实体类
+@Entity(name = "t_classRoom")
+public class ClassRoom {
+    @Id
+    @GeneratedValue(generator = "cid")
+    @GenericGenerator(name = "cid", strategy = "assigned")
+    @Column(length = 4)
+    private String cid;//班级的编号
+    private String cname;//班级的名字
+
+    public ClassRoom() {
+    }
+
+    public ClassRoom(String cid, String cname) {
+        this.cid = cid;
+        this.cname = cname;
+    }
+
+    public String getCid() {
+        return cid;
+    }
+
+    public void setCid(String cid) {
+        this.cid = cid;
+    }
+
+    public String getCname() {
+        return cname;
+    }
+
+    public void setCname(String cname) {
+        this.cname = cname;
+    }
+}
+
+//StudentsTest.java
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        ClassRoom classRoom1 = new ClassRoom("C001", "软件工程");
+        ClassRoom classRoom2 = new ClassRoom("C002", "网络工程");
+
+        Students students1 = new Students("张三", "男", new Date(), "太极拳", classRoom1);
+        Students students2 = new Students("李四", "男", new Date(), "太极拳", classRoom2);
+        Students students3 = new Students("王五", "女", new Date(), "太极拳", classRoom1);
+        Students students4 = new Students("赵六", "女", new Date(), "太极拳", classRoom2);
+
+        session.save(classRoom1);
+        session.save(classRoom2);
+        session.save(students1);
+        session.save(students2);
+        session.save(students3);
+        session.save(students4);
+
+        transaction.commit();
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-8 一个对多单向外键
+一方持有多方的集合，一个班级有多个学生（一对多）。
+@OneToMany(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+@JoinColumn(name="cid")
+总结：多对一的时候，多方设置EAGER，一方设置LAZY
+
+//Students.java
+package com.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.util.Date;
+
+//学生类
+@Entity(name = "t_students")
+public class Students {
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+
+    public Students() {
+    }
+
+    public Students(String sname, String gender, Date birthday, String major) {
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.major = major;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            '}';
+    }
+}
+
+//ClassRoom.java
+package com.entity;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+
+import java.util.Set;
+
+import org.hibernate.annotations.GenericGenerator;
+
+//班级实体类
+@Entity(name = "t_classRoom")
+public class ClassRoom {
+    @Id
+    @GeneratedValue(generator = "cid")
+    @GenericGenerator(name = "cid", strategy = "assigned")
+    @Column(length = 4)
+    private String cid;//班级的编号
+    private String cname;//班级的名字
+
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_cid", referencedColumnName = "cid") //如果不加这行，将新建一个中间表，但是该表无法自动插入数据。这行表示，要在多方表中增加外键字段fk_cid，引用一方表的cid属性字段
+    private Set<Students> students;
+
+    public ClassRoom() {
+    }
+
+    public ClassRoom(String cid, String cname) {
+        this.cid = cid;
+        this.cname = cname;
+    }
+
+    public String getCid() {
+        return cid;
+    }
+
+    public void setCid(String cid) {
+        this.cid = cid;
+    }
+
+    public String getCname() {
+        return cname;
+    }
+
+    public void setCname(String cname) {
+        this.cname = cname;
+    }
+
+    public Set<Students> getStudents() {
+        return students;
+    }
+
+    public void setStudents(Set<Students> students) {
+        this.students = students;
+    }
+}
+
+//StudentsTest.java
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        ClassRoom classRoom1 = new ClassRoom("C001", "软件工程");
+        ClassRoom classRoom2 = new ClassRoom("C002", "网络工程");
+
+        Students students1 = new Students("张三", "男", new Date(), "太极拳");
+        Students students2 = new Students("李四", "男", new Date(), "太极拳");
+        Students students3 = new Students("王五", "女", new Date(), "太极拳");
+        Students students4 = new Students("赵六", "女", new Date(), "太极拳");
+
+        Set<Students> studentsSet1 = new HashSet<>();
+        studentsSet1.add(students1);
+        studentsSet1.add(students2);
+        classRoom1.setStudents(studentsSet1);
+
+        Set<Students> studentsSet2 = new HashSet<>();
+        studentsSet2.add(students3);
+        studentsSet2.add(students4);
+        classRoom2.setStudents(studentsSet2);
+
+        //先保存学生，再保存教室。Hibernate会先插入学生数据，再插入老师数据，最后再更新学生外键数据
+        session.save(students1);
+        session.save(students2);
+        session.save(students3);
+        session.save(students4);
+
+        session.save(classRoom1);
+        session.save(classRoom2);
+
+        //如果先保存classRoom1和classRoom2，则Hibernate会先保存classRoom1、students1和students2，再保存classRoom2、students3和students4。后面保存students的四条保存语句写不写都没有关系，框架不会重复插入数据
+        // session.save(classRoom1);
+        // session.save(classRoom2);
+
+        // session.save(students1);
+        // session.save(students2);
+        // session.save(students3);
+        // session.save(students4);
+        
+        transaction.commit();
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-9 一对多（多对一）双向外键
+多方：多方持有一方的引用。
+@ManyToOne(cascade = {CascadeType.ALL}, fetch=FetchType.EAGER)
+@JoinColumn(name="cid", referenceColumnName="CID")
+
+一方：一方持有多方的集合。
+@OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+@JoinColumn(name = "fk_cid", referencedColumnName = "cid")
+
+//
+package com.entity;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import java.util.Date;
+
+//学生类
+@Entity(name = "t_students")
+public class Students {
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private ClassRoom classRoom;//多方持有一方的引用
+
+    public Students() {
+    }
+
+    public Students(String sname, String gender, Date birthday, String major) {
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.major = major;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "fk_cid", referencedColumnName = "cid")//name = "fk_cid2"，则会在t_students表中生成两个外键字段fk_cid2和fk_cid
+    public ClassRoom getClassRoom() {
+        return classRoom;
+    }
+
+    public void setClassRoom(ClassRoom classRoom) {
+        this.classRoom = classRoom;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            '}';
+    }
+}
+
+
+//
+package com.entity;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+
+import java.util.Set;
+
+import org.hibernate.annotations.GenericGenerator;
+
+//班级实体类
+@Entity(name = "t_classRoom")
+public class ClassRoom {
+    @Id
+    @GeneratedValue(generator = "cid")
+    @GenericGenerator(name = "cid", strategy = "assigned")
+    @Column(length = 4)
+    private String cid;//班级的编号
+    private String cname;//班级的名字
+
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_cid", referencedColumnName = "cid")
+    private Set<Students> students;
+
+    public ClassRoom() {
+    }
+
+    public ClassRoom(String cid, String cname) {
+        this.cid = cid;
+        this.cname = cname;
+    }
+
+    public String getCid() {
+        return cid;
+    }
+
+    public void setCid(String cid) {
+        this.cid = cid;
+    }
+
+    public String getCname() {
+        return cname;
+    }
+
+    public void setCname(String cname) {
+        this.cname = cname;
+    }
+
+    public Set<Students> getStudents() {
+        return students;
+    }
+
+    public void setStudents(Set<Students> students) {
+        this.students = students;
+    }
+}
+
+//
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        ClassRoom classRoom1 = new ClassRoom("C001", "软件工程");
+        ClassRoom classRoom2 = new ClassRoom("C002", "网络工程");
+
+        Students students1 = new Students("张三", "男", new Date(), "太极拳");
+        Students students2 = new Students("李四", "男", new Date(), "太极拳");
+        Students students3 = new Students("王五", "女", new Date(), "太极拳");
+        Students students4 = new Students("赵六", "女", new Date(), "太极拳");
+
+        //这里把学生的设置都交一方对象，无需手工设置Students::setClassRoom
+        Set<Students> studentsSet1 = new HashSet<>();
+        studentsSet1.add(students1);
+        studentsSet1.add(students2);
+        classRoom1.setStudents(studentsSet1);
+
+        Set<Students> studentsSet2 = new HashSet<>();
+        studentsSet2.add(students3);
+        studentsSet2.add(students4);
+        classRoom2.setStudents(studentsSet2);
+
+        session.save(classRoom1);
+        session.save(classRoom2);
+
+        session.save(students1);
+        session.save(students2);
+        session.save(students3);
+        session.save(students4);
+
+        //无论是先存学生还是先存教室，如果@ManyToOne和@OneToMany设置的外键名字不一样，则多方增加的外键fk_cid2，无法插入数据
+//        session.save(students1);
+//        session.save(students2);
+//        session.save(students3);
+//        session.save(students4);
+//
+//        session.save(classRoom1);
+//        session.save(classRoom2);
+
+        transaction.commit();
+    }
+    
+    @Test
+    public void testGetStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        Students students =  session.get(Students.class, 1);//这里获取到学生对象，其成员变量classRoom已经有值，非null
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-10 多对多单向外键
+学生和教师构成多对多的关联关系。
+其中一个多方持有另一个多方的集合对象（学生持有教师的集合）
+创建中间表
+//学生类
+@ManyToMany
+@JoinTable(
+    name="teachers_students",
+    joinColumns={@JoinColumn(name="sid")},
+    inverseJoinColumns={@JoinColumn(name="tid")}
+)
+
+//Students.java
+package com.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import java.util.Date;
+import java.util.Set;
+
+//学生类
+@Entity(name = "t_students")
+public class Students {
+    private int sid;//学号
+    private String sname;//姓名
+    private String gender;//性别
+    private Date birthday;//出生日期
+    private String major;//专业
+    private Set<Teachers> teachers;//学生持有教师的集合
+
+    public Students() {
+    }
+
+    public Students(String sname, String gender, Date birthday, String major) {
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.major = major;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int getSid() {
+        return sid;
+    }
+
+    public void setSid(int sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    @ManyToMany
+    @JoinTable(
+        name = "t_teachers_students",
+        joinColumns = {@JoinColumn(name = "fk_sid", referencedColumnName = "sid")},
+        inverseJoinColumns = {@JoinColumn(name = "fk_tid", referencedColumnName = "tid")}
+    )
+    public Set<Teachers> getTeachers() {
+        return teachers;
+    }
+
+    public void setTeachers(Set<Teachers> teachers) {
+        this.teachers = teachers;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid=" + sid +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", major='" + major + '\'' +
+            '}';
+    }
+}
+
+//Teachers.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity(name = "t_teachers")
+public class Teachers {
+    @Id
+    @GeneratedValue(generator = "tid")
+    @GenericGenerator(name = "tid", strategy = "assigned")
+    @Column(length = 4)
+    private String tid;//教师编号
+    private String tname;//姓名
+
+    public Teachers() {
+    }
+
+    public Teachers(String tid, String tname) {
+        this.tid = tid;
+        this.tname = tname;
+    }
+
+    public String getTid() {
+        return tid;
+    }
+
+    public void setTid(String tid) {
+        this.tid = tid;
+    }
+
+    public String getTname() {
+        return tname;
+    }
+
+    public void setTname(String tname) {
+        this.tname = tname;
+    }
+}
+
+//StudentsTest.java
+package com.entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.Test;
+
+public class StudentsTest {
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        Teachers t1 = new Teachers("T001", "张老师");
+        Teachers t2 = new Teachers("T002", "李老师");
+        Teachers t3 = new Teachers("T003", "陈老师");
+        Teachers t4 = new Teachers("T004", "刘老师");
+
+        Students students1 = new Students("张三", "男", new Date(), "太极拳");
+        Students students2 = new Students("李四", "男", new Date(), "太极拳");
+        Students students3 = new Students("王五", "女", new Date(), "太极拳");
+        Students students4 = new Students("赵六", "女", new Date(), "太极拳");
+
+        Set<Teachers> teachers1 = new HashSet<>();
+        teachers1.add(t1);
+        teachers1.add(t2);
+
+        Set<Teachers> teachers2 = new HashSet<>();
+        teachers2.add(t2);
+        teachers2.add(t3);
+
+        Set<Teachers> teachers3 = new HashSet<>();
+        teachers3.add(t3);
+        teachers3.add(t4);
+
+        Set<Teachers> teachers4 = new HashSet<>();
+        teachers4.add(t2);
+        teachers4.add(t4);
+
+        students1.setTeachers(teachers1);
+        students2.setTeachers(teachers2);
+        students3.setTeachers(teachers3);
+        students4.setTeachers(teachers4);
+
+        session.save(t1);
+        session.save(t2);
+        session.save(t3);
+        session.save(t4);
+
+        session.save(students1);
+        session.save(students2);
+        session.save(students3);
+        session.save(students4);
+
+        transaction.commit();
+    }
+}
+
+//t_students
+"sid"	"birthday"	"gender"	"major"	"sname"
+"1"	"12/5/2018 14:49:02"	"男"	"太极拳"	"张三"
+"2"	"12/5/2018 14:49:02"	"男"	"太极拳"	"李四"
+"3"	"12/5/2018 14:49:02"	"女"	"太极拳"	"王五"
+"4"	"12/5/2018 14:49:02"	"女"	"太极拳"	"赵六"
+
+//t_teachers
+"tid"	"tname"
+"T001"	"张老师"
+"T002"	"李老师"
+"T003"	"陈老师"
+"T004"	"刘老师"
+
+//t_teachers_students
+"fk_sid"	"fk_tid"
+"1"	"T001"
+"1"	"T002"
+"2"	"T002"
+"4"	"T002"
+"2"	"T003"
+"3"	"T003"
+"3"	"T004"
+"4"	"T004"
+
+//------------------------------------------------------------------------------------------------
+3-12 多对多双向外键
+双方持有对方的集合对象，其中一方设置
+//教师类
+@ManyToMany(mappedBy="teachers")
+另一方：
+//学生类
+@ManyToMany
+@JoinTable(
+    name="teachers_students",
+    joinColumns={@JoinColumn(name="sid")},
+    inverseJoinColumns={@JoinColumn(name="tid")}
+)
+
+//其余代码同上
+//Teachers.java
+package com.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+
+import java.util.Set;
+
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity(name = "t_teachers")
+public class Teachers {
+    @Id
+    @GeneratedValue(generator = "tid")
+    @GenericGenerator(name = "tid", strategy = "assigned")
+    @Column(length = 4)
+    private String tid;//教师编号
+    private String tname;//姓名
+
+    @ManyToMany(mappedBy = "teachers")
+    private Set<Students> students;//教师持有的学生集合
+
+    public Teachers() {
+    }
+
+    public Teachers(String tid, String tname) {
+        this.tid = tid;
+        this.tname = tname;
+    }
+
+    public String getTid() {
+        return tid;
+    }
+
+    public void setTid(String tid) {
+        this.tid = tid;
+    }
+
+    public String getTname() {
+        return tname;
+    }
+
+    public void setTname(String tname) {
+        this.tname = tname;
+    }
+
+    public Set<Students> getStudents() {
+        return students;
+    }
+
+    public void setStudents(Set<Students> students) {
+        this.students = students;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
 //------------------------------------------------------------------------------------------------
 
 
