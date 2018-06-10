@@ -24674,7 +24674,7 @@ private Object readResolve() {
     return INSTANCE;
 }
 
-从Java 1.5 发行版本起，实现Singleton还有第三种方法。只需编写一个包含单个元素的枚举类型：
+从Java 1.5 发行版本起，实现Singleton还有第三种方法。只需编写一个包含单个元素的枚举类型： //https://www.cnblogs.com/yangzhilong/p/6148639.html
 //
 package test;
 
@@ -35674,79 +35674,2169 @@ public class Teachers {
 }
 
 //------------------------------------------------------------------------------------------------
+Struts入门 3-2 struts2核心文件
+struts.xml中包含的内容：
+1. 全局属性
+2. 用户请求和响应Action之间的对应关系
+3. Action可能用到的参数和返回结果
+4. 各种拦截器的配置
+
+struts.properties
+struts2框架的全局属性文件，自动加载。
+该文件包含很多key-value对。
+该文件完全可以配置在struts.xml文件中，使用constant元素。
+
+struts2中struts.xml配置文件详解：https://www.cnblogs.com/wkrbky/p/5889328.html
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN" "http://struts.apache.org/dtds/struts-2.5.dtd">
+<struts>
+    <!-- 所有匹配*.action的请求都由struts2处理 -->
+    <constant name="struts.action.extension" value="action" />
+    <!-- 是否启用开发模式 -->
+    <constant name="struts.devMode" value="true" />
+    <!-- struts配置文件改动后，是否重新加载 -->
+    <constant name="struts.configuration.xml.reload" value="true" />
+    <!-- 设置浏览器是否缓存静态内容 -->
+    <constant name="struts.serve.static.browserCache" value="false" />
+    <!-- 请求参数的编码方式 -->
+    <constant name="struts.i18n.encoding" value="utf-8" />
+    <!-- 每次HTTP请求系统都重新加载资源文件，有助于开发 -->
+    <constant name="struts.i18n.reload" value="true" />
+    <!-- 文件上传最大值 -->
+    <constant name="struts.multipart.maxSize" value="104857600" />
+    <!-- 让struts2支持动态方法调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+    <!-- Action名称中是否还是用斜线 -->
+    <constant name="struts.enable.SlashesInActionNames" value="false" />
+    <!-- 允许标签中使用表达式语法 -->
+    <constant name="struts.tag.altSyntax" value="true" />
+    <!-- 对于WebLogic,Orion,OC4J此属性应该设置成true -->
+    <constant name="struts.dispatcher.parametersWorkaround" value="false" />
+
+    <package name="basePackage" extends="struts-default">
+
+    </package>
+</struts>
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN" "http://struts.apache.org/dtds/struts-2.5.dtd" >
+<struts>
+
+    <!-- include节点是struts2中组件化的方式 可以将每个功能模块独立到一个xml配置文件中 然后用include节点引用 -->
+    <include file="struts-default.xml"></include>
+    
+    
+    <!-- package提供了将多个Action组织为一个模块的方式
+        package的名字必须是唯一的 package可以扩展 当一个package扩展自
+        另一个package时该package会在本身配置的基础上加入扩展的package
+        的配置 父package必须在子package前配置 
+        name：package名称
+        extends:继承的父package名称
+        abstract:设置package的属性为抽象的 抽象的package不能定义action 值true:false
+        namespace:定义package命名空间 该命名空间影响到url的地址，例如此命名空间为/test那么访问是的地址为http://localhost:8080/struts2/test/XX.action
+     -->
+    <package name="com.kay.struts2" extends="struts-default" namespace="/test">
+        <interceptors>
+            <!-- 定义拦截器 
+                name:拦截器名称
+                class:拦截器类路径
+             -->
+            <interceptor name="timer" class="com.kay.timer"></interceptor>
+            <interceptor name="logger" class="com.kay.logger"></interceptor>
+            <!-- 定义拦截器栈 -->
+            <interceptor-stack name="mystack">
+                <interceptor-ref name="timer"></interceptor-ref>
+                <interceptor-ref name="logger"></interceptor-ref>
+            </interceptor-stack>
+        </interceptors>
+        
+        <!-- 定义默认的拦截器 每个Action都会自动引用
+         如果Action中引用了其它的拦截器 默认的拦截器将无效 -->
+        <default-interceptor-ref name="mystack"></default-interceptor-ref>
+        
+        
+        <!-- 全局results配置 -->
+        <global-results>
+            <result name="input">/error.jsp</result>
+        </global-results>
+        
+        <!-- Action配置 一个Action可以被多次映射(只要action配置中的name不同)
+             name：action名称 包有命名空间时：http://localhost:8080/struts/db/hello.action 包没有命名空间时：http://localhost:8080/struts/hello.action
+             class: 对应的类的路径
+             method: 调用Action中的方法名
+        -->
+        <action name="hello" class="com.kay.struts2.Action.LoginAction">
+            <!-- 引用拦截器
+                name:拦截器名称或拦截器栈名称
+             -->
+            <interceptor-ref name="timer"></interceptor-ref>
+        
+            <!-- 节点配置
+                name : result名称 和Action中返回的值相同
+                type : result类型 不写则选用superpackage的type struts-default.xml中的默认为dispatcher
+             -->
+         <result name="success" type="dispatcher">/talk.jsp</result>
+         <!-- 参数设置 
+             name：对应Action中的get/set方法 
+         -->
+         <param name="url">http://www.sina.com</param>
+        </action>
+    </package>
+</struts>
+
+//工程搭建
+//resources/struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <action name="hello" class="struts.HelloAction" method="hello">
+            <result name="success">/index.jsp</result>
+        </action>
+
+        <action name="default" class="struts.HelloAction">
+            <result name="success">/index.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//resources/log4j2.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5p] %d %c - %m%n" />
+        </Console>
+        <File name="File" fileName="dist/my.log">
+            <PatternLayout pattern="%m%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="mh.sample2.Log4jTest2" level="INFO">
+            <AppenderRef ref="File" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+//web/WEB-INF/web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <filter>
+        <filter-name>struts</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts</filter-name>
+        <url-pattern>/*</url-pattern>   */后注释
+    </filter-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>
+
+//web/index.jsp
+<%--
+  Created by IntelliJ IDEA.
+  User: Ben
+  Date: 2018/5/13
+  Time: 20:02
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>DingBenTestPage</title>
+</head>
+<body>
+this is a jsp page.
+<br> ${hello}
+</body>
+</html>
+
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>struts</groupId>
+  <artifactId>struts</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>struts</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-core</artifactId>
+      <version>2.5.16</version>
+    </dependency>
+    <dependency>
+      <groupId>jstl</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>struts</groupId>
+      <artifactId>struts</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+
+//struts.HelloAction
+package struts;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class HelloAction extends ActionSupport {
+    HttpServletRequest request = ServletActionContext.getRequest();
+
+    public String execute() {
+        request.setAttribute("hello", "execute()!");
+        return SUCCESS;
+    }
+
+    public String hello() {
+        request.setAttribute("hello", "hello world!");
+        return SUCCESS;
+    }
+}
+
+//Idea maven搭建Struts工程：
+https://www.cnblogs.com/liygheart/p/3628835.html
+https://blog.csdn.net/pinebud55/article/details/53037937
 
 
 //------------------------------------------------------------------------------------------------
+4-2 访问Servlet API
+提供了三种方式去访问Servlet API：
+1. ActionContext
+2. 实现***Aware接口
+3. ServletActionContext
 
 
 //------------------------------------------------------------------------------------------------
+4-3 Action搜索顺序 https://www.imooc.com/video/8998 https://blog.csdn.net/taosst/article/details/6225272
+
+//用函数返回值与result的name值匹配，匹配不到，就取最后一个jsp
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <action name="hello" class="struts.HelloAction" method="hello">
+            <result name="success">/index.jsp</result>
+        </action>
+
+        <action name="default" class="struts.HelloAction">
+            <result name="success">/index.jsp</result>
+        </action>
+    </package>
+
+    <!--包名 -->
+    <package name="defaultNamespace" namespace="" extends="struts-default">
+        <action name="good" class="struts.DefaultAction" method="good">
+            <result name="success">/index.jsp</result>
+        </action>
+
+        <action name="" class="struts.DefaultAction">
+            <result name="success">/index.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//DefaultAction.java
+package struts;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class DefaultAction extends ActionSupport {
+
+    HttpServletRequest request = ServletActionContext.getRequest();
+
+    public String execute() {
+        request.setAttribute("hello", "DefaultAction.execute()!");
+        return SUCCESS;
+    }
+
+    public String good() {
+        request.setAttribute("hello", "DefaultAction.hello world!");
+        return SUCCESS;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+4-4 动态方法调用
+指定method方法：struts.xml里，action 中配置method方法，指定调用的方法。
+
+//如果不指定result的name属性，则返回函数无法找到匹配的jsp，显示的就是最后一个
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <action name="hello" class="struts.HelloAction" method="hello">
+            <result >/index.jsp</result>
+            <result >/add.jsp</result>
+            <result >/update.jsp</result>
+        </action>
+    </package>
+
+</struts>
+输入：
+http://localhost:8080/struts/hello
+输出：
+This is update.jsp
+
+//使用感叹号方式，在struts2.5需要增加配置参数 https://blog.csdn.net/GS_Warriors/article/details/78406685
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods><!--struts2.5 需要多配置这一行-->
+        <action name="hello" class="struts.HelloAction">
+            <result name = "success">/index.jsp</result>
+            <result name = "add">/add.jsp</result>
+            <result name = "update">/update.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//HelloAction.java
+package struts;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class HelloAction extends ActionSupport {
+    HttpServletRequest request = ServletActionContext.getRequest();
+
+    public String execute() {
+        request.setAttribute("hello", "execute()!");
+        return SUCCESS;
+    }
+
+    public String hello() {
+        request.setAttribute("hello", "hello world!");
+        return SUCCESS;
+    }
+
+    public String add() {
+        return "add";
+    }
+
+    public String update() {
+        return "update";
+    }
+}
+
+//通配符方式调用
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="hello*" method="{1}" class="struts.HelloAction">
+            <result name = "success">/index.jsp</result>
+            <result name = "add">/{1}.jsp</result>
+            <result name = "update">/{1}.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+浏览器输入：http://localhost:8080/struts/helloupdate
+输出：This is update.jsp
+
+//使用两个通配符
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="*_*" method="{2}" class="struts.{1}Action">
+            <result name = "success">/index.jsp</result>
+            <result name = "add">/{2}.jsp</result>
+            <result name = "update">/{2}.jsp</result>
+        </action>
+    </package>
+
+</struts>
+浏览器输入：http://localhost:8080/struts/Hello_update.action
+输出：This is update.jsp
+浏览器输入：http://localhost:8080/struts/Hello_.action
+输出：
+this is a jsp page. 
+execute()!
+//------------------------------------------------------------------------------------------------
+4-5 指定多个配置文件
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--文件名 -->
+    <include file="helloWorld.xml"></include>
+
+</struts>
+
+//helloWorld.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="*_*" method="{2}" class="struts.{1}Action">
+            <result name = "success">/index.jsp</result>
+            <result name = "add">/{2}.jsp</result>
+            <result name = "update">/{2}.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+也可以访问到：http://localhost:8080/struts/Hello_update.action
+
+也可以把helloWorld.xml放置到resources/hello/helloWorld.xml路径中，配置文件中参数配置如下：
+<include file="hello/helloWorld.xml"></include>
+
+//------------------------------------------------------------------------------------------------
+4-6 默认Action
+
+default-action-ref与*_*冲突：http://blog.sina.com.cn/s/blog_9772ef170101dczo.html
+
+//这里下面不能配置*_*，否则会优先与*_*匹配，无法找到默认提供的action
+//另外，default-action-ref、global-allowed-methods、action的先后顺序不能变，否则报编译错误
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <default-action-ref name="index"></default-action-ref>
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="index" class="struts.HelloAction" method="execute">
+            <result>/error.jsp</result>
+        </action>
+
+        <action name="hello_*" method="{1}" class="struts.HelloAction">
+            <result name = "success">/index.jsp</result>
+            <result name = "add">/{1}.jsp</result>
+            <result name = "update">/{1}.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//error.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>ErrorPage</title>
+</head>
+<body>
+Sorry, the page is not found!
+</body>
+</html>
+
+输入：http://localhost:8080/struts/update.action
+输出：Sorry, the page is not found!
+//------------------------------------------------------------------------------------------------
+4-7 Struts2后缀
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--访问的后缀-->
+    <constant name="struts.action.extension" value="html"/>
+    <!--文件名 -->
+    <include file="hello/helloWorld.xml"></include>
+
+</struts>
+输入：http://localhost:8080/struts/hello_update.html
+输出：This is update.jsp
+
+增加了后缀参数后，则浏览器访问时必须使用value定义的后缀，否则访问不到。（不能像之前默认一样不加.action后缀）
+<constant name="struts.action.extension" value="html"/>
+
+还可以将value值置为空，则可以不加后缀访问：
+<constant name="struts.action.extension" value="html"/>
+输入：http://localhost:8080/struts/hello_update
+
+还可以配置用逗号分隔的多个后缀，则下例使用html、action或不加后缀都可以：
+<constant name="struts.action.extension" value="html,action,"/>
+
+有三个位置可以配置后缀：
+struts.xml
+struts.properties
+web.xml
+
+web.xml配置如下：
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <filter>
+        <filter-name>struts</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
+        <init-param>
+            <param-name>struts.action.extension</param-name>
+            <param-value>html</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts</filter-name>
+        <url-pattern>/*</url-pattern>  --*/
+    </filter-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>
+//------------------------------------------------------------------------------------------------
+4-8 接收参数
+1. 使用Action的属性接收参数
+2. 使用Domain Model接收参数
+3. 使用ModelDriven接收参数
+
+
+1. 使用Action的属性接收参数
+//login.jsp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+//success.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>LoginSuccessPage</title>
+</head>
+<body>
+This is success.jsp after login.
+</body>
+</html>
+
+//helloWorld.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <default-action-ref name="index"></default-action-ref>
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="index" class="struts.HelloAction" method="execute">
+            <result>/error.jsp</result>
+        </action>
+        
+        <action name="LoginAction" method="login" class="struts.LoginAction">
+            <result>/success.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--访问的后缀-->
+    <!--<constant name="struts.action.extension" value="html,action,"/>-->
+    <!--文件名 -->
+    <include file="hello/helloWorld.xml"></include>
+
+</struts>
+
+//LoginAction.java
+package struts;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class LoginAction extends ActionSupport {
+
+    private String username;
+    private String password;
+
+    public String login() {
+        System.out.println(String.format("Username: %s, password: %s", username, password));
+        return SUCCESS;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+
+浏览器输入：http://localhost:8080/struts/login.jsp
+会跳转到success.jsp：This is success.jsp after login.
+控制台输出：
+Username: 333, password: 444
+Username: dingben, password: hello
+说一下自己的理解：在这个界面中login.jsp，表单触发的action是LoginAction.action，此时会根据HelloWorld.xml中的LoginAction名称，调用到struts.LoginAction.login()方法中，再返回到success.jsp界面。
+
+2. 使用Domain Model接收参数
+//login.jsp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="user.username"><!--这里的user指的是LoginAction的getter/setter方法名，如果方法名改为getUser2()/setUser2()，则这里name="user2.username"
+    密码：<input type="password" name="user.password">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+//User.java
+package struts;
+
+public class User {
+    String username;
+    String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+
+//LoginAction.java
+package struts;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class LoginAction extends ActionSupport {
+
+    private User user;
+
+    public String login() {
+        System.out.println(String.format("User.username: %s, user.password: %s", user.getUsername(), user.getPassword()));
+        return SUCCESS;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+}
+
+3. 使用ModelDriven接收参数（推荐使用这种方式）
+//login.jsp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+//LoginAction.java 实现ModelDriven接口，去掉User的getter和setter方法，并提供user的初始化，再修改掉jsp中的user.
+package struts;
+
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+
+public class LoginAction extends ActionSupport implements ModelDriven<User> {
+
+    private User user = new User();
+
+    public String login() {
+        System.out.println(String.format("User.username: %s, user.password: %s", user.getUsername(), user.getPassword()));
+        return SUCCESS;
+    }
+
+    @Override
+    public User getModel() {
+        return user;
+    }
+}
+
+另外，如果不提供setter和getter方法，只要把属性修改为public，也可以完成功能
+//User.java
+package struts;
+
+public class User {
+    public String username;
+    public String password;
+}
+
+如果有复杂结构，如User中有List
+//User.java
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    书籍1：<input type="text" name="bookList[0]">
+    书籍2：<input type="text" name="bookList[1]">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+//login.jsp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    书籍1：<input type="text" name="bookList[0]">
+    书籍2：<input type="text" name="bookList[1]">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+输出：
+User.username: 123, user.password: 456, user.bookList: [《雷雨》, 《背影》]
+
+如果List的泛型是对象，也可以完成赋值：
+//User.java
+package struts;
+
+import java.util.List;
+
+public class User {
+    private String username;
+    private String password;
+    private List<User> userList;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public List<User> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "username='" + username + '\'' +
+            '}';
+    }
+}
+
+//login.jsp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    子用户1：<input type="text" name="userList[0].username">
+    子用户2：<input type="text" name="userList[1].username">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+输出：User.username: 111, user.password: 222, user.userList: [User{username='333'}, User{username='444'}]
+
+//------------------------------------------------------------------------------------------------
+4-9 处理结果类型
+<result name="success">/success.jsp</result>
+result元素中的name就是result元素的逻辑视图名称。
+
+<result>/success.jsp</result>
+如果省略了name属性，系统将采用默认的name属性值，默认的name值是success。
+路径前面是有一个斜杠/的，表示是项目的绝对路径，不带斜杠就是执行Action的相对路径（本地验证不带斜杠也可以正常展示）
+
+com.opensymphony.xwork2.Action五个内置值：
+SUCCESS = "success"; Action正确的执行完成，返回相应的视图，success是name属性的默认值；
+NONE = "none"; 表示Action正确的执行完成，但并不返回任何视图；
+ERROR = "error";表示Action执行失败，返回到错误处理视图；
+LOGIN = "login";Action因为用户没有登录的原因没有正确执行，将返回该登录视图，要求用户进行登录验证；
+INPUT = "input";Action的执行，需要从前端界面获取参数，INPUT就是代表这个参数输入的界面，一般在应用中，会对这些参数进行验证，如果验证没有通过，将自动返回到该视图。
+
+//------------------------------------------------------------------------------------------------
+4-10 关于input的代码演示 https://www.imooc.com/video/9004
+//增加User.age属性
+package struts;
+
+import java.util.List;
+
+public class User {
+    private String username;
+    private String password;
+    private int age;
+    private List<User> userList;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public List<User> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "username='" + username + '\'' +
+            '}';
+    }
+}
+
+//login.jsp增加age框
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username">
+    密码：<input type="password" name="password">
+    年龄：<input type="text" name="age">
+    子用户1：<input type="text" name="userList[0].username">
+    子用户2：<input type="text" name="userList[1].username">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+//helloWorld.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <default-action-ref name="index"></default-action-ref>
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="index" class="struts.HelloAction" method="execute">
+            <result>/error.jsp</result>
+        </action>
+
+        <action name="LoginAction" method="login" class="struts.LoginAction">
+            <result name="success">/success.jsp</result>
+            <result name="input">/login.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+正常情况按视频演示，增加addFieldError时，会返回到input界面，但是本地测试，没有成功？？？
+https://blog.csdn.net/u011726984/article/details/45150183
+
+
+//参考https://blog.csdn.net/u011726984/article/details/45150183
+//LoginAction-validation.xml要和LoginAction.java放在一起，但是关于age一定要是int输入，还是没有校验出来
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE validators PUBLIC
+        "-//Apache Struts//XWork Validator 1.0.3//EN"
+        "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+<!-- 基于配置文件的表单验证
+1,动作类中指定的方法进行验证:
+    配置文件名：动作类名-动作名（配置文件中的动作名）-validation.xml，
+如，UserAction-user_add-validation.xml
+
+2,验证动作类中的所有方法:
+    配置文件名：动作简单类名-validation.xml，如，UserAction-validation.xml
+ -->
+<validators>
+
+    <validator type="requiredstring">
+        <param name="fieldName">username</param>
+        <message>用户名不能为空！</message>
+    </validator>
+
+    <field name="password">
+        <field-validator type="requiredstring">
+            <message>密码不能为空！</message>
+        </field-validator>
+        <field-validator type="regex">
+            <param name="regex"><![CDATA[\w{6,16}]]></param>
+            <message>密码可以为6~16位数字和字母的组合！</message>
+        </field-validator>
+    </field>
+    
+    <field name="age">
+        <field-validator type="int">
+            <message>年龄不能为空！</message>
+        </field-validator>
+    </field>
+</validators>
+
+//在代码中增加校验函数
+//LoginAction.java
+package struts;
+
+import java.io.Serializable;
+
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+
+public class LoginAction extends ActionSupport implements ModelDriven<User>, Serializable {
+
+    private User user = new User();
+
+    public String login() {
+//        System.out.println("login()");
+//        String username = user.getUsername();
+//        if (null == username || username.isEmpty()) {
+//            System.out.println("userName not exist");
+//            addFieldError("username", "用户名不能为空");
+//            return INPUT;//如果在这里配置，就必须增加return INPUT;
+//        }
+
+        System.out.println(String.format("User.username: %s, user.password: %s, user.userList: %s", user.getUsername(), user.getPassword(), user.getUserList()));
+        return SUCCESS;
+    }
+
+    @Override
+    public void validate() { //在这里校验，不用加return INPUT;
+        System.out.println("validate()");
+
+        if (user.getUsername() == null || "".equals(user.getUsername().trim())) {
+            addFieldError("username", "用户名不能为空");
+        }
+        if (user.getPassword() == null || !user.getPassword().matches("\\w{6,16}")) {
+            addFieldError("password", "密码不能为空且必须是6~16位的大小写字母或数字");
+        }
+    }
+
+    @Override
+    public User getModel() {
+        return user;
+    }
+}
+
+//login.jsp
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<form action="LoginAction.action" method="post">
+    用户名：<input type="text" name="username"><s:fielderror name="username"></s:fielderror>
+    密码：<input type="password" name="password"><s:fielderror name="password"></s:fielderror>
+    年龄：<input type="text" name="age">
+    子用户1：<input type="text" name="userList[0].username">
+    子用户2：<input type="text" name="userList[1].username">
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
+
+//------------------------------------------------------------------------------------------------
+4-11 处理结果类型
+处理结果是通过在struts.xml使用<result/>标签配置结果。
+根据位置的不同，分为两种结果：
+局部结果：将<result/>作为<action/>元素的子元素配置
+全局结果：将<result/>作为<global-result/>元素的子元素配置
+
+<result name="...">
+    <param name="location">resource</param>
+</result>
+子标签<param>具有两个属性：
+1、 location：该属性定义了该视图对应的实际视图资源。
+2、 parse：该参数指定是否可以在实际视图名字中使用OGNL表达式。struts2框架默认该属性为true，即支持OGNL表达式。OGNL：Object-Graph Navigation Language
+
+示例：
+//helloWorld.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <default-action-ref name="index"></default-action-ref>
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="index" class="struts.HelloAction" method="execute">
+            <result>/error.jsp</result>
+        </action>
+
+        <action name="hello_*" method="{1}" class="struts.HelloAction">
+            <result name = "success">/index.jsp</result>
+            <result name = "add">
+                <param name="location">/${#request.path}.jsp</param>
+            </result>
+            <result name = "update">/{1}.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//HelloAction.java
+package struts;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class HelloAction extends ActionSupport {
+    HttpServletRequest request = ServletActionContext.getRequest();
+
+    public String execute() {
+        request.setAttribute("hello", "execute()!");
+        return SUCCESS;
+    }
+
+    public String hello() {
+        request.setAttribute("hello", "hello world!");//增加属性，用于在jsp中使用
+        return SUCCESS;
+    }
+
+    public String add() {
+        request.setAttribute("path", "add");//增加属性，用于在xml中使用
+        return "add";
+    }
+
+    public String update() {
+        return "update";
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+4-12 处理结果类型——type属性
+<result name="success" type="XXX">/success.jsp</result>
+type的默认值dispatcher，这个类型支持JSP视图技术。
+
+struts支持多种视图技术，例如JSP、Valocity、FreeMarker等。
+
+E:\Program Files\JetBrains\JavaProject\Maven\repository\org\apache\struts\struts2-core\2.5.16\struts2-core-2.5.16.jar!\struts-default.xml
+<result-types>
+    <result-type name="chain" class="com.opensymphony.xwork2.ActionChainResult"/>
+    <result-type name="dispatcher" class="org.apache.struts2.result.ServletDispatcherResult" default="true"/>
+    <result-type name="freemarker" class="org.apache.struts2.views.freemarker.FreemarkerResult"/>
+    <result-type name="httpheader" class="org.apache.struts2.result.HttpHeaderResult"/>
+    <result-type name="redirect" class="org.apache.struts2.result.ServletRedirectResult"/><!--重定向会丢失请求参数-->
+    <result-type name="redirectAction" class="org.apache.struts2.result.ServletActionRedirectResult"/>
+    <result-type name="stream" class="org.apache.struts2.result.StreamResult"/>
+    <result-type name="velocity" class="org.apache.struts2.result.VelocityResult"/>
+    <result-type name="xslt" class="org.apache.struts2.views.xslt.XSLTResult"/>
+    <result-type name="plainText" class="org.apache.struts2.result.PlainTextResult" />
+    <result-type name="postback" class="org.apache.struts2.result.PostbackResult" />
+</result-types>
+
+例如：
+//helloWorld.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    <!--包名 -->
+    <package name="front" namespace="/" extends="struts-default">
+        <default-action-ref name="index"></default-action-ref>
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="index" class="struts.HelloAction" method="execute">
+            <result>/error.jsp</result>
+        </action>
+
+        <action name="hello_*" method="{1}" class="struts.HelloAction">
+            <result name = "success" type="plainText">/index.jsp</result><!--这里type使用plainText-->
+            <result name = "add">
+                <param name="location">/${#request.path}.jsp</param>
+            </result>
+            <result name = "update">/{1}.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+浏览器输入：http://localhost:8080/struts/hello
+界面显示原始字符串：
+<%--
+  Created by IntelliJ IDEA.
+  User: Ben
+  Date: 2018/5/13
+  Time: 20:02
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>DingBenTestPage</title>
+</head>
+<body>
+this is a jsp page.
+<br> ${hello}
+</body>
+</html>
+//------------------------------------------------------------------------------------------------
+2-1 Struts拦截器简介 https://www.imooc.com/video/8915
+什么是拦截器
+Struts大多数核心功能是通过拦截器实现的，每个拦截器完成某项功能。例如：数据转移、类型转换、数据校验。
+拦截器方法在Action执行之前或者之后执行。
+
+拦截器栈
+--从结构上看，拦截器栈相当于多个拦截器的组合。
+--在功能上看，拦截器栈也是拦截器。
+
+拦截器的执行过程是一个递归的过程。
+//------------------------------------------------------------------------------------------------
+2-2 自定义拦截器
+方式一：实现Interceptor接口
+--void init(): 初始化拦截器所需资源
+--void destroy(): 释放在init()中分配的资源
+--String intercept(ActionInvocation ai) throws Exception
+    --实现拦截器功能
+    --利用ActionInvocation参数获取Action状态
+    --返回result字符串作为逻辑视图
+
+方式二：继承AbstractInterceptor类
+--提供了init()和destroy()方法的空实现
+--只需要实现intercept方法即可
+//------------------------------------------------------------------------------------------------
+3-2 拦截器示例
+--创建拦截器
+--在配置文件中定义拦截器并引用它
+
+//index.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>计算执行Action花费的时间</title>
+</head>
+<body>
+<a href="timer.action">访问Action并计算执行Action花费的时间</a>
+</body>
+</html>
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <!--注册拦截器-->
+        <interceptors>
+            <interceptor name="mytimer" class="interceptor.TimerInterceptor"></interceptor>
+            <interceptor name="mytimer2" class="interceptor.TimerInterceptor2"></interceptor>
+        </interceptors>
+        <action name="timer" class="action.TimerAction" method="execute">
+            <result>/success.jsp</result>
+            <!--引用拦截器-->
+            <interceptor-ref name="mytimer"></interceptor-ref>
+            <interceptor-ref name="mytimer2"></interceptor-ref>
+        </action>
+    </package>
+
+</struts>
+
+//TimerAction.java
+package action;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class TimerAction extends ActionSupport {
+    @Override
+    public String execute() throws Exception {
+        for (int i = 0; i < 10000; i++) {
+            System.out.println("I love Java!");
+        }
+        return SUCCESS;
+    }
+}
+
+//TimerInterceptor.java
+package interceptor;
+
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+
+/*
+ * 计算执行Action花费的时间
+ */
+public class TimerInterceptor extends AbstractInterceptor {
+    //自动调用此方法，进行拦截操作
+    @Override
+    public String intercept(ActionInvocation invocation) throws Exception {
+        //1. 执行Action之前
+        long start = System.currentTimeMillis();
+        //2. 执行下一个拦截器，如果已经是最后一个拦截器，则执行目标Action
+        String result = invocation.invoke();
+        //3. 执行Action之后
+        long end = System.currentTimeMillis();
+        System.out.println(String.format("TimerInterceptor：执行Action花费的时间：%s ms", end - start));
+        return result;
+    }
+}
+
+//TimerInterceptor2.java
+package interceptor;
+
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+
+public class TimerInterceptor2 extends AbstractInterceptor {
+    @Override
+    public String intercept(ActionInvocation invocation) throws Exception {
+        //1. 执行Action之前
+        long start = System.currentTimeMillis();
+        //2. 执行下一个拦截器，如果已经是最后一个拦截器，则执行目标Action
+        String result = invocation.invoke();
+        //3. 执行Action之后
+        long end = System.currentTimeMillis();
+        System.out.println(String.format("TimerInterceptor2：执行Action花费的时间：%s ms", end - start));
+        return result;
+    }
+}
+
+浏览器输入：http://localhost:8080/struts/
+点击超链接后，输出：访问Action成功！
+...
+I love Java!
+I love Java!
+I love Java!
+I love Java!
+I love Java!
+TimerInterceptor2：执行Action花费的时间：1186 ms
+TimerInterceptor：执行Action花费的时间：1186 ms
+
+//------------------------------------------------------------------------------------------------
+4-2 Struts2内建拦截器
+params拦截器
+--负责将请求参数设置为Action属性
+
+内建拦截器定义在包中：E:\Program Files\JetBrains\JavaProject\Maven\repository\org\apache\struts\struts2-core\2.5.16\struts2-core-2.5.16.jar!\struts-default.xml 的interceptors节点下
+最后定义了一个默认的拦截器栈：<default-interceptor-ref name="defaultStack"/>
+
+--只要在定义包的过程中继承struts-default包，那么defaultStack将是默认的拦截器。
+<package name="default" namespace="/" extends="struts-default">
+--当为包中的某个action显式指定了某个拦截器，则默认拦截器不会起作用。
+--拦截器栈中的各个拦截器的顺序很重要。
+
+//配置了自定义拦截器后，如果需要默认拦截器栈，需要手工引用
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <!--注册拦截器-->
+        <interceptors>
+            <interceptor name="mytimer" class="interceptor.TimerInterceptor"></interceptor>
+            <interceptor name="mytimer2" class="interceptor.TimerInterceptor2"></interceptor>
+        </interceptors>
+        <action name="timer" class="action.TimerAction" method="execute">
+            <result>/success.jsp</result>
+            <!--为Action显示引用拦截器后，默认的拦截器栈将不再生效，需要手工引用-->
+            <interceptor-ref name="defaultStack"></interceptor-ref>
+
+            <!--引用拦截器-->
+            <interceptor-ref name="mytimer"></interceptor-ref>
+            <interceptor-ref name="mytimer2"></interceptor-ref>
+        </action>
+    </package>
+
+</struts>
+//------------------------------------------------------------------------------------------------
+5-1 拦截器使用样例
+登录后台管理界面时要求admin用户已经登录
+//web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <filter>
+        <filter-name>struts</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts</filter-name>
+        <url-pattern>/*</url-pattern> //*/
+    </filter-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <!--注册拦截器-->
+        <interceptors>
+            <interceptor name="auth" class="interceptor.AuthInterceptor"></interceptor>
+            <!--自定义拦截器栈myStack，组合了defaultStack和auth-->
+            <interceptor-stack name="myStack">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="auth"/>
+            </interceptor-stack>
+        </interceptors>
+
+        <!-- 通过此Action访问后台管理页面，需要判断用户是否已登陆，如果未登陆跳转到登陆页面-->
+        <action name="auth">
+            <result>/WEB-INF/page/manager.jsp</result>
+            <result name="login">/login.jsp</result>
+            <!--引用自定义的拦截器栈-->
+            <interceptor-ref name="myStack"/>
+        </action>
+
+        <action name="login" class="action.LoginAction" method="login">
+            <result>/WEB-INF/page/manager.jsp</result>
+            <result name="error">/login.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//index.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>StartPage</title>
+</head>
+Start page.
+</body>
+</html>
+
+//login.jsp
+<%--
+  Created by IntelliJ IDEA.
+  User: Ben
+  Date: 2018/6/7
+  Time: 0:18
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>LoginPage</title>
+</head>
+<body>
+<h2>用户登陆</h2>
+${loginError}
+<form action="login.action" method="post">
+    用户名：<input type="text" name="username"/><br/>
+    密码：<input type="password" name="password"/><br/>
+    <input type="submit" value="登陆"/>
+</form>
+</body>
+</html>
+
+//page/manager.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>ManagerPage</title>
+</head>
+<body>
+后台管理页面，只有已登陆的用户才能访问！
+</body>
+</html>
+
+//LoginAction.java
+package action;
+
+import java.util.Map;
+
+import org.apache.struts2.interceptor.SessionAware;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+public class LoginAction extends ActionSupport implements SessionAware {
+    private String username;
+    private String password;
+    private Map<String, Object> session;
+
+    @Override
+    public void setSession(Map<String, Object> session) {
+        this.session = session;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    //处理登陆请求
+    public String login() {
+        System.out.println(String.format("username = %s, password = %s", username, password));
+        if (username == null) {
+            return ERROR;
+        }
+        else if ("admin".equals(username) && "123".equals(password)) {
+            session.put("loginInfo", username);
+            return SUCCESS;
+        } else {
+            session.put("loginError", "用户名或密码不正确");
+            return ERROR;
+        }
+    }
+}
+
+//AuthInterceptor.java
+package interceptor;
+
+import java.util.Map;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
+
+public class AuthInterceptor extends AbstractInterceptor {
+    @Override
+    public String intercept(ActionInvocation invocation) throws Exception {
+        ActionContext context = ActionContext.getContext();
+        Map<String, Object> session = context.getSession();
+        if (session.get("loginInfo") != null) {
+            return invocation.invoke();
+        } else {
+            return "login";
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+// 慕课网 使用Struts2+Hibernate开发学生管理系统 https://www.imooc.com/video/9026
+2-1 用户登录模块
+1. 项目分层
+2. 创建MyHibernateSessionFaction
+3. 设计用户接口和实现类
+4. 设计所有Action父类
+5. 设计用户Action类
+6. 页面调用
+7. 显示报错信息
+
+--实体层
+--数据库层
+--接口层
+--接口实现层
+--动作层
+--Jsp页面
+体现了MVC模式，前4个是模型层（Model），第5个是控制层（Controller），第6个是视图层（View）
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="hello" class="action.HelloAction" method="hello">
+            <result name="success">/index.jsp</result>
+        </action>
+    </package>
+
+</struts>
+
+//log4j2.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5p] %d %c - %m%n" />
+        </Console>
+        <File name="File" fileName="dist/my.log">
+            <PatternLayout pattern="%m%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="mh.sample2.Log4jTest2" level="INFO">
+            <AppenderRef ref="File" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+//hibernate.cfg.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!--  mysql账户名  -->
+        <property name="connection.username">root</property>
+
+        <!--  mysql密码  -->
+        <property name="connection.password">root123</property>
+
+        <!--  mysql驱动  -->
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!--  mysql连接URL  这里修改mysql-connector-java.jar版本为8.0.11，并且安装了MySQL的Connector：MySQL Connector/J-->
+        <property name="connection.url">jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8</property>
+
+        <!--  数据库方言  -->
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!--  显示sql语句  -->
+        <property name="show_sql">true</property>
+
+        <!--  格式化sql语句  -->
+        <property name="format_sql">true</property>
+
+        <!--<property name="hibernate.default_schema">hibernate</property>-->
+        <!--  根据需要创建数据库  如果表存在，则会删除；如果表不存在，则新建；如果不加这个条件，则不会新建或删除表-->
+        <property name="hbm2ddl.auto">update</property>
+
+        <!--本地事务（jdbc事务）用thread参数 全局事务（jta事务）用jta参数-->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <mapping resource="entity/Students.hbm.xml"/>
+        <mapping resource="entity/Users.hbm.xml"/>
+    </session-factory>
+</hibernate-configuration>
+
+//生成实体类数据库表
+//WebTest.java
+package entity;
+
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class WebTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        Configuration configuration = new Configuration().configure();//创建配置对象
+        sessionFactory = configuration.buildSessionFactory();//创建会话工厂
+        session = sessionFactory.getCurrentSession();//开启会话
+        transaction = session.beginTransaction();//开启事务
+    }
+
+    @After
+    public void destory() {
+        transaction.commit();//事务提交
+        session.close();//关闭会话
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+}
+//------------------------------------------------------------------------------------------------
+2-2 数据库工厂类
+//MyHibernateSessionFaction.java
+package db;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+public class MyHibernateSessionFaction {
+    private static SessionFactory sessionFactory;//会话工厂属性
+
+    //构造方法私有化，保证单例模式
+    private MyHibernateSessionFaction() {
+    }
+
+    //公有的静态方法，获得会话工厂对象
+    public static SessionFactory getSessionFaction() {
+        if (sessionFactory == null) {
+            Configuration config = new Configuration().configure();
+            sessionFactory = config.buildSessionFactory();
+        }
+        return sessionFactory;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+2-3 设计用户接口和实现类
+--用户业务逻辑接口
+--用户业务逻辑实现类
+
+//UsersDAO.java
+package service;
+
+import entity.Users;
+
+//用户业务逻辑接口
+public interface UsersDAO {
+    //用户登录方法
+    boolean usersLogin(Users user);
+}
+
+//UsersDAOImpl.java
+package service.impl;
+
+import db.MyHibernateSessionFaction;
+import entity.Users;
+import service.UsersDAO;
+
+import java.util.List;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+public class UsersDAOImpl implements UsersDAO {
+    @Override
+    public boolean usersLogin(Users user) {
+        Transaction transaction;
+        String hql;
+        try {
+            Session session = MyHibernateSessionFaction.getSessionFaction().getCurrentSession();
+            transaction = session.beginTransaction();
+
+            hql = "from Users where username=? and password=?";
+            Query query = session.createQuery(hql);
+            query.setParameter(0, user.getUsername());
+            query.setParameter(1, user.getPassword());
+
+            List list = query.list();
+            transaction.commit();//提交事务
+            return !list.isEmpty();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+//        finally {
+//            if (transaction != null) {
+//                //transaction.commit();//不能重复提交事务
+//            }
+//        }
+    }
+}
+
+//UsersDAOImplTest.java
+package service.impl;
+
+import entity.Users;
+import service.UsersDAO;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class UsersDAOImplTest {
+
+    @Test
+    public void testUsersLogin() {
+        Users user = new Users(1, "zhangsan", "123456");
+        UsersDAO usersDAO = new UsersDAOImpl();
+        assertEquals(false, usersDAO.usersLogin(user)); //在数据库中插入了数据后，就可以正常获取到对象了，返回true
+    }
+}
+//------------------------------------------------------------------------------------------------
+2-4 设计所有Action父类
+--设计action父类
+--继承ActionSupport
+--为了获得常用的内置对象采用耦合IOC方式注入属性
+需要实现如下三个接口：ServletRequestAware/ServletResponseAware/ServletContextAware
+
+//SuperAction.java
+package action;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
+import org.apache.struts2.util.ServletContextAware;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+//所有Action动作的父类
+public class SuperAction extends ActionSupport implements ServletRequestAware, ServletResponseAware, ServletContextAware {
+
+    private static final long serialVersionUID = 5110053493783737838L;
+    protected HttpServletRequest request;//请求对象
+    protected HttpServletResponse response;//响应对象
+    protected HttpSession session;//会话对象
+    protected ServletContext application;//全局对象
+
+    @Override
+    public void setServletRequest(HttpServletRequest request) {
+        this.request = request;
+        this.session = this.request.getSession();
+    }
+
+    @Override
+    public void setServletResponse(HttpServletResponse response) {
+        this.response = response;
+    }
+
+    @Override
+    public void setServletContext(ServletContext application) {
+        this.application = application;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+2-5 设计用户Action类
+--设计用户Action类，采用模型驱动接收表单数据。 
+struts接收表单数据的方式：普通属性、领域对象、模型驱动。
+//UsersAction.java
+package action;
+
+import entity.Users;
+import service.UsersDAO;
+import service.impl.UsersDAOImpl;
+
+import org.apache.struts2.interceptor.validation.SkipValidation;
+
+import com.opensymphony.xwork2.ModelDriven;
+
+public class UsersAction extends SuperAction implements ModelDriven<Users> {
+
+    private static final long serialVersionUID = 1171517276988253426L;
+    private Users user = new Users();
+
+    //用户登录动作
+    public String login() {
+        UsersDAO usersDAO = new UsersDAOImpl();
+        if (usersDAO.usersLogin(user)) {
+            //在session中保存登录成功的用户名
+            session.setAttribute("loginUserName", user.getUsername()); //对应JSP中的EL表达式
+            return "login_success";
+        } else {
+            return "login_failure";
+        }
+    }
+
+    //用户注销方法，用@SkipValidation可以跳过表单验证，即validation方法
+    @SkipValidation
+    public String logout() {
+        if (session.getAttribute("loginUserName") != null) {
+            session.removeAttribute("loginUserName");
+        }
+        return "logout_success";
+    }
+
+    //当校验失败的时候，validate函数默认返回INPUT，即"input"，所以必须要定义result name="input"的jsp页面
+    @Override
+    public void validate() {
+        String username = user.getUsername();
+        //用户名不能为空
+        if (username == null || username.trim().isEmpty()) {
+            this.addFieldError("usernameError", "用户名不能为空");
+        }
+        String password = user.getPassword();
+        if (password == null || password.length() < 6) {
+            this.addFieldError("passwordError", "密码长度不少于6位");
+        }
+    }
+
+    @Override
+    public Users getModel() {
+        return this.user;
+    }
+}
 
 
 //------------------------------------------------------------------------------------------------
+2-6 页面调用 
 
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
 
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="hello" class="action.HelloAction" method="hello">
+            <result name="success">/hello.jsp</result>
+        </action>
+    </package>
+
+    <package name="users" namespace="/users" extends="default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="*_*" class="action.{1}Action" method="{2}">
+            <result name="login_success">/users/Users_login_success.jsp</result>
+            <result name="login_failure">/users/Users_login.jsp</result>
+            <result name="logout_success">/users/Users_login.jsp</result>
+            <result name="input">/users/Users_login.jsp</result>
+        </action>
+    </package>
+</struts>
 //------------------------------------------------------------------------------------------------
-
-
+2-7 完成显示登录成功用户名和注销功能
+参见2-5 节
 //------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
+2-8 完成表单验证功能
 
 //------------------------------------------------------------------------------------------------
 
