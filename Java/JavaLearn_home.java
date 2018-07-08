@@ -30337,6 +30337,58 @@ public class InjectionDAOImpl implements InjectionDAO {
 
     <bean id="injectionDAO" class="com.imooc.ioc.injection.dao.InjectionDAOImpl"></bean>
 </beans>
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>SpringProjectGroup</groupId>
+    <artifactId>SpringProjectGroup</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sonatype.sisu</groupId>
+            <artifactId>sisu-inject-bean</artifactId>
+            <version>1.4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>aopalliance</groupId>
+            <artifactId>aopalliance</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.8.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.8.9</version>
+        </dependency>
+    </dependencies>
+</project>
 //------------------------------------------------------------------------------------------------
 3-2 Bean的生命周期
 
@@ -37439,7 +37491,7 @@ public class AuthInterceptor extends AbstractInterceptor {
 // 慕课网 使用Struts2+Hibernate开发学生管理系统 https://www.imooc.com/video/9026
 2-1 用户登录模块
 1. 项目分层
-2. 创建MyHibernateSessionFaction
+2. 创建MyHibernateSessionFactory
 3. 设计用户接口和实现类
 4. 设计所有Action父类
 5. 设计用户Action类
@@ -37575,7 +37627,6 @@ public class WebTest {
     @After
     public void destory() {
         transaction.commit();//事务提交
-        session.close();//关闭会话
         sessionFactory.close();//关闭会话工厂
     }
 
@@ -37587,23 +37638,155 @@ public class WebTest {
         export.create(EnumSet.of(TargetType.DATABASE), metadata);
     }
 }
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>webproject</groupId>
+  <artifactId>webproject</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>entity</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+
+    <!-- 添加mysql驱动依赖 -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.11</version>
+    </dependency>
+
+    <!-- 添加hibernate依赖包 -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.2.6.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-core</artifactId>
+      <version>2.5.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jstl</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+
+    <!--<dependency>-->
+      <!--<groupId>struts</groupId>-->
+      <!--<artifactId>struts</artifactId>-->
+      <!--<version>1.0-SNAPSHOT</version>-->
+    <!--</dependency>-->
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.7</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+
 //------------------------------------------------------------------------------------------------
 2-2 数据库工厂类
-//MyHibernateSessionFaction.java
+//MyHibernateSessionFactory.java
 package db;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-public class MyHibernateSessionFaction {
+package db;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+public class MyHibernateSessionFactory {
     private static SessionFactory sessionFactory;//会话工厂属性
 
     //构造方法私有化，保证单例模式
-    private MyHibernateSessionFaction() {
+    private MyHibernateSessionFactory() {
     }
 
     //公有的静态方法，获得会话工厂对象
-    public static SessionFactory getSessionFaction() {
+    public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration config = new Configuration().configure();
             sessionFactory = config.buildSessionFactory();
@@ -37611,6 +37794,7 @@ public class MyHibernateSessionFaction {
         return sessionFactory;
     }
 }
+
 
 //------------------------------------------------------------------------------------------------
 2-3 设计用户接口和实现类
@@ -37631,7 +37815,7 @@ public interface UsersDAO {
 //UsersDAOImpl.java
 package service.impl;
 
-import db.MyHibernateSessionFaction;
+import db.MyHibernateSessionFactory;
 import entity.Users;
 import service.UsersDAO;
 
@@ -37647,7 +37831,7 @@ public class UsersDAOImpl implements UsersDAO {
         Transaction transaction;
         String hql;
         try {
-            Session session = MyHibernateSessionFaction.getSessionFaction().getCurrentSession();
+            Session session = MyHibernateSessionFactory.getSessionFaction().getCurrentSession();
             transaction = session.beginTransaction();
 
             hql = "from Users where username=? and password=?";
@@ -37831,12 +38015,2248 @@ public class UsersAction extends SuperAction implements ModelDriven<Users> {
             <result name="input">/users/Users_login.jsp</result>
         </action>
     </package>
+    
+    <!--type="chain"表示执行链式操作，不是直接显示一个jsp，而是执行下一个action-->
+    <package name="students" namespace="/students" extends="default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="*_*" class="action.{1}Action" method="{2}">
+            <result name="query_success">/students/Students_query_success.jsp</result>
+            <result name="delete_success" type="chain">Students_query</result>
+        </action>
+    </package>
 </struts>
 //------------------------------------------------------------------------------------------------
 2-7 完成显示登录成功用户名和注销功能
 参见2-5 节
 //------------------------------------------------------------------------------------------------
 2-8 完成表单验证功能
+
+//------------------------------------------------------------------------------------------------
+3-1 学生管理模块 https://www.imooc.com/video/9036
+1. 显示学生资料
+--添加测试数据
+--设计学生业务逻辑接口
+--设计学生业务逻辑接口实现类
+--设计学生Action类
+--页面调用
+--显示数据
+
+2. 删除学生资料
+3. 学生主键生成策略
+4. 添加学生资料
+5. 修改学生资料
+
+//添加测试数据
+package entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class WebTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        Configuration configuration = new Configuration().configure();//创建配置对象
+        sessionFactory = configuration.buildSessionFactory();//创建会话工厂
+        session = sessionFactory.getCurrentSession();//开启会话
+        transaction = session.beginTransaction();//开启事务
+    }
+
+    @After
+    public void destory() {
+        transaction.commit();//事务提交
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Students students1 = new Students("S0000001", "张三丰", "男", new Date(), "武当山");
+        Students students3 = new Students("S0000003", "郭靖", "男", new Date(), "桃花岛");
+        Students students2 = new Students("S0000002", "黄蓉", "女", new Date(), "桃花岛");
+
+        session.save(students1);
+        session.save(students2);
+        session.save(students3);
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-2 显示学生资料-设计学生业务逻辑接口
+
+//StudentDAO.java
+package service;
+
+import entity.Students;
+
+import java.util.List;
+
+//学生的业务逻辑接口
+public interface StudentsDAO {
+    //查询所有学生资料
+    List<Students> queryAllStudents();
+
+    //根据学生编号查询学生资料
+    Students queryStudentsBySid(String sid);
+
+    //添加学生资料
+    boolean addStudents(Students students);
+
+    //修改学生资料
+    boolean updateStudents(Students students);
+
+    //删除学生资料
+    boolean deleteStudents(String sid);
+}
+
+//------------------------------------------------------------------------------------------------
+3-3 显示学生资料-实现显示学生资料业务逻辑
+
+//StudentsDAOImpl.java
+package service.impl;
+
+import db.MyHibernateSessionFactory;
+import entity.Students;
+import service.StudentsDAO;
+
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+//学生业务逻辑接口的实现类
+public class StudentsDAOImpl implements StudentsDAO {
+    @Override
+    public List<Students> queryAllStudents() {
+        Transaction transaction;
+        List<Students> studentsList = null;
+        String hql;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+
+            hql = "from Students";
+            Query query = session.createQuery(hql);
+
+            studentsList = query.list();
+            transaction.commit();
+            return studentsList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return studentsList;
+        }
+    }
+
+    @Override
+    public Students queryStudentsBySid(String sid) {
+        return null;
+    }
+
+    @Override
+    public boolean addStudents(Students students) {
+        students.setSid(getNewSid());
+        Transaction transaction;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            session.save(students);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateStudents(Students students) {
+        return false;
+    }
+
+    @Override
+    public boolean deleteStudents(String sid) {
+        try {
+            Transaction transaction;
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            Students s = session.get(Students.class, sid);
+            session.delete(s);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //生成学生的学号
+    private String getNewSid() {
+        Transaction transaction;
+        String hql;
+        String sid;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            //获得当前学生的最大编号
+            hql = "select max(sid) from Students";
+            Query query = session.createQuery(hql);
+            sid = (String) query.uniqueResult();
+            transaction.commit();
+
+            if (StringUtils.isEmpty(sid)) {
+                //给一个默认的最大编号
+                sid = "S0000001";
+            } else {
+                String temp = sid.substring(1);//取后七位
+                int i = Integer.parseInt(temp);//转成数字
+                ++i;
+                //再还原成字符串
+                temp = String.valueOf(i);
+                int len = temp.length();
+                for (int j = 0; j < 7 - len; j++) {
+                    temp = "0" + temp;
+                }
+                sid = "S" + temp;
+            }
+            return sid;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+
+//StudentsDAOImplTest.java
+package service.impl;
+
+import entity.Students;
+import service.StudentsDAO;
+
+import java.util.List;
+
+import org.junit.Test;
+
+public class StudentsDAOImplTest {
+    @Test
+    public void testQueryAllStudents() {
+        StudentsDAO studentDAO = new StudentsDAOImpl();
+        List<Students> studentsList = studentDAO.queryAllStudents();
+        studentsList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testGetNewSid() {
+        StudentsDAOImpl studentDAO = new StudentsDAOImpl();
+        System.out.println(studentDAO.getNewSid());
+    }
+    
+    @Test
+    public void testAddStudents() {
+        Students s = new Students();
+        s.setSname("张三丰");
+        s.setGender("男");
+        s.setBirthday(new Date());
+        s.setAddress("武当山");
+        StudentsDAO studentsDAO = new StudentsDAOImpl();
+        assertEquals(true, studentsDAO.addStudents(s));
+    }
+}
+输出：
+Students{sid='S0000001', sname='张三丰', gender='男', birthday=2018-06-13, address='武当山'}
+Students{sid='S0000002', sname='黄蓉', gender='女', birthday=2018-06-13, address='桃花岛'}
+Students{sid='S0000003', sname='郭靖', gender='男', birthday=2018-06-13, address='桃花岛'}
+//------------------------------------------------------------------------------------------------
+3-5 显示学生资料-页面调用与数据展现
+
+//StudentsAction.java
+package action;
+
+import entity.Students;
+import service.StudentDAO;
+import service.impl.StudentDAOImpl;
+
+import java.util.List;
+
+public class StudentsAction extends SuperAction {
+
+    private static final long serialVersionUID = 7524786985348374469L;
+
+    //查询所有学生的动作
+    public String query() {
+        StudentDAO studentDAO = new StudentDAOImpl();
+        List<Students> studentsList = studentDAO.queryAllStudents();
+        //放进session中
+        // if (studentsList != null && !studentsList.isEmpty()) {
+        //即使studentsList为空，也要设置进session中，否则当数据库中没有students时，无法刷新列表
+        if (studentsList != null) {
+            session.setAttribute("students_list", studentsList);
+        }
+        return "query_success";
+    }
+    
+    //删除学生动作
+    public String delete() {
+        StudentDAO studentDAO = new StudentDAOImpl();
+        String sid = request.getParameter("sid");
+        studentDAO.deleteStudents(sid);//调用删除方法
+        return "delete_success";
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+3-6 删除学生资料
+--界面调用
+--编写业务逻辑代码
+--编写删除action
+--测试
+
+//------------------------------------------------------------------------------------------------
+3-7 添加学生资料
+--界面原型演示
+--编写添加学生业务逻辑代码
+--编写添加action
+--页面调用
+//------------------------------------------------------------------------------------------------
+3-8 添加学生资料
+--学生的主键生成策略
+--编写添加学生业务逻辑代码
+
+//------------------------------------------------------------------------------------------------
+3-9 添加学生资料——实现添加学生资料业务逻辑
+参见 service.impl.StudentsDAOImpl#addStudents
+
+//------------------------------------------------------------------------------------------------
+3-10 修改学生资料
+--界面原型演示
+--编写修改学生业务逻辑代码
+--编写修改action
+
+//------------------------------------------------------------------------------------------------
+3-11 修改学生资料
+--编写修改学生业务逻辑代码
+--页面显示学生资料
+--保存修改后的学生资料
+
+//--完整代码
+//SuperAction.java
+package action;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
+import org.apache.struts2.util.ServletContextAware;
+
+import com.opensymphony.xwork2.ActionSupport;
+
+//所有Action动作的父类
+public class SuperAction extends ActionSupport implements ServletRequestAware, ServletResponseAware, ServletContextAware {
+
+    private static final long serialVersionUID = 5110053493783737838L;
+    protected HttpServletRequest request;//请求对象
+    protected HttpServletResponse response;//响应对象
+    protected HttpSession session;//会话对象
+    protected ServletContext application;//全局对象
+
+    @Override
+    public void setServletRequest(HttpServletRequest request) {
+        this.request = request;
+        this.session = this.request.getSession();
+    }
+
+    @Override
+    public void setServletResponse(HttpServletResponse response) {
+        this.response = response;
+    }
+
+    @Override
+    public void setServletContext(ServletContext application) {
+        this.application = application;
+    }
+}
+
+
+//StudentsAction.java
+package action;
+
+import entity.Students;
+import service.StudentsDAO;
+import service.impl.StudentsDAOImpl;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+
+public class StudentsAction extends SuperAction {
+
+    private static final long serialVersionUID = 7524786985348374469L;
+
+    //查询所有学生的动作
+    public String query() {
+        StudentsDAO studentDAO = new StudentsDAOImpl();
+        List<Students> studentsList = studentDAO.queryAllStudents();
+        //放进session中
+        if (studentsList != null) {
+            session.setAttribute("students_list", studentsList);
+        }
+        return "query_success";
+    }
+
+    //删除学生动作
+    public String delete() {
+        StudentsDAO studentDAO = new StudentsDAOImpl();
+        String sid = request.getParameter("sid");
+        studentDAO.deleteStudents(sid);//调用删除方法
+        return "delete_success";
+    }
+
+    //添加学生动作
+    public String add() throws Exception {
+        Students students = new Students();
+        students.setSname(request.getParameter("sname"));
+        students.setGender(request.getParameter("gender"));
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        //方法1，设置时间为标准时间
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+00"));
+        Date birthday = simpleDateFormat.parse(request.getParameter("birthday"));
+        students.setBirthday(birthday);
+
+        //方法2，手工给时间加8小时，变成标准时间
+//        Calendar c = Calendar.getInstance();
+//        c.setTime(birthday);
+//        c.add(Calendar.HOUR, 8);//东8区，比标准时间慢8个小时，需要加8个小时，才是标准时间的日期
+//        students.setBirthday(c.getTime());
+
+        students.setAddress(request.getParameter("address"));
+        StudentsDAO studentsDAO = new StudentsDAOImpl();
+        studentsDAO.addStudents(students);
+        return "add_success";
+    }
+
+    //修改学生资料动作
+    public String modify() {
+        //获得传递过来的学生编号
+        String sid = request.getParameter("sid");
+        StudentsDAO studentsDAO = new StudentsDAOImpl();
+        Students students = studentsDAO.queryStudentsBySid(sid);
+        //保存在会话中
+        session.setAttribute("modify_students", students);
+        return "modify_success";
+    }
+
+    //保存修改后的学生资料动作
+    public String save() throws ParseException {
+        Students students = new Students();
+        students.setSid(request.getParameter("sid"));
+        students.setSname(request.getParameter("sname"));
+        students.setGender(request.getParameter("gender"));
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+00"));
+        students.setBirthday(simpleDateFormat.parse(request.getParameter("birthday")));
+        students.setAddress(request.getParameter("address"));
+        StudentsDAO studentsDAO = new StudentsDAOImpl();
+        studentsDAO.updateStudents(students);
+        return "save_success";
+    }
+}
+
+//UsersAction.java
+package action;
+
+import entity.Users;
+import service.UsersDAO;
+import service.impl.UsersDAOImpl;
+
+import org.apache.struts2.interceptor.validation.SkipValidation;
+
+import com.opensymphony.xwork2.ModelDriven;
+
+public class UsersAction extends SuperAction implements ModelDriven<Users> {
+
+    private static final long serialVersionUID = 1171517276988253426L;
+    private Users user = new Users();
+
+    //用户登录动作
+    public String login() {
+//        System.out.println(request.getParameter("username"));//表单中的name和password值，可以通过request.getParameter获取，而name和password又构成了user对象
+//        System.out.println(request.getParameter("password"));
+
+        UsersDAO usersDAO = new UsersDAOImpl();
+        if (usersDAO.usersLogin(user)) {
+            //在session中保存登录成功的用户名
+            session.setAttribute("loginUserName", user.getUsername()); //对应JSP中的EL表达式
+            return "login_success";
+        } else {
+            return "login_failure";
+        }
+    }
+
+    //用户注销方法，用@SkipValidation可以跳过表单验证，即validation方法
+    @SkipValidation
+    public String logout() {
+        if (session.getAttribute("loginUserName") != null) {
+            session.removeAttribute("loginUserName");
+        }
+        return "logout_success";
+    }
+
+    @Override
+    public void validate() {
+        String username = user.getUsername();
+        //用户名不能为空
+        if (username == null || username.trim().isEmpty()) {
+            this.addFieldError("usernameError", "用户名不能为空");
+        }
+        String password = user.getPassword();
+        if (password == null || password.length() < 6) {
+            this.addFieldError("passwordError", "密码长度不少于6位");
+        }
+    }
+
+    @Override
+    public Users getModel() {
+        return this.user;
+    }
+}
+
+//MyHibernateSessionFactory.java
+package db;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+public class MyHibernateSessionFactory {
+    private static SessionFactory sessionFactory;//会话工厂属性
+
+    //构造方法私有化，保证单例模式
+    private MyHibernateSessionFactory() {
+    }
+
+    //公有的静态方法，获得会话工厂对象
+    public static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            Configuration config = new Configuration().configure();
+            sessionFactory = config.buildSessionFactory();
+        }
+        return sessionFactory;
+    }
+}
+
+//Students.java
+package entity;
+
+import java.util.Date;
+
+public class Students {
+    private String sid;//学号
+    private String sname;
+    private String gender;
+    private Date birthday;
+    private String address;
+
+    public Students() {
+    }
+
+    public Students(String sid, String sname, String gender, Date birthday, String address) {
+        this.sid = sid;
+        this.sname = sname;
+        this.gender = gender;
+        this.birthday = birthday;
+        this.address = address;
+    }
+
+    public String getSid() {
+        return sid;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
+    }
+
+    public String getSname() {
+        return sname;
+    }
+
+    public void setSname(String sname) {
+        this.sname = sname;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Students{" +
+            "sid='" + sid + '\'' +
+            ", sname='" + sname + '\'' +
+            ", gender='" + gender + '\'' +
+            ", birthday=" + birthday +
+            ", address='" + address + '\'' +
+            '}';
+    }
+}
+
+//Students.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="entity.Students" table="t_students" schema="hibernate">
+        <id name="sid" type="java.lang.String" length="8">
+            <generator class="assigned"/>
+        </id>
+        <property name="sname" type="java.lang.String"/>
+        <property name="gender" type="java.lang.String"/>
+        <property name="birthday" type="date"/>
+        <property name="address" type="java.lang.String"/>
+    </class>
+</hibernate-mapping>
+
+
+//Users.java
+package entity;
+
+public class Users {
+    private int uid;
+    private String username;
+    private String password;
+
+    public Users() {
+    }
+
+    public Users(int uid, String username, String password) {
+        this.uid = uid;
+        this.username = username;
+        this.password = password;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+
+//Users.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="entity.Users" table="t_users" schema="hibernate">
+        <id name="uid" type="int" column="uid">
+            <generator class="native"/>
+        </id>
+        <property name="username" type="java.lang.String" column="username"/>
+        <property name="password" type="java.lang.String" column="password"/>
+    </class>
+</hibernate-mapping>
+
+
+//UsersDAO.java
+package service;
+
+import entity.Users;
+
+//用户业务逻辑接口
+public interface UsersDAO {
+    //用户登录方法
+    boolean usersLogin(Users user);
+}
+
+//UsersDAOImpl.java
+package service.impl;
+
+import db.MyHibernateSessionFactory;
+import entity.Users;
+import service.UsersDAO;
+
+import java.util.List;
+
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+public class UsersDAOImpl implements UsersDAO {
+    @Override
+    public boolean usersLogin(Users user) {
+        Transaction transaction;
+        String hql;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+
+            hql = "from Users where username=? and password=?";
+            Query query = session.createQuery(hql);
+            query.setParameter(0, user.getUsername());
+            query.setParameter(1, user.getPassword());
+
+            List list = query.list();
+            transaction.commit();//提交事务
+            return !list.isEmpty();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+//        finally {
+//            if (transaction != null) {
+//                //transaction.commit();//不能重复提交事务
+//            }
+//        }
+    }
+}
+
+//StudentsDAO.java
+package service;
+
+import entity.Students;
+
+import java.util.List;
+
+//学生的业务逻辑接口
+public interface StudentsDAO {
+    //查询所有学生资料
+    List<Students> queryAllStudents();
+
+    //根据学生编号查询学生资料
+    Students queryStudentsBySid(String sid);
+
+    //添加学生资料
+    boolean addStudents(Students students);
+
+    //修改学生资料
+    boolean updateStudents(Students students);
+
+    //删除学生资料
+    boolean deleteStudents(String sid);
+}
+
+//StudentsDAOImpl.java
+package service.impl;
+
+import db.MyHibernateSessionFactory;
+import entity.Students;
+import service.StudentsDAO;
+
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+//学生业务逻辑接口的实现类
+public class StudentsDAOImpl implements StudentsDAO {
+    @Override
+    public List<Students> queryAllStudents() {
+        Transaction transaction;
+        List<Students> studentsList = null;
+        String hql;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+
+            hql = "from Students";
+            Query query = session.createQuery(hql);
+
+            studentsList = query.list();
+            transaction.commit();
+            return studentsList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return studentsList;
+        }
+    }
+
+    @Override
+    public Students queryStudentsBySid(String sid) {
+        Transaction transaction;
+        Students students = null;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            students = session.get(Students.class, sid);
+            transaction.commit();
+            return students;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return students;
+        }
+    }
+
+    @Override
+    public boolean addStudents(Students students) {
+        students.setSid(getNewSid());
+        Transaction transaction;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            session.save(students);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateStudents(Students students) {
+        Transaction transaction;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            session.update(students);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deleteStudents(String sid) {
+        try {
+            Transaction transaction;
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            Students s = session.get(Students.class, sid);
+            session.delete(s);
+            transaction.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    //生成学生的学号
+    private String getNewSid() {
+        Transaction transaction;
+        String hql;
+        String sid;
+        try {
+            Session session = MyHibernateSessionFactory.getSessionFactory().getCurrentSession();
+            transaction = session.beginTransaction();
+            //获得当前学生的最大编号
+            hql = "select max(sid) from Students";
+            Query query = session.createQuery(hql);
+            sid = (String) query.uniqueResult();
+            transaction.commit();
+
+            if (StringUtils.isEmpty(sid)) {
+                //给一个默认的最大编号
+                sid = "S0000001";
+            } else {
+                String temp = sid.substring(1);//取后七位
+                int i = Integer.parseInt(temp);//转成数字
+                ++i;
+                //再还原成字符串
+                temp = String.valueOf(i);
+                int len = temp.length();
+                for (int j = 0; j < 7 - len; j++) {
+                    temp = "0" + temp;
+                }
+                sid = "S" + temp;
+            }
+            return sid;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+
+//hibernate.cfg.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!--  mysql账户名  -->
+        <property name="connection.username">root</property>
+
+        <!--  mysql密码  -->
+        <property name="connection.password">root123</property>
+
+        <!--  mysql驱动  -->
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!--  mysql连接URL  这里修改mysql-connector-java.jar版本为8.0.11，并且安装了MySQL的Connector：MySQL Connector/J-->
+        <property name="connection.url">jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8</property>
+
+        <!--  数据库方言  -->
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!--  显示sql语句  -->
+        <property name="show_sql">true</property>
+
+        <!--  格式化sql语句  -->
+        <property name="format_sql">true</property>
+
+        <!--<property name="hibernate.default_schema">hibernate</property>-->
+        <!--  根据需要创建数据库  如果表存在，则会删除；如果表不存在，则新建；如果不加这个条件，则不会新建或删除表-->
+        <property name="hbm2ddl.auto">update</property>
+
+        <!--本地事务（jdbc事务）用thread参数 全局事务（jta事务）用jta参数-->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <mapping resource="entity/Students.hbm.xml"/>
+        <mapping resource="entity/Users.hbm.xml"/>
+    </session-factory>
+</hibernate-configuration>
+
+//log4j2.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5p] %d %c - %m%n" />
+        </Console>
+        <File name="File" fileName="dist/my.log">
+            <PatternLayout pattern="%m%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="mh.sample2.Log4jTest2" level="INFO">
+            <AppenderRef ref="File" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="hello" class="action.HelloAction" method="hello">
+            <result name="success">/hello.jsp</result>
+        </action>
+    </package>
+
+    <package name="users" namespace="/users" extends="default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="*_*" class="action.{1}Action" method="{2}">
+            <result name="login_success">/users/Users_login_success.jsp</result>
+            <result name="login_failure">/users/Users_login.jsp</result>
+            <result name="logout_success">/users/Users_login.jsp</result>
+            <result name="input">/users/Users_login.jsp</result>
+        </action>
+    </package>
+
+    <package name="students" namespace="/students" extends="default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="*_*" class="action.{1}Action" method="{2}">
+            <result name="query_success">/students/Students_query_success.jsp</result>
+            <result name="add_success">/students/Students_add_success.jsp</result>
+            <result name="save_success">/students/Students_modify_success.jsp</result>
+            <result name="modify_success">/students/Students_modify.jsp</result>
+            <result name="delete_success" type="chain">Students_query</result>
+        </action>
+    </package>
+</struts>
+
+//WebTest.java
+package entity;
+
+import java.util.Date;
+import java.util.EnumSet;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.tool.schema.TargetType;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class WebTest {
+    private SessionFactory sessionFactory;
+    private Session session;
+    private Transaction transaction;
+
+    @Before
+    public void init() {
+        Configuration configuration = new Configuration().configure();//创建配置对象
+        sessionFactory = configuration.buildSessionFactory();//创建会话工厂
+        session = sessionFactory.getCurrentSession();//开启会话
+        transaction = session.beginTransaction();//开启事务
+    }
+
+    @After
+    public void destory() {
+        transaction.commit();//事务提交
+        sessionFactory.close();//关闭会话工厂
+    }
+
+    @Test
+    public void testSchemaExport() {
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().configure().build();//这里的configure()会调用hibernate.cfg.xml的配置资源文件
+        Metadata metadata = new MetadataSources(serviceRegistry).buildMetadata();
+        SchemaExport export = new SchemaExport();
+        export.create(EnumSet.of(TargetType.DATABASE), metadata);
+    }
+
+    @Test
+    public void testSaveStudent() {
+        Students students1 = new Students("S0000001", "张三丰", "男", new Date(), "武当山");
+        Students students3 = new Students("S0000003", "郭靖", "男", new Date(), "桃花岛");
+        Students students2 = new Students("S0000002", "黄蓉", "女", new Date(), "桃花岛");
+
+        session.save(students1);
+        session.save(students2);
+        session.save(students3);
+    }
+}
+
+//StudentsDAOImplTest.java
+package service.impl;
+
+import entity.Students;
+import service.StudentsDAO;
+
+import java.util.Date;
+import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class StudentsDAOImplTest {
+    @Test
+    public void testQueryAllStudents() {
+        StudentsDAO studentDAO = new StudentsDAOImpl();
+        List<Students> studentsList = studentDAO.queryAllStudents();
+        studentsList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testGetNewSid() {
+        StudentsDAOImpl studentDAO = new StudentsDAOImpl();
+//        System.out.println(studentDAO.getNewSid());
+    }
+
+    @Test
+    public void testAddStudents() {
+        Students s = new Students();
+        s.setSname("张三丰");
+        s.setGender("男");
+        s.setBirthday(new Date());
+        s.setAddress("武当山");
+        StudentsDAO studentsDAO = new StudentsDAOImpl();
+        assertEquals(true, studentsDAO.addStudents(s));
+    }
+}
+
+//UsersDAOImplTest.java
+package service.impl;
+
+import entity.Users;
+import service.UsersDAO;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class UsersDAOImplTest {
+
+    @Test
+    public void testUsersLogin() {
+        Users user = new Users(1, "zhangsan", "123456");
+        UsersDAO usersDAO = new UsersDAOImpl();
+        assertEquals(false, usersDAO.usersLogin(user));
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-12 修改学生资料-实现修改学生资料
+
+//------------------------------------------------------------------------------------------------
+1-1 基于SSH之框架整合篇，基于SSH实现员工管理系统之框架整合篇教程 https://www.imooc.com/video/12461
+
+//------------------------------------------------------------------------------------------------
+3-1 创建项目引入jar包
+struts2-convention-plugin-2.XXX.jar
+--strut2的注解开发的jar包
+
+struts2-spring-plugin-2.XXX.jar
+--struts2用于整合spring的jar包
+
+//------------------------------------------------------------------------------------------------
+4-3 配置Action，Service，Dao的类 https://www.imooc.com/video/12468
+Struts2和Srping整合的两种方式：
+1. Action的类由Struts2自身去创建
+//Action的配置和创建：struts.xml
+    <package name="ssh" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="product_*" class="action.ProductAction" method="{1}"><!--这里写的class="action.ProductAction"，会由strut2创建Action类-->
+
+        </action>
+    </package>
+
+//Service和DAO的配置和创建：applicationContext.xml
+    <!-- 配置业务层的类 -->
+    <bean id="productService" class="service.ProductService">
+        <property name="productDao" ref="productDao"/>
+    </bean>
+
+    <!-- 配置DAO的类 -->
+    <bean id="productDao" class="dao.ProductDao">
+
+    </bean>
+2. Action的类交给Spring框架创建
+//Action的配置：struts.xml
+    <package name="ssh" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="product_*" class="productAction" method="{1}"><!--这里写的class="productAction"，只是spring配置文件中的Action类Id-->
+
+        </action>
+    </package>
+
+//Action、Service和DAO的配置和创建：applicationContext.xml
+    <!-- 配置Action的类 -->
+    <bean id="productAction" class="action.ProductAction" scope="prototype">
+        <!-- 手动注入Service -->
+        <property name="productService" ref="productService"/>
+    </bean>
+
+    <!-- 配置业务层的类 -->
+    <bean id="productService" class="service.ProductService">
+        <property name="productDao" ref="productDao"/>
+    </bean>
+
+    <!-- 配置DAO的类 -->
+    <bean id="productDao" class="dao.ProductDao">
+
+    </bean>
+    
+建议使用第二种方式，所有类的配置和创建都将由Spring完成，可以进行AOP增强，如果将由Strut2创建类则无法进行AOP。
+//------------------------------------------------------------------------------------------------
+5-1 创建数据库和映射文件-Spring整合Hiberante
+
+基于hibernate.cfg.xml
+//ProductAction.java
+package action;
+
+// 本来需要通过如下工厂方式获得Bean对象：
+// WebApplicationContext wap = WebApplicationContextUtils.getWebApplicationContext(...);
+// BookService bs = wap.getBeans("bookService");
+
+// 使用了struts2-spring-plugin-XXX.jar后，就可以自动装配：
+// org/apache/struts/struts2-core/2.5.16/struts2-core-2.5.16.jar!/org/apache/struts2/default.properties中将
+// # struts.objectFactory = spring注释掉
+// 后一句struts.objectFactory.spring.autoWire = name表示使用name自动装配
+// org/apache/struts/struts2-spring-plugin/2.5.16/struts2-spring-plugin-2.5.16.jar!/struts-plugin.xml中<constant name="struts.objectFactory" value="spring" />将此工厂方法定义上
+
+import domain.Product;
+import service.ProductService;
+
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+
+/**
+ * 商品管理的Action类
+ */
+public class ProductAction extends ActionSupport implements ModelDriven<Product> {
+    // 模型驱动使用的类
+    private Product product = new Product();
+    @Override
+    public Product getModel() {
+        return product;
+    }
+
+    // Struts和Spring整合过程中按名称自动注入的业务层类
+    private ProductService productService;
+
+    public void setProductService(ProductService productService) {
+        this.productService = productService;
+    }
+
+    /**
+     * 保存商品的执行的方法
+     */
+    public String save() {
+        System.out.println("Action的save方法执行了...");
+        productService.save(product);
+        return NONE;
+    }
+}
+
+//ProductDao.java
+package dao;
+
+import domain.Product;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+/**
+ * 商品管理的DAO类
+ */
+public class ProductDao {
+
+    /**
+     * DAO中保存商品的方法
+     * @param product
+     */
+    public void save(Product product) {
+        System.out.println("DAO中的save方法执行了...");
+        System.out.println(product);
+
+        Configuration config = new Configuration().configure();
+        SessionFactory sessionFactory = config.buildSessionFactory();
+        Session session = sessionFactory.getCurrentSession();
+        Transaction transaction = session.beginTransaction();
+
+        session.save(product);
+        transaction.commit();
+    }
+}
+
+//Product.java
+package domain;
+
+/**
+ * 商品的实体
+ */
+public class Product {
+    private Integer pid;
+    private String pname;
+    private Double price;
+
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    public String getPname() {
+        return pname;
+    }
+
+    public void setPname(String pname) {
+        this.pname = pname;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+            "pid=" + pid +
+            ", pname='" + pname + '\'' +
+            ", price=" + price +
+            '}';
+    }
+}
+
+//Product.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="domain.Product" table="t_product">
+        <id name="pid" type="int" column="pid">
+            <generator class="native"/>
+        </id>
+
+        <property name="pname" type="java.lang.String" column="pname" length="20"/>
+        <property name="price" type="double" column="price"/>
+    </class>
+</hibernate-mapping>
+
+//ProductService.java
+package service;
+
+import dao.ProductDao;
+import domain.Product;
+
+/**
+ * 商品管理的业务层的类
+ */
+public class ProductService {
+    // 业务层注入的DAO类
+    private ProductDao productDao;
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    /**
+     * 业务层保存商品的方法
+     * @param product
+     */
+    public void save(Product product) {
+        System.out.println("Service的savey方法执行了...");
+        productDao.save(product);
+    }
+}
+
+
+//applicationContext.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+    <!-- 配置Action的类 -->
+    <bean id="productAction" class="action.ProductAction" scope="prototype">
+        <!-- 手动注入Service -->
+        <property name="productService" ref="productService"/>
+    </bean>
+
+    <!-- 配置业务层的类 -->
+    <bean id="productService" class="service.ProductService">
+        <property name="productDao" ref="productDao"/>
+    </bean>
+
+    <!-- 配置DAO的类 -->
+    <bean id="productDao" class="dao.ProductDao">
+
+    </bean>
+</beans>
+
+//hibernate.cfg.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!--  mysql账户名  -->
+        <property name="connection.username">root</property>
+
+        <!--  mysql密码  -->
+        <property name="connection.password">root123</property>
+
+        <!--  mysql驱动  -->
+        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!--  mysql连接URL  这里修改mysql-connector-java.jar版本为8.0.11，并且安装了MySQL的Connector：MySQL Connector/J-->
+        <property name="connection.url">jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8</property>
+
+        <!--  数据库方言  -->
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!--  显示sql语句  -->
+        <property name="show_sql">true</property>
+
+        <!--  格式化sql语句  -->
+        <property name="format_sql">true</property>
+
+        <!--<property name="hibernate.default_schema">hibernate</property>-->
+        <!--  根据需要创建数据库  如果表存在，则会删除；如果表不存在，则新建；如果不加这个条件，则不会新建或删除表-->
+        <property name="hbm2ddl.auto">update</property>
+
+        <!--本地事务（jdbc事务）用thread参数 全局事务（jta事务）用jta参数-->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <mapping resource="domain/Product.hbm.xml"/>
+    </session-factory>
+</hibernate-configuration>
+
+//log4j2.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5p] %d %c - %m%n" />
+        </Console>
+        <File name="File" fileName="dist/my.log">
+            <PatternLayout pattern="%m%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="mh.sample2.Log4jTest2" level="INFO">
+            <AppenderRef ref="File" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+//strut.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="hello" class="action.HelloAction" method="hello">
+            <result name="success">/hello.jsp</result>
+        </action>
+    </package>
+
+    <package name="ssh" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <!--<action name="product_*" class="action.ProductAction" method="{1}">&lt;!&ndash;这里写的class="action.ProductAction"，会由strut2创建Action类&ndash;&gt;-->
+        <action name="product_*" class="productAction" method="{1}">
+
+        </action>
+    </package>
+</struts>
+
+
+//web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <!--Spring的框架的核心监听器-->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+
+    <!--Struts2的框架的核心过滤器的配置-->
+    <filter>
+        <filter-name>struts</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts</filter-name>
+        <url-pattern>/*</url-pattern> */
+    </filter-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>
+
+//addProduct.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s"%>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<h1>保存商品的页面</h1>
+<s:form action="product_save" method="post" namespace="/" theme="simple">
+    <table border="1" width="400">
+        <tr>
+            <td>商品名称</td>
+            <td><s:textfield name="pname"/></td>
+        </tr>
+        <tr>
+            <td>商品价格</td>
+            <td><s:textfield name="price"/></td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="submit" value="添加"/></td>
+        </tr>
+    </table>
+</s:form>
+</body>
+</html>
+
+//index.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8"%>
+<%
+  String path = request.getContextPath();
+  String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+  response.sendRedirect(path+"/addProduct.jsp");
+%>
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>webproject</groupId>
+  <artifactId>webproject</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>entity</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+
+    <!-- 添加mysql驱动依赖 -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.11</version>
+    </dependency>
+
+    <!-- 添加hibernate依赖包 -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>5.2.6.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-core</artifactId>
+      <version>2.5.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jstl</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-spring-plugin</artifactId>
+      <version>2.5.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>5.0.7.RELEASE</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+
+
+//-----使用Spring整合Hibernate，不配置hibernate.cfg.xml文件：
+//ProductAction.java
+package action;
+
+// 本来需要通过如下工厂方式获得Bean对象：
+// WebApplicationContext wap = WebApplicationContextUtils.getWebApplicationContext(...);
+// BookService bs = wap.getBeans("bookService");
+
+// 使用了struts2-spring-plugin-XXX.jar后，就可以自动装配：
+// org/apache/struts/struts2-core/2.5.16/struts2-core-2.5.16.jar!/org/apache/struts2/default.properties中将
+// # struts.objectFactory = spring注释掉
+// 后一句struts.objectFactory.spring.autoWire = name表示使用name自动装配
+// org/apache/struts/struts2-spring-plugin/2.5.16/struts2-spring-plugin-2.5.16.jar!/struts-plugin.xml中<constant name="struts.objectFactory" value="spring" />将此工厂方法定义上
+
+import domain.Product;
+import service.ProductService;
+
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+
+/**
+ * 商品管理的Action类
+ */
+public class ProductAction extends ActionSupport implements ModelDriven<Product> {
+    // 模型驱动使用的类
+    private Product product = new Product();
+    @Override
+    public Product getModel() {
+        return product;
+    }
+
+    // Struts和Spring整合过程中按名称自动注入的业务层类
+    private ProductService productService;
+
+    public void setProductService(ProductService productService) {
+        this.productService = productService;
+    }
+
+    /**
+     * 保存商品的执行的方法
+     */
+    public String save() {
+        System.out.println("Action的save方法执行了...");
+        productService.save(product);
+        return NONE;
+    }
+}
+
+//ProductDao.java
+package dao;
+
+import domain.Product;
+
+import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
+
+/**
+ * 商品管理的DAO类
+ */
+public class ProductDao extends HibernateDaoSupport {
+
+    /**
+     * DAO中保存商品的方法
+     * @param product
+     */
+    public void save(Product product) {
+        System.out.println("DAO中的save方法执行了...");
+        System.out.println(product);
+        this.getHibernateTemplate().save(product);
+        
+        //这是原来单独使用Hibernate的保存方式
+//        Configuration config = new Configuration().configure();
+//        SessionFactory sessionFactory = config.buildSessionFactory();
+//        Session session = sessionFactory.getCurrentSession();
+//        Transaction transaction = session.beginTransaction();
+//
+//        session.save(product);
+//        transaction.commit();
+    }
+}
+
+//Product.java
+package domain;
+
+/**
+ * 商品的实体
+ */
+public class Product {
+    private Integer pid;
+    private String pname;
+    private Double price;
+
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    public String getPname() {
+        return pname;
+    }
+
+    public void setPname(String pname) {
+        this.pname = pname;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+            "pid=" + pid +
+            ", pname='" + pname + '\'' +
+            ", price=" + price +
+            '}';
+    }
+}
+
+//Product.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="domain.Product" table="t_product">
+        <id name="pid" type="int" column="pid">
+            <generator class="native"/>
+        </id>
+
+        <property name="pname" type="java.lang.String" column="pname" length="20"/>
+        <property name="price" type="double" column="price"/>
+    </class>
+</hibernate-mapping>
+
+//ProductService.java
+package service;
+
+import dao.ProductDao;
+import domain.Product;
+
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 商品管理的业务层的类
+ */
+@Transactional
+public class ProductService {
+    // 业务层注入的DAO类
+    private ProductDao productDao;
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
+    /**
+     * 业务层保存商品的方法
+     * @param product
+     */
+    public void save(Product product) {
+        System.out.println("Service的savey方法执行了...");
+        productDao.save(product);
+    }
+}
+
+//applicationContext.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 引入外部的属性文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- 配置Hibernate的相关属性 在启动服务时，会把表t_product创建起来-->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!-- 注入连接池 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 配置Hibernate的属性 -->
+        <property name="hibernateProperties">
+            <props>
+                <!-- 这里如果不设置成MySQL5Dialect，则Hibernate生成建表语句时会加一句type=MyISAM，执行SQL时失败 https://blog.csdn.net/u014158770/article/details/66478060-->
+                <!-- 改成MySQL5Dialect之后，建表语句最后为engine=MyISAM，但是此时建出来的表无法创建外键 https://blog.csdn.net/tongxinxiao/article/details/50617369 -->
+                <!-- 修改言为MySQL55Dialect，建表语句最后为engine=InnoDB，此时可以正常增加外键 https://blog.csdn.net/tianyaleixiaowu/article/details/79468277-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <!-- https://blog.csdn.net/maoyuanming0806/article/details/61417995 -->
+                <!-- 在hibernate5上不需要配置如下thread方式 -->
+                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+                <!-- 或者配置如下 org.springframework.orm.hibernate5.SpringSessionContext -->
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            </props>
+        </property>
+        <!--配置Hibernate的映射文件-->
+        <property name="mappingResources">
+            <list>
+                <value>domain/Product.hbm.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 配置Action的类 -->
+    <bean id="productAction" class="action.ProductAction" scope="prototype">
+        <!-- 手动注入Service -->
+        <property name="productService" ref="productService"/>
+    </bean>
+
+    <!-- 配置业务层的类 -->
+    <bean id="productService" class="service.ProductService">
+        <property name="productDao" ref="productDao"/>
+    </bean>
+
+    <!-- 配置DAO的类 -->
+    <bean id="productDao" class="dao.ProductDao">
+        <!-- 注入到抽象类HibernateDaoSupport中的sessionFactory -->
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 开启注释事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
+
+//jdbc.properties
+//注意这里的url地址原来是xml中配置时对于&是使用转义符&apm;使用的，配置在properties中时需要换成原连接符&
+jdbc.driverClass=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+jdbc.username=root
+jdbc.password=root123
+
+//log4j.properties
+log4j.rootLogger=DEBUG,A1
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+log4j.appender.A1.layout.ConversionPattern=%-d{yyyy-MM-dd HH:mm:ss,SSS} [%t] [%c]-[%p] %m%n
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="hello" class="action.HelloAction" method="hello">
+            <result name="success">/hello.jsp</result>
+        </action>
+    </package>
+
+    <package name="ssh" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <!--<action name="product_*" class="action.ProductAction" method="{1}">&lt;!&ndash;这里写的class="action.ProductAction"，会由strut2创建Action类&ndash;&gt;-->
+        <action name="product_*" class="productAction" method="{1}">
+
+        </action>
+    </package>
+</struts>
+
+//addProduct.jsp和index.jsp文件与原来相同
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>webproject</groupId>
+  <artifactId>webproject</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <name>entity</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+
+    <!-- 添加mysql驱动依赖 -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.11</version>
+    </dependency>
+
+    <!-- 添加hibernate依赖包 -->
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <!--<version>4.1.7.Final</version>-->
+      <version>5.3.2.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-core</artifactId>
+      <version>2.5.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jstl</groupId>
+      <artifactId>jstl</artifactId>
+      <version>1.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-spring-plugin</artifactId>
+      <version>2.5.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.11.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>5.0.7.RELEASE</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.mchange</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.9.5.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-orm</artifactId>
+      <version>5.0.7.RELEASE</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
+      <version>5.0.7.RELEASE</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.20.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    
+    <!--https://blog.csdn.net/swpu_lipan/article/details/78460852?utm_source=debugrun&utm_medium=referral
+    https://www.cnblogs.com/machanghai/p/5456294.html-->
+    <!--配置如下resources，才会把*.hbm文件拷贝到target目录，否则java中的配置文件不会拷贝，导致xxx.hbm.xml文件找不到的错误-->
+    <resources>
+        <resource>
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
+            <filtering>true</filtering>
+        </resource>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.xml</include>
+                <include>**/*.properties</include> 在IDE中配置时需要去注释*/
+            </includes>
+        </resource>
+    </resources>
+  </build>
+</project>
+
+//------------------------------------------------------------------------------------------------
+SSH实现员工管理系统之案例实现篇
+1-3 实体及映射的创建 
+主要问题点在于外键的生成，使用引擎为MyISAM时，则无法创建外键，使用引擎为InnoDB时，可以正常创建外键
+<!-- 这里如果不设置成MySQL5Dialect，则Hibernate生成建表语句时会加一句type=MyISAM，执行SQL时失败 https://blog.csdn.net/u014158770/article/details/66478060-->
+<!-- 改成5之后，建表语句最后为engine=MyISAM，但是此时建出来的表无法创建外键 https://blog.csdn.net/tongxinxiao/article/details/50617369 -->
+<!-- 修改言为MySQL55Dialect，建表语句最后为engine=InnoDB，此时可以正常增加外键 https://blog.csdn.net/tianyaleixiaowu/article/details/79468277-->
+<prop key="hibernate.dialect">org.hibernate.dialect.MySQL55Dialect</prop>
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------------------------
 
