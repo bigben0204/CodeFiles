@@ -39164,6 +39164,1142 @@ public class UsersDAOImplTest {
         assertEquals(false, usersDAO.usersLogin(user));
     }
 }
+
+//index.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8"%>
+<%
+  String path = request.getContextPath();
+  String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+  response.sendRedirect(path+"/users/Users_login.jsp");
+%>
+
+//tree.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>导航树</title>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<style type="text/css">@import url('components/dtree/dtree.css');</style>
+	<script type="text/javascript">var dtreeIconBasePath = "components/dtree";</script>
+	<script type="text/javascript"  src="components/dtree/dtree.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+<%--学生管理列表的link写如下的绝对路径也可以：<%=path%>/students/Students_query.action--%>
+var treeMenu = [
+	{ level:1, name:"学生管理"},
+	{ level:2, name:"学生列表", ico:"images/icon_default.gif",link:"students/Students_query.action"},
+	{ level:1, name:"教师管理"},
+	{ level:2, name:"教师列表", ico:"images/icon_default.gif",link:"role_list.html"},
+	{ level:1, name:"信息管理"},
+	{ level:2, name:"新闻管理", ico:"images/icon_default.gif",link:"news_list.html"},
+	{ level:2, name:"公告管理", ico:"images/icon_default.gif",link:"bulletin_list.html"},
+	{ level:1, name:"系统邮件", ico:"images/icon_default.gif"},
+	{ level:1, name:"网络文件", ico:"images/icon_default.gif",link:"complaint_list.html"}
+];
+</script>
+<style>
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#menuControll{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0 10px;
+	font-size:14px;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+</style>
+<div id="menuControll">
+菜单控制:【<a href="#" onclick="tree.openAll();this.blur();return false;" style="color:#333333;text-decoration:none">展开</a>】
+【<a href="#" onclick="tree.closeAll();this.blur();return false;" style="color:#333333;text-decoration:none">折叠</a>】
+</div>
+<div class="dtree" style="margin:10px;">
+<script type="text/javascript"> 
+//建立新树
+tree = new dTree('tree');
+tree.config.target = "MainFrame";
+tree.config.useCookies = false;
+var selNum = -1;
+var link = "";
+//根目录
+tree.add(0,-1,'管理中心', null, null, null, '', '');
+var count = 0;
+var pLevelIdArray = new Array();
+pLevelIdArray[1] = 0;
+var currLevel = 1;
+for (var i=0; i<treeMenu.length; i++) {
+	var item = treeMenu[i];
+	var itemLevel = item.level;
+	pLevelIdArray[itemLevel+1] = ++count;
+	if (item.link!=null && item.link!="") {
+		if (item.ico!=null) {
+			tree.add(count, pLevelIdArray[itemLevel], item.name, item.link, null, null, item.ico, item.ico);
+		} else {
+			tree.add(count, pLevelIdArray[itemLevel], item.name, item.link);
+		}
+	} else {
+		if (item.ico!=null) {
+			tree.add(count, pLevelIdArray[itemLevel], item.name, null, null, null, item.ico, item.ico);
+		} else {
+			tree.add(count, pLevelIdArray[itemLevel], item.name);
+		}
+	}
+	if (item.select) {
+		selNum = count;
+		link = item.link;
+	}
+}
+document.write(tree);
+tree.openAll();
+if (selNum != -1) {
+	tree.openTo(selNum,true);
+	top.document.frames["MainFrame"].location.href=link;
+}
+</script>
+</div>
+</body>
+</html>
+
+//Users_login.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!-- 这是一个html5 doctype声明 -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>用户登录</title>
+    
+</head>
+<style type="text/css">
+body{
+	margin:0px;
+	padding:0px;
+	overflow:hidden;
+}
+#wrapper{
+	position:absolute;
+	width:100%;
+	height:100%;
+	min-width:1280px;
+	min-height:680px;
+	overflow-x:hidden;
+	overflow-y:hidden;
+    background-image: -moz-linear-gradient(top,#77D1F6, #2F368F);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #77D1F6),color-stop(1, #2F368F));
+}
+#header{
+	height:100px;
+	width:100%;
+}
+#logo{
+	position:absolute;
+	float:left;
+	margin-left:5%;
+	margin-top:30px;
+	height:40px;
+	width:160px;
+	text-align:center;
+}
+#heading{
+	position:relative;
+	float:left;
+	margin-left:20%;
+	margin-top:-18px;
+	height:110px;
+	width:60%;
+	border-radius: 18px;
+	background-color:#1C75BC;
+	opacity:0.6;
+}
+#heading #title{
+	margin-top:40px;
+	text-align:center;
+	font-family:微软雅黑;
+	font-size:24px;
+	font-weight:bold;
+}
+#heading #subTitle{
+	margin-top:10px;
+	text-align:center;
+	font-family:Courier New;
+}
+#main{
+	margin-top:20px;
+	height:500px;
+	width:100%;
+}
+#mainBg{
+	position:relative;
+	float:left;
+	margin-left:20%;
+	margin-top:0px;
+	height:500px;
+	width:60%;
+    border-radius: 18px;
+    background-color:#000000;
+    opacity:0.5;
+}
+#mainPanel{
+    position:relative;
+	margin:25px;
+	height:450px;
+    border-radius: 18px;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainPanel #left{
+	float:left;
+	border-right:2px solid #F6F6F6;
+	position:relative;
+	top:10%;
+	height:80%;
+	width:49%;
+	border-right-style:groove;
+}
+#mainPanel #image{
+	position:relative;
+	height:256px;
+	width:256px;
+	left:15%;
+	top:12%;
+	background-image:url('../images/admin.png');
+}
+#mainPanel #right{
+	float:left;
+	position:relative;
+	height:90%;
+	width:49%;
+	top:5%;
+}
+#welcome{
+	margin-top:20px;
+	height:60px;
+	width:100%;
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 60px;
+	text-align:center;
+}
+#welcome #welcome-text{
+	font-size:38px;
+	font-weight:bold;
+	font-family:微软雅黑;
+	text-shadow: 0 1px 1px #F6F6F6;
+}
+#user-name{
+	height:35px;
+	width:100%;
+	margin-top:20px;
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 35px;
+}
+#user-password{
+	margin-top:20px;
+	height:35px;
+	width:100%;
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 35px;
+}
+#user-checkcode{
+	margin-top:20px;
+	height:35px;
+	width:100%;
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 35px;
+}
+#button-group{
+	margin-top:10px;
+	height:35px;
+	width:100%;
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 35px;
+	text-align:center;
+}
+#error-tip{
+	margin-top:20px;
+	margin-left:5%;
+	height:40px;
+	width:90%;
+	vertical-align: middle;
+	display: inline-block;
+	line-height: 35px;
+	text-align:center;
+	border-bottom:2px solid #F6F6F6;
+	border-bottom-style:groove;
+}
+#error-tip #tip-text{
+	font-size:18px;
+	font-weight:bold;
+	font-family:微软雅黑;
+	color:red;
+}
+.item{
+	margin-left:20px;
+	font-family:微软雅黑;
+	font-size:20px;
+	font-weight:bold;
+	float: left;
+	width:80px;
+	margin-top: 3px;
+	text-align: center;
+	text-shadow: 0 1px 1px #F6F6F6;
+}
+.input{
+	vertical-align: middle;
+	display: inline-block;
+}
+#checkcode-img{
+	margin-top:3px;
+	height:20px;
+	width:60px;
+}
+.form-input{
+	height:20px;
+}
+.btn{
+    border:1px solid #cccccc;
+    cursor:pointer;
+    margin:10px 5px;
+    height:40px;
+	width:80px;
+    text-align:center;
+    border-radius: 4px;
+    border-color: #636263 #464647 #A1A3A5;
+    text-shadow: 0 1px 1px #F6F6F6;
+    background-image: -moz-linear-gradient(center top, #D9D9D9, #A6A6A6 49%, #A6A6A6 50%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #D9D9D9),color-stop(1, #A6A6A6));
+}
+#footer{
+	margin-top:20px;
+	width:100%;
+}
+#footer #text{
+	text-align:center;
+	font-size:14px;
+	font-family:微软雅黑;
+	font-weight:bold;
+}
+</style>
+<body>
+<div id="wrapper">
+	<div id="header">
+		<div id="logo"></div>
+		<div id="heading">
+			<div id="title">后台管理系统</div>
+			<div id="subTitle">Ver 1.0</div>
+		</div>
+	</div>
+	<div id="main">
+		<div id="mainBg">
+			<div id="mainPanel">
+				<div id="left">
+					<div id="image"></div>
+				</div>
+				<div id="right">
+					
+					<form name="loginForm" action="<%=path%>/users/Users_login.action" method="post">
+					<!-- start of login form -->
+					<div id="welcome">
+						<span id="welcome-text">管&nbsp;理&nbsp;登&nbsp;录</span>
+					</div>
+					<div id="user-name">
+						<span class="item">用户名:</span>
+						<span><input type="text" name="username" class="form-input"></span>
+					</div>
+					<div id="user-password">
+						<span class="item">密&nbsp;&nbsp;&nbsp;码:</span>
+						<span class="input"><input type="password" name="password" class="form-input"></span>
+					</div>
+					<div id="button-group">
+						<input type="submit" class="btn" value="登录"/>
+						<input type="reset" class="btn" value="重置"/>
+					</div>
+					<div>
+					  <s:fielderror/> <!-- 显示表单验证的出错信息 -->
+					</div>
+					<!-- end of form -->
+					</form>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="footer">
+		<div id="text">Copyright ? 2009-2015 All Rights Reserved Powered By Simoniu</div>
+	</div>
+</div>
+</body>
+</html>
+
+//Users_login_main.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+<style type="text/css">
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#navi{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+#naviDiv{
+	font-size:14px;
+	color:#333;
+	padding-left:10px;
+}
+#tips{
+	margin-top:10px;
+	width:100%;
+	height:40px;
+}
+#buttonGroup{
+	padding-left:10px;
+	float:left;
+	height:35px;
+}
+.button{
+	float:left;
+	margin-right:10px;
+	padding-left:10px;
+	padding-right:10px;
+	font-size:14px;
+	width:70px;
+	height:30px;
+	line-height:30px;
+	vertical-align:middle;
+	text-align:center;
+	cursor:pointer;
+    border-color: #77D1F6;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 6px 6px;
+    -moz-box-shadow: 2px 2px 4px #282828;
+    -webkit-box-shadow: 2px 2px 4px #282828;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainContainer{
+	padding-left:10px;
+	padding-right:10px;
+	text-align:center;
+	width:98%;
+	font-size:12px;
+}
+</style>
+<body>
+<div id="navi">
+	<!-- 导航空白 -->
+</div>
+<div id="tips">
+	<!-- 导航空白 -->
+</div>
+<div id="mainContainer">
+   <img src="../images/welcome.jpg">
+   <!--数据表格空白 -->
+</div>
+</body>
+</html>
+
+//Users_login_success.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>后台管理</title>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/index.css" />
+</head>
+<body>
+<div id="wrapper">
+	<div id="header">
+		<div id="logo">LOGO</div>
+		<div id="title">后台管理系统</div>
+		<div id="menu">
+			<div id="menu_container">
+				<ul id="menu_items">
+					<li class="menu_item on" style="border-radius:8px 0 0 8px" onmouseout="this.style.backgroundColor=''" onmouseover="this.style.backgroundColor='#77D1F6';this.style.borderRadius='8px 0 0 8px'"><a>系统管理</a></li>
+					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>学生管理</a></li>
+					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>新闻管理</a></li>
+					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>网盘管理</a></li>
+					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>相册管理</a></li>
+					<li class="menu_item" style="border-radius:8px 0 0 8px;border:0px;" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.borderRadius='0 8px 8px 0';this.style.fontWeight='bold'"><a>邮件管理</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="user_info">
+			<div id="welcome">欢迎${sessionScope.loginUserName}使用本系统</div>
+			<div id="logout"><a href="<%=path%>/users/Users_logout.action">安全退出</a></div>
+		</div>
+	</div>
+	<div id="navigator">
+		<iframe src="../tree.jsp"></iframe>
+	</div>
+	<div id="main">
+		<iframe name="MainFrame" src="Users_login_main.jsp"></iframe>
+	</div>
+	<div id="footer">Copyright ? 2009-2015 All Rights Reserved Powered By Somoniu</div>
+</div>
+</body>
+<script type="text/javascript">
+function screenAdapter(){
+	document.getElementById('footer').style.top=document.documentElement.scrollTop+document.documentElement.clientHeight- document.getElementById('footer').offsetHeight+"px";
+		document.getElementById('navigator').style.height=document.documentElement.clientHeight-100+"px";
+		document.getElementById('main').style.height=document.documentElement.clientHeight-100+"px";
+		document.getElementById('main').style.width=window.screen.width-330+"px";
+}
+
+window.onscroll=function(){screenAdapter();};
+window.onresize=function(){screenAdapter();};
+window.onload=function(){screenAdapter();};
+</script>
+</html>
+
+//Students_add.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+<style type="text/css">
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 1 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#navi{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+#naviDiv{
+	font-size:14px;
+	color:#333;
+	padding-left:10px;
+}
+#tips{
+	margin-top:10px;
+	width:100%;
+	height:40px;
+}
+#buttonGroup{
+	padding-left:10px;
+	float:left;
+	height:35px;
+}
+.button{
+	margin-top:20px;
+	padding-left:10px;
+	padding-right:10px;
+	font-size:14px;
+	width:70px;
+	height:30px;
+	line-height:30px;
+	vertical-align:middle;
+	text-align:center;
+	cursor:pointer;
+    border-color: #77D1F6;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 6px 6px;
+    -moz-box-shadow: 2px 2px 4px #282828;
+    -webkit-box-shadow: 2px 2px 4px #282828;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainContainer{
+	padding-left:10px;
+	padding-right:10px;
+	text-align:left;
+	width:98%;
+	font-size:16px;
+}
+</style>
+<body>
+<script type="text/javascript" src="../js/Calendar3.js"></script>
+
+<div id="navi">
+	<div id='naviDiv'>
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;学生管理<span>&nbsp;
+        <%--用如下href="students/Students_query.action" 可以显示出数据，但是没有样式--%>
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">学生列表</a><span>&nbsp;
+	</div>
+</div>
+<div id="tips">
+</div>
+<div id="mainContainer">
+<!-- 从session中获取学生集合 -->
+<strong>添加学生资料</strong>
+<br>
+<br>
+<form name="addForm" action="<%=path%>/students/Students_add.action" method="post">
+<table width="400" >
+  <tr>
+    <td width="30%">姓名：</td>
+    <td><input type="text" name="sname" /></td>
+  </tr>
+  <tr>
+    <td>性别：</td>
+    <td><input type="radio" name="gender" value="男" checked="checked"/>男<input type="radio" name="gender" value="女"/>女</td>
+  </tr>
+  <tr>
+    <td>出生日期：</td>
+    <td><input name="birthday" type="text" id="control_date" size="20"
+      maxlength="10" onclick="new Calendar().show(this);" readonly="readonly" />
+    </td>
+  </tr>
+  <tr>
+    <td>地址：</td>
+    <td><input type="text" name="address" /></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><input class="button" type="submit" value="添加"></td>
+  </tr>
+</table>
+</form>
+</div>
+</body>
+</html>
+
+//Students_add_success.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+<style type="text/css">
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#navi{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+#naviDiv{
+	font-size:14px;
+	color:#333;
+	padding-left:10px;
+}
+#tips{
+	margin-top:10px;
+	width:100%;
+	height:40px;
+}
+#buttonGroup{
+	padding-left:10px;
+	float:left;
+	height:35px;
+}
+.button{
+	float:left;
+	margin-right:10px;
+	padding-left:10px;
+	padding-right:10px;
+	font-size:14px;
+	width:70px;
+	height:30px;
+	line-height:30px;
+	vertical-align:middle;
+	text-align:center;
+	cursor:pointer;
+    border-color: #77D1F6;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 6px 6px;
+    -moz-box-shadow: 2px 2px 4px #282828;
+    -webkit-box-shadow: 2px 2px 4px #282828;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainContainer{
+	padding-left:10px;
+	padding-right:10px;
+	text-align:center;
+	width:98%;
+	font-size:12px;
+}
+</style>
+<body>
+<div id="navi">
+	<!-- 导航空白 -->
+	<div id='naviDiv'>
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;学生管理<span>&nbsp;
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">学生列表</a><span>&nbsp;
+	</div>
+</div>
+<div id="tips">
+	<!-- 导航空白 -->
+</div>
+<div id="mainContainer">
+   <strong>添加成功，<a href="<%=path%>/students/Students_add.jsp">继续添加？</a>或<a href="<%=path%>/students/Students_query.action">返回学生列表？</a></strong>
+   <!--数据表格空白 -->
+</div>
+</body>
+</html>
+
+//Students_modify.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+<style type="text/css">
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 1 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#navi{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+#naviDiv{
+	font-size:14px;
+	color:#333;
+	padding-left:10px;
+}
+#tips{
+	margin-top:10px;
+	width:100%;
+	height:40px;
+}
+#buttonGroup{
+	padding-left:10px;
+	float:left;
+	height:35px;
+}
+.button{
+	margin-top:20px;
+	padding-left:10px;
+	padding-right:10px;
+	font-size:14px;
+	width:70px;
+	height:30px;
+	line-height:30px;
+	vertical-align:middle;
+	text-align:center;
+	cursor:pointer;
+    border-color: #77D1F6;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 6px 6px;
+    -moz-box-shadow: 2px 2px 4px #282828;
+    -webkit-box-shadow: 2px 2px 4px #282828;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainContainer{
+	padding-left:10px;
+	padding-right:10px;
+	text-align:left;
+	width:98%;
+	font-size:16px;
+}
+</style>
+<body>
+<script type="text/javascript" src="../js/Calendar3.js"></script>
+
+<div id="navi">
+	<div id='naviDiv'>
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;学生管理<span>&nbsp;
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">学生列表</a><span>&nbsp;
+	</div>
+</div>
+<div id="tips">
+</div>
+<div id="mainContainer">
+<!-- 从session中获取学生集合 -->
+<strong>修改学生资料</strong>
+<br>
+<br>
+
+<form name="modifyForm" action="<%=path%>/students/Students_save.action" method="post">
+<table width="400" >
+  <tr>
+    <td width="30%">学号：</td>
+    <td><input type="text" name="sid" value='<s:property value="#session.modify_students.sid"/>'  readonly="readonly"/></td>
+  </tr>
+  <tr>
+    <td width="30%">姓名：</td>
+    <td><input type="text" name="sname" value='<s:property value="#session.modify_students.sname"/>'/></td>
+  </tr>
+  <tr>
+    <td>性别：</td>
+    <td>
+      <s:if test='%{#session.modify_students.gender=="男"}'>
+         <input type="radio" name="gender" value="男" checked="checked"/>男
+         <input type="radio" name="gender" value="女"/>女
+      </s:if>
+      <s:else>
+         <input type="radio" name="gender" value="男" />男
+         <input type="radio" name="gender" value="女" checked="checked"/>女
+      </s:else>
+      </td>
+  </tr>
+  <tr>
+    <td>出生日期：</td>
+    <td><input name="birthday" type="text" id="control_date" size="20"
+      maxlength="10" onclick="new Calendar().show(this);" readonly="readonly" 
+      value="<s:date name="#session.modify_students.birthday" format="yyyy-MM-dd"/>"
+      />
+    </td>
+  </tr>
+  <tr>
+    <td>地址：</td>
+    <td><input type="text" name="address" value='<s:property value="#session.modify_students.address"/>'/></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><input class="button" type="submit" value="修改"></td>
+  </tr>
+</table>
+</form>
+
+
+</div>
+</body>
+</html>
+
+//Students_modify_success.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+<style type="text/css">
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#navi{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+#naviDiv{
+	font-size:14px;
+	color:#333;
+	padding-left:10px;
+}
+#tips{
+	margin-top:10px;
+	width:100%;
+	height:40px;
+}
+#buttonGroup{
+	padding-left:10px;
+	float:left;
+	height:35px;
+}
+.button{
+	float:left;
+	margin-right:10px;
+	padding-left:10px;
+	padding-right:10px;
+	font-size:14px;
+	width:70px;
+	height:30px;
+	line-height:30px;
+	vertical-align:middle;
+	text-align:center;
+	cursor:pointer;
+    border-color: #77D1F6;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 6px 6px;
+    -moz-box-shadow: 2px 2px 4px #282828;
+    -webkit-box-shadow: 2px 2px 4px #282828;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainContainer{
+	padding-left:10px;
+	padding-right:10px;
+	text-align:center;
+	width:98%;
+	font-size:12px;
+}
+</style>
+<body>
+<div id="navi">
+	<!-- 导航空白 -->
+	<div id='naviDiv'>
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;学生管理<span>&nbsp;
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">学生列表</a><span>&nbsp;
+	</div>
+</div>
+<div id="tips">
+	<!-- 导航空白 -->
+</div>
+<div id="mainContainer">
+   <strong>修改成功，<a href="<%=path%>/students/Students_query.action">返回学生列表</a></strong>
+   <!--数据表格空白 -->
+</div>
+</body>
+</html>
+
+//Students_query_success.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+<style type="text/css">
+* {
+    background: none repeat scroll 0 0 transparent;
+    border: 0 none;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+	font-family:微软雅黑;
+	overflow:hidden;
+}
+#navi{
+	width:100%;
+	position:relative;
+	word-wrap:break-word;
+	border-bottom:1px solid #065FB9;
+	margin:0;
+	padding:0;
+	height:40px;
+	line-height:40px;
+	vertical-align:middle;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
+#BFBFBF));
+}
+#naviDiv{
+	font-size:14px;
+	color:#333;
+	padding-left:10px;
+}
+#tips{
+	margin-top:10px;
+	width:100%;
+	height:40px;
+}
+#buttonGroup{
+	padding-left:10px;
+	float:left;
+	height:35px;
+}
+.button{
+	float:left;
+	margin-right:10px;
+	padding-left:10px;
+	padding-right:10px;
+	font-size:14px;
+	width:70px;
+	height:30px;
+	line-height:30px;
+	vertical-align:middle;
+	text-align:center;
+	cursor:pointer;
+    border-color: #77D1F6;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 6px 6px;
+    -moz-box-shadow: 2px 2px 4px #282828;
+    -webkit-box-shadow: 2px 2px 4px #282828;
+    background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
+}
+#mainContainer{
+	padding-left:10px;
+	padding-right:10px;
+	text-align:center;
+	width:98%;
+	font-size:12px;
+}
+</style>
+<body>
+<div id="navi">
+	<div id='naviDiv'>
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;学生管理<span>&nbsp;
+		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">学生列表</a><span>&nbsp;
+	</div>
+</div>
+<div id="tips">
+	<div id="buttonGroup">
+		<div class="button" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'">
+			<a href="<%=path%>/students/Students_add.jsp">添加学生</a>
+		</div>
+		<div class="button" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'">
+			<a>查找学生</a>
+		</div>
+	</div>
+</div>
+<div id="mainContainer">
+<!-- 从session中获取学生集合 -->
+
+<table class="default" width="100%">
+	<col width="10%">
+	<col width="20%">
+	<col width="5%">
+	<col width="20%">
+	<col width="30%">
+	<col width="15%">
+	<tr class="title">
+		<td>学号</td>
+		<td>姓名</td>
+		<td>性别</td>
+		<td>出生日期</td>
+		<td>地址</td>
+		<td>操作</td>
+	</tr>
+	
+	<!-- 遍历开始 -->
+	<s:iterator value="#session.students_list" var="stu">
+	<tr class="list">
+		<td><s:property value="#stu.sid"/></td>
+		<td><a href="<%=path%>/students/Students_modify.action?sid=<s:property value="#stu.sid"/>"><s:property value="#stu.sname"/></a></td>
+		<td><s:property value="#stu.gender"/></td>
+		<td><s:date name="#stu.birthday" format="yyyy年MM月dd日"/></td>
+		<td><s:property value="#stu.address"/></td>
+		<td><a href="<%=path%>/students/Students_delete.action?sid=<s:property value="#stu.sid"/>" onclick="javascript: return confirm('真的要删除吗？');">删除</a></td>
+	</tr>
+	</s:iterator>
+	<!-- 遍历结束 -->
+</table>
+</div>
+</body>
+</html>
+
 //------------------------------------------------------------------------------------------------
 3-12 修改学生资料-实现修改学生资料
 
@@ -40215,18 +41351,1900 @@ SSH实现员工管理系统之案例实现篇
 
 //------------------------------------------------------------------------------------------------
 
+//login2.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>登陆</title>
+<link type="text/css" rel="stylesheet" href="<%=path%>/style/reset.css">
+<link type="text/css" rel="stylesheet" href="<%=path%>/style/main.css">
+<!--[if IE 6]>
+<script type="text/javascript" src="js/DD_belatedPNG_0.0.8a-min.js"></script>
+<script type="text/javascript" src="js/ie6Fixpng.js"></script>
+<![endif]-->
+</head>
+
+<body>
+<div class="headerBar">
+	<div class="logoBar login_logo">
+		<div class="comWidth">
+			<div class="logo fl">
+				<a href="#"><img src="<%=path%>/images/logo.jpg" alt="慕课网"></a>
+			</div>
+			<h3 class="welcome_title">欢迎登陆</h3>
+		</div>
+	</div>
+</div>
+<form action="frame.html" method="post">
+<div class="loginBox">
+	<div class="login_cont">
+		<ul class="login">
+			<li class="l_tit">用户名</li>
+			<li class="mb_10"><input type="text" class="login_input user_icon"></li>
+			<li class="l_tit">密码</li>
+			<li class="mb_10"><input type="text" class="login_input user_icon"></li>
+			
+			<li><input type="submit" value="" class="login_btn"></li>
+		</ul>
+		<div class="login_partners">
+			<p class="l_tit">使用合作方账号登陆网站</p>
+			<ul class="login_list clearfix">
+				<li><a href="#">QQ</a></li>
+				<li><span>|</span></li>
+				<li><a href="#">网易</a></li>
+				<li><span>|</span></li>
+				<li><a href="#">新浪微博</a></li>
+				<li><span>|</span></li>
+				<li><a href="#">腾讯微薄</a></li>
+				<li><span>|</span></li>
+				<li><a href="#">新浪微博</a></li>
+				<li><span>|</span></li>
+				<li><a href="#">腾讯微薄</a></li>
+			</ul>
+		</div>
+	</div>
+	
+</div>
+</form>
+
+<div class="hr_25"></div>
+<div class="footer">
+	<p><a href="#">慕课简介</a><i>|</i><a href="#">慕课公告</a><i>|</i> <a href="#">招纳贤士</a><i>|</i><a href="#">联系我们</a><i>|</i>客服热线：400-675-1234</p>
+	<p>Copyright &copy; 2006 - 2014 慕课版权所有&nbsp;&nbsp;&nbsp;京ICP备09037834号&nbsp;&nbsp;&nbsp;京ICP证B1034-8373号&nbsp;&nbsp;&nbsp;某市公安局XX分局备案编号：123456789123</p>
+	<p class="web"><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a></p>
+</div>
+</body>
+</html>
 
 //------------------------------------------------------------------------------------------------
+2-2 SSH-案例：登录功能代码实现 https://www.imooc.com/video/12479
+//https://blog.csdn.net/m0_37922841/article/details/80560127
+在Hibernate5.3.1 中，HQL语句使用"?"参数占位符运行报错：
+Caused by: org.hibernate.QueryException: 
+Legacy-style query parameters (`?`) are no longer supported; use JPA-style ordinal parameters (e.g., `?1`) instead
 
+并且：在Query查询时：setInteger()等方法已过时：
+
+解决办法：
+1.将HQL语句中的"?"改为JPA-style：
+String hql = "from Student where age > ?0 and score < ?1";
+
+2.方法过时问题解决：使用setParameter():
+List<Student> list = createQuery .setParameter(0, 21) .setParameter(1, 95.0) .list();
+
+3.使用别名方式写HQL语句：
+String hql = "from Student where age > :myage and score < :myscore";
+
+
+//https://www.cnblogs.com/DarrenChan/p/5528194.html find()方法使用介绍
+
+//EmployeeDaoImpl.java
+package dao.impl;
+
+import dao.EmployeeDao;
+import domain.Employee;
+
+import java.util.List;
+
+import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
+
+/**
+ * 员工管理的DAO的实现类
+ */
+public class EmployeeDaoImpl extends HibernateDaoSupport implements EmployeeDao {
+    /**
+     * DAO中根据用户名和密码查询用户的方法
+     * @param employee
+     * @return
+     */
+    @Override
+    public Employee findByUsernameAndPassword(Employee employee) {
+        //find方法已经废弃了
+//        String hql = "from Employee where username = ?0 and password = ?1";
+//        List<Employee> employees = (List<Employee>) this.getHibernateTemplate().find(hql, employee.getUsername(), employee.getPassword());
+        
+        //可以使用findByExample方法，这里的employee里只有username和password为非null值，主键eid也有默认值0，但是Hibernate构造查询语句时会忽略主键和null值，查询语句如下：
+    /**
+    select
+        this_.eid as eid1_1_0_,
+        this_.ename as ename2_1_0_,
+        this_.sex as sex3_1_0_,
+        this_.birthday as birthday4_1_0_,
+        this_.joinDate as joinDate5_1_0_,
+        this_.eno as eno6_1_0_,
+        this_.username as username7_1_0_,
+        this_.password as password8_1_0_,
+        this_.dno as dno9_1_0_ 
+    from
+        t_employee this_ 
+    where
+        (
+            this_.username=? 
+            and this_.password=?
+        )
+findByExample
+1.不支持主键 
+2.不支持关联 
+3.不支持NULL
+        */
+        List<Employee> employees = this.getHibernateTemplate().findByExample(employee);
+        if (!employees.isEmpty()) {
+            return employees.get(0);
+        }
+        return null;
+    }
+}
+//------------------------------------------------------------------------------------------------
+3-1 Action、Dao、Service的创建和配置 https://www.imooc.com/video/12480
+html文件直接打开正常显示，使用struts打开乱码。
+把html用notepad++打开后，编码转成utf-8 ，再把浏览器的缓存清理掉，重启Tomcat服务器，就可以正常显示了。
+
+//Spring Bean的prototype和singleton https://blog.csdn.net/q276513307/article/details/78393599
+总结一下 
+1. 对于有实例变量的类，要设置成prototype；没有实例变量的类，就用默认的singleton 
+2. Action一般我们都会设置成prototype，而Service只用singleton就可以。 
+
+
+//http://www.cnblogs.com/share2015/p/5321822.html
+如果没有增加@Transactional/*(propagation = Propagation.REQUIRED)*/，则会报如下面的错误：
+2018-07-14 17:30:19,552 [http-nio-8080-exec-10] [org.springframework.orm.hibernate5.HibernateTemplate]-[DEBUG] Could not retrieve pre-bound Hibernate session
+org.hibernate.HibernateException: Could not obtain transaction-synchronized Session for current thread
+
+//https://www.cnblogs.com/Loadhao/p/6553606.html @Transactional 注解的使用和注意
+注解@Transactional cglib与java动态代理最大区别是代理目标对象不用实现接口,那么注解要是写到接口方法上，要是使用cglib代理，这是注解事物就失效了，为了保持兼容注解最好都写到实现类方法上。
+Spring团队建议在具体的类（或类的方法）上使用 @Transactional 注解，而不要使用在类所要实现的任何接口上。在接口上使用 @Transactional 注解，只能当你设置了基于接口的代理时它才生效。因为注解是 不能继承 的，这就意味着如果正在使用基于类的代理时，那么事务的设置将不能被基于类的代理所识别，而且对象也将不会被事务代理所包装。
+//------------------------------------------------------------------------------------------------
+4-3 修改员工 
+这里value不能使用<s:property value="username">，struts标签里不能再套标签
+<td><s:textfield name="username" value="%{model.username}"/></td>
 
 //------------------------------------------------------------------------------------------------
+SSH实现员工管理系统之案例实现篇 完整代码
+//DepartmentAction.java
+package action;
+
+import domain.Department;
+import domain.PageBean;
+import service.DepartmentService;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+
+/**
+ * 部门管理的Action类
+ */
+public class DepartmentAction extends ActionSupport implements ModelDriven<Department> {
+
+    //模型驱动使用的对象，模型驱动的值默认在值栈中
+    private Department department = new Department();
+    @Override
+    public Department getModel() {
+        return department;
+    }
+
+    private int currPage = 1;
+    public void setCurrPage(int currPage) {
+        this.currPage = currPage;
+    }
+
+//    private int newPageSize = 1;
+//
+//    public int getNewPageSize() {
+//        return newPageSize;
+//    }
+//
+//    public void setNewPageSize(int newPageSize) {
+//        this.newPageSize = newPageSize;
+//    }
+
+    //注入部门管理的Service
+    private DepartmentService departmentService;
+
+    public void setDepartmentService(DepartmentService departmentService) {
+        this.departmentService = departmentService;
+    }
+
+    //提供一个查询方法
+    public String findAll() {
+        PageBean<Department> pageBean = departmentService.findByPage(currPage);
+        //将pageBean存入值栈中
+        ActionContext.getContext().getValueStack().push(pageBean);//这里如果没有push进来，则在jsp中就无法获取到相应的值
+        return "findAll";
+    }
+
+    //跳转到添加部门页面的方法
+    public String saveUI() {
+        return "saveUI";
+    }
+
+    //添加部门的执行方法
+    public String save() {
+        departmentService.save(department);
+        return "saveSuccess";
+    }
+
+    //编辑部门的执行方法
+    public String edit() {
+        department = departmentService.findById(department.getDid());
+        return "editSuccess";
+    }
+
+    //修改部门的执行方法
+    public String update() {
+        departmentService.update(department);
+        return "updateSuccess";
+    }
+
+    //删除部门的执行方法
+    public String delete() {
+        department = departmentService.findById(department.getDid());
+        departmentService.delete(department);
+        return "deleteSuccess";
+    }
+}
 
 
-//------------------------------------------------------------------------------------------------
+//EmployeeAction.java
+package action;
+
+import domain.Department;
+import domain.Employee;
+import domain.PageBean;
+import service.DepartmentService;
+import service.EmployeeService;
+
+import java.util.List;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+
+/**
+ * 员工管理的Action类
+ */
+public class EmployeeAction extends ActionSupport implements ModelDriven<Employee> {
+
+    //模型驱动使用的对象
+    private Employee employee = new Employee();
+
+    @Override
+    public Employee getModel() {
+        return employee;
+    }
+
+    private int currPage = 1;
+    public void setCurrPage(int currPage) {
+        this.currPage = currPage;
+    }
+
+    //注入业务层类
+    private EmployeeService employeeService;
+    private DepartmentService departmentService;
+
+    public void setEmployeeService(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
+    public void setDepartmentService(DepartmentService departmentService) {
+        this.departmentService = departmentService;
+    }
+
+    /**
+     * 登录执行的方法
+     * @return
+     */
+    public String login() {
+        System.out.println("login执行了...");
+        //调用业务层的类
+        Employee existEmployee = employeeService.login(this.employee);
+        if (existEmployee == null) {
+            //登录失败
+            this.addActionError("用户名或密码错误！");
+            return INPUT;
+        } else {
+            //登录成功
+            ActionContext.getContext().getSession().put("existEmployee", existEmployee);
+            return SUCCESS;
+        }
+    }
+
+    /**
+     * 分布查询员工的执行的方法
+     */
+    public String findAll() {
+        PageBean<Employee> pageBean = employeeService.findByPage(currPage);
+        //将pageBean存入值栈中
+        ActionContext.getContext().getValueStack().push(pageBean);//这里如果没有push进来，则在jsp中就无法获取到相应的值
+        return "findAll";
+    }
+
+    /**
+     * 跳转到添加员工页面执行的方法
+     */
+    public String saveUI() {
+        //查询所有部门
+        List<Department> departments = departmentService.findAll();
+        ActionContext.getContext().getValueStack().set("departments", departments);//集合用set，对象用push
+        return "saveUI";
+    }
+
+    /**
+     * 保存员工的执行的方法
+     */
+    public String save() {
+        //如果要在Employee.hbm.xml中保留cascade="save-update"属性，那么这里就需要查出来Department的完整信息，再设置给employee，才能保证department的数据完整，不被更新为空值
+        Department department = departmentService.findById(employee.getDepartment().getDid());
+        if (department != null) {
+            employee.setDepartment(department);
+        }
+        employeeService.save(employee);
+        return "saveSuccess";
+    }
+
+    /**
+     * 编辑员工的执行的方法
+     */
+    public String edit() {
+        //根据员工ID查询员工
+        employee = employeeService.findById(employee.getEid());
+        //查询所有的部门
+        List<Department> departments = departmentService.findAll();
+        ActionContext.getContext().getValueStack().set("departments", departments);//集合用set，对象用push
+        return "editSuccess";
+    }
+
+    /**
+     * 修改员工的执行的方法
+     */
+    public String update() {
+        Department department = departmentService.findById(employee.getDepartment().getDid());
+        if (department != null) {
+            employee.setDepartment(department);
+        }
+        employeeService.update(employee);
+        return "updateSuccess";
+    }
+
+    /**
+     * 删除员工的的执行方法
+     */
+    public String delete() {
+        employee = employeeService.findById(employee.getEid());
+        employeeService.delete(employee);
+        return "delelteSuccess";
+    }
+}
+
+//DepartmentDao.java
+package dao;
+
+import domain.Department;
+
+import java.util.List;
+
+/**
+ * 部门管理的DAO层的接口类
+ */
+public interface DepartmentDao {
+    int findCount();
+
+    List<Department> findByPage(int begin, int pageSize);
+
+    void save(Department department);
+
+    Department findById(int did);
+
+    void update(Department department);
+
+    void delete(Department department);
+
+    List<Department> findAll();
+}
+
+//DepartmentDaoImpl.java
+package dao.impl;
+
+import dao.DepartmentDao;
+import domain.Department;
+
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
+
+/**
+ * 部门管理的DAO层的实现类
+ */
+public class DepartmentDaoImpl extends HibernateDaoSupport implements DepartmentDao {
+
+    @Override
+    public int findCount() {
+        String hql = "select count(*) from Department";
+        List<Long> list = (List<Long>) this.getHibernateTemplate().find(hql);
+        if (!list.isEmpty()) {
+            return list.get(0).intValue();
+        }
+        return 0;
+    }
+
+    /** 分页查询部门
+     * @param begin
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public List<Department> findByPage(int begin, int pageSize) {
+        DetachedCriteria criteria = DetachedCriteria.forClass(Department.class);
+        List<Department> departments = (List<Department>) this.getHibernateTemplate().findByCriteria(criteria, begin, pageSize);
+        return departments;
+    }
+
+    //DAO中保存部门的方法
+    @Override
+    public void save(Department department) {
+        this.getHibernateTemplate().save(department);
+    }
+
+    //DAO中根据部门ID查询部门的方法
+    @Override
+    public Department findById(int did) {
+        return this.getHibernateTemplate().get(Department.class, did);
+    }
+
+    //DAO中修改部门的方法
+    @Override
+    public void update(Department department) {
+        this.getHibernateTemplate().update(department);
+    }
+
+    //DAO中删除部门的方法
+    @Override
+    public void delete(Department department) {
+        this.getHibernateTemplate().delete(department);//传入对象可以级联删除，外键引用的子表也会一起删除
+    }
+
+    //DAO中查询所有部门的方法
+    @Override
+    public List<Department> findAll() {
+        return (List<Department>) this.getHibernateTemplate().find("from Department");
+    }
+}
+
+//EmployeeDao.java
+package dao;
+
+import domain.Employee;
+
+import java.util.List;
+
+/**
+ * 员工管理的DAO的接口
+ */
+public interface EmployeeDao {
+    Employee findByUsernameAndPassword(Employee employee);
+
+    int findCount();
+
+    List<Employee> findByPage(int begin, int pageSize);
+
+    void save(Employee employee);
+
+    Employee findById(int eid);
+
+    void update(Employee employee);
+
+    void delete(Employee employee);
+}
+
+//EmployeeDaoImpl.java
+package dao.impl;
+
+import dao.EmployeeDao;
+import domain.Employee;
+
+import java.util.List;
+
+import org.hibernate.criterion.DetachedCriteria;
+import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
+
+/**
+ * 员工管理的DAO的实现类
+ */
+public class EmployeeDaoImpl extends HibernateDaoSupport implements EmployeeDao {
+    /**
+     * DAO中根据用户名和密码查询用户的方法
+     * @param employee
+     * @return
+     */
+    @Override
+    public Employee findByUsernameAndPassword(Employee employee) {
+//        String hql = "from Employee where username = ?0 and password = ?1";
+//        List<Employee> employees = (List<Employee>) this.getHibernateTemplate().find(hql, employee.getUsername(), employee.getPassword());
+        List<Employee> employees = this.getHibernateTemplate().findByExample(employee);
+        if (!employees.isEmpty()) {
+            return employees.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public int findCount() {
+        String hql = "select count(*) from Employee";
+        List<Long> employeeCount = (List<Long>) this.getHibernateTemplate().find(hql);
+        if (!employeeCount.isEmpty()) {
+            return employeeCount.get(0).intValue();
+        }
+        return 0;
+    }
+
+    @Override
+    public List<Employee> findByPage(int begin, int pageSize) {
+        DetachedCriteria criteria = DetachedCriteria.forClass(Employee.class);
+        List<Employee> employees = (List<Employee>) this.getHibernateTemplate().findByCriteria(criteria, begin, pageSize);
+        return employees;
+    }
+
+    //DAO中优点员工的方法
+    @Override
+    public void save(Employee employee) {
+        this.getHibernateTemplate().save(employee);
+    }
+
+    //DAO中根据员工ID查询员工的方法
+    @Override
+    public Employee findById(int eid) {
+        return this.getHibernateTemplate().get(Employee.class, eid);
+    }
+
+    //DAO中修改员工的方法
+    @Override
+    public void update(Employee employee) {
+        this.getHibernateTemplate().update(employee);
+    }
+
+    //DAO中删除员工的方法
+    @Override
+    public void delete(Employee employee) {
+        this.getHibernateTemplate().delete(employee);
+    }
+}
+
+//Department.java
+package domain;
+
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * 部门的实体
+ */
+public class Department {
+    private int did;
+    private String dname;
+    private String ddesc;
+    //员工的集合
+    private Set<Employee> employees = new HashSet<>();
+
+    public int getDid() {
+        return did;
+    }
+
+    public void setDid(int did) {
+        this.did = did;
+    }
+
+    public String getDname() {
+        return dname;
+    }
+
+    public void setDname(String dname) {
+        this.dname = dname;
+    }
+
+    public String getDdesc() {
+        return ddesc;
+    }
+
+    public void setDdesc(String ddesc) {
+        this.ddesc = ddesc;
+    }
+
+    public Set<Employee> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(Set<Employee> employees) {
+        this.employees = employees;
+    }
+}
+
+//Department.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="domain.Department" table="t_department">
+        <id name="did" type="int" column="did">
+            <generator class="native"/>
+        </id>
+
+        <property name="dname" type="java.lang.String" column="dname" length="20"/>
+        <property name="ddesc" type="java.lang.String" column="ddesc" length="100"/>
+
+        <!--关联关系映射-->
+        <!--cascade="delete"才会级联删除从表-->
+        <!--如果没有inverse="true"，说明双方都掌控维护权，导致部门修改时，员工不会同步修改；配置inverse="true"，让部门放弃维护权，则修改部门信息时，员工上的值会同步显示修改-->
+        <set name="employees" cascade="delete" inverse="true">
+            <key column="dno"/>
+            <one-to-many class="domain.Employee"/>
+        </set>
+    </class>
+</hibernate-mapping>
+
+//Employee.java
+package domain;
+
+import java.util.Date;
+
+/**
+ * 员工的实体
+ */
+public class Employee {
+    private int eid;
+    private String ename;
+    private String sex;
+    private Date birthday;
+    private Date joinDate;
+    private String eno;
+    private String username;
+    private String password;
+    //所属部门
+    private Department department;
+
+    public int getEid() {
+        return eid;
+    }
+
+    public void setEid(int eid) {
+        this.eid = eid;
+    }
+
+    public String getEname() {
+        return ename;
+    }
+
+    public void setEname(String ename) {
+        this.ename = ename;
+    }
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public Date getJoinDate() {
+        return joinDate;
+    }
+
+    public void setJoinDate(Date joinDate) {
+        this.joinDate = joinDate;
+    }
+
+    public String getEno() {
+        return eno;
+    }
+
+    public void setEno(String eno) {
+        this.eno = eno;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+}
+
+//Employee.hbm.xml
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="domain.Employee" table="t_employee">
+        <id name="eid" type="int" column="eid">
+            <generator class="native"/>
+        </id>
+
+        <property name="ename" type="java.lang.String" column="ename" length="20"/>
+        <property name="sex" type="java.lang.String" column="sex" length="10"/>
+        <property name="birthday" type="date" column="birthday"/>
+        <property name="joinDate" type="date" column="joinDate"/>
+        <property name="eno" type="java.lang.String" column="eno" length="20"/>
+        <property name="username" type="java.lang.String" column="username" length="20"/>
+        <property name="password" type="java.lang.String" column="password" length="20"/>
+
+        <!--https://blog.csdn.net/leisure_life/article/details/62229195-->
+        <!-- 关联关系映射 在查询Employee值时，外键department默认lazy="true"，如果配置为lazy="false"则取消延迟加载，即立即加载，也可以直接在Web界面显示，推荐在web.xml配置过滤器的OpenSessionInViewFilter方式-->
+        <!--这里如果参考视频教程配置了cascade="save-update"，则在save(employeer)的时候会更新department，而department的dname和ddesc并未在jsp中回填给employee，导致department表数据被清空-->
+        <!--这里可以动态修改cascade="save-update"，说明hbm.xml文件并非只在建表时使用，在后续数据处理中也在使用-->
+        <many-to-one name="department" cascade="save-update" class="domain.Department">
+            <column name="dno" not-null="false"/>
+        </many-to-one>
+    </class>
+</hibernate-mapping>
+
+//PageBean.java
+package domain;
+
+import java.util.List;
+
+/**
+ * 分布封装的类
+ */
+public class PageBean<T> {
+    private int currPage; //当前页数，list.jsp中的currPage变量是根据PageBean::getCurrentPage和setCurrentPage方法来读取和设置值的，与私有成员变量currPage无关
+    private int pageSize; //每页显示的记录数
+    private int totalCount; //总记录数
+    private int totalPage; //总页数
+    private List<T> pageDatas; //每页显示的数据
+
+    public int getCurrPage() {
+        return currPage;
+    }
+
+    public void setCurrPage(int currPage) {
+        this.currPage = currPage;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
+    }
+
+    public int getTotalPage() {
+        return totalPage;
+    }
+
+    public void setTotalPage(int totalPage) {
+        this.totalPage = totalPage;
+    }
+
+    public List<T> getPageDatas() {
+        return pageDatas;
+    }
+
+    public void setPageDatas(List<T> pageDatas) {
+        this.pageDatas = pageDatas;
+    }
+}
+
+//DepartmentService.java
+package service;
+
+import domain.Department;
+import domain.PageBean;
+
+import java.util.List;
+
+/**
+ * 部门管理的业务层的接口类
+ */
+public interface DepartmentService {
+    PageBean<Department> findByPage(int currPage);
+
+    void save(Department department);
+
+    Department findById(int did);
+
+    void update(Department department);
+
+    void delete(Department department);
+
+    List<Department> findAll();
+}
+
+//DepartmentServiceImpl.java
+package service.impl;
+
+import dao.DepartmentDao;
+import domain.Department;
+import domain.PageBean;
+import service.DepartmentService;
+
+import java.util.List;
+
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 部门管理的业务层的实现类
+ */
+@Transactional
+public class DepartmentServiceImpl implements DepartmentService {
+    //自动注入
+    private DepartmentDao departmentDao;
+    private int pageSize;
+
+    public void setDepartmentDao(DepartmentDao departmentDao) {
+        this.departmentDao = departmentDao;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    //分页查询部分的方法
+    @Override
+    public PageBean<Department> findByPage(int currPage) {
+        PageBean<Department> pageBean = new PageBean<>();
+        //封装当前页数
+        pageBean.setCurrPage(currPage);
+        //封装每页显示记录数
+        pageBean.setPageSize(pageSize);
+        //封装总记录数：
+        int totalCount = departmentDao.findCount();
+        pageBean.setTotalCount(totalCount);
+        //封装总页数
+        double tc = totalCount;
+        double num = Math.ceil(tc / pageSize);
+        pageBean.setTotalPage((int) num);
+        //封装每页显示的数据
+        int begin = (currPage - 1) * pageSize;
+        List<Department> pageDatas = departmentDao.findByPage(begin, pageSize);
+        pageBean.setPageDatas(pageDatas);
+
+        return pageBean;
+    }
+
+    //业务层保存部门的方法
+    @Override
+    public void save(Department department) {
+        departmentDao.save(department);
+    }
+
+    //业务层根据部门ID查询部门的方法
+    @Override
+    public Department findById(int did) {
+        return departmentDao.findById(did);
+    }
+
+    //业务层修改部门的方法
+    @Override
+    public void update(Department department) {
+        departmentDao.update(department);
+    }
+
+    //业务层删除部门的方法
+    @Override
+    public void delete(Department department) {
+        departmentDao.delete(department);
+    }
+
+    //查询所有部门的方法
+    @Override
+    public List<Department> findAll() {
+        return departmentDao.findAll();
+    }
+}
+
+//EmployeeService.java
+package service;
+
+import domain.Employee;
+import domain.PageBean;
+
+/**
+ * 员工管理的业务层接口
+ */
+public interface EmployeeService {
+    Employee login(Employee employee);
+
+    PageBean<Employee> findByPage(int currPage);
+
+    void save(Employee employee);
+
+    Employee findById(int eid);
+
+    void update(Employee employee);
+
+    void delete(Employee employee);
+}
+
+//EmployeeServiceImpl.java
+package service.impl;
+
+import dao.EmployeeDao;
+import domain.Employee;
+import domain.PageBean;
+import service.EmployeeService;
+
+import java.util.List;
+
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 员工管理的业务层实现类
+ */
+@Transactional
+public class EmployeeServiceImpl implements EmployeeService {
+
+    private EmployeeDao employeeDao;
+    private int pageSize;
+
+    public void setEmployeeDao(EmployeeDao employeeDao) {
+        this.employeeDao = employeeDao;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    /**
+     * 业务层的登录方法
+     * @param employee
+     * @return
+     */
+    @Override
+    public Employee login(Employee employee) {
+        Employee existEmployee = employeeDao.findByUsernameAndPassword(employee);
+        return existEmployee;
+    }
+
+    @Override
+    public PageBean<Employee> findByPage(int currPage) {
+        PageBean<Employee> pageBean = new PageBean<>();
+        //封装当前页数
+        pageBean.setCurrPage(currPage);
+        //封装每页显示记录数
+        pageBean.setPageSize(pageSize);
+        //封装总记录数：
+        int totalCount = employeeDao.findCount();
+        pageBean.setTotalCount(totalCount);
+        //封装总页数
+        double tc = totalCount;
+        double num = Math.ceil(tc / pageSize);
+        pageBean.setTotalPage((int) num);
+        //封装每页显示的数据
+        int begin = (currPage - 1) * pageSize;
+        List<Employee> pageDatas = employeeDao.findByPage(begin, pageSize);
+        pageBean.setPageDatas(pageDatas);
+
+        return pageBean;
+    }
+
+    //业务层保存员工的方法
+    @Override
+    public void save(Employee employee) {
+        employeeDao.save(employee);
+    }
+
+    //业务层根据员工ID查询员工的方法
+    @Override
+    public Employee findById(int eid) {
+        return employeeDao.findById(eid);
+    }
+
+    //业务层修改员工的方法
+    @Override
+    public void update(Employee employee) {
+        employeeDao.update(employee);
+    }
+
+    //业务层删除员工的方法
+    @Override
+    public void delete(Employee employee) {
+        employeeDao.delete(employee);
+    }
+}
+
+//applicationContext.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 引入外部的属性文件 https://blog.csdn.net/sf_climber/article/details/78850038-->
+    <context:property-placeholder location="classpath:jdbc.properties,classpath:config.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- 配置Hibernate的相关属性 在启动服务时，会把表t_product创建起来-->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!-- 注入连接池 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 配置Hibernate的属性 -->
+        <property name="hibernateProperties">
+            <props>
+                <!-- 这里如果不设置成MySQL5Dialect，则Hibernate生成建表语句时会加一句type=MyISAM，执行SQL时失败 https://blog.csdn.net/u014158770/article/details/66478060-->
+                <!-- 改成5之后，建表语句最后为engine=MyISAM，但是此时建出来的表无法创建外键 https://blog.csdn.net/tongxinxiao/article/details/50617369 -->
+                <!-- 修改言为MySQL55Dialect，建表语句最后为engine=InnoDB，此时可以正常增加外键 https://blog.csdn.net/tianyaleixiaowu/article/details/79468277-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL55Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <!-- https://blog.csdn.net/maoyuanming0806/article/details/61417995 -->
+                <!-- 在hibernate5上不需要配置如下thread方式 -->
+                <!--<prop key="hibernate.current_session_context_class">thread</prop>-->
+                <!-- 或者配置如下 org.springframework.orm.hibernate5.SpringSessionContext -->
+                <prop key="hibernate.current_session_context_class">org.springframework.orm.hibernate5.SpringSessionContext</prop>
+            </props>
+        </property>
+        <!--配置Hibernate的映射文件-->
+        <property name="mappingResources">
+            <list>
+                <value>domain/Department.hbm.xml</value>
+                <value>domain/Employee.hbm.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 配置Action的类 -->
+    <bean id="employeeAction" class="action.EmployeeAction" scope="prototype">
+        <!-- 手动注入Service -->
+        <property name="employeeService" ref="employeeService"/>
+        <property name="departmentService" ref="departmentService"/>
+    </bean>
+    <bean id="departmentAction" class="action.DepartmentAction" scope="prototype">
+        <property name="departmentService" ref="departmentService"/>
+    </bean>
+
+    <!-- 配置业务层的类 -->
+    <bean id="employeeService" class="service.impl.EmployeeServiceImpl">
+        <property name="employeeDao" ref="employeeDao"/>
+        <property name="pageSize" value="${employee.pageSize}"/>
+    </bean>
+    <bean id="departmentService" class="service.impl.DepartmentServiceImpl">
+        <property name="departmentDao" ref="departmentDao"/>
+        <property name="pageSize" value="${department.pageSize}"/>
+    </bean>
+
+    <!-- 配置DAO的类 -->
+    <bean id="employeeDao" class="dao.impl.EmployeeDaoImpl">
+        <!-- 注入到抽象类HibernateDaoSupport中的sessionFactory -->
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <bean id="departmentDao" class="dao.impl.DepartmentDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 开启注释事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
+
+//config.properties
+department.pageSize=3
+employee.pageSize=3
+
+//jdbc.properties
+jdbc.driverClass=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+jdbc.username=root
+jdbc.password=root123
+
+//log4j.properties
+log4j.rootLogger=DEBUG,A1
+log4j.appender.A1=org.apache.log4j.ConsoleAppender
+log4j.appender.A1.layout=org.apache.log4j.PatternLayout
+log4j.appender.A1.layout.ConversionPattern=%-d{yyyy-MM-dd HH:mm:ss,SSS} [%t] [%c]-[%p] %m%n
+log4j.logger.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+log4j.logger.org.hibernate.type.descriptor.sql.BasicExtractor=TRACE
+log4j.logger.org.hibernate.SQL=DEBUG
+log4j.logger.org.hibernate.engine.QueryParameters=DEBUG
+log4j.logger.org.hibernate.engine.query.HQLQueryPlan=DEBUG
+log4j.appender.STDOUT.Threshold=trace
+log4j.category.org.hibernate.SQL=trace
+log4j.category.org.hibernate.type=trace
+
+//log4j2.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5p] %d %c - %m%n" />
+        </Console>
+        <File name="File" fileName="dist/my.log">
+            <PatternLayout pattern="%m%n" />
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="mh.sample2.Log4jTest2" level="INFO">
+            <AppenderRef ref="File" />
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+
+//struts.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- 支持动态调用 -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/>
+    <!-- 设置开发模式 -->
+    <constant name="struts.devMode" value="true"/>
+
+    <!--包名 -->
+    <package name="default" namespace="/" extends="struts-default">
+        <action name="hello" class="action.HelloAction" method="hello">
+            <result name="success">/hello.jsp</result>
+        </action>
+    </package>
+
+    <package name="ssh" namespace="/" extends="struts-default">
+        <global-allowed-methods>regex:.*</global-allowed-methods>
+        <action name="employee_*" class="employeeAction" method="{1}">
+            <result name="input">/login.jsp</result>
+            <result name="success" type="redirect">/frame.jsp</result>
+            <result name="findAll">/jsp/employee/listEmployee.jsp</result>
+            <result name="saveUI">/jsp/employee/addEmployee.jsp</result>
+            <result name="saveSuccess" type="redirectAction">employee_findAll</result>
+            <result name="updateSuccess" type="redirectAction">employee_findAll</result>
+            <result name="delelteSuccess" type="redirectAction">employee_findAll</result>
+            <result name="editSuccess">/jsp/employee/editEmployee.jsp</result>
+        </action>
+
+        <action name="department_*" class="departmentAction" method="{1}">
+            <result name="findAll">/jsp/department/listDepartment.jsp</result>
+            <result name="saveUI">/jsp/department/addDepartment.jsp</result>
+            <!--redirection后面为department_findAll或department_findAll.action都可以；chain只能为department_findAll，不能为action-->
+            <result name="saveSuccess" type="redirectAction">department_findAll</result>
+            <result name="updateSuccess" type="redirectAction">department_findAll</result>
+            <result name="deleteSuccess" type="redirectAction">department_findAll</result>
+            <result name="editSuccess">/jsp/department/editDepartment.jsp</result>
+        </action>
+    </package>
+</struts>
 
 
-//------------------------------------------------------------------------------------------------
+//web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <!--Spring的框架的核心监听器-->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
 
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+
+    <!--配置此过滤器后，可以把employee的外键值加载显示在Web界面，否则为空-->
+    <filter>
+        <filter-name>OpenSessionInViewFilter</filter-name>
+        <filter-class>org.springframework.orm.hibernate5.support.OpenSessionInViewFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>OpenSessionInViewFilter</filter-name>
+        <url-pattern>*.action</url-pattern>
+    </filter-mapping>
+
+    <!--Struts2的框架的核心过滤器的配置-->
+    <filter>
+        <filter-name>struts</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>struts</filter-name>
+        <url-pattern>/*</url-pattern> */
+    </filter-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>webproject</groupId>
+    <artifactId>webproject</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>entity</name>
+    <!-- FIXME change it to the project's website -->
+    <url>http://www.example.com</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+
+        <!-- 添加mysql驱动依赖 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.11</version>
+        </dependency>
+
+        <!-- 添加hibernate依赖包 -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.3.2.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.struts</groupId>
+            <artifactId>struts2-core</artifactId>
+            <version>2.5.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jstl</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.struts</groupId>
+            <artifactId>struts2-spring-plugin</artifactId>
+            <version>2.5.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.11.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.11.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>5.0.7.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.5.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>5.0.7.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>5.0.7.RELEASE</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.7.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.20.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <!--https://blog.csdn.net/swpu_lipan/article/details/78460852?utm_source=debugrun&utm_medium=referral
+        https://www.cnblogs.com/machanghai/p/5456294.html-->
+        <!--配置如下resources，才会把*.hbm文件拷贝到target目录，否则java中的配置文件不会拷贝，导致xxx.hbm.xml文件找不到的错误-->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include> */
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>
+
+
+//frame.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>员工管理系统</title>
+</head>
+
+<frameset rows="80,*">
+    <frame name="top" src="${ pageContext.request.contextPath }/frame/top.jsp">
+    <frameset cols="150,*" id="main">
+
+        <frame src="${ pageContext.request.contextPath }/frame/left.jsp">
+        <frame name="right" src="${ pageContext.request.contextPath }/frame/right.jsp">
+    </frameset>
+</frameset>
+</html>
+
+//index.jsp
+<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8"%>
+<%
+  String path = request.getContextPath();
+  String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+  response.sendRedirect(path+"/login.jsp");
+%>
+
+//login.jsp
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="/struts-tags" prefix="s" %>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>登陆</title>
+<link type="text/css" rel="stylesheet" href="${ pageContext.request.contextPath }/style/reset.css">
+<link type="text/css" rel="stylesheet" href="${ pageContext.request.contextPath }/style/main.css">
+<!--[if IE 6]>
+<script type="text/javascript" src="js/DD_belatedPNG_0.0.8a-min.js"></script>
+<script type="text/javascript" src="js/ie6Fixpng.js"></script>
+<![endif]-->
+</head>
+
+<body>
+<div class="headerBar">
+	<div class="logoBar login_logo">
+		<div class="comWidth">
+			<div class="logo fl">
+				<a href="#"><img src="${ pageContext.request.contextPath }/images/logo.jpg" alt="慕课网"></a>
+			</div>
+			<h3 class="welcome_title">欢迎登陆</h3>
+		</div>
+	</div>
+</div>
+<s:form action="employee_login" method="post" namespace="/">
+	<div class="loginBox">
+		<h3><s:actionerror/></h3>
+		<div class="login_cont">
+			<ul class="login">
+				<li class="l_tit">用户名</li>
+				<li class="mb_10"><input type="text" name="username" class="login_input user_icon"></li>
+				<li class="l_tit">密码</li>
+				<li class="mb_10"><input type="text" name="password" class="login_input user_icon"></li>
+
+				<li><input type="submit" value="" class="login_btn"></li>
+			</ul>
+			<div class="login_partners">
+				<p class="l_tit">使用合作方账号登陆网站</p>
+				<ul class="login_list clearfix">
+					<li><a href="#">QQ</a></li>
+					<li><span>|</span></li>
+					<li><a href="#">网易</a></li>
+					<li><span>|</span></li>
+					<li><a href="#">新浪微博</a></li>
+					<li><span>|</span></li>
+					<li><a href="#">腾讯微薄</a></li>
+					<li><span>|</span></li>
+					<li><a href="#">新浪微博</a></li>
+					<li><span>|</span></li>
+					<li><a href="#">腾讯微薄</a></li>
+				</ul>
+			</div>
+		</div>
+
+	</div>
+</s:form>
+
+<div class="hr_25"></div>
+<div class="footer">
+	<p><a href="#">慕课简介</a><i>|</i><a href="#">慕课公告</a><i>|</i> <a href="#">招纳贤士</a><i>|</i><a href="#">联系我们</a><i>|</i>客服热线：400-675-1234</p>
+	<p>Copyright &copy; 2006 - 2014 慕课版权所有&nbsp;&nbsp;&nbsp;京ICP备09037834号&nbsp;&nbsp;&nbsp;京ICP证B1034-8373号&nbsp;&nbsp;&nbsp;某市公安局XX分局备案编号：123456789123</p>
+	<p class="web"><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a></p>
+</div>
+</body>
+</html>
+
+//addDepartment.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s" %>
+<html>
+<head></head>
+<body>
+<table border="0" width="600px">
+    <tr>
+        <td align="center" style="font-size:24px; color:#666"> 部门添加</td>
+    </tr>
+    <tr>
+        <td align="right">
+            <a href="javascript:document.getElementById('saveForm').submit()">保存</a> &nbsp;&nbsp;
+            <a href="javascript:history.go(-1)">退回</a>
+        </td>
+    </tr>
+</table>
+<br/>
+<br>
+<s:form id="saveForm" action="department_save" method="post" namespace="/" theme="simple">
+    <table style="font-size:16px">
+        <tr>
+            <td>部门名称：</td>
+            <td><s:textfield name="dname"/></td>
+        </tr>
+        <tr>
+            <td>部门介绍：</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td width="10%"></td>
+            <td>
+                <s:textarea name="ddesc" cols="50" rows="5"></s:textarea>
+            </td>
+        </tr>
+    </table>
+</s:form>
+</body>
+</html>
+
+//editDepartment.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s" %>
+<html>
+<head></head>
+<body>
+<table border="0" width="600px">
+    <tr>
+        <td align="center" style="font-size:24px; color:#666"> 部门编辑</td>
+    </tr>
+    <tr>
+        <td align="right">
+            <a href="javascript:document.getElementById('saveForm').submit()">保存</a> &nbsp;&nbsp;
+            <a href="javascript:history.go(-1)">退回</a>
+        </td>
+    </tr>
+</table>
+<br/>
+<br>
+<s:form id="saveForm" action="department_update" method="post" namespace="/" theme="simple">
+    <s:hidden name="did" value="%{model.did}"/>
+    <table style="font-size:16px">
+        <tr>
+            <td>部门名称：</td>
+            <td><s:textfield name="dname" value="%{model.dname}"/></td>
+        </tr>
+        <tr>
+            <td>部门介绍：</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td width="10%"></td>
+            <td>
+                <s:textarea name="ddesc" cols="50" rows="5" value="%{model.ddesc}"></s:textarea>
+            </td>
+        </tr>
+    </table>
+</s:form>
+</body>
+</html>
+
+//listDepartment.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s" %>
+<html>
+<head>
+    <style type="text/css">
+        .table1 {
+            border: 1px solid #ddd;
+            width: 900px;
+        }
+
+        thead {
+            background-color: lightblue;
+        }
+
+    </style>
+</head>
+<body>
+<table border="0" width="900px">
+    <tr>
+        <td align="center" style="font-size:24px; color:#666">部门管理</td>
+    </tr>
+    <tr>
+        <td align="right"><a href="${ pageContext.request.contextPath }/department_saveUI.action">添加</a></td>
+    </tr>
+</table>
+<br/>
+<table cellspacing="0" border="1" class="table1">
+    <thead>
+    <tr>
+        <th width="40%">部门名称</th>
+        <th width="40%">部门描述</th>
+        <th width="10%">编辑</th>
+        <th width="10%">删除</th>
+    </tr>
+    </thead>
+    <tbody>
+    <s:iterator value="pageDatas" var="d">
+    <tr>
+        <td align="center"><s:property value="#d.dname"/></td>
+        <td align="center"><s:property value="#d.ddesc"/></td>
+        <td align="center"><a href="${ pageContext.request.contextPath }/department_edit.action?did=<s:property value="#d.did"/>"><img src="${ pageContext.request.contextPath }/images/编辑.png"></a></td>
+        <td align="center"><a href="${ pageContext.request.contextPath }/department_delete.action?did=<s:property value="#d.did"/>" onclick="javascript: return confirm('真的要删除吗？');"><img src="${ pageContext.request.contextPath }/images/删除.png"></a></td>
+    </tr>
+    </s:iterator>
+    </tbody>
+</table>
+<br/>
+
+
+<table border="0" cellspacing="0" cellpadding="0" width="900px">
+    <tr>
+        <td align="right">
+            <span>第<s:property value="currPage"/>/<s:property value="totalPage"/>页</span>&nbsp;&nbsp;
+            <span>总记录数：<s:property value="totalCount"/>&nbsp;&nbsp;每页显示：<s:property value="pageSize"/></span>&nbsp;&nbsp;
+            <%--<span>总记录数：<s:property value="totalCount"/>&nbsp;&nbsp;每页显示：--%>
+                <%--<s:select name="pageSizeSelect" list="#{'10':'5', '20':'10'}" value="20"/>--%>
+            <%--</span>&nbsp;&nbsp;--%>
+            <span>
+            <s:if test="currPage != 1">
+                <a href="${ pageContext.request.contextPath }/department_findAll.action?currPage=1">[首页]</a>&nbsp;&nbsp;
+                <a href="${ pageContext.request.contextPath }/department_findAll.action?currPage=<s:property value="currPage - 1"/>">[上一页]</a>&nbsp;&nbsp;
+            </s:if>
+            <s:if test="currPage != totalPage">
+                <a href="${ pageContext.request.contextPath }/department_findAll.action?currPage=<s:property value="currPage + 1"/>">[下一页]</a>&nbsp;&nbsp;
+                <%--<a href="<s:url action="department_findAll.action">--%>
+                        <%--<s:param name="currPage" value="currPage + 1"/>--%>
+                        <%--<s:param name="newPageSize" value="javascript:document.getElementById('pageSizeSelect').value"/>--%>
+                    <%--</s:url>">[下一页]</a>&nbsp;&nbsp;--%>
+                <a href="${ pageContext.request.contextPath }/department_findAll.action?currPage=<s:property value="totalPage"/>">[尾页]</a>&nbsp;&nbsp;
+            </s:if>
+            </span>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
+
+//addEmployee.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s" %>
+<html>
+<head></head>
+<body>
+<table border="0" width="600px">
+    <tr>
+        <td align="center" style="font-size:24px; color:#666"> 员工添加</td>
+    </tr>
+    <tr>
+        <td align="right">
+            <a href="javascript:document.getElementById('saveForm').submit()">保存</a>&nbsp;&nbsp;
+            <a href="javascript:history.go(-1)">退回</a>
+        </td>
+    </tr>
+</table>
+<br/>
+
+<s:form action="employee_save" id="saveForm" method="post" namespace="/" theme="simple">
+<table border='0' cellpadding="0" cellspacing="10">
+    <tr>
+        <td>姓名：</td>
+        <td><s:textfield name="ename"/></td>
+        <td>性别：</td>
+        <td><s:radio name="sex" list="{'男', '女'}" value="'男'"/></td>
+    </tr>
+    <tr>
+        <td>用户名：</td>
+        <td><s:textfield name="username"/></td>
+        <td>密码：</td>
+        <td><s:password name="password"/></td>
+    </tr>
+    <tr>
+        <td>出生日期：</td>
+        <td><s:textfield name="birthday"/></td>
+        <td>入职时间：</td>
+        <td><s:textfield name="joinDate"/></td>
+    </tr>
+
+    <tr>
+        <td>所属部门：</td>
+        <td><s:select name="department.did" list="departments" listKey="did" listValue="dname" headerKey="" headerValue="--请选择--"/></td>
+        <td>编号：</td>
+        <td><s:textfield name="eno"/></td>
+    </tr>
+</table>
+</s:form>
+</body>
+</html>
+
+//editEmployee.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s" %>
+<html>
+<head></head>
+<body>
+<table border="0" width="600px">
+    <tr>
+        <td align="center" style="font-size:24px; color:#666"> 员工添加</td>
+    </tr>
+    <tr>
+        <td align="right">
+            <a href="javascript:document.getElementById('saveForm').submit()">保存</a>&nbsp;&nbsp;
+            <a href="javascript:history.go(-1)">退回</a>
+        </td>
+    </tr>
+</table>
+<br/>
+
+<s:form action="employee_update" id="saveForm" method="post" namespace="/" theme="simple">
+<s:hidden name="eid" value="%{model.eid}"/>
+    <table border='0' cellpadding="0" cellspacing="10">
+    <tr>
+        <td>姓名：</td>
+        <td><s:textfield name="ename" value="%{model.ename}"/></td>
+        <td>性别：</td>
+        <td><s:radio name="sex" list="{'男', '女'}" value="%{model.sex}"/></td>
+    </tr>
+    <tr>
+        <td>用户名：</td>
+        <td><s:textfield name="username" value="%{model.username}"/></td>
+        <td>密码：</td>
+        <td><s:password name="password" value="%{model.password}" showPassword="true"/></td>
+    </tr>
+    <tr>
+        <td>出生日期：</td>
+        <td><input type="text" name="birthday" value="<s:date name="model.birthday" format="yyyy-MM-dd"/>"/></td>
+        <td>入职时间：</td>
+        <td><input type="text" name="joinDate" value="<s:date name="model.joinDate" format="yyyy-MM-dd"/>"/></td>
+    </tr>
+
+    <tr>
+        <td>所属部门：</td>
+        <td><s:select name="department.did" list="departments" value="%{model.department.did}" listKey="did" listValue="dname" headerKey="" headerValue="--请选择--"/></td>
+        <td>编号：</td>
+        <td><s:textfield name="eno" value="%{model.eno}"/></td>
+    </tr>
+</table>
+</s:form>
+</body>
+</html>
+
+//listEmployee.jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="/struts-tags" prefix="s"%>
+<html>
+<head>
+    <style type="text/css">
+        .table1{
+            border:1px solid #ddd;
+            width:900px;
+
+        }
+        thead{
+            background-color:lightblue;
+        }
+
+    </style>
+</head>
+<body>
+<table border="0" width="900px">
+    <tr>
+        <td align="center" style="font-size:24px; color:#666"> 员工管理</td>
+    </tr>
+    <tr>
+        <td align="right" > <a href="${ pageContext.request.contextPath }/employee_saveUI.action">添加</a></td>
+    </tr>
+</table>
+<br/>
+
+
+<table cellspacing="0" border="1" class="table1">
+    <thead>
+    <tr>
+        <td align="center">编号</td>
+        <td align="center">员工姓名</td>
+        <td align="center">性别</td>
+        <td align="center">出生日期</td>
+        <td align="center">入职时间</td>
+        <td align="center">所属部门</td>
+        <td align="center">编辑</td>
+        <td align="center">删除</td>
+    </tr>
+    </thead>
+    <tbody>
+    <s:iterator value="pageDatas" var="e">
+    <tr>
+        <td align="center"><s:property value="#e.eno"/></td>
+        <td align="center"><s:property value="#e.ename"/></td>
+        <td align="center"><s:property value="#e.sex"/></td>
+        <td align="center"><s:date name="#e.birthday" format="yyyy-MM-dd"/></td>
+        <td align="center"><s:date name="#e.joinDate" format="yyyy-MM-dd"/></td>
+        <td align="center"><s:property value="#e.department.dname"/></td>
+        <td align="center"><a href="${ pageContext.request.contextPath }/employee_edit.action?eid=<s:property value="#e.eid"/>"><img src="${ pageContext.request.contextPath }/images/编辑.png"></a></td>
+        <td align="center"><a href="${ pageContext.request.contextPath }/employee_delete.action?eid=<s:property value="#e.eid"/>" onclick="javascript: return confirm('真的要删除吗？');"><img src="${ pageContext.request.contextPath }/images/删除.png"></a></td>
+    </tr>
+    </s:iterator>
+    </tbody>
+</table>
+<br/>
+
+<table table border="0" cellspacing="0" cellpadding="0" width="900px">
+    <tr>
+        <td align="right">
+            <span>第<s:property value="currPage"/>/<s:property value="totalPage"/>页</span>&nbsp;&nbsp;
+            <span>总记录数：<s:property value="totalCount"/>&nbsp;&nbsp;每页显示：<s:property value="pageSize"/></span>&nbsp;&nbsp;
+            <span>
+            <s:if test="currPage != 1">
+                <a href="${ pageContext.request.contextPath }/employee_findAll.action?currPage=1">[首页]</a>&nbsp;&nbsp;
+                <a href="${ pageContext.request.contextPath }/employee_findAll.action?currPage=<s:property value="currPage - 1"/>">[上一页]</a>&nbsp;&nbsp;
+            </s:if>
+            <s:if test="currPage != totalPage">
+                <a href="${ pageContext.request.contextPath }/employee_findAll.action?currPage=<s:property value="currPage + 1"/>">[下一页]</a>&nbsp;&nbsp;
+                <a href="${ pageContext.request.contextPath }/employee_findAll.action?currPage=<s:property value="totalPage"/>">[尾页]</a>&nbsp;&nbsp;
+            </s:if>
+            </span>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
 
 //------------------------------------------------------------------------------------------------
 
