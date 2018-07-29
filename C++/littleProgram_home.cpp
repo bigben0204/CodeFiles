@@ -1,4 +1,311 @@
 //------------------------------------------------------------------------------------------------
+//extern作用
+//https://www.cnblogs.com/yc_sunniwell/archive/2010/07/14/1777431.html
+也就是说extern有两个作用，第一个,当它与"C"一起连用时，如: extern "C" void fun(int a, int b);则告诉编译器在编译fun这个函数名时按着C的规则去翻译相应的函数名而不是C++的，C++的规则在翻译这个函数名时会把fun这个名字变得面目全非，可能是fun@aBc_int_int#%$也可能是别的，这要看编译器的"脾气"了(不同的编译器采用的方法不一样)，为什么这么做呢，因为C++支持函数的重载啊，在这里不去过多的论述这个问题，如果你有兴趣可以去网上搜索，相信你可以得到满意的解释!
+第二，当extern不与"C"在一起修饰变量或函数时，如在头文件中: extern int g_Int; 它的作用就是声明函数或全局变量的作用范围的关键字，其声明的函数和变量可以在本模块或其他模块中使用，记住它是一个声明不是定义!也就是说B模块(编译单元)要是引用模块(编译单元)A中定义的全局变量或函数时，它只要包含A模块的头文件即可,在编译阶段，模块B虽然找不到该函数或变量，但它不会报错，它会在连接时从模块A生成的目标代码中找到此函数。
+
+例如：
+//Define.h
+#ifndef __DEFINE_HPP__
+#define __DEFINE_HPP__
+
+int number = 100;
+
+#endif
+
+//main.cpp
+#include <iostream>
+#include <string> 
+using namespace std;
+
+extern int number;//当用extern指定了此参数后，就可以不用包含头文件Define.h，可以正常编译过，链接时会找到对应变量
+
+int main(int argc, char* argv[])
+{
+    cout << number << endl;
+    return 0;
+}
+
+如果写成extern int number2;，则会链接错误：
+1>main.obj : error LNK2001: 无法解析的外部符号 "int number2" (?number2@@3HA)
+1>     1>
+1>e:\Program Files\VS Projects\TestProject\Debug\TestProject.exe : fatal error LNK1120: 1 个无法解析的外部命令
+
+问题：当单方面修改extern 函数原型
+当函数提供方单方面修改函数原型时，如果使用方不知情继续沿用原来的extern申明，这样编译时编译器不会报错。但是在运行过程中，因为少了或者多了输入参数，往往会照成系统错误，这种情况应该如何解决？
+答案与分析：
+目前业界针对这种情况的处理没有一个很完美的方案，通常的做法是提供方在自己的xxx_pub.h中提供对外部接口的声明，然后调用方include该头文件，从而省去extern这一步。以避免这种错误。
+宝剑有双锋，对extern的应用，不同的场合应该选择不同的做法。
+//------------------------------------------------------------------------------------------------
+//windows环境下用c++实现socket编程
+http://blog.csdn.net/xiaoquantouer/article/details/58001960
+
+（1）服务端
+1、加载套接字库，创建套接字（WSAStartup()/socket()）;
+2、绑定套接字到一个IP地址和一个端口上（bind()）;
+3、将套接字设置为监听模式等待连接请求（listen()）；
+4、请求到来后，接受连接请求，返回一个新的对应于此次连接的套接字（accept()）；
+5、用返回的套接字和客户端进行通信（send()/recv()）；
+6、返回，等待另一个连接请求；
+7、关闭套接字，关闭加载的套接字库（closesocket()/WSACleanup()）；
+
+#include <stdio.h>    
+#include <winsock2.h>    
+
+#pragma comment(lib,"ws2_32.lib")    
+
+int main(int argc, char* argv[])
+{
+    //初始化WSA    
+    WORD sockVersion = MAKEWORD(2, 2);
+    WSADATA wsaData;
+    if (WSAStartup(sockVersion, &wsaData) != 0)
+    {
+        return 0;
+    }
+
+    //创建套接字    
+    SOCKET slisten = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (slisten == INVALID_SOCKET)
+    {
+        printf("socket error !");//如果没有//初始化WSA，则报错
+        return 0;
+    }
+
+    //绑定IP和端口    
+    sockaddr_in sin;
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(8888);//本地监听端口：8888
+    sin.sin_addr.S_un.S_addr = INADDR_ANY;
+    if (bind(slisten, (LPSOCKADDR) &sin, sizeof(sin)) == SOCKET_ERROR)
+    {
+        printf("bind error !");
+    }
+
+    //绑定成功后就开始监听 
+    if (listen(slisten, 5) == SOCKET_ERROR)//5为等待连接数目
+    {
+        printf("listen error !");
+        return 0;
+    }
+
+    //循环接收数据    
+    SOCKET sClient;
+    sockaddr_in remoteAddr;
+    int nAddrlen = sizeof(remoteAddr);
+    char revData[255];
+    while (true)
+    {
+        printf("等待连接...\n");
+        sClient = accept(slisten, (SOCKADDR *) &remoteAddr, &nAddrlen);
+        if (sClient == INVALID_SOCKET)
+        {
+            printf("accept error !");
+            continue;
+        }
+        printf("接受到一个连接：%s \r\n", inet_ntoa(remoteAddr.sin_addr));
+
+        //接收数据    
+        int ret = recv(sClient, revData, 255, 0);
+        if (ret > 0)
+        {
+            revData[ret] = 0x00;
+            printf(revData);
+        }
+
+        //发送数据    
+        const char * sendData = "你好，TCP客户端！\n";
+        send(sClient, sendData, strlen(sendData), 0);
+        closesocket(sClient);
+    }
+
+    closesocket(slisten);
+    WSACleanup();
+    return 0;
+}
+
+
+（2）客户端
+1、加载套接字库，创建套接字（WSAStartup()/socket()）；
+2、向服务器发出连接请求（connect()）；
+3、和服务器进行通信（send()/recv()）；
+4、关闭套接字，关闭加载的套接字库（closesocket()/WSACleanup()）；
+#include<WINSOCK2.H>  
+#include<STDIO.H>  
+#include<iostream>  
+#include<cstring>  
+#include<string>  
+using namespace std;
+#pragma comment(lib, "ws2_32.lib")  
+
+int main()
+{
+    WORD sockVersion = MAKEWORD(2, 2);
+    WSADATA data;
+    if (WSAStartup(sockVersion, &data) != 0)
+    {
+        return 0;
+    }
+    while (true) {
+        SOCKET sclient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (sclient == INVALID_SOCKET)
+        {
+            printf("invalid socket!");
+            return 0;
+        }
+
+        sockaddr_in serAddr;
+        serAddr.sin_family = AF_INET;
+        serAddr.sin_port = htons(8888);
+        serAddr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+        if (connect(sclient, (sockaddr *) &serAddr, sizeof(serAddr)) == SOCKET_ERROR)
+        {  //连接失败   
+            printf("connect error !");
+            closesocket(sclient);
+            return 0;
+        }
+
+        string data;
+        cin >> data;
+        const char * sendData;
+        sendData = data.c_str();   //string转const char*   
+                                   //char * sendData = "你好，TCP服务端，我是客户端\n";  
+        send(sclient, sendData, strlen(sendData), 0);
+        //send()用来将数据由指定的socket传给对方主机  
+        //int send(int s, const void * msg, int len, unsigned int flags)  
+        //s为已建立好连接的socket，msg指向数据内容，len则为数据长度，参数flags一般设0  
+        //成功则返回实际传送出去的字符数，失败返回-1，错误原因存于error   
+
+        char recData[255];
+        int ret = recv(sclient, recData, 255, 0);
+        if (ret>0) {
+            recData[ret] = 0x00;
+            printf(recData);
+        }
+        closesocket(sclient);
+    }
+
+
+    WSACleanup();
+    return 0;
+}
+
+
+（二）UDP协议
+服务端代码：
+#include <stdio.h>   
+#include <winsock2.h>   
+
+#pragma comment(lib,"ws2_32.lib")    
+
+int main(int argc, char* argv[])
+{
+    WSADATA wsaData;
+    WORD sockVersion = MAKEWORD(2, 2);
+    if (WSAStartup(sockVersion, &wsaData) != 0)
+    {
+        return 0;
+    }
+
+    SOCKET serSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (serSocket == INVALID_SOCKET)
+    {
+        printf("socket error !");
+        return 0;
+    }
+
+    sockaddr_in serAddr;
+    serAddr.sin_family = AF_INET;
+    serAddr.sin_port = htons(8888);
+    serAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+    if (bind(serSocket, (sockaddr *) &serAddr, sizeof(serAddr)) == SOCKET_ERROR)
+    {
+        printf("bind error !");
+        closesocket(serSocket);
+        return 0;
+    }
+
+    sockaddr_in remoteAddr;
+    int nAddrLen = sizeof(remoteAddr);
+    while (true)
+    {
+        char recvData[255];
+        int ret = recvfrom(serSocket, recvData, 255, 0, (sockaddr*) &remoteAddr, &nAddrLen);
+        if (ret > 0)
+        {
+            recvData[ret] = 0x00;
+            printf("接受到一个连接：%s \r\n", inet_ntoa(remoteAddr.sin_addr));
+            printf(recvData);
+        }
+
+        const char * sendData = "一个来自服务端的UDP数据包\n";
+        sendto(serSocket, sendData, strlen(sendData), 0, (sockaddr *) &remoteAddr, nAddrLen);
+
+    }
+    closesocket(serSocket);
+    WSACleanup();
+    return 0;
+}
+
+客户端代码：
+#include <stdio.h>   
+#include <winsock2.h>   
+   
+#pragma comment(lib,"ws2_32.lib")    
+   
+int main(int argc, char* argv[])   
+{   
+   WORD socketVersion = MAKEWORD(2,2);   
+   WSADATA wsaData;    
+   if(WSAStartup(socketVersion, &wsaData) != 0)   
+   {   
+       return 0;   
+   }   
+   SOCKET sclient = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);   
+       
+   sockaddr_in sin;   
+   sin.sin_family = AF_INET;   
+   sin.sin_port = htons(8888);   
+   sin.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");   
+   int len = sizeof(sin);   
+       
+   const char * sendData = "来自客户端的数据包.\n";   
+   sendto(sclient, sendData, strlen(sendData), 0, (sockaddr *)&sin,len);   
+   
+   char recvData[255];        
+   int ret = recvfrom(sclient, recvData, 255, 0, (sockaddr *)&sin,&len);   
+   if(ret > 0)   
+   {   
+       recvData[ret] = 0x00;   
+       printf(recvData);   
+   }   
+   
+   closesocket(sclient);   
+   WSACleanup();   
+   return 0;   
+}   
+//------------------------------------------------------------------------------------------------
+//使用pack预处理指令来禁止对齐调整
+#pragma pack(1)
+struct XXX
+{
+    
+};
+#pragma pack()
+//------------------------------------------------------------------------------------------------
+int f(int x, int y)
+{
+    return (x & y) + ((x ^ y) >> 1);
+}
+
+int main()
+{
+    cout << f(2, 6);
+
+    return 0;
+}
+输出：4
+//------------------------------------------------------------------------------------------------
 //基类可以作为模板类来编写
 //TemplateBase.h
 #ifndef __TEMPLATEBASE_H__

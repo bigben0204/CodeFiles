@@ -1,4 +1,1281 @@
 //------------------------------------------------------------------------------------------------
+//仿Lisp运算
+//BracketRecursivelyMatcher.java
+package lisp;
+
+public class BracketRecursivelyMatcher {
+    public boolean match(String s) {
+        return match(s, 0);
+    }
+
+    private boolean match(String s, int count) {
+        if (s.isEmpty()) {
+            return count == 0;
+        }
+
+        if (s.charAt(0) == '(') {
+            ++count;
+        } else if (s.charAt(0) == ')') {
+            --count;
+        }
+        return count >= 0 && match(s.substring(1), count);
+    }
+}
+
+//OpCalculator.java
+package lisp;
+
+public class OpCalculator {
+    private static final String ERROR = "error";
+
+    public String calculate(String inputStr) {
+        if (!new BracketRecursivelyMatcher().match(inputStr)) {
+            return ERROR;
+        }
+
+        return calculateValue(inputStr);
+    }
+
+    private String calculateValue(String inputStr) {
+        int value;
+        try {
+            value = ParameterUtils.getValue(inputStr);
+        } catch (Exception e) {
+            return ERROR;
+        }
+        return String.valueOf(value);
+    }
+}
+
+//OpP1P2.java
+package lisp;
+
+import java.util.Objects;
+
+public class OpP1P2 {
+    private OpType opType;
+    private String p1;
+    private String p2;
+
+    public OpP1P2() {
+    }
+
+    public OpP1P2(OpType opType, String p1, String p2) {
+        this.opType = opType;
+        this.p1 = p1;
+        this.p2 = p2;
+    }
+
+    public OpType getOpType() {
+        return opType;
+    }
+
+    public void setOpType(OpType opType) {
+        this.opType = opType;
+    }
+
+    public String getP1() {
+        return p1;
+    }
+
+    public void setP1(String p1) {
+        this.p1 = p1;
+    }
+
+    public String getP2() {
+        return p2;
+    }
+
+    public void setP2(String p2) {
+        this.p2 = p2;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OpP1P2 opP1P2 = (OpP1P2) o;
+        return opType == opP1P2.opType &&
+            Objects.equals(p1, opP1P2.p1) &&
+            Objects.equals(p2, opP1P2.p2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(opType, p1, p2);
+    }
+
+    @Override
+    public String toString() {
+        return "OpP1P2{" +
+            "opType=" + opType +
+            ", p1='" + p1 + '\'' +
+            ", p2='" + p2 + '\'' +
+            '}';
+    }
+}
+
+//OpP1P2Spliter.java
+package lisp;
+
+import java.util.Stack;
+
+import org.apache.commons.lang3.tuple.MutablePair;
+
+public class OpP1P2Spliter {
+    private Stack<Integer> firstBracketPositionStack = new Stack<>();
+    private int segmentNumber = 1;
+    private MutablePair<Integer, Integer> lastBracketPosPair = new MutablePair<>();
+
+    public OpP1P2 parse(String inputStr) {
+        return getOpP1P2(inputStr);
+    }
+
+    private OpP1P2 getOpP1P2(String inputStr) {
+        OpP1P2 opP1P2 = new OpP1P2();
+        int i = 0;
+        for (; i < inputStr.length(); ++i) {
+            char c = inputStr.charAt(i);
+            if (c == '(') {
+                firstBracketPositionStack.push(i);
+                if (isProcessingFirstBracket()) {
+                    lastBracketPosPair.setLeft(i + 1);
+                }
+            } else if (c == ')') {
+                fillBracketPair(i);
+            } else if (c == ' ' && isProcessingFirstBracket()) {
+                getAndFillOpP1P2Attr(opP1P2, inputStr, i);
+            }
+        }
+
+        getAndFillOpP1P2Attr(opP1P2, inputStr, i - 1);
+        return opP1P2;
+    }
+
+    private boolean isProcessingFirstBracket() {
+        return firstBracketPositionStack.size() == 1;
+    }
+
+    private void fillBracketPair(int matchedBracketPos) {
+        int previousBracketPos = firstBracketPositionStack.pop();
+        if (isProcessingFirstBracket()) {
+            lastBracketPosPair.setLeft(previousBracketPos);
+            lastBracketPosPair.setRight(matchedBracketPos);
+        }
+    }
+
+    private void getAndFillOpP1P2Attr(OpP1P2 opP1P2, String inputStr, int spacePos) {
+        Integer leftBracketPos = lastBracketPosPair.getLeft();
+        Integer rightBracketPos = lastBracketPosPair.getRight();
+        if (leftBracketPos != null && rightBracketPos != null) {
+            //这里匹配上括号了
+            String subString = inputStr.substring(leftBracketPos, rightBracketPos + 1);
+            fillOpP1P2AttrValue(opP1P2, subString);
+
+            lastBracketPosPair.setLeft(rightBracketPos + 2);
+            lastBracketPosPair.setRight(null);
+        } else if (leftBracketPos != null) {
+            //这里是空格匹配上或者最后P2匹配上
+            String subString = inputStr.substring(leftBracketPos, spacePos);
+            fillOpP1P2AttrValue(opP1P2, subString);
+
+            lastBracketPosPair.setLeft(spacePos + 1);
+            lastBracketPosPair.setRight(null);
+        }
+    }
+
+    private void fillOpP1P2AttrValue(OpP1P2 opP1P2, String subString) {
+        if (segmentNumber == 1) {
+            opP1P2.setOpType(OpType.fromStr(subString));
+        } else if (segmentNumber == 2) {
+            opP1P2.setP1(subString);
+        } else {
+            opP1P2.setP2(subString);
+        }
+        ++segmentNumber;
+    }
+}
+
+//
+package lisp;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public enum OpType {
+    ADD("add") {
+        public int getOpValue(int p1, int p2) {
+            return p1 + p2;
+        }
+    },
+    SUB("sub") {
+        public int getOpValue(int p1, int p2) {
+            return p1 - p2;
+        }
+    },
+    MUL("mul") {
+        public int getOpValue(int p1, int p2) {
+            return p1 * p2;
+        }
+    },
+    DIV("div") {
+        public int getOpValue(int p1, int p2) {
+            return p1 / p2;
+        }
+    };
+
+    private static final Map<String, OpType> STRING_TO_ENUM_MAP = new HashMap<>();
+
+    static {
+        for (OpType e : OpType.values()) {
+            STRING_TO_ENUM_MAP.put(e.getOpStr(), e);
+        }
+    }
+
+    private final String opStr;
+
+    OpType(String opStr) {
+        this.opStr = opStr;
+    }
+
+    public String getOpStr() {
+        return opStr;
+    }
+
+    public static OpType fromStr(String s) {
+        return STRING_TO_ENUM_MAP.get(s);
+    }
+
+    abstract public int getOpValue(int p1, int p2);
+}
+
+//ParameterUtils.java
+package lisp;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ParameterUtils {
+
+    public static int getValue(String str) {
+        if (isNumeric(str)) {
+            return Integer.valueOf(str);
+        } else {
+            OpP1P2 opP1P2 = new OpP1P2Spliter().parse(str);
+            OpType opType = opP1P2.getOpType();
+            int p1Value = getValue(opP1P2.getP1());
+            int p2Value = getValue(opP1P2.getP2());
+            return opType.getOpValue(p1Value, p2Value);
+        }
+    }
+
+    public static boolean isNumeric(String str){
+        Pattern pattern = Pattern.compile("[-0-9]*");
+        Matcher isNum = pattern.matcher(str);
+        if(!isNum.matches()){
+            return false;
+        }
+        return true;
+    }
+}
+
+//OpCalculatorTest.java
+package lisp;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class OpCalculatorTest {
+    @Test
+    public void testOpCalculator() {
+        OpCalculator opCalculator = new OpCalculator();
+
+        String inputStr = "(mul 3 -7)";
+        assertEquals("-21", opCalculator.calculate(inputStr));
+
+        inputStr = "(add 1 2)";
+        assertEquals("3", opCalculator.calculate(inputStr));
+
+        inputStr = "(sub (mul 2 4) (div 9 3))";
+        assertEquals("5", opCalculator.calculate(inputStr));
+
+        inputStr = "(div 1 0)";
+        assertEquals("error", opCalculator.calculate(inputStr));
+    }
+}
+
+//OpP1P2SpliterTest.java
+package lisp;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class OpP1P2SpliterTest {
+
+    @Test
+    public void testOneOpAdd() {
+        String inputStr = "(add 1 2)";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.ADD, "1", "2");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testOneOpSub() {
+        String inputStr = "(sub 1 2)";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.SUB, "1", "2");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testOneOpMul() {
+        String inputStr = "(mul 1 2)";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.MUL, "1", "2");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testOneOpDiv() {
+        String inputStr = "(div 1 2)";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.DIV, "1", "2");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testOpInP1() {
+        String inputStr = "(div (sub 1 2) 2)";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.DIV, "(sub 1 2)", "2");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testOpInP2() {
+        String inputStr = "(div 1 (sub 1 2))";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.DIV, "1", "(sub 1 2)");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testOpInP1P2() {
+        String inputStr = "(div (mul 1 2) (sub 1 2))";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.DIV, "(mul 1 2)", "(sub 1 2)");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+
+    @Test
+    public void testTwoOpsInP1() {
+        String inputStr = "(div (mul (add 1 2) 2) (sub 1 2))";
+        OpP1P2 opP1P2 = new OpP1P2(OpType.DIV, "(mul (add 1 2) 2)", "(sub 1 2)");
+        assertEquals(opP1P2, new OpP1P2Spliter().parse(inputStr));
+    }
+}
+
+//ParameterUtilsTest.java
+package lisp;
+
+import org.junit.Test;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+
+public class ParameterUtilsTest {
+    @Test
+    public void testIsNumeric() {
+        assertTrue(ParameterUtils.isNumeric("123"));
+        assertTrue(ParameterUtils.isNumeric("-123"));
+    }
+
+    @Test
+    public void testGetValueAdd() {
+        assertEquals(3, ParameterUtils.getValue("(add 1 2)"));
+    }
+
+    @Test
+    public void testGetValueSub() {
+        assertEquals(-1, ParameterUtils.getValue("(sub 1 2)"));
+    }
+
+    @Test
+    public void testGetValueMul() {
+        assertEquals(8, ParameterUtils.getValue("(mul 4 2)"));
+    }
+
+    @Test
+    public void testGetValueDiv() {
+        assertEquals(2, ParameterUtils.getValue("(div 4 2)"));
+    }
+
+    @Test
+    public void testGetValueOpInP1() {
+        assertEquals(5, ParameterUtils.getValue("(add (add 1 2) 2)"));
+    }
+
+    @Test
+    public void testGetValueOpInP1P2() {
+        assertEquals(12, ParameterUtils.getValue("(add (add 1 2) (add 4 5))"));
+    }
+
+    @Test
+    public void testGetValueOpsInP1P2() {
+        assertEquals(23, ParameterUtils.getValue("(add (add (mul 3 4) 2) (add 4 5))"));
+    }
+}
+//------------------------------------------------------------------------------------------------
+//26进制字母与数字转换
+package programtest;
+
+import java.util.Scanner;
+
+public class Main {
+    private static final String ERROR_STR = "ERROR";
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        while (in.hasNext()) {
+            System.out.println(convertTo26(in.next()));
+        }
+    }
+
+    public static String convertTo26(String inputStr) {
+        String alphaRegex = "[a-z]{1,6}";
+        String digitRegex = "[0-9]*";
+
+        if (inputStr.matches(alphaRegex)) {
+            int result = inputStr.chars().reduce(0, (count, c) -> count * 26 + c - 'a' + 1);
+            return String.valueOf(result);
+        } else if (inputStr.matches(digitRegex)) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                int inputDigit = Integer.parseInt(inputStr);
+                while (inputDigit > 0) {
+                    char lastChar = (char) (inputDigit % 26 == 0 ? 'z' : 'a' + inputDigit % 26 - 1);
+                    sb.append(lastChar);
+                    inputDigit = inputDigit / 26;
+                }
+                return sb.reverse().toString();
+            } catch (Exception e) {
+                return ERROR_STR;
+            }
+        }
+
+        return ERROR_STR;
+    }
+}
+
+//10进制转2进制
+2进制 | 10进制数 | 余数
+----------------------
+2     | 10       | 0
+      ------
+2     | 5        | 1
+      ------
+2     | 2        | 0
+      ------
+2     | 1        | 1
+      ------
+        0
+将余数取反即可
+
+//------------------------------------------------------------------------------------------------
+//判断德州扑克牌型
+//CardsTypeJudger.java
+package cardstype;
+
+import cardstype.impl.CardsTypeProcessorImplUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CardsTypeJudger {
+    private static final int INPUT_STR_LENGTH = 10;
+
+    /**
+     * @param inputStr 10个长度的字符串，每2个连续字符表示一张牌，第1个字符表示数字，第2个字符表示花色；
+     *                 2-9，T，JQKA表示1到13，花色表示：方片用d(diamonds), 梅花c(clubs)，红桃h(hearts)，黑桃s(spades)
+     *                 如：3s5c4d1s2h表示黑桃3、梅花5、方片4、黑桃1、红桃2
+     *                 不用考虑非法输入情况
+     * @return 返回牌型，如上例3s5c4d1s2h为顺子，返回5
+     * 五张牌，每张牌由牌大小和花色组成，牌大小2~10、J、Q、K、A，牌花色为红桃、黑桃、梅花、方块四种花色之一。 判断牌型:
+     * 牌型1，同花顺：同一花色的顺子，如红桃2红桃3红桃4红桃5红桃6。
+     * 牌型2，四条：四张相同数字 + 单张，如红桃A黑桃A梅花A方块A + 黑桃K。
+     * 牌型3，葫芦：三张相同数字 + 一对，如红桃5黑桃5梅花5 + 方块9梅花9。
+     * 牌型4，同花：同一花色，如方块3方块7方块10方块J方块Q。
+     * 牌型5，顺子：花色不一样的顺子，如红桃2黑桃3红桃4红桃5方块6。
+     * 牌型6，三条：三张相同 + 两张单。
+     * 牌型7，其他。
+     * 说明：
+     * 1）五张牌里不会出现牌大小和花色完全相同的牌。
+     * 2）前面的牌型比后面的牌型大，如同花顺比四条大，依次类推。
+     */
+    public int getCardsType(String inputStr) {
+        if (inputStr.length() != INPUT_STR_LENGTH) {
+            throw new IllegalArgumentException("Input str is invalid");
+        }
+
+        List<PokeCard> pokeCards = parseStrToPokeCards(inputStr);
+        CardsTypeProcessor cardsTypeProcessor = CardsTypeProcessorImplUtils.getCardsTypeProcessor();
+        CardsTypeProcessorImplUtils.preProcessPokeCards(pokeCards);
+        return cardsTypeProcessor.getCardsType(pokeCards);
+    }
+
+    private List<PokeCard> parseStrToPokeCards(String inputStr) {
+        List<PokeCard> pokeCards = new ArrayList<>();
+        for (int i = 0; i < inputStr.length(); i = i + 2) {
+            char numberChar = inputStr.charAt(i);
+            char typeChar = inputStr.charAt(i + 1);
+            PokeCard pokeCard = PokeCard.fromTwoChars(numberChar, typeChar);
+            pokeCards.add(pokeCard);
+        }
+        return pokeCards;
+    }
+}
+
+//CardType.java
+package cardstype;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public enum CardType {
+    DIAMONDS("d"), CLUBS("c"), HEARTS("h"), SPADES("s");
+
+    private static final Map<String, CardType> STRING_CARD_MAP = new HashMap<>();
+    static {
+        for (CardType cardType : CardType.values()) {
+            STRING_CARD_MAP.put(cardType.typeStr, cardType);
+        }
+    }
+
+    private String typeStr;
+
+    CardType(String typeStr) {
+        this.typeStr = typeStr;
+    }
+
+    public String getTypeStr() {
+        return typeStr;
+    }
+
+    public static CardType fromChar(char typeChar) {
+        return STRING_CARD_MAP.get(String.valueOf(typeChar));
+    }
+}
+
+//PokeCard.java
+package cardstype;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class PokeCard {
+    private static final Map<Character, Integer> CHARACTER_INTEGER_MAP = new HashMap<Character, Integer>() {
+        {
+            put('T', 10);
+            put('J', 11);
+            put('Q', 12);
+            put('K', 13);
+            put('A', 1);
+        }
+    };
+
+    private int cardNumber;
+    private CardType cardType;
+
+    private PokeCard(int cardNumber, CardType cardType) {
+        this.cardNumber = cardNumber;
+        this.cardType = cardType;
+    }
+
+    public int getCardNumber() {
+        return cardNumber;
+    }
+
+    public CardType getCardType() {
+        return cardType;
+    }
+
+    public static PokeCard fromTwoChars(char numberChar, char typeChar) {
+        int cardNumber;
+        if (Character.isDigit(numberChar)) {
+            String cardStr = String.valueOf(numberChar);
+            cardNumber = Integer.valueOf(cardStr);
+        } else {
+            cardNumber = CHARACTER_INTEGER_MAP.get(numberChar);
+        }
+
+        CardType cardType = CardType.fromChar(typeChar);
+        return new PokeCard(cardNumber, cardType);
+    }
+}
+
+//CardsTypeProcessor.java
+package cardstype;
+
+import java.util.List;
+
+public interface CardsTypeProcessor {
+    int getCardsType(List<PokeCard> pokeCards);
+
+    default void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+    }
+}
+
+//CardsTypeStraightFlushProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeStraightFlushProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 1;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isStraightFlush(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isStraightFlush(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isAllCardsSameType(pokeCards)
+            && CardsTypeProcessorImplUtils.isAllCardsNumberContinuous(pokeCards);
+    }
+}
+
+//CardsTypeFourOfAKindProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeFourOfAKindProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 2;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isFourOfAKind(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isFourOfAKind(List<PokeCard> pokeCards) {
+        return isFirstFourOfAKind(pokeCards)
+            || isLastFourOfAKind(pokeCards);
+    }
+
+    private boolean isFirstFourOfAKind(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isLastFourOfAKind(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+}
+
+//CardsTypeFullHouseProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeFullHouseProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 3;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isFullHouse(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isFullHouse(List<PokeCard> pokeCards) {
+        return is3And2FullHouse(pokeCards)
+            || is2And3FullHouse(pokeCards);
+    }
+
+    private boolean is3And2FullHouse(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean is2And3FullHouse(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+}
+
+//CardsTypeFlushProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeFlushProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 4;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isFlush(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isFlush(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isAllCardsSameType(pokeCards);
+    }
+}
+
+//CardsTypeStraightProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeStraightProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 5;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isStraight(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isStraight(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isAllCardsSameType(pokeCards)
+            && CardsTypeProcessorImplUtils.isAllCardsNumberContinuous(pokeCards);
+    }
+}
+
+//CardsTypeThreeOfAKindProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeThreeOfAKindProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 6;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isThreeOfAKind(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isThreeOfAKind(List<PokeCard> pokeCards) {
+        return isFirstThreeOfAKind(pokeCards)
+            || isMiddleThreeOfAKind(pokeCards)
+            || isLastThreeOfAKind(pokeCards);
+    }
+
+    private boolean isFirstThreeOfAKind(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isMiddleThreeOfAKind(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isLastThreeOfAKind(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+}
+
+//CardsTypeTwoPairProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeTwoPairProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 7;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isTwoPair(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isTwoPair(List<PokeCard> pokeCards) {
+        return isFirstSingle(pokeCards)
+            || isMiddleSingle(pokeCards)
+            || isLastSingle(pokeCards);
+    }
+
+    private boolean isFirstSingle(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isMiddleSingle(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isLastSingle(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+}
+
+//CardsTypeOnePairProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeOnePairProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 8;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isOnePair(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isOnePair(List<PokeCard> pokeCards) {
+        return isFirst2Pair(pokeCards)
+            || isSecond2Pair(pokeCards)
+            || isThird2Pair(pokeCards)
+            || isFourth2Pair(pokeCards);
+    }
+
+    private boolean isFirst2Pair(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isSecond2Pair(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isThird2Pair(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+
+    private boolean isFourth2Pair(List<PokeCard> pokeCards) {
+        return !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(0), pokeCards.get(1))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(1), pokeCards.get(2))
+            && !CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(2), pokeCards.get(3))
+            && CardsTypeProcessorImplUtils.isTwoCardsSameNumber(pokeCards.get(3), pokeCards.get(4));
+    }
+}
+
+
+
+//CardsTypeOtherProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+
+public class CardsTypeOtherProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 9;
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        return CARDS_TYPE_NUMBER;
+    }
+}
+
+//CardsTypeProcessorImplUtils.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class CardsTypeProcessorImplUtils {
+    public static CardsTypeProcessor getCardsTypeProcessor() {
+        CardsTypeProcessor cardsTypeRoyalStraightFlushProcessor = new CardsTypeRoyalStraightFlushProcessor();
+        CardsTypeProcessor cardsTypeStraightFlushProcessor = new CardsTypeStraightFlushProcessor();
+        CardsTypeProcessor cardsTypeFourOfAKindProcessor = new CardsTypeFourOfAKindProcessor();
+        CardsTypeProcessor cardsTypeFullHouseProcessor = new CardsTypeFullHouseProcessor();
+        CardsTypeProcessor cardsTypeFlushProcessor = new CardsTypeFlushProcessor();
+        CardsTypeProcessor cardsTypeStraightProcessor = new CardsTypeStraightProcessor();
+        CardsTypeProcessor cardsTypeThreeOfAKindProcessor = new CardsTypeThreeOfAKindProcessor();
+        CardsTypeProcessor cardsTypeTwoPairProcessorProcessor = new CardsTypeTwoPairProcessor();
+        CardsTypeProcessor cardsTypeOnePairProcessor = new CardsTypeOnePairProcessor();
+        CardsTypeProcessor cardsTypeOtherProcessor = new CardsTypeOtherProcessor();
+
+        cardsTypeRoyalStraightFlushProcessor.setNextCardsTypeProcessor(cardsTypeStraightFlushProcessor);
+        cardsTypeStraightFlushProcessor.setNextCardsTypeProcessor(cardsTypeFourOfAKindProcessor);
+        cardsTypeFourOfAKindProcessor.setNextCardsTypeProcessor(cardsTypeFullHouseProcessor);
+        cardsTypeFullHouseProcessor.setNextCardsTypeProcessor(cardsTypeFlushProcessor);
+        cardsTypeFlushProcessor.setNextCardsTypeProcessor(cardsTypeStraightProcessor);
+        cardsTypeStraightProcessor.setNextCardsTypeProcessor(cardsTypeThreeOfAKindProcessor);
+        cardsTypeThreeOfAKindProcessor.setNextCardsTypeProcessor(cardsTypeTwoPairProcessorProcessor);
+        cardsTypeTwoPairProcessorProcessor.setNextCardsTypeProcessor(cardsTypeOnePairProcessor);
+        cardsTypeOnePairProcessor.setNextCardsTypeProcessor(cardsTypeOtherProcessor);
+
+        return cardsTypeRoyalStraightFlushProcessor;
+    }
+
+    public static void preProcessPokeCards(List<PokeCard> pokeCards) {
+        pokeCards.sort(Comparator.comparingInt(PokeCard::getCardNumber));
+    }
+
+    public static boolean isTwoCardsSameNumber(PokeCard firstPokeCard, PokeCard secondPokeCard) {
+        return Objects.equals(firstPokeCard.getCardNumber(), secondPokeCard.getCardNumber());
+    }
+
+    public static boolean isAllCardsSameType(List<PokeCard> pokeCards) {
+        Set<String> types = pokeCards.stream().map(pokeCard -> pokeCard.getCardType().getTypeStr()).collect(Collectors.toSet());
+        return types.size() == 1;
+    }
+
+    public static boolean isAllCardsNumberContinuous(List<PokeCard> pokeCards) {
+        return isCardsNumberContinuousNotIncludingTJQKA(pokeCards)
+            || isCardsNumberContinuousIncludingTJQKA(pokeCards);
+    }
+
+    private static boolean isCardsNumberContinuousNotIncludingTJQKA(List<PokeCard> pokeCards) {
+        return pokeCards.get(0).getCardNumber() + 1 == pokeCards.get(1).getCardNumber()
+            && pokeCards.get(1).getCardNumber() + 1 == pokeCards.get(2).getCardNumber()
+            && pokeCards.get(2).getCardNumber() + 1 == pokeCards.get(3).getCardNumber()
+            && pokeCards.get(3).getCardNumber() + 1 == pokeCards.get(4).getCardNumber();
+    }
+
+    public static boolean isCardsNumberContinuousIncludingTJQKA(List<PokeCard> pokeCards) {
+        return pokeCards.get(0).getCardNumber() == 1
+            && pokeCards.get(1).getCardNumber() + 1 == pokeCards.get(2).getCardNumber()
+            && pokeCards.get(2).getCardNumber() + 1 == pokeCards.get(3).getCardNumber()
+            && pokeCards.get(3).getCardNumber() + 1 == pokeCards.get(4).getCardNumber()
+            && pokeCards.get(4).getCardNumber() == 13;
+    }
+}
+
+
+//测试用例
+//CardsTypeJudgerTest.java
+package cardstype;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class CardsTypeJudgerTest {
+    private static CardsTypeJudger cardsTypeJudger = new CardsTypeJudger();
+
+    @Test
+    public void testOtherType() {
+        String inputStr = "1s3h5d7s9d";
+        assertEquals(9, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testFirstThreeOfAKindType() {
+        String inputStr = "1s1h1d7s9d";
+        assertEquals(6, cardsTypeJudger.getCardsType(inputStr));
+        inputStr = "1s7s9d1h1d";
+        assertEquals(6, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testMiddleThreeOfAKindType() {
+        String inputStr = "7s7h1d7s9d";
+        assertEquals(6, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testLastThreeOfAKindType() {
+        String inputStr = "7s9h1d9s9d";
+        assertEquals(6, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testStraightTypeNotIncludingTJQKA() {
+        String inputStr = "6s8h4d5s7d";
+        assertEquals(5, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testStraightTypeIncludingTJQKA() {
+        String inputStr = "AsKhTdQsJd";
+        assertEquals(5, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testFlushType() {
+        String inputStr = "1s1s1s7s9s";
+        assertEquals(4, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void test3And2FullHouseType() {
+        String inputStr = "Js7dJh7s7h";
+        assertEquals(3, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void test2And3FullHouseType() {
+        String inputStr = "Qs7dQh7sQh";
+        assertEquals(3, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testFirstFourOfAKindType() {
+        String inputStr = "AsAdAh7sAc";
+        assertEquals(2, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testLastFourOfAKindType() {
+        String inputStr = "QsQdQh7sQc";
+        assertEquals(2, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testStraightFlushTypeNotIncludingTJQKA() {
+        String inputStr = "Ac2c3c4c5c";
+        assertEquals(1, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testStraightFlushTypeIncludingTJQKA() {
+        String inputStr = "QcTcKc9cJc";
+        assertEquals(1, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testRoyalStraightFlushType() {
+        String inputStr = "QcTcKcAcJc";
+        assertEquals(0, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testTwoPairTypeFirstSingle() {
+        String inputStr = "TcTs2c7d7h";
+        assertEquals(7, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testTwoPairTypeMiddleSingle() {
+        String inputStr = "TcTs2c7d2h";
+        assertEquals(7, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testTwoPairTypeLastSingle() {
+        String inputStr = "Tc2s2c7d7h";
+        assertEquals(7, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testOnePairTypeWithFirst2Pair() {
+        String inputStr = "Jc2s2c7d8h";
+        assertEquals(8, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testOnePairTypeWithSecond2Pair() {
+        String inputStr = "Jc2s7c7d8h";
+        assertEquals(8, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testOnePairTypeWithThird2Pair() {
+        String inputStr = "Jc2s8c7d8h";
+        assertEquals(8, cardsTypeJudger.getCardsType(inputStr));
+    }
+
+    @Test
+    public void testOnePairTypeWithFourth2Pair() {
+        String inputStr = "Jc2s8c7dJh";
+        assertEquals(8, cardsTypeJudger.getCardsType(inputStr));
+    }
+}
+//------------------------------------------------------------------------------------------------
+//Java 排序
+//MyTask.java
+package test;
+
+public class MyTask {
+    private int priority;
+    private String desc;
+
+    public MyTask(int priority, String desc) {
+
+        this.priority = priority;
+        this.desc = desc;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    @Override
+    public String toString() {
+        return "MyTask{" +
+            "priority=" + priority +
+            ", desc='" + desc + '\'' +
+            '}';
+    }
+}
+
+//MyTaskSorterTest.java
+package test;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class MyTaskSorterTest {
+    @Test
+    public void testTaskSort() {
+        MyTask myTask1 = new MyTask(5, "5");
+        MyTask myTask2 = new MyTask(3, "first3");
+        MyTask myTask3 = new MyTask(3, "second3");
+
+        List<MyTask> myTasks = Arrays.asList(myTask1, myTask2, myTask3);
+        myTasks.sort(Comparator.comparingInt(MyTask::getPriority));
+//        myTasks.sort(Comparator.comparingInt(MyTask::getPriority).reversed());//对比较算法进行反向排序
+        List<MyTask> expectedMyTasks = Arrays.asList(myTask2, myTask3, myTask1);
+        assertEquals(expectedMyTasks, myTasks);
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 //int数字倒序
 package test;
 
@@ -43245,7 +44522,6 @@ log4j.category.org.hibernate.type=trace
 </table>
 </body>
 </html>
-
 //------------------------------------------------------------------------------------------------
 
 
