@@ -1,4 +1,173 @@
 //------------------------------------------------------------------------------------------------
+//leetcode 1
+package leetcode;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+/**
+ * https://www.cnblogs.com/grandyang/p/4606334.html
+ * 1	Two Sum
+ */
+public class TwoSum {
+    public int[] twoSum(int[] nums, int target) {
+        // Collectors.toMap的第三个参数表示重复的Key时，如何处理Value值，(a, b) -> a表示保留用第一个Value，(a, b) -> b表示用第一个Value
+        Map<Integer, Integer> valuePosMap = IntStream.range(0, nums.length).boxed().collect(Collectors.toMap(i -> nums[i], i -> i, (a, b) -> b));
+
+        int[] res = new int[2];
+        for (int firstIndex = 0; firstIndex < nums.length; firstIndex++) {
+            int secondValue = target - nums[firstIndex];
+            if (valuePosMap.containsKey(secondValue) && valuePosMap.get(secondValue) != firstIndex) {
+                res[0] = firstIndex;
+                res[1] = valuePosMap.get(secondValue);
+                break;
+            }
+        }
+
+        return res;
+    }
+
+    public int[] twoSumForOneLoop(int[] nums, int target) {
+        Map<Integer, Integer> valuePosMap = new HashMap<>();
+
+        int[] res = new int[2];
+        for (int firstIndex = 0; firstIndex < nums.length; firstIndex++) {
+            int firstValue = nums[firstIndex];
+            int secondValue = target - firstValue;
+            if (valuePosMap.containsKey(secondValue)) {
+                res[0] = valuePosMap.get(secondValue); //这里的顺序是反的
+                res[1] = firstIndex;
+                break;
+            } else {
+                valuePosMap.put(firstValue, firstIndex);
+            }
+        }
+
+        return res;
+    }
+}
+
+//test
+package leetcode;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+
+public class TwoSumTest {
+
+    private static final TwoSum TWO_SUM = new TwoSum();
+
+    @Test
+    public void test1() {
+        int[] nums = new int[]{2, 3, 10, 7};
+        int target = 10;
+        int[] targetIndex = new int[]{1, 3};
+//        assertArrayEquals(targetIndex, TWO_SUM.twoSum(nums, target));
+        assertArrayEquals(targetIndex, TWO_SUM.twoSumForOneLoop(nums, target));
+    }
+
+    @Test
+    public void test2() {
+        int[] nums = new int[]{2, 3, 10, 2};
+        int target = 4;
+        int[] targetIndex = new int[]{0, 3};
+//        assertArrayEquals(targetIndex, TWO_SUM.twoSum(nums, target));
+        assertArrayEquals(targetIndex, TWO_SUM.twoSumForOneLoop(nums, target));
+    }
+}
+//------------------------------------------------------------------------------------------------
+//letcode 3
+package leetcode;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * https://www.cnblogs.com/grandyang/p/4606334.html
+ * 3	Longest Substring Without Repeating Characters
+ */
+public class LongestSubstring {
+    public int lengthOfLongestSubstring(String s) {
+        int[] m = new int[256];
+        Arrays.fill(m, -1);
+        int res = 0, left = -1;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            left = Math.max(left, m[c]); //取滑窗左边位置
+            m[c] = i;
+            res = Math.max(res, i - left); //取res和当前滑窗的最大长度
+        }
+        return res;
+    }
+
+    public int lengthOfLongestSubstringWithMap(String s) {
+        Map<Character, Integer> characterPosMap = new HashMap<>();
+        int res = 0, left = -1;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            left = Math.max(left, characterPosMap.getOrDefault(c, -1)); //取滑窗左侧位置
+            characterPosMap.put(c, i);
+            res = Math.max(res, i - left); //取res和当前滑窗的最大长度
+        }
+        return res;
+    }
+
+    public int lengthOfLongestSubstringWithSet(String s) {
+        int res = 0, left = 0, right = 0;
+        Set<Character> characterSet = new HashSet<>();
+        while (right < s.length()) {
+            char c = s.charAt(right);
+            if (!characterSet.contains(c)) {
+                characterSet.add(c);
+                right++;
+                res = Math.max(res, characterSet.size());
+            } else {
+                characterSet.remove(s.charAt(left++)); //只要发现right对应的字符串在滑窗(即Set)中存在，就不断往右移滑窗左侧，直到滑窗不包含right字符
+            }
+        }
+        return res;
+    }
+}
+
+//test
+package leetcode;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class LongestSubstringTest {
+
+    private static final LongestSubstring LONGEST_SUBSTRING = new LongestSubstring();
+
+    @Test
+    public void lengthOfLongestSubstring() {
+        String s = "abcabcbb";
+        int length = 3;
+        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
+    }
+
+    @Test
+    public void lengthOfLongestSubstring2() {
+        String s = "bbbbb";
+        int length = 1;
+        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
+    }
+
+    @Test
+    public void lengthOfLongestSubstring3() {
+        String s = "pwwkew";
+        int length = 3;
+        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //仿Lisp运算
 //BracketRecursivelyMatcher.java
 package lisp;
@@ -31630,12 +31799,6 @@ public class InjectionDAOImpl implements InjectionDAO {
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
@@ -31663,6 +31826,16 @@ public class InjectionDAOImpl implements InjectionDAO {
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>1.8.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>4.3.13.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-dao</artifactId>
+            <version>1.2.9</version>
         </dependency>
     </dependencies>
 </project>

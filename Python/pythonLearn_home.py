@@ -8631,20 +8631,255 @@ async def hello():
 #https://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/0014320981492785ba33cc96c524223b2ea4e444077708d000
 
 #-----------------------------------------------------------------------------------------
+#sklearn 学习 
+https://www.bilibili.com/video/av17003173/?p=8
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+if __name__ == '__main__':
+    iris = datasets.load_iris()
+    iris_X = iris.data
+    iris_y = iris.target
+
+    # print(iris_X[:2, :])
+    # print(iris_y)
+
+    X_train, X_test, y_train, y_test = train_test_split(iris_X, iris_y, test_size=0.3)
+    # print(y_train)
+
+    knn = KNeighborsClassifier() #生成KNN分类器
+    knn.fit(X_train, y_train) #训练数据集
+    y_predict = knn.predict(X_test) #根据测试集生成预测结果
+    print(y_predict)
+    print(y_test)
+
+    # 这是自己写的评估函数
+    correctNum = sum(map(lambda x, y: x == y, y_predict, y_test))
+    correctRatio = correctNum / len(y_test)
+    print(correctRatio)
+
+    # Sklearn自带的评估函数
+    score = knn.score(X_test, y_test)
+    print(score)
+#-----------------------------------------------------------------------------------------
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from sklearn import datasets
+from sklearn.linear_model import LinearRegression
+
+if __name__ == '__main__':
+    load_data = datasets.load_boston()
+    data_X = load_data.data
+    data_y = load_data.target
+    #     print(data_X)
+    #     print(data_y)
+    model = LinearRegression()
+    model.fit(data_X, data_y)
+    
+#     print(model.predict(data_X[:4]))
+#     print(data_y[:4])
+
+#     print(model.coef_)
+#     print(model.intercept_)
+#     print(model.get_params())
+    print(model.score(data_X, data_y)) #R^2 coefficient of determination
+#-----------------------------------------------------------------------------------------
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from sklearn import datasets
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+
+if __name__ == '__main__':
+    X, y = datasets.make_regression(n_samples=200, n_features=1, n_targets=1, noise=1)
+    plt.scatter(X, y)
+    plt.show()
+    
+    model = LinearRegression()
+    model.fit(X, y)
+    
+    score = model.score(X, y)
+    print(model.predict(X[:4]))
+    print(y[:4])
+    print(score)
+#-----------------------------------------------------------------------------------------
+7. normalization 标准化数据
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from sklearn import preprocessing
+import numpy as np
+from sklearn.datasets import make_classification
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+
+if __name__ == '__main__':
+    # a = np.array([[10, 2.7, 3.6],
+    #              [-100, 5, -2],
+    #              [120, 20, 40]], dtype=np.float64)
+    # print(a)
+    # print(preprocessing.scale(a))
+
+    X, y = make_classification(n_samples=300, n_features=2, n_redundant=0, n_informative=2, random_state=22,
+                               n_clusters_per_class=1, scale=100)
+    # plt.scatter(X[:, 0], X[:, 1], c=y)
+    # plt.show()
+    # X = preprocessing.scale(X) #去掉这行标准化，测试准确率大大下降
+    # X = preprocessing.minmax_scale(X, feature_range=(-1, 1))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3)
+    clf = SVC()
+    clf.fit(X_train, y_train)
+    print(clf.score(X_test, y_test))
+#-----------------------------------------------------------------------------------------
+8. cross_validation 1
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from sklearn.model_selection import cross_val_score
+from sklearn.datasets import load_iris # iris数据集
+from sklearn.model_selection import train_test_split # 分割数据模块
+from sklearn.neighbors import KNeighborsClassifier # K最近邻(kNN，k-NearestNeighbor)分类算法
+import matplotlib.pyplot as plt
+
+if __name__ == '__main__':
+    # 加载iris数据集
+    iris = load_iris()
+    X = iris.data
+    y = iris.target
+
+    # 分割数据并
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=4)
+    #
+    # # 建立模型
+    # knn = KNeighborsClassifier(n_neighbors=5)
+    #
+    # # 训练模型
+    # knn.fit(X_train, y_train)
+    #
+    # # 将准确率打印出
+    # print(knn.score(X_test, y_test))
+
+    # 分成多组测试集和训练集
+    # knn = KNeighborsClassifier(n_neighbors=5)
+    # scores = cross_val_score(knn, X, y, cv=5, scoring='accuracy')
+    # print(scores.mean()) # print(scores)
+
+    k_range = range(1, 31)
+    k_scores = []
+    for k in k_range:
+        knn = KNeighborsClassifier(n_neighbors=k)
+        # scores = cross_val_score(knn, X, y, cv=10, scoring='accuracy') # for classification
+        # k_scores.append(scores.mean())
+        loss = -cross_val_score(knn, X, y, cv=10, scoring='mean_squared_error')  # for regression
+        k_scores.append(loss.mean())
+
+    plt.plot(k_range, k_scores)
+    plt.xlabel('Value of K for KNN')
+    plt.ylabel('Cross-Validated Accuracy')
+    plt.show()
 
 #-----------------------------------------------------------------------------------------
+9. cross_validation 2
 
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import load_digits
+from sklearn.model_selection import learning_curve
+from sklearn.svm import SVC
+
+if __name__ == '__main__':
+    digits = load_digits()
+    X = digits.data
+    y = digits.target
+
+    train_sizes, train_loss, test_loss = learning_curve(
+        SVC(gamma=0.001), X, y, cv=10, scoring='mean_squared_error',
+        train_sizes=[0.1, 0.25, 0.5, 0.75, 1])
+
+    # 平均每一轮所得到的平均方差(共5轮，分别为样本10%、25%、50%、75%、100%)
+    train_loss_mean = -np.mean(train_loss, axis=1)
+    test_loss_mean = -np.mean(test_loss, axis=1)
+
+    plt.plot(train_sizes, train_loss_mean, 'o-', color="r", label="Training")
+    plt.plot(train_sizes, test_loss_mean, 'o-', color="g", label="Cross-validation")
+
+    plt.xlabel("Training examples")
+    plt.ylabel("Loss")
+    plt.legend(loc="best")
+    plt.show()
 
 #-----------------------------------------------------------------------------------------
+10. cross_validation 3
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import load_digits
+from sklearn.model_selection import validation_curve
+from sklearn.svm import SVC
 
+if __name__ == '__main__':
+    digits = load_digits()
+    X = digits.data
+    y = digits.target
+
+    param_range = np.logspace(-6, -2.3, 5)
+    train_loss, test_loss = validation_curve(
+        SVC(), X, y, param_name='gamma', param_range=param_range, cv=10,
+        scoring='mean_squared_error')
+
+    # 平均每一轮所得到的平均方差(共5轮，分别为样本10%、25%、50%、75%、100%)
+    train_loss_mean = -np.mean(train_loss, axis=1)
+    test_loss_mean = -np.mean(test_loss, axis=1)
+
+    plt.plot(param_range, train_loss_mean, 'o-', color="r", label="Training")
+    plt.plot(param_range, test_loss_mean, 'o-', color="g", label="Cross-validation")
+
+    plt.xlabel("Gamma")
+    plt.ylabel("Loss")
+    plt.legend(loc="best")
+    plt.show()
 
 #-----------------------------------------------------------------------------------------
+11 save
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from sklearn import svm
+from sklearn import datasets
+import pickle
 
+from sklearn.externals import joblib
 
-#-----------------------------------------------------------------------------------------
+if __name__ == '__main__':
+    clf = svm.SVC()
+    digits = datasets.load_digits()
+    X, y= digits.data, digits.target
+    clf.fit(X, y)
+    #
+    # save
+    # # method 1: pickle
+    # with open('save/clf.pickle', 'wb') as f:
+    #     pickle.dump(clf, f)
+    #
+    # restore
+    # with open('save/clf.pickle', 'rb') as f:
+    #     clf2 = pickle.load(f)
+    #     print(clf2.predict(X[0:1]))
 
-
+    # method 2: joblib
+    # save
+    joblib.dump(clf, 'save/clf.pkl')
+    # restore
+    clf3 = joblib.load('save/clf.pkl') #速度会更快些
+    print(clf3.predict(X[0:1]))
 #-----------------------------------------------------------------------------------------
 
 
