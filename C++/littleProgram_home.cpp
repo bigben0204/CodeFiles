@@ -383,8 +383,110 @@ int main()
 DerivedA: BaseA
 
 //------------------------------------------------------------------------------------------------
+//类函数里的静态对象，对于所有的类实例来说，都是共用的，并不是针对单个实例独有的。
+//这种情况下，是否多线程可能会有问题？多个线程同时写同一个对象
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
 
+class StaticObjectTest
+{
+public:
+    void printStaticVector() const
+    {
+        static vector<string> strVector;
 
+        cout << strVector.size() << endl;
+
+        if (strVector.empty())
+        {
+            strVector = {"hello", "world", "nice", "day"};
+        }
+
+        for_each(strVector.begin(), strVector.end(), [] (const string& s) {cout << s << "\n"; });
+    }
+};
+
+int main()
+{
+    StaticObjectTest s1;
+    s1.printStaticVector();
+    s1.printStaticVector();
+    StaticObjectTest s2;
+    s2.printStaticVector();
+
+    return 0;
+}
+输出：
+0
+hello
+world
+nice
+day
+4
+hello
+world
+nice
+day
+4
+hello
+world
+nice
+day
+请按任意键继续. . .
+//------------------------------------------------------------------------------------------------
+//C++的派生类重载函数的返回类型可以与基类函数不一致，但也要有继承关系，即可以返回基类返回对象的子类（同Java一样）
+//没有继承关系的不同返回类型编译报错
+#include <iostream>
+#include <string>
+#include <memory>
+using namespace std;
+
+class Base
+{
+public:
+	virtual Base* get() = 0;//virtual int get() = 0;
+};
+
+class DerivedString: public Base
+{
+public:
+	/*virtual string get() override //string与int无法继承返回
+	{
+		return "hello, world";
+	}*/
+	virtual DerivedString* get() override
+	{
+		return new DerivedString();
+	}
+};
+
+class DerivedDouble: public Base
+{
+public:
+	/*virtual double get() override
+	{
+		return 3.0;
+	}*/
+	virtual DerivedDouble* get() override
+	{
+		return new DerivedDouble();
+	}
+};
+
+int main()
+{
+	/*unique_ptr<Base> pBase1(new DerivedString());
+	cout << pBase1->get() << endl;
+
+	unique_ptr<Base> pBase2(new DerivedDouble());
+	cout << pBase2->get() << endl;*/
+
+	return 0;
+}
+//------------------------------------------------------------------------------------------------
 //gtest学习
 http://www.cnblogs.com/coderzh/archive/2009/04/06/1426755.html
 
@@ -42522,9 +42624,6 @@ PREDECESSOR(S, x)
 
 
 //------------------------------------------------------------------------------------------------
-//Windows Sockets网络编程
-3.3.3 传输协议的选择：UDP与TCP的对比 P47
-经验法则：采用TCP吧，除非你的确有不用的理由。
 
 //------------------------------------------------------------------------------------------------
 

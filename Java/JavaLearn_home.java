@@ -438,7 +438,7 @@ public class ParameterUtils {
         }
     }
 
-    public static boolean isNumeric(String str){
+    public static boolean isNumeric(String str) {
         Pattern pattern = Pattern.compile("[-0-9]*");
         Matcher isNum = pattern.matcher(str);
         if(!isNum.matches()){
@@ -683,8 +683,8 @@ public class CardsTypeJudger {
         }
 
         List<PokeCard> pokeCards = parseStrToPokeCards(inputStr);
-        CardsTypeProcessor cardsTypeProcessor = CardsTypeProcessorImplUtils.getCardsTypeProcessor();
         CardsTypeProcessorImplUtils.preProcessPokeCards(pokeCards);
+        CardsTypeProcessor cardsTypeProcessor = CardsTypeProcessorImplUtils.getCardsTypeProcessor();
         return cardsTypeProcessor.getCardsType(pokeCards);
     }
 
@@ -786,7 +786,38 @@ import java.util.List;
 public interface CardsTypeProcessor {
     int getCardsType(List<PokeCard> pokeCards);
 
-    default void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+    void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor);
+}
+
+//CardsTypeRoyalStraightFlushProcessor.java
+package cardstype.impl;
+
+import cardstype.CardsTypeProcessor;
+import cardstype.PokeCard;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CardsTypeRoyalStraightFlushProcessor implements CardsTypeProcessor {
+    private static final int CARDS_TYPE_NUMBER = 0;
+    private CardsTypeProcessor nextCardsTypeProcessor;
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
+        this.nextCardsTypeProcessor = nextCardsTypeProcessor;
+    }
+
+    @Override
+    public int getCardsType(List<PokeCard> pokeCards) {
+        if (isStraightFlush(pokeCards)) {
+            return CARDS_TYPE_NUMBER;
+        }
+        return Optional.of(nextCardsTypeProcessor).map(e -> e.getCardsType(pokeCards)).orElseThrow(NullPointerException::new);
+    }
+
+    private boolean isStraightFlush(List<PokeCard> pokeCards) {
+        return CardsTypeProcessorImplUtils.isAllCardsSameType(pokeCards)
+            && CardsTypeProcessorImplUtils.isCardsNumberContinuousIncludingTJQKA(pokeCards);
     }
 }
 
@@ -1163,6 +1194,10 @@ public class CardsTypeOtherProcessor implements CardsTypeProcessor {
     @Override
     public int getCardsType(List<PokeCard> pokeCards) {
         return CARDS_TYPE_NUMBER;
+    }
+
+    @Override
+    public void setNextCardsTypeProcessor(CardsTypeProcessor nextCardsTypeProcessor) {
     }
 }
 
@@ -44695,6 +44730,1275 @@ log4j.category.org.hibernate.type=trace
 </table>
 </body>
 </html>
+//------------------------------------------------------------------------------------------------
+//Spring事务管理课程 https://www.imooc.com/video/9323
+事务指的是逻辑上的一组操作，这组操作要么全部成功，要么全部失败。
+
+事务的特性：原子性、一致性、隔离性、持久性
+
+原子性是的指事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生。
+一致性指事务前后数据的完整性必须保持一致。
+隔离性指多个用户并发访问数据库时，一个用户的事务不能被其他用户的事务所干扰，多个并发事务之间数据要相互隔离。
+持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，即便数据库发生故障也不应该对其有任何影响。
+//------------------------------------------------------------------------------------------------
+//3-1 接口介绍
+Spring事务管理
+Spring事务管理高层抽象主要包括3个接口：
+--PlatformTransactionManager
+事务管理器
+--TransactionDefinition
+事务定义信息（隔离、传播、超时、只读）
+--TransactionStatus
+事务具体运行状态
+
+//------------------------------------------------------------------------------------------------
+//3-2 事务管理器PlatformTransactionManager
+Spring为不同的持久化框架提供了不同的PlatTransactionManager接口实现
+//------------------------------------------------------------------------------------------------
+//3-3 事务隔离级别（四种）
+隔离级别：
+DEFAULT/READ_UNCOMMITED/READ_COMMITTED/REPEATABLE_READ/SERIALIZABLE
+//------------------------------------------------------------------------------------------------
+//3-4 TransactionDefinition定义事务传播行为
+//------------------------------------------------------------------------------------------------
+//3-5 TransactionStatus事务状态
+//------------------------------------------------------------------------------------------------
+//4-1 转账环境搭建
+Spring支持两种方式事务管理
+——编程式的事务管理
+--在实际应用中很少使用
+--通过TransactionTemplate手动管理事务
+——使用XML配置声明式事务
+--开发中推荐使用（代码侵入性最小）
+--Spring的声明式事务是通过AOP实现的
+
+//AccountService.java
+package cn.muke.spring.demo1;
+/**
+ * 转账安全的业务层接口
+ */
+public interface AccountService {
+    /**
+     * @param out：转出账号
+     * @param in：转入账号
+     * @param money：转账金额
+     */
+    void transfer(String out, String in, double money);
+}
+
+//AccountServiceImpl.java
+package cn.muke.spring.demo1;
+
+/**
+ * 转账安全的业务层实现类
+ */
+public class AccountServiceImpl implements AccountService {
+    // 注入转账的Dao的类
+    private AccountDao accountDao;
+
+    public void setAccountDao(AccountDaoImpl accountDao) {
+        this.accountDao = accountDao;
+    }
+
+    /**
+     * @param out：转出账号
+     * @param in：转入账号
+     * @param money：转账金额
+     */
+    @Override
+    public void transfer(String out, String in, double money) {
+        accountDao.outMoney(out, money);
+        //int i = 1 / 0;//测试抛出异常，钱是否转出账户，是否转入账户
+        accountDao.inMoney(in, money);
+    }
+}
+
+
+//AccountDao.java
+package cn.muke.spring.demo1;
+
+/**
+ * 转账案例的DAO层的接口
+ */
+public interface AccountDao {
+    /**
+     * @param out：转出账号
+     * @param money：转出金额
+     */
+    void outMoney(String out, double money);
+
+    /**
+     * @param in：转入账号
+     * @param money：转入金额
+     */
+    void inMoney(String in, double money);
+}
+
+//AccountDaoImpl.java
+package cn.muke.spring.demo1;
+
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
+
+/**
+ * 转账案例的DAO层的实现类
+ */
+public class AccountDaoImpl extends JdbcDaoSupport implements AccountDao {
+    /**
+     * @param out：转出账号
+     * @param money：转出金额
+     */
+    @Override
+    public void outMoney(String out, double money) {
+        String sql = "update account set money = money - ? where name = ?";
+        this.getJdbcTemplate().update(sql, money, out);
+    }
+
+    /**
+     * @param in：转入账号
+     * @param money：转入金额
+     */
+
+    @Override
+    public void inMoney(String in, double money) {
+        String sql = "update account set money = money + ? where name = ?";
+        this.getJdbcTemplate().update(sql, money, in);
+    }
+}
+
+//applicationContext.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 引入外部的属性文件 https://blog.csdn.net/sf_climber/article/details/78850038-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    
+    <!--<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>-->
+
+    <!--配置业务层类-->
+    <bean id="accountService" class="cn.muke.spring.demo1.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+    </bean>
+    <!--配置DAO的类-->
+    <bean id="accountDao" class="cn.muke.spring.demo1.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>
+
+//jdbc.properties
+jdbc.driverClass=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+jdbc.username=root
+jdbc.password=root123
+
+//测试 AccountServiceTest.java
+package cn.muke.spring.demo1;
+
+import javax.annotation.Resource;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+/**
+ * 转账案例的测试类
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:applicationContext.xml")
+public class AccountServiceTest {
+
+    // 测试业务层类：
+    @Resource(name = "accountService")
+    private AccountService accountService;
+
+    @Test
+    public void testTransfer() {
+        accountService.transfer("aaa", "bbb", 200);
+    }
+}
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>webproject</groupId>
+    <artifactId>webproject</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>entity</name>
+    <url>http://www.example.com</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+
+        <!-- 添加mysql驱动依赖 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.5.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.0.9.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.0.9.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.0.9.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>5.0.9.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>aopalliance</groupId>
+            <artifactId>aopalliance</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.7.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.20.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <!--https://blog.csdn.net/swpu_lipan/article/details/78460852?utm_source=debugrun&utm_medium=referral
+        https://www.cnblogs.com/machanghai/p/5456294.html-->
+        <!--配置如下resources，才会把*.hbm文件拷贝到target目录，否则java中的配置文件不会拷贝，导致xxx.hbm.xml文件找不到的错误-->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include> */
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>
+
+
+//------------------------------------------------------------------------------------------------
+//5-1 编程式的事务管理 https://www.imooc.com/video/9331
+--在AccountService中使用TransactionTemplate
+--TransactionTemplate依赖DataSourceTransactionManager
+--DataSourceTransactionManager依赖DataSource构造
+
+<bean id="accountService" class="cn.muke.spring.demo1.AccountServiceImpl">
+    <property name="accountDao" ref="accountDao"/>
+    <property name="transactionTemplate" ref="transactionTemplate"/>
+</bean>
+
+<!--配置事务管理的模板：Spring为了简化事务管理的代码而提供的类-->
+<bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+    <property name="transactionManager" ref="transactionManager"/>
+</bean>
+
+<!-- 配置事务管理器 -->
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource"/>
+</bean>
+
+
+//AccountServiceImpl.java
+package cn.muke.spring.demo1;
+
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
+
+/**
+ * 转账安全的业务层实现类
+ */
+public class AccountServiceImpl implements AccountService {
+    // 注入转账的Dao的类
+    private AccountDao accountDao;
+
+    public void setAccountDao(AccountDaoImpl accountDao) {
+        this.accountDao = accountDao;
+    }
+
+    // 注入事务管理的模板
+    private TransactionTemplate transactionTemplate;
+
+    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+        this.transactionTemplate = transactionTemplate;
+    }
+
+    /**
+     * @param out：转出账号
+     * @param in：转入账号
+     * @param money：转账金额
+     */
+    @Override
+    public void transfer(final String out, final String in, final double money) {
+        //要么全部成功，要么失败则回滚
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                accountDao.outMoney(out, money);
+                int i = 1 / 0;//测试抛出异常，钱是否转出账户，是否转入账户
+                accountDao.inMoney(in, money);
+            }
+        });
+    }
+}
+
+//applicationContext.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 引入外部的属性文件 https://blog.csdn.net/sf_climber/article/details/78850038-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">-->
+        <!--<property name="dataSource" ref="dataSource"/>-->
+    <!--</bean>-->
+
+    <!--配置业务层类-->
+    <bean id="accountService" class="cn.muke.spring.demo1.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+        <property name="transactionTemplate" ref="transactionTemplate"/>
+    </bean>
+    <!--配置DAO的类-->
+    <bean id="accountDao" class="cn.muke.spring.demo1.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务管理的模板：Spring为了简化事务管理的代码而提供的类-->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+</beans>
+//------------------------------------------------------------------------------------------------
+//6-1 声明式事务管理方式一：基于TransactionProxyFactoryBean
+
+//AccountServiceTest2.java
+package cn.muke.spring.demo2;
+
+import javax.annotation.Resource;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+/**
+ * Spring的声明式事务管理的方式一的测试类
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:applicationContext2.xml")
+public class AccountServiceTest2 {
+    /**
+     * 注入代理类：因为代理类进行增强的操作
+     */
+//    @Resource(name = "accountService")
+    @Resource(name = "accountServiceProxy")
+    private AccountService accountService;
+
+    /**
+     * 转账案例
+     */
+    @Test
+    public void testTransfer() {
+        accountService.transfer("aaa", "bbb", 200);
+    }
+}
+
+//applicationContext2.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 引入外部的属性文件 https://blog.csdn.net/sf_climber/article/details/78850038-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--配置业务层类-->
+    <bean id="accountService" class="cn.muke.spring.demo2.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+    </bean>
+    <!--配置DAO的类-->
+    <bean id="accountDao" class="cn.muke.spring.demo2.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置业务层的代理，对accountService进行增加过的代理类，基于AOP的方式-->
+    <bean id="accountServiceProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <!--配置目标对象-->
+        <property name="target" ref="accountService"/>
+        <!--注入事务管理器-->
+        <property name="transactionManager" ref="transactionManager"/>
+        <!--注入事务属性-->
+        <property name="transactionAttributes">
+            <props>
+                <!--prop的格式 key="insert*"/"update*"/"*"
+                    * PROPAGATION：事务的传播行为。
+                    * ISOLATION：事务的隔离级别。
+                    * readOnly：只读。（不可以修改、插入、删除）
+                    * -Exception：发生哪些异常回滚事务。
+                    * +Exception：发生哪些异常事务不回滚。
+                -->
+                <!--如果增加readOnly属性，如：PROPAGATION_REQUIRED,readOnly，则就算没有异常，转账也会异常，提示Connection is read-only. Queries leading to data modification are not allowed-->
+                <!--如果增加异常，如PROPAGATION_REQUIRED,+ArithmeticException，则就算发生算术异常，事务也不回滚，则钱会转丢-->
+                <prop key="transfer">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
+</beans>
+//------------------------------------------------------------------------------------------------
+//6-2 声明式事务管理方式二：基于AspectJ的XML方式
+--引入aop和tx命名空间
+
+//AccountServiceTest3.java
+package cn.muke.spring.demo3;
+
+import javax.annotation.Resource;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+/**
+ * Spring的声明式事务的方式二：基于AspectJ的XML方式配置。
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:applicationContext3.xml")
+public class AccountServiceTest3 {
+    /**
+     * 转账案例
+     */
+    @Resource(name = "accountService")
+    private AccountService accountService;
+
+    @Test
+    public void testTransfer() {
+        accountService.transfer("aaa", "bbb", 200);
+    }
+}
+
+//需要在pom.xml中增加aspectjweaver的配置
+
+//applicationContext3.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 引入外部的属性文件 https://blog.csdn.net/sf_climber/article/details/78850038-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--配置业务层类-->
+    <bean id="accountService" class="cn.muke.spring.demo3.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+    </bean>
+    <!--配置DAO的类-->
+    <bean id="accountDao" class="cn.muke.spring.demo3.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务的通知：（事务的增强）-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--
+                propagation:事务传播行为
+                isolation:事务隔离级别
+                read-only:只读
+                rollback-for:发生哪些异常回滚
+                no-rollback-for:发生哪些异常不回滚
+                timeout:过期信息
+            -->
+            <tx:method name="transfer" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置切面-->
+    <aop:config>
+        <!--配置切入点-->
+        <aop:pointcut id="pointcut1" expression="execution(* cn.muke.spring.demo3.AccountService+.*(..))"/>
+        <!--配置切面-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut1"/>
+    </aop:config>
+</beans>
+//------------------------------------------------------------------------------------------------
+//6-3 声明式事务管理方式三：基于注解的方式
+
+//AccountServiceTest4.java
+package cn.muke.spring.demo4;
+
+import javax.annotation.Resource;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+/**
+ * Spring的声明式事务管理的方式三：基于注释的事务管理的方式
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:applicationContext4.xml")
+public class AccountServiceTest4 {
+
+    @Resource(name = "accountService")
+    private AccountService accountService;
+
+    /**
+     * 转账案例
+     */
+    @Test
+    public void testTransfer() {
+        accountService.transfer("aaa", "bbb", 200);
+    }
+}
+
+//applicationContext4.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 引入外部的属性文件 https://blog.csdn.net/sf_climber/article/details/78850038-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!-- 配置连接池 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--配置业务层类-->
+    <bean id="accountService" class="cn.muke.spring.demo4.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+    </bean>
+    <!--配置DAO的类-->
+    <bean id="accountDao" class="cn.muke.spring.demo4.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--开启注解事务，配置了这个配置项之后，才能通过注释来管理事务-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+</beans>
+
+//AccountServiceImpl.java
+package cn.muke.spring.demo4;
+
+/**
+ * 转账安全的业务层实现类
+ */
+
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * @Transactional注解中的属性：
+ *  propagation:事务中的传播行为
+ *  isolation:事务的隔离级别
+ *  readOnly:只读
+ *  rollbackFor:发生哪些异常回滚
+ *  noRollbackFor:发生哪些异常不回滚
+ */
+//@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, readOnly = true)
+@Transactional
+public class AccountServiceImpl implements AccountService {
+    // 注入转账的Dao的类
+    private AccountDao accountDao;
+
+    public void setAccountDao(AccountDaoImpl accountDao) {
+        this.accountDao = accountDao;
+    }
+
+    /**
+     * @param out：转出账号
+     * @param in：转入账号
+     * @param money：转账金额
+     */
+    @Override
+    public void transfer(String out, String in, double money) {
+        accountDao.outMoney(out, money);
+//        int i = 1 / 0;//测试抛出异常，钱是否转出账户，是否转入账户
+        accountDao.inMoney(in, money);
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//7-1 课程总结 https://www.imooc.com/video/9335
+Spring将事务分成了两类：
+--编程式事务管理：
+    *手动编写代码进行事务管理（很少使用）
+--声明式事务管理：
+    *基于TransactionProxyFactoryBean的方式（很少使用，配置和管理比较麻烦）
+        *需要为每个进行事务管理的类，配置一个TransactionProxyFactoryBean进行增强。
+    *基于AspectJ的XML方式（经常使用，XML看起来比较清晰）
+        *一旦配置好之后，类上不需要添加任何东西
+    *基于注解方式（经常使用）
+        *配置简单，但是需要在业务层类上添加一个@Transactional的注释
+//------------------------------------------------------------------------------------------------
+//1-1 Redis入门 https://www.imooc.com/video/14924
+
+什么是NoSQL？
+--NoSQL =  Not Only SQL
+--非关系型的数据库
+
+为什么需要NoSQL
+--High Performance-高并发读写
+--Huge Storage-海量数据的高效率存储和访问
+--High Scalability && High Availablity-高可扩展性和高可用性
+
+NoSQL数据库的四大分类
+--键值（Key-Value）存储
+--列存储
+--文档数据库
+--图形数据库
+
+NoSQL的特点
+--易扩展
+--灵活的数据模型
+--大数据量，高性能
+--高可用
+//------------------------------------------------------------------------------------------------
+3-1 Redis的概述
+高性能键值对数据库，支持的键值数据类型：
+--字符串类型
+--列表类型
+--有序集合类型
+--散列类型
+--集合类型
+
+Redis的应用场景：
+--缓存
+--任务队列
+--网站访问统计
+--数据过期处理
+--应用排行榜
+--分布式集群架构中的session分离
+//------------------------------------------------------------------------------------------------
+//5-1 Jedis入门 https://www.imooc.com/video/14927
+*Jedis是Redis官方首先的Java客户端开发包
+
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+    <version>2.9.0</version>
+</dependency>
+
+//JedisTest.java
+package com.imooc.jedis;
+
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class JedisTest {
+    /**
+     * 单实例的测试
+     */
+    @Test
+    public void testJedisInstance() {
+        //1. 设置IP地址和端口
+        Jedis jedis = new Jedis("192.168.100.129", 6379);
+        //2. 保存数据
+        jedis.set("name", "imooc");
+        //3. 获取数据
+        String value = jedis.get("name");
+        assertEquals("imooc", value);
+    }
+
+    /**
+     * 连接池方式连接
+     */
+    @Test
+    public void testJedisPool() {
+        //获得连接池的配置对象
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        //设置最大连接数
+        jedisPoolConfig.setMaxTotal(30);
+        //设置最大空闲连接数
+        jedisPoolConfig.setMaxIdle(10);
+
+        // 获得连接池
+        // 通过连接池获得连接，获得核心对象
+        try (JedisPool jedisPool = new JedisPool(jedisPoolConfig, "192.168.100.129", 6379);
+             Jedis jedis = jedisPool.getResource()) {
+            //设置数据
+            jedis.set("name", "张三");
+            String value = jedis.get("name");
+            assertEquals("张三", value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+用宿主机访问虚拟机Linux：
+说明：默认情况下，如果没有没有开防火墙（ubuntu系统是ufw，通过sudo ufw status来查看），则可以在宿主机直接访问虚拟机系统。
+但是由于redis默认只绑定了本机端口127.0.0.1 ，所以需要把配置文件redis.conf里的：bind 127.0.0.1 。该行注释掉，同时把：protected-mode yes修改为protected-mode no
+再启动redis服务：./bin/redis-server ./redis.conf
+即可正常访问。
+（参考：https://blog.csdn.net/nocol123/article/details/74356752 https://blog.csdn.net/rangf/article/details/41733533）
+
+//------------------------------------------------------------------------------------------------
+//6-1 Redis的数据结构之字符串
+五种数据类型：
+*字符串（String）
+*字符串列表（list）
+*有序字符串集合（sorted set）
+*哈希（hash）
+*字符串集合（set）
+
+Key定义的注意点：
+*不要过长（最好不要超过1024个字节）
+*不要过短
+*统一的命名规范
+
+存储String：
+*二进制案例的，存入和获取的数据相同
+*Value最多可以容纳的数据长度是512M
+
+存储String常用命令
+*赋值 set
+*删除 del
+*取值 get getset
+*扩展命令 append
+*数值增减 incr decr incrby decrby
+
+//------------------------------------------------------------------------------------------------
+//6-2 Redis的数据结构之哈希
+存储Hash：
+*String Key和String Value的map容器
+*每一个Hash可以存储4294967295个键值对
+
+存储Hash常用命令：
+*赋值
+*删除
+*自学命令
+*取值
+*增加数字
+//------------------------------------------------------------------------------------------------
+//6-3 Redis的数据结构之list
+存储list：
+*ArrayList使用数组方式
+*LinkedList使用双向链接方式
+*双向链表中增加数据
+*双向链表中删除数据
+
+存储list常用命令：
+*两端添加
+*查看列表
+*两端弹出
+*获取列表元素个数
+*扩展命令
+//------------------------------------------------------------------------------------------------
+//6-4 Redis的数据结构之set
+存储Set
+*和List类型不同的是，Set集合中不允许出现重复的元素
+*可以做集合操作，如交集，差集，并集等
+*Set可包含的最大元素数量是4294967295
+
+存储set常用命令：
+*添加/删除元素
+*获得集合中的元素
+*集合中的差集运算
+*集合中的交集运算
+*集合中的并集运算
+*扩展命令
+
+存储Set使用场景：
+*跟踪一些唯一性数据
+*用于维护数据对象之间的关联关系
+//------------------------------------------------------------------------------------------------
+//6-5 Redis的数据结构之Sorted-Set
+存储Sorted-Set
+*Sorted-Set和Set的区别
+*Sorted-Set中的成员在集合中的位置是有序的
+
+存储Sorted-Set常用命令：
+*添加元素
+*获得元素
+*删除元素
+*范围查询
+*扩展命令
+
+Sorted-Set使用场景：
+*如大型在线游戏积分排行榜
+*构建索引数据
+//------------------------------------------------------------------------------------------------
+//7-1 Redis的Keys的通用操作
+get keys rename 等
+//------------------------------------------------------------------------------------------------
+//8-1 Redis的特性
+*多数据库
+有0-15 号共16个数据库，默认连接0号数据库，可以用select 0 来选择特定数据库。
+
+*Redis事务
+multi：开启事务
+exec：提交事务
+discard：回滚事务
+//------------------------------------------------------------------------------------------------
+//9-1 Redis的持久化的概述
+两种持久化方式
+*RDB方式
+*AOF方式
+
+持久化使用的方式：
+*RDB持久化：定时写入硬盘
+*AOF持久化：将操作写入日志，下次启redis服务时就将数据加载起来
+*无持久化：单纯的缓存功能
+*同时使用RDB和AOF
+//------------------------------------------------------------------------------------------------
+//9-2 Redis的持久化的RDB方式
+RDB
+*优势：
+整个Redis数据库只包括一个硬盘文件
+性能最大化，启服务时只起几个子进程，定时写硬盘
+*劣势：
+无法满足数据高可用性，可能会丢失数据
+子进程来写硬盘，如果数据集过大的时候可能会影响主服务运行几百毫秒到一秒
+//redis.conf
+#   In the example below the behaviour will be to save:
+#   after 900 sec (15 min) if at least 1 key changed
+#   after 300 sec (5 min) if at least 10 keys changed
+#   after 60 sec if at least 10000 keys changed
+#
+#   Note: you can disable saving completely by commenting out all "save" lines.
+#
+#   It is also possible to remove all the previously configured save
+#   points by adding a save directive with a single empty string argument
+#   like in the following example:
+#
+#   save ""
+
+save 900 1
+save 300 10
+save 60 10000
+
+把这三行注释掉之后，再启动redis服务，则所有设置的值，只能作缓存用。
+在服务停掉之后，都会丢失掉了。
+//------------------------------------------------------------------------------------------------
+//9-3 Redis的持久化的AOF的方式
+AOF
+*优势：
+--每一秒写入日志
+--每次修改都写入日志：效率低，但是案例
+--不同步
+
+包含一个格式清晰，易于修改的日志文件
+
+*劣势：
+相同数据集，日志文件较RDB大
+效率低于RDB
+
+############################## APPEND ONLY MODE ###############################
+
+# By default Redis asynchronously dumps the dataset on disk. This mode is
+# good enough in many applications, but an issue with the Redis process or
+# a power outage may result into a few minutes of writes lost (depending on
+# the configured save points).
+#
+# The Append Only File is an alternative persistence mode that provides
+# much better durability. For instance using the default data fsync policy
+# (see later in the config file) Redis can lose just one second of writes in a
+# dramatic event like a server power outage, or a single write if something
+# wrong with the Redis process itself happens, but the operating system is
+# still running correctly.
+#
+# AOF and RDB persistence can be enabled at the same time without problems.
+# If the AOF is enabled on startup Redis will load the AOF, that is the file
+# with the better durability guarantees.
+#
+# Please check http://redis.io/topics/persistence for more information.
+
+appendonly no
+
+# The name of the append only file (default: "appendonly.aof")
+
+appendfilename "appendonly.aof"
+
+# The fsync() call tells the Operating System to actually write data on disk
+# instead of waiting for more data in the output buffer. Some OS will really flush
+# data on disk, some other OS will just try to do it ASAP.
+#
+# Redis supports three different modes:
+#
+# no: don't fsync, just let the OS flush the data when it wants. Faster.
+# always: fsync after every write to the append only log. Slow, Safest.
+# everysec: fsync only one time every second. Compromise.
+#
+# The default is "everysec", as that's usually the right compromise between
+# speed and data safety. It's up to you to understand if you can relax this to
+# "no" that will let the operating system flush the output buffer when
+# it wants, for better performances (but if you can live with the idea of
+# some data loss consider the default persistence mode that's snapshotting),
+# or on the contrary, use "always" that's very slow but a bit safer than
+# everysec.
+#
+# More details please check the following article:
+# http://antirez.com/post/redis-persistence-demystified.html
+#
+# If unsure, use "everysec".
+
+# appendfsync always
+appendfsync everysec
+# appendfsync no
+
+修改appendonly no为yes即开启了AOF持久化方式。另外建议将使用appendfsync always方式。
+
+可以修改生成的appendonly.aof文件，来修改持久化数据，当redis服务下次重启时，就会加载修改后日志文件数据。
+//------------------------------------------------------------------------------------------------
+//使用Jedis操作Redis样例 <https://blog.csdn.net/zmx729618/article/details/56670800>
+//JedisTest.java
+package com.imooc.jedis;
+
+import redis.clients.jedis.Jedis;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Test;
+
+public class JedisTest {
+    //1. 设置IP地址和端口
+    private Jedis jedis = new Jedis("192.168.100.128", 6379);
+
+    /**
+     * redis存储字符串
+     */
+    @Test
+    public void testString() {
+        //-----添加数据----------
+        jedis.set("name", "xinxin");//向key-->name中放入了value-->xinxin
+        System.out.println(jedis.get("name"));//执行结果：xinxin
+
+        jedis.append("name", " is my lover"); //拼接
+        System.out.println(jedis.get("name"));
+
+        jedis.del("name");  //删除某个键
+        System.out.println(jedis.get("name"));
+        //设置多个键值对
+        jedis.mset("name", "liuling", "age", "23", "qq", "476777XXX");
+        jedis.incr("age"); //进行加1操作
+        System.out.println(jedis.get("name") + "-" + jedis.get("age") + "-" + jedis.get("qq"));
+    }
+
+    /**
+     * redis操作Map
+     */
+    @Test
+    public void testMap() {
+        //-----添加数据----------
+        Map<String, String> map = new HashMap<>();
+        map.put("name", "xinxin");
+        map.put("age", "22");
+        map.put("qq", "123456");
+        jedis.hmset("user", map);
+        //取出user中的name，执行结果:[minxr]-->注意结果是一个泛型的List
+        //第一个参数是存入redis中map对象的key，后面跟的是放入map中的对象的key，后面的key可以跟多个，是可变参数
+        List<String> rsmap = jedis.hmget("user", "name", "age", "qq");
+        System.out.println(String.format("jedis.hmget(\"user\", \"name\", \"age\", \"qq\"): %s", rsmap));
+
+        System.out.println(String.format("jedis.exists(\"user\"): %b", jedis.exists("user")));//是否存在key为user的记录 返回true
+        //删除map中的某个键值
+        jedis.hdel("user", "age");
+        System.out.println(String.format("jedis.hexists(\"user\", \"age\"): %b", jedis.hexists("user", "age")));//user中是否包括age
+        System.out.println(String.format("jedis.hmget(\"user\", \"age\"): %s", jedis.hmget("user", "age"))); //因为删除了，所以返回的是null
+        System.out.println(String.format("jedis.hlen(\"user\"): %d", jedis.hlen("user"))); //返回key为user的键中存放的值的个数2
+        System.out.println(String.format("jedis.hkeys(\"user\"): %s", jedis.hkeys("user")));//返回map对象中的所有key
+        System.out.println(String.format("jedis.hvals(\"user\"): %s", jedis.hvals("user")));//返回map对象中的所有value
+
+        Iterator<String> iter = jedis.hkeys("user").iterator();
+        while (iter.hasNext()) {
+            String key = iter.next();
+            System.out.println("By hkeys set iterator: " + key + ":" + jedis.hmget("user", key));//hmget返回的是List，因为传入的是可变参数
+        }
+
+        Map<String, String> userMap = jedis.hgetAll("user");
+        for (Map.Entry<String, String> userEntry : userMap.entrySet()) {
+            System.out.println("By hgetAll map.entry: " + userEntry.getKey() + ":" + userEntry.getValue());
+        }
+    }
+    
+    /**
+     * jedis操作List
+     */
+    @Test
+    public void testList() {
+        //开始前，先移除所有的内容
+        jedis.del("java framework");
+        System.out.println(jedis.lrange("java framework", 0, -1));
+        //先向key java framework中存放三条数据
+        jedis.lpush("java framework", "spring");
+        jedis.lpush("java framework", "struts");
+        jedis.lpush("java framework", "hibernate");
+        //再取出所有数据jedis.lrange是按范围取出，
+        // 第一个是key，第二个是起始位置，第三个是结束位置，jedis.llen获取长度 -1表示取得所有
+        System.out.println(jedis.lrange("java framework", 0, -1));
+
+        jedis.del("java framework");
+        jedis.rpush("java framework", "spring");
+        jedis.rpush("java framework", "struts");
+        jedis.rpush("java framework", "hibernate");
+        System.out.println(jedis.lrange("java framework", 0, -1));
+
+        System.out.println(jedis.llen("java framework"));
+
+        System.out.println(jedis.type("java framework"));
+    }
+    
+    /**
+     * jedis操作Set
+     */
+    @Test
+    public void testSet() {
+        //添加
+        jedis.del("user");
+        jedis.sadd("user", "liuling");
+        jedis.sadd("user", "xinxin");
+        jedis.sadd("user", "ling");
+        jedis.sadd("user", "zhangxinxin");
+        jedis.sadd("user", "who");
+        //移除noname
+        jedis.srem("user", "who");
+        System.out.println(jedis.smembers("user"));//获取所有加入的value
+        System.out.println(jedis.sismember("user", "who"));//判断 who 是否是user集合的元素
+        System.out.println(String.format("srandmember: %s", jedis.srandmember("user")));
+        System.out.println(String.format("srandmember: %s", jedis.srandmember("user")));
+        System.out.println(jedis.scard("user"));//返回集合的元素个数
+    }
+
+    /**
+     * jedis排序
+     */
+    @Test
+    public void testSort() {
+        //注意，此处的rpush和lpush是List的操作。是一个双向链表（但从表现来看的）
+        jedis.del("a");//先清除数据，再加入数据进行测试
+        jedis.rpush("a", "1");
+        jedis.lpush("a", "6");
+        jedis.lpush("a", "3");
+        jedis.lpush("a", "9");
+        System.out.println(jedis.lrange("a", 0, -1));// [9, 3, 6, 1]
+        System.out.println(jedis.sort("a")); //[1, 3, 6, 9]  //输入排序后结果
+        System.out.println(jedis.lrange("a", 0, -1));
+    }
+}
+输出：
+//testString
+xinxin
+xinxin is my lover
+null
+liuling-24-476777XXX
+
+//testMap
+jedis.hmget("user", "name", "age", "qq"): [xinxin, 22, 123456]
+jedis.exists("user"): true
+jedis.hexists("user", "age"): false
+jedis.hmget("user", "age"): [null]
+jedis.hlen("user"): 2
+jedis.hkeys("user"): [qq, name]
+jedis.hvals("user"): [123456, xinxin]
+By hkeys set iterator: qq:[123456]
+By hkeys set iterator: name:[xinxin]
+By hgetAll map.entry: qq:123456
+By hgetAll map.entry: name:xinxin
+
+//testList
+[]
+[hibernate, struts, spring]
+[spring, struts, hibernate]
+3
+list
+
+//testSet
+[zhangxinxin, liuling, xinxin, ling]
+false
+srandmember: ling
+srandmember: liuling
+4
+
+//testSort
+[9, 3, 6, 1]
+[1, 3, 6, 9]
+[9, 3, 6, 1]
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
 //------------------------------------------------------------------------------------------------
 
 

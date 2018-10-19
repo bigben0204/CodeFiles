@@ -8881,8 +8881,180 @@ if __name__ == '__main__':
     clf3 = joblib.load('save/clf.pkl') #速度会更快些
     print(clf3.predict(X[0:1]))
 #-----------------------------------------------------------------------------------------
+# str.format https://www.cnblogs.com/Alexzzzz/p/6832253.html
+format方法被用于字符串的格式化输出。
+
+ print('{0}+{1}={2}'.format(1,2,1+2))   #in
+1+2=3   #out
+可见字符串中大括号内的数字分别对应着format的几个参数。
+
+若省略数字：
+print('{}+{}={}'.format(1,2,1+2))   #in
+可以得到同样的输出结果。但是替换顺序默认按照[0],[1],[2]...进行。
+
+若替换{0}和{1}：
+print('{1}+{0}={2}'.format(1,2,1+2))   #in
+2+1=3   #out
+
+输出字符串:
+print('{0} am {1}'.format('i','alex'))  
+i am alex   #out
+
+输出参数的值:
+length = 4
+name = 'alex'
+print('the length of {0} is {1}'.format(name,length))
+the length of alex is 4
+
+精度控制：
+print('{0:.3}'.format(1/3))
+0.333
+
+宽度控制：
+print('{0:7}{1:7}'.format('use','python'))
+use    python 
+
+精宽度控制(宽度内居左)：
+print('{0:<7.3}..'.format(1/3))   
+0.333  ..
+其实精宽度控制很类似于C中的printf函数。
+同理'>'为居右，'^'为居中。符号很形象。
+
+补全：
+#!/usr/bin/python
+#python3.6
+print('{0:0>3}'.format(1)) #居右，左边用0补全
+print('{0:{1}>3}'.format(1,0))  #也可以这么写
+#当输出中文使用空格补全的时候，系统会自动调用英文空格，这可能会造成不对齐
+#for example
+blog = {'1':'中国石油大学','2':'浙江大学','3':'南京航空航天大学'}
+print('不对齐：')
+print('{0:^4}\t\t{1:^8}'.format('序号','名称'))
+for no,name in blog.items(): #字典的items()方法返回一个键值对，分别赋值给no和name
+    print('{0:^4}\t\t{1:^8}'.format(no,name))
+print('\n对齐：')
+print('{0:^4}\t\t{1:{2}^8}'.format('序号','名称',chr(12288))) #chr(12288)为UTF-8中的中文空格
+for no,name in blog.items():
+    print('{0:^4}\t\t{1:{2}^8}'.format(no,name,chr(12288)))
+#out
+001
+001
+不对齐：
+ 序号              名称   
+ 1               中国石油大学 
+ 2                浙江大学  
+ 3              南京航空航天大学
+
+对齐：
+ 序号           　　　名称　　　
+ 1              　中国石油大学　
+ 2              　　浙江大学　　
+ 3              南京航空航天大学
+#-----------------------------------------------------------------------------------------
+# pdb调试 https://www.cnblogs.com/xiaohai2003ly/p/8529472.html
+#pytest.py
+def add(a, b):
+    return a + b
+
+s = '5'
+n = int(s)
+c = add(n, 10)
+print(c)
+
+Python 调试器之pdb
+使用PDB的方式有两种:
+1. 单步执行代码,通过命令 python -m pdb xxx.py 启动脚本，进入单步执行模式
+ pdb命令行：
+1）进入命令行Debug模式，python -m pdb xxx.py
+2）h：（help）帮助
+3）w：（where）打印当前执行堆栈
+4）d：（down）执行跳转到在当前堆栈的深一层（进入到下一个深层堆栈，可以理解为下一个函数）
+5）u：（up）执行跳转到当前堆栈的上一层（返回到上一层堆栈，可以理解为删除当前堆栈桢）
+6）b：（break）添加断点 （这里添加的断点，只要程序不退出，则断点一直存在，如果exit，或者q，则设置的断点会失效）
+             b 列出当前所有断点，和断点执行到统计次数
+             b line_no：当前脚本的line_no行添加断点
+             b filename:line_no：脚本filename的line_no行添加断点
+             b function：在函数function的第一条可执行语句处添加断点
+7）tbreak：（temporary break）临时断点
+             在第一次执行到这个断点之后，就自动删除这个断点，用法和b一样
+8）cl：（clear）清除断点
+            cl 清除所有断点
+            cl bpnumber1 bpnumber2... 清除断点号为bpnumber1,bpnumber2...的断点
+            cl lineno 清除当前脚本lineno行的断点
+            cl filename:line_no 清除脚本filename的line_no行的断点
+9）disable：停用断点，参数为bpnumber，和cl的区别是，断点依然存在，只是不启用
+10）enable：激活断点，参数为bpnumber
+11）s：（step）执行下一条命令 （执行下一条命令，如果下一句为函数，则会进入到函数中）
+            如果本句是函数调用，则s会执行到函数的第一句
+12）n：（next）执行下一条语句 （执行下一条命令，如果下一句为函数，则会执行完函数）
+            如果本句是函数调用，则执行函数，接着执行当前执行语句的下一条。
+13）r：（return）执行当前运行函数到结束 （已经走到当前函数的结束语句，无法再使用j linenumber来在当前函数内跳转了）
+14）c：（continue）继续执行，直到遇到下一条断点
+15）l：（list）列出源码 （还有ll语句）
+             l 列出当前执行语句周围11条代码
+             l first 列出first行周围11条代码
+             l first, second 列出first--second范围的代码，如果second<first，second将被解析为行数 （如l 10,15，将列出10到15行）
+16）a：（args）列出当前执行函数的函数
+17）p expression：（print）输出expression的值
+18）pp expression：好看一点的p expression
+19）run：重新启动debug，相当于restart
+20）q：（quit）退出debug
+21）j lineno：（jump）设置下条执行的语句函数 （单纯的跳转语句，可以跳转到执行过的语句来重新执行，也可以跳转到后续语句，则中间跳过的语句都会略过不执行）
+            只能在堆栈的最底层跳转，向后重新执行，向前可直接执行到行号
+22）unt：（until）执行到下一行（跳出循环），或者当前堆栈结束 （执行到特定语句，则接行号，如：unt 7，使用unt也可以执行到当前函数的最后一行，但是并没有走到函数结束语句，可以使用j linenumber来跳转）
+23）condition bpnumber conditon，给断点设置条件，当参数condition返回True的时候bpnumber断点有效，否则bpnumber断点无效 （只能在已设置的断点上增加条件，并且第2个参数是断点号，如：condition 3 a == 4，给3号断点增加条件a == 4时）
+
+注意：
+1：直接输入Enter，会执行上一条命令；
+2：输入PDB不认识的命令，PDB会把他当做Python语句在当前环境下执行；
 
 
+
+2. pdb单步执行太麻烦了，所以第二种方法是import pdb 之后，直接在代码里需要调试的地方放一个pdb.set_trace()，就可以设置一个断点， 程序会在pdb.set_trace()暂停并进入pdb调试环境，可以用pdb 变量名查看变量，或者c继续运行
+#pdbtest.py
+import pdb
+
+def add(a, b):
+    print("hello, world")
+    print("good day")
+    pdb.set_trace()
+    return a + b
+
+def loop(n):
+    i = 1
+    pdb.set_trace()
+    while (i < n):
+        m = i * i
+        print(m)
+        i += 1
+    print("i = {}".format(i))
+
+s = '2'
+n = int(s)
+c = add(n, 10)
+c += c
+loop(c)
+print(c)
+
+如果使用参数 -m pdb，则程序会进入调试模式，会进停止在第一行，并且程序运行过程中的print()信息不会显示出来：
+python -m pdb pdbtest.py
+
+如果不使用参数，则程序会直接正常运行，并且会停止在打了pdb.set_trace()的后一句，也会把程序中的print()信息正常输出到控制台：
+python pdbtest.py
+
+
+#https://blog.csdn.net/qq_21398167/article/details/52325464
+在调试的时候动态改变值 。在调试的时候可以动态改变变量的值，具体如下实例。需要注意的是下面有个错误，原因是 b 已经被赋值了，如果想重新改变 b 的赋值，则应该使用！ B。
+清单 9. 在调试的时候动态改变值
+[root@rcc-pok-idg-2255 ~]# python epdb2.py 
+ > /root/epdb2.py(10)?() 
+ -> b = "bbb"
+ (Pdb) var = "1234"
+ (Pdb) b = "avfe"
+ *** The specified object '= "avfe"' is not a function 
+ or was not found along sys.path. 
+ (Pdb) !b="afdfd"
+ (Pdb)
 #-----------------------------------------------------------------------------------------
 
 
