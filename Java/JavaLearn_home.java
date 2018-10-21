@@ -4240,6 +4240,57 @@ public class ThreeNPlusOneTransformerTest {
     }
 }
 //------------------------------------------------------------------------------------------------
+//Java 8的map，merge功能
+@Test
+public void testMapMerge() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("A", 1000);
+    map.put("B", 2000);
+    map.put("C", 3000);
+
+    // add new key value ("A",99), if key "A" exist in map then do function  "(X,Y) -> (Y+X)" ,the function return value will replace the oldvalue.
+    Integer newValue1 = map.merge("A", 99, (X, Y) -> (Y + X));
+    System.out.println(newValue1);
+
+    Integer newValue2 = map.merge("B", 666, (X, Y) -> Y);
+    System.out.println(newValue2);
+
+    Integer newValue3 = map.merge("D", 777, (X, Y) -> (Y + X));
+    System.out.println(newValue3);
+
+    System.out.println(map);
+}
+输出：
+1099
+666
+777
+{A=1099, B=666, C=3000, D=777}
+
+@Test
+public void testMapMerge2() {
+    Map<String, List<String>> map = new HashMap<>();
+    List<String> aList = new ArrayList<>();
+    aList.add("a");
+    //List<String> aList = Arrays.asList("a");//不能使用Arrays.asList，因为返回的List无法add值
+    map.put("A", aList);
+
+    List<String> bList = new ArrayList<>();
+    bList.add("b");
+    map.put("B", bList);
+
+    List<String> newAList = Arrays.asList("aa");
+    List newValue1 = map.merge("A", newAList, (strings, strings2) -> {
+        strings.addAll(strings2);
+        return strings;
+    });
+    System.out.println(newValue1);
+
+    System.out.println(map);
+}
+输出：
+[a, aa]
+{A=[a, aa], B=[b]}
+//------------------------------------------------------------------------------------------------
 //Java8 Stream API
 http://www.liaoxuefeng.com/article/001411309538536a1455df20d284b81a7bfa2f91db0f223000
 
