@@ -1,4 +1,174 @@
 //------------------------------------------------------------------------------------------------
+//有一个100G的文件每一行记录一个URL地址，只用一台只有1G内存的电脑，计算出哪个URL地址出现次数最多
+//MyFileReader.java
+package test;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MyFileReader {
+    private static final Map<Integer, FileWriter> INDEX_2_FILE_WRITER_MAP = new HashMap<>();
+    private static final Map<Integer, BufferedWriter> INDEX_2_BUFFERED_WRITER_MAP = new HashMap<>();
+    private static final String TXT_NAME = "%d.txt";
+
+    private int maxCount = Integer.MIN_VALUE;
+    private String maxLengthStr;
+
+    public void readAndWriteToFiles(String filePath, int fileNumber) {
+        try (
+            FileReader reader = new FileReader(filePath);
+            BufferedReader br = new BufferedReader(reader)) {
+            String str;
+            while ((str = br.readLine()) != null) {
+                int hashValue = str.hashCode();
+                int fileIndex = Math.abs(hashValue) % fileNumber; //hash值在超过Integer最大值时会反转，用abs取正值
+                writeToFile(str, fileIndex);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            closeWriters();
+        }
+    }
+
+    public String getMaxCountStr() {
+        INDEX_2_BUFFERED_WRITER_MAP.keySet().forEach(this::calcMaxLengthStr);
+        return maxLengthStr;
+    }
+
+    private void calcMaxLengthStr(Integer fileIndex) {
+        Map<String, Integer> strCountMap = getStrCountMap(fileIndex);
+        calcMaxLengthStrFromMap(strCountMap);
+    }
+
+    private void calcMaxLengthStrFromMap(Map<String, Integer> strCountMap) {
+        if (!strCountMap.isEmpty()) {
+            List<Map.Entry<String, Integer>> entries = new ArrayList(strCountMap.entrySet());
+            Collections.sort(entries, (o1, o2) -> (o2.getValue() - o1.getValue()));
+            Map.Entry<String, Integer> maxStrCountEntry = entries.get(0);
+            if (maxStrCountEntry.getValue() > maxCount) {
+                maxCount = maxStrCountEntry.getValue();
+                maxLengthStr = maxStrCountEntry.getKey();
+            }
+
+            entries.forEach(entry -> System.out.println(String.format("str: %s , count: %d", entry.getKey(), entry.getValue())));
+        }
+    }
+
+    private Map<String, Integer> getStrCountMap(Integer fileIndex) {
+        Map<String, Integer> strCountMap = new HashMap<>();
+        File file = new File(String.format(TXT_NAME, fileIndex));
+        try (
+            FileReader reader = new FileReader(file);
+            BufferedReader br = new BufferedReader(reader)) {
+            String str;
+            while ((str = br.readLine()) != null) {
+                strCountMap.merge(str, 1, (oldV, newV) -> oldV + newV);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+        return strCountMap;
+    }
+
+    private void closeWriters() {
+        INDEX_2_BUFFERED_WRITER_MAP.forEach(this::closeWriter);//如果这里用MyFileReader::closeWriter，则closeWriter方法需要为static
+        INDEX_2_FILE_WRITER_MAP.forEach(this::closeWriter);
+    }
+
+    private void closeWriter(Integer k, Writer writer) {
+        try {
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeToFile(String str, int fileIndex) throws IOException {
+        if (INDEX_2_BUFFERED_WRITER_MAP.containsKey(fileIndex)) {
+            INDEX_2_BUFFERED_WRITER_MAP.get(fileIndex).write(String.format("%s\n", str));
+        } else {
+            FileWriter fileWriter = new FileWriter(String.format(TXT_NAME, fileIndex));
+            INDEX_2_FILE_WRITER_MAP.put(fileIndex, fileWriter);
+
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            INDEX_2_BUFFERED_WRITER_MAP.put(fileIndex, bufferedWriter);
+
+            bufferedWriter.write(String.format("%s\n", str));
+        }
+    }
+}
+
+//MyFileReaderTest.java
+package test;
+
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.junit.Test;
+
+public class MyFileReaderTest {
+    @Test
+    public void testMyFileReader() throws URISyntaxException {
+        URL url = this.getClass().getClassLoader().getResource("Urls.txt");
+        MyFileReader myFileReader = new MyFileReader();
+        myFileReader.readAndWriteToFiles(url.toURI().getPath(), 10);
+        String maxCountStr = myFileReader.getMaxCountStr();
+        System.out.printf("MaxCountStr: %s%n", maxCountStr);
+    }
+}
+
+//Urls.txt （位于src/test/resources/Urls.txt）
+https://blog.csdn.net/woliuyunyicai/article/details/48489525
+https://blog.csdn.net/chenze666/article/details/78332397
+https://www.cnblogs.com/youilika/p/4998402.html
+https://blog.csdn.net/woliuyunyicai/article/details/48489525
+https://blog.csdn.net/chenze666/article/details/78332397
+https://blog.csdn.net/woliuyunyicai/article/details/48489525
+https://www.cnblogs.com/go-onxp/p/jdk8.html
+https://www.baidu.com/s?ie=UTF-8&wd=java%20map.foreah
+https://blog.csdn.net/wohaqiyi/article/details/79179600
+https://www.imooc.com/u/6424054/courses
+https://www.cnblogs.com/go-onxp/p/jdk8.html
+https://blog.csdn.net/wohaqiyi/article/details/79179600
+https://www.baidu.com/s?ie=UTF-8&wd=java%20%E5%90%8C%E6%97%B6%E8%A6%81%E5%86%99%E5%BE%88%E5%A4%9A%E6%96%87%E4%BB%B6
+https://www.imooc.com/u/6424054/courses
+https://blog.csdn.net/wohaqiyi/article/details/79179600
+https://www.imooc.com/
+https://blog.csdn.net/wohaqiyi/article/details/79179600
+https://www.cnblogs.com/go-onxp/p/jdk8.html
+
+输出：
+str: https://www.baidu.com/s?ie=UTF-8&wd=java%20map.foreah , count: 1
+str: https://www.baidu.com/s?ie=UTF-8&wd=java%20%E5%90%8C%E6%97%B6%E8%A6%81%E5%86%99%E5%BE%88%E5%A4%9A%E6%96%87%E4%BB%B6 , count: 1
+str: https://www.cnblogs.com/go-onxp/p/jdk8.html , count: 3
+str: https://www.cnblogs.com/youilika/p/4998402.html , count: 1
+str: https://blog.csdn.net/chenze666/article/details/78332397 , count: 2
+str: https://www.imooc.com/u/6424054/courses , count: 2
+str: https://www.imooc.com/ , count: 1
+str: https://blog.csdn.net/wohaqiyi/article/details/79179600 , count: 4
+str: https://blog.csdn.net/woliuyunyicai/article/details/48489525 , count: 3
+MaxCountStr: https://blog.csdn.net/wohaqiyi/article/details/79179600
+//------------------------------------------------------------------------------------------------
 //leetcode 1
 package leetcode;
 
@@ -46036,23 +46206,95 @@ srandmember: liuling
 [1, 3, 6, 9]
 [9, 3, 6, 1]
 //------------------------------------------------------------------------------------------------
+//IntelliJ Idea 使用技巧 
+//1-2 神器初试 https://www.imooc.com/video/16212
+//15秒内完成main函数编码
+import java.util.Date;
 
-
+public class Main {
+    public static void main(String[] args) {
+        for (int i = 0; i < 100; i++) {
+            System.out.println(new Date());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
 //------------------------------------------------------------------------------------------------
+//IntelliJ Idea 使用技巧 
+//3-1 列操作 https://www.imooc.com/video/16218
 
+public enum Status {
+    // 1xx Informational
+    100: "Continue"
+    102: "Processing"
+    103: "Checkpoint"
 
+    // 2xx Success
+    200: "OK"
+    201: "Created"
+    202: "Accepted"
+
+    private int code;
+
+    Status(int code) {
+        this.code = code;
+    }
+}
+修改后效果：
+public enum Status {
+    // 1xx Informational
+    CONTINUE(100),
+    PROCESSING(102),
+    CHECKPOINT(103),
+
+    // 2xx Success
+    OK(200),
+    CREATED(201),
+    ACCEPTED(202);
+
+    private int code;
+
+    Status(int code) {
+        this.code = code;
+    }
+}
 //------------------------------------------------------------------------------------------------
-
-
+//IntelliJ Idea 使用技巧 
+//3-3 postfix https://www.imooc.com/video/16220
+常用：
+.fori
+.sout
+.field
+.try
+.return
+.nn
+.format
+.var
+.iter
 //------------------------------------------------------------------------------------------------
-
-
+//IntelliJ Idea 使用技巧 
+//3-4 alter enter https://www.imooc.com/video/16221
+String name = "zhangsan";
+int age = 24;
+"name: " + name + ", age: " + age.sout -> System.out.println("name: " + name + ", age: " + age);
+System.out.println("name: " + name + ", age: " + age); (alter + enter: Replace '+' with String.format()) -> System.out.printf("name: %s, age: %d%n", name, age);
 //------------------------------------------------------------------------------------------------
-
-
+//IntelliJ Idea 使用技巧 
+//8-1 文件操作
+ctrl + alt + insert ：在当前目录中创建新文件...
 //------------------------------------------------------------------------------------------------
-
-
+//IntelliJ Idea 使用技巧 
+//8-2 文本操作
+ctrl + c ：在文件上即可复制文件名
+//------------------------------------------------------------------------------------------------
+//IntelliJ Idea 使用技巧 
+//8-3 结构图 https://www.imooc.com/video/16232
+ctrl + h : 查看类的层级
+ctrl + alt + h ：查看函数调用层次
 //------------------------------------------------------------------------------------------------
 
 
