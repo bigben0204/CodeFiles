@@ -133,7 +133,7 @@ public class MyFileReaderTest {
         MyFileReader myFileReader = new MyFileReader();
         myFileReader.readAndWriteToFiles(url.toURI().getPath(), 10);
         String maxCountStr = myFileReader.getMaxCountStr();
-        System.out.printf("MaxCountStr: %s%n", maxCountStr);
+        System.out.printf(String.format("MaxCountStr: %s", maxCountStr));
     }
 }
 
@@ -46275,6 +46275,7 @@ public enum Status {
 .format
 .var
 .iter
+.if
 //------------------------------------------------------------------------------------------------
 //IntelliJ Idea 使用技巧 
 //3-4 alter enter https://www.imooc.com/video/16221
@@ -46296,17 +46297,220 @@ ctrl + c ：在文件上即可复制文件名
 ctrl + h : 查看类的层级
 ctrl + alt + h ：查看函数调用层次
 //------------------------------------------------------------------------------------------------
+//Spring Boot 2.0深度实践
+//1-2 Spring Boot的角色 https://www.imooc.com/video/16347
+Spring Framework -> Spring Boot -> Spring Cloud
+//------------------------------------------------------------------------------------------------
+//Spring Boot 2.0深度实践
+//2-2 第一个Spring Boot应用（一） https://www.imooc.com/video/16351
+通过https://start.spring.io/ 生成一个Spring Boot工程
 
+*编写REST程序
+*运行Spring Boot应用
+*使用HTTP请求工具：PostMan
+
+场景说明：
+*定义用户模型，包括属性：用户ID和名称
+*客户端发送POST请求，创建用户（Web MVC）
+*客户端发送GET请求，获取所有用户（Web Flux）
+
+//User.java
+package com.imooc.firstappdemo.domain;
+
+/**
+ * 用户模型
+ */
+public class User {
+    private int id;
+    private String name;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            '}';
+    }
+}
+
+//UserRepository.java
+package com.imooc.firstappdemo.repository;
+
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.stereotype.Repository;
+
+import com.imooc.firstappdemo.domain.User;
+
+/**
+ * {@link User} {@link Repository}
+ */
+@Repository
+public class UserRepository {
+
+    /**
+     * 采用内存型的存储方式 -> Map
+     */
+    private final ConcurrentMap<Integer, User> repository = new ConcurrentHashMap<>();
+
+    private final static AtomicInteger idGenerator = new AtomicInteger();
+
+    /**
+     * 保存用户对象
+     * @param user {@link User} 对象
+     * @return 如果保存成功，返回<code>true</code>
+     *          否则，返回<code>false</code>
+     */
+    public boolean save(User user) {
+        //ID 从1开始
+        Integer id = idGenerator.incrementAndGet();
+        //设置 ID
+        user.setId(id);
+        return repository.put(id, user) == null;
+    }
+
+    public Collection<User> findAll() {
+        return repository.values();
+    }
+}
+
+
+//UserController.java
+package com.imooc.firstappdemo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.firstappdemo.domain.User;
+import com.imooc.firstappdemo.repository.UserRepository;
+
+@RestController
+public class UserController {
+
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @PostMapping("/person/save")
+    public User save(@RequestParam String name) {
+        User user = new User();
+        user.setName(name);
+        if (userRepository.save(user)) {
+            System.out.println(String.format("用户对象: %s 保存成功！", user));
+        }
+        return user;
+    }
+}
+
+//RouterFunctionConfiguration.java
+package com.imooc.firstappdemo.config;
+
+import reactor.core.publisher.Flux;
+
+import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.server.RequestPredicates;
+import org.springframework.web.reactive.function.server.RouterFunction;
+import org.springframework.web.reactive.function.server.RouterFunctions;
+import org.springframework.web.reactive.function.server.ServerResponse;
+
+import com.imooc.firstappdemo.domain.User;
+import com.imooc.firstappdemo.repository.UserRepository;
+
+/**
+ * 路由器函数配置
+ */
+@Configuration //逐一替换xml配置文件
+public class RouterFunctionConfiguration {
+
+    /**
+     * Servlet
+     * 请求接口：ServletRequest 或者 HttpServletRequest
+     * 响应接口：ServletResponse 或者 HttpServletResponse
+     * Spring 5.0 重新定义了服务请求和响应接口：
+     * 请求接口：ServerRequest
+     * 响应接口：ServerResponse
+     * 既可支持Servlet规范，也可以支持自定义，比如Netty (Web Server)
+     * 以本例：
+     * 定义GET请求，并且返回所有的用户对象 URL: /person/find/all
+     * Flux是0 - N个对象集合
+     * Mono是0 - 1个对象集合
+     * Reactive中的Flux或者Mono，它是异步处理（非阻塞）
+     * 集合对象基本上是同步处理（阻塞）
+     * Flux 或者 Mono都是Publisher
+     */
+    @Bean
+    @Autowired //方法参数注入、Property注入（set/get）、参数注入、构造器注入
+    public RouterFunction<ServerResponse> personFindAll(UserRepository userRepository) {
+        return RouterFunctions.route(RequestPredicates.GET("/person/find/all"),
+            request -> {
+                //返回所有用户对象
+                Collection<User> users = userRepository.findAll();
+                Flux<User> userFlux = Flux.fromIterable(users);
+                return ServerResponse.ok().body(userFlux, User.class);
+            });
+    }
+
+}
 
 //------------------------------------------------------------------------------------------------
-
-
+//Spring Boot 2.0深度实践
+//2-3 第一个Spring Boot应用（二）https://www.imooc.com/video/16352
+使用Postman测试POST请求：
+http://localhost:8080/person/save 将会得到400 Bad Request
+http://localhost:8080/person/save?name=bigben 使用post正常返回，调用到了java端
+{
+    "id": 1,
+    "name": "bigben"
+}
+http://localhost:8080/person/save?name=yan 使用post正常返回，调用到了java端
+{
+    "id": 2,
+    "name": "yan"
+}
 //------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
-
+//Spring Boot 2.0深度实践
+//2-4 第一个Spring Boot应用（三）https://www.imooc.com/video/16353
+使用Postman测试GET请求：
+http://localhost:8080/person/find/all
+返回：
+[
+    {
+        "id": 1,
+        "name": "bigben"
+    },
+    {
+        "id": 2,
+        "name": "yan"
+    }
+]
 //------------------------------------------------------------------------------------------------
 
 
