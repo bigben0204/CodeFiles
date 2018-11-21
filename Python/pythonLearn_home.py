@@ -77,6 +77,80 @@ from openpyxl import load_workbook
 wb = load_workbook(filename = r'empty_book.xlsx')
 sheet_ranges = wb.get_sheet_by_name(name = 'range names')
 print sheet_ranges.cell('D18').value # D18	
+
+
+#单元格样式设置
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, Border, Side, Alignment
+
+if __name__ == '__main__':
+    # https://www.cnblogs.com/BlueSkyyj/p/7571787.html
+    # https://blog.csdn.net/weixin_41595432/article/details/79349995
+    # https://www.cnblogs.com/Unikfox/p/9124767.html
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "我的页签"
+
+    ws.cell(row=1, column=1).value = 99
+    ws.cell(row=2, column=1, value=100)
+    ws['A3'] = 4  # write
+    ws['A4'] = "这里是单元格"
+    ws.append(['This is A1', 'This is B1', 'This is C1'])
+    ws.append({'A': 'This is A1', 'C': 'This is C1'})
+    ws.append({1: 'This is A1', 3: 'This is C1'})
+
+    # 设置单元格字体
+    font1 = Font(name='Arial',
+                 size=20,
+                 bold=True,
+                 italic=False,
+                 vertAlign=None,
+                 underline='none',
+                 strike=False,
+                 color='FF000000')
+    ws['A3'].font = font1
+    ws['A4'].font = font1
+    ws['A5'].font = font1
+    # row = ws.row_dimensions[6]
+    # row.font = font
+
+    # 设置单元格边框
+    border = Border(left=Side(border_style='thin',
+                              color='FF000000'),
+                    right=Side(border_style='thin',
+                               color='FF000000'),
+                    top=Side(border_style='thick',
+                             color='FF000000'),
+                    bottom=Side(border_style='thick',
+                                color='FF000000'))
+    ws['A3'].border = border
+
+    #设置对齐方式
+    alignment1 = Alignment(horizontal='right',
+                           vertical='bottom',
+                           text_rotation=0,
+                           wrap_text=True,
+                           shrink_to_fit=False,
+                           indent=0)
+    ws['B5'].alignment = alignment1
+
+    alignment2 = Alignment(horizontal='left',
+                           vertical='center',
+                           text_rotation=0,
+                           wrap_text=True,
+                           shrink_to_fit=False,
+                           indent=0)
+    ws['C5'].alignment = alignment2
+
+    # 设置行高和列宽
+    ws.row_dimensions[6].height = 50
+    ws.column_dimensions['C'].width = 100
+
+    wb.save(filename="testExcel.xlsx")
 #-----------------------------------------------------------------------------------------
 #from openpyxl import Workbook
 from openpyxl import load_workbook
