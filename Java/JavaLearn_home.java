@@ -46364,7 +46364,7 @@ import com.imooc.firstappdemo.domain.User;
 /**
  * {@link User} {@link Repository}
  */
-@Repository
+@Repository //@Repository即以Bean对象构造UserRepository，并完成在UserController中的变量注入
 public class UserRepository {
 
     /**
@@ -46477,9 +46477,76 @@ public class RouterFunctionConfiguration {
                 return ServerResponse.ok().body(userFlux, User.class);
             });
     }
-
 }
 
+//FirstAppDemoApplication.java
+package com.imooc.firstappdemo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class FirstAppDemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(FirstAppDemoApplication.class, args);
+    }
+}
+
+//pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.imooc</groupId>
+	<artifactId>first-app-demo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>first-app-demo</name>
+	<description>Demo project for Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.0.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>
 //------------------------------------------------------------------------------------------------
 //Spring Boot 2.0深度实践
 //2-3 第一个Spring Boot应用（二）https://www.imooc.com/video/16352
@@ -46512,17 +46579,321 @@ http://localhost:8080/person/find/all
     }
 ]
 //------------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------------
-
+//Spring Boot 2.0深度实践
+//3-1 Spring Boot构建应用-命令行方式 https://www.imooc.com/video/16355
 
 //------------------------------------------------------------------------------------------------
+//Spring Boot 2.0深度实践
+//3-2 Spring Boot多模块 Srping Boot项目 https://www.imooc.com/video/16354
+重构
+*调整主（父）工程类型（<packaging>）
+*创建子模块工程（<module>）
+    *模型层：model
+    *持久层：persistence
+    *表示层：web
+*子模块依赖管理（<dependencyManagement>）
 
+//first-app-demo pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
+	<groupId>com.imooc</groupId>
+	<artifactId>first-app-demo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<modules>
+		<module>web</module>
+		<module>persistence</module>
+        <module>model</module>
+    </modules>
+
+	<!--修改成pom-->
+	<!--
+		模型层：model
+		持久层：persistence
+		表示层：web
+		web 依赖于 persistence，persistence 依赖于 model
+		web UserController -> UserRepository -> User
+	-->
+	<packaging>pom</packaging>
+
+	<name>first-app-demo</name>
+	<description>Demo project for Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.1.0.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+
+//web module
+//保留RouterFunctionConfiguration.java
+//保留FirstAppDemoApplication.java
+//web pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>first-app-demo</artifactId>
+        <groupId>com.imooc</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>web</artifactId>
+
+    <dependencies>
+        <!--增加了这个persistence依赖后，UserController依赖UserRepository，才不会报错-->
+        <dependency>
+            <groupId>com.imooc</groupId>
+            <artifactId>persistence</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>
+
+//persistence module
+//保留UserRepository.java
+//persistence pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>first-app-demo</artifactId>
+        <groupId>com.imooc</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>persistence</artifactId>
+
+    <dependencies>
+        <!--增加了这个model依赖后，UserRepository依赖User，才不会报错-->
+        <dependency>
+            <groupId>com.imooc</groupId>
+            <artifactId>model</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+</project>
+
+//model module
+//保留User.java
+//model pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>first-app-demo</artifactId>
+        <groupId>com.imooc</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>model</artifactId>
+</project>
 //------------------------------------------------------------------------------------------------
+//Spring Boot 2.0深度实践
+//3-3 Spring Boot项目打包 https://www.imooc.com/video/16356
+打包方式：
+*构建JAR包
+*构建WAR包
+指定Main-Class
 
+//生成jar包方式：
+cmd中执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean package
+第一次执行会报错：
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.1.0.RELEASE:repackage (repackage) on project model: Execution repackage of goal org.springframework.boot:spring-boot-maven-plugin:2.1.0.RELEASE:repackage failed: Unable to find main class -> [Help 1]
 
+在first-app-demo的pom.xml中build中增加configuration的mainClass：
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <mainClass>com.imooc.firstappdemo.FirstAppDemoApplication</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+第二次执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean package
+又报错：
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project persistence: Compilation failure: Compilation failure:
+[ERROR] /E:/Program Files/JetBrains/JavaProject/first-app-demo/persistence/src/main/java/com/imooc/firstappdemo/repository/UserRepository.java:[10,37] 程序包com.imooc.firstappdemo.domain不存在
+[ERROR] /E:/Program Files/JetBrains/JavaProject/first-app-demo/persistence/src/main/java/com/imooc/firstappdemo/repository/UserRepository.java:[21,42] 找不到符号
+[ERROR]   符号:   类 User
+[ERROR]   位置: 类 com.imooc.firstappdemo.repository.UserRepository
+[ERROR] /E:/Program Files/JetBrains/JavaProject/first-app-demo/persistence/src/main/java/com/imooc/firstappdemo/repository/UserRepository.java:[31,25] 找不到符号
+[ERROR]   符号:   类 User
+[ERROR]   位置: 类 com.imooc.firstappdemo.repository.UserRepository
+[ERROR] /E:/Program Files/JetBrains/JavaProject/first-app-demo/persistence/src/main/java/com/imooc/firstappdemo/repository/UserRepository.java:[39,23] 找不到符号
+[ERROR]   符号:   类 User
+[ERROR]   位置: 类 com.imooc.firstappdemo.repository.UserRepository
+[ERROR] -> [Help 1]
+
+在first-app-demo的pom.xml中build中再增加dependencies：
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <dependencies>
+                <dependency>
+                    <groupId>com.imooc</groupId>
+                    <artifactId>model</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                </dependency>
+            </dependencies>
+            <configuration>
+                <mainClass>com.imooc.firstappdemo.FirstAppDemoApplication</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+第三次执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean package
+又报错：
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.1.0.RELEASE:repackage (repackage) on project first-app-demo: Execution repackage of goal org.springframework.boot:spring-boot-maven-plugin:2.1.0.RELEASE:repackage failed: Plugin org.springframework.boot:spring-boot-maven-plugin:2.1.0.RELEASE or one of its dependencies could not be resolved: Could not find artifact com.imooc:model:jar:0.0.1-SNAPSHOT -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginResolutionException
+
+将mvn -Dmaven.test.skip -U clean package修改为mvn -Dmaven.test.skip -U clean install依旧报错。（install是将jar包先放入本地仓储）
+
+换种方式，将first-app-demo的pom.xml中build节点放入web的pom.xml中：
+//web pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>first-app-demo</artifactId>
+        <groupId>com.imooc</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>web</artifactId>
+
+    <dependencies>
+        <!--增加了这个persistence依赖后，UserController依赖UserRepository，才不会报错-->
+        <dependency>
+            <groupId>com.imooc</groupId>
+            <artifactId>persistence</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.imooc</groupId>
+                        <artifactId>model</artifactId>
+                        <version>0.0.1-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <mainClass>com.imooc.firstappdemo.FirstAppDemoApplication</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+再次执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean package
+显示make成功。
+
+进入web/target目录，执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo\web\target>java -jar web-0.0.1-SNAPSHOT.jar
+可使用POSTMAN正常访问。
+
+//修改为war包方式：
+修改生成jar包为war包，在web pom.xml中增加如下：
+<!--将packaging值（默认：jar）调整成 war-->
+<packaging>war</packaging>
+
+再次执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean package
+报错：
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-war-plugin:3.2.2:war (default-war) on project web: Error assembling WAR: webxml attribute is required (or pre-existing WEB-INF/web.xml if executing in update mode) -> [Help 1]
+
+需要符合maven war包规范，增加如下web.xml：
+E:\Program Files\JetBrains\JavaProject\first-app-demo\web\src\main\webapp\WEB-INF\web.xml
+再次执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean package
+即可执行成功。
+
+进入web/target目录，执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo\web\target>java -jar web-0.0.1-SNAPSHOT.war
+可使用POSTMAN正常访问。
+//------------------------------------------------------------------------------------------------
+//Spring Boot 2.0深度实践
+//3-4 Spring Boot运行模式 https://www.imooc.com/video/16357
+模式类型：
+*IDEA方式：开发环境开发和调试
+*JAR/WAR方式：生产环境启动和运行
+*Maven插件方式：没有图形界面时，命令行运行
+
+执行如下命令：
+E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U clean install
+执行成功，并可以看到，把生成的war包放到maven仓储：
+[INFO] Installing E:\Program Files\JetBrains\JavaProject\first-app-demo\web\target\web-0.0.1-SNAPSHOT.war to E:\Program Files\JetBrains\JavaProject\Maven\repository\com\imooc\web\0.0.1-SNAPSHOT\web-0.0.1-SNAPSHOT.war
+[INFO] Installing E:\Program Files\JetBrains\JavaProject\first-app-demo\web\pom.xml to E:\Program Files\JetBrains\JavaProject\Maven\repository\com\imooc\web\0.0.1-SNAPSHOT\web-0.0.1-SNAPSHOT.pom
+
+执行如下命令可以直接启动application：
+E:\Program Files\JetBrains\JavaProject\first-app-demo\web>mvn spring-boot:run
 //------------------------------------------------------------------------------------------------
 
 

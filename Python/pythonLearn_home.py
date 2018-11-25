@@ -98,7 +98,7 @@ if __name__ == '__main__':
     ws.cell(row=1, column=1).value = 99
     ws.cell(row=2, column=1, value=100)
     ws['A3'] = 4  # write
-    ws['A4'] = "这里是单元格"
+    ws['A4'] = u"这里是单元格"
     ws.append(['This is A1', 'This is B1', 'This is C1'])
     ws.append({'A': 'This is A1', 'C': 'This is C1'})
     ws.append({1: 'This is A1', 3: 'This is C1'})
