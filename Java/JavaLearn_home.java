@@ -34067,7 +34067,7 @@ AfterReturning: Return value: This is a test.
 @perthis @pertarget
 //------------------------------------------------------------------------------------------------
 Jdbc连接数据库 https://www.cnblogs.com/GarfieldEr007/p/5746137.html
-//
+//DbHelper.java
 package jdbc;
 
 import java.sql.Connection;
@@ -34106,7 +34106,7 @@ public class DbHelper {
     }
 }
 
-//
+//JdbcConnection.java
 package jdbc;
 
 import java.sql.ResultSet;
@@ -34119,7 +34119,7 @@ public class JdbcConnection {
     static ResultSet ret = null;
 
     public static void main(String[] args) {
-        sql = "select *from t_students_copy1";//SQL语句
+        sql = "select * from t_students_copy1";//SQL语句
         db1 = new DbHelper(sql);//创建DBHelper对象
 
         try {
@@ -46894,6 +46894,1227 @@ E:\Program Files\JetBrains\JavaProject\first-app-demo>mvn -Dmaven.test.skip -U c
 
 执行如下命令可以直接启动application：
 E:\Program Files\JetBrains\JavaProject\first-app-demo\web>mvn spring-boot:run
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//1-1 SpringBoot简介 https://www.imooc.com/video/16783
+使用场景：
+*有Spring的地方都行
+*J2EE/web项目
+*微服务
+
+源代码：https://github.com/leechenxiang/imooc-springboot-starter
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//3-1 SpringBoot 构造并返回一个json对象 https://www.imooc.com/video/16786
+//ImoocApplication.java
+package com.imooc;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ImoocApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ImoocApplication.class, args);
+	}
+}
+
+//UserController.java
+package com.imooc.controller;
+
+import java.util.Date;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.pojo.IMoocJSONResult;
+import com.imooc.pojo.User;
+
+//@Controller //SpringMVC方式
+@RestController // @RestController = @Controller + @ResponseBody
+@RequestMapping("/user")
+public class UserController {
+
+    @RequestMapping("/getUser") //这里如果仍使用hello，则提示已经在HelloController中已经有hello映射，需要改为另外的映射名称
+//    @ResponseBody //表明返回的对象都是是Json字符串或是Json对象，类使用@Controller，则这里必须加@ResponseBody；如果类使用@RestController，则这里不用加
+    public User getUser() { //函数名称可以随意定，与@RequestMapping里的映射名称没有关系
+        User user = new User();
+        user.setName("imooc");
+        user.setAge(18);
+        user.setBirthday(new Date());
+        user.setPassword("imooc");
+//        user.setDesc(null);//不设置则为null
+        return user;
+    }
+
+    @RequestMapping("/getUserJson") //这里如果仍使用hello，则提示已经在HelloController中已经有hello映射，需要改为另外的映射名称
+//    @ResponseBody //表明返回的对象都是是Json字符串或是Json对象，类使用@Controller，则这里必须加@ResponseBody；如果类使用@RestController，则这里不用加
+    public IMoocJSONResult getUserJson() { //函数名称可以随意定，与@RequestMapping里的映射名称没有关系
+        User user = new User();
+        user.setName("imooc");
+        user.setAge(18);
+        user.setBirthday(new Date());
+        user.setPassword("imooc");
+//        user.setDesc(null);//不设置则为null
+        return IMoocJSONResult.ok(user);
+    }
+}
+
+//HelloController.java
+package com.imooc.controller;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+
+    @RequestMapping("/hello")
+    public Object hello() {
+        return "hello springboot~~";
+    }
+}
+
+使用http://localhost:8080/user/getUser 访问
+Response：
+{
+"status": 200,
+"msg": "OK",
+"data":{
+"name": "imooc",
+"password": "imooc",
+"age": 18,
+"birthday": "2018-12-02T06:35:32.126+0000",
+"desc": null
+},
+"ok": null
+}
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//3-2 Jackson基本演绎法 https://www.imooc.com/video/16787
+
+//通过注释控制Json对象的显示控制
+package com.imooc.pojo;
+
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+public class User {
+    private String name;
+
+    @JsonIgnore
+    private String password;
+    private Integer age;
+    @JsonFormat(pattern="yyyy-MM-dd a hh:mm:ss", locale="zh", timezone="GMT+8")
+    private Date birthday;
+
+    @JsonInclude(Include.NON_NULL)
+    private String desc;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+}
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//4-1 SpringBoot 使用devtools进行热部署 https://www.imooc.com/video/16717
+
+//pom.xml
+<!-- 热部署 -->
+<!-- devtools可以实现页面热部署（即页面修改后会立即生效，
+    这个可以直接在application.properties文件中配置spring.thymeleaf.cache=false来实现） -->
+<!-- 实现类文件热部署（类文件修改后不会立即生效），实现对属性文件的热部署。 -->
+<!-- 即devtools会监听classpath下的文件变动，并且会立即重启应用（发生在保存时机），
+    注意：因为其采用的虚拟机机制，该项重启是很快的 -->
+<!-- （1）base classloader （Base类加载器）：加载不改变的Class，例如：第三方提供的jar包。 -->
+<!-- （2）restart classloader（Restart类加载器）：加载正在开发的Class。 -->
+<!-- 为什么重启很快，因为重启的时候只是加载了在开发的Class，没有重新加载第三方的jar包。 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <!-- optional=true, 依赖不会传递, 该项目依赖devtools;
+        之后依赖boot项目的项目如果想要使用devtools, 需要重新引入 -->
+    <optional>true</optional>
+</dependency>
+
+//application.properties
+#关闭缓存, 即时刷新
+#spring.freemarker.cache=false
+spring.thymeleaf.cache=true
+
+#热部署生效
+spring.devtools.restart.enabled=true
+#设置重启的目录,添加那个目录的文件需要restart
+spring.devtools.restart.additional-paths=src/main/java
+# 为mybatis设置，生产环境可删除
+#restart.include.mapper=/mapper-[\\w-\\.]+jar
+#restart.include.pagehelper=/pagehelper-[\\w-\\.]+jar
+##排除那个目录的文件不需要restart
+##spring.devtools.restart.exclude=static/**,public/**
+##classpath目录下的WEB-INF文件夹内容修改不重启
+##spring.devtools.restart.exclude=WEB-INF/**        */
+
+需要依赖Idea的自动编译，编出class文件，才能实现热部署：https://blog.csdn.net/java_zhaoyu/article/details/81940407?utm_source=blogxgwz7
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//5-1 SpringBoot 资源文件属性配置 https://www.imooc.com/video/16718
+*资源文件中的属性配置与映射到实体类
+
+//resource.properties
+com.imooc.opensource.name=imooc
+com.imooc.opensource.website=www.imooc.com
+com.imooc.opensource.language=java
+
+//Resource.java
+package com.imooc.pojo;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+
+@Configuration
+@ConfigurationProperties(prefix = "com.imooc.opensource")
+@PropertySource(value = "classpath:resource.properties")
+public class Resource {
+    private String name;
+    private String website;
+    private String language;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+}
+
+//HelloController.java
+package com.imooc.controller;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.pojo.IMoocJSONResult;
+import com.imooc.pojo.Resource;
+
+@RestController
+public class HelloController {
+
+    @Autowired
+    private Resource resource;
+
+    @RequestMapping("/hello")
+    public Object hello() {
+        return "hello springboot~~";
+    }
+
+    @RequestMapping("/getResource")
+    public IMoocJSONResult getResource() {
+        Resource bean = new Resource();
+        BeanUtils.copyProperties(resource, bean);
+        return IMoocJSONResult.ok(bean);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//5-2 SpringBoot 资源文件配置server https://www.imooc.com/video/16719
+*资源文件中配置tomcat相关属性
+
+############################################################
+#
+# Server 服务端相关配置
+#
+############################################################
+# 配置api端口号
+server.port=8088
+# 配置context-path, 一般来说这个配置在正式发布的时候不配置
+#server.context-path=/IMooc server.context-path已经被废弃
+server.servlet.context-path=/IMooc
+# 错误页，指定发生错误时，跳转的URL --> BasicErrorController
+#server.error.path=/error
+# session最大超时时间(分钟)，默认为30分钟
+server.session-timeout=60
+# 该服务绑定IP地址，启动服务器时如本机不是该IP地址则抛出异常启动失败,
+# 只有特殊需求的情况下才配置, 具体根据各自的业务来设置 查看本地IP后，使用http://192.168.100.102:8088/IMooc/hello访问
+#server.address=192.168.100.102
+
+############################################################
+# Server - tomcat 相关常用配置
+############################################################
+# tomcat最大线程数, 默认为200
+#server.tomcat.max-threads=250
+# tomcat的URI编码
+server.tomcat.uri-encoding=UTF-8
+# 存放Tomcat的日志、Dump等文件的临时文件夹，默认为系统的tmp文件夹
+#（如：C:\Users\Shanhy\AppData\Local\Temp）
+#server.tomcat.basedir=H:/springboot-tomcat-tmp
+# 打开Tomcat的Access日志，并可以设置日志格式的方法：
+#server.tomcat.access-log-enabled=true
+#server.tomcat.access-log-pattern=
+# accesslog目录，默认在basedir/logs
+#server.tomcat.accesslog.directory=
+# 日志文件目录
+#logging.path=H:/springboot-tomcat-tmp
+# 日志文件名称，默认为spring.log
+#logging.file=myapp.log
+
+E:\Program Files\Apache Maven\apache-maven-repository\org\springframework\boot\spring-boot-autoconfigure\2.1.1.RELEASE\spring-boot-autoconfigure-2.1.1.RELEASE.jar!\META-INF\spring-configuration-metadata.json
+中可以看到：
+{
+  "name": "server.context-path",
+  "type": "java.lang.String",
+  "description": "Context path of the application.",
+  "deprecated": true,
+  "deprecation": {
+    "level": "error",
+    "replacement": "server.servlet.context-path"
+  }
+}
+
+使用 http://localhost:8088/IMooc/hello 访问
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//6-1 SpringBoot整合freemarker https://www.imooc.com/video/16720
+*SpringBoot整合freemarker
+
+//pom.xml
+<!--引入freemarker模板依赖-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-freemarker</artifactId>
+</dependency>
+
+//application.properties
+############################################################
+#
+# freemarker 静态资源配置
+#
+############################################################
+#设定ftl文件路径
+spring.freemarker.template-loader-path=classpath:/templates
+# 关闭缓存, 即时刷新, 上线生产环境需要改为true
+spring.freemarker.cache=false
+spring.freemarker.charset=UTF-8
+spring.freemarker.check-template-location=true
+spring.freemarker.content-type=text/html
+spring.freemarker.expose-request-attributes=true
+spring.freemarker.expose-session-attributes=true
+spring.freemarker.request-context-attribute=request
+spring.freemarker.suffix=.ftl
+
+//FreemarkerController.java
+package com.imooc.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.imooc.pojo.Resource;
+
+@Controller
+@RequestMapping("ftl")
+public class FreemarkerController {
+
+    @Autowired
+    private Resource resource;
+
+    @RequestMapping("/index")
+    public String index(ModelMap map) {
+        map.addAttribute("resource", resource);
+        return "freemarker/index";
+    }
+
+    @RequestMapping("/center")
+    public String center() {
+        return "freemarker/center/center";
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//6-2 SpringBoot整合Thymeleaf https://www.imooc.com/video/16721
+*SpringBoot整合thymeleaf
+
+//pom.xml
+<!--引入thymeleaf模板依赖-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+
+//application.properties
+############################################################
+#
+# thymeleaf 静态资源配置
+#
+############################################################
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.mode=HTML
+spring.thymeleaf.encoding=UTF-8
+spring.thymeleaf.servlet.content-type=text/html
+#spring.thymeleaf.content-type=text/html 已经被废弃
+# 关闭缓存, 即时刷新, 上线生产环境需要改为true
+spring.thymeleaf.cache=false
+
+//ThymeleafController.java
+package com.imooc.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.imooc.pojo.User;
+
+@Controller
+@RequestMapping("th")
+public class ThymeleafController {
+
+    @RequestMapping("/index")
+    public String index(ModelMap map) {
+        map.addAttribute("name", "bigben");
+        return "thymeleaf/index";
+    }
+
+    @RequestMapping("center")
+    public String center() {
+        return "thymeleaf/center/center";
+    }
+
+    @RequestMapping("test")
+    public String test(ModelMap map) {
+
+        User u = new User();
+        u.setName("superadmin");
+        u.setAge(10);
+        u.setPassword("123465");
+        u.setBirthday(new Date());
+        u.setDesc("<font color='green'><b>hello imooc</b></font>");
+
+        map.addAttribute("user", u);
+
+        User u1 = new User();
+        u1.setAge(19);
+        u1.setName("imooc");
+        u1.setPassword("123456");
+        u1.setBirthday(new Date());
+
+        User u2 = new User();
+        u2.setAge(17);
+        u2.setName("LeeCX");
+        u2.setPassword("123456");
+        u2.setBirthday(new Date());
+
+        List<User> userList = new ArrayList<>();
+        userList.add(u);
+        userList.add(u1);
+        userList.add(u2);
+
+        map.addAttribute("userList", userList);
+
+        return "thymeleaf/test";
+    }
+
+    @PostMapping("postform")
+    public String postform(User u) {
+
+        System.out.println("姓名：" + u.getName());
+        System.out.println("年龄：" + u.getAge());
+
+        return "redirect:/th/test";
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//6-3 Thymeleaf常用标签的使用方法 https://www.imooc.com/video/16722
+*基本使用方式
+*对象引用方式
+*时间类型转换
+*text与utext
+*URL
+*引用静态资源文件js/css
+
+*条件判断th:if
+*th:unless与th:if
+*循环th:each
+*text与utext
+*th:swith与th:case
+
+//application.properties
+############################################################
+#
+# 配置i18n 资源文件，供thymeleaf 读取
+#
+############################################################
+spring.messages.basename=i18n/messages
+#spring.messages.cache-seconds=3600 已经被废弃
+spring.messages.cache-duration=3600
+spring.messages.encoding=UTF-8
+
+
+#设定静态文件路径，js,css等
+spring.mvc.static-path-pattern=/static/**
+
+//thymeleaf/test.html
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head lang="en">
+    <meta charset="UTF-8" />
+    <title></title>
+    
+ 	<!--<script th:src="@{/static/js/test.js}"></script>-->
+    
+</head>
+<body>
+
+<div>
+	用户姓名：<input th:id="${user.name}" th:name="${user.name}" th:value="${user.name}"/>
+	<br/>
+	用户年龄：<input th:value="${user.age}"/>
+	<br/>
+	用户生日：<input th:value="${user.birthday}"/>
+	<br/>
+	用户生日：<input th:value="${#dates.format(user.birthday, 'yyyy-MM-dd')}"/>
+	<br/>
+</div>
+
+<br/>
+
+<div th:object="${user}">
+	用户姓名：<input th:id="*{name}" th:name="*{name}" th:value="*{name}"/>
+	<br/>
+	用户年龄：<input th:value="*{age}"/>
+	<br/>
+	用户生日：<input th:value="*{#dates.format(birthday, 'yyyy-MM-dd hh:mm:ss')}"/>
+	<br/>
+</div>
+
+<br/>
+
+text 与 utext ：<br/>
+<span th:text="${user.desc}">abc</span>
+<br/>
+<span th:utext="${user.desc}">abc</span>
+<br/>
+<br/>
+
+URL:<br/>
+<a href="" th:href="@{http://www.imooc.com}">网站地址</a>
+<br/>
+
+<br/>
+<form th:action="@{/th/postform}" th:object="${user}" method="post" th:method="post">
+    <input type="text" th:field="*{name}"/>
+    <input type="text" th:field="*{age}"/>
+    <input type="submit"/>
+</form>
+<br/>
+
+<br/>
+<div th:if="${user.age} == 18">十八岁的天空</div>
+<div th:if="${user.age} gt 18">你老了</div>
+<div th:if="${user.age} lt 18">你很年轻</div>
+<div th:if="${user.age} ge 18">大于等于</div>
+<div th:if="${user.age} le 18">小于等于</div>
+<br/>
+
+<br/>
+<select>
+     <option >选择框</option>
+     <option th:selected="${user.name eq 'lee'}">lee</option>
+     <option th:selected="${user.name eq 'imooc'}">imooc</option>
+     <option th:selected="${user.name eq 'LeeCX'}">LeeCX</option>
+</select>
+<br/>
+
+<br/>
+<table>
+    <tr>
+        <th>姓名</th>
+        <th>年龄</th>
+        <th>年龄备注</th>
+        <th>生日</th>
+    </tr>
+    <tr th:each="person:${userList}">
+        <td th:text="${person.name}"></td>
+        <td th:text="${person.age}"></td>
+        <td th:text="${person.age gt 18} ? 你老了 : 你很年轻">18岁</td>
+        <td th:text="${#dates.format(user.birthday, 'yyyy-MM-dd hh:mm:ss')}"></td>
+    </tr>
+</table>
+<br/>
+
+<br/>
+<div th:switch="${user.name}">
+  <p th:case="'lee'">lee</p>
+  <p th:case="#{roles.manager}">普通管理员</p>
+  <p th:case="#{roles.superadmin}">超级管理员</p>
+  <p th:case="*">其他用户</p>
+</div>
+<br/>
+
+</body>
+</html>
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//7-1 SpringBoot配置全局的异常捕获-web页面跳转 https://www.imooc.com/video/16723
+*页面跳转形式
+*ajax形式
+*统一返回异常的形式
+
+使用http://localhost:8080/err/error
+//ErrorController.java
+package com.imooc.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.imooc.pojo.IMoocJSONResult;
+
+@Controller
+@RequestMapping("err")
+public class ErrorController {
+
+    @RequestMapping("/error")
+    public String error() {
+        int a = 1 / 0;
+        return "thymeleaf/error";
+    }
+
+    @RequestMapping("/ajaxerror")
+    public String ajaxerror() {
+        return "thymeleaf/ajaxerror";
+    }
+
+    @RequestMapping("/getAjaxerror")
+    @ResponseBody
+    public IMoocJSONResult getAjaxerror() {
+        int a = 1 / 0;
+        return IMoocJSONResult.ok();
+    }
+}
+
+//IMoocExceptionHandler.java
+package com.imooc.exception;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.imooc.pojo.IMoocJSONResult;
+
+@ControllerAdvice
+public class IMoocExceptionHandler {
+
+    public static final String IMOOC_ERROR_VIEW = "error";
+
+//	@ExceptionHandler(value = Exception.class)
+//    public Object errorHandler(HttpServletRequest reqest, 
+//    		HttpServletResponse response, Exception e) throws Exception {
+//    	
+//    	e.printStackTrace();
+//    	
+//		ModelAndView mav = new ModelAndView();
+//        mav.addObject("exception", e);
+//        mav.addObject("url", reqest.getRequestURL());
+//        mav.setViewName(IMOOC_ERROR_VIEW);
+//        return mav;
+//    }
+
+    @ExceptionHandler(value = Exception.class)
+    public Object errorHandler(HttpServletRequest reqest,
+                               HttpServletResponse response, Exception e) throws Exception {
+
+        e.printStackTrace();
+
+        if (isAjax(reqest)) {
+            return IMoocJSONResult.errorException(e.getMessage());
+        } else {
+            ModelAndView mav = new ModelAndView();
+            mav.addObject("exception", e);
+            mav.addObject("url", reqest.getRequestURL());
+            mav.setViewName(IMOOC_ERROR_VIEW);
+            return mav;
+        }
+    }
+
+    /**
+     * @Title: IMoocExceptionHandler.java
+     * @Package com.imooc.exception
+     * @Description: 判断是否是ajax请求
+     * Copyright: Copyright (c) 2017
+     * Company:FURUIBOKE.SCIENCE.AND.TECHNOLOGY
+     * @author leechenxiang
+     * @date 2017年12月3日 下午1:40:39
+     * @version V1.0
+     */
+    public static boolean isAjax(HttpServletRequest httpRequest) {
+        return (httpRequest.getHeader("X-Requested-With") != null
+            && "XMLHttpRequest"
+            .equals(httpRequest.getHeader("X-Requested-With").toString()));
+    }
+}
+
+//error.html
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head lang="en">
+    <meta charset="UTF-8" />
+    <title>捕获全局异常</title>
+</head>
+<body>
+    <h1 style="color: red">发生错误：</h1>
+    <div th:text="${url}"></div>
+    <div th:text="${exception.message}"></div>
+</body>
+</html>
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//7-2 SpringBoot配置全局的异常捕获-ajax形式 https://www.imooc.com/video/16724
+
+使用http://localhost:8080/err/ajaxerror
+//IMoocAjaxExceptionHandler.java 注释掉IMoocExceptionHandler类的@ControllerAdvice
+package com.imooc.exception;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.imooc.pojo.IMoocJSONResult;
+
+@RestControllerAdvice
+public class IMoocAjaxExceptionHandler {
+
+	@ExceptionHandler(value = Exception.class)
+	public IMoocJSONResult defaultErrorHandler(HttpServletRequest req, 
+			Exception e) throws Exception {
+
+		e.printStackTrace();
+		return IMoocJSONResult.errorException(e.getMessage());
+	}
+}
+
+//ajaxerror.js
+$.ajax({
+    	url: "/err/getAjaxerror",
+    	type: "POST",
+    	async: false,
+    	success: function(data) {
+    		debugger;
+            if(data.status == 200 && data.msg == "OK") {
+            	alert("success");
+            } else {
+            	alert("发生异常：" + data.msg);
+            }
+    	},
+        error: function (response, ajaxOptions, thrownError) {
+        	debugger;
+        	alert("error");       
+        }
+    });
+    
+会走到function(data)函数的debugger
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//7-3 SpringBoot配置全局的异常捕获-同时兼容web和ajax https://www.imooc.com/video/16725
+
+使用http://localhost:8080/err/error
+或
+使用http://localhost:8080/err/ajaxerror 会走到ajaxerror.js的error: function函数中
+
+com.imooc.exception.IMoocExceptionHandler#isAjax函数会判断是否ajax形式，走到对应的ajax和web异常处理
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//7-3 整合MyBatis - 使用generatorConfig生成mapper以及pojo https://www.imooc.com/video/16726
+*使用generatorConfig生成mapper以及pojo
+*实现基于mybatis的CRUD功能
+*整合mybatis-pagehelper实现分页
+*自定义mapper的实现
+
+Mybatis开源框架：https://github.com/abel533/MyBatis-Spring-Boot
+
+//sys_user建表语句：
+create table sys_user
+(
+	id varchar(20) not null,
+	username varchar(50) not null comment '用户名，登录名',
+	password varchar(30) null comment '密码',
+	nickname varchar(50) null comment '昵称',
+	age int null comment '年龄',
+	sex int null comment '性别',
+	job int null,
+	face_image varchar(1000) null,
+	province varchar(10) null,
+	city varchar(10) null,
+	district varchar(10) null,
+	address varchar(50) null,
+	auth_salt varchar(10) null,
+	last_login_ip varchar(32) null,
+	last_login_time timestamp null,
+	is_delete int null,
+	regist_time timestamp null,
+	PRIMARY KEY(id)
+);
+
+//GeneratorDisplay.java 用来读取sys_user表生成SysUserMapper.xml、SysUser.java、SysUserMapper.java
+package com.imooc.utils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mybatis.generator.api.MyBatisGenerator;
+import org.mybatis.generator.config.Configuration;
+import org.mybatis.generator.config.xml.ConfigurationParser;
+import org.mybatis.generator.internal.DefaultShellCallback;
+
+public class GeneratorDisplay {
+
+    public void generator() throws Exception {
+
+        List<String> warnings = new ArrayList<String>();
+        boolean overwrite = true;
+        //指定 逆向工程配置文件
+        File configFile = new File("generatorConfig.xml");
+        ConfigurationParser cp = new ConfigurationParser(warnings);
+        Configuration config = cp.parseConfiguration(configFile);
+        DefaultShellCallback callback = new DefaultShellCallback(overwrite);
+        MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config,
+            callback, warnings);
+        myBatisGenerator.generate(null);
+
+    }
+
+    public static void main(String[] args) {
+        try {
+            GeneratorDisplay generatorSqlmap = new GeneratorDisplay();
+            generatorSqlmap.generator();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+//generatorConfiguration.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="MysqlContext" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <plugin type="tk.mybatis.mapper.generator.MapperPlugin">
+            <property name="mappers" value="com.imooc.utils.MyMapper"/>
+        </plugin>
+
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&amp;useUnicode=true&amp;characterEncoding=UTF-8"
+                        userId="root"
+                        password="root123">
+        </jdbcConnection>
+
+        <!-- 对于生成的pojo所在包 -->
+        <javaModelGenerator targetPackage="com.imooc.pojo" targetProject="src/main/java"/>
+
+        <!-- 对于生成的mapper所在目录 -->
+        <sqlMapGenerator targetPackage="mapper" targetProject="src/main/resources"/>
+
+        <!-- 配置mapper对应的java映射 -->
+        <javaClientGenerator targetPackage="com.imooc.mapper" targetProject="src/main/java"
+                             type="XMLMAPPER"/>
+
+
+        <table tableName="sys_user"></table>
+
+    </context>
+</generatorConfiguration>
+//------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//7-4 整合MyBatis - 实现基于mybatis的CRUD功能 https://www.imooc.com/video/16788
+
+这里把devtools给注掉了，在整合mybatis时，如果加载devtools时，如果ctrl+F9会提示tk.mybatis.mapper.provider.EmptyProvider中缺少selectOne方法，没找到解决方法。
+<!--<dependency>-->
+    <!--<groupId>org.springframework.boot</groupId>-->
+    <!--<artifactId>spring-boot-devtools</artifactId>-->
+    <!--&lt;!&ndash; optional=true, 依赖不会传递, 该项目依赖devtools;-->
+        <!--之后依赖boot项目的项目如果想要使用devtools, 需要重新引入 &ndash;&gt;-->
+    <!--<optional>true</optional>-->
+<!--</dependency>-->
+
+//MyBatisCRUDController.java
+package com.imooc.controller;
+
+import java.util.Date;
+import java.util.List;
+
+import org.n3r.idworker.Sid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.pojo.IMoocJSONResult;
+import com.imooc.pojo.SysUser;
+import com.imooc.service.UserService;
+
+@RestController
+@RequestMapping("mybatis")
+public class MyBatisCRUDController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private Sid sid;
+
+    @RequestMapping("/saveUser")
+    public IMoocJSONResult saveUser() throws Exception {
+
+        String userId = sid.nextShort();
+
+        SysUser user = new SysUser();
+        user.setId(userId);
+        user.setUsername("imooc" + new Date());
+        user.setNickname("imooc" + new Date());
+        user.setPassword("abc123");
+        user.setIsDelete(0);
+        user.setRegistTime(new Date());
+
+        userService.saveUser(user);
+
+        return IMoocJSONResult.ok("保存成功");
+    }
+
+    @RequestMapping("/updateUser")
+    public IMoocJSONResult updateUser() {
+
+        SysUser user = new SysUser();
+        user.setId("10011001");
+        user.setUsername("10011001-updated" + new Date());
+        user.setNickname("10011001-updated" + new Date());
+        user.setPassword("10011001-updated");
+        user.setIsDelete(0);
+        user.setRegistTime(new Date());
+
+        userService.updateUser(user);
+
+        return IMoocJSONResult.ok("保存成功");
+    }
+
+    @RequestMapping("/deleteUser")
+    public IMoocJSONResult deleteUser(String userId) {
+
+        userService.deleteUser(userId);
+
+        return IMoocJSONResult.ok("删除成功");
+    }
+
+    @RequestMapping("/queryUserById")
+    public IMoocJSONResult queryUserById(String userId) {
+
+        return IMoocJSONResult.ok(userService.queryUserById(userId));
+    }
+
+    @RequestMapping("/queryUserList")
+    public IMoocJSONResult queryUserList() {
+
+        SysUser user = new SysUser();
+        user.setUsername("imooc");
+        user.setNickname("lee");
+
+        List<SysUser> userList = userService.queryUserList(user);
+
+        return IMoocJSONResult.ok(userList);
+    }
+
+	@RequestMapping("/queryUserListPaged")
+	public IMoocJSONResult queryUserListPaged(Integer page) {
+
+		if (page == null) {
+			page = 1;
+		}
+
+		int pageSize = 5;
+
+		SysUser user = new SysUser();
+//		user.setNickname("lee");
+
+		List<SysUser> userList = userService.queryUserListPaged(user, page, pageSize);
+
+		return IMoocJSONResult.ok(userList);
+	}
+//
+//	@RequestMapping("/queryUserByIdCustom")
+//	public IMoocJSONResult queryUserByIdCustom(String userId) {
+//
+//		return IMoocJSONResult.ok(userService.queryUserByIdCustom(userId));
+//	}
+//
+//	@RequestMapping("/saveUserTransactional")
+//	public IMoocJSONResult saveUserTransactional() {
+//
+//		String userId = sid.nextShort();
+//
+//		SysUser user = new SysUser();
+//		user.setId(userId);
+//		user.setUsername("lee" + new Date());
+//		user.setNickname("lee" + new Date());
+//		user.setPassword("abc123");
+//		user.setIsDelete(0);
+//		user.setRegistTime(new Date());
+//
+//		userService.saveUserTransactional(user);
+//
+//		return IMoocJSONResult.ok("保存成功");
+//	}
+}
+
+
+//UserServiceImpl.java
+package com.imooc.service.impl;
+
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
+
+import com.github.pagehelper.PageHelper;
+import com.imooc.mapper.SysUserMapper;
+import com.imooc.pojo.SysUser;
+import com.imooc.service.UserService;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private SysUserMapper userMapper;
+
+    @Override
+    public void saveUser(SysUser user) throws Exception {
+        userMapper.insert(user);
+    }
+
+    @Override
+    public void updateUser(SysUser user) {
+        //Selective只会更新有值的属性，无值属性则不更新。如果不带Selective则会把user中的null对象值也更新到数据库对象中
+//        userMapper.updateByPrimaryKey(user);
+        userMapper.updateByPrimaryKeySelective(user);
+    }
+
+    @Override
+    public void deleteUser(String userId) {
+        userMapper.deleteByPrimaryKey(userId);
+    }
+
+    @Override
+    public SysUser queryUserById(String userId) {
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return userMapper.selectByPrimaryKey(userId);
+    }
+
+    @Override
+    public List<SysUser> queryUserList(SysUser user) {
+        try {
+            Thread.sleep(11000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Example example = new Example(SysUser.class);
+        Example.Criteria criteria = example.createCriteria();
+
+        if (!StringUtils.isEmptyOrWhitespace(user.getUsername())) {
+//			criteria.andEqualTo("username", user.getUsername());
+            criteria.andLike("username", "%" + user.getUsername() + "%");
+        }
+
+        if (!StringUtils.isEmptyOrWhitespace(user.getNickname())) {
+            criteria.andLike("nickname", "%" + user.getNickname() + "%");
+        }
+        List<SysUser> userList = userMapper.selectByExample(example);
+        return userList;
+    }
+
+    @Override
+    public List<SysUser> queryUserListPaged(SysUser user, Integer page, Integer pageSize) {
+        // 开始分页
+        PageHelper.startPage(page, pageSize);
+
+        Example example = new Example(SysUser.class);
+        Example.Criteria criteria = example.createCriteria();
+
+        if (!StringUtils.isEmptyOrWhitespace(user.getNickname())) {
+            criteria.andLike("nickname", "%" + user.getNickname() + "%");
+        }
+        example.orderBy("registTime").desc();
+        List<SysUser> userList = userMapper.selectByExample(example);
+
+        return userList;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------------------------
+
+
 //------------------------------------------------------------------------------------------------
 
 
