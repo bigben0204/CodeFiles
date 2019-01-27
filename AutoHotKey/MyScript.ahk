@@ -40,6 +40,7 @@
     {
         MsgBox, 0, Succeed, Word "error" or "fail" is not found in current file.
     }
+    fileContent := ""
     return
 }
 #IfWinActive
