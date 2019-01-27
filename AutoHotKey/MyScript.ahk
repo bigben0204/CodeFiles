@@ -26,19 +26,26 @@
 {
     SendInput ^3
     Sleep 100 ;需要等100ms，否则路径还未拷贝到剪切板
+    if SubStr(Clipboard, -3) != ".txt" and SubStr(Clipboard, -3) != ".log"
+    {
+        MsgBox, 64, FileTypeError, Select file is not txt or log file. File full path: `n%Clipboard%
+        return
+    }
+    
     FileRead, fileContent, %Clipboard%
     if ErrorLevel ;如果失败则ErrorLevel为1
     {
         MsgBox % "Failed to read file: " . Clipboard
+        return
     }
     
     if InStr(fileContent, "error") or InStr(fileContent, "fail")
     {
-        MsgBox, 16, Error, Word "error" or "fail" is found in current file!!!`nPlease check the file.
+        MsgBox, 16, ContentCheckError, Word "error" or "fail" is found in current file!!!`nPlease check the file.
     }
     else
     {
-        MsgBox, 0, Succeed, Word "error" or "fail" is not found in current file.
+        MsgBox, 0, ContentCheckSucceed, Word "error" or "fail" is not found in current file.
     }
     fileContent := ""
     return
