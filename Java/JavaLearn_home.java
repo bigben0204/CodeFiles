@@ -179,7 +179,7 @@ import java.util.stream.IntStream;
 
 /**
  * https://www.cnblogs.com/grandyang/p/4606334.html
- * 1	Two Sum
+ * 1    Two Sum
  */
 public class TwoSum {
     public int[] twoSum(int[] nums, int target) {
@@ -260,7 +260,7 @@ import java.util.Set;
 
 /**
  * https://www.cnblogs.com/grandyang/p/4606334.html
- * 3	Longest Substring Without Repeating Characters
+ * 3    Longest Substring Without Repeating Characters
  */
 public class LongestSubstring {
     public int lengthOfLongestSubstring(String s) {
@@ -4201,45 +4201,45 @@ public class ListAddInStreamTest {
 2
 
 java.lang.UnsupportedOperationException
-	at java.util.AbstractList.add(AbstractList.java:148)
-	at java.util.AbstractList.add(AbstractList.java:108)
-	at test.ListAddInStreamTest.lambda$testListAddInStream$2(ListAddInStreamTest.java:15)
-	at java.util.stream.ReferencePipeline$4$1.accept(ReferencePipeline.java:210)
-	at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
-	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
-	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
-	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
-	at java.util.stream.ForEachOps$ForEachOp$OfInt.evaluateSequential(ForEachOps.java:189)
-	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.util.stream.IntPipeline.forEach(IntPipeline.java:404)
-	at test.ListAddInStreamTest.testListAddInStream(ListAddInStreamTest.java:17)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:68)
-	at com.intellij.rt.execution.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:51)
-	at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:237)
-	at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:70)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
+    at java.util.AbstractList.add(AbstractList.java:148)
+    at java.util.AbstractList.add(AbstractList.java:108)
+    at test.ListAddInStreamTest.lambda$testListAddInStream$2(ListAddInStreamTest.java:15)
+    at java.util.stream.ReferencePipeline$4$1.accept(ReferencePipeline.java:210)
+    at java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
+    at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+    at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+    at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151)
+    at java.util.stream.ForEachOps$ForEachOp$OfInt.evaluateSequential(ForEachOps.java:189)
+    at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+    at java.util.stream.IntPipeline.forEach(IntPipeline.java:404)
+    at test.ListAddInStreamTest.testListAddInStream(ListAddInStreamTest.java:17)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke(Method.java:498)
+    at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+    at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+    at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)
+    at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)
+    at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)
+    at org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)
+    at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)
+    at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)
+    at org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)
+    at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)
+    at org.junit.runners.ParentRunner.run(ParentRunner.java:363)
+    at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+    at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:68)
+    at com.intellij.rt.execution.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:51)
+    at com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:237)
+    at com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:70)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke(Method.java:498)
+    at com.intellij.rt.execution.application.AppMain.main(AppMain.java:147)
 
 
 //------------------------------------------------------------------------------------------------
@@ -6059,7 +6059,7 @@ toArray·½·¨½«Ò»¸öÁ÷×ª»»³ÉÊı×é£¬¶øÈç¹ûÏë×ª»»³ÉÆäËü¼¯ºÏÀàĞÍ£¬ĞèÒªµ÷ÓÃcollect·½·¨£¬
 public static <T,C extends Collection<T>> Collector<T,?,C> toCollection(Supplier<C> collectionFactory)
 public static ¡­¡­ toConcurrentMap(¡­¡­)
 public static <T> Collector<T,?,List<T>> toList()
-public static ¡­¡­ 	toMap(¡­¡­)
+public static ¡­¡­     toMap(¡­¡­)
 public static <T> Collector<T,?,Set<T>> toSet()
 //------------------------------------------------------------------------------------------------
 //Java 8 Streams API£º¶ÔStream·Ö×éºÍ·ÖÇø
@@ -7055,20 +7055,20 @@ public class CalculatorTest {
 
 org.junit.runners.model.TestTimedOutException: test timed out after 1000 milliseconds
 
-	at calculator.Calculator.squareRoot(Calculator.java:17)
-	at calculator.CalculatorTest.test_return_outoftime_when_runingSquareRoot(CalculatorTest.java:57)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
-	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
-	at java.lang.Thread.run(Thread.java:745)
+    at calculator.Calculator.squareRoot(Calculator.java:17)
+    at calculator.CalculatorTest.test_return_outoftime_when_runingSquareRoot(CalculatorTest.java:57)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke(Method.java:498)
+    at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+    at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+    at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
+    at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
+    at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+    at java.lang.Thread.run(Thread.java:745)
 
 Ò»¸ö²âÊÔ¿ªÊ¼£º
 Ò»¸ö²âÊÔ½áÊø
@@ -7272,20 +7272,20 @@ java Ò»¸öÀà²»ÄÜÍ¬Ê±¼Ì³Ğ¶à¸öÀà£¬Ò»¸öÀàÖ»ÄÜ¼Ì³ĞÒ»¸öÀà(class)£¬µ«ÊÇ¿ÉÒÔÊµÏÖ¶à¸ö½Ó¿Ú
 //------------------------------------------------------------------------------------------------
 //JavaÖµ´«µİ£¬¼´´«ÈëµÄÊÇÒıÓÃµÄ¸±±¾£¬ÔÚº¯ÊıÀï»á°Ñ¸ÃÒıÓÃÖ¸Ïòµ½ĞÂµÄ¶ÔÏóÉÏ£¬µ«²»»áÓ°Ïìµ½º¯ÊıÈë¿Ú´¦¶ÔÏó
 public class Test {
-	public static void swap(int a, int b) {
-		int temp = a;
-		a = b;
-		b = temp;
-		System.out.println("swap·½·¨Àï£¬aµÄÖµÊÇ" + a + ";bµÄÖµÊÇ" + b);
-	}
+    public static void swap(int a, int b) {
+        int temp = a;
+        a = b;
+        b = temp;
+        System.out.println("swap·½·¨Àï£¬aµÄÖµÊÇ" + a + ";bµÄÖµÊÇ" + b);
+    }
 
-	public static void main(String args[]) {
-		int a = 6;
-		int b = 9;
-		System.out.println("½»»»¿ªÊ¼Ç°£¬±äÁ¿aµÄÖµÊÇ" + a + ";±äÁ¿bµÄÖµÊÇ" + b);
-		swap(a, b);
-		System.out.println("½»»»½áÊøºó£¬±äÁ¿aµÄÖµÊÇ" + a + ";±äÁ¿bµÄÖµÊÇ" + b);
-	}
+    public static void main(String args[]) {
+        int a = 6;
+        int b = 9;
+        System.out.println("½»»»¿ªÊ¼Ç°£¬±äÁ¿aµÄÖµÊÇ" + a + ";±äÁ¿bµÄÖµÊÇ" + b);
+        swap(a, b);
+        System.out.println("½»»»½áÊøºó£¬±äÁ¿aµÄÖµÊÇ" + a + ";±äÁ¿bµÄÖµÊÇ" + b);
+    }
 }
 Êä³öÈçÏÂ£º
 ½»»»¿ªÊ¼Ç°£¬±äÁ¿aµÄÖµÊÇ6;±äÁ¿bµÄÖµÊÇ9
@@ -7295,30 +7295,30 @@ swap·½·¨Àï£¬aµÄÖµÊÇ9;bµÄÖµÊÇ6
 //ĞèÒª°Ñ´ı½»»»µÄÖµ·ÅÈë¶ÔÏóÖĞ
 class DataWrap
 {
-	public int a;
-	public int b;
+    public int a;
+    public int b;
 }
 
 public class Test
 {
-	//ÕâÀïµÄDataWrap¶ÔÏódw£¬ÈÔÊÇº¯ÊıÈë¿Ú¶ÔÏóµÄÒıÓÃ¸±±¾£¬Ö»²»¹ıÕâ¸ö¸±±¾µØÖ·ÓëÔ­¶ÔÏóµØÖ·Ò»ÖÂ£¬ËùÒÔĞŞÆä³ÉÔ±º¯Êı±äÁ¿¼´¿ÉĞŞ¸ÄÔ­¶ÔÏó³ÉÔ±º¯Êı
-	public static void swap(DataWrap dw)
-	{
-		int tmp = dw.a;
-		dw.a = dw.b;
-		dw.b = tmp;
-		System.out.println("swap·½·¨Àï£¬aÊôĞÔµÄÖµÊÇ" + dw.a + ";bÊôĞÔµÄÖµÊÇ" + dw.b);
-	}
+    //ÕâÀïµÄDataWrap¶ÔÏódw£¬ÈÔÊÇº¯ÊıÈë¿Ú¶ÔÏóµÄÒıÓÃ¸±±¾£¬Ö»²»¹ıÕâ¸ö¸±±¾µØÖ·ÓëÔ­¶ÔÏóµØÖ·Ò»ÖÂ£¬ËùÒÔĞŞÆä³ÉÔ±º¯Êı±äÁ¿¼´¿ÉĞŞ¸ÄÔ­¶ÔÏó³ÉÔ±º¯Êı
+    public static void swap(DataWrap dw)
+    {
+        int tmp = dw.a;
+        dw.a = dw.b;
+        dw.b = tmp;
+        System.out.println("swap·½·¨Àï£¬aÊôĞÔµÄÖµÊÇ" + dw.a + ";bÊôĞÔµÄÖµÊÇ" + dw.b);
+    }
 
-	public static void main(String args[])
-	{
-		DataWrap dw = new DataWrap();
-		dw.a = 6;
-		dw.b = 9;
-		System.out.println("½»»»¿ªÊ¼Ç°£¬aÊôĞÔµÄÖµÊÇ" + dw.a + ";bÊôĞÔµÄÖµÊÇ" + dw.b);
-		swap(dw);
-		System.out.println("½»»»½áÊøºó£¬aÊôĞÔµÄÖµÊÇ" + dw.a + ";bÊôĞÔµÄÖµÊÇ" + dw.b);
-	}
+    public static void main(String args[])
+    {
+        DataWrap dw = new DataWrap();
+        dw.a = 6;
+        dw.b = 9;
+        System.out.println("½»»»¿ªÊ¼Ç°£¬aÊôĞÔµÄÖµÊÇ" + dw.a + ";bÊôĞÔµÄÖµÊÇ" + dw.b);
+        swap(dw);
+        System.out.println("½»»»½áÊøºó£¬aÊôĞÔµÄÖµÊÇ" + dw.a + ";bÊôĞÔµÄÖµÊÇ" + dw.b);
+    }
 }
 Êä³öÈçÏÂ£º
 ½»»»¿ªÊ¼Ç°£¬aÊôĞÔµÄÖµÊÇ6;bÊôĞÔµÄÖµÊÇ9
@@ -7328,48 +7328,48 @@ swap·½·¨Àï£¬aÊôĞÔµÄÖµÊÇ9;bÊôĞÔµÄÖµÊÇ6
 //ÕâÖÖ¶ÔÏó·½Ê½Ò²ÎŞ·¨ÊµÏÖ£¬Integer¾¡¹ÜÊÇ·â×°Àà¶ÔÏó£¬µ«ÊÇÒ»µ©Éú³ÉºÃ£¬¾ÍÃ»ÓĞ°ì·¨ĞŞ¸ÄÖµÁË
 public class Test
 {
-	public static void main(String args[])
-	{
-		Integer a = new Integer(3);
-		Integer b = new Integer(4);
-		Test.swap(a, b);
-		System.out.println(a);
-		System.out.println(b);
-	}
-	
-	public static void swap(Integer lhs, Integer rhs) {
-		int temp = lhs;
-		lhs = rhs;
-		rhs = temp; 
-	}
+    public static void main(String args[])
+    {
+        Integer a = new Integer(3);
+        Integer b = new Integer(4);
+        Test.swap(a, b);
+        System.out.println(a);
+        System.out.println(b);
+    }
+    
+    public static void swap(Integer lhs, Integer rhs) {
+        int temp = lhs;
+        lhs = rhs;
+        rhs = temp; 
+    }
 }
 //------------------------------------------------------------------------------------------------
 //Java´ÓÈëÃÅµ½¾«Í¨ µÚ2ÕÂ P66
 
 public class HelloJava {
-	private static String say = "ÎÒÒªÑ§»áÄã.";
-	public static void main(String[] args) {
-		System.out.println("ÄãºÃ Java " + say);
-	}
+    private static String say = "ÎÒÒªÑ§»áÄã.";
+    public static void main(String[] args) {
+        System.out.println("ÄãºÃ Java " + say);
+    }
 }
 
 //Ò»¸ö*.javaÖĞ×î¶àÖ»ÄÜÓĞÒ»¸öÀàÎªpublic£¬¿ÉÒÔÃ»ÓĞpublic
 public class Hello{
-	public static void main(String[] args){
-		System.out.println("Hello, world!");
-	}
+    public static void main(String[] args){
+        System.out.println("Hello, world!");
+    }
 }
 
 class HelloA{
-	public static void main(String[] args){
-		System.out.println("Hello, world!");
-	}
+    public static void main(String[] args){
+        System.out.println("Hello, world!");
+    }
 }
 
 class HelloB{
-	public static void main(String[] args){
-		System.out.println("Hello, world!");
-	}
+    public static void main(String[] args){
+        System.out.println("Hello, world!");
+    }
 }
 
 ÒÔ0¿ªÍ·µÄÕûĞÍ±íÊ¾°Ë½øÖÆÊı
@@ -7380,12 +7380,12 @@ class HelloB{
 
 //P78
 public class HelloJava {
-	public static void main(String[] args) {
-		char char1 = '\\';
-		char char2 = '\u2605';
-		System.out.println(char1);
-		System.out.println(char2);
-	}
+    public static void main(String[] args) {
+        char char1 = '\\';
+        char char2 = '\u2605';
+        System.out.println(char1);
+        System.out.println(char2);
+    }
 }
 Êä³öÈçÏÂ£º
 \
@@ -7394,28 +7394,28 @@ public class HelloJava {
 
 //P80
 public class HelloJava {
-	private static final double PI = 3.141592653;//ÕâÀïµÄprivate¿ÉÒÔ²»¼Ó£¬ÏÖÔÚ»¹²»Ì«¶®ÓĞÊ²Ã´²î±ğ
-	private static int age = 23;//ÕâÀïµÄprivate¿ÉÒÔ²»¼Ó£¬ÏÖÔÚ»¹²»Ì«¶®ÓĞÊ²Ã´²î±ğ
-	public static void main(String[] args) {
-		final int number;
-		number = 1234;//¶ÔÓÚfinal³£Á¿Ö»ÄÜ¸³Ò»´ÎÖµ£¬¿ÉÒÔÔÚÉùÃ÷Ê±¸³Öµ£¬Ò²¿ÉÉùÃ÷Ê±²»¸³Öµ
-		//number = 22222;//ÕâÀïÔÙ´Î¸³Öµ½«±àÒë±¨´í
-		age = 22;
-		System.out.println(PI);
-		System.out.println(number);
-		System.out.println(age);
-	}
+    private static final double PI = 3.141592653;//ÕâÀïµÄprivate¿ÉÒÔ²»¼Ó£¬ÏÖÔÚ»¹²»Ì«¶®ÓĞÊ²Ã´²î±ğ
+    private static int age = 23;//ÕâÀïµÄprivate¿ÉÒÔ²»¼Ó£¬ÏÖÔÚ»¹²»Ì«¶®ÓĞÊ²Ã´²î±ğ
+    public static void main(String[] args) {
+        final int number;
+        number = 1234;//¶ÔÓÚfinal³£Á¿Ö»ÄÜ¸³Ò»´ÎÖµ£¬¿ÉÒÔÔÚÉùÃ÷Ê±¸³Öµ£¬Ò²¿ÉÉùÃ÷Ê±²»¸³Öµ
+        //number = 22222;//ÕâÀïÔÙ´Î¸³Öµ½«±àÒë±¨´í
+        age = 22;
+        System.out.println(PI);
+        System.out.println(number);
+        System.out.println(age);
+    }
 }
 
 
 //P81
 public class HelloJava {
-	static int times = 3;
-	public static void main(String[] args) {
-		int times = 4;
-		System.out.println(times);
-		System.out.println(HelloJava.times);
-	}
+    static int times = 3;
+    public static void main(String[] args) {
+        int times = 4;
+        System.out.println(times);
+        System.out.println(HelloJava.times);
+    }
 }
 
 
@@ -7423,14 +7423,14 @@ public class HelloJava {
 &&Óë&¶¼ÊÇÂß¼­Óë£¬||Óë|¶¼ÊÇÂß¼­»ò£¬²»Í¬µãÊÇÇ°ÕßÓĞ¶ÌÂ·ÌØĞÔ£¬ºóÕßÃ»ÓĞ
 
 public class HelloJava {
-	public static void main(String[] args) {
-		System.out.println(5 & -4);
-		System.out.println(3 | 6);
-		System.out.println(~7);
-		System.out.println(10 ^ 3);
-		System.out.println(48 << 1);
-		System.out.println(48 >> 1);//>>>ÎŞ·ûºÅÓÒÒÆÔËËã·û£¬ÒÔ0Ìî³ä
-	}
+    public static void main(String[] args) {
+        System.out.println(5 & -4);
+        System.out.println(3 | 6);
+        System.out.println(~7);
+        System.out.println(10 ^ 3);
+        System.out.println(48 << 1);
+        System.out.println(48 >> 1);//>>>ÎŞ·ûºÅÓÒÒÆÔËËã·û£¬ÒÔ0Ìî³ä
+    }
 }
 Êä³öÈçÏÂ£º
 4
@@ -7445,172 +7445,172 @@ public class HelloJava {
 import java.util.Scanner;
 
 public class VariableExchange {
-	public static void main(String[] args) {
-		Scanner scan = new Scanner(System.in);
-		System.out.println("Please input value of variable A:");
-		long A = scan.nextLong();
-		System.out.println("Please input value of variable B:	");
-		long B = scan.nextLong();
-		//scan.close();//²»¼ÓÕâĞĞ»áÓĞÌáÊ¾scanÃ»ÓĞclose
-		System.out.println("A = " + A + "\tB = " + B);
-		System.out.println("Exchange the two variables...");
-		A = A ^ B;//¿ÉÒÔÕâÃ´Ğ´£ºA ^= B;
-		B = B ^ A;//B = A ^ B;
-		A = A ^ B;
-		System.out.println("After exchange: A = " + A + "\tB = " + B);
-	}
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Please input value of variable A:");
+        long A = scan.nextLong();
+        System.out.println("Please input value of variable B:    ");
+        long B = scan.nextLong();
+        //scan.close();//²»¼ÓÕâĞĞ»áÓĞÌáÊ¾scanÃ»ÓĞclose
+        System.out.println("A = " + A + "\tB = " + B);
+        System.out.println("Exchange the two variables...");
+        A = A ^ B;//¿ÉÒÔÕâÃ´Ğ´£ºA ^= B;
+        B = B ^ A;//B = A ^ B;
+        A = A ^ B;
+        System.out.println("After exchange: A = " + A + "\tB = " + B);
+    }
 }
 Êä³öÈçÏÂ£º
 Please input value of variable A:
 10
 Please input value of variable B:
 20
-A = 10	B = 20
+A = 10    B = 20
 Exchange the two variables...
-After exchange: A = 20	B = 10
+After exchange: A = 20    B = 10
 
 
 //Êı¾İÒç³ö P93
 public class HelloJava {
-	public static void main(String[] args) {
-		short s = 516;
-		byte b = (byte)s;
-		System.out.println(b);
-	}
+    public static void main(String[] args) {
+        short s = 516;
+        byte b = (byte)s;
+        System.out.println(b);
+    }
 }
 
 boolenÀàĞÍ²»ÄÜÓëÈÎºÎÀàĞÍ×÷×ª»»£¬ËùÒÔÈçÏÂĞ´·¨±àÒë²»¹ı£¬ÓëC++²»Í¬
 public class HelloJava {
-	public static void main(String[] args) {
-		boolean b = true;
-		if (0)
-		{
-			System.out.println(b);
-		}
-	}
+    public static void main(String[] args) {
+        boolean b = true;
+        if (0)
+        {
+            System.out.println(b);
+        }
+    }
 }
 
 //ÈòÄêµÄÅĞ¶Ï P96
 import java.util.Scanner;
 
 public class HelloJava {
-	public static void main(String[] args) {
-		Scanner scan = new Scanner(System.in);
-		System.out.println("ÇëÊäÈëÒ»¸öÄê·İ£º");
-		long year = scan.nextLong();
-		scan.close();
-		if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
-		{
-			System.out.println(year + "ÄêÊÇÈòÄê£¡");
-		}
-		else
-		{
-			System.out.println(year + "Äê²»ÊÇÈòÄê£¡");
-		}
-	}
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("ÇëÊäÈëÒ»¸öÄê·İ£º");
+        long year = scan.nextLong();
+        scan.close();
+        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
+        {
+            System.out.println(year + "ÄêÊÇÈòÄê£¡");
+        }
+        else
+        {
+            System.out.println(year + "Äê²»ÊÇÈòÄê£¡");
+        }
+    }
 }
 
 //P105 switchÓï¾äÖĞµÄcaseÄÚÈİ£¬Èç¹û²»¼Óbreak£¬Ôò»á²»½øĞĞÅĞ¶ÏÖ±½ÓÖ´ĞĞºóĞøcaseÖĞµÄÓï¾äÄÚÈİ£¬Ö±µ½Óöµ½break»ò½áÊø
 public class HelloJava {
-	public static void main(String[] args) {
-		int a = 2;
-		switch (a)
-		{
-		case 1:
-			System.out.println("1");
-			System.out.println("11");
-		case 2:
-			System.out.println("2");
-		case 3:
-			System.out.println("3");
-		default:
-			System.out.println("don't know");
-		}
-	}
+    public static void main(String[] args) {
+        int a = 2;
+        switch (a)
+        {
+        case 1:
+            System.out.println("1");
+            System.out.println("11");
+        case 2:
+            System.out.println("2");
+        case 3:
+            System.out.println("3");
+        default:
+            System.out.println("don't know");
+        }
+    }
 }
 
 //foreachÓï¾ä£¬int x²»ÄÜÔÚforÖ®Ç°¶¨Òå
 public class HelloJava {
-	public static void main(String[] args) {
-		int arr[] = {0, 1, 2};
-		System.out.println("Êı×éÔªËØÎª£º");
-		for (int x : arr) {
-			System.out.println(x);
-		}
-	}
+    public static void main(String[] args) {
+        int arr[] = {0, 1, 2};
+        System.out.println("Êı×éÔªËØÎª£º");
+        for (int x : arr) {
+            System.out.println(x);
+        }
+    }
 }
 
 //P112 
 public class HelloJava {
-	public static void main(String[] args) {
-		String[] aves = new String[] {"°×ğØ", "µ¤¶¥º×"};//¿ÉÒÔĞ´ÎªÈçÏÂ¼¸ÖÖĞÎÊ½String aves[] = new String[] {"°×ğØ", "µ¤¶¥º×"}»òString aves[] = {"°×ğØ", "µ¤¶¥º×"}»òString[] aves = {"°×ğØ", "µ¤¶¥º×"}
-		int index = 0;
-		System.out.println("Äñ£º");
-		while (index < aves.length) {
-			System.out.print(aves[index++] + " ");
-		}
-		
-		//while¿ÉÒÔĞ´³ÉÈçÏÂforÑ­»·
-		for (String b : aves) {
-			System.out.print(b + " ");
-		}
-	}
+    public static void main(String[] args) {
+        String[] aves = new String[] {"°×ğØ", "µ¤¶¥º×"};//¿ÉÒÔĞ´ÎªÈçÏÂ¼¸ÖÖĞÎÊ½String aves[] = new String[] {"°×ğØ", "µ¤¶¥º×"}»òString aves[] = {"°×ğØ", "µ¤¶¥º×"}»òString[] aves = {"°×ğØ", "µ¤¶¥º×"}
+        int index = 0;
+        System.out.println("Äñ£º");
+        while (index < aves.length) {
+            System.out.print(aves[index++] + " ");
+        }
+        
+        //while¿ÉÒÔĞ´³ÉÈçÏÂforÑ­»·
+        for (String b : aves) {
+            System.out.print(b + " ");
+        }
+    }
 }
 
 //Ë«²ãforÑ­»·±éÀú¶şÎ¬Êı×é P116
 public class HelloJava {
-	public static void main(String[] args) {
-		int[][] scores = new int[][] {{1, 2, 3}, {4, 5, 6}};//Î¬Êı¿ÉÒÔ²»ÍêÈ«Æ¥Åä{{1, 3}, {4, 5, 6}}
-		for (int[] is : scores) {
-			for (int i : is) {
-				System.out.println(i);
-			}
-		}
-	}
+    public static void main(String[] args) {
+        int[][] scores = new int[][] {{1, 2, 3}, {4, 5, 6}};//Î¬Êı¿ÉÒÔ²»ÍêÈ«Æ¥Åä{{1, 3}, {4, 5, 6}}
+        for (int[] is : scores) {
+            for (int i : is) {
+                System.out.println(i);
+            }
+        }
+    }
 }
 
 
 //P130¾ØÕó×ªÖÃ
 public class HelloJava {
-	public static void main(String[] args) {
-		int arr[][] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-		System.out.println("×ªÖÃÇ°µÄ¾ØÕóÊÇ£º");
-		printArray(arr);//
-		
-		int arr2[][] = new int[arr.length][arr.length];
-		for (int i = 0; i < arr.length; ++i) {
-			for (int j = 0; j < arr[i].length; ++j) {
-				arr2[j][i] = arr[i][j];
-			}
-		}
-		System.out.println("×ªÖÃºóµÄ¾ØÕóÊÇ£º");
-		printArray(arr2);
-	}
-	
-	//ÕâÀïÈç¹û²»¼Óstatic£¬»á±¨´íËµ¾²Ì¬º¯Êı²»ÄÜÒıÓÃ·Ç¾²Ì¬º¯Êı
-	private static void printArray(int[][] arr) {
-		for (int i = 0; i < arr.length; ++i) {
-			for (int j = 0; j < arr[i].length; ++j) {
-				System.out.print(arr[i][j] + " ");
-			}
-			System.out.println();
-		}
-	}
+    public static void main(String[] args) {
+        int arr[][] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        System.out.println("×ªÖÃÇ°µÄ¾ØÕóÊÇ£º");
+        printArray(arr);//
+        
+        int arr2[][] = new int[arr.length][arr.length];
+        for (int i = 0; i < arr.length; ++i) {
+            for (int j = 0; j < arr[i].length; ++j) {
+                arr2[j][i] = arr[i][j];
+            }
+        }
+        System.out.println("×ªÖÃºóµÄ¾ØÕóÊÇ£º");
+        printArray(arr2);
+    }
+    
+    //ÕâÀïÈç¹û²»¼Óstatic£¬»á±¨´íËµ¾²Ì¬º¯Êı²»ÄÜÒıÓÃ·Ç¾²Ì¬º¯Êı
+    private static void printArray(int[][] arr) {
+        for (int i = 0; i < arr.length; ++i) {
+            for (int j = 0; j < arr[i].length; ++j) {
+                System.out.print(arr[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
 }
 
 private static void print1DimensionArray(int[] arr) {
-	for (int i = 0; i < arr.length; ++i) {
-		System.out.println(arr[i] + " ");
-	}
+    for (int i = 0; i < arr.length; ++i) {
+        System.out.println(arr[i] + " ");
+    }
 }
 
 private static void print2DimensionArray(int[][] arr) {
-	for (int i = 0; i < arr.length; ++i) {
-		for (int j = 0; j < arr[i].length; ++j) {
-			System.out.print(arr[i][j] + " ");
-		}
-		System.out.println();
-	}
+    for (int i = 0; i < arr.length; ++i) {
+        for (int j = 0; j < arr[i].length; ++j) {
+            System.out.print(arr[i][j] + " ");
+        }
+        System.out.println();
+    }
 }
 
 Arrays.fill Ìî³äÊı×é P133
@@ -7620,40 +7620,40 @@ Arrays.copyOf/Arrays.copyOfRange ¸´ÖÆÊı×é P135
 
 //¶Ô±ÈÒ»Î¬¶şÎ¬Êı×éËùÕ¼ÄÚ´æ P137
 public class HelloJava {
-	public static void main(String[] args) {
-		int num1 = 1024 * 1024 * 2;
-		int arr1[] = new int[num1];
-		for (int i = 0; i < arr1.length; ++i) {
-			arr1[i] = i;
-		}
-		//»ñµÃÕ¼ÓÃÄÚ´æ×ÜÊı£¬²¢½«µ¥Î»×ª»»ÎªMB
-		long memory1 = Runtime.getRuntime().totalMemory() / 1024 / 1024;
-		System.out.println("Ò»Î¬Êı×éÕ¼ÓÃÄÚ´æÎÊÌâÎª£º" + memory1);
-		
-		int num2 = 1024 * 1024;
-		int arr2[][] = new int[num2][2];
-		for (int i = 0; i < arr2.length; ++i) {
-			arr2[i][0] = i;
-			arr2[i][1] = i;
-		}
-		//»ñµÃÕ¼ÓÃÄÚ´æ×ÜÊı£¬²¢½«µ¥Î»×ª»»ÎªMB
-		long memory2 = Runtime.getRuntime().totalMemory() / 1024 / 1024;
-		System.out.println("¶şÎ¬Êı×éÕ¼ÓÃÄÚ´æÎÊÌâÎª£º" + memory2);
-	}
+    public static void main(String[] args) {
+        int num1 = 1024 * 1024 * 2;
+        int arr1[] = new int[num1];
+        for (int i = 0; i < arr1.length; ++i) {
+            arr1[i] = i;
+        }
+        //»ñµÃÕ¼ÓÃÄÚ´æ×ÜÊı£¬²¢½«µ¥Î»×ª»»ÎªMB
+        long memory1 = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+        System.out.println("Ò»Î¬Êı×éÕ¼ÓÃÄÚ´æÎÊÌâÎª£º" + memory1);
+        
+        int num2 = 1024 * 1024;
+        int arr2[][] = new int[num2][2];
+        for (int i = 0; i < arr2.length; ++i) {
+            arr2[i][0] = i;
+            arr2[i][1] = i;
+        }
+        //»ñµÃÕ¼ÓÃÄÚ´æ×ÜÊı£¬²¢½«µ¥Î»×ª»»ÎªMB
+        long memory2 = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+        System.out.println("¶şÎ¬Êı×éÕ¼ÓÃÄÚ´æÎÊÌâÎª£º" + memory2);
+    }
 }
 
 P144 ÔÚ×Ö·û´®ºÍÆäËûÊı¾İÀàĞÍÁ¬½ÓÊ±£¬Í¬ÑùÊ¹ÓÃ¡°+¡±Á¬½Ó·û£¬Á¬½ÓÖ®ºóµÄ·µ»ØÖµÊÇ×Ö·û´®¡£
 
 P146 »ñÈ¡×Ö·û´®ĞÅÏ¢
 public class HelloJava {
-	public static void main(String[] args) {
-		String s = "";
-		System.out.println(s.length());
-		System.out.println(s.indexOf("a"));
-		System.out.println(s.lastIndexOf("a"));
-		s = "abc";
-		System.out.println(s.charAt(2));
-	}
+    public static void main(String[] args) {
+        String s = "";
+        System.out.println(s.length());
+        System.out.println(s.indexOf("a"));
+        System.out.println(s.lastIndexOf("a"));
+        s = "abc";
+        System.out.println(s.charAt(2));
+    }
 }
 
 s.trim();²»¶Ôµ±Ç°×Ö·û´®ĞŞ¸Ä£¬ĞèÒª½«·µ»ØÖµ¸³Öµ s = s.trim();
@@ -7662,18 +7662,18 @@ s.trim();²»¶Ôµ±Ç°×Ö·û´®ĞŞ¸Ä£¬ĞèÒª½«·µ»ØÖµ¸³Öµ s = s.trim();
 import java.util.StringTokenizer;
 
 public class HelloJava {
-	public static void main(String[] args) {
-		String text = "   We are students     ";
-		System.out.println("Ô­×Ö·û´®ÊÇ£º\n" + text);
-		StringTokenizer st = new StringTokenizer(text, " ");//¿ÉÒÔ°Ñ¿Õ¸ñ»»³ÉÈÎÒâ×Ö·û´®£¬Èç»»³É"tsn"£¬ÔòÈ¥³ıËùÓĞµÄ't','s','n'×Ö·û
-		StringBuffer sb = new StringBuffer();
-		while (st.hasMoreTokens()) {
-			sb.append(st.nextToken());
-		}
-		System.out.println("È¥µô×Ö·û´®ÖĞËùÓĞ¿Õ¸ñÖ®ºóµÄ×Ö·û´®ÊÇ£º\n" + sb.toString());
-		String s = text.replaceAll("ts", "");
-		System.out.println(s);
-	}
+    public static void main(String[] args) {
+        String text = "   We are students     ";
+        System.out.println("Ô­×Ö·û´®ÊÇ£º\n" + text);
+        StringTokenizer st = new StringTokenizer(text, " ");//¿ÉÒÔ°Ñ¿Õ¸ñ»»³ÉÈÎÒâ×Ö·û´®£¬Èç»»³É"tsn"£¬ÔòÈ¥³ıËùÓĞµÄ't','s','n'×Ö·û
+        StringBuffer sb = new StringBuffer();
+        while (st.hasMoreTokens()) {
+            sb.append(st.nextToken());
+        }
+        System.out.println("È¥µô×Ö·û´®ÖĞËùÓĞ¿Õ¸ñÖ®ºóµÄ×Ö·û´®ÊÇ£º\n" + sb.toString());
+        String s = text.replaceAll("ts", "");
+        System.out.println(s);
+    }
 }
 Êä³öÈçÏÂ£º
 Ô­×Ö·û´®ÊÇ£º
@@ -7687,44 +7687,44 @@ s.replaceAll(" ", "");
 //P151 ±È½ÏÔËËã·û¡°==¡±±È½ÏµÄÊÇÄÚ´æÎ»ÖÃ£¬²»ÊÊÒËÄÃÀ´±È½Ï×Ö·û´®£¬µ«ÕûĞÍµÈ¿ÉÒÔÓÃ±È½ÏÔËËã·û±È½Ï£»equals()·½·¨±È½ÏµÄÁ½¸ö×Ö·û´®ÄÚÈİ±ØĞëÍêÈ«Ò»Ñù£»equalsIgnoreCase()·½·¨ÔÚºöÂÔ´óĞ¡Ğ´µÄÇé¿öÏÂÄÚÈİ±ØĞëÒ»Ñù¡£
 
 public class HelloJava {
-	public static void main(String[] args) {
-		String text = "   We are students     ";
-		System.out.println(text.toUpperCase());
-	}
+    public static void main(String[] args) {
+        String text = "   We are students     ";
+        System.out.println(text.toUpperCase());
+    }
 }
 
 //split·Ö¸î×Ö·û´®
 public class HelloJava {
-	public static void main(String[] args) {
-		String s = new String("abc,def,ghi,gkl");
-		String news[] = s.split(",");//String news[] = s.split(",|g") ÓÃ|±íÊ¾,ºÍg¶¼ÊÇ·Ö¸ô·û£¬¼´Óöµ½,Ò²·Ö¸ô£¬Óöµ½gÒ²·Ö¸ô
-		for (String str : news) {
-			System.out.println(str);
-		}
-	}
+    public static void main(String[] args) {
+        String s = new String("abc,def,ghi,gkl");
+        String news[] = s.split(",");//String news[] = s.split(",|g") ÓÃ|±íÊ¾,ºÍg¶¼ÊÇ·Ö¸ô·û£¬¼´Óöµ½,Ò²·Ö¸ô£¬Óöµ½gÒ²·Ö¸ô
+        for (String str : news) {
+            System.out.println(str);
+        }
+    }
 }
 
 //ÅĞ¶Ï×Ö·û´®ÊÇ·ñÊÇÊı×Ö P155
 public class CheckNumber {
-	public static void main(String[] args) {
-		String s = "123456a";
-		if (CheckNumber.isNumber(s)) {//ÕâÀï¿ÉÒÔ²»ÓÃÖ¸¶¨ÀàÃû£¬Ö±½ÓÊ¹ÓÃisNumber
-			System.out.println(s + " is a number.");
-		}
-		else {
-			System.out.println(s + " is not a number.");
-		}
-	}
-	
-	private static boolean isNumber(String str) {
-		char c[] = str.toCharArray();
-		for (int i = 0; i < c.length; ++i) {
-			if (!Character.isDigit(c[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
+    public static void main(String[] args) {
+        String s = "123456a";
+        if (CheckNumber.isNumber(s)) {//ÕâÀï¿ÉÒÔ²»ÓÃÖ¸¶¨ÀàÃû£¬Ö±½ÓÊ¹ÓÃisNumber
+            System.out.println(s + " is a number.");
+        }
+        else {
+            System.out.println(s + " is not a number.");
+        }
+    }
+    
+    private static boolean isNumber(String str) {
+        char c[] = str.toCharArray();
+        for (int i = 0; i < c.length; ++i) {
+            if (!Character.isDigit(c[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 //ÈÕÆÚ¸ñÊ½»¯ P158
@@ -7732,28 +7732,28 @@ import java.util.Date;
 import java.util.Locale;
 
 public class HelloJava {
-	public static void main(String[] args) {
-		Date today = new Date();
-		String a = String.format(Locale.US, "%tb", today);//¿ÉÒÔ½«US¸Ä³ÉCHINESE/CHINA£¬»òÕßÊ¡ÂÔ£¬µÃµ½ÖĞÎÄµÄÏÔÊ¾
-		String b = String.format(Locale.US, "%tB", today);
-		String c = String.format("%ta", today);
-		String d = String.format("%tA", today);
-		String e = String.format("%tY", today);
-		String f = String.format("%ty", today);
-		String g = String.format("%tm", today);
-		String h = String.format("%td", today);
-		String i = String.format("%te", today);
-		
-		System.out.println(a);
-		System.out.println(b);
-		System.out.println(c);
-		System.out.println(d);
-		System.out.println(e);
-		System.out.println(f);
-		System.out.println(g);
-		System.out.println(h);
-		System.out.println(i);
-	}
+    public static void main(String[] args) {
+        Date today = new Date();
+        String a = String.format(Locale.US, "%tb", today);//¿ÉÒÔ½«US¸Ä³ÉCHINESE/CHINA£¬»òÕßÊ¡ÂÔ£¬µÃµ½ÖĞÎÄµÄÏÔÊ¾
+        String b = String.format(Locale.US, "%tB", today);
+        String c = String.format("%ta", today);
+        String d = String.format("%tA", today);
+        String e = String.format("%tY", today);
+        String f = String.format("%ty", today);
+        String g = String.format("%tm", today);
+        String h = String.format("%td", today);
+        String i = String.format("%te", today);
+        
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(c);
+        System.out.println(d);
+        System.out.println(e);
+        System.out.println(f);
+        System.out.println(g);
+        System.out.println(h);
+        System.out.println(i);
+    }
 }
 Êä³öÈçÏÂ£º
 Apr
@@ -7771,90 +7771,90 @@ April
 
 //ÕıÔò±í´ïÊ½ P165
 public class HelloJava {
-	public static void main(String[] args) {
-		String s1 = "Mrkj007";
-		String s2 = "mrdk007";
-		String regexStr = "\\p{Upper}\\p{Lower}\\p{Lower}\\p{Lower}\\d\\d\\d";//String regexStr = "\\p{Upper}\\p{Lower}{3}\\d{3}";
-		
-		boolean bn1 = s1.matches(regexStr);
-		boolean bn2 = s2.matches(regexStr);
-		
-		System.out.println(bn1);
-		System.out.println(bn2);
-	}
+    public static void main(String[] args) {
+        String s1 = "Mrkj007";
+        String s2 = "mrdk007";
+        String regexStr = "\\p{Upper}\\p{Lower}\\p{Lower}\\p{Lower}\\d\\d\\d";//String regexStr = "\\p{Upper}\\p{Lower}{3}\\d{3}";
+        
+        boolean bn1 = s1.matches(regexStr);
+        boolean bn2 = s2.matches(regexStr);
+        
+        System.out.println(bn1);
+        System.out.println(bn2);
+    }
 }
 
 //P166
 //Í¨Åä·û.Ç°²»ÓÃ\\£¬Æ¥Åäµ¥¸öÌØ¶¨×Ö·û¿ÉÒÔÖ±½Ó½«Õâ¸ö×Ö·ûĞ´ÉÏ£¬Èç@
 public class HelloJava {
-	public static void main(String[] args) {
-		String s1 = "a@aa";
-		
-		String regexStr = "\\w{0,}@.{1}\\w{1,}";//"\\w{0,}@.{1}\\w{1,}3$"±ØĞëÒªÇóÒÔ3Îª½áÎ²
-		
-		boolean bn1 = s1.matches(regexStr);
-		
-		System.out.println(bn1);
-	}
+    public static void main(String[] args) {
+        String s1 = "a@aa";
+        
+        String regexStr = "\\w{0,}@.{1}\\w{1,}";//"\\w{0,}@.{1}\\w{1,}3$"±ØĞëÒªÇóÒÔ3Îª½áÎ²
+        
+        boolean bn1 = s1.matches(regexStr);
+        
+        System.out.println(bn1);
+    }
 }
 
 
 public class HelloJava {
-	public static void main(String[] args) {
-		String telephone1 = "13024588795";
-		if (check(telephone1)) {
-			System.out.println("Legal");
-		}
-		else {
-			System.out.println("Unlegal");
-		}
-	}
-	
-	public static boolean check(String handset) {
-		String regex = "1[3,5,8]\\d{9}$";//[3,5,8]ÀïµÄ¶ººÅ¿ÉÒÔÊ¡ÂÔÎª[358]£¬×îºóµÄ$ÊÇ×Ö·û´®ÊÇÒÔÊ²Ã´Îª½áÎ²µÄÆ¥Åä·û
-		if (handset.matches(regex)) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
+    public static void main(String[] args) {
+        String telephone1 = "13024588795";
+        if (check(telephone1)) {
+            System.out.println("Legal");
+        }
+        else {
+            System.out.println("Unlegal");
+        }
+    }
+    
+    public static boolean check(String handset) {
+        String regex = "1[3,5,8]\\d{9}$";//[3,5,8]ÀïµÄ¶ººÅ¿ÉÒÔÊ¡ÂÔÎª[358]£¬×îºóµÄ$ÊÇ×Ö·û´®ÊÇÒÔÊ²Ã´Îª½áÎ²µÄÆ¥Åä·û
+        if (handset.matches(regex)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }
 
 //P168 ÕıÔò±í´ïÊ½ÑéÖ¤IPµØÖ·ºÏ·¨ĞÔ
 //P168 Í³¼Æºº×Ö¸öÊı
 import java.util.regex.Pattern;
 public class HelloJava {
-	public static void main(String[] args) {
-		String text = "Ã÷ÈÕ¿Æ¼¼ soft";
-		int amount = 0;
-		for (int i = 0; i < text.length(); ++i) {
-			boolean matches = Pattern.matches("^[\u4E00-\u9FA5]{0,}$", "" + text.charAt(i));//µÚ¶ş¸ö²ÎÊıÊÇString£¬ËùÒÔÒª½«×Ö·û´®Óë×Ö·ûÏà¼ÓµÃµ½×Ö·û´®Èë²Î£¬µÚÒ»¸ö²ÎÊı¸Ğ¾õÕâÑùÒ²¿ÉÒÔ"[\u4E00-\u9FA5]"
-			if (matches) {
-				++amount;
-			}
-		}
-		System.out.println(text + " ºº×Ö¸öÊı = " + amount);
-	}
+    public static void main(String[] args) {
+        String text = "Ã÷ÈÕ¿Æ¼¼ soft";
+        int amount = 0;
+        for (int i = 0; i < text.length(); ++i) {
+            boolean matches = Pattern.matches("^[\u4E00-\u9FA5]{0,}$", "" + text.charAt(i));//µÚ¶ş¸ö²ÎÊıÊÇString£¬ËùÒÔÒª½«×Ö·û´®Óë×Ö·ûÏà¼ÓµÃµ½×Ö·û´®Èë²Î£¬µÚÒ»¸ö²ÎÊı¸Ğ¾õÕâÑùÒ²¿ÉÒÔ"[\u4E00-\u9FA5]"
+            if (matches) {
+                ++amount;
+            }
+        }
+        System.out.println(text + " ºº×Ö¸öÊı = " + amount);
+    }
 }
 
 //StringBuilderÀà P170 ¸Ğ¾õÓĞµãÏñC++ÀïµÄstringstreamÀà
 public class HelloJava {
-	public static void main(String[] args) {
-		String s1 = "int";
-		String s2 = "ser";
-		StringBuilder builder = new StringBuilder(s1);
-		builder.insert(2, s2);//builder.insert(builder.length(), s2)µÈÓÚbuilder.append(s2)
-		System.out.println(builder);
-	}
+    public static void main(String[] args) {
+        String s1 = "int";
+        String s2 = "ser";
+        StringBuilder builder = new StringBuilder(s1);
+        builder.insert(2, s2);//builder.insert(builder.length(), s2)µÈÓÚbuilder.append(s2)
+        System.out.println(builder);
+    }
 }
 
 //JavaÀï¿ÉÒÔÕı³£´òÓ¡³ö×Ö·ûÊı×éÀïµÄ×Ö·û£¬¶ø²»±ØÏñC++Ò»Ñù¼Ó½áÊø·û'\0'
 public class HelloJava {
-	public static void main(String[] args) {
-		char arr[] = new char[] {'a', 'b'};
-		System.out.println(arr);
-	}
+    public static void main(String[] args) {
+        char arr[] = new char[] {'a', 'b'};
+        System.out.println(arr);
+    }
 }
 
 //nullÓë¿Õ×Ö·û´®µÄ²î±ğ
@@ -7871,36 +7871,36 @@ null ÄÇ¸ö¶ÔÏóÃ»ÓĞÄÚ´æ¿Õ¼ä
 
 //×Ö·û´®¼ÓÃÜ P174
 public class HelloJava {
-	public static void main(String[] args) {
-		String value = "ÎÒ°® Java";
-		char secret = 'Æí';
-		System.out.println("Ô­×Ö·û´®Îª£º" + value);
-		String encryt = EAndU(value, secret);
-		System.out.println("¼ÓÃÜºóµÄÖµ£º" + encryt);
-		String uncrypt = EAndU(encryt, secret);
-		System.out.println("½âÃÜºóµÄÖµ£º" + uncrypt);
-	}
-	
-	private static String EAndU(String value, char secret) {
-		byte bt[] = value.getBytes();
-		for (int i = 0; i < bt.length; ++i) {
-			bt[i] = (byte)(bt[i] ^ (int)secret);
-		}
-		return new String(bt, 0, bt.length);
-	}
+    public static void main(String[] args) {
+        String value = "ÎÒ°® Java";
+        char secret = 'Æí';
+        System.out.println("Ô­×Ö·û´®Îª£º" + value);
+        String encryt = EAndU(value, secret);
+        System.out.println("¼ÓÃÜºóµÄÖµ£º" + encryt);
+        String uncrypt = EAndU(encryt, secret);
+        System.out.println("½âÃÜºóµÄÖµ£º" + uncrypt);
+    }
+    
+    private static String EAndU(String value, char secret) {
+        byte bt[] = value.getBytes();
+        for (int i = 0; i < bt.length; ++i) {
+            bt[i] = (byte)(bt[i] ^ (int)secret);
+        }
+        return new String(bt, 0, bt.length);
+    }
 }
 
 //P184 Ö»¿ÉÒÔÔÚÎŞ²Î¹¹Ôì·½·¨ÖĞµÄµÚÒ»¾äÊ¹ÓÃthis¹Ø¼ü×Öµ÷ÓÃÓĞ²Î¹¹Ôì·½·¨
 public class AnyThing {
-	public AnyThing() {
-		//String a;
-		this("this µ÷ÓÃÓĞ²Î¹¹Ôì·½·¨");
-		System.out.println("ÎŞ²Î¹¹Ôì·½·¨");
-	}
-	
-	public AnyThing(String name) {
-		System.out.println("ÓĞ²Î¹¹Ôì·½·¨" + name);
-	}
+    public AnyThing() {
+        //String a;
+        this("this µ÷ÓÃÓĞ²Î¹¹Ôì·½·¨");
+        System.out.println("ÎŞ²Î¹¹Ôì·½·¨");
+    }
+    
+    public AnyThing(String name) {
+        System.out.println("ÓĞ²Î¹¹Ôì·½·¨" + name);
+    }
 }
 
 //P190
@@ -7910,24 +7910,24 @@ JavaÖĞ²»ÄÜ½«·½·¨ÌåÄÚµÄ¾Ö²¿±äÁ¿ÉùÃ÷Îªstatic¡£
 Èç¹ûÔÚÖ´ĞĞÀàÊ±£¬Ï£ÍûÏÈÖ´ĞĞÀàµÄ³õÊ¼»¯¶¯×÷£¬¿ÉÒÔÊ¹ÓÃstatic¶¨ÒåÒ»¸ö¾²Ì¬ÇøÓò¡£
 µ±Õâ¶Î´úÂë±»Ö´ĞĞÊ±£¬Ê×ÏÈÖ´ĞĞstatic¿éÖĞµÄ³ÌĞò£¬²¢ÇÒÖ»»áÖ´ĞĞÒ»´Î¡£
 public class AnyThing {
-	static {
-		System.out.println("static area");
-	}
-	public AnyThing() {
-		this("this µ÷ÓÃÓĞ²Î¹¹Ôì·½·¨");
-		System.out.println("ÎŞ²Î¹¹Ôì·½·¨");
-	}
-	
-	public AnyThing(String name) {
-		System.out.println("ÓĞ²Î¹¹Ôì·½·¨" + name);
-	}
+    static {
+        System.out.println("static area");
+    }
+    public AnyThing() {
+        this("this µ÷ÓÃÓĞ²Î¹¹Ôì·½·¨");
+        System.out.println("ÎŞ²Î¹¹Ôì·½·¨");
+    }
+    
+    public AnyThing(String name) {
+        System.out.println("ÓĞ²Î¹¹Ôì·½·¨" + name);
+    }
 }
 
 public class HelloJava {
-	public static void main(String[] args) {
-		AnyThing a1 = new AnyThing();
-		AnyThing a2 = new AnyThing();
-	}
+    public static void main(String[] args) {
+        AnyThing a1 = new AnyThing();
+        AnyThing a2 = new AnyThing();
+    }
 }
 Êä³öÈçÏÂ£º
 static area
@@ -7942,26 +7942,26 @@ static area
 
 //¿ÉÒÔ¶ÔÓĞmainº¯ÊıµÄÀà½øĞĞÉùÃ÷´´½¨ P193
 public class HelloJava {
-	public static void main(String[] args) {
-		HelloJava hj = new HelloJava();
-		System.out.println(hj.plus(1, 2));
-	}
-	
-	public double plus(double d1, double d2) {
-		return d1 + d2;
-	}
+    public static void main(String[] args) {
+        HelloJava hj = new HelloJava();
+        System.out.println(hj.plus(1, 2));
+    }
+    
+    public double plus(double d1, double d2) {
+        return d1 + d2;
+    }
 }
 
 //µ±°Ñplus¶¨ÒåÎªstaticºó£¬»áÓĞÌáÊ¾¾²Ì¬·½·¨Ó¦¸ÃÍ¨¹ı¾²Ì¬·½Ê½·ÃÎÊ£¬ËùÒÔhj.plusÓ¦¸ÃĞŞ¸ÄÎªHelloJava.plus
 public class HelloJava {
-	public static void main(String[] args) {
-		HelloJava hj = new HelloJava();//HelloJava hj = null;ÉèÖÃhjÎªnull,ÏÂÒ»¾äµÄÊä³öÈÔÊÇÕı³£¿ÉÓÃµÄ£¬ÒòÎª¾²Ì¬º¯Êı²»ÒÀÀµÓÚ¶ÔÏó£¬ÈôÈ¥µôstatic£¬Ôò±àÒë±¨´í
-		System.out.println(hj.plus(1, 2));//System.out.println(HelloJava.plus(1, 2));
-	}
-	
-	public static double plus(double d1, double d2) {
-		return d1 + d2;
-	}
+    public static void main(String[] args) {
+        HelloJava hj = new HelloJava();//HelloJava hj = null;ÉèÖÃhjÎªnull,ÏÂÒ»¾äµÄÊä³öÈÔÊÇÕı³£¿ÉÓÃµÄ£¬ÒòÎª¾²Ì¬º¯Êı²»ÒÀÀµÓÚ¶ÔÏó£¬ÈôÈ¥µôstatic£¬Ôò±àÒë±¨´í
+        System.out.println(hj.plus(1, 2));//System.out.println(HelloJava.plus(1, 2));
+    }
+    
+    public static double plus(double d1, double d2) {
+        return d1 + d2;
+    }
 }
 
 P199 À¬»ø»ØÊÕÆ÷Ö»ÄÜ»ØÊÕÄÇĞ©ÓÉnew²Ù×÷·û´´½¨µÄ¶ÔÏó£¬Èç¹û¶ÔÏó²»ÊÇÍ¨¹ınew²Ù×÷·ûÔÚÄÚ´æÖĞ»ñÈ¡Ò»¿éÄÚ´æÇøÓò£¬ÕâÖÖ¶ÔÏó¿ÉÄÜ²»±»À¬»ø»ØÊÕ»úÖÆËùÊ¶±ğ£¬ËùÒÔÔÚJavaÓïÑÔÖĞÌá¹©ÁËÒ»¸öfinalize()·½·¨£¬ÊÇObjectÀàµÄ·½·¨£¬Ëü±»ÉùÃ÷Îªprotected£¬ÓÃ»§¿ÉÒÔÔÚ×Ô¼ºµÄÀàÖĞ¶¨ÒåÕâ¸ö·½·¨£¬Èç¹ûÓÃ»§ÔÚÀàÖĞ¶¨ÒåÁËfinalize()·½·¨£¬ÔÚÀ¬»ø»ØÊÕÊ±Ê×ÏÈµ÷ÓÃ¸Ã·½·¨£¬²¢ÇÒÔÚÏÂÒ»´ÎÀ¬»ø»ØÊÕ¶¯×÷·¢ÉúÊ±£¬²ÅÄÜÕæÕı»ØÊÕ¶ÔÏóÕ¼ÓÃµÄÄÚ´æ¡£
@@ -7971,37 +7971,37 @@ P199 À¬»ø»ØÊÕÆ÷Ö»ÄÜ»ØÊÕÄÇĞ©ÓÉnew²Ù×÷·û´´½¨µÄ¶ÔÏó£¬Èç¹û¶ÔÏó²»ÊÇÍ¨¹ınew²Ù×÷·ûÔÚÄÚ´
 import java.util.Random;
 
 public class HelloJava {
-	public static void main(String[] args) {
-		String titles[] = {"Java1", "Java2", "Java3"};
-		for (int i = 0; i < 5; ++i) {
-			new Book(titles[new Random().nextInt(3)]);//ÕâÀïµÄnew Random().nextInt(3)»á±»Ê¶±ğÎª(new Random()).nextInt(3)£¬¼´new³öÀ´Ò»¸öRandom¶ÔÏó£¬²¢µ÷ÓÃÆä³ÉÔ±º¯ÊınextInt¡£
-		}
-		System.out.println("×Ü¼ÆÂôÊé£º" + Book.getCounter());
-	}
+    public static void main(String[] args) {
+        String titles[] = {"Java1", "Java2", "Java3"};
+        for (int i = 0; i < 5; ++i) {
+            new Book(titles[new Random().nextInt(3)]);//ÕâÀïµÄnew Random().nextInt(3)»á±»Ê¶±ğÎª(new Random()).nextInt(3)£¬¼´new³öÀ´Ò»¸öRandom¶ÔÏó£¬²¢µ÷ÓÃÆä³ÉÔ±º¯ÊınextInt¡£
+        }
+        System.out.println("×Ü¼ÆÂôÊé£º" + Book.getCounter());
+    }
 }
 
 
 public class Book {
-	private static int counter = 0;
-	public Book(String titel) {
-		System.out.println("Sold book: " + titel);
-		++counter;
-	}
-	
-	public static int getCounter() {
-		return counter;
-	}
+    private static int counter = 0;
+    public Book(String titel) {
+        System.out.println("Sold book: " + titel);
+        ++counter;
+    }
+    
+    public static int getCounter() {
+        return counter;
+    }
 }
 
 //JavaÀïµÄÄ¬ÈÏ¶ÔÏóµÄequals·½·¨¼Ì³Ğ×ÔObject£¬Óë==Ò»Ñù£¬Ö»ÓĞµ±Á½¸ö¶ÔÏóËùÒıÓÃµÄÄÚ´æÒ»ÖÂÊ±£¬²Å·µ»Øtrue£»StringµÄ==ÈÔÊÇÄ¬ÈÏ±È½ÏÄÚ´æÊÇ·ñÒ»ÖÂ£¬equalsÊÇÖØÔØ¹ıµÄ±È½Ï×Ö·û´®ÄÚÈİÊÇ·ñÒ»Ñù
 public class HelloJava {
-	public static void main(String[] args) {
-		Book b1 = new Book("abc");
-		Book b2 = new Book("abc");
-		Book b3 = b1;
-		System.out.println(b1 == b2);//System.out.println(b1.equals(b2));
-		System.out.println(b1 == b3);//System.out.println(b1.equals(b3));
-	}
+    public static void main(String[] args) {
+        Book b1 = new Book("abc");
+        Book b2 = new Book("abc");
+        Book b3 = b1;
+        System.out.println(b1 == b2);//System.out.println(b1.equals(b2));
+        System.out.println(b1 == b3);//System.out.println(b1.equals(b3));
+    }
 }
 Êä³öÈçÏÂ£º
 Sold book: abc
@@ -8013,195 +8013,195 @@ true
 import java.awt.Color;
 
 public class HelloJava {
-	public static void main(String[] args) {
-		Cat cat1 = new Cat("Java", 12, 21, Color.BLACK);
-		Cat cat2 = new Cat("C++", 12, 21, Color.WHITE);
-		Cat cat3 = new Cat("Java", 12, 21, Color.BLACK);
-		
-		System.out.println("Cat1 hashCode: " + cat1.hashCode());
-		System.out.println("Cat2 hashCode: " + cat2.hashCode());
-		System.out.println("Cat3 hashCode: " + cat3.hashCode());
-		
-		System.out.println("Cat1 equals Cat2: " + cat1.equals(cat2));
-		System.out.println("Cat1 equals Cat3: " + cat1.equals(cat3));
-	}
+    public static void main(String[] args) {
+        Cat cat1 = new Cat("Java", 12, 21, Color.BLACK);
+        Cat cat2 = new Cat("C++", 12, 21, Color.WHITE);
+        Cat cat3 = new Cat("Java", 12, 21, Color.BLACK);
+        
+        System.out.println("Cat1 hashCode: " + cat1.hashCode());
+        System.out.println("Cat2 hashCode: " + cat2.hashCode());
+        System.out.println("Cat3 hashCode: " + cat3.hashCode());
+        
+        System.out.println("Cat1 equals Cat2: " + cat1.equals(cat2));
+        System.out.println("Cat1 equals Cat3: " + cat1.equals(cat3));
+    }
 }
 
 import java.awt.Color;
 
 public class Cat {
-	private String name;
-	private int age;
-	private double weight;
-	private Color color;
-	
-	public Cat(String name, int age, double weight, Color color) {
-		this.name = name;
-		this.age = age;//age = ageÕâÑù¸³Öµ£¬½«Ã»ÓĞĞ§¹û£¬²»ÏñÊéÖĞËùÊö¿ÉÒÔÈ¥µôthis
-		this.weight = weight;
-		this.color = color;
-	}
+    private String name;
+    private int age;
+    private double weight;
+    private Color color;
+    
+    public Cat(String name, int age, double weight, Color color) {
+        this.name = name;
+        this.age = age;//age = ageÕâÑù¸³Öµ£¬½«Ã»ÓĞĞ§¹û£¬²»ÏñÊéÖĞËùÊö¿ÉÒÔÈ¥µôthis
+        this.weight = weight;
+        this.color = color;
+    }
 
-	//@Override¸æËß±àÒëÆ÷ÏÂÃæµÄº¯ÊıÊÇÖØÔØ£¬Èç¹ûÊ¶Ğ´³ÉEquals£¬Ôò»áÓĞ±àÒë´íÎó£¬Èç¹û²»¼Ó@Override£¬¾ÍËãº¯ÊıĞ´´íÁË£¬±àÒëÆ÷Ò²Ö»»áÈÏÎªÊÇĞÂÔöÁËÒ»¸öº¯Êı
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		
-		Cat cat = (Cat) obj;
-		return name.equals(cat.name) && (age == cat.age)
-				&& (weight == cat.weight) && (color.equals(cat.color));
-	}
-	
-	@Override
-	public int hashCode() {
-		//ÕâÀïµÄ¼¸¸öÊı×Ö¿ÉÒÔËæ±ã¼Ó£¬Ö»ÊÇÎªÁËÇø·Ö²»Í¬¶ÔÏóµÄ¹şÏ£Âë
-		//IntegerºÍDoubleÕâĞ©Ô­Ê¼Êı¾İÀàĞÍÒª×ª»»³ÉÔ­Êı¾İÀàĞÍ²ÅÓĞhashCodeº¯Êı£¬ÕâÒ²ÊÇÕâĞ©Êı¾İÀàĞÍ¿ÉÒÔÖ±½ÓÓÃ==±È½ÏµÄÔ­ÒòÂğ£¿
-		return 7 * name.hashCode() + 11 * new Integer(age).hashCode()
-				+ 13 * new Double(weight).hashCode() + 17 * color.hashCode();
-	}
-	
-	public void show() {
-		System.out.println(name + age + weight + color);
-	}
+    //@Override¸æËß±àÒëÆ÷ÏÂÃæµÄº¯ÊıÊÇÖØÔØ£¬Èç¹ûÊ¶Ğ´³ÉEquals£¬Ôò»áÓĞ±àÒë´íÎó£¬Èç¹û²»¼Ó@Override£¬¾ÍËãº¯ÊıĞ´´íÁË£¬±àÒëÆ÷Ò²Ö»»áÈÏÎªÊÇĞÂÔöÁËÒ»¸öº¯Êı
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        
+        Cat cat = (Cat) obj;
+        return name.equals(cat.name) && (age == cat.age)
+                && (weight == cat.weight) && (color.equals(cat.color));
+    }
+    
+    @Override
+    public int hashCode() {
+        //ÕâÀïµÄ¼¸¸öÊı×Ö¿ÉÒÔËæ±ã¼Ó£¬Ö»ÊÇÎªÁËÇø·Ö²»Í¬¶ÔÏóµÄ¹şÏ£Âë
+        //IntegerºÍDoubleÕâĞ©Ô­Ê¼Êı¾İÀàĞÍÒª×ª»»³ÉÔ­Êı¾İÀàĞÍ²ÅÓĞhashCodeº¯Êı£¬ÕâÒ²ÊÇÕâĞ©Êı¾İÀàĞÍ¿ÉÒÔÖ±½ÓÓÃ==±È½ÏµÄÔ­ÒòÂğ£¿
+        return 7 * name.hashCode() + 11 * new Integer(age).hashCode()
+                + 13 * new Double(weight).hashCode() + 17 * color.hashCode();
+    }
+    
+    public void show() {
+        System.out.println(name + age + weight + color);
+    }
 }
 
 //P201 ººÅµËş
 //P202 µ¥ÀıÄ£Ê½
 //JavaÀïÃ»ÓĞstatic¾Ö²¿±äÁ¿£¬ËùÒÔ²»ÄÜÏñC++Ò»Ñù£¬ÔÚgetInstanceÀïÉùÃ÷Ò»¸östaticµÄµ¥Àı¶ÔÏó
 public class HelloJava {
-	public static void main(String[] args) {
-		Emperor emperor1 = Emperor.getInstance();
-		Emperor emperor2 = Emperor.getInstance();
-		Emperor emperor3 = Emperor.getInstance();
-		
-		emperor1.getName();
-		emperor2.getName();
-		emperor3.getName();
-	}
+    public static void main(String[] args) {
+        Emperor emperor1 = Emperor.getInstance();
+        Emperor emperor2 = Emperor.getInstance();
+        Emperor emperor3 = Emperor.getInstance();
+        
+        emperor1.getName();
+        emperor2.getName();
+        emperor3.getName();
+    }
 }
 
 
 public class Emperor {
-	private static Emperor emperor = null;
-	private Emperor() {
-	}
-	
-	public static Emperor getInstance() {//Ö»ÔÚÊ¹ÓÃÊ±²Å´´½¨
-		if (null == emperor) {
-			emperor = new Emperor();
-		}
-		return emperor;
-	}
-	
-	public void getName() {
-		System.out.println("ÎÒÊÇ»ÊµÛ£ºÃ÷ÈÕ¿Æ¼¼");
-	}
+    private static Emperor emperor = null;
+    private Emperor() {
+    }
+    
+    public static Emperor getInstance() {//Ö»ÔÚÊ¹ÓÃÊ±²Å´´½¨
+        if (null == emperor) {
+            emperor = new Emperor();
+        }
+        return emperor;
+    }
+    
+    public void getName() {
+        System.out.println("ÎÒÊÇ»ÊµÛ£ºÃ÷ÈÕ¿Æ¼¼");
+    }
 }
 
 //¿É²Î¿¼Head FirstÖĞËù½²µÄ£¬ÔÚ³ÌĞò³õÊ¼»¯¾Í½«ÊµÀı½¨ºÃ¡£ÔÚC++³ÌĞòÖĞËÑ¡°private static Singleton uniqueInstance = new Singleton();¡±
 public class Emperor {
-	private static Emperor emperor = new Emperor();
-	private Emperor() {
-	}
-	
-	public static Emperor getInstance() {
-		return emperor;
-	}
-	
-	public void getName() {
-		System.out.println("ÎÒÊÇ»ÊµÛ£ºÃ÷ÈÕ¿Æ¼¼");
-	}
+    private static Emperor emperor = new Emperor();
+    private Emperor() {
+    }
+    
+    public static Emperor getInstance() {
+        return emperor;
+    }
+    
+    public void getName() {
+        System.out.println("ÎÒÊÇ»ÊµÛ£ºÃ÷ÈÕ¿Æ¼¼");
+    }
 }
 
 
 //P209 ½Ó¿Ú
 public class GifSaver implements ImageSaver {
-	@Override
-	public void save() {//Èç¹û²»implements ImageSaver£¬Ôò¼ÓÁË@Override»áÌá¹©±¨´í
-		System.out.println("save as GIF");
-	}
-	
-	public static void main(String[] args) {
-		GifSaver gs = new GifSaver();
-		gs.save();
-	}
+    @Override
+    public void save() {//Èç¹û²»implements ImageSaver£¬Ôò¼ÓÁË@Override»áÌá¹©±¨´í
+        System.out.println("save as GIF");
+    }
+    
+    public static void main(String[] args) {
+        GifSaver gs = new GifSaver();
+        gs.save();
+    }
 }
 
 public interface ImageSaver {
-	void save();//Ö»ÄÜÊÇpublic»ò²»¼Ó¼´public£¬²»ÄÜÎªprivate
+    void save();//Ö»ÄÜÊÇpublic»ò²»¼Ó¼´public£¬²»ÄÜÎªprivate
 }
 
 //½Ó¿ÚºÍ¼Ì³ĞµÄÊ¹ÓÃ P208
 import java.awt.Point;
 
 public class Image {//Èç¹ûÕâÀï¼ÓÁËfinal£¬Ôò´ËÀà½«ÎŞ·¨±»¼Ì³Ğ
-	private String name;//²»¼ÓĞŞÊÎ·û£¬ÔòÄ¬ÈÏÎªpublic
-	private Point size;
-	
-	public Image(String name, Point size) {
-		this.name = name;
-		this.size = size;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public Point getSize() {
-		return size;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public void setSize(Point size) {
-		this.size = size;
-	}
+    private String name;//²»¼ÓĞŞÊÎ·û£¬ÔòÄ¬ÈÏÎªpublic
+    private Point size;
+    
+    public Image(String name, Point size) {
+        this.name = name;
+        this.size = size;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public Point getSize() {
+        return size;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setSize(Point size) {
+        this.size = size;
+    }
 }
 
 
 public interface ImageSaver {
-	void save();
+    void save();
 }
 
 
 import java.awt.Point;
 
 public class GifSaver extends Image implements ImageSaver {//Èç¹ûÓĞ¶à¸ö½Ó¿ÚÒªÊµÏÖ£¬ÔòÓÃ,·Ö¸ô¶à¸ö½Ó¿Ú
-	private static String extendsName = ".gif";
-	
-	public GifSaver(String name, Point size) {
-		super(name, size);//ÕâÀïµ÷ÓÃ¸¸ÀàµÄ¹¹Ôìº¯Êı
-	}
-	
-	@Override
-	public void save() {
-		System.out.println(getName() + " is saved as a GIF.");
-	}
-	
-	@Override
-	public String getName() {//ÕâÀï¸ÄÎªprivate£¬½«ÌáÊ¾²»ÄÜ¼õÉÙ»ùÀàµÄ¿É¼ûĞÔ¡£¿É½«»ùÀàµÄĞŞÊÎ·û¸ÄÎªprotected£¬ÕâÀï¸ÄÎªpublic
-		return super.getName() + extendsName;
-	}
-	
-	public static void main(String[] args) {
-		GifSaver gs = new GifSaver("hello", new Point(3, 4));//¿É¸ÄÎª£ºImage gs = new GifSaver("hello", new Point(3, 4));£¬Ôògs.save()½«ÎŞ·¨µ÷ÓÃ
-		gs.save();
-		System.out.println(gs.getName());
-		
-		Image i = new Image("abc", new Point(4, 5));//Èç¹ûÔÚImageµÄÉùÃ÷Àï¼ÓÁËabstract£¬ÔòÊÇĞé»ùÀà£¬ÄÇÃ´ÕâÀï½«²»ÄÜÊµÀı»¯
-		//i.save();//saveÊÇ½Ó¿ÚÌá¹©µÄº¯Êı£¬¸¸ÀàÃ»ÓĞ´Ëº¯Êı
-		System.out.println(i.getName());
-	}
+    private static String extendsName = ".gif";
+    
+    public GifSaver(String name, Point size) {
+        super(name, size);//ÕâÀïµ÷ÓÃ¸¸ÀàµÄ¹¹Ôìº¯Êı
+    }
+    
+    @Override
+    public void save() {
+        System.out.println(getName() + " is saved as a GIF.");
+    }
+    
+    @Override
+    public String getName() {//ÕâÀï¸ÄÎªprivate£¬½«ÌáÊ¾²»ÄÜ¼õÉÙ»ùÀàµÄ¿É¼ûĞÔ¡£¿É½«»ùÀàµÄĞŞÊÎ·û¸ÄÎªprotected£¬ÕâÀï¸ÄÎªpublic
+        return super.getName() + extendsName;
+    }
+    
+    public static void main(String[] args) {
+        GifSaver gs = new GifSaver("hello", new Point(3, 4));//¿É¸ÄÎª£ºImage gs = new GifSaver("hello", new Point(3, 4));£¬Ôògs.save()½«ÎŞ·¨µ÷ÓÃ
+        gs.save();
+        System.out.println(gs.getName());
+        
+        Image i = new Image("abc", new Point(4, 5));//Èç¹ûÔÚImageµÄÉùÃ÷Àï¼ÓÁËabstract£¬ÔòÊÇĞé»ùÀà£¬ÄÇÃ´ÕâÀï½«²»ÄÜÊµÀı»¯
+        //i.save();//saveÊÇ½Ó¿ÚÌá¹©µÄº¯Êı£¬¸¸ÀàÃ»ÓĞ´Ëº¯Êı
+        System.out.println(i.getName());
+    }
 }
 Êä³öÈçÏÂ£º
 hello.gif is saved as a GIF.
@@ -8214,35 +8214,35 @@ abc
 
 //P221 Ê¹ÓÃComparable½Ó¿Ú×Ô¶¨ÒåÅÅĞò
 public class Employee implements Comparable<Employee>{
-	private int id;
-	private String name;
-	private int age;
-	
-	public Employee(int id, String name, int age) {
-		this.id = id;
-		this.name = name;
-		this.age = age;
-	}
-	
-	@Override
-	public int compareTo(Employee o) {
-		if (id > o.id) {
-			return 1;
-		}
-		else if (id < o.id) {
-			return -1;
-		}
-		return 0;
-	}
-	
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Id: " + id + ",");
-		sb.append("name: " + name + ",");
-		sb.append("age: " + age);
-		return sb.toString();
-	}
+    private int id;
+    private String name;
+    private int age;
+    
+    public Employee(int id, String name, int age) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+    }
+    
+    @Override
+    public int compareTo(Employee o) {
+        if (id > o.id) {
+            return 1;
+        }
+        else if (id < o.id) {
+            return -1;
+        }
+        return 0;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("Id: " + id + ",");
+        sb.append("name: " + name + ",");
+        sb.append("age: " + age);
+        return sb.toString();
+    }
 }
 
 
@@ -8251,28 +8251,28 @@ import java.util.Collections;
 import java.util.List;
 
 public class Test {
-	public static void main(String args[]) {
-		Employee e1 = new Employee(3, "Li Lei", 26);
-		Employee e2 = new Employee(2, "Han Meimei", 25);
-		Employee e3 = new Employee(1, "Kily", 27);
-		
-		List<Employee> employeeList = new ArrayList<Employee>();//ÕâÊÇÊı×éĞÍµÄList£¬Ò²¿ÉÒÔ´´½¨Á´±íĞÍµÄLinkedList<>
-		employeeList.add(e1);
-		employeeList.add(e2);
-		employeeList.add(e3);
-		
-		System.out.println("Before sort: ");//System.out.println(employeeList);¿ÉÒÔÖ±½Ó´òÓ¡Õû¸öList
-		for (Employee e : employeeList) {
-			System.out.println(e);
-		}
-		
-		Collections.sort(employeeList);
-		
-		System.out.println("After sort: ");
-		for (Employee e : employeeList) {
-			System.out.println(e);
-		}
-	}
+    public static void main(String args[]) {
+        Employee e1 = new Employee(3, "Li Lei", 26);
+        Employee e2 = new Employee(2, "Han Meimei", 25);
+        Employee e3 = new Employee(1, "Kily", 27);
+        
+        List<Employee> employeeList = new ArrayList<Employee>();//ÕâÊÇÊı×éĞÍµÄList£¬Ò²¿ÉÒÔ´´½¨Á´±íĞÍµÄLinkedList<>
+        employeeList.add(e1);
+        employeeList.add(e2);
+        employeeList.add(e3);
+        
+        System.out.println("Before sort: ");//System.out.println(employeeList);¿ÉÒÔÖ±½Ó´òÓ¡Õû¸öList
+        for (Employee e : employeeList) {
+            System.out.println(e);
+        }
+        
+        Collections.sort(employeeList);
+        
+        System.out.println("After sort: ");
+        for (Employee e : employeeList) {
+            System.out.println(e);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 Before sort: 
@@ -8286,82 +8286,82 @@ Id: 3,name: Li Lei,age: 26
 
 //¶¯Ì¬ÉèÖÃÀàµÄË½ÓĞÓò P222
 public class Student {
-	private int id;
-	private String name;
-	private boolean male;
-	private double account;
-	
-	public Student(int id, String name, boolean male, double account) {
-		this.id = id;
-		this.name = name;
-		this.male = male;
-		this.account = account;
-	}
-	
-	public int getId() {
-		return id;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public boolean isMale() {
-		return male;
-	}
-	
-	public double getAccount() {
-		return account;
-	}
+    private int id;
+    private String name;
+    private boolean male;
+    private double account;
+    
+    public Student(int id, String name, boolean male, double account) {
+        this.id = id;
+        this.name = name;
+        this.male = male;
+        this.account = account;
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public boolean isMale() {
+        return male;
+    }
+    
+    public double getAccount() {
+        return account;
+    }
 }
 
 
 import java.lang.reflect.Field;
 
 public class Test {
-	public static void main(String args[]) {
-		Student student = new Student(1, "Li Lei", true, 100);
-		Class<?> clazz = student.getClass();
-		System.out.println("The standard class name: " + clazz.getCanonicalName());
-		System.out.println("The simple class name: " + clazz.getSimpleName());
-		try {
-			Field id = clazz.getDeclaredField("id");
-			System.out.println("Before id is set: " + student.getId());
-			id.setAccessible(true);
-			id.setInt(student, 10);
-			System.out.println("After id is set: " + student.getId());
-			
-			Field name = clazz.getDeclaredField("name");
-			System.out.println("Before name is set: " + student.getName());
-			name.setAccessible(true);
-			name.set(student, "Han Meimei");
-			System.out.println("After name is set: " + student.getName());
-			
-			Field male = clazz.getDeclaredField("male");
-			System.out.println("Before male is set: " + student.isMale());
-			male.setAccessible(true);
-			male.setBoolean(student, false);
-			System.out.println("After male is set: " + student.isMale());
-			
-			Field account = clazz.getDeclaredField("account");
-			System.out.println("Before account is set: " + student.getAccount());
-			account.setAccessible(true);
-			account.setDouble(student, 200);
-			System.out.println("After account is set: " + student.getAccount());
-		}
-		catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		}
-		catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		}
-		catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String args[]) {
+        Student student = new Student(1, "Li Lei", true, 100);
+        Class<?> clazz = student.getClass();
+        System.out.println("The standard class name: " + clazz.getCanonicalName());
+        System.out.println("The simple class name: " + clazz.getSimpleName());
+        try {
+            Field id = clazz.getDeclaredField("id");
+            System.out.println("Before id is set: " + student.getId());
+            id.setAccessible(true);
+            id.setInt(student, 10);
+            System.out.println("After id is set: " + student.getId());
+            
+            Field name = clazz.getDeclaredField("name");
+            System.out.println("Before name is set: " + student.getName());
+            name.setAccessible(true);
+            name.set(student, "Han Meimei");
+            System.out.println("After name is set: " + student.getName());
+            
+            Field male = clazz.getDeclaredField("male");
+            System.out.println("Before male is set: " + student.isMale());
+            male.setAccessible(true);
+            male.setBoolean(student, false);
+            System.out.println("After male is set: " + student.isMale());
+            
+            Field account = clazz.getDeclaredField("account");
+            System.out.println("Before account is set: " + student.getAccount());
+            account.setAccessible(true);
+            account.setDouble(student, 200);
+            System.out.println("After account is set: " + student.getAccount());
+        }
+        catch (SecurityException e) {
+            e.printStackTrace();
+        }
+        catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 The standard class name: Student
@@ -8377,114 +8377,114 @@ After account is set: 200.0
 
 //»ùÀàÓë×ÓÀàµÄÀàĞÍ×ª»» P223 Á·Ï°2
 class HighSchoolStudent extends Student {
-	public HighSchoolStudent(int id, String name, boolean male, double account) {
-		super(id, name, male, account);
-	}
-	
-	@Override
-	public String getName() {
-		return "High School: " + super.getName();
-	}
-	
-	public void highSchoolSpecification() {
-		System.out.println("I'm high school student.");
-	}
+    public HighSchoolStudent(int id, String name, boolean male, double account) {
+        super(id, name, male, account);
+    }
+    
+    @Override
+    public String getName() {
+        return "High School: " + super.getName();
+    }
+    
+    public void highSchoolSpecification() {
+        System.out.println("I'm high school student.");
+    }
 }
 
 
 public class Test {
-	public static void main(String args[]) {
-		HighSchoolStudent hss = new HighSchoolStudent(1, "Li Lei", true, 100);
-		System.out.println(hss.getName());
-		hss.highSchoolSpecification();
-		
-		Student s = (Student)hss;//ÀàĞÍ×ª»»Ö±½ÓÓÃ()¼´¿É
-		System.out.println(s.getName());
-		//s.highSchoolSpecification();//ÕâÀï×ª»»³É»ùÀàºó£¬Ã»ÓĞ×ÓÀàº¯ÊıÁË
-		
-		hss = (HighSchoolStudent)s;
-		hss.highSchoolSpecification();
-	}
+    public static void main(String args[]) {
+        HighSchoolStudent hss = new HighSchoolStudent(1, "Li Lei", true, 100);
+        System.out.println(hss.getName());
+        hss.highSchoolSpecification();
+        
+        Student s = (Student)hss;//ÀàĞÍ×ª»»Ö±½ÓÓÃ()¼´¿É
+        System.out.println(s.getName());
+        //s.highSchoolSpecification();//ÕâÀï×ª»»³É»ùÀàºó£¬Ã»ÓĞ×ÓÀàº¯ÊıÁË
+        
+        hss = (HighSchoolStudent)s;
+        hss.highSchoolSpecification();
+    }
 }
 
 P225 ³éÏó·½·¨²»ÄÜÊ¹ÓÃprivate»òstatic¹Ø¼ü×Ö½øĞĞĞŞÊÎ£¬°üº¬Ò»¸ö»ò¶à¸ö³éÏó·½·¨µÄÀà±ØĞë±»ÉùÃ÷Îª³éÏóÀà¡£
 
 //P229 ÄÚ²¿Àà
 public class OuterClass {
-	innerClass in = new innerClass(); // ÔÚÍâ²¿ÀàÊµÀı»¯ÄÚ²¿Àà¶ÔÏóÒıÓÃ
-	
-	public void ouf() {
-		in.inf(); // ÔÚÍâ²¿Àà·½·¨ÖĞµ÷ÓÃÄÚ²¿Àà·½·¨
-	}
-	
-	class innerClass {//ÕâÀï¼Óprivate£¬Ã»ÓĞÊ²Ã´²îÒì
-		innerClass() { // ÄÚ²¿Àà¹¹Ôì·½·¨
-		}
-		
-		public void inf() { // ÄÚ²¿Àà³ÉÔ±·½·¨
-		}
-		
-		int y = 0; // ¶¨ÒåÄÚ²¿Àà³ÉÔ±±äÁ¿
-	}
-	
-	//ÕâÖÖĞ´·¨±àÒë²»¹ı£¬ÄÚ²¿Àà±ØĞëÒÀÀµÍâ²¿ÀàµÄ´æÔÚ£¬¶ø²»ÄÜÓÃ¾²Ì¬º¯ÊıÀ´´´½¨ÄÚ²¿Àà
-//	public static innerClass getInnerClass() {
-//		return new innerClass();
-//	}
+    innerClass in = new innerClass(); // ÔÚÍâ²¿ÀàÊµÀı»¯ÄÚ²¿Àà¶ÔÏóÒıÓÃ
+    
+    public void ouf() {
+        in.inf(); // ÔÚÍâ²¿Àà·½·¨ÖĞµ÷ÓÃÄÚ²¿Àà·½·¨
+    }
+    
+    class innerClass {//ÕâÀï¼Óprivate£¬Ã»ÓĞÊ²Ã´²îÒì
+        innerClass() { // ÄÚ²¿Àà¹¹Ôì·½·¨
+        }
+        
+        public void inf() { // ÄÚ²¿Àà³ÉÔ±·½·¨
+        }
+        
+        int y = 0; // ¶¨ÒåÄÚ²¿Àà³ÉÔ±±äÁ¿
+    }
+    
+    //ÕâÖÖĞ´·¨±àÒë²»¹ı£¬ÄÚ²¿Àà±ØĞëÒÀÀµÍâ²¿ÀàµÄ´æÔÚ£¬¶ø²»ÄÜÓÃ¾²Ì¬º¯ÊıÀ´´´½¨ÄÚ²¿Àà
+//    public static innerClass getInnerClass() {
+//        return new innerClass();
+//    }
 
-	public innerClass doit() { // Íâ²¿Àà·½·¨£¬·µ»ØÖµÎªÄÚ²¿ÀàÒıÓÃ
-		// y=4; //Íâ²¿Àà²»¿ÉÒÔÖ±½Ó·ÃÎÊÄÚ²¿Àà³ÉÔ±±äÁ¿
-		in.y = 4;
-		return new innerClass(); // ·µ»ØÄÚ²¿ÀàÒıÓÃ
-	}
-	
-	public static void main(String args[]) {
-		OuterClass out = new OuterClass();
-		// ÄÚ²¿ÀàµÄ¶ÔÏóÊµÀı»¯²Ù×÷±ØĞëÔÚÍâ²¿Àà»òÍâ²¿ÀàÖĞµÄ·Ç¾²Ì¬·½·¨ÖĞÊµÏÖ
-		OuterClass.innerClass in = out.doit();
-		System.out.println(in.y);
-		System.out.println(out.in.y);
-		OuterClass.innerClass in2 = out.new innerClass();//ÊµÀı»¯ÄÚ²¿ÀàÊ±ĞèÒªÓÃÍâ²¿Àà¶ÔÏóÀ´ÊµÀı»¯£¬new out.innerClass()ÕâÖÖĞ´·¨´íÎó
-	}
+    public innerClass doit() { // Íâ²¿Àà·½·¨£¬·µ»ØÖµÎªÄÚ²¿ÀàÒıÓÃ
+        // y=4; //Íâ²¿Àà²»¿ÉÒÔÖ±½Ó·ÃÎÊÄÚ²¿Àà³ÉÔ±±äÁ¿
+        in.y = 4;
+        return new innerClass(); // ·µ»ØÄÚ²¿ÀàÒıÓÃ
+    }
+    
+    public static void main(String args[]) {
+        OuterClass out = new OuterClass();
+        // ÄÚ²¿ÀàµÄ¶ÔÏóÊµÀı»¯²Ù×÷±ØĞëÔÚÍâ²¿Àà»òÍâ²¿ÀàÖĞµÄ·Ç¾²Ì¬·½·¨ÖĞÊµÏÖ
+        OuterClass.innerClass in = out.doit();
+        System.out.println(in.y);
+        System.out.println(out.in.y);
+        OuterClass.innerClass in2 = out.new innerClass();//ÊµÀı»¯ÄÚ²¿ÀàÊ±ĞèÒªÓÃÍâ²¿Àà¶ÔÏóÀ´ÊµÀı»¯£¬new out.innerClass()ÕâÖÖĞ´·¨´íÎó
+    }
 }
 
 //P229 this¹Ø¼ü×Ö»ñÈ¡ÄÚ²¿ÀàÓëÍâ²¿ÀàµÄÒıÓÃ
 public class TheSameName {
-	private int x;
-	
-	public void doit() {
-		x = 5;
-		Inner in = new Inner();
-		in.doit(x);
-	}
-	
-	private class Inner {
-		private int x = 9;
-		public void doit(int x) {
-			x++; // µ÷ÓÃµÄÊÇĞÎ²Îx
-			this.x++; // µ÷ÓÃÄÚ²¿ÀàµÄ±äÁ¿x
-			TheSameName.this.x++; // µ÷ÓÃÍâ²¿ÀàµÄ±äÁ¿x
-		}
-	}
-	
-	public static void main(String args[]) {
-		TheSameName tsn = new TheSameName();
-		tsn.doit();
-	}
+    private int x;
+    
+    public void doit() {
+        x = 5;
+        Inner in = new Inner();
+        in.doit(x);
+    }
+    
+    private class Inner {
+        private int x = 9;
+        public void doit(int x) {
+            x++; // µ÷ÓÃµÄÊÇĞÎ²Îx
+            this.x++; // µ÷ÓÃÄÚ²¿ÀàµÄ±äÁ¿x
+            TheSameName.this.x++; // µ÷ÓÃÍâ²¿ÀàµÄ±äÁ¿x
+        }
+    }
+    
+    public static void main(String args[]) {
+        TheSameName tsn = new TheSameName();
+        tsn.doit();
+    }
 }
 
 //¶Ô×Ö·û´®µÄ¸³Öµ£¬Ïàµ±ÓÚ¶ÔĞÎ²ÎµÄÒıÓÃ¸Ä±ä£¬¶ø¶Ôµ÷ÓÃ´¦µÄÈë²ÎÃ»ÓĞÓ°Ïì
 public class TheSameName {
-	public void doit(String s) {
-		s = "abc";
-	}
-	
-	public static void main(String args[]) {
-		String s = "aaa";
-		TheSameName tsn = new TheSameName();
-		tsn.doit(s);
-		System.out.println(s);
-	}
+    public void doit(String s) {
+        s = "abc";
+    }
+    
+    public static void main(String args[]) {
+        String s = "aaa";
+        TheSameName tsn = new TheSameName();
+        tsn.doit(s);
+        System.out.println(s);
+    }
 }
 Êä³öÈçÏÂ£º
 aaa
@@ -8495,8 +8495,8 @@ http://www.cnblogs.com/dolphin0520/p/3736238.html
 ¶ÔÓÚÒ»¸öfinal±äÁ¿£¬Èç¹ûÊÇ»ù±¾Êı¾İÀàĞÍµÄ±äÁ¿£¬ÔòÆäÊıÖµÒ»µ©ÔÚ³õÊ¼»¯Ö®ºó±ã²»ÄÜ¸ü¸Ä£»Èç¹ûÊÇÒıÓÃÀàĞÍµÄ±äÁ¿£¬ÔòÔÚ¶ÔÆä³õÊ¼»¯Ö®ºó±ã²»ÄÜÔÙÈÃÆäÖ¸ÏòÁíÒ»¸ö¶ÔÏó¡££¨ÀàËÆC++ÖĞµÄÒıÓÃ£©
 
 public class Test {
-	public static void main(String args[]) {
-		String a = "hello2";  
+    public static void main(String args[]) {
+        String a = "hello2";  
 
         final String b = "hello";
         String d = "hello";
@@ -8504,7 +8504,7 @@ public class Test {
         String e = d + 2;
         System.out.println((a == c));//true
         System.out.println((a == e));//false
-	}
+    }
 }
 ´ó¼Ò¿ÉÒÔÏÈÏëÒ»ÏÂÕâµÀÌâµÄÊä³ö½á¹û¡£ÎªÊ²Ã´µÚÒ»¸ö±È½Ï½á¹ûÎªtrue£¬¶øµÚ¶ş¸ö±È½Ï½á¹ûÎªfasle¡£ÕâÀïÃæ¾ÍÊÇfinal±äÁ¿ºÍÆÕÍ¨±äÁ¿µÄÇø±ğÁË£¬µ±final±äÁ¿ÊÇ»ù±¾Êı¾İÀàĞÍÒÔ¼°StringÀàĞÍÊ±£¬Èç¹ûÔÚ±àÒëÆÚ¼äÄÜÖªµÀËüµÄÈ·ÇĞÖµ£¬Ôò±àÒëÆ÷»á°ÑËüµ±×ö±àÒëÆÚ³£Á¿Ê¹ÓÃ¡£Ò²¾ÍÊÇËµÔÚÓÃµ½¸Ãfinal±äÁ¿µÄµØ·½£¬Ïàµ±ÓÚÖ±½Ó·ÃÎÊµÄÕâ¸ö³£Á¿£¬²»ĞèÒªÔÚÔËĞĞÊ±È·¶¨¡£ÕâÖÖºÍCÓïÑÔÖĞµÄºêÌæ»»ÓĞµãÏñ¡£Òò´ËÔÚÉÏÃæµÄÒ»¶Î´úÂëÖĞ£¬ÓÉÓÚ±äÁ¿b±»finalĞŞÊÎ£¬Òò´Ë»á±»µ±×ö±àÒëÆ÷³£Á¿£¬ËùÒÔÔÚÊ¹ÓÃµ½bµÄµØ·½»áÖ±½Ó½«±äÁ¿b Ìæ»»ÎªËüµÄ  Öµ¡£¶ø¶ÔÓÚ±äÁ¿dµÄ·ÃÎÊÈ´ĞèÒªÔÚÔËĞĞÊ±Í¨¹ıÁ´½ÓÀ´½øĞĞ¡£Ïë±ØÆäÖĞµÄÇø±ğ´ó¼ÒÓ¦¸ÃÃ÷°×ÁË£¬²»¹ıÒª×¢Òâ£¬Ö»ÓĞÔÚ±àÒëÆÚ¼äÄÜÈ·ÇĞÖªµÀfinal±äÁ¿ÖµµÄÇé¿öÏÂ£¬±àÒëÆ÷²Å»á½øĞĞÕâÑùµÄÓÅ»¯¡£±ÈÈçÏÂÃæµÄÕâ¶Î´úÂë¾Í²»»á½øĞĞÓÅ»¯£º
 public class Test {
@@ -8529,24 +8529,24 @@ P231 ÄäÃûÄÚ²¿Àà
 ÔÚÍ¼ĞÎ»¯±à³ÌµÄÊÂ¼ş¼à¿ØÆ÷´úÂëÖĞ£¬»á´óÁ¿Ê¹ÓÃÄäÃûÄÚ²¿Àà£¬ÕâÑù¿É´ó´ó¼ò»¯´úÂë£¬²¢ÔöÇ¿´úÂëµÄ¿É¶ÁĞÔ¡£
 
 public interface IStringDeal {
-	public String filterBlankChar();
+    public String filterBlankChar();
 }
 
 public class Test {
-	public static void main(String args[]) {
-		final String sourceStr = "abc de f";//ÕâÀï²»¼ÓfinalÒ²Ã»Ê²Ã´ÎÊÌâ£¬µ«ÊÇÔÚÄäÃûÀàÖĞ²»ÄÜĞŞ¸ÄsourceStrµÄÖµ¡£2.ÎªÊ²Ã´¾Ö²¿ÄÚ²¿ÀàºÍÄäÃûÄÚ²¿ÀàÖ»ÄÜ·ÃÎÊ¾Ö²¿final±äÁ¿£¿
-		IStringDeal s = new IStringDeal() {
-			@Override
-			public String filterBlankChar() {
-				String convertStr = sourceStr;//ÕâÀïÖ±½ÓÓÃsourceStr.replace(" ", "")Ò²Ã»Ê²Ã´ÎÊÌâ£¿
-				convertStr = convertStr.replace(" ", "");
-				return convertStr;
-			}
-		};
-		
-		System.out.println("Ô´×Ö·û´®£º" + sourceStr);
-		System.out.println("×ª»»ºóµÄ×Ö·û´®£º" + s.filterBlankChar());
-	}
+    public static void main(String args[]) {
+        final String sourceStr = "abc de f";//ÕâÀï²»¼ÓfinalÒ²Ã»Ê²Ã´ÎÊÌâ£¬µ«ÊÇÔÚÄäÃûÀàÖĞ²»ÄÜĞŞ¸ÄsourceStrµÄÖµ¡£2.ÎªÊ²Ã´¾Ö²¿ÄÚ²¿ÀàºÍÄäÃûÄÚ²¿ÀàÖ»ÄÜ·ÃÎÊ¾Ö²¿final±äÁ¿£¿
+        IStringDeal s = new IStringDeal() {
+            @Override
+            public String filterBlankChar() {
+                String convertStr = sourceStr;//ÕâÀïÖ±½ÓÓÃsourceStr.replace(" ", "")Ò²Ã»Ê²Ã´ÎÊÌâ£¿
+                convertStr = convertStr.replace(" ", "");
+                return convertStr;
+            }
+        };
+        
+        System.out.println("Ô´×Ö·û´®£º" + sourceStr);
+        System.out.println("×ª»»ºóµÄ×Ö·û´®£º" + s.filterBlankChar());
+    }
 }
 Êä³öÈçÏÂ£º
 Ô´×Ö·û´®£ºabc de f
@@ -8554,23 +8554,23 @@ public class Test {
 
 //Èç¹û²»ÓÃÊ¹ÓÃÄäÃûÀà£¬ÔòĞèÒªĞŞ¸ÄÎªÈçÏÂ¾Ö²¿ÄÚ²¿Àà·½Ê½¡£ÕâÖÖĞ´·¨ËäÈ»ÄÜ´ïµ½Ò»ÑùµÄĞ§¹û£¬µ«ÊÇ¼ÈÈß³¤ÓÖÄÑÒÔÎ¬»¤£¬ËùÒÔÒ»°ãÊ¹ÓÃÄäÃûÄÚ²¿ÀàµÄ·½·¨À´±àĞ´ÊÂ¼ş¼àÌı´úÂë¡£Í¬ÑùµÄ£¬ÄäÃûÄÚ²¿ÀàÒ²ÊÇ²»ÄÜÓĞ·ÃÎÊĞŞÊÎ·ûºÍstaticĞŞÊÎ·ûµÄ¡£
 public class Test {
-	public static void main(String args[]) {
-		final String sourceStr = "abc de f";
-		
-		class Dealer implements IStringDeal {
-			@Override
-			public String filterBlankChar() {
-				String convertStr = sourceStr;
-				convertStr = convertStr.replace(" ", "");
-				return convertStr;
-			}
-		}
-		
-		IStringDeal s = new Dealer();
-		
-		System.out.println("Ô´×Ö·û´®£º" + sourceStr);
-		System.out.println("×ª»»ºóµÄ×Ö·û´®£º" + s.filterBlankChar());
-	}
+    public static void main(String args[]) {
+        final String sourceStr = "abc de f";
+        
+        class Dealer implements IStringDeal {
+            @Override
+            public String filterBlankChar() {
+                String convertStr = sourceStr;
+                convertStr = convertStr.replace(" ", "");
+                return convertStr;
+            }
+        }
+        
+        IStringDeal s = new Dealer();
+        
+        System.out.println("Ô´×Ö·û´®£º" + sourceStr);
+        System.out.println("×ª»»ºóµÄ×Ö·û´®£º" + s.filterBlankChar());
+    }
 }
 
 http://www.cnblogs.com/dolphin0520/p/3811445.html
@@ -8603,25 +8603,25 @@ class InheritInner extends WithInner.Inner {
    public static void main(String[] args)
 ·ñÔò JavaFX Ó¦ÓÃ³ÌĞòÀà±ØĞëÀ©Õ¹javafx.application.Application
 public class Test {
-	static int x = 100;
-	
-	static class Inner {
-		static void doitinner() {
-			System.out.println("Íâ²¿ÀàµÄ³ÉÔ±±äÁ¿£º" + x);
-		}
-		
-		public static void maint(String args[]) {
-			doitinner();
-		}
-	}
+    static int x = 100;
+    
+    static class Inner {
+        static void doitinner() {
+            System.out.println("Íâ²¿ÀàµÄ³ÉÔ±±äÁ¿£º" + x);
+        }
+        
+        public static void maint(String args[]) {
+            doitinner();
+        }
+    }
 }
 
 //P233 ¾Ö²¿ÄÚ²¿ÀàÉèÖÃÄÖÖÓ£¬Ã»ÔËĞĞÆğÀ´£¿
 public class Test {
-	public static void main(String args[]) {
-		AlarmClock ac = new AlarmClock(1, true);
-		ac.start();
-	}
+    public static void main(String args[]) {
+        AlarmClock ac = new AlarmClock(1, true);
+        ac.start();
+    }
 }
 
 import java.awt.Toolkit;
@@ -8632,84 +8632,84 @@ import java.util.Date;
 import javax.swing.Timer;
 
 public class AlarmClock {
-	private int delay;
-	private boolean flag;
-	
-	public AlarmClock(int delay, boolean flag) {
-		this.delay = delay;
-		this.flag = flag;
-	}
-	
-	public void start() {
-		class Printer implements ActionListener {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				SimpleDateFormat format = new SimpleDateFormat("k:m:s");
-				String result = format.format(new Date());
-				System.out.println("Current time is: " + result);
-				if (flag) {
-					Toolkit.getDefaultToolkit().beep();
-				}
-			}
-		}
-		new Timer(delay, new Printer()).start();
-	}
+    private int delay;
+    private boolean flag;
+    
+    public AlarmClock(int delay, boolean flag) {
+        this.delay = delay;
+        this.flag = flag;
+    }
+    
+    public void start() {
+        class Printer implements ActionListener {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SimpleDateFormat format = new SimpleDateFormat("k:m:s");
+                String result = format.format(new Date());
+                System.out.println("Current time is: " + result);
+                if (flag) {
+                    Toolkit.getDefaultToolkit().beep();
+                }
+            }
+        }
+        new Timer(delay, new Printer()).start();
+    }
 }
 
 
 //P234 ¾²Ì¬ÄÚ²¿ÀàÇó¼«Öµ
 
 public class MaxMin {
-	public static class Result {//ÕâÀï¸ÄÎªprivateÔòTestÖĞ²»¿É¼û£¬±àÒë±¨´í
-		private double max;
-		private double min;
-		
-		public Result(double max, double min) {
-			this.max = max;
-			this.min = min;
-		}
-		
-		public double getMax() {
-			return max;
-		}
-		
-		public double getMin() {
-			return min;
-		}
-	}
-	
-	public static Result getResult(double[] array) {
-		double max = Double.MIN_VALUE;//ÉèÖÃ×îĞ¡Öµ¸ømax
-		double min = Double.MAX_VALUE;//ÉèÖÃ×î´óÖµ¸ømax
-		
-		for (double i : array) {
-			if (i > max) {
-				max = i;
-			}
-			if (i < min) {
-				min = i;
-			}
-		}
-		
-		return new Result(max, min);
-	}
+    public static class Result {//ÕâÀï¸ÄÎªprivateÔòTestÖĞ²»¿É¼û£¬±àÒë±¨´í
+        private double max;
+        private double min;
+        
+        public Result(double max, double min) {
+            this.max = max;
+            this.min = min;
+        }
+        
+        public double getMax() {
+            return max;
+        }
+        
+        public double getMin() {
+            return min;
+        }
+    }
+    
+    public static Result getResult(double[] array) {
+        double max = Double.MIN_VALUE;//ÉèÖÃ×îĞ¡Öµ¸ømax
+        double min = Double.MAX_VALUE;//ÉèÖÃ×î´óÖµ¸ømax
+        
+        for (double i : array) {
+            if (i > max) {
+                max = i;
+            }
+            if (i < min) {
+                min = i;
+            }
+        }
+        
+        return new Result(max, min);
+    }
 }
 
 public class Test {
-	public static void main(String args[]) {
-		double array[] = new double[5];
-		for (int i = 0; i < array.length; i++) {
-			array[i] = 100 * Math.random();
-		}
-		System.out.println("Ô´Êı×é£º");
-		for (int i = 0; i < array.length; i++) {
-			System.out.println(array[i]);
-		}
-		
-		MaxMin.Result result= MaxMin.getResult(array);
-		System.out.println("×î´óÖµ£º" + result.getMax());
-		System.out.println("×îĞ¡Öµ£º" + result.getMin());
-	}
+    public static void main(String args[]) {
+        double array[] = new double[5];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = 100 * Math.random();
+        }
+        System.out.println("Ô´Êı×é£º");
+        for (int i = 0; i < array.length; i++) {
+            System.out.println(array[i]);
+        }
+        
+        MaxMin.Result result= MaxMin.getResult(array);
+        System.out.println("×î´óÖµ£º" + result.getMax());
+        System.out.println("×îĞ¡Öµ£º" + result.getMin());
+    }
 }
 Êä³öÈçÏÂ£º
 Ô´Êı×é£º
@@ -8725,84 +8725,84 @@ public class Test {
 
 //P238 ·ÃÎÊ¹¹Ôì·½·¨
 public class MoreConstructor {
-	String s;
-	int i, i2, i3;
-	
-	private MoreConstructor() {
-	}
-	
-	protected MoreConstructor(String s, int i) {
-		this.s = s;
-		this.i = i;
-	}
-	
-	public MoreConstructor(String... strings) throws NumberFormatException {
-		if (0 < strings.length) {
-			i = Integer.valueOf(strings[0]);
-		}
-		if (1 < strings.length) {
-			i2 = Integer.valueOf(strings[1]);
-		}
-		if (2 < strings.length) {
-			i3 = Integer.valueOf(strings[2]);
-		}
-	}
-	
-	public void print() {
-		System.out.println("s=" + s);
-		System.out.println("i=" + i);
-		System.out.println("i2=" + i2);
-		System.out.println("i3=" + i3);
-	}
+    String s;
+    int i, i2, i3;
+    
+    private MoreConstructor() {
+    }
+    
+    protected MoreConstructor(String s, int i) {
+        this.s = s;
+        this.i = i;
+    }
+    
+    public MoreConstructor(String... strings) throws NumberFormatException {
+        if (0 < strings.length) {
+            i = Integer.valueOf(strings[0]);
+        }
+        if (1 < strings.length) {
+            i2 = Integer.valueOf(strings[1]);
+        }
+        if (2 < strings.length) {
+            i3 = Integer.valueOf(strings[2]);
+        }
+    }
+    
+    public void print() {
+        System.out.println("s=" + s);
+        System.out.println("i=" + i);
+        System.out.println("i2=" + i2);
+        System.out.println("i3=" + i3);
+    }
 }
 
 import java.lang.reflect.Constructor;
 
 public class Test {
-	public static void main(String args[]) {
-		MoreConstructor example = new MoreConstructor();
-		Class<?> exampleC = example.getClass();
-		Constructor<?>[] declaredConstructors = exampleC.getDeclaredConstructors();
-		for (int i = 0; i < declaredConstructors.length; ++i) {
-			Constructor<?> constructor = declaredConstructors[i];
-			System.out.println("²é¿´ÊÇ·ñÔÊĞí´øÓĞ¿É±äÊıÁ¿µÄ²ÎÊı£º" + constructor.isVarArgs());
-			
-			System.out.println("¸Ã¹¹Ôì·½·¨µÄÈë¿Ú²ÎÊıÀàĞÍÒÀ´ÎÎª£º");
-			Class<?>[] parameterTypes = constructor.getParameterTypes();
-			for (int j = 0; j < parameterTypes.length; j++) {
-				System.out.println(" " + parameterTypes[j]);
-			}
-			
-			System.out.println("¸Ã¹¹Ôì·½·¨¿ÉÄÜÅ×³öµÄÒì³£ÀàĞÍÎª£º");
-			Class<?>[] exceptionTypes = constructor.getExceptionTypes();
-			for (int j = 0; j < exceptionTypes.length; j++) {
-				System.out.println(" " + exceptionTypes[j]);
-			}
-			
-			MoreConstructor example2 = null;
-			while (example2 == null) {
-				try {
-					//ÕâÀïÓĞµãÎÊÌâµÄ»°£¬i=0µÄÊ±ºò²»Ò»¶¨ÊÇµÚÒ»¸öÉùÃ÷Ë³ĞòÖĞµÄµÚÒ»¸ö¹¹Ôìº¯Êı£¬µ¼ÖÂ¹¹ÔìÊ§°Ü£¬ËÀÑ­»·
-					if (i == 0) {
-						Object[] parameters = new Object[] {new String[] {"1", "2", "3"}};
-						example2 = (MoreConstructor) constructor.newInstance(parameters);
-					}
-					else if (i == 1) {
-						example2 = (MoreConstructor) constructor.newInstance("7", 5);
-					}
-					else {
-						example2 = (MoreConstructor) constructor.newInstance();
-					}
-				}
-				catch (Exception e) {
-					System.out.println("ÔÚ´´½¨¶ÔÏóÊ±Å×³öÒì³££¬ÏÂÃæÖ´ĞĞsetAccessible()·½·¨");
-					constructor.setAccessible(true);
-				}
-			}
-			example2.print();
-			System.out.println();
-		}
-	}
+    public static void main(String args[]) {
+        MoreConstructor example = new MoreConstructor();
+        Class<?> exampleC = example.getClass();
+        Constructor<?>[] declaredConstructors = exampleC.getDeclaredConstructors();
+        for (int i = 0; i < declaredConstructors.length; ++i) {
+            Constructor<?> constructor = declaredConstructors[i];
+            System.out.println("²é¿´ÊÇ·ñÔÊĞí´øÓĞ¿É±äÊıÁ¿µÄ²ÎÊı£º" + constructor.isVarArgs());
+            
+            System.out.println("¸Ã¹¹Ôì·½·¨µÄÈë¿Ú²ÎÊıÀàĞÍÒÀ´ÎÎª£º");
+            Class<?>[] parameterTypes = constructor.getParameterTypes();
+            for (int j = 0; j < parameterTypes.length; j++) {
+                System.out.println(" " + parameterTypes[j]);
+            }
+            
+            System.out.println("¸Ã¹¹Ôì·½·¨¿ÉÄÜÅ×³öµÄÒì³£ÀàĞÍÎª£º");
+            Class<?>[] exceptionTypes = constructor.getExceptionTypes();
+            for (int j = 0; j < exceptionTypes.length; j++) {
+                System.out.println(" " + exceptionTypes[j]);
+            }
+            
+            MoreConstructor example2 = null;
+            while (example2 == null) {
+                try {
+                    //ÕâÀïÓĞµãÎÊÌâµÄ»°£¬i=0µÄÊ±ºò²»Ò»¶¨ÊÇµÚÒ»¸öÉùÃ÷Ë³ĞòÖĞµÄµÚÒ»¸ö¹¹Ôìº¯Êı£¬µ¼ÖÂ¹¹ÔìÊ§°Ü£¬ËÀÑ­»·
+                    if (i == 0) {
+                        Object[] parameters = new Object[] {new String[] {"1", "2", "3"}};
+                        example2 = (MoreConstructor) constructor.newInstance(parameters);
+                    }
+                    else if (i == 1) {
+                        example2 = (MoreConstructor) constructor.newInstance("7", 5);
+                    }
+                    else {
+                        example2 = (MoreConstructor) constructor.newInstance();
+                    }
+                }
+                catch (Exception e) {
+                    System.out.println("ÔÚ´´½¨¶ÔÏóÊ±Å×³öÒì³££¬ÏÂÃæÖ´ĞĞsetAccessible()·½·¨");
+                    constructor.setAccessible(true);
+                }
+            }
+            example2.print();
+            System.out.println();
+        }
+    }
 }
 
 //P240·ÃÎÊ³ÉÔ±±äÁ¿
@@ -8823,64 +8823,64 @@ import java.util.ArrayList;
 
 
 public class ClassDeclarationViewer {
-	public static void main(String args[]) throws ClassNotFoundException {
-		Class<?> clazz = Class.forName("java.util.ArrayList");
-		System.out.println("ÀàµÄ±ê×¼Ãû³Æ£º" + clazz.getCanonicalName());
-		System.out.println("ÀàµÄĞŞÊÎ·û£º" + Modifier.toString(clazz.getModifiers()));
-		
-		//·ºĞÍ²ÎÊı
-		TypeVariable<?>[] typeVariables = clazz.getTypeParameters();
-		System.out.print("ÀàµÄ·ºĞÍ²ÎÊı£º");
-		if (typeVariables.length != 0) {
-			for (TypeVariable<?> typeVariable : typeVariables) {
-				System.out.println(typeVariable + "\t");
-			}
-		}
-		else {
-			System.out.println("¿Õ");
-		}
-		
-		Type[] interfaces = clazz.getGenericInterfaces();
-		System.out.println("ÀàËùÊµÏÖµÄ½Ó¿Ú£º");
-		if (interfaces.length != 0) {
-			for (Type type : interfaces) {
-				System.out.println("\t" + type);
-			}
-		}
-		else {
-			System.out.println("\t¿Õ");
-		}
-		
-		Type superClass = clazz.getGenericSuperclass();
-		System.out.print("ÀàµÄÖ±½Ó¼Ì³ĞÀà£º");
-		if (superClass != null) {
-			System.out.println(superClass);
-		}
-		else {
-			System.out.println("¿Õ");
-		}
-		
-		Annotation[] annotations = clazz.getAnnotations();
-		System.out.print("ÀàµÄ×¢ÊÍ£º");
-		if (annotations.length != 0) {
-			for (Annotation annotation : annotations) {
-				System.out.println("\t" + annotation);
-			}
-		}
-		else {
-			System.out.println("¿Õ");
-		}
-	}
+    public static void main(String args[]) throws ClassNotFoundException {
+        Class<?> clazz = Class.forName("java.util.ArrayList");
+        System.out.println("ÀàµÄ±ê×¼Ãû³Æ£º" + clazz.getCanonicalName());
+        System.out.println("ÀàµÄĞŞÊÎ·û£º" + Modifier.toString(clazz.getModifiers()));
+        
+        //·ºĞÍ²ÎÊı
+        TypeVariable<?>[] typeVariables = clazz.getTypeParameters();
+        System.out.print("ÀàµÄ·ºĞÍ²ÎÊı£º");
+        if (typeVariables.length != 0) {
+            for (TypeVariable<?> typeVariable : typeVariables) {
+                System.out.println(typeVariable + "\t");
+            }
+        }
+        else {
+            System.out.println("¿Õ");
+        }
+        
+        Type[] interfaces = clazz.getGenericInterfaces();
+        System.out.println("ÀàËùÊµÏÖµÄ½Ó¿Ú£º");
+        if (interfaces.length != 0) {
+            for (Type type : interfaces) {
+                System.out.println("\t" + type);
+            }
+        }
+        else {
+            System.out.println("\t¿Õ");
+        }
+        
+        Type superClass = clazz.getGenericSuperclass();
+        System.out.print("ÀàµÄÖ±½Ó¼Ì³ĞÀà£º");
+        if (superClass != null) {
+            System.out.println(superClass);
+        }
+        else {
+            System.out.println("¿Õ");
+        }
+        
+        Annotation[] annotations = clazz.getAnnotations();
+        System.out.print("ÀàµÄ×¢ÊÍ£º");
+        if (annotations.length != 0) {
+            for (Annotation annotation : annotations) {
+                System.out.println("\t" + annotation);
+            }
+        }
+        else {
+            System.out.println("¿Õ");
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 ÀàµÄ±ê×¼Ãû³Æ£ºjava.util.ArrayList
 ÀàµÄĞŞÊÎ·û£ºpublic
-ÀàµÄ·ºĞÍ²ÎÊı£ºE	
+ÀàµÄ·ºĞÍ²ÎÊı£ºE    
 ÀàËùÊµÏÖµÄ½Ó¿Ú£º
-	java.util.List<E>
-	interface java.util.RandomAccess
-	interface java.lang.Cloneable
-	interface java.io.Serializable
+    java.util.List<E>
+    interface java.util.RandomAccess
+    interface java.lang.Cloneable
+    interface java.io.Serializable
 ÀàµÄÖ±½Ó¼Ì³ĞÀà£ºjava.util.AbstractList<E>
 ÀàµÄ×¢ÊÍ£º¿Õ
 
@@ -8888,37 +8888,37 @@ public class ClassDeclarationViewer {
 import java.lang.reflect.Method;
 
 public class MethodTest {
-	public static void main(String args[]) {
-		try {
-			System.out.println("µ÷ÓÃMathÀàµÄ¾²Ì¬·½·¨sin()");
-			Method sin = Math.class.getDeclaredMethod("sin", Double.TYPE);//double.classÒ»Ñù
-			double sin1 = (double) sin.invoke(null, new Integer(1));//double sin1 = (double) sin.invoke(null, 1);Ò»Ñù
-			System.out.println("1µÄÕıÏÒÖµÊÇ£º" + sin1);
-			
-			System.out.println("µ÷ÓÃStringÀàµÄ·Ç¾²Ì¬·½·¨equals()");
-			Method equals = String.class.getDeclaredMethod("equals", Object.class);
-			boolean flag = (boolean) equals.invoke(new String("abc"), "abc");//boolean flag = (boolean) equals.invoke("abc", "abc");Ò»Ñù
-			System.out.println("×Ö·û´®ÊÇ·ñÏàµÈ£º" + flag);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String args[]) {
+        try {
+            System.out.println("µ÷ÓÃMathÀàµÄ¾²Ì¬·½·¨sin()");
+            Method sin = Math.class.getDeclaredMethod("sin", Double.TYPE);//double.classÒ»Ñù
+            double sin1 = (double) sin.invoke(null, new Integer(1));//double sin1 = (double) sin.invoke(null, 1);Ò»Ñù
+            System.out.println("1µÄÕıÏÒÖµÊÇ£º" + sin1);
+            
+            System.out.println("µ÷ÓÃStringÀàµÄ·Ç¾²Ì¬·½·¨equals()");
+            Method equals = String.class.getDeclaredMethod("equals", Object.class);
+            boolean flag = (boolean) equals.invoke(new String("abc"), "abc");//boolean flag = (boolean) equals.invoke("abc", "abc");Ò»Ñù
+            System.out.println("×Ö·û´®ÊÇ·ñÏàµÈ£º" + flag);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 //P246 ÀûÓÃ·´ÉäÖØĞ´toString()·½·¨¡£ObjectÀàµÄtoString()º¯ÊıÄ¬ÈÏÊÇÊä³öÀàÃûºÍ¹şÏ£Âë
 public class MethodTest {
-	public static void main(String args[]) {
-		String s = "abc";
-		System.out.println(s.toString());
-	}
+    public static void main(String args[]) {
+        String s = "abc";
+        System.out.println(s.toString());
+    }
 }
 
 public class Test {
-	public static void main(String args[]) {
-		MethodTest mt = new MethodTest();
-		System.out.println(mt.toString());
-	}
+    public static void main(String args[]) {
+        MethodTest mt = new MethodTest();
+        System.out.println(mt.toString());
+    }
 }
 Êä³öÈçÏÂ£º
 MethodTest@1db9742
@@ -8930,53 +8930,53 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class StringUtils {
-	@SuppressWarnings("unchecked")//È¡Ïû unchecked ¾¯¸æ
-	public String toString(Object object) {
-		Class<?> clazz = object.getClass();
-		StringBuilder sb = new StringBuilder();
-		Package packageName = clazz.getPackage();
-		sb.append("°üÃû£º" + packageName.getName() + "\t");
-		
-		String className = clazz.getSimpleName();
-		sb.append("ÀàÃû£º" + className + "\n");
-		
-		//ÕâÈı¸ö²¿·Ö¸Ğ¾õ¿ÉÒÔÓÃ·ºĞÍº¯ÊıÀ´Ğ´£¬Ä¿Ç°»¹²»»á-.-£¿
-		sb.append("¹«¹²¹¹Ôì·½·¨£º\n");
-		Constructor<?>[] constructors = clazz.getDeclaredConstructors();
-		for (Constructor<?> constructor : constructors) {
-			String modifier = Modifier.toString(constructor.getModifiers());
-			if (modifier.contains("public")) {
-				sb.append(constructor.toGenericString() + "\n");
-			}
-		}
-		
-		sb.append("¹«¹²Óò £º\n");
-		Field[] fields = clazz.getDeclaredFields();
-		for (Field field : fields) {
-			String modifier = Modifier.toString(field.getModifiers());
-			if (modifier.contains("public")) {
-				sb.append(field.toGenericString() + "\n");
-			}
-		}
-		
-		sb.append("¹«¹²·½·¨£º\n");
-		Method[] methods = clazz.getDeclaredMethods();
-		for (Method method : methods) {
-			String modifier = Modifier.toString(method.getModifiers());
-			if (modifier.contains("public")) {
-				sb.append(method.toGenericString() + "\n");
-			}
-		}
-		
-		return sb.toString();
-	}
-	
-	public static void main(String args[]) {
-		System.out.println(new StringUtils().toString(new java.util.Date()));
-	}
+    @SuppressWarnings("unchecked")//È¡Ïû unchecked ¾¯¸æ
+    public String toString(Object object) {
+        Class<?> clazz = object.getClass();
+        StringBuilder sb = new StringBuilder();
+        Package packageName = clazz.getPackage();
+        sb.append("°üÃû£º" + packageName.getName() + "\t");
+        
+        String className = clazz.getSimpleName();
+        sb.append("ÀàÃû£º" + className + "\n");
+        
+        //ÕâÈı¸ö²¿·Ö¸Ğ¾õ¿ÉÒÔÓÃ·ºĞÍº¯ÊıÀ´Ğ´£¬Ä¿Ç°»¹²»»á-.-£¿
+        sb.append("¹«¹²¹¹Ôì·½·¨£º\n");
+        Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+        for (Constructor<?> constructor : constructors) {
+            String modifier = Modifier.toString(constructor.getModifiers());
+            if (modifier.contains("public")) {
+                sb.append(constructor.toGenericString() + "\n");
+            }
+        }
+        
+        sb.append("¹«¹²Óò £º\n");
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            String modifier = Modifier.toString(field.getModifiers());
+            if (modifier.contains("public")) {
+                sb.append(field.toGenericString() + "\n");
+            }
+        }
+        
+        sb.append("¹«¹²·½·¨£º\n");
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
+            String modifier = Modifier.toString(method.getModifiers());
+            if (modifier.contains("public")) {
+                sb.append(method.toGenericString() + "\n");
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    public static void main(String args[]) {
+        System.out.println(new StringUtils().toString(new java.util.Date()));
+    }
 }
 Êä³öÈçÏÂ£º
-°üÃû£ºjava.util	ÀàÃû£ºDate
+°üÃû£ºjava.util    ÀàÃû£ºDate
 ¹«¹²¹¹Ôì·½·¨£º
 public java.util.Date(java.lang.String)
 public java.util.Date(int,int,int,int,int,int)
@@ -9029,35 +9029,35 @@ import java.util.TreeSet;
 
 
 public class Test {
-	public static void main(String args[]) {
-		List<String> list = new LinkedList<String>();
-		list.add("apple");
-		list.add("pear");
-		list.add("banana");
-		list.add("apple");
-		//list.add("a");
-		System.out.println(list);
-		
-		Set<String> set = new TreeSet<String>();//TreeSet×Ô´øÄ¬ÈÏÅÅĞò¹¦ÄÜ£¬HashSet×Ô´øHashCodeÅÅĞò¹¦ÄÜ
-		set.addAll(list);
-		Iterator<String> iter = set.iterator();
-		while (iter.hasNext()) {
-			System.out.println(iter.next() + "\t");
-			
-		}
-		
-		set.clear();
-		set.add("banana");
-		set.add("pear");
-		set.add("apple");
-		System.out.println(set);
-		
-		set.clear();
-		set.add("c");
-		set.add("b");
-		set.add("a");
-		System.out.println(set);
-	}
+    public static void main(String args[]) {
+        List<String> list = new LinkedList<String>();
+        list.add("apple");
+        list.add("pear");
+        list.add("banana");
+        list.add("apple");
+        //list.add("a");
+        System.out.println(list);
+        
+        Set<String> set = new TreeSet<String>();//TreeSet×Ô´øÄ¬ÈÏÅÅĞò¹¦ÄÜ£¬HashSet×Ô´øHashCodeÅÅĞò¹¦ÄÜ
+        set.addAll(list);
+        Iterator<String> iter = set.iterator();
+        while (iter.hasNext()) {
+            System.out.println(iter.next() + "\t");
+            
+        }
+        
+        set.clear();
+        set.add("banana");
+        set.add("pear");
+        set.add("apple");
+        System.out.println(set);
+        
+        set.clear();
+        set.add("c");
+        set.add("b");
+        set.add("a");
+        System.out.println(set);
+    }
 }
 
 //P259 List½Ó¿ÚµÄÊµÏÖÀà
@@ -9066,17 +9066,17 @@ LinkedList£º°´Ë÷Òı²éÕÒÂı£¬²åÈëÉ¾³ı¿ì
 import java.util.ArrayList;
 
 public class Test {
-	public static void main(String args[]) {
-		List<String> list = new ArrayList<String>();
-		list.add("a");
-		list.add("b");
-		list.add("c");
-		
-		int i = (int) (Math.random() * (list.size()));
-		System.out.println("Ëæ»ú»ñÈ¡Êı×éÖĞµÄÔªËØ£º" + list.get(i));
-		list.remove(2);
-		System.out.println("Ë÷Òı2µÄÔªËØÒÆ³ıºó£¬Êı×éÎª£º" + list);
-	}
+    public static void main(String args[]) {
+        List<String> list = new ArrayList<String>();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+        
+        int i = (int) (Math.random() * (list.size()));
+        System.out.println("Ëæ»ú»ñÈ¡Êı×éÖĞµÄÔªËØ£º" + list.get(i));
+        list.remove(2);
+        System.out.println("Ë÷Òı2µÄÔªËØÒÆ³ıºó£¬Êı×éÎª£º" + list);
+    }
 }
 
 //P260 Set½Ó¿ÚµÄÊµÏÖÀà
@@ -9088,21 +9088,21 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class Test {
-	public static void main(String args[]) {
-		Employee e1 = new Employee(3, "Li Lei", 26);
-		Employee e2 = new Employee(2, "Han Meimei", 25);
-		Employee e3 = new Employee(1, "Kily", 27);
-		
-		Set<Employee> employeeList = new HashSet<Employee>();//EmployeeÊµÏÖÁËComparable½Ó¿Úºó£¬¾Í¿ÉÒÔÓÃSet<Employee> employeeList = new TreeSet<Employee>();±£´æÁË£¬Êä³öÈçÏÂµÚ2¶ÎÊä³ö£¬²¢ÇÒÊÇÅÅºÃĞòµÄ
-		employeeList.add(e1);
-		employeeList.add(e2);
-		employeeList.add(e3);
-		
-		System.out.println("The order in set:");
-		for (Employee e : employeeList) {
-			System.out.println(e);
-		}
-	}
+    public static void main(String args[]) {
+        Employee e1 = new Employee(3, "Li Lei", 26);
+        Employee e2 = new Employee(2, "Han Meimei", 25);
+        Employee e3 = new Employee(1, "Kily", 27);
+        
+        Set<Employee> employeeList = new HashSet<Employee>();//EmployeeÊµÏÖÁËComparable½Ó¿Úºó£¬¾Í¿ÉÒÔÓÃSet<Employee> employeeList = new TreeSet<Employee>();±£´æÁË£¬Êä³öÈçÏÂµÚ2¶ÎÊä³ö£¬²¢ÇÒÊÇÅÅºÃĞòµÄ
+        employeeList.add(e1);
+        employeeList.add(e2);
+        employeeList.add(e3);
+        
+        System.out.println("The order in set:");
+        for (Employee e : employeeList) {
+            System.out.println(e);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 The order in set:
@@ -9130,31 +9130,31 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class Test {
-	public static void main(String args[]) {
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("001", "Zhang San");
-		map.put("005", "Li Si");
-		map.put("004", "Wang Yi");
-		
-		Set<String> set = map.keySet();
-		Iterator<String> it = set.iterator();
-		System.out.println("HashMapÀàÊµÏÖµÄMap¼¯ºÏ£¬ÎŞĞò£º");
-		while (it.hasNext()) {
-			String str = (String) it.next();//if not using String convertion£¬²»¼ÓÀàĞÍ×ª»»Ò²Ã»ÓĞÎÊÌâ
-			String name = (String) map.get(str);
-			System.out.println(str + " " + name);
-		}
-		
-		TreeMap<String, String> treeMap = new TreeMap<String, String>();
-		treeMap.putAll(map);
-		Iterator<String> iter = treeMap.keySet().iterator();
-		System.out.println("TreeMapÀàÊµÏÖµÄMap¼¯ºÏ£¬¼ü¶ÔÏóÉıĞò£º");
-		while (iter.hasNext()) {
-			String str = (String) iter.next();
-			String name = (String) map.get(str);
-			System.out.println(str + " " + name);
-		}
-	}
+    public static void main(String args[]) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("001", "Zhang San");
+        map.put("005", "Li Si");
+        map.put("004", "Wang Yi");
+        
+        Set<String> set = map.keySet();
+        Iterator<String> it = set.iterator();
+        System.out.println("HashMapÀàÊµÏÖµÄMap¼¯ºÏ£¬ÎŞĞò£º");
+        while (it.hasNext()) {
+            String str = (String) it.next();//if not using String convertion£¬²»¼ÓÀàĞÍ×ª»»Ò²Ã»ÓĞÎÊÌâ
+            String name = (String) map.get(str);
+            System.out.println(str + " " + name);
+        }
+        
+        TreeMap<String, String> treeMap = new TreeMap<String, String>();
+        treeMap.putAll(map);
+        Iterator<String> iter = treeMap.keySet().iterator();
+        System.out.println("TreeMapÀàÊµÏÖµÄMap¼¯ºÏ£¬¼ü¶ÔÏóÉıĞò£º");
+        while (iter.hasNext()) {
+            String str = (String) iter.next();
+            String name = (String) map.get(str);
+            System.out.println(str + " " + name);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 HashMapÀàÊµÏÖµÄMap¼¯ºÏ£¬ÎŞĞò£º
@@ -9174,31 +9174,31 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class Test {
-	public static void main(String args[]) {
-		Map<Integer, String> map = new HashMap<Integer, String>();
-		map.put(1, "Zhang San");
-		map.put(5, "Li Si");
-		map.put(4, "Wang Yi");
-		
-		Set<Integer> set = map.keySet();
-		Iterator<Integer> it = set.iterator();
-		System.out.println("HashMapÀàÊµÏÖµÄMap¼¯ºÏ£¬ÎŞĞò£º");
-		while (it.hasNext()) {
-			int str = it.next();//if not using String convertion
-			String name = map.get(str);
-			System.out.println(str + " " + name);
-		}
-		
-		TreeMap<Integer, String> treeMap = new TreeMap<Integer, String>();
-		treeMap.putAll(map);
-		Iterator<Integer> iter = treeMap.keySet().iterator();
-		System.out.println("TreeMapÀàÊµÏÖµÄMap¼¯ºÏ£¬¼ü¶ÔÏóÉıĞò£º");
-		while (iter.hasNext()) {//System.out.println(treeMap);¿ÉÒÔÖ±½ÓÕâÑù´òÓ¡
-			int str = iter.next();
-			String name = map.get(str);
-			System.out.println(str + " " + name);
-		}
-	}
+    public static void main(String args[]) {
+        Map<Integer, String> map = new HashMap<Integer, String>();
+        map.put(1, "Zhang San");
+        map.put(5, "Li Si");
+        map.put(4, "Wang Yi");
+        
+        Set<Integer> set = map.keySet();
+        Iterator<Integer> it = set.iterator();
+        System.out.println("HashMapÀàÊµÏÖµÄMap¼¯ºÏ£¬ÎŞĞò£º");
+        while (it.hasNext()) {
+            int str = it.next();//if not using String convertion
+            String name = map.get(str);
+            System.out.println(str + " " + name);
+        }
+        
+        TreeMap<Integer, String> treeMap = new TreeMap<Integer, String>();
+        treeMap.putAll(map);
+        Iterator<Integer> iter = treeMap.keySet().iterator();
+        System.out.println("TreeMapÀàÊµÏÖµÄMap¼¯ºÏ£¬¼ü¶ÔÏóÉıĞò£º");
+        while (iter.hasNext()) {//System.out.println(treeMap);¿ÉÒÔÖ±½ÓÕâÑù´òÓ¡
+            int str = iter.next();
+            String name = map.get(str);
+            System.out.println(str + " " + name);
+        }
+    }
 }
 
 //P265 µü´úÆ÷
@@ -9207,55 +9207,55 @@ import java.util.Collections;
 import java.util.ListIterator;
 
 public class Test {
-	public static void main(String args[]) {
-		ArrayList<Integer> array = new ArrayList<>();
-		Collections.addAll(array, 1, 2, 3, 4, 5, 6);
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
-		ListIterator<Integer> iterator = array.listIterator();//µü´úÆ÷ÉùÃ÷ºÃµÄÊ±ºò£¬ÊÇÖ¸ÏòÎ»ÖÃ0µÄÔªËØµÄ
-		
-		//iterator.set(10);´ËÊ±µü´úÆ÷»¹»á·µ»Ø¹ıÈÎºÎÖµ£¬ÎŞ·¨set
-		
-		//ËùÓĞµÄnextµÄ²Ù×÷£¬¶¼ÊÇÖ¸µ±Ç°µü´úÆ÷ËùÖ¸ÏòµÄÔªËØ£¬ÎŞÂÛÊÇnext()£¬»¹ÊÇnextIndex()
-		//ËùÓĞµÄpreviousµÄ²Ù×÷£¬¶¼ÊÇÖ¸µü´úÆ÷µÄÇ°Ò»¸öÔªËØµÄ
-		
-		System.out.println(iterator.next());
-		iterator.add(-1);
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
-		
-		boolean hasNext = iterator.hasNext();
-		System.out.println("¼¯ºÏÊÇ·ñ¾ßÓĞÏÂÒ»¸öÔªËØ£º" + hasNext);
-		
-		boolean hasPrevious = iterator.hasPrevious();
-		System.out.println("¼¯ºÏÊÇ·ñ¾ßÓĞÇ°Ò»¸öÔªËØ£º" + hasPrevious);
-		
-		int next = iterator.next();
-		System.out.println("»ñµÃ¼¯ºÏµÄÏÂÒ»¸öÔªËØ£º" + next);
-		
-		//iterator.next();
-		
-		int nextIndex = iterator.nextIndex();
-		System.out.println("»ñµÃ¼¯ºÏµÄÏÂÒ»¸öÔªËØµÄË÷Òı£º" + nextIndex);
-		System.out.println("»ñµÃÔªËØµÄÉÏÒ»¸öÔªËØµÄË÷Òı£º" + iterator.previousIndex());
-		
-		
-		int previous = iterator.previous();//·µ»Øµ±Ç°µü´úÆ÷×îºóÒ»´Înext()µÃµ½µÄÔªËØÖµ£¨Ò²¿ÉÒÔÈÏÎªÊÇµ±Ç°Ö¸ÏòµÄÔªËØÖµ£©£¬²¢ÇÒ½«µü´úÆ÷ºóÍËÒ»¸öÔªËØ
-		System.out.println("»ñµÃ¼¯ºÏµÄÇ°Ò»¸öÔªËØ£º" + previous);
-		
-		int previousIndex = iterator.previousIndex();//·µ»Øµ±Ç°µü´úÆ÷ËùÖ¸ÏòµÄÔªËØË÷Òı
-		System.out.println("»ñµÃ¼¯ºÏµÄÇ°Ò»¸öÔªËØµÄË÷Òı£º" + previousIndex);
-		
-		iterator.add(7);//ÔÚµü´úÆ÷µ±Ç°ËùÖ¸ÏòµÄÔªËØÎ»ÖÃ Ôö¼ÓÒ»¸öÔªËØ£¬²¢ÇÒ»áÊ¹µü´úÆ÷Ç°½ø1
-		System.out.println("Ïò¼¯ºÏÖĞÔö¼ÓÔªËØ7ºóµÄ¼¯ºÏ£º" + array);
-		
-		System.out.println("Ôö¼ÓÔªËØ7ºóµÄnext()£º" + iterator.next());
-		iterator.set(12);//ĞŞ¸Äµü´úÆ÷×îºóÒ»´Î·µ»ØµÄÔªËØÖµ
-		System.out.println("½«»ñµÃµÄÏÂÒ»¸öÔªËØĞŞ¸Ä³É12ºóµÄ¼¯ºÏ£º" + array);
-		
-		iterator.remove();//É¾³ıµÄÊÇµü´úÆ÷×îºóÒ»´Î·µ»ØµÄÔªËØÖµ£¬²¢ÇÒ»áÊ¹µü´úÆ÷index¼õ1
-		System.out.println("½«»ñµÃµÄÏÂÒ»¸öÔªËØÉ¾³ıºóµÄ¼¯ºÏ£º" + array);
-		
-		System.out.println("remove()ºóµÄnext()Öµ£º" + iterator.next());
-	}
+    public static void main(String args[]) {
+        ArrayList<Integer> array = new ArrayList<>();
+        Collections.addAll(array, 1, 2, 3, 4, 5, 6);
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+        ListIterator<Integer> iterator = array.listIterator();//µü´úÆ÷ÉùÃ÷ºÃµÄÊ±ºò£¬ÊÇÖ¸ÏòÎ»ÖÃ0µÄÔªËØµÄ
+        
+        //iterator.set(10);´ËÊ±µü´úÆ÷»¹»á·µ»Ø¹ıÈÎºÎÖµ£¬ÎŞ·¨set
+        
+        //ËùÓĞµÄnextµÄ²Ù×÷£¬¶¼ÊÇÖ¸µ±Ç°µü´úÆ÷ËùÖ¸ÏòµÄÔªËØ£¬ÎŞÂÛÊÇnext()£¬»¹ÊÇnextIndex()
+        //ËùÓĞµÄpreviousµÄ²Ù×÷£¬¶¼ÊÇÖ¸µü´úÆ÷µÄÇ°Ò»¸öÔªËØµÄ
+        
+        System.out.println(iterator.next());
+        iterator.add(-1);
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+        
+        boolean hasNext = iterator.hasNext();
+        System.out.println("¼¯ºÏÊÇ·ñ¾ßÓĞÏÂÒ»¸öÔªËØ£º" + hasNext);
+        
+        boolean hasPrevious = iterator.hasPrevious();
+        System.out.println("¼¯ºÏÊÇ·ñ¾ßÓĞÇ°Ò»¸öÔªËØ£º" + hasPrevious);
+        
+        int next = iterator.next();
+        System.out.println("»ñµÃ¼¯ºÏµÄÏÂÒ»¸öÔªËØ£º" + next);
+        
+        //iterator.next();
+        
+        int nextIndex = iterator.nextIndex();
+        System.out.println("»ñµÃ¼¯ºÏµÄÏÂÒ»¸öÔªËØµÄË÷Òı£º" + nextIndex);
+        System.out.println("»ñµÃÔªËØµÄÉÏÒ»¸öÔªËØµÄË÷Òı£º" + iterator.previousIndex());
+        
+        
+        int previous = iterator.previous();//·µ»Øµ±Ç°µü´úÆ÷×îºóÒ»´Înext()µÃµ½µÄÔªËØÖµ£¨Ò²¿ÉÒÔÈÏÎªÊÇµ±Ç°Ö¸ÏòµÄÔªËØÖµ£©£¬²¢ÇÒ½«µü´úÆ÷ºóÍËÒ»¸öÔªËØ
+        System.out.println("»ñµÃ¼¯ºÏµÄÇ°Ò»¸öÔªËØ£º" + previous);
+        
+        int previousIndex = iterator.previousIndex();//·µ»Øµ±Ç°µü´úÆ÷ËùÖ¸ÏòµÄÔªËØË÷Òı
+        System.out.println("»ñµÃ¼¯ºÏµÄÇ°Ò»¸öÔªËØµÄË÷Òı£º" + previousIndex);
+        
+        iterator.add(7);//ÔÚµü´úÆ÷µ±Ç°ËùÖ¸ÏòµÄÔªËØÎ»ÖÃ Ôö¼ÓÒ»¸öÔªËØ£¬²¢ÇÒ»áÊ¹µü´úÆ÷Ç°½ø1
+        System.out.println("Ïò¼¯ºÏÖĞÔö¼ÓÔªËØ7ºóµÄ¼¯ºÏ£º" + array);
+        
+        System.out.println("Ôö¼ÓÔªËØ7ºóµÄnext()£º" + iterator.next());
+        iterator.set(12);//ĞŞ¸Äµü´úÆ÷×îºóÒ»´Î·µ»ØµÄÔªËØÖµ
+        System.out.println("½«»ñµÃµÄÏÂÒ»¸öÔªËØĞŞ¸Ä³É12ºóµÄ¼¯ºÏ£º" + array);
+        
+        iterator.remove();//É¾³ıµÄÊÇµü´úÆ÷×îºóÒ»´Î·µ»ØµÄÔªËØÖµ£¬²¢ÇÒ»áÊ¹µü´úÆ÷index¼õ1
+        System.out.println("½«»ñµÃµÄÏÂÒ»¸öÔªËØÉ¾³ıºóµÄ¼¯ºÏ£º" + array);
+        
+        System.out.println("remove()ºóµÄnext()Öµ£º" + iterator.next());
+    }
 }
 
 //P267 ÄæĞò´ò³öËùÓĞListÖĞµÄÔªËØ
@@ -9264,20 +9264,20 @@ import java.util.Collections;
 import java.util.ListIterator;
 
 public class Test {
-	public static void main(String args[]) {
-		ArrayList<Integer> array = new ArrayList<>();
-		Collections.addAll(array, 1, 2, 3, 4, 5, 6);
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
-		ListIterator<Integer> iterator = array.listIterator();
-		
-		for (; iterator.hasNext();) {
-			iterator.next();
-		}
-		
-		for (; iterator.hasPrevious();) {
-			System.out.print(iterator.previous() + " ");
-		}
-	}
+    public static void main(String args[]) {
+        ArrayList<Integer> array = new ArrayList<>();
+        Collections.addAll(array, 1, 2, 3, 4, 5, 6);
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+        ListIterator<Integer> iterator = array.listIterator();
+        
+        for (; iterator.hasNext();) {
+            iterator.next();
+        }
+        
+        for (; iterator.hasPrevious();) {
+            System.out.print(iterator.previous() + " ");
+        }
+    }
 }
 
 //µü´úÆ÷¶ÔÏóÖĞÓĞ¸ö±äÁ¿lastRet£¬ÓÃÀ´Î¬»¤×î½üÒ»´Î²Ù×÷µÄÔªËØË÷Òı£¬³õÊ¼Ê±lastRet=-1£¬ÎŞ·¨remove£¬µ±removeºó£¬lastRetÒ²»á±»ÖÃÎª-1£¬Òò´Ë²»ÄÜÖØ¸´µÄ½øĞĞremove²Ù×÷
@@ -9286,17 +9286,17 @@ import java.util.Collections;
 import java.util.ListIterator;
 
 public class Test {
-	public static void main(String args[]) {
-		ArrayList<Integer> array = new ArrayList<>();
-		Collections.addAll(array, 6, 5, 4, 3, 2, 2, 1);
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+    public static void main(String args[]) {
+        ArrayList<Integer> array = new ArrayList<>();
+        Collections.addAll(array, 6, 5, 4, 3, 2, 2, 1);
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
 
-		ListIterator<Integer> iter = array.listIterator();
-		iter.next();
-		iter.remove();
-		iter.remove();//Å×Òì³£
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
-	}
+        ListIterator<Integer> iter = array.listIterator();
+        iter.next();
+        iter.remove();
+        iter.remove();//Å×Òì³£
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+    }
 }
 
 //ListÖĞÉ¾³ıÔªËØ×îºÃÓÃµü´úÆ÷£¬·ñÔò×Ô¼º±éÀú»áÈİÒ×³ö´í
@@ -9305,27 +9305,27 @@ import java.util.Collections;
 import java.util.ListIterator;
 
 public class Test {
-	public static void main(String args[]) {
-		ArrayList<Integer> array = new ArrayList<>();
-		Collections.addAll(array, 6, 5, 4, 3, 2, 2, 1);
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
-		
-		//ÕâÖÖÉ¾³ı·½Ê½£¬»áµ¼ÖÂÌø¹ıÁËÒ»¸öË÷ÒıÖµ£¬Ö»ÄÜÉ¾³ıÒ»¸ö2
-//		for (int i = 0; i < array.size(); ++i) {
-//			int n = array.get(i);
-//			if (n == 2) {
-//				array.remove(i);//List.remove(index)ÖĞµÄ²ÎÊıÊÇË÷Òı£¬¶ø²»ÊÇ¾ßÌåÖµ
-//			}
-//		}
-		
-		for (ListIterator<Integer> iter = array.listIterator(); iter.hasNext();) {
-			if (iter.next() == 2) {
-				iter.remove();
-			}
-		}
-		
-		System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
-	}
+    public static void main(String args[]) {
+        ArrayList<Integer> array = new ArrayList<>();
+        Collections.addAll(array, 6, 5, 4, 3, 2, 2, 1);
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+        
+        //ÕâÖÖÉ¾³ı·½Ê½£¬»áµ¼ÖÂÌø¹ıÁËÒ»¸öË÷ÒıÖµ£¬Ö»ÄÜÉ¾³ıÒ»¸ö2
+//        for (int i = 0; i < array.size(); ++i) {
+//            int n = array.get(i);
+//            if (n == 2) {
+//                array.remove(i);//List.remove(index)ÖĞµÄ²ÎÊıÊÇË÷Òı£¬¶ø²»ÊÇ¾ßÌåÖµ
+//            }
+//        }
+        
+        for (ListIterator<Integer> iter = array.listIterator(); iter.hasNext();) {
+            if (iter.next() == 2) {
+                iter.remove();
+            }
+        }
+        
+        System.out.println("¼¯ºÏÖĞµÄÔªËØ£º" + array);
+    }
 }
 Êä³öÈçÏÂ£º
 ¼¯ºÏÖĞµÄÔªËØ£º[6, 5, 4, 3, 2, 2, 1]
@@ -9340,30 +9340,30 @@ ThrowableÀàÊÇËùÓĞÒì³£ÀàµÄ³¬Àà£¬¸ÃÀàµÄÁ½¸öÖ±½Ó×ÓÀàÊÇErrorºÍException¡£ÆäÖĞ£¬Error
 
 //ÔËĞĞÊ±Òì³£
 public class Test {
-	public static void main(String args[]) {
-		try {
-			int i = 3/0;
-		} catch (Exception e) {
-			e.printStackTrace();//¿ÉÒÔÓÃSystem.out.println(e.getMessage());À´Êä³ö
-		}
-	}
+    public static void main(String args[]) {
+        try {
+            int i = 3/0;
+        } catch (Exception e) {
+            e.printStackTrace();//¿ÉÒÔÓÃSystem.out.println(e.getMessage());À´Êä³ö
+        }
+    }
 }
 ±¨ÈçÏÂ´íÎó£º
 java.lang.ArithmeticException: / by zero
-	at Test.main(Test.java:6)
+    at Test.main(Test.java:6)
 
 11.2.3 ËãÊõÒì³£ P276
 ÕûÊı±»0³ı²úÉúµÄÒì³£¡£¸¡µãÊı±»0³ı£¬½«²»Òı·¢Ëã·¨Òì³£¡£
 public class Test {
-	public static void main(String args[]) {
-		try {
-			double d = 3.0 / 0;
-			System.out.println(d);
-		} 
-		catch (ArithmeticException e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String args[]) {
+        try {
+            double d = 3.0 / 0;
+            System.out.println(d);
+        } 
+        catch (ArithmeticException e) {
+            e.printStackTrace();
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 Infinity
@@ -9374,35 +9374,35 @@ Infinity
 import java.util.Arrays;
 
 public class Test {
-	public static void main(String args[]) {
-		int array[] = new int[5];
-		Arrays.fill(array, 8);
-		for (int i = 0; i < 6; ++i) {
-			System.out.println(array[i]);
-		}
-	}
+    public static void main(String args[]) {
+        int array[] = new int[5];
+        Arrays.fill(array, 8);
+        for (int i = 0; i < 6; ++i) {
+            System.out.println(array[i]);
+        }
+    }
 }
 ±éÀúÊı×é£¬ÍÆ¼öÊ¹ÓÃforeachÑ­»·£¬¿ÉÒÔ±ÜÃâÊı×éÏÂ±êÔ½½ç¡£Èç¹ûÒªÊ¹ÓÃÊı×éµÄÏÂ±ê£¬ĞèÒª¼Ç×¡Êı×éµÄÏÂ±êÊÇ´Ó0¿ªÊ¼¼ÆËãµÄ¡£Èç¹ûĞèÒªÊ¹ÓÃÊı×éµÄ³¤¶È£¬ÔòÍÆ¼öÊ¹ÓÃlengthÊôĞÔ¡£ÁíÍâÊ¹ÓÃArrayListÀàÒ²¿ÉÒÔ±ÜÃâÕâĞ©ÎÊÌâ¡£
 
 P278 ²¶»ñÒì³£ĞÅÏ¢
 public class Test {
-	public static void main(String args[]) {
-		try {
-			int i = 3/0;
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("getMessage·½·¨£º\t" + e.getMessage());
-			System.out.println("getLocalizedMessage·½·¨£º\t" + e.getLocalizedMessage());
-			System.out.println("toString·½·¨£º\t" + e.toString());
-		}
-	}
+    public static void main(String args[]) {
+        try {
+            int i = 3/0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("getMessage·½·¨£º\t" + e.getMessage());
+            System.out.println("getLocalizedMessage·½·¨£º\t" + e.getLocalizedMessage());
+            System.out.println("toString·½·¨£º\t" + e.toString());
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 java.lang.ArithmeticException: / by zero
-	at Test.main(Test.java:4)
-getMessage·½·¨£º	/ by zero
-getLocalizedMessage·½·¨£º	/ by zero
-toString·½·¨£º	java.lang.ArithmeticException: / by zero
+    at Test.main(Test.java:4)
+getMessage·½·¨£º    / by zero
+getLocalizedMessage·½·¨£º    / by zero
+toString·½·¨£º    java.lang.ArithmeticException: / by zero
 
 11.4 ´¦ÀíÒì³£ P280
 11.4.2 Ê¹ÓÃ try...catch...finally ´¦ÀíÒì³£
@@ -9416,36 +9416,36 @@ import java.io.IOException;
 import java.security.spec.ECGenParameterSpec;
 
 public class CloseIo {
-	private FileInputStream in = null;
-	
-	public void readInfo() {
-		try {
-			in = new FileInputStream("src/IStringDeal.java");
-			System.out.println("´´½¨IOÁ÷£¬·ÖÅäÄÚ´æ×ÊÔ´¡£");
-		} 
-		catch (IOException io) {
-			io.printStackTrace();
-			System.out.println("´´½¨IO¶ÔÏó·¢ÉúÒì³£¡£");
-		}
-		//¸Ğ¾õÕâ¸öfinally¿é²»¼ÓÒ²Ã»Ê²Ã´ÎÊÌâ£¬·´Õı¶¼»á×ßµ½
-		finally {
-			if (in != null) {
-				try {
-					in.close();
-					System.out.println("¹Ø±ÕIOÁ÷£¬ÊÍ·ÅÄÚ´æ×ÊÔ´¡£");
-				} 
-				catch (IOException ioe) {
-					ioe.printStackTrace();
-					System.out.println("¹Ø±ÕIO¶ÔÏó·¢ÉúÒì³£¡£");
-				}
-			}
-		}
-	}
-	
-	public static void main(String args[]) {
-		CloseIo ex = new CloseIo();
-		ex.readInfo();
-	}
+    private FileInputStream in = null;
+    
+    public void readInfo() {
+        try {
+            in = new FileInputStream("src/IStringDeal.java");
+            System.out.println("´´½¨IOÁ÷£¬·ÖÅäÄÚ´æ×ÊÔ´¡£");
+        } 
+        catch (IOException io) {
+            io.printStackTrace();
+            System.out.println("´´½¨IO¶ÔÏó·¢ÉúÒì³£¡£");
+        }
+        //¸Ğ¾õÕâ¸öfinally¿é²»¼ÓÒ²Ã»Ê²Ã´ÎÊÌâ£¬·´Õı¶¼»á×ßµ½
+        finally {
+            if (in != null) {
+                try {
+                    in.close();
+                    System.out.println("¹Ø±ÕIOÁ÷£¬ÊÍ·ÅÄÚ´æ×ÊÔ´¡£");
+                } 
+                catch (IOException ioe) {
+                    ioe.printStackTrace();
+                    System.out.println("¹Ø±ÕIO¶ÔÏó·¢ÉúÒì³£¡£");
+                }
+            }
+        }
+    }
+    
+    public static void main(String args[]) {
+        CloseIo ex = new CloseIo();
+        ex.readInfo();
+    }
 }
 Êä³öÈçÏÂ£º
 ´´½¨IOÁ÷£¬·ÖÅäÄÚ´æ×ÊÔ´¡£
@@ -9459,37 +9459,37 @@ import java.io.IOException;
 import java.security.spec.ECGenParameterSpec;
 
 public class CloseIo {
-	private FileInputStream in = null;
-	
-	public void readInfo() {
-		try {
-			try {
-				in = new FileInputStream("src/IStringsDeal.java");
-				System.out.println("´´½¨IOÁ÷£¬·ÖÅäÄÚ´æ×ÊÔ´¡£");
-			} 
-			catch (FileNotFoundException e) {
-				e.printStackTrace();
-				System.out.println("´´½¨IO¶ÔÏó·¢ÉúÒì³£¡£");
-			}
-		}
-		finally {
-			if (in != null) {
-				try {
-					in.close();
-					System.out.println("¹Ø±ÕIOÁ÷£¬ÊÍ·ÅÄÚ´æ×ÊÔ´¡£");
-				} 
-				catch (IOException ioe) {
-					ioe.printStackTrace();
-					System.out.println("¹Ø±ÕIO¶ÔÏó·¢ÉúÒì³£¡£");
-				}
-			}
-		}
-	}
-	
-	public static void main(String args[]) {
-		CloseIo ex = new CloseIo();
-		ex.readInfo();
-	}
+    private FileInputStream in = null;
+    
+    public void readInfo() {
+        try {
+            try {
+                in = new FileInputStream("src/IStringsDeal.java");
+                System.out.println("´´½¨IOÁ÷£¬·ÖÅäÄÚ´æ×ÊÔ´¡£");
+            } 
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+                System.out.println("´´½¨IO¶ÔÏó·¢ÉúÒì³£¡£");
+            }
+        }
+        finally {
+            if (in != null) {
+                try {
+                    in.close();
+                    System.out.println("¹Ø±ÕIOÁ÷£¬ÊÍ·ÅÄÚ´æ×ÊÔ´¡£");
+                } 
+                catch (IOException ioe) {
+                    ioe.printStackTrace();
+                    System.out.println("¹Ø±ÕIO¶ÔÏó·¢ÉúÒì³£¡£");
+                }
+            }
+        }
+    }
+    
+    public static void main(String args[]) {
+        CloseIo ex = new CloseIo();
+        ex.readInfo();
+    }
 }
 
 11.5.1 Ê¹ÓÃthrowsÉùÃ÷Å×³öÒì³£ P283
@@ -9499,76 +9499,76 @@ import java.io.IOException;
 import java.security.spec.ECGenParameterSpec;
 
 public class CloseIo {
-	private FileInputStream in = null;
-	
-	public void showInfo() throws Exception {
-		FileInputStream in = new FileInputStream("src/abc.java");//ÕâÀïÈç¹ûin³É¹¦´ò¿ªÎÄ¼ş£¬µ«È´Ã»ÓĞ¹Ø±ÕÎÄ¼ş£¬¿ÉÄÜÔì³É×ÊÔ´Ğ¹Â¶
-	}
-	
-	public static void main(String args[]) {
-		CloseIo ex = new CloseIo();
-		ex.showInfo();//µ÷showInfoº¯Êı¿ÉÄÜ»áÅ×³öÒì³££¬µ«ÕâÀïÈ´Ã»ÓĞ´¦Àí
-	}
+    private FileInputStream in = null;
+    
+    public void showInfo() throws Exception {
+        FileInputStream in = new FileInputStream("src/abc.java");//ÕâÀïÈç¹ûin³É¹¦´ò¿ªÎÄ¼ş£¬µ«È´Ã»ÓĞ¹Ø±ÕÎÄ¼ş£¬¿ÉÄÜÔì³É×ÊÔ´Ğ¹Â¶
+    }
+    
+    public static void main(String args[]) {
+        CloseIo ex = new CloseIo();
+        ex.showInfo();//µ÷showInfoº¯Êı¿ÉÄÜ»áÅ×³öÒì³££¬µ«ÕâÀïÈ´Ã»ÓĞ´¦Àí
+    }
 }
 
 //P286 Ê¹ÓÃthrowÅ×³öÒì³£
 public class CloseIo {
-	final static double PI = 3.14;
-	
-	public void computeArea(double r) throws Exception {
-		if (r <= 20.0) {
-			throw new Exception("³ÌĞòÒì³££º\n°ë¾¶Îª£º" + r + "\n°ë¾¶²»ÄÜĞ¡ÓÚ20¡£");
-		}
-		else {
-			double circleArea = PI * r * r;
-			System.out.println("°ë¾¶ÊÇ" + r + "µÄÔ²µÄÃæ»ıÊÇ£º" + circleArea);
-		}
-	}
-	
-	public static void main(String args[]) {
-		CloseIo ex = new CloseIo();
-		try {
-			ex.computeArea(20.1);
-		}
-		catch (Exception e){
-			System.out.println(e.getMessage());
-		}
-	}
+    final static double PI = 3.14;
+    
+    public void computeArea(double r) throws Exception {
+        if (r <= 20.0) {
+            throw new Exception("³ÌĞòÒì³££º\n°ë¾¶Îª£º" + r + "\n°ë¾¶²»ÄÜĞ¡ÓÚ20¡£");
+        }
+        else {
+            double circleArea = PI * r * r;
+            System.out.println("°ë¾¶ÊÇ" + r + "µÄÔ²µÄÃæ»ıÊÇ£º" + circleArea);
+        }
+    }
+    
+    public static void main(String args[]) {
+        CloseIo ex = new CloseIo();
+        try {
+            ex.computeArea(20.1);
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
 }
 
 11.5.3 ·½·¨ÖĞÅ×³öÒì³£
 Èç¹ûÄ³¸öÀà»¹Ã»ÓĞÊµÏÖ£¬¿ÉÒÔÏÈÔÚÆäÖĞÅ×³öÒì³££¬ÕâÑùÆäËûÀàµ÷ÓÃÊ±£¬»áÅ×³öÒì³££¬ÒÔ±ãÒÔºóĞŞ¸ÄÍê³É¡£
 
 public class CloseIo {
-	public void computeArea(double r) {
-		throw new UnsupportedOperationException("·½·¨ÉĞÎ´ÊµÏÖ");
-	}
-	
-	public static void main(String args[]) {
-		CloseIo ex = new CloseIo();
-		ex.computeArea(20.1);
-	}
+    public void computeArea(double r) {
+        throw new UnsupportedOperationException("·½·¨ÉĞÎ´ÊµÏÖ");
+    }
+    
+    public static void main(String args[]) {
+        CloseIo ex = new CloseIo();
+        ex.computeArea(20.1);
+    }
 }
 Êä³öÈçÏÂ£º
 Exception in thread "main" java.lang.UnsupportedOperationException: ·½·¨ÉĞÎ´ÊµÏÖ
-	at CloseIo.computeArea(CloseIo.java:4)
-	at CloseIo.main(CloseIo.java:9)
+    at CloseIo.computeArea(CloseIo.java:4)
+    at CloseIo.main(CloseIo.java:9)
 
 11.6.1 ´´½¨×Ô¶¨ÒåÒì³£Àà P287
 public class NewException extends Exception {
-	public NewException(String s) {
-		super(s);
-	}
+    public NewException(String s) {
+        super(s);
+    }
 }
 
-public class Test {	
-	public static void main(String args[]) {
-		try {
-			throw new NewException("Throw a NewException.");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
+public class Test {    
+    public static void main(String args[]) {
+        try {
+            throw new NewException("Throw a NewException.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 Throw a NewException.
@@ -9576,19 +9576,19 @@ Throw a NewException.
 11.6.2 Ê¹ÓÃ×Ô¶¨ÒåÒì³£Àà P288
 //¸Ğ¾õÊéÉÏµÄÀı×ÓÊä³ö²»Ì«¶Ô
 public class NewException extends Exception {
-	public NewException(String s) {
-		System.out.println(s);
-	}
+    public NewException(String s) {
+        System.out.println(s);
+    }
 }
 
-public class Test {	
-	public static void main(String args[]) {
-		try {
-			throw new NewException("Throw a NewException.");
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-	}
+public class Test {    
+    public static void main(String args[]) {
+        try {
+            throw new NewException("Throw a NewException.");
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 Throw a NewException.
@@ -9615,66 +9615,66 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
-public class Test {	
-	public static void main(String args[]) {
-		String before = "today";
-		String after = "½ñÌì";
-		
-		FileReader reader = null;
-		FileWriter writer = null;
-		StringBuilder sb = new StringBuilder();
-		
-		int flag = 0;
-		final int maxLength = 1024;
-		char temp[] = new char[maxLength];
-						
-		String textFile = "src/TestFile.txt";
-		try {
-			reader = new FileReader(textFile);
-			while ((flag = reader.read(temp)) != -1) {
-				//ÕâÀïÈç¹û²»×öÕâ¸öÅĞ¶Ï£¬ÄÇÃ´»á½«tempµÄ1024¸ö×Ö·ûÈ«¶¼Ğ´½øÎÄ¼şÖĞ£¬Èç¹ûÎ´¶ÁÂú£¬Ôò»á³öÏÖÒ»¶ÑÎ´¶¨Òå×Ö·û
-				if (flag == maxLength) {
-					sb.append(temp);
-				}
-				else {
-					//½«×Ö·ûÊı×éµÄÌØ¶¨³¤¶È¸½¼Óµ½sbÖĞ
-					sb.append(temp, 0, flag);
-					
-					//»òÕß½«»ñÈ¡µÄÌØ¶¨³¤¶È×Ö·ûÉú³ÉString£¬²¢¸½¼Óµ½sbÖĞ
-					// String tempString = new String(temp, 0, flag);
-					// sb.append(tempString);
-					
-					//ÈçÏÂ·½·¨£¬×Ö·û×ª³ÉtoStringµÃµ½µÄ½«ÊÇÀàÃû¼ÓHashCodeµÄ×Ö·û´®£¬¶ø²»Ô­×Ö·û´®£¬ÀàËÆ[C@1db9742µÄÄÚÈİ
-//					String tempString = temp.toString();
-//					tempString = tempString.substring(0, flag);
-//					sb.append(tempString);
-				}
-			}
-			
-			String content = sb.toString().replace(before, after);
-			writer = new FileWriter(textFile);
-			writer.write(content);
-		} 
-		catch (FileNotFoundException e1) {
-			System.out.println(e1);
-		}
-		catch (IOException e2) {
-			e2.printStackTrace();
-		}
-		finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-				if (writer != null) {
-					writer.close();
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+public class Test {    
+    public static void main(String args[]) {
+        String before = "today";
+        String after = "½ñÌì";
+        
+        FileReader reader = null;
+        FileWriter writer = null;
+        StringBuilder sb = new StringBuilder();
+        
+        int flag = 0;
+        final int maxLength = 1024;
+        char temp[] = new char[maxLength];
+                        
+        String textFile = "src/TestFile.txt";
+        try {
+            reader = new FileReader(textFile);
+            while ((flag = reader.read(temp)) != -1) {
+                //ÕâÀïÈç¹û²»×öÕâ¸öÅĞ¶Ï£¬ÄÇÃ´»á½«tempµÄ1024¸ö×Ö·ûÈ«¶¼Ğ´½øÎÄ¼şÖĞ£¬Èç¹ûÎ´¶ÁÂú£¬Ôò»á³öÏÖÒ»¶ÑÎ´¶¨Òå×Ö·û
+                if (flag == maxLength) {
+                    sb.append(temp);
+                }
+                else {
+                    //½«×Ö·ûÊı×éµÄÌØ¶¨³¤¶È¸½¼Óµ½sbÖĞ
+                    sb.append(temp, 0, flag);
+                    
+                    //»òÕß½«»ñÈ¡µÄÌØ¶¨³¤¶È×Ö·ûÉú³ÉString£¬²¢¸½¼Óµ½sbÖĞ
+                    // String tempString = new String(temp, 0, flag);
+                    // sb.append(tempString);
+                    
+                    //ÈçÏÂ·½·¨£¬×Ö·û×ª³ÉtoStringµÃµ½µÄ½«ÊÇÀàÃû¼ÓHashCodeµÄ×Ö·û´®£¬¶ø²»Ô­×Ö·û´®£¬ÀàËÆ[C@1db9742µÄÄÚÈİ
+//                    String tempString = temp.toString();
+//                    tempString = tempString.substring(0, flag);
+//                    sb.append(tempString);
+                }
+            }
+            
+            String content = sb.toString().replace(before, after);
+            writer = new FileWriter(textFile);
+            writer.write(content);
+        } 
+        catch (FileNotFoundException e1) {
+            System.out.println(e1);
+        }
+        catch (IOException e2) {
+            e2.printStackTrace();
+        }
+        finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+                if (writer != null) {
+                    writer.close();
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 Ìæ»»Ç°µÄÎÄ¼şÄÚÈİ£º
 today is a nice day.
@@ -9697,48 +9697,48 @@ The toString method for class Object returns a string consisting of the name of 
 
 import java.io.File;
 
-public class Test {	
-	public static void main(String args[]) {
-		File file = new File("src","abc.txt");//Í¬"src/abc.txt"£¬ÕâÀïµÄÂ·¾¶ÎÄ¼ş¼ĞÒ»¶¨Òª´æÔÚ£¬·ñÔòÔÚ´´½¨ÎÄ¼şÊ±»á±¨´í
-		if (file.exists()) {
-			file.delete();
-			System.out.println("ÎÄ¼şÒÑÉ¾³ı");
-		}
-		else {
-			try {
-				file.createNewFile();//Èç¹û´æÔÚÔ­ÎÄ¼ş£¬ÕâÀï´´½¨ĞÂÎÄ¼ş²»»á´´½¨£¬Ò²²»»á±¨´í
-				System.out.println("ÎÄ¼şÒÑ´´½¨");
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
-	}
+public class Test {    
+    public static void main(String args[]) {
+        File file = new File("src","abc.txt");//Í¬"src/abc.txt"£¬ÕâÀïµÄÂ·¾¶ÎÄ¼ş¼ĞÒ»¶¨Òª´æÔÚ£¬·ñÔòÔÚ´´½¨ÎÄ¼şÊ±»á±¨´í
+        if (file.exists()) {
+            file.delete();
+            System.out.println("ÎÄ¼şÒÑÉ¾³ı");
+        }
+        else {
+            try {
+                file.createNewFile();//Èç¹û´æÔÚÔ­ÎÄ¼ş£¬ÕâÀï´´½¨ĞÂÎÄ¼ş²»»á´´½¨£¬Ò²²»»á±¨´í
+                System.out.println("ÎÄ¼şÒÑ´´½¨");
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+    }
 }
 
 //P300
 import java.io.File;
 
-public class Test {	
-	public static void main(String args[]) {
-		File file = new File("src/abc.txt");
-		if (file.exists()) {
-			System.out.println("ÎÄ¼şÃû³Æ£º" + file.getName());
-			System.out.println("ÎÄ¼ş³¤¶È£º" + file.length());
-			System.out.println("ÎÄ¼şÊÇ·ñÊÇÒş²ØÎÄ¼ş£º" + file.isHidden());
-			System.out.println("¸¸Â·¾¶£º" + file.getParent());
-			System.out.println("ÎÄ¼ş¾ø¶ÔÂ·¾¶£º" + file.getAbsolutePath());
-			System.out.println("ÎÄ¼şÂ·¾¶£º" + file.getPath());
-			System.out.println("ÏµÍ³·Ö¸ô·û£º" + File.separator);
-		}
-		else {
-			System.out.println("ÎÄ¼ş²»´æÔÚ");
-		}
-		
-		String newFileName = new String(file.getParent() + File.separator + "def.txt");//½«ÎÄ¼şÖØÃüÃû£¬Èë²ÎÎªĞÂÎÄ¼şÀà¡£Èç¹ûÂ·¾¶²»Í¬£¬Ò²¿ÉÒÔÓÃÓÚÒÆ¶¯ÎÄ¼ş
-		file.renameTo(new File(newFileName));
-	}
+public class Test {    
+    public static void main(String args[]) {
+        File file = new File("src/abc.txt");
+        if (file.exists()) {
+            System.out.println("ÎÄ¼şÃû³Æ£º" + file.getName());
+            System.out.println("ÎÄ¼ş³¤¶È£º" + file.length());
+            System.out.println("ÎÄ¼şÊÇ·ñÊÇÒş²ØÎÄ¼ş£º" + file.isHidden());
+            System.out.println("¸¸Â·¾¶£º" + file.getParent());
+            System.out.println("ÎÄ¼ş¾ø¶ÔÂ·¾¶£º" + file.getAbsolutePath());
+            System.out.println("ÎÄ¼şÂ·¾¶£º" + file.getPath());
+            System.out.println("ÏµÍ³·Ö¸ô·û£º" + File.separator);
+        }
+        else {
+            System.out.println("ÎÄ¼ş²»´æÔÚ");
+        }
+        
+        String newFileName = new String(file.getParent() + File.separator + "def.txt");//½«ÎÄ¼şÖØÃüÃû£¬Èë²ÎÎªĞÂÎÄ¼şÀà¡£Èç¹ûÂ·¾¶²»Í¬£¬Ò²¿ÉÒÔÓÃÓÚÒÆ¶¯ÎÄ¼ş
+        file.renameTo(new File(newFileName));
+    }
 }
 Êä³öÈçÏÂ£º
 ÎÄ¼şÃû³Æ£ºabc.txt
@@ -9754,30 +9754,30 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-public class Test {	
-	public static void main(String args[]) {
-		File file = new File("src","abc.txt");
-		try {
-			FileOutputStream out = new FileOutputStream(file);
-			byte buy[] = "Hello".getBytes();
-			out.write(buy);
-			out.close();
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+public class Test {    
+    public static void main(String args[]) {
+        File file = new File("src","abc.txt");
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            byte buy[] = "Hello".getBytes();
+            out.write(buy);
+            out.close();
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		try {
-			FileInputStream in = new FileInputStream(file);
-			byte byt[] = new byte[1024];
-			int len = in.read(byt);
-			System.out.println("ÎÄ¼şÖĞµÄĞÅÏ¢ÊÇ£º" + new String(byt, 0, len));
-			in.close();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            FileInputStream in = new FileInputStream(file);
+            byte byt[] = new byte[1024];
+            int len = in.read(byt);
+            System.out.println("ÎÄ¼şÖĞµÄĞÅÏ¢ÊÇ£º" + new String(byt, 0, len));
+            in.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 ÎÄ¼şÖĞµÄĞÅÏ¢ÊÇ£ºHello
@@ -9790,43 +9790,43 @@ public class Test {
 import java.io.File;
 
 public class Test {
-	public void deleteFile(String path) {
-		File file = new File(path);
-		StringBuilder sb = new StringBuilder();
-		deleteFile(file, sb);
-		System.out.print(sb.toString());
-	}
-	
-	private void deleteFile(File root, StringBuilder sbLog) {
-		if (!root.exists()) {
-			sbLog.append("File or directory does not exist. Path: \n" + root.getAbsolutePath());
-			return;
-		}
-		if (root.isFile()) {
-			deleteOneFile(root, sbLog);
-		} else {
-			File files[] = root.listFiles();
-			for (File file : files) {
-				if (file.isFile()) {
-					deleteOneFile(file, sbLog);
-				} else {
-					deleteFile(file, sbLog);
-				}
-			}
-			deleteOneFile(root, sbLog);
-		}
-	}
-	
-	private void deleteOneFile(File file, StringBuilder sbLog) {
-		String s = new String(file.isFile() ? "File is deleted: " : "Directory is delete: ");
-		file.delete();
-		sbLog.append(s + file.getAbsolutePath() + "\n");
-	}
-	
-	public static void main(String args[]) {
-		Test t = new Test();
-		t.deleteFile("d:/Program Files/eclipseJava workspace/dbTest");
-	}
+    public void deleteFile(String path) {
+        File file = new File(path);
+        StringBuilder sb = new StringBuilder();
+        deleteFile(file, sb);
+        System.out.print(sb.toString());
+    }
+    
+    private void deleteFile(File root, StringBuilder sbLog) {
+        if (!root.exists()) {
+            sbLog.append("File or directory does not exist. Path: \n" + root.getAbsolutePath());
+            return;
+        }
+        if (root.isFile()) {
+            deleteOneFile(root, sbLog);
+        } else {
+            File files[] = root.listFiles();
+            for (File file : files) {
+                if (file.isFile()) {
+                    deleteOneFile(file, sbLog);
+                } else {
+                    deleteFile(file, sbLog);
+                }
+            }
+            deleteOneFile(root, sbLog);
+        }
+    }
+    
+    private void deleteOneFile(File file, StringBuilder sbLog) {
+        String s = new String(file.isFile() ? "File is deleted: " : "Directory is delete: ");
+        file.delete();
+        sbLog.append(s + file.getAbsolutePath() + "\n");
+    }
+    
+    public static void main(String args[]) {
+        Test t = new Test();
+        t.deleteFile("d:/Program Files/eclipseJava workspace/dbTest");
+    }
 }
 Êä³öÈçÏÂ£º
 File is deleted: d:\Program Files\eclipseJava workspace\dbTest\b.txt
@@ -9843,37 +9843,37 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class Student {
-	public static void main(String args[]) {
-		String content[] = {"abc", "def", "opq"};
-		File file = new File("src", "abc.txt");
-		try {
-			FileWriter fw = new FileWriter(file);//¹¹Ôìº¯Êı¿ÉÒÔÊÇFile¶ÔÏó£¬Ò²¿ÉÒÔÊÇ×Ö·û´®ÎÄ¼şÂ·¾¶
-			BufferedWriter bufw = new BufferedWriter(fw);
-			for (int k = 0; k < content.length; ++k) {
-				bufw.write(content[k]);
-				bufw.newLine();
-			}
-			bufw.close();
-			fw.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			FileReader fr = new FileReader(file);
-			BufferedReader bufr = new BufferedReader(fr);
-			String s = null;
-			int i = 0;
-			while ((s = bufr.readLine()) != null) {
-				++i;
-				System.out.println("Line " + i + ": " + s);
-			}
-			bufr.close();
-			fr.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String args[]) {
+        String content[] = {"abc", "def", "opq"};
+        File file = new File("src", "abc.txt");
+        try {
+            FileWriter fw = new FileWriter(file);//¹¹Ôìº¯Êı¿ÉÒÔÊÇFile¶ÔÏó£¬Ò²¿ÉÒÔÊÇ×Ö·û´®ÎÄ¼şÂ·¾¶
+            BufferedWriter bufw = new BufferedWriter(fw);
+            for (int k = 0; k < content.length; ++k) {
+                bufw.write(content[k]);
+                bufw.newLine();
+            }
+            bufw.close();
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            FileReader fr = new FileReader(file);
+            BufferedReader bufr = new BufferedReader(fr);
+            String s = null;
+            int i = 0;
+            while ((s = bufr.readLine()) != null) {
+                ++i;
+                System.out.println("Line " + i + ": " + s);
+            }
+            bufr.close();
+            fr.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 Line 1: abc
@@ -9890,31 +9890,31 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 public class Student {
-	public static void main(String args[]) {
-		File file = new File("src/abc.txt");
-		Properties properties = new Properties();
-		FileReader reader = null;
-		try {
-			reader = new FileReader(file);
-			properties.load(reader);
-			Enumeration<?> keys = properties.propertyNames();
-			while (keys.hasMoreElements()) {
-				String key = (String) keys.nextElement();
-				String value = properties.getProperty(key);
-				System.out.println("Key: " + key + "-- Value: "+ value);
-			}
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e2) {
-			e2.printStackTrace();
-		} finally {
-			try {
-				reader.close();
-			} catch (Exception e3) {
-				e3.printStackTrace();
-			}
-		}
-	}
+    public static void main(String args[]) {
+        File file = new File("src/abc.txt");
+        Properties properties = new Properties();
+        FileReader reader = null;
+        try {
+            reader = new FileReader(file);
+            properties.load(reader);
+            Enumeration<?> keys = properties.propertyNames();
+            while (keys.hasMoreElements()) {
+                String key = (String) keys.nextElement();
+                String value = properties.getProperty(key);
+                System.out.println("Key: " + key + "-- Value: "+ value);
+            }
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+        } finally {
+            try {
+                reader.close();
+            } catch (Exception e3) {
+                e3.printStackTrace();
+            }
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 Key: abc-- Value: ÄãºÃ
@@ -9934,39 +9934,39 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Student {
-	public static void main(String args[]) {
-		File file = new File("d:/Program Files/eclipseJava workspace/LearningProject/dbTest");
-		File textFiles[] = file.listFiles();
-		BufferedReader reader = null;
-		FileWriter writer = null;
-		try {
-			writer = new FileWriter("d:/Program Files/eclipseJava workspace/LearningProject/Concatenation.txt");
-			for (File textFile : textFiles) { 
-				if (textFile.isDirectory()) {
-					continue;
-				}
-				reader = new BufferedReader(new FileReader(textFile));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					writer.write(line + "\n");
-				}
-				reader.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    public static void main(String args[]) {
+        File file = new File("d:/Program Files/eclipseJava workspace/LearningProject/dbTest");
+        File textFiles[] = file.listFiles();
+        BufferedReader reader = null;
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter("d:/Program Files/eclipseJava workspace/LearningProject/Concatenation.txt");
+            for (File textFile : textFiles) { 
+                if (textFile.isDirectory()) {
+                    continue;
+                }
+                reader = new BufferedReader(new FileReader(textFile));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line + "\n");
+                }
+                reader.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+                if (writer != null) {
+                    writer.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
 
 12.6 Êı¾İÊäÈë/Êä³öÁ÷ P312
@@ -9977,22 +9977,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 public class Student {
-	public static void main(String args[]) {
-		try {
-			FileOutputStream fs = new FileOutputStream("src/Concatenation.txt");
-			DataOutputStream ds = new DataOutputStream(fs);
-			ds.writeUTF("Ê¹ÓÃwriteUTF()·½·¨Ğ´ÈëÊı¾İ");
-			//ds.writeChars("Ê¹ÓÃwriteChars()·½·¨Ğ´ÈëÊı¾İ");//ÕâÁ½¸ö·½·¨£¬½«ÎŞ·¨¶Á³öÊı¾İ
-			//ds.writeBytes("Ê¹ÓÃwriteBytes·½·¨Ğ´ÈëÊı¾İ");
-			ds.close();
-			
-			FileInputStream fis = new FileInputStream("src/Concatenation.txt");
-			DataInputStream dis = new DataInputStream(fis);
-			System.out.println(dis.readUTF());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String args[]) {
+        try {
+            FileOutputStream fs = new FileOutputStream("src/Concatenation.txt");
+            DataOutputStream ds = new DataOutputStream(fs);
+            ds.writeUTF("Ê¹ÓÃwriteUTF()·½·¨Ğ´ÈëÊı¾İ");
+            //ds.writeChars("Ê¹ÓÃwriteChars()·½·¨Ğ´ÈëÊı¾İ");//ÕâÁ½¸ö·½·¨£¬½«ÎŞ·¨¶Á³öÊı¾İ
+            //ds.writeBytes("Ê¹ÓÃwriteBytes·½·¨Ğ´ÈëÊı¾İ");
+            ds.close();
+            
+            FileInputStream fis = new FileInputStream("src/Concatenation.txt");
+            DataInputStream dis = new DataInputStream(fis);
+            System.out.println(dis.readUTF());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 12.7 ZIPÑ¹ËõÊäÈë/Êä³öÁ÷ P313
@@ -10003,43 +10003,43 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class MyZip {
-	private void zip(String zipFilename, File inputFile) throws Exception {
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFilename));
-		zip(out, inputFile, "");
-		System.out.println("Zipping...");
-		out.close();
-	}
-	
-	private void zip(ZipOutputStream out, File f, String base) throws Exception {
-		if (f.isDirectory()) {
-			File files[] = f.listFiles();
-			out.putNextEntry(new ZipEntry(base + "/"));
-			base = base.length() == 0 ? "" : base + "/";
-			for (int i = 0; i < files.length; ++i) {
-				zip(out, files[i], base + files[i]);
-			}
-		} else {
-			out.putNextEntry(new ZipEntry(base));
-			FileInputStream in = new FileInputStream(f);
-			int b;
-			System.out.println(base);
-			while ((b = in.read()) != -1) {
-				out.write(b);
-			}
-			in.close();
-		}
-	}
-	
-	public static void main(String args[]) {
-		MyZip book = new MyZip();
-		try {
-			book.zip("d:/Program Files/eclipseJava workspace/LearningProject/dbTest.zip", 
-					new File("d:/Program Files/eclipseJava workspace/LearningProject/dbTest"));
-			System.out.println("Finish zipping.");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private void zip(String zipFilename, File inputFile) throws Exception {
+        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFilename));
+        zip(out, inputFile, "");
+        System.out.println("Zipping...");
+        out.close();
+    }
+    
+    private void zip(ZipOutputStream out, File f, String base) throws Exception {
+        if (f.isDirectory()) {
+            File files[] = f.listFiles();
+            out.putNextEntry(new ZipEntry(base + "/"));
+            base = base.length() == 0 ? "" : base + "/";
+            for (int i = 0; i < files.length; ++i) {
+                zip(out, files[i], base + files[i]);
+            }
+        } else {
+            out.putNextEntry(new ZipEntry(base));
+            FileInputStream in = new FileInputStream(f);
+            int b;
+            System.out.println(base);
+            while ((b = in.read()) != -1) {
+                out.write(b);
+            }
+            in.close();
+        }
+    }
+    
+    public static void main(String args[]) {
+        MyZip book = new MyZip();
+        try {
+            book.zip("d:/Program Files/eclipseJava workspace/LearningProject/dbTest.zip", 
+                    new File("d:/Program Files/eclipseJava workspace/LearningProject/dbTest"));
+            System.out.println("Finish zipping.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 12.7.2 ½âÑ¹ËõZIPÎÄ¼ş P315 Î´¿´
@@ -10050,49 +10050,49 @@ import java.io.File;
 import java.io.FileReader;
 
 public class Candidate {
-	public static void main(String args[]) {
-		Candidate c = new Candidate();
-		System.out.println(c.getBallot("B"));
-	}
-	
-	public int getBallot(String name) {
-		File file = new File("src/count.txt");
-		FileReader fr = null;
-		BufferedReader br = null;
-		int len = 0;
-		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			fr = new FileReader(file);
-			br = new BufferedReader(fr);
-			String str[] = new String[3];
-			String size;
-			int i = 0;
-			while ((size = br.readLine()) != null) {
-				str[i] = size.trim();
-				if (str[i].startsWith(name)) {
-					int length = str[i].indexOf(":");
-					String sub = str[i].substring(length + 1, str[i].length());
-					len = Integer.parseInt(sub);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (fr != null) {
-					fr.close();
-				}
-				if (br != null) {
-					br.close();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return len;
-	}
+    public static void main(String args[]) {
+        Candidate c = new Candidate();
+        System.out.println(c.getBallot("B"));
+    }
+    
+    public int getBallot(String name) {
+        File file = new File("src/count.txt");
+        FileReader fr = null;
+        BufferedReader br = null;
+        int len = 0;
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            fr = new FileReader(file);
+            br = new BufferedReader(fr);
+            String str[] = new String[3];
+            String size;
+            int i = 0;
+            while ((size = br.readLine()) != null) {
+                str[i] = size.trim();
+                if (str[i].startsWith(name)) {
+                    int length = str[i].indexOf(":");
+                    String sub = str[i].substring(length + 1, str[i].length());
+                    len = Integer.parseInt(sub);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fr != null) {
+                    fr.close();
+                }
+                if (br != null) {
+                    br.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return len;
+    }
 }
 
 count.txtÄÚÈİÈçÏÂ£º
@@ -10112,21 +10112,21 @@ import javax.swing.WindowConstants;
 
 
 public class JFrameExample {
-	public static void main(String args[]) {
-		new JFrameExample().CreateJFrame("´´½¨Ò»¸öJFrame´°Ìå");
-	}
-	
-	public void CreateJFrame(String title) {
-		JFrame jf = new JFrame(title);//´´½¨Ò»¸ö³õÊ¼²»¿É¼ûµÄ£¬µ«ÊÇ¾ßÌå±êÌâµÄ´°Ìå£¬¿ÉÒÔ²»¼Ótitle²ÎÊı
-		Container container = jf.getContentPane();
-		JLabel jl = new JLabel("ÕâÊÇÒ»¸öJFrame´°Ìå");
-		jl.setHorizontalAlignment(SwingConstants.CENTER);
-		container.add(jl);
-		container.setBackground(Color.white);
-		jf.setVisible(true);
-		jf.setSize(400, 300);
-		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);//DO_NOTHING_ON_CLOSEÊ±£¬µã»÷XÎŞ·¨¹Ø±Õ´°Ìå£»HIDE_ON_CLOSEÊ±£¬µã»÷XÒ²¿ÉÒÔ¹Ø±Õ´°Ìå
-	}
+    public static void main(String args[]) {
+        new JFrameExample().CreateJFrame("´´½¨Ò»¸öJFrame´°Ìå");
+    }
+    
+    public void CreateJFrame(String title) {
+        JFrame jf = new JFrame(title);//´´½¨Ò»¸ö³õÊ¼²»¿É¼ûµÄ£¬µ«ÊÇ¾ßÌå±êÌâµÄ´°Ìå£¬¿ÉÒÔ²»¼Ótitle²ÎÊı
+        Container container = jf.getContentPane();
+        JLabel jl = new JLabel("ÕâÊÇÒ»¸öJFrame´°Ìå");
+        jl.setHorizontalAlignment(SwingConstants.CENTER);
+        container.add(jl);
+        container.setBackground(Color.white);
+        jf.setVisible(true);
+        jf.setSize(400, 300);
+        jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);//DO_NOTHING_ON_CLOSEÊ±£¬µã»÷XÎŞ·¨¹Ø±Õ´°Ìå£»HIDE_ON_CLOSEÊ±£¬µã»÷XÒ²¿ÉÒÔ¹Ø±Õ´°Ìå
+    }
 }
 
 13.2.2 JDialog´°Ìå P325
@@ -10144,50 +10144,50 @@ import javax.swing.WindowConstants;
 
 
 class MyJDialog extends JDialog{
-	private static final long serialVersionUID = 1L;
-	
-	public MyJDialog(JFrame jFrame) {
-		//ÊµÀı»¯Ò»¸öJDailogÀà¶ÔÏó£¬Ö¸¶¨¶Ô»°¿òµÄ¸¸´°Ìå¡¢´°Ìå±êÌâºÍÀàĞÍ
-		super(jFrame, "µÚÒ»¸öJDialog´°Ìå", true);
-		Container container = getContentPane();
-		container.add(new JLabel("ÕâÊÇÒ»¸ö¶Ô»°¿ò"));
-		setSize(100, 100);
-		//setBounds(120, 120, 100, 100); // ÉèÖÃ¶Ô»°¿ò´°Ìå´óĞ¡£¬ÆäÖĞÇ°Á½¸ö²ÎÊı£¬ÊÇÀëÆÁÄ»×óÉÏ½ÇµÄ¾àÀë
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public MyJDialog(JFrame jFrame) {
+        //ÊµÀı»¯Ò»¸öJDailogÀà¶ÔÏó£¬Ö¸¶¨¶Ô»°¿òµÄ¸¸´°Ìå¡¢´°Ìå±êÌâºÍÀàĞÍ
+        super(jFrame, "µÚÒ»¸öJDialog´°Ìå", true);
+        Container container = getContentPane();
+        container.add(new JLabel("ÕâÊÇÒ»¸ö¶Ô»°¿ò"));
+        setSize(100, 100);
+        //setBounds(120, 120, 100, 100); // ÉèÖÃ¶Ô»°¿ò´°Ìå´óĞ¡£¬ÆäÖĞÇ°Á½¸ö²ÎÊı£¬ÊÇÀëÆÁÄ»×óÉÏ½ÇµÄ¾àÀë
+    }
 }
 
 public class MyFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public static void main(String args[]) {
-		new MyFrame();
-	}
-	
-	public MyFrame() {
-		Container container = getContentPane();
-		container.setLayout(null);
-		
-		//ÕâÈıĞĞµÄJLabelÎŞ·¨ÏÔÊ¾³öÀ´£¬°ÑÉÏÒ»ĞĞµÄcontainer.setLayout(null);È¥µô£¬ÓÖ»áµ¼ÖÂJButtonÕ¼¾İÁËÕû¸ö´°Ìå£¬Ä¿Ç°²»ÖªµÀÈçºÎ½â¾ö£¿
-//		JLabel jl = new JLabel("ÕâÊÇÒ»¸öJFrame´°Ìå");
-//		jl.setHorizontalAlignment(SwingConstants.CENTER);
-//		container.add(jl);
-		
-		JButton bl = new JButton("µ¯³ö¶Ô»°¿ò");
-		bl.setBounds(10, 10, 100, 21);//¿ÉÒÔÉèÖÃJButtonÔÚ´°ÌåÖĞµÄÎ»ÖÃºÍÆä´óĞ¡
-		bl.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new MyJDialog(MyFrame.this).setVisible(true);
-			}
-		});
-		container.add(bl);
-		
-		container.setBackground(Color.white);
-		setSize(200, 200);
-		//setBounds(100, 100, 200, 200);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setVisible(true);
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public static void main(String args[]) {
+        new MyFrame();
+    }
+    
+    public MyFrame() {
+        Container container = getContentPane();
+        container.setLayout(null);
+        
+        //ÕâÈıĞĞµÄJLabelÎŞ·¨ÏÔÊ¾³öÀ´£¬°ÑÉÏÒ»ĞĞµÄcontainer.setLayout(null);È¥µô£¬ÓÖ»áµ¼ÖÂJButtonÕ¼¾İÁËÕû¸ö´°Ìå£¬Ä¿Ç°²»ÖªµÀÈçºÎ½â¾ö£¿
+//        JLabel jl = new JLabel("ÕâÊÇÒ»¸öJFrame´°Ìå");
+//        jl.setHorizontalAlignment(SwingConstants.CENTER);
+//        container.add(jl);
+        
+        JButton bl = new JButton("µ¯³ö¶Ô»°¿ò");
+        bl.setBounds(10, 10, 100, 21);//¿ÉÒÔÉèÖÃJButtonÔÚ´°ÌåÖĞµÄÎ»ÖÃºÍÆä´óĞ¡
+        bl.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new MyJDialog(MyFrame.this).setVisible(true);
+            }
+        });
+        container.add(bl);
+        
+        container.setBackground(Color.white);
+        setSize(200, 200);
+        //setBounds(100, 100, 200, 200);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
 }
 
 13.2.3 ÉèÖÃ´°Ìå´óĞ¡ P326
@@ -10198,22 +10198,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class ControlFormSize extends JFrame {
-	public static void main(String args[]) {
-		new ControlFormSize();
-	}
-	
-	public ControlFormSize() {
-		setTitle("ÉèÖÃ´°Ìå´óĞ¡");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(400, 300);
-		JPanel contentPane = new JPanel();
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);//ÉèÖÃµ±Ç°´°ÌåÃæ°å£¬ÓëgetContentPaneÊÇÏà·´µÄ¹ı³Ì
-		JLabel label = new JLabel("¿í¶È£º400£¬ ¸ß¶È£º300");
-		contentPane.add(label, BorderLayout.CENTER);
-		setVisible(true);
-	}
-	
+    public static void main(String args[]) {
+        new ControlFormSize();
+    }
+    
+    public ControlFormSize() {
+        setTitle("ÉèÖÃ´°Ìå´óĞ¡");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout(0, 0));
+        setContentPane(contentPane);//ÉèÖÃµ±Ç°´°ÌåÃæ°å£¬ÓëgetContentPaneÊÇÏà·´µÄ¹ı³Ì
+        JLabel label = new JLabel("¿í¶È£º400£¬ ¸ß¶È£º300");
+        contentPane.add(label, BorderLayout.CENTER);
+        setVisible(true);
+    }
+    
 }
 
 13.2.4 ½ûÖ¹¸Ä±ä´°ÌåµÄ´óĞ¡ P327
@@ -10226,34 +10226,34 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 public class LimitChangeFormSize extends JFrame {
-	public static void main(String args[]) {
-		new LimitChangeFormSize();
-	}
-	
-	public LimitChangeFormSize() {
-		Container container = getContentPane();
-		container.setLayout(null);//²»½øĞĞsetLayoutµÄ»°£¬ÔòJButton½«Õ¼¾İÕû¸öÃæ°å´óĞ¡
-		
-		setTitle("ÉèÖÃ´°Ìå´óĞ¡");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(400, 300);
-		setLocation(100, 100);
-		
-		String title = new String("ÇĞ»»´°ÌåÊÇ·ñ¿É±ä×´Ì¬");
-		JButton jb = new JButton(title);//¾ÓÈ»Ã»ÓĞÕÒµ½¿ÉÒÔĞŞ¸ÄJButtonÃû³ÆµÄ·½·¨£¿
-		//jb.setBounds(MAXIMIZED_BOTH, MAXIMIZED_BOTH, 200, 22);
-		jb.setSize(200, 22);
-		//jb.setHorizontalAlignment(SwingConstants.CENTER);//Ã»Ğ§¹û£¿Ö»ÓĞJLabel²ÅÓĞÓÃ£¿
-		jb.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setResizable(!isResizable());
-			}
-		});
-		container.add(jb);
-		
-		setVisible(true);
-	}
+    public static void main(String args[]) {
+        new LimitChangeFormSize();
+    }
+    
+    public LimitChangeFormSize() {
+        Container container = getContentPane();
+        container.setLayout(null);//²»½øĞĞsetLayoutµÄ»°£¬ÔòJButton½«Õ¼¾İÕû¸öÃæ°å´óĞ¡
+        
+        setTitle("ÉèÖÃ´°Ìå´óĞ¡");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 300);
+        setLocation(100, 100);
+        
+        String title = new String("ÇĞ»»´°ÌåÊÇ·ñ¿É±ä×´Ì¬");
+        JButton jb = new JButton(title);//¾ÓÈ»Ã»ÓĞÕÒµ½¿ÉÒÔĞŞ¸ÄJButtonÃû³ÆµÄ·½·¨£¿
+        //jb.setBounds(MAXIMIZED_BOTH, MAXIMIZED_BOTH, 200, 22);
+        jb.setSize(200, 22);
+        //jb.setHorizontalAlignment(SwingConstants.CENTER);//Ã»Ğ§¹û£¿Ö»ÓĞJLabel²ÅÓĞÓÃ£¿
+        jb.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setResizable(!isResizable());
+            }
+        });
+        container.add(jb);
+        
+        setVisible(true);
+    }
 }
 
 13.3.2 Í¼±êµÄÊ¹ÓÃ P328
@@ -10268,42 +10268,42 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 public class DrawIcon implements Icon {
-	private int width;
-	private int height;
+    private int width;
+    private int height;
 
-	public DrawIcon(int width, int height) {
-		this.width = width;
-		this.height = height;
-	}
-	
-	@Override
-	public int getIconHeight() {
-		// TODO Auto-generated method stub
-		return this.height;
-	}
+    public DrawIcon(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+    
+    @Override
+    public int getIconHeight() {
+        // TODO Auto-generated method stub
+        return this.height;
+    }
 
-	@Override
-	public int getIconWidth() {
-		// TODO Auto-generated method stub
-		return this.width;
-	}
+    @Override
+    public int getIconWidth() {
+        // TODO Auto-generated method stub
+        return this.width;
+    }
 
-	@Override
-	public void paintIcon(Component arg0, Graphics arg1, int x, int y) {
-		// TODO Auto-generated method stub
-		arg1.fillOval(x, y, width, height);
-	}
-	
-	public static void main(String args[]) {
-		DrawIcon icon = new DrawIcon(15, 15);
-		JLabel jb = new JLabel("²âÊÔ", icon, SwingConstants.CENTER);
-		JFrame jf = new JFrame();
-		Container c = jf.getContentPane();
-		c.add(jb);
-		jf.setSize(100, 100);
-		jf.setVisible(true);
-		jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-	}
+    @Override
+    public void paintIcon(Component arg0, Graphics arg1, int x, int y) {
+        // TODO Auto-generated method stub
+        arg1.fillOval(x, y, width, height);
+    }
+    
+    public static void main(String args[]) {
+        DrawIcon icon = new DrawIcon(15, 15);
+        JLabel jb = new JLabel("²âÊÔ", icon, SwingConstants.CENTER);
+        JFrame jf = new JFrame();
+        Container c = jf.getContentPane();
+        c.add(jb);
+        jf.setSize(100, 100);
+        jf.setVisible(true);
+        jf.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
 }
 
 //P329 Ê¹ÓÃÍ¼Æ¬Í¼±ê
@@ -10318,24 +10318,24 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 public class MyImageIcon extends JFrame {
-	public MyImageIcon() {
-		Container container = getContentPane();
-		JLabel jl = new JLabel("ÕâÊÇÒ»¸öJFrame´°Ìå", JLabel.CENTER);
-		URL url = MyImageIcon.class.getResource("imageButton.jpg");//ĞèÒª½«imageButton.jpgÓëMyImageIcon.classÎÄ¼ş·ÅÖÃÔÚÍ¬¼¶Ä¿Â¼¡£Ä¿Ç°ÊÔÁËÖ»ÓĞ.jpgºÃÓÃ£¬.bmpÎŞ·¨Ê¶±ğ
-		Icon icon = new ImageIcon(url);
-		jl.setIcon(icon);
-		jl.setHorizontalAlignment(SwingConstants.CENTER);
-		jl.setOpaque(true);//ÉèÖÃ±êÇ©Îª²»Í¸Ã÷×´Ì¬
-		container.add(jl);
-		setSize(250, 100);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		
-	}
-	
-	public static void main(String args[]) {
-		new MyImageIcon();
-	}
+    public MyImageIcon() {
+        Container container = getContentPane();
+        JLabel jl = new JLabel("ÕâÊÇÒ»¸öJFrame´°Ìå", JLabel.CENTER);
+        URL url = MyImageIcon.class.getResource("imageButton.jpg");//ĞèÒª½«imageButton.jpgÓëMyImageIcon.classÎÄ¼ş·ÅÖÃÔÚÍ¬¼¶Ä¿Â¼¡£Ä¿Ç°ÊÔÁËÖ»ÓĞ.jpgºÃÓÃ£¬.bmpÎŞ·¨Ê¶±ğ
+        Icon icon = new ImageIcon(url);
+        jl.setIcon(icon);
+        jl.setHorizontalAlignment(SwingConstants.CENTER);
+        jl.setOpaque(true);//ÉèÖÃ±êÇ©Îª²»Í¸Ã÷×´Ì¬
+        container.add(jl);
+        setSize(250, 100);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        
+    }
+    
+    public static void main(String args[]) {
+        new MyImageIcon();
+    }
 }
 
 13.3.3 ÎªÍ¼Æ¬Ìí¼ÓËµÃ÷ P330
@@ -10348,25 +10348,25 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 public class UseLabelFrame extends JFrame {
-	public UseLabelFrame() {
-		super();
-		setTitle("Ê¹ÓÃ±êÇ©×é¼ş");
-		setBounds(100, 100, 330, 200);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		final JLabel label = new JLabel();
-		label.setText("ÕâÊÇÃÀÀöµÄÉ½Ë®ÕÕÆ¬£º");
-		getContentPane().add(label, BorderLayout.NORTH);
-		URL url = UseLabelFrame.class.getResource("wxPython.jpg");
-		Icon icon = new ImageIcon(url);
-		final JLabel labelPicture = new JLabel();
-		labelPicture.setIcon(icon);
-		getContentPane().add(labelPicture, BorderLayout.CENTER);
-	}
-	
-	public static void main(String args[]) {
-		UseLabelFrame frame = new UseLabelFrame();
-		frame.setVisible(true);
-	}
+    public UseLabelFrame() {
+        super();
+        setTitle("Ê¹ÓÃ±êÇ©×é¼ş");
+        setBounds(100, 100, 330, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        final JLabel label = new JLabel();
+        label.setText("ÕâÊÇÃÀÀöµÄÉ½Ë®ÕÕÆ¬£º");
+        getContentPane().add(label, BorderLayout.NORTH);
+        URL url = UseLabelFrame.class.getResource("wxPython.jpg");
+        Icon icon = new ImageIcon(url);
+        final JLabel labelPicture = new JLabel();
+        labelPicture.setIcon(icon);
+        getContentPane().add(labelPicture, BorderLayout.CENTER);
+    }
+    
+    public static void main(String args[]) {
+        UseLabelFrame frame = new UseLabelFrame();
+        frame.setVisible(true);
+    }
 }
 
 13.4 ³£ÓÃ²¼¾Ö¹ÜÀíÆ÷ P331
@@ -10378,24 +10378,24 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 public class AbsolutePosition extends JFrame {
-	public AbsolutePosition() {
-		setTitle("±¾´°ÌåÊ¹ÓÃ¾ø¶Ô²¼¾Ö");
-		setLayout(null);//È¡Ïû²¼¾Ö¹ÜÀíÆ÷
-		setBounds(0, 0, 200, 150);//ÉèÖÃÃ¿¸ö×é¼şµÄ´óĞ¡ÓëÎ»ÖÃ
-		Container c = getContentPane();
-		JButton b1 = new JButton("°´Å¥1");
-		JButton b2 = new JButton("°´Å¥2");
-		b1.setBounds(10, 30, 80, 30);
-		b2.setBounds(60, 70, 100, 20);
-		c.add(b1);
-		c.add(b2);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new AbsolutePosition();
-	}
+    public AbsolutePosition() {
+        setTitle("±¾´°ÌåÊ¹ÓÃ¾ø¶Ô²¼¾Ö");
+        setLayout(null);//È¡Ïû²¼¾Ö¹ÜÀíÆ÷
+        setBounds(0, 0, 200, 150);//ÉèÖÃÃ¿¸ö×é¼şµÄ´óĞ¡ÓëÎ»ÖÃ
+        Container c = getContentPane();
+        JButton b1 = new JButton("°´Å¥1");
+        JButton b2 = new JButton("°´Å¥2");
+        b1.setBounds(10, 30, 80, 30);
+        b2.setBounds(60, 70, 100, 20);
+        c.add(b1);
+        c.add(b2);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new AbsolutePosition();
+    }
 }
 
 13.4.2 Á÷²¼¾Ö¹ÜÀíÆ÷ P332
@@ -10408,22 +10408,22 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 public class FlowLayoutPosition extends JFrame {
-	public FlowLayoutPosition() {
-		setTitle("±¾´°ÌåÊ¹ÓÃÁ÷²¼¾Ö¹ÜÀíÆ÷");
-		Container c = getContentPane();
-		setLayout(new FlowLayout(2, 10, 10));//µÚÒ»¸ö²ÎÊı£¬FlowLayout.LEFT=0£¬×ó¶ÔÆë£»FlowLayout.CENTER=1£¬ÓÒ¶ÔÆë£»FlowLayout.RIGHT=2£¬ÓÒ¶ÔÆë£¬µÚ2£¬3²ÎÊıÉèÖÃ¸÷×é¼şÖ®¼äµÄË®Æ½¼ä¸ôÓë´¹Ö±¼ä¸ô
-		
-		for (int i = 0; i < 10; i++) {
-			c.add(new JButton("button" + i));
-		}
-		setSize(300, 200);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new FlowLayoutPosition();
-	}
+    public FlowLayoutPosition() {
+        setTitle("±¾´°ÌåÊ¹ÓÃÁ÷²¼¾Ö¹ÜÀíÆ÷");
+        Container c = getContentPane();
+        setLayout(new FlowLayout(2, 10, 10));//µÚÒ»¸ö²ÎÊı£¬FlowLayout.LEFT=0£¬×ó¶ÔÆë£»FlowLayout.CENTER=1£¬ÓÒ¶ÔÆë£»FlowLayout.RIGHT=2£¬ÓÒ¶ÔÆë£¬µÚ2£¬3²ÎÊıÉèÖÃ¸÷×é¼şÖ®¼äµÄË®Æ½¼ä¸ôÓë´¹Ö±¼ä¸ô
+        
+        for (int i = 0; i < 10; i++) {
+            c.add(new JButton("button" + i));
+        }
+        setSize(300, 200);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new FlowLayoutPosition();
+    }
 }
 
 13.4.3 ±ß½ç²¼¾Ö¹ÜÀíÆ÷ P334
@@ -10436,26 +10436,26 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 public class BorderlayoutPosition extends JFrame {
-	String border[] = {BorderLayout.CENTER, BorderLayout.NORTH, BorderLayout.SOUTH, BorderLayout.WEST, BorderLayout.EAST};
-	String buttonName[] = {"center button", "north button", "south button", "west button", "east button"};
-	
-	public BorderlayoutPosition() {
-		setTitle("±¾´°ÌåÊ¹ÓÃ±ß½ç²¼¾Ö¹ÜÀíÆ÷");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
-		
-		for (int i = 0; i < border.length; ++i) {
-			c.add(border[i], new JButton(buttonName[i]));//Ìá¹©ÔÚÈİÆ÷ÖĞÌí¼Ó×é¼şµÄ¹¦ÄÜ£¬²¢Í¬Ê±ÉèÖÃ×é¼şµÄ°Ú·ÅÎ»ÖÃ
-		}
-		
-		setSize(350, 200);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new BorderlayoutPosition();
-	}
+    String border[] = {BorderLayout.CENTER, BorderLayout.NORTH, BorderLayout.SOUTH, BorderLayout.WEST, BorderLayout.EAST};
+    String buttonName[] = {"center button", "north button", "south button", "west button", "east button"};
+    
+    public BorderlayoutPosition() {
+        setTitle("±¾´°ÌåÊ¹ÓÃ±ß½ç²¼¾Ö¹ÜÀíÆ÷");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
+        
+        for (int i = 0; i < border.length; ++i) {
+            c.add(border[i], new JButton(buttonName[i]));//Ìá¹©ÔÚÈİÆ÷ÖĞÌí¼Ó×é¼şµÄ¹¦ÄÜ£¬²¢Í¬Ê±ÉèÖÃ×é¼şµÄ°Ú·ÅÎ»ÖÃ
+        }
+        
+        setSize(350, 200);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new BorderlayoutPosition();
+    }
 }
 
 13.4.4 ·ç¸ñ²¼¾Ö¹ÜÀíÆ÷ P335
@@ -10467,23 +10467,23 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 public class GridLayoutPosition extends JFrame {
-	public GridLayoutPosition() {
-		setTitle("±¾´°ÌåÊ¹ÓÃ·ç¸ñ²¼¾Ö¹ÜÀíÆ÷");
-		Container c = getContentPane();
-		setLayout(new GridLayout(7, 3, 5, 5));//Ç°Á½¸ö²ÎÊı±í¸ñÍø¸ñµÄĞĞÊıÓëÁĞÊı£¬Ö»ÓĞÒ»¸ö¿ÉÒÔÎª0£¬´ú±íÒ»ĞĞ»òÒ»ÁĞ¿ÉÒÔÅÅÁĞÈÎÒâ¶à¸ö×é¼ş¡£ºóÁ½¸ö²ÎÊıÖ¸¶¨Íø¸ñÖ®¼äµÄ¼ä¾à¡£
-		
-		for (int i = 0; i < 20; ++i) {
-			c.add(new JButton("button" + i));
-		}
-		
-		setSize(300, 300);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new GridLayoutPosition();
-	}
+    public GridLayoutPosition() {
+        setTitle("±¾´°ÌåÊ¹ÓÃ·ç¸ñ²¼¾Ö¹ÜÀíÆ÷");
+        Container c = getContentPane();
+        setLayout(new GridLayout(7, 3, 5, 5));//Ç°Á½¸ö²ÎÊı±í¸ñÍø¸ñµÄĞĞÊıÓëÁĞÊı£¬Ö»ÓĞÒ»¸ö¿ÉÒÔÎª0£¬´ú±íÒ»ĞĞ»òÒ»ÁĞ¿ÉÒÔÅÅÁĞÈÎÒâ¶à¸ö×é¼ş¡£ºóÁ½¸ö²ÎÊıÖ¸¶¨Íø¸ñÖ®¼äµÄ¼ä¾à¡£
+        
+        for (int i = 0; i < 20; ++i) {
+            c.add(new JButton("button" + i));
+        }
+        
+        setSize(300, 300);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new GridLayoutPosition();
+    }
 }
 
 13.5 ³£ÓÃÃæ°å P336
@@ -10497,42 +10497,42 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 public class JPanelTest extends JFrame {
-	public JPanelTest() {
-		setTitle("ÔÚÕâ¸ö´°ÌåÖĞÊ¹ÓÃÖĞÃæ°å");
-		Container c = getContentPane();
-		setLayout(new GridLayout(2, 1, 10, 10));
-		
-		JPanel p1 = new JPanel(new GridLayout(1, 3, 10, 10));
-		JPanel p2 = new JPanel(new GridLayout(1, 2, 10, 10));
-		JPanel p3 = new JPanel(new GridLayout(1, 2, 10, 10));
-		JPanel p4 = new JPanel(new GridLayout(2, 10, 10, 10));
-		
-		p1.add(new JButton("1"));
-		p1.add(new JButton("2"));
-		p1.add(new JButton("3"));
-		
-		p2.add(new JButton("4"));
-		p2.add(new JButton("5"));
-		
-		p3.add(new JButton("6"));
-		p3.add(new JButton("7"));
-		
-		p4.add(new JButton("8"));
-		p4.add(new JButton("9"));
-		
-		c.add(p1);
-		c.add(p2);
-		c.add(p3);
-		c.add(p4);
-		
-		setSize(600, 300);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JPanelTest();
-	}
+    public JPanelTest() {
+        setTitle("ÔÚÕâ¸ö´°ÌåÖĞÊ¹ÓÃÖĞÃæ°å");
+        Container c = getContentPane();
+        setLayout(new GridLayout(2, 1, 10, 10));
+        
+        JPanel p1 = new JPanel(new GridLayout(1, 3, 10, 10));
+        JPanel p2 = new JPanel(new GridLayout(1, 2, 10, 10));
+        JPanel p3 = new JPanel(new GridLayout(1, 2, 10, 10));
+        JPanel p4 = new JPanel(new GridLayout(2, 10, 10, 10));
+        
+        p1.add(new JButton("1"));
+        p1.add(new JButton("2"));
+        p1.add(new JButton("3"));
+        
+        p2.add(new JButton("4"));
+        p2.add(new JButton("5"));
+        
+        p3.add(new JButton("6"));
+        p3.add(new JButton("7"));
+        
+        p4.add(new JButton("8"));
+        p4.add(new JButton("9"));
+        
+        c.add(p1);
+        c.add(p2);
+        c.add(p3);
+        c.add(p4);
+        
+        setSize(600, 300);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JPanelTest();
+    }
 }
 
 13.5.2 JScrollPaneÃæ°å P337
@@ -10544,22 +10544,22 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class JScrollPaneTest extends JFrame {
-	public JScrollPaneTest() {
-		setTitle("´ø¹ö¶¯ÌõµÄÎÄ×Ö±à¼­Æ÷");
-		Container c = getContentPane();
-		JTextArea ta = new JTextArea(20, 50);//³õÊ¼ÎÄ±¾±à¼­Æ÷µÄĞĞÓëÁĞÊı
-		ta.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷");
-		JScrollPane sp = new JScrollPane(ta);
-		c.add(sp);
-		
-		setSize(600, 300);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JScrollPaneTest();
-	}
+    public JScrollPaneTest() {
+        setTitle("´ø¹ö¶¯ÌõµÄÎÄ×Ö±à¼­Æ÷");
+        Container c = getContentPane();
+        JTextArea ta = new JTextArea(20, 50);//³õÊ¼ÎÄ±¾±à¼­Æ÷µÄĞĞÓëÁĞÊı
+        ta.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷");
+        JScrollPane sp = new JScrollPane(ta);
+        c.add(sp);
+        
+        setSize(600, 300);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JScrollPaneTest();
+    }
 }
 
 //Ìí¼ÓÁËËÄ¸öJScrollPane
@@ -10572,39 +10572,39 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class JScrollPaneTest extends JFrame {
-	public JScrollPaneTest() {
-		setTitle("´ø¹ö¶¯ÌõµÄÎÄ×Ö±à¼­Æ÷");
-		Container c = getContentPane();
-		setLayout(new GridLayout(2, 2, 10, 10));
-		JTextArea ta1 = new JTextArea(10, 50);
-		ta1.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷1");
-		JScrollPane sp1 = new JScrollPane(ta1);
-		
-		JTextArea ta2 = new JTextArea(20, 50);
-		ta2.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷2");
-		JScrollPane sp2 = new JScrollPane(ta2);
-		
-		JTextArea ta3 = new JTextArea(30, 50);
-		ta3.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷3");
-		JScrollPane sp3 = new JScrollPane(ta3);
-		
-		JTextArea ta4 = new JTextArea(40, 50);
-		ta4.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷4");
-		JScrollPane sp4 = new JScrollPane(ta4);
-		
-		c.add(sp1);
-		c.add(sp2);
-		c.add(sp3);
-		c.add(sp4);
-		
-		setSize(600, 300);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JScrollPaneTest();
-	}
+    public JScrollPaneTest() {
+        setTitle("´ø¹ö¶¯ÌõµÄÎÄ×Ö±à¼­Æ÷");
+        Container c = getContentPane();
+        setLayout(new GridLayout(2, 2, 10, 10));
+        JTextArea ta1 = new JTextArea(10, 50);
+        ta1.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷1");
+        JScrollPane sp1 = new JScrollPane(ta1);
+        
+        JTextArea ta2 = new JTextArea(20, 50);
+        ta2.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷2");
+        JScrollPane sp2 = new JScrollPane(ta2);
+        
+        JTextArea ta3 = new JTextArea(30, 50);
+        ta3.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷3");
+        JScrollPane sp3 = new JScrollPane(ta3);
+        
+        JTextArea ta4 = new JTextArea(40, 50);
+        ta4.setText("´ø¹ö¶¯ÌõµÄÎÄ×Ö±àÒëÆ÷4");
+        JScrollPane sp4 = new JScrollPane(ta4);
+        
+        c.add(sp1);
+        c.add(sp2);
+        c.add(sp3);
+        c.add(sp4);
+        
+        setSize(600, 300);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JScrollPaneTest();
+    }
 }
 
 13.6.1 Ìá½»°´Å¥×é¼ş P338
@@ -10620,35 +10620,35 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 public class JButtonTest extends JFrame {
-	public JButtonTest() {
-		Container c = getContentPane();
-		setLayout(new GridLayout(3, 2, 5, 5));
-		URL url = JButtonTest.class.getResource("imageButton.jpg");
-		Icon icon = new ImageIcon(url);
-		for (int i = 0; i < 5; ++i) {
-			JButton j = new JButton("button" + i, icon);
-			c.add(j);
-			if (i % 2 == 0) {
-				j.setEnabled(false);
-			}
-		}
-		
-		JButton jb = new JButton();
-		jb.setMaximumSize(new Dimension(90, 30));
-		jb.setIcon(icon);
-		jb.setHideActionText(true);
-		jb.setToolTipText("Í¼Æ¬°´Å¥");
-		jb.setBorderPainted(false);
-		c.add(jb);
-		
-		setSize(350, 150);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JButtonTest();
-	}
+    public JButtonTest() {
+        Container c = getContentPane();
+        setLayout(new GridLayout(3, 2, 5, 5));
+        URL url = JButtonTest.class.getResource("imageButton.jpg");
+        Icon icon = new ImageIcon(url);
+        for (int i = 0; i < 5; ++i) {
+            JButton j = new JButton("button" + i, icon);
+            c.add(j);
+            if (i % 2 == 0) {
+                j.setEnabled(false);
+            }
+        }
+        
+        JButton jb = new JButton();
+        jb.setMaximumSize(new Dimension(90, 30));
+        jb.setIcon(icon);
+        jb.setHideActionText(true);
+        jb.setToolTipText("Í¼Æ¬°´Å¥");
+        jb.setBorderPainted(false);
+        c.add(jb);
+        
+        setSize(350, 150);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JButtonTest();
+    }
 }
 
 13.6.2 µ¥Ñ¡°´Å¥×é¼ş P339
@@ -10661,32 +10661,32 @@ import javax.swing.JRadioButton;
 import javax.swing.WindowConstants;
 
 public class JRadioButtonTest extends JFrame {
-	public JRadioButtonTest() {
-		setTitle("´ø¹ö¶¯ÌõµÄÎÄ×Ö±à¼­Æ÷");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
-		//setLayout(new GridLayout(3, 2, 5, 5));
-		
-		JRadioButton jr1 = new JRadioButton("radio button 1");
-		JRadioButton jr2 = new JRadioButton("radio button 2");
-		JRadioButton jr3 = new JRadioButton("radio button 3");
-		ButtonGroup group = new ButtonGroup();//ĞèÒª¼Óµ½×éÖĞ£¬²ÅÄÜÔÚ×éÖĞ×öµ¥Ñ¡²Ù×÷
-		group.add(jr1);
-		group.add(jr2);
-		group.add(jr3);
-		
-		c.add(jr1, BorderLayout.NORTH);
-		c.add(jr2, BorderLayout.SOUTH);
-		c.add(jr3, BorderLayout.CENTER);
-		
-		setSize(350, 150);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JRadioButtonTest();
-	}
+    public JRadioButtonTest() {
+        setTitle("´ø¹ö¶¯ÌõµÄÎÄ×Ö±à¼­Æ÷");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
+        //setLayout(new GridLayout(3, 2, 5, 5));
+        
+        JRadioButton jr1 = new JRadioButton("radio button 1");
+        JRadioButton jr2 = new JRadioButton("radio button 2");
+        JRadioButton jr3 = new JRadioButton("radio button 3");
+        ButtonGroup group = new ButtonGroup();//ĞèÒª¼Óµ½×éÖĞ£¬²ÅÄÜÔÚ×éÖĞ×öµ¥Ñ¡²Ù×÷
+        group.add(jr1);
+        group.add(jr2);
+        group.add(jr3);
+        
+        c.add(jr1, BorderLayout.NORTH);
+        c.add(jr2, BorderLayout.SOUTH);
+        c.add(jr3, BorderLayout.CENTER);
+        
+        setSize(350, 150);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JRadioButtonTest();
+    }
 }
 
 13.6.3 ¸´Ñ¡¿ò×é¼ş P340
@@ -10705,50 +10705,50 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class CheckBoxTest extends JFrame {
-	public CheckBoxTest() {
-		setTitle("¸´Ñ¡¿òµÄÊ¹ÓÃ");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
-		
-		JPanel panel1 = new JPanel();
-		panel1.setLayout(new BorderLayout());
-		//panel1.setMinimumSize(new Dimension(300, 300));
-		JTextArea ta = new JTextArea(20, 10);
-		JScrollPane scrollPanel = new JScrollPane(ta);
-		panel1.add(scrollPanel, BorderLayout.CENTER);
-		c.add(panel1, BorderLayout.NORTH);
-		
-		
-		JPanel panel2 = new JPanel();
-		panel2.setLayout(new FlowLayout(1, 20, 10));
-		//panel2.setMinimumSize(new Dimension(300, 200));
-		JCheckBox cb1 = new JCheckBox("1");
-		JCheckBox cb2 = new JCheckBox("2");
-		JCheckBox cb3 = new JCheckBox("3");
-		panel2.add(cb1);
-		panel2.add(cb2);
-		panel2.add(cb3);
-		cb1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (cb1.isSelected()) {
-					ta.append("¸´Ñ¡¿ò1±»Ñ¡ÖĞ\n");
-				}
-				else {
-					ta.append("¸´Ñ¡¿ò1±»È¥¹´Ñ¡\n");
-				}
-			}
-		});
-		c.add(panel2, BorderLayout.SOUTH);
-		
-		setSize(300, 500);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new CheckBoxTest();
-	}
+    public CheckBoxTest() {
+        setTitle("¸´Ñ¡¿òµÄÊ¹ÓÃ");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
+        
+        JPanel panel1 = new JPanel();
+        panel1.setLayout(new BorderLayout());
+        //panel1.setMinimumSize(new Dimension(300, 300));
+        JTextArea ta = new JTextArea(20, 10);
+        JScrollPane scrollPanel = new JScrollPane(ta);
+        panel1.add(scrollPanel, BorderLayout.CENTER);
+        c.add(panel1, BorderLayout.NORTH);
+        
+        
+        JPanel panel2 = new JPanel();
+        panel2.setLayout(new FlowLayout(1, 20, 10));
+        //panel2.setMinimumSize(new Dimension(300, 200));
+        JCheckBox cb1 = new JCheckBox("1");
+        JCheckBox cb2 = new JCheckBox("2");
+        JCheckBox cb3 = new JCheckBox("3");
+        panel2.add(cb1);
+        panel2.add(cb2);
+        panel2.add(cb3);
+        cb1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (cb1.isSelected()) {
+                    ta.append("¸´Ñ¡¿ò1±»Ñ¡ÖĞ\n");
+                }
+                else {
+                    ta.append("¸´Ñ¡¿ò1±»È¥¹´Ñ¡\n");
+                }
+            }
+        });
+        c.add(panel2, BorderLayout.SOUTH);
+        
+        setSize(300, 500);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new CheckBoxTest();
+    }
 }
 
 13.7.1 ÏÂÀ­ÁĞ±í¿ò×é¼ş P341
@@ -10771,98 +10771,98 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListDataListener;
 
 public class JComboBoxModelTest extends JFrame {
-	//Èç¹û²»×Ô¼ºÊµÏÖComboBoxModel£¬¿ÉÒÔ½«Array´«ÈëÀ´¹¹ÔìJComboBox
-	//private String stringArray[] = {"a", "b", "c"};
-	//private JComboBox<String> jc = new JComboBox<>(stringArray);
-	
-	JComboBox<String> jc = new JComboBox<>(new MyComboBox());
-	JLabel jl = new JLabel("ÇëÑ¡ÔñÖ¤¼ş:");
-	
-	public JComboBoxModelTest() {
-		setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
-		
-		JPanel panel1 = new JPanel();
-		panel1.setLayout(new BorderLayout());
-		JTextArea ta = new JTextArea(20, 10);
-		JScrollPane scrollPanel = new JScrollPane(ta);
-		panel1.add(scrollPanel, BorderLayout.CENTER);
-		c.add(panel1, BorderLayout.NORTH);
-		
-		JPanel panel2 = new JPanel();
-		panel2.setLayout(new FlowLayout(1, 20, 10));
-		jc.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ta.append((String)jc.getSelectedItem() + "\n");
-			}
-		});
-		panel2.add(jl);
-		panel2.add(jc);
-		c.add(panel2, BorderLayout.SOUTH);
-		
-		setSize(300, 500);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JComboBoxModelTest();
-	}
+    //Èç¹û²»×Ô¼ºÊµÏÖComboBoxModel£¬¿ÉÒÔ½«Array´«ÈëÀ´¹¹ÔìJComboBox
+    //private String stringArray[] = {"a", "b", "c"};
+    //private JComboBox<String> jc = new JComboBox<>(stringArray);
+    
+    JComboBox<String> jc = new JComboBox<>(new MyComboBox());
+    JLabel jl = new JLabel("ÇëÑ¡ÔñÖ¤¼ş:");
+    
+    public JComboBoxModelTest() {
+        setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
+        
+        JPanel panel1 = new JPanel();
+        panel1.setLayout(new BorderLayout());
+        JTextArea ta = new JTextArea(20, 10);
+        JScrollPane scrollPanel = new JScrollPane(ta);
+        panel1.add(scrollPanel, BorderLayout.CENTER);
+        c.add(panel1, BorderLayout.NORTH);
+        
+        JPanel panel2 = new JPanel();
+        panel2.setLayout(new FlowLayout(1, 20, 10));
+        jc.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                ta.append((String)jc.getSelectedItem() + "\n");
+            }
+        });
+        panel2.add(jl);
+        panel2.add(jc);
+        c.add(panel2, BorderLayout.SOUTH);
+        
+        setSize(300, 500);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JComboBoxModelTest();
+    }
 }
 
 class MyComboBox extends AbstractList<String> implements ComboBoxModel<String> {
-	String selectedItem = null;
-	String test[] = {"Éí·İÖ¤", "¾üÈËÖ¤", "Ñ§ÉúÖ¤", "¹¤×÷Ö¤"};
-	
-	@Override
-	public String getElementAt(int index) {
-		return test[index];
-	}
-	
-	@Override
-	public int getSize() {
-		return test.length;
-	}
-	
-	@Override
-	public void setSelectedItem(Object item) {
-		selectedItem = (String) item;
-	}
-	
-	@Override
-	public String getSelectedItem() {
-		return selectedItem;
-	}
-	
-	public int getIndex() {
-		for (int i = 0; i < test.length; i++) {
-			if (test[i].equals(getSelectedItem()))
-				return i;
-		}
-		return 0;
-	}
-	
-	@Override
-	public void addListDataListener(ListDataListener l) {
-		
-	}
+    String selectedItem = null;
+    String test[] = {"Éí·İÖ¤", "¾üÈËÖ¤", "Ñ§ÉúÖ¤", "¹¤×÷Ö¤"};
+    
+    @Override
+    public String getElementAt(int index) {
+        return test[index];
+    }
+    
+    @Override
+    public int getSize() {
+        return test.length;
+    }
+    
+    @Override
+    public void setSelectedItem(Object item) {
+        selectedItem = (String) item;
+    }
+    
+    @Override
+    public String getSelectedItem() {
+        return selectedItem;
+    }
+    
+    public int getIndex() {
+        for (int i = 0; i < test.length; i++) {
+            if (test[i].equals(getSelectedItem()))
+                return i;
+        }
+        return 0;
+    }
+    
+    @Override
+    public void addListDataListener(ListDataListener l) {
+        
+    }
 
-	@Override
-	public void removeListDataListener(ListDataListener l) {
-		
-	}
+    @Override
+    public void removeListDataListener(ListDataListener l) {
+        
+    }
 
-	@Override
-	public String get(int index) {
-		return test[index];
-	}
+    @Override
+    public String get(int index) {
+        return test[index];
+    }
 
-	@Override
-	public int size() {
-		return test.length;
-	}
+    @Override
+    public int size() {
+        return test.length;
+    }
 }
 
 13.7.2 ÁĞ±í¿ò×é¼ş P343
@@ -10883,58 +10883,58 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 public class JListTest extends JFrame {
-	private JList<String> jc = new JList<>(new MyListModel());
-	private JLabel jl = new JLabel("ÇëÑ¡ÔñÖ¤¼ş:");
-	
-	public JListTest() {
-		setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
-		
-		JPanel panel1 = new JPanel();
-		panel1.setLayout(new BorderLayout());
-		JTextArea ta = new JTextArea(20, 10);
-		JScrollPane scrollPanel = new JScrollPane(ta);
-		panel1.add(scrollPanel, BorderLayout.CENTER);
-		c.add(panel1, BorderLayout.WEST);
-		
-		JScrollPane js = new JScrollPane(jc);//Ò²Ã»ÓĞ¿´µ½¹ö¶¯ÌõµÄÁĞ±íĞ§¹û
-		JPanel panel2 = new JPanel();
-		panel2.setLayout(new FlowLayout(1, 20, 10));
-		jc.addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				// TODO Auto-generated method stub
-				ta.append((String) jc.getSelectedValue() + "\n");//Ã¿´Î»á°ÑÑ¡ÔñµÄÖµÊä³öÁ½´Î£¬²»ÖªµÀÎªÊ²Ã´£¿
-			}
-		});
-		panel2.add(jl);
-		panel2.add(js);
-		c.add(panel2, BorderLayout.EAST);
-		
-		setSize(300, 500);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JListTest();
-	}
+    private JList<String> jc = new JList<>(new MyListModel());
+    private JLabel jl = new JLabel("ÇëÑ¡ÔñÖ¤¼ş:");
+    
+    public JListTest() {
+        setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
+        
+        JPanel panel1 = new JPanel();
+        panel1.setLayout(new BorderLayout());
+        JTextArea ta = new JTextArea(20, 10);
+        JScrollPane scrollPanel = new JScrollPane(ta);
+        panel1.add(scrollPanel, BorderLayout.CENTER);
+        c.add(panel1, BorderLayout.WEST);
+        
+        JScrollPane js = new JScrollPane(jc);//Ò²Ã»ÓĞ¿´µ½¹ö¶¯ÌõµÄÁĞ±íĞ§¹û
+        JPanel panel2 = new JPanel();
+        panel2.setLayout(new FlowLayout(1, 20, 10));
+        jc.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                // TODO Auto-generated method stub
+                ta.append((String) jc.getSelectedValue() + "\n");//Ã¿´Î»á°ÑÑ¡ÔñµÄÖµÊä³öÁ½´Î£¬²»ÖªµÀÎªÊ²Ã´£¿
+            }
+        });
+        panel2.add(jl);
+        panel2.add(js);
+        c.add(panel2, BorderLayout.EAST);
+        
+        setSize(300, 500);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JListTest();
+    }
 }
 
 class MyListModel extends AbstractListModel<String> {
-	String selectedItem = null;
-	String contents[] = {"Éí·İÖ¤", "¾üÈËÖ¤", "Ñ§ÉúÖ¤", "¹¤×÷Ö¤", "¼İÊ»Ö¤", "Ç©Ö¤", "ÀÏÄêÖ¤"};
-	
-	@Override
-	public String getElementAt(int index) {
-		return (index < contents.length) ? contents[index] : null;
-	}
-	
-	@Override
-	public int getSize() {
-		return contents.length;
-	}
+    String selectedItem = null;
+    String contents[] = {"Éí·İÖ¤", "¾üÈËÖ¤", "Ñ§ÉúÖ¤", "¹¤×÷Ö¤", "¼İÊ»Ö¤", "Ç©Ö¤", "ÀÏÄêÖ¤"};
+    
+    @Override
+    public String getElementAt(int index) {
+        return (index < contents.length) ? contents[index] : null;
+    }
+    
+    @Override
+    public int getSize() {
+        return contents.length;
+    }
 }
 
 13.8 ÎÄ±¾×é¼ş P345
@@ -10950,44 +10950,44 @@ import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
 public class JTextFieldTest extends JFrame {
-	public JTextFieldTest() {
-		setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
+    public JTextFieldTest() {
+        setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
 
-		final JTextField jt = new JTextField("aaa", 20);
-		
-		//»»³ÉÃÜÂë¿ò
-		//final JPasswordField jt = new JPasswordField("aaa", 20);
-		//jt.setEchoChar('#');
-		
-		final JButton jb = new JButton("Çå³ı");
-		jt.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				jt.setText("´¥·¢ÊÂ¼ş");
-			}
-		});
-		
-		jb.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				jt.setText("");
-				jt.requestFocus();
-			}
-		});
-		
-		c.add(jt, BorderLayout.NORTH);
-		c.add(jb, BorderLayout.SOUTH);
-		
-		setSize(300, 200);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JTextFieldTest();
-	}
+        final JTextField jt = new JTextField("aaa", 20);
+        
+        //»»³ÉÃÜÂë¿ò
+        //final JPasswordField jt = new JPasswordField("aaa", 20);
+        //jt.setEchoChar('#');
+        
+        final JButton jb = new JButton("Çå³ı");
+        jt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                jt.setText("´¥·¢ÊÂ¼ş");
+            }
+        });
+        
+        jb.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                jt.setText("");
+                jt.requestFocus();
+            }
+        });
+        
+        c.add(jt, BorderLayout.NORTH);
+        c.add(jb, BorderLayout.SOUTH);
+        
+        setSize(300, 200);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JTextFieldTest();
+    }
 }
 
 13.8.2 ÃÜÂë¿ò×é¼ş P346
@@ -11004,15 +11004,15 @@ jt.setLineWrap(true);
 
 13.9.1 ÉèÖÃ´°Ìå±êÌâ¿òÍ¼±ê P349
 protected void do_button_actionPerformed(ActionEvent e) {
-	String resource = "";
-	if (e.getSource == button1) {
-		resource = "icon1.png";
-	}
-	if (e.getSource == button2) {
-		resource = "icon2.png";
-	}
-	URL url = getClass().getResource(resource);
-	setIconImage(Toolkit.getDefaultToolkit().getImage(url));
+    String resource = "";
+    if (e.getSource == button1) {
+        resource = "icon1.png";
+    }
+    if (e.getSource == button2) {
+        resource = "icon2.png";
+    }
+    URL url = getClass().getResource(resource);
+    setIconImage(Toolkit.getDefaultToolkit().getImage(url));
 }
 //------------------------------------------------------------------------------------------------
 //Java´ÓÈëÃÅµ½¾«Í¨ µÚ14ÕÂ ¸ß¼¶´¦ÀíÊÂ¼ş P355
@@ -11027,59 +11027,59 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class JTextFieldTest extends JFrame {
-	public JTextFieldTest() {
-		setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
+    public JTextFieldTest() {
+        setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
 
-		final JTextArea ja = new JTextArea("aaa", 10, 20);
-		ja.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent e) {
-				System.out.println("´Ë´ÎÊäÈëµÄÊÇ£º" + e.getKeyChar());
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				String keyText = KeyEvent.getKeyText(e.getKeyCode());
-				System.out.println("ÄúÊÍ·ÅµÄÊÇ£º" + keyText);
-				System.out.println();
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				String keyText = KeyEvent.getKeyText(e.getKeyCode());
-				if (e.isActionKey()) { //ÊÇ·ñÎª¶¯×÷¼ü£¬capital/breakµÈ
-					System.out.println("Äú°´ÏÂµÄÊÇ¶¯×÷¼ü£º" + keyText);
-				} else {
-					System.out.println("Äú°´ÏÂµÄÊÇ·Ç¶¯×÷¼ü£º" + keyText);
-					int keyCode = e.getKeyCode();
-					switch (keyCode) {
-					case KeyEvent.VK_CONTROL:
-						System.out.println("£¬Ctrl¼ü±»°´ÏÂ");
-						break;
-					case KeyEvent.VK_ALT:
-						System.out.println("£¬Alt¼ü±»°´ÏÂ");
-						break;
-					case KeyEvent.VK_SHIFT:
-						System.out.println("£¬Shift¼ü±»°´ÏÂ");
-						break;
-					}
-				}
-			}
-		});
-		
-		c.add(ja, BorderLayout.NORTH);
-		
-		setSize(300, 200);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JTextFieldTest();
-	}
+        final JTextArea ja = new JTextArea("aaa", 10, 20);
+        ja.addKeyListener(new KeyListener() {
+            
+            @Override
+            public void keyTyped(KeyEvent e) {
+                System.out.println("´Ë´ÎÊäÈëµÄÊÇ£º" + e.getKeyChar());
+            }
+            
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String keyText = KeyEvent.getKeyText(e.getKeyCode());
+                System.out.println("ÄúÊÍ·ÅµÄÊÇ£º" + keyText);
+                System.out.println();
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent e) {
+                String keyText = KeyEvent.getKeyText(e.getKeyCode());
+                if (e.isActionKey()) { //ÊÇ·ñÎª¶¯×÷¼ü£¬capital/breakµÈ
+                    System.out.println("Äú°´ÏÂµÄÊÇ¶¯×÷¼ü£º" + keyText);
+                } else {
+                    System.out.println("Äú°´ÏÂµÄÊÇ·Ç¶¯×÷¼ü£º" + keyText);
+                    int keyCode = e.getKeyCode();
+                    switch (keyCode) {
+                    case KeyEvent.VK_CONTROL:
+                        System.out.println("£¬Ctrl¼ü±»°´ÏÂ");
+                        break;
+                    case KeyEvent.VK_ALT:
+                        System.out.println("£¬Alt¼ü±»°´ÏÂ");
+                        break;
+                    case KeyEvent.VK_SHIFT:
+                        System.out.println("£¬Shift¼ü±»°´ÏÂ");
+                        break;
+                    }
+                }
+            }
+        });
+        
+        c.add(ja, BorderLayout.NORTH);
+        
+        setSize(300, 200);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JTextFieldTest();
+    }
 }
 
 14.2 Êó±êÊÂ¼ş P357
@@ -11096,119 +11096,119 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class JTextFieldTest extends JFrame {
-	public JTextFieldTest() {
-		setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
-		Container c = getContentPane();
-		setLayout(new BorderLayout());
+    public JTextFieldTest() {
+        setTitle("ÔÚ´°¿ÚÖĞÉèÖÃÏÂÀ­ÁĞ±í¿ò");
+        Container c = getContentPane();
+        setLayout(new BorderLayout());
 
-		final JTextArea ja = new JTextArea("aaa", 10, 20);
-		ja.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent e) {
-				System.out.println("´Ë´ÎÊäÈëµÄÊÇ£º" + e.getKeyChar());
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				String keyText = KeyEvent.getKeyText(e.getKeyCode());
-				System.out.println("ÄúÊÍ·ÅµÄÊÇ£º" + keyText);
-				System.out.println();
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				String keyText = KeyEvent.getKeyText(e.getKeyCode());
-				if (e.isActionKey()) { //ÊÇ·ñÎª¶¯×÷¼ü£¬capital/breakµÈ
-					System.out.println("Äú°´ÏÂµÄÊÇ¶¯×÷¼ü£º" + keyText);
-				} else {
-					System.out.println("Äú°´ÏÂµÄÊÇ·Ç¶¯×÷¼ü£º" + keyText);
-					int keyCode = e.getKeyCode();
-					switch (keyCode) {
-					case KeyEvent.VK_CONTROL:
-						System.out.println("£¬Ctrl¼ü±»°´ÏÂ");
-						break;
-					case KeyEvent.VK_ALT:
-						System.out.println("£¬Alt¼ü±»°´ÏÂ");
-						break;
-					case KeyEvent.VK_SHIFT:
-						System.out.println("£¬Shift¼ü±»°´ÏÂ");
-						break;
-					}
-				}
-			}
-		});
-		
-		ja.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				System.out.print("Êó±ê°´Å¥±»ÊÍ·Å£¬");
-				int i = e.getButton();
-				if (i == MouseEvent.BUTTON1) {
-					System.out.println("ÊÍ·ÅµÄÊÇÊó±ê×ó¼ü");
-				}
-				if (i == MouseEvent.BUTTON2) {
-					System.out.println("ÊÍ·ÅµÄÊÇÊó±ê¹öÂÖ");
-				}
-				if (i == MouseEvent.BUTTON3) {
-					System.out.println("ÊÍ·ÅµÄÊÇÊó±êÓÒ¼ü");
-				}
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-				System.out.print("Êó±ê°´Å¥±»°´ÏÂ£¬");
-				int i = e.getButton();
-				if (i == MouseEvent.BUTTON1) {
-					System.out.println("°´ÏÂµÄÊÇÊó±ê×ó¼ü");
-				}
-				if (i == MouseEvent.BUTTON2) {
-					System.out.println("°´ÏÂµÄÊÇÊó±ê¹öÂÖ");
-				}
-				if (i == MouseEvent.BUTTON3) {
-					System.out.println("°´ÏÂµÄÊÇÊó±êÓÒ¼ü");
-				}
-			}
-			
-			@Override
-			public void mouseExited(MouseEvent e) {
-				System.out.println("¹â±êÒÆ³ö×é¼ş");
-			}
-			
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				System.out.println("¹â±êÒÆÈë×é¼ş");
-			}
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {//Èç¹ûÊó±êÒÆ³ö×é¼ş·¶Î§£¬µ¥»÷ÊÂ¼ş²»»á´¥·¢
-				System.out.print("µ¥»÷ÁËÊó±ê°´¼ü£¬");
-				int i = e.getButton();
-				if (i == MouseEvent.BUTTON1) {
-					System.out.println("µ¥»÷µÄÊÇÊó±ê×ó¼ü");
-				}
-				if (i == MouseEvent.BUTTON2) {
-					System.out.println("µ¥»÷µÄÊÇÊó±ê¹öÂÖ");
-				}
-				if (i == MouseEvent.BUTTON3) {
-					System.out.println("µ¥»÷µÄÊÇÊó±êÓÒ¼ü");
-				}
-				int clickCount = e.getClickCount();
-				System.out.println("µ¥»÷´ÎÊıÎª£º" + clickCount);//Ë«»÷Êó±êÊ±£¬µÚÒ»´Îµ¥»÷Êó±ê½«´¥·¢Ò»´Îµ¥»÷ÊÂ¼ş
-			}
-		});
-		
-		c.add(ja, BorderLayout.NORTH);
-		
-		setSize(300, 200);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new JTextFieldTest();
-	}
+        final JTextArea ja = new JTextArea("aaa", 10, 20);
+        ja.addKeyListener(new KeyListener() {
+            
+            @Override
+            public void keyTyped(KeyEvent e) {
+                System.out.println("´Ë´ÎÊäÈëµÄÊÇ£º" + e.getKeyChar());
+            }
+            
+            @Override
+            public void keyReleased(KeyEvent e) {
+                String keyText = KeyEvent.getKeyText(e.getKeyCode());
+                System.out.println("ÄúÊÍ·ÅµÄÊÇ£º" + keyText);
+                System.out.println();
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent e) {
+                String keyText = KeyEvent.getKeyText(e.getKeyCode());
+                if (e.isActionKey()) { //ÊÇ·ñÎª¶¯×÷¼ü£¬capital/breakµÈ
+                    System.out.println("Äú°´ÏÂµÄÊÇ¶¯×÷¼ü£º" + keyText);
+                } else {
+                    System.out.println("Äú°´ÏÂµÄÊÇ·Ç¶¯×÷¼ü£º" + keyText);
+                    int keyCode = e.getKeyCode();
+                    switch (keyCode) {
+                    case KeyEvent.VK_CONTROL:
+                        System.out.println("£¬Ctrl¼ü±»°´ÏÂ");
+                        break;
+                    case KeyEvent.VK_ALT:
+                        System.out.println("£¬Alt¼ü±»°´ÏÂ");
+                        break;
+                    case KeyEvent.VK_SHIFT:
+                        System.out.println("£¬Shift¼ü±»°´ÏÂ");
+                        break;
+                    }
+                }
+            }
+        });
+        
+        ja.addMouseListener(new MouseListener() {
+            
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                System.out.print("Êó±ê°´Å¥±»ÊÍ·Å£¬");
+                int i = e.getButton();
+                if (i == MouseEvent.BUTTON1) {
+                    System.out.println("ÊÍ·ÅµÄÊÇÊó±ê×ó¼ü");
+                }
+                if (i == MouseEvent.BUTTON2) {
+                    System.out.println("ÊÍ·ÅµÄÊÇÊó±ê¹öÂÖ");
+                }
+                if (i == MouseEvent.BUTTON3) {
+                    System.out.println("ÊÍ·ÅµÄÊÇÊó±êÓÒ¼ü");
+                }
+            }
+            
+            @Override
+            public void mousePressed(MouseEvent e) {
+                System.out.print("Êó±ê°´Å¥±»°´ÏÂ£¬");
+                int i = e.getButton();
+                if (i == MouseEvent.BUTTON1) {
+                    System.out.println("°´ÏÂµÄÊÇÊó±ê×ó¼ü");
+                }
+                if (i == MouseEvent.BUTTON2) {
+                    System.out.println("°´ÏÂµÄÊÇÊó±ê¹öÂÖ");
+                }
+                if (i == MouseEvent.BUTTON3) {
+                    System.out.println("°´ÏÂµÄÊÇÊó±êÓÒ¼ü");
+                }
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                System.out.println("¹â±êÒÆ³ö×é¼ş");
+            }
+            
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                System.out.println("¹â±êÒÆÈë×é¼ş");
+            }
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {//Èç¹ûÊó±êÒÆ³ö×é¼ş·¶Î§£¬µ¥»÷ÊÂ¼ş²»»á´¥·¢
+                System.out.print("µ¥»÷ÁËÊó±ê°´¼ü£¬");
+                int i = e.getButton();
+                if (i == MouseEvent.BUTTON1) {
+                    System.out.println("µ¥»÷µÄÊÇÊó±ê×ó¼ü");
+                }
+                if (i == MouseEvent.BUTTON2) {
+                    System.out.println("µ¥»÷µÄÊÇÊó±ê¹öÂÖ");
+                }
+                if (i == MouseEvent.BUTTON3) {
+                    System.out.println("µ¥»÷µÄÊÇÊó±êÓÒ¼ü");
+                }
+                int clickCount = e.getClickCount();
+                System.out.println("µ¥»÷´ÎÊıÎª£º" + clickCount);//Ë«»÷Êó±êÊ±£¬µÚÒ»´Îµ¥»÷Êó±ê½«´¥·¢Ò»´Îµ¥»÷ÊÂ¼ş
+            }
+        });
+        
+        c.add(ja, BorderLayout.NORTH);
+        
+        setSize(300, 200);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new JTextFieldTest();
+    }
 }
 
 14.3 ´°ÌåÊÂ¼ş P359
@@ -11221,51 +11221,51 @@ import java.awt.event.WindowStateListener;
 import javax.swing.JFrame;
 
 public class WindowStateListener_Example extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	public static void main(String args[]) {
-		WindowStateListener_Example frame = new WindowStateListener_Example();
-		frame.setVisible(true);
-	}
-	public WindowStateListener_Example() {
-		super();
-		// Îª´°ÌåÌí¼Ó×´Ì¬ÊÂ¼ş¼àÌıÆ÷
-		addWindowStateListener(new MyWindowStateListener());
-		setTitle("²¶»ñ´°Ìå×´Ì¬ÊÂ¼ş");
-		setBounds(100, 100, 500, 375);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	}
-	private class MyWindowStateListener implements WindowStateListener {
-		public void windowStateChanged(WindowEvent e) {
-			int oldState = e.getOldState();// »ñµÃ´°ÌåÒÔÇ°µÄ×´Ì¬
-			int newState = e.getNewState();// »ñµÃ´°ÌåÏÖÔÚµÄ×´Ì¬
-			String from = "";// ±êÊ¶´°ÌåÒÔÇ°×´Ì¬µÄÖĞÎÄ×Ö·û´®
-			String to = "";// ±êÊ¶´°ÌåÏÖÔÚ×´Ì¬µÄÖĞÎÄ×Ö·û´®
-			switch (oldState) {// ÅĞ¶Ï´°Ì¨ÒÔÇ°µÄ×´Ì¬
-				case Frame.NORMAL:// ´°Ìå´¦ÓÚÕı³£»¯
-					from = "Õı³£»¯";
-					break;
-				case Frame.MAXIMIZED_BOTH:// ´°Ìå´¦ÓÚ×î´ó»¯
-					from = "×î´ó»¯";
-					break;
-				default:// ´°Ìå´¦ÓÚ×îĞ¡»¯
-					from = "×îĞ¡»¯";
-			}
-			switch (newState) {// ÅĞ¶Ï´°Ì¨ÏÖÔÚµÄ×´Ì¬
-				case Frame.NORMAL:// ´°Ìå´¦ÓÚÕı³£»¯
-					to = "Õı³£»¯";
-					break;
-				case Frame.MAXIMIZED_BOTH:// ´°Ìå´¦ÓÚ×î´ó»¯
-					to = "×î´ó»¯";
-					break;
-				default:// ´°Ìå´¦ÓÚ×îĞ¡»¯
-					to = "×îĞ¡»¯";
-			}
-			System.out.println(from + "¡ª¡ª>" + to);
-		}
-	}
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    public static void main(String args[]) {
+        WindowStateListener_Example frame = new WindowStateListener_Example();
+        frame.setVisible(true);
+    }
+    public WindowStateListener_Example() {
+        super();
+        // Îª´°ÌåÌí¼Ó×´Ì¬ÊÂ¼ş¼àÌıÆ÷
+        addWindowStateListener(new MyWindowStateListener());
+        setTitle("²¶»ñ´°Ìå×´Ì¬ÊÂ¼ş");
+        setBounds(100, 100, 500, 375);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+    private class MyWindowStateListener implements WindowStateListener {
+        public void windowStateChanged(WindowEvent e) {
+            int oldState = e.getOldState();// »ñµÃ´°ÌåÒÔÇ°µÄ×´Ì¬
+            int newState = e.getNewState();// »ñµÃ´°ÌåÏÖÔÚµÄ×´Ì¬
+            String from = "";// ±êÊ¶´°ÌåÒÔÇ°×´Ì¬µÄÖĞÎÄ×Ö·û´®
+            String to = "";// ±êÊ¶´°ÌåÏÖÔÚ×´Ì¬µÄÖĞÎÄ×Ö·û´®
+            switch (oldState) {// ÅĞ¶Ï´°Ì¨ÒÔÇ°µÄ×´Ì¬
+                case Frame.NORMAL:// ´°Ìå´¦ÓÚÕı³£»¯
+                    from = "Õı³£»¯";
+                    break;
+                case Frame.MAXIMIZED_BOTH:// ´°Ìå´¦ÓÚ×î´ó»¯
+                    from = "×î´ó»¯";
+                    break;
+                default:// ´°Ìå´¦ÓÚ×îĞ¡»¯
+                    from = "×îĞ¡»¯";
+            }
+            switch (newState) {// ÅĞ¶Ï´°Ì¨ÏÖÔÚµÄ×´Ì¬
+                case Frame.NORMAL:// ´°Ìå´¦ÓÚÕı³£»¯
+                    to = "Õı³£»¯";
+                    break;
+                case Frame.MAXIMIZED_BOTH:// ´°Ìå´¦ÓÚ×î´ó»¯
+                    to = "×î´ó»¯";
+                    break;
+                default:// ´°Ìå´¦ÓÚ×îĞ¡»¯
+                    to = "×îĞ¡»¯";
+            }
+            System.out.println(from + "¡ª¡ª>" + to);
+        }
+    }
 }
 
 14.3.3 ²¶»ñÆäËû´°ÌåÊÂ¼ş
@@ -11282,113 +11282,113 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 
 public class TableModelEvent_Example extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private JTable table;// ÉùÃ÷Ò»¸ö±í¸ñ¶ÔÏó
-	private DefaultTableModel tableModel;// ÉùÃ÷Ò»¸ö±í¸ñÄ£ĞÍ¶ÔÏó
-	private JTextField aTextField;
-	private JTextField bTextField;
-	public static void main(String args[]) {
-		TableModelEvent_Example frame = new TableModelEvent_Example();
-		frame.setVisible(true);
-	}
-	public TableModelEvent_Example() {
-		super();
-		setTitle("±í¸ñÄ£ĞÍÊÂ¼şÊ¾Àı");
-		setBounds(100, 100, 650, 213);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		final JScrollPane scrollPane = new JScrollPane();
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-		
-		String[] columnNames = { "A", "B" };
-		String[][] rowValues = { { "A1", "B1" }, { "A2", "B2" },
-				{ "A3", "B3" }, { "A4", "B4" } };
-		// ´´½¨±í¸ñÄ£ĞÍ¶ÔÏó
-		tableModel = new DefaultTableModel(rowValues, columnNames);
-		// Îª±í¸ñÄ£ĞÍÌí¼ÓÊÂ¼ş¼àÌıÆ÷
-		tableModel.addTableModelListener(new TableModelListener() {
-			public void tableChanged(TableModelEvent e) {
-				int type = e.getType();// »ñµÃÊÂ¼şµÄÀàĞÍ
-				int row = e.getFirstRow() + 1;// »ñµÃ´¥·¢´Ë´ÎÊÂ¼şµÄ±í¸ñĞĞË÷Òı
-				int column = e.getColumn() + 1;// »ñµÃ´¥·¢´Ë´ÎÊÂ¼şµÄ±í¸ñÁĞË÷Òı
-				if (type == TableModelEvent.INSERT) {// ÅĞ¶ÏÊÇ·ñÓĞ²åÈëĞĞ´¥·¢
-					System.out.print("´Ë´ÎÊÂ¼şÓÉ ²åÈë ĞĞ´¥·¢£¬");
-					System.out.println("´Ë´Î²åÈëµÄÊÇµÚ " + row + " ĞĞ£¡");
-					// ÅĞ¶ÏÊÇ·ñÓĞĞŞ¸ÄĞĞ´¥·¢
-				} else if (type == TableModelEvent.UPDATE) {
-					System.out.print("´Ë´ÎÊÂ¼şÓÉ ĞŞ¸Ä ĞĞ´¥·¢£¬");
-					System.out.println("´Ë´ÎĞŞ¸ÄµÄÊÇµÚ " + row + " ĞĞµÚ " + column
-							+ " ÁĞ£¡");
-					// ÅĞ¶ÏÊÇ·ñÓĞÉ¾³ıĞĞ´¥·¢
-				} else if (type == TableModelEvent.DELETE) {
-					System.out.print("´Ë´ÎÊÂ¼şÓÉ É¾³ı ĞĞ´¥·¢£¬");
-					System.out.println("´Ë´ÎÉ¾³ıµÄÊÇµÚ " + row + " ĞĞ£¡");
-				} else {
-					System.out.println("´Ë´ÎÊÂ¼şÓÉ ÆäËûÔ­Òò ´¥·¢£¡");
-				}
-			}
-		});
-		table = new JTable(tableModel);// ÀûÓÃ±í¸ñÄ£ĞÍ¶ÔÏó´´½¨±í¸ñ¶ÔÏó£¬µÈÍ¬ÓÚtable = new JTable();table.setModel(tableModel);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		scrollPane.setViewportView(table);
-		
-		
-		final JPanel panel = new JPanel();
-		getContentPane().add(panel, BorderLayout.SOUTH);
-		
-		final JLabel aLabel = new JLabel("A£º");
-		panel.add(aLabel);
-		
-		aTextField = new JTextField(15);
-		panel.add(aTextField);
-		
-		final JLabel bLabel = new JLabel("B£º");
-		panel.add(bLabel);
-		
-		bTextField = new JTextField(15);
-		panel.add(bTextField);
-		
-		final JButton addButton = new JButton("Ìí¼Ó");
-		addButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String[] rowValues = { aTextField.getText(),
-						bTextField.getText() };
-				tableModel.addRow(rowValues);// Ïò±í¸ñÄ£ĞÍÖĞÌí¼ÓÒ»ĞĞ
-				aTextField.setText(null);
-				bTextField.setText(null);
-			}
-		});
-		panel.add(addButton);
-		
-		final JButton updButton = new JButton("ĞŞ¸Ä");
-		updButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int selectedRow = table.getSelectedRow();
-				if (selectedRow != -1) {
-					tableModel.setValueAt(aTextField.getText(), selectedRow, 0);
-					tableModel.setValueAt(bTextField.getText(), selectedRow, 1);
-				}
-			}
-		});
-		panel.add(updButton);
-		
-		final JButton delButton = new JButton("É¾³ı");
-		delButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// »ñµÃ±í¸ñÖĞµÄÑ¡ÖĞĞĞ
-				int[] selectedRows = table.getSelectedRows();
-				for (int row = 0; row < selectedRows.length; row++) {
-					// ´Ó±í¸ñÄ£ĞÍÖĞÒÆ³ı±í¸ñÖĞµÄÑ¡ÖĞĞĞ
-					tableModel.removeRow(selectedRows[row] - row);
-				}
-			}
-		});
-		panel.add(delButton);
-	}
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private JTable table;// ÉùÃ÷Ò»¸ö±í¸ñ¶ÔÏó
+    private DefaultTableModel tableModel;// ÉùÃ÷Ò»¸ö±í¸ñÄ£ĞÍ¶ÔÏó
+    private JTextField aTextField;
+    private JTextField bTextField;
+    public static void main(String args[]) {
+        TableModelEvent_Example frame = new TableModelEvent_Example();
+        frame.setVisible(true);
+    }
+    public TableModelEvent_Example() {
+        super();
+        setTitle("±í¸ñÄ£ĞÍÊÂ¼şÊ¾Àı");
+        setBounds(100, 100, 650, 213);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        final JScrollPane scrollPane = new JScrollPane();
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        
+        String[] columnNames = { "A", "B" };
+        String[][] rowValues = { { "A1", "B1" }, { "A2", "B2" },
+                { "A3", "B3" }, { "A4", "B4" } };
+        // ´´½¨±í¸ñÄ£ĞÍ¶ÔÏó
+        tableModel = new DefaultTableModel(rowValues, columnNames);
+        // Îª±í¸ñÄ£ĞÍÌí¼ÓÊÂ¼ş¼àÌıÆ÷
+        tableModel.addTableModelListener(new TableModelListener() {
+            public void tableChanged(TableModelEvent e) {
+                int type = e.getType();// »ñµÃÊÂ¼şµÄÀàĞÍ
+                int row = e.getFirstRow() + 1;// »ñµÃ´¥·¢´Ë´ÎÊÂ¼şµÄ±í¸ñĞĞË÷Òı
+                int column = e.getColumn() + 1;// »ñµÃ´¥·¢´Ë´ÎÊÂ¼şµÄ±í¸ñÁĞË÷Òı
+                if (type == TableModelEvent.INSERT) {// ÅĞ¶ÏÊÇ·ñÓĞ²åÈëĞĞ´¥·¢
+                    System.out.print("´Ë´ÎÊÂ¼şÓÉ ²åÈë ĞĞ´¥·¢£¬");
+                    System.out.println("´Ë´Î²åÈëµÄÊÇµÚ " + row + " ĞĞ£¡");
+                    // ÅĞ¶ÏÊÇ·ñÓĞĞŞ¸ÄĞĞ´¥·¢
+                } else if (type == TableModelEvent.UPDATE) {
+                    System.out.print("´Ë´ÎÊÂ¼şÓÉ ĞŞ¸Ä ĞĞ´¥·¢£¬");
+                    System.out.println("´Ë´ÎĞŞ¸ÄµÄÊÇµÚ " + row + " ĞĞµÚ " + column
+                            + " ÁĞ£¡");
+                    // ÅĞ¶ÏÊÇ·ñÓĞÉ¾³ıĞĞ´¥·¢
+                } else if (type == TableModelEvent.DELETE) {
+                    System.out.print("´Ë´ÎÊÂ¼şÓÉ É¾³ı ĞĞ´¥·¢£¬");
+                    System.out.println("´Ë´ÎÉ¾³ıµÄÊÇµÚ " + row + " ĞĞ£¡");
+                } else {
+                    System.out.println("´Ë´ÎÊÂ¼şÓÉ ÆäËûÔ­Òò ´¥·¢£¡");
+                }
+            }
+        });
+        table = new JTable(tableModel);// ÀûÓÃ±í¸ñÄ£ĞÍ¶ÔÏó´´½¨±í¸ñ¶ÔÏó£¬µÈÍ¬ÓÚtable = new JTable();table.setModel(tableModel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        scrollPane.setViewportView(table);
+        
+        
+        final JPanel panel = new JPanel();
+        getContentPane().add(panel, BorderLayout.SOUTH);
+        
+        final JLabel aLabel = new JLabel("A£º");
+        panel.add(aLabel);
+        
+        aTextField = new JTextField(15);
+        panel.add(aTextField);
+        
+        final JLabel bLabel = new JLabel("B£º");
+        panel.add(bLabel);
+        
+        bTextField = new JTextField(15);
+        panel.add(bTextField);
+        
+        final JButton addButton = new JButton("Ìí¼Ó");
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String[] rowValues = { aTextField.getText(),
+                        bTextField.getText() };
+                tableModel.addRow(rowValues);// Ïò±í¸ñÄ£ĞÍÖĞÌí¼ÓÒ»ĞĞ
+                aTextField.setText(null);
+                bTextField.setText(null);
+            }
+        });
+        panel.add(addButton);
+        
+        final JButton updButton = new JButton("ĞŞ¸Ä");
+        updButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    tableModel.setValueAt(aTextField.getText(), selectedRow, 0);
+                    tableModel.setValueAt(bTextField.getText(), selectedRow, 1);
+                }
+            }
+        });
+        panel.add(updButton);
+        
+        final JButton delButton = new JButton("É¾³ı");
+        delButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // »ñµÃ±í¸ñÖĞµÄÑ¡ÖĞĞĞ
+                int[] selectedRows = table.getSelectedRows();
+                for (int row = 0; row < selectedRows.length; row++) {
+                    // ´Ó±í¸ñÄ£ĞÍÖĞÒÆ³ı±í¸ñÖĞµÄÑ¡ÖĞĞĞ
+                    tableModel.removeRow(selectedRows[row] - row);
+                }
+            }
+        });
+        panel.add(delButton);
+    }
 }
 
 14.6 ¾­µä·¶Àı P367
@@ -11401,31 +11401,31 @@ public class TableModelEvent_Example extends JFrame {
 15.2.1 ¼Ì³ĞThreadÀà
 ÔÚmain()·½·¨ÖĞ£¬Ê¹Ïß³ÌÖ´ĞĞĞèÒªµ÷ÓÃThreadÀàÖĞµÄstart()·½·¨£¬start()·½·¨µ÷ÓÃ±»¸²¸ÇµÄrun()·½·¨£¬Èç¹û²»µ÷ÓÃstart()·½·¨£¬Ïß³ÌÓÀÔ¶¶¼²»»áÆô¶¯£¬ÔÚÖ÷·½·¨Ã»ÓĞµ÷ÓÃstart()·½·¨Ö®Ç°£¬Thread¶ÔÏóÖ»ÊÇÒ»¸öÊµÀı£¬¶ø²»ÊÇÒ»¸öÕæÕıµÄÏß³Ì¡£
 public class ThreadTest extends Thread {
-	private int count = 10;
-	private long timeInterval;
-	
-	public ThreadTest(long timeInterval) {
-		this.timeInterval = timeInterval;
-	}
-	
-	public void run() {
-		while (true) {
-			try {
-				Thread.sleep(timeInterval);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.out.print(count + " ");
-			if (--count == 0) {
-				return;
-			}
-		}
-	}
-	
-	public static void main(String args[]) {
-		new ThreadTest(500).start();
-		new ThreadTest(1000).start();
-	}
+    private int count = 10;
+    private long timeInterval;
+    
+    public ThreadTest(long timeInterval) {
+        this.timeInterval = timeInterval;
+    }
+    
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(timeInterval);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.print(count + " ");
+            if (--count == 0) {
+                return;
+            }
+        }
+    }
+    
+    public static void main(String args[]) {
+        new ThreadTest(500).start();
+        new ThreadTest(1000).start();
+    }
 }
 
 15.2.2 ÊµÏÖRunnable½Ó¿Ú
@@ -11445,101 +11445,101 @@ import javax.swing.WindowConstants;
 
 
 public class SwingAndThread extends JFrame {
-	private JLabel jl = new JLabel();
-	private static Thread t;
-	private int count = 0;
-	private Container container = getContentPane();
-	
-	public SwingAndThread() {
-		setBounds(300, 200, 250, 100);
-		container.setLayout(null);
-		URL url = SwingAndThread.class.getResource("imageButton.jpg");
-		Icon icon = new ImageIcon(url);
-		jl.setIcon(icon);
-		jl.setHorizontalAlignment(SwingConstants.LEFT);
-		jl.setBounds(10, 10, 200, 50);
-		jl.setOpaque(true);
-		t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (count <= 200) {
-					jl.setBounds(count, 10, 200, 50);
-					try {
-						Thread.sleep(100);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					count += 4;
-					
-					if (count == 200) {
-						count = 10;//´Ó0¿ªÊ¼ÄÜÇ¡ºÃ×ßµ½200£¬Ñ­»·Ò»´Î´Ó10¿ªÊ¼Ö®ºó£¬×ß²»µ½200£¬¾ÍÍË³öwhileÁË
-					}
-				}
-				
-			}
-		});
-		t.start();
-		container.add(jl);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new SwingAndThread();
-	}
+    private JLabel jl = new JLabel();
+    private static Thread t;
+    private int count = 0;
+    private Container container = getContentPane();
+    
+    public SwingAndThread() {
+        setBounds(300, 200, 250, 100);
+        container.setLayout(null);
+        URL url = SwingAndThread.class.getResource("imageButton.jpg");
+        Icon icon = new ImageIcon(url);
+        jl.setIcon(icon);
+        jl.setHorizontalAlignment(SwingConstants.LEFT);
+        jl.setBounds(10, 10, 200, 50);
+        jl.setOpaque(true);
+        t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (count <= 200) {
+                    jl.setBounds(count, 10, 200, 50);
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    count += 4;
+                    
+                    if (count == 200) {
+                        count = 10;//´Ó0¿ªÊ¼ÄÜÇ¡ºÃ×ßµ½200£¬Ñ­»·Ò»´Î´Ó10¿ªÊ¼Ö®ºó£¬×ß²»µ½200£¬¾ÍÍË³öwhileÁË
+                    }
+                }
+                
+            }
+        });
+        t.start();
+        container.add(jl);
+        setVisible(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new SwingAndThread();
+    }
 }
 
 15.2.3 ·¶Àı1£º²é¿´Ïß³ÌµÄÔËĞĞ×´Ì¬ P377
 
 public class ThreadState implements Runnable {
-	public synchronized void waitForASecond() throws InterruptedException {
-		wait(500);
-	}
-	
-	public synchronized void waitForYears() throws InterruptedException {
-		wait();
-	}
-	
-	public synchronized void notifyNow() throws InterruptedException {
-		notify();
-	}
-	
-	public void run() {
-		try {
-			waitForASecond();
-			waitForYears();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+    public synchronized void waitForASecond() throws InterruptedException {
+        wait(500);
+    }
+    
+    public synchronized void waitForYears() throws InterruptedException {
+        wait();
+    }
+    
+    public synchronized void notifyNow() throws InterruptedException {
+        notify();
+    }
+    
+    public void run() {
+        try {
+            waitForASecond();
+            waitForYears();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 
 public class Test {
-	public static void main(String args[]) {
-		try {
-			ThreadState state = new ThreadState();
-			Thread thread = new Thread(state);
-			System.out.println("New thread: " + thread.getState());
+    public static void main(String args[]) {
+        try {
+            ThreadState state = new ThreadState();
+            Thread thread = new Thread(state);
+            System.out.println("New thread: " + thread.getState());
 
-			thread.start();
-			System.out.println("Start thread: " + thread.getState());
+            thread.start();
+            System.out.println("Start thread: " + thread.getState());
 
-			Thread.sleep(100);
-			System.out.println("Wait for timer: " + thread.getState());
+            Thread.sleep(100);
+            System.out.println("Wait for timer: " + thread.getState());
 
-			Thread.sleep(1000);
-			System.out.println("Wait for thread: " + thread.getState());
+            Thread.sleep(1000);
+            System.out.println("Wait for thread: " + thread.getState());
 
-			state.notifyNow();
-			System.out.println("Wake thread: " + thread.getState());
+            state.notifyNow();
+            System.out.println("Wake thread: " + thread.getState());
 
-			Thread.sleep(1000);
-			System.out.println("Stop thread: " + thread.getState());
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+            Thread.sleep(1000);
+            System.out.println("Stop thread: " + thread.getState());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 15.2.4 ·¶Àı2£º²é¿´JVMÖĞµÄÏß³ÌÃû
@@ -11548,50 +11548,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ThreadList {
-	private static ThreadGroup getRootThreadGroups() {
-		ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
-		ThreadGroup lastGroup = rootGroup;
-		while (true) {
-			if (rootGroup != null && rootGroup.getClass() != null) {
-				rootGroup = rootGroup.getParent();
-			}
-			
-			if (rootGroup != null) {
-				lastGroup = rootGroup;
-			}
-			else {
-				break;
-			}
-			
-		}
-		return lastGroup;
-	}
-	
-	public static List<String> getThreads(ThreadGroup group) {
-		List<String> threadList = new ArrayList<String>();
-		Thread threads[] = new Thread[group.activeCount()];//5¸ö»î¶¯Ïß³Ì
-		int count = group.enumerate(threads, false);//ÕâÀïÈ´¸´ÖÆÁË4¸ö»î¶¯Ïß³Ìµ½threadsÖĞ
-		for (int i = 0; i < count; ++i) {
-			threadList.add(group.getName() + "Ïß³Ì×é£º" + threads[i].getName());
-		}
-		return threadList;
-	}
-	
-	public static List<String> getThreadGroups(ThreadGroup group) {
-		List<String> threadList = getThreads(group);
-		ThreadGroup groups[] = new ThreadGroup[group.activeGroupCount()];//1¸ö»î¶¯Ïß³Ì×é
-		int count = group.enumerate(groups, false);
-		for (int i = 0; i < count; ++i) {
-			threadList.addAll(getThreads(groups[i]));
-		}
-		return threadList;
-	}
-	
-	public static void main(String args[]) {
-		for (String string : getThreadGroups(getRootThreadGroups())) {
-			System.out.println(string);
-		}
-	}
+    private static ThreadGroup getRootThreadGroups() {
+        ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+        ThreadGroup lastGroup = rootGroup;
+        while (true) {
+            if (rootGroup != null && rootGroup.getClass() != null) {
+                rootGroup = rootGroup.getParent();
+            }
+            
+            if (rootGroup != null) {
+                lastGroup = rootGroup;
+            }
+            else {
+                break;
+            }
+            
+        }
+        return lastGroup;
+    }
+    
+    public static List<String> getThreads(ThreadGroup group) {
+        List<String> threadList = new ArrayList<String>();
+        Thread threads[] = new Thread[group.activeCount()];//5¸ö»î¶¯Ïß³Ì
+        int count = group.enumerate(threads, false);//ÕâÀïÈ´¸´ÖÆÁË4¸ö»î¶¯Ïß³Ìµ½threadsÖĞ
+        for (int i = 0; i < count; ++i) {
+            threadList.add(group.getName() + "Ïß³Ì×é£º" + threads[i].getName());
+        }
+        return threadList;
+    }
+    
+    public static List<String> getThreadGroups(ThreadGroup group) {
+        List<String> threadList = getThreads(group);
+        ThreadGroup groups[] = new ThreadGroup[group.activeGroupCount()];//1¸ö»î¶¯Ïß³Ì×é
+        int count = group.enumerate(groups, false);
+        for (int i = 0; i < count; ++i) {
+            threadList.addAll(getThreads(groups[i]));
+        }
+        return threadList;
+    }
+    
+    public static void main(String args[]) {
+        for (String string : getThreadGroups(getRootThreadGroups())) {
+            System.out.println(string);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 systemÏß³Ì×é£ºReference Handler
@@ -11615,54 +11615,54 @@ import java.util.Random;
 import javax.swing.JFrame;
 
 public class SleepMethodTest extends JFrame {
-	private Thread t;
-	
-	private static Color color[] = {Color.BLACK, Color.BLUE, Color.CYAN, Color.GREEN, Color.ORANGE, Color.YELLOW, Color.RED, 
-		Color.PINK, Color.LIGHT_GRAY};
-	
-	private static final Random rand = new Random();
-	
-	private static Color getC() {
-		return color[rand.nextInt(color.length)];
-	}
-	
-	public SleepMethodTest() {
-		t = new Thread(new Runnable() {
-			int x = 30;
-			int y = 50;
-			
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					
-					Graphics graphics = getGraphics();
-					graphics.setColor(getC());
-					graphics.drawLine(x, y, 100, y++);//»æÖÆÖ±Ïß²¢µİÔö´¹Ö±×ø±ê
-					
-					if (y >= 80) {
-						y = 50;
-					}
-				}
-			}
-		});
-		
-		t.start();
-	}
-	
-	public static void init(JFrame frame, int width, int height) {
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(width, height);
-		frame.setVisible(true);
-	}
-	
-	public static void main(String args[]) {
-		init(new SleepMethodTest(), 100, 100);
-	}
+    private Thread t;
+    
+    private static Color color[] = {Color.BLACK, Color.BLUE, Color.CYAN, Color.GREEN, Color.ORANGE, Color.YELLOW, Color.RED, 
+        Color.PINK, Color.LIGHT_GRAY};
+    
+    private static final Random rand = new Random();
+    
+    private static Color getC() {
+        return color[rand.nextInt(color.length)];
+    }
+    
+    public SleepMethodTest() {
+        t = new Thread(new Runnable() {
+            int x = 30;
+            int y = 50;
+            
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    
+                    Graphics graphics = getGraphics();
+                    graphics.setColor(getC());
+                    graphics.drawLine(x, y, 100, y++);//»æÖÆÖ±Ïß²¢µİÔö´¹Ö±×ø±ê
+                    
+                    if (y >= 80) {
+                        y = 50;
+                    }
+                }
+            }
+        });
+        
+        t.start();
+    }
+    
+    public static void init(JFrame frame, int width, int height) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setVisible(true);
+    }
+    
+    public static void main(String args[]) {
+        init(new SleepMethodTest(), 100, 100);
+    }
 }
 
 15.4.2 Ïß³ÌµÄ¼ÓÈë P383
@@ -11676,72 +11676,72 @@ import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 
 public class JoinTest extends JFrame {
-	private Thread threadA;
-	private Thread threadB;
-	
-	private final JProgressBar progressBar1 = new JProgressBar();
-	private final JProgressBar progressBar2 = new JProgressBar();
-	
-	private int count = 0;
-	
-	public JoinTest() {
-		//super();//²»Ğ´»á×Ô¶¯µ÷ÓÃ
-		
-		getContentPane().add(progressBar1, BorderLayout.NORTH);
-		getContentPane().add(progressBar2, BorderLayout.SOUTH);
-		
-		progressBar1.setStringPainted(true);
-		progressBar2.setStringPainted(true);
-		
-		threadA = new Thread(new Runnable() {
-			int count = 0;
-			
-			@Override
-			public void run() {
-				while (true) {
-					progressBar1.setValue(++count);
-					try {
-						Thread.sleep(10);
-						threadB.join();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		threadA.start();
-		
-		threadB = new Thread(new Runnable() {
-			int count = 0;
-			
-			@Override
-			public void run() {
-				while (true) {
-					progressBar2.setValue(++count);
-					try {
-						Thread.sleep(10);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-					if (count == 100) {
-						break;
-					}
-				}
-			}
-		});
-		threadB.start();
-	}
-	
-	public static void init(JFrame frame, int width, int height) {
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(width, height);
-		frame.setVisible(true);
-	}
-	
-	public static void main(String args[]) {
-		init(new JoinTest(), 100, 100);
-	}
+    private Thread threadA;
+    private Thread threadB;
+    
+    private final JProgressBar progressBar1 = new JProgressBar();
+    private final JProgressBar progressBar2 = new JProgressBar();
+    
+    private int count = 0;
+    
+    public JoinTest() {
+        //super();//²»Ğ´»á×Ô¶¯µ÷ÓÃ
+        
+        getContentPane().add(progressBar1, BorderLayout.NORTH);
+        getContentPane().add(progressBar2, BorderLayout.SOUTH);
+        
+        progressBar1.setStringPainted(true);
+        progressBar2.setStringPainted(true);
+        
+        threadA = new Thread(new Runnable() {
+            int count = 0;
+            
+            @Override
+            public void run() {
+                while (true) {
+                    progressBar1.setValue(++count);
+                    try {
+                        Thread.sleep(10);
+                        threadB.join();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        threadA.start();
+        
+        threadB = new Thread(new Runnable() {
+            int count = 0;
+            
+            @Override
+            public void run() {
+                while (true) {
+                    progressBar2.setValue(++count);
+                    try {
+                        Thread.sleep(10);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    
+                    if (count == 100) {
+                        break;
+                    }
+                }
+            }
+        });
+        threadB.start();
+    }
+    
+    public static void init(JFrame frame, int width, int height) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setVisible(true);
+    }
+    
+    public static void main(String args[]) {
+        init(new JoinTest(), 100, 100);
+    }
 }
 
 15.4.3 Ïß³ÌµÄÖĞ¶Ï P385
@@ -11750,18 +11750,18 @@ public class JoinTest extends JFrame {
 Èç¹ûÏß³ÌÊÇÒòÎªÊ¹ÓÃÁËsleep()»òwait()·½·¨½øÈëÁË¾ÍĞ÷×´Ì¬£¬ÕâÊ±¿ÉÒÔÊ¹ÓÃThreadÀàµÄinterrupt()·½·¨Ê¹Ïß³ÌÀë¿ªrun()·½·¨£¬Í¬Ê±½áÊøÏß³Ì£¬µ«ÊÇ³ÌĞò»áÅ×³öInterruptedExceptionÒì³£¡£
 
 public class InterrupedTest implements Runnable {
-	private boolean isContinue = true;
-	public void run() {
-		while (true) {
-			//...
-			if (isContinue) {
-				break;
-			}
-		}
-	}
-	public void setContinue() {
-		this.isContinue = true;
-	}
+    private boolean isContinue = true;
+    public void run() {
+        while (true) {
+            //...
+            if (isContinue) {
+                break;
+            }
+        }
+    }
+    public void setContinue() {
+        this.isContinue = true;
+    }
 }
 //²Î¿¼ÏÂÀı£¬ÓÃÁ½¸ö°´Å¥À´½øĞĞisContinue±äÁ¿µÄÉèÖÃ
 import java.awt.*;
@@ -11770,86 +11770,86 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class TestThread extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	JPanel jPanel1 = new JPanel();
-	JButton startButton = new JButton();
-	JButton stopButton = new JButton();
-	MyThread thread = null;
-	private boolean isContinue;
-	public TestThread() {
-		try {
-			jbInit();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void jbInit() throws Exception {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		startButton.setText("start");
-		startButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				startButton_actionPerformed(e);
-			}
-		});
-		stopButton.setText("stop");
-		stopButton.addActionListener(new java.awt.event.ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				stopButton_actionPerformed(e);
-			}
-		});
-		this.getContentPane().add(jPanel1, BorderLayout.CENTER);
-		jPanel1.add(startButton);
-		startButton.setBounds(36, 105, 82, 30);
-		jPanel1.add(stopButton);
-		stopButton.setBounds(160, 108, 100, 31);
-	}
-	
-	void startButton_actionPerformed(ActionEvent e) {
-		if (thread != null) {
-			isContinue = true;
-		}
-		else {
-			thread = new MyThread();
-			thread.start();
-		}
-	}
-	
-	void stopButton_actionPerformed(ActionEvent e) {
-		if (thread != null) {
-			isContinue = false;
-		}
-		//thread = null;
-	}
-	
-	public static void main(String[] args) {
-		TestThread test = new TestThread();
-		test.setBounds(300,300,300, 80);
-		test.setVisible(true);
-	}
-	
-	private class MyThread extends Thread {
-		public MyThread() {
-			isContinue = true;
-		}
-		
-		public void run() {
-			System.out.println("\n\n");
-			while (true) {
-				if (isContinue) {
-					try {
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					System.out.println("Java ±à³Ì´Êµä\thttp://www.mrbccd.com");
-				}
-			}
-		}
-	}
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    JPanel jPanel1 = new JPanel();
+    JButton startButton = new JButton();
+    JButton stopButton = new JButton();
+    MyThread thread = null;
+    private boolean isContinue;
+    public TestThread() {
+        try {
+            jbInit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void jbInit() throws Exception {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        startButton.setText("start");
+        startButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                startButton_actionPerformed(e);
+            }
+        });
+        stopButton.setText("stop");
+        stopButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                stopButton_actionPerformed(e);
+            }
+        });
+        this.getContentPane().add(jPanel1, BorderLayout.CENTER);
+        jPanel1.add(startButton);
+        startButton.setBounds(36, 105, 82, 30);
+        jPanel1.add(stopButton);
+        stopButton.setBounds(160, 108, 100, 31);
+    }
+    
+    void startButton_actionPerformed(ActionEvent e) {
+        if (thread != null) {
+            isContinue = true;
+        }
+        else {
+            thread = new MyThread();
+            thread.start();
+        }
+    }
+    
+    void stopButton_actionPerformed(ActionEvent e) {
+        if (thread != null) {
+            isContinue = false;
+        }
+        //thread = null;
+    }
+    
+    public static void main(String[] args) {
+        TestThread test = new TestThread();
+        test.setBounds(300,300,300, 80);
+        test.setVisible(true);
+    }
+    
+    private class MyThread extends Thread {
+        public MyThread() {
+            isContinue = true;
+        }
+        
+        public void run() {
+            System.out.println("\n\n");
+            while (true) {
+                if (isContinue) {
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("Java ±à³Ì´Êµä\thttp://www.mrbccd.com");
+                }
+            }
+        }
+    }
 }
 
 
@@ -11860,59 +11860,59 @@ import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 
 public class InterruptedSwing extends JFrame {
-	private Thread threadA;
-	
-	public InterruptedSwing() {
-		//super();
-		final JProgressBar progressBar1 = new JProgressBar();
-		getContentPane().add(progressBar1, BorderLayout.NORTH);
-		
-		progressBar1.setStringPainted(true);
-		
-		threadA = new Thread(new Runnable() {
-			int count = 0;
-			
-			@Override
-			public void run() {
-				while (true) {
-					progressBar1.setValue(++count);
-					try {
-						Thread.sleep(100);
-					} catch (Exception e) {
-						e.printStackTrace();
-						System.out.println("µ±Ç°Ïß³Ì±»ÖĞ¶Ï");
-						System.out.println("Run exception");
-					}
-				}
-			}
-		});
-		threadA.start();
-		
-		try {
-			Thread.sleep(10000);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Contructor exception");
-		}
-		
-		threadA.interrupt();
-	}
-	
-	public static void init(JFrame frame, int width, int height) {
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(width, height);
-		frame.setVisible(true);
-	}
-	
-	public static void main(String args[]) {
-		init(new InterruptedSwing(), 100, 100);
-	}
+    private Thread threadA;
+    
+    public InterruptedSwing() {
+        //super();
+        final JProgressBar progressBar1 = new JProgressBar();
+        getContentPane().add(progressBar1, BorderLayout.NORTH);
+        
+        progressBar1.setStringPainted(true);
+        
+        threadA = new Thread(new Runnable() {
+            int count = 0;
+            
+            @Override
+            public void run() {
+                while (true) {
+                    progressBar1.setValue(++count);
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("µ±Ç°Ïß³Ì±»ÖĞ¶Ï");
+                        System.out.println("Run exception");
+                    }
+                }
+            }
+        });
+        threadA.start();
+        
+        try {
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Contructor exception");
+        }
+        
+        threadA.interrupt();
+    }
+    
+    public static void init(JFrame frame, int width, int height) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setVisible(true);
+    }
+    
+    public static void main(String args[]) {
+        init(new InterruptedSwing(), 100, 100);
+    }
 }
 Êä³öÈçÏÂ£º
 java.lang.InterruptedException: sleep interrupted
-	at java.lang.Thread.sleep(Native Method)
-	at InterruptedSwing$1.run(InterruptedSwing.java:24)
-	at java.lang.Thread.run(Unknown Source)
+    at java.lang.Thread.sleep(Native Method)
+    at InterruptedSwing$1.run(InterruptedSwing.java:24)
+    at java.lang.Thread.run(Unknown Source)
 µ±Ç°Ïß³Ì±»ÖĞ¶Ï
 Run exception
 
@@ -11931,109 +11931,109 @@ import java.awt.*;
 import javax.swing.*;
 
 public class PriorityTest extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private Thread threadA;
-	private Thread threadB;
-	private Thread threadC;
-	private Thread threadD;
-	
-	public PriorityTest() {
-		getContentPane().setLayout(new GridLayout(4, 1));
-		// ·Ö±ğÊµÀı»¯4¸öÏß³Ì
-		final JProgressBar progressBar = new JProgressBar();
-		final JProgressBar progressBar2 = new JProgressBar();
-		final JProgressBar progressBar3 = new JProgressBar();
-		final JProgressBar progressBar4 = new JProgressBar();
-		getContentPane().add(progressBar);
-		getContentPane().add(progressBar2);
-		getContentPane().add(progressBar3);
-		getContentPane().add(progressBar4);
-		progressBar.setStringPainted(true);
-		progressBar2.setStringPainted(true);
-		progressBar3.setStringPainted(true);
-		progressBar4.setStringPainted(true);
-		threadA = new Thread(new MyThread(progressBar));
-		threadB = new Thread(new MyThread(progressBar2));
-		threadC = new Thread(new MyThread(progressBar3));
-		threadD = new Thread(new MyThread(progressBar4));
-		setPriority("threadA", 5, threadA);
-		setPriority("threadB", 5, threadB);
-		setPriority("threadC", 4, threadC);
-		setPriority("threadD", 3, threadD);
-	}
-	
-	// ¶¨ÒåÉèÖÃÏß³ÌµÄÃû³Æ¡¢ÓÅÏÈ¼¶µÄ·½·¨
-	public static void setPriority(String threadName, int priority,
-			Thread t) {
-		t.setPriority(priority); // ÉèÖÃÏß³ÌµÄÓÅÏÈ¼¶
-		t.setName(threadName); // ÉèÖÃÏß³ÌµÄÃû³Æ
-		t.start(); // Æô¶¯Ïß³Ì
-	}
-	
-	public static void main(String[] args) {
-		init(new PriorityTest(), 100, 100);
-	}
-	
-	public static void init(JFrame frame, int width, int height) {
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(width, height);
-		frame.setVisible(true);
-	}
-	
-	private final class MyThread implements Runnable { // ¶¨ÒåÒ»¸öÊµÏÖRunnable½Ó¿ÚµÄÀà
-		private final JProgressBar bar;
-		int count = 0;
-		
-		private MyThread(JProgressBar bar) {
-			this.bar = bar;
-		}
-		
-		public void run() { // ÖØĞ´run()·½·¨
-			while (true) {
-				bar.setValue(count += 10); // ÉèÖÃ¹ö¶¯ÌõµÄÖµÃ¿´Î×ÔÔö10
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					System.out.println("µ±Ç°Ïß³ÌĞò±»ÖĞ¶Ï");
-				}
-			}
-		}
-	}
-	
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private Thread threadA;
+    private Thread threadB;
+    private Thread threadC;
+    private Thread threadD;
+    
+    public PriorityTest() {
+        getContentPane().setLayout(new GridLayout(4, 1));
+        // ·Ö±ğÊµÀı»¯4¸öÏß³Ì
+        final JProgressBar progressBar = new JProgressBar();
+        final JProgressBar progressBar2 = new JProgressBar();
+        final JProgressBar progressBar3 = new JProgressBar();
+        final JProgressBar progressBar4 = new JProgressBar();
+        getContentPane().add(progressBar);
+        getContentPane().add(progressBar2);
+        getContentPane().add(progressBar3);
+        getContentPane().add(progressBar4);
+        progressBar.setStringPainted(true);
+        progressBar2.setStringPainted(true);
+        progressBar3.setStringPainted(true);
+        progressBar4.setStringPainted(true);
+        threadA = new Thread(new MyThread(progressBar));
+        threadB = new Thread(new MyThread(progressBar2));
+        threadC = new Thread(new MyThread(progressBar3));
+        threadD = new Thread(new MyThread(progressBar4));
+        setPriority("threadA", 5, threadA);
+        setPriority("threadB", 5, threadB);
+        setPriority("threadC", 4, threadC);
+        setPriority("threadD", 3, threadD);
+    }
+    
+    // ¶¨ÒåÉèÖÃÏß³ÌµÄÃû³Æ¡¢ÓÅÏÈ¼¶µÄ·½·¨
+    public static void setPriority(String threadName, int priority,
+            Thread t) {
+        t.setPriority(priority); // ÉèÖÃÏß³ÌµÄÓÅÏÈ¼¶
+        t.setName(threadName); // ÉèÖÃÏß³ÌµÄÃû³Æ
+        t.start(); // Æô¶¯Ïß³Ì
+    }
+    
+    public static void main(String[] args) {
+        init(new PriorityTest(), 100, 100);
+    }
+    
+    public static void init(JFrame frame, int width, int height) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setVisible(true);
+    }
+    
+    private final class MyThread implements Runnable { // ¶¨ÒåÒ»¸öÊµÏÖRunnable½Ó¿ÚµÄÀà
+        private final JProgressBar bar;
+        int count = 0;
+        
+        private MyThread(JProgressBar bar) {
+            this.bar = bar;
+        }
+        
+        public void run() { // ÖØĞ´run()·½·¨
+            while (true) {
+                bar.setValue(count += 10); // ÉèÖÃ¹ö¶¯ÌõµÄÖµÃ¿´Î×ÔÔö10
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    System.out.println("µ±Ç°Ïß³ÌĞò±»ÖĞ¶Ï");
+                }
+            }
+        }
+    }
+    
 }
 
 15.6 Ïß³ÌÍ¬²½ P391
 ±àĞ´¶àÏß³Ì³ÌĞòÊ±£¬Ó¦¸Ã¿¼ÂÇµ½Ïß³Ì°²È«ÎÊÌâ¡£ÊµÖÊÉÏÏß³Ì°²È«ÎÊÌâÀ´Ô´ÓÚÁ½¸öÏß³ÌÍ¬Ê±´æÈ¡µ¥Ò»¶ÔÏóµÄÊı¾İ¡£
 //ÓĞÎÊÌâµÄÊÇÕâĞ©Ïß³Ì¶¼Ã»ÓĞÕı³£ÍË³ö£¿
 public class ThreadSafeTest implements Runnable {
-	int num = 10;
-	
-	public void run() {
-		while (true) {
-			if (num > 0) {
-				try {
-					Thread.sleep(100);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				System.out.println("³µÆ±»¹ÓĞ " + num-- + "ÕÅ");
-			}
-		}
-	}
-	public static void main(String[] args) {
-		ThreadSafeTest t = new ThreadSafeTest();
-		Thread tA = new Thread(t);
-		Thread tB = new Thread(t);
-		Thread tC = new Thread(t);
-		Thread tD = new Thread(t);
-		tA.start();
-		tB.start();
-		tC.start();
-		tD.start();
-	}
+    int num = 10;
+    
+    public void run() {
+        while (true) {
+            if (num > 0) {
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println("³µÆ±»¹ÓĞ " + num-- + "ÕÅ");
+            }
+        }
+    }
+    public static void main(String[] args) {
+        ThreadSafeTest t = new ThreadSafeTest();
+        Thread tA = new Thread(t);
+        Thread tB = new Thread(t);
+        Thread tC = new Thread(t);
+        Thread tD = new Thread(t);
+        tA.start();
+        tB.start();
+        tC.start();
+        tD.start();
+    }
 }
 Êä³öÈçÏÂ£º
 ³µÆ±»¹ÓĞ 10ÕÅ
@@ -12056,37 +12056,37 @@ public class ThreadSafeTest implements Runnable {
 JavaÖĞÌá¹©ÁËÍ¬²½»úÖÆ£¬¿ÉÒÔÓĞĞ§µØ·ÀÖ¹×ÊÔ´³åÍ»£¬Í¬²½»úÖÆÊ¹ÓÃsynchronized¹Ø¼ü×Ö¡£
 
 public class ThreadSafeTest implements Runnable {
-	int num = 10;
-	
-	public void run() {
-		while (true) {
-			synchronized ("") {
-				if (num > 0) {
-					try {
-						Thread.sleep(100);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					System.out.println("³µÆ±»¹ÓĞ " + num-- + "ÕÅ");
-				}
-			}
-		}
-	}
-	public static void main(String[] args) {
-		ThreadSafeTest t = new ThreadSafeTest();
-		Thread tA = new Thread(t);
-		Thread tB = new Thread(t);
-		Thread tC = new Thread(t);
-		Thread tD = new Thread(t);
-		tA.start();
-		tB.start();
-		tC.start();
-		tD.start();
-	}
+    int num = 10;
+    
+    public void run() {
+        while (true) {
+            synchronized ("") {
+                if (num > 0) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("³µÆ±»¹ÓĞ " + num-- + "ÕÅ");
+                }
+            }
+        }
+    }
+    public static void main(String[] args) {
+        ThreadSafeTest t = new ThreadSafeTest();
+        Thread tA = new Thread(t);
+        Thread tB = new Thread(t);
+        Thread tC = new Thread(t);
+        Thread tD = new Thread(t);
+        tA.start();
+        tB.start();
+        tC.start();
+        tD.start();
+    }
 }
 ´òÓ¡µ½×îºóÃ»ÓĞ³öÏÖ¸ºÊı£¬ÕâÊÇÒòÎª½«×ÊÔ´·ÅÖÃÔÚÁËÍ¬²½¿éÖĞ¡£Õâ¸öÍ¬²½¿éÒ²±»³ÆÎªÁÙ½çÇø£¬ËüÊ¹ÓÃsynchronized¹Ø¼ü×Ö£¬Óï·¨¸ñÊ½ÈçÏÂ£º
 synchronized(Object) {
-	//...
+    //...
 }
 Í¨³£½«¹²Ïí×ÊÔ´µÄ²Ù×÷·ÅÖÃÔÚsynchronized¶¨ÒåµÄÇøÓòÖĞ£¬µ±ÆäËûÏß³ÌÒ²»ñÈ¡µ½Õâ¸öËøÊ±£¬±ØĞëµÈ´ıËø±»ÊÍ·ÅÊ±²ÅÄÜ½øÈë¸ÃÇøÓò¡£ObjectÎªÈÎÒâÒ»¸ö¶ÔÏó£¬Ã¿¸ö¶ÔÏó¶¼´æÔÚÒ»¸ö±êÖ¾Î»£¬²¢¾ßÓĞÁ½¸öÖµ£¬·Ö±ğÎª0ºÍ1¡£Ò»¸öÏß³ÌÔËĞĞµ½Í¬²½¿éÊ±Ê×ÏÈ¼ì²é¸Ã¶ÔÏóµÄ±êÖ¾Î»£¬Èç¹ûÎª0×´Ì¬£¬±íÃ÷´ËÍ¬²½¿éÖĞ´æÔÚÆäËûÏß³ÌÔÚÔËĞĞ¡£ÕâÊ±¸ÃÏß³Ì¾Í´¦ÓÚ¾ÍĞ÷×´Ì¬£¬Ö±µ½´¦ÓÚÍ¬²½¿éÖĞµÄÏß³ÌÖ´ĞĞÍêÍ¬²½¿éÖĞµÄ´úÂëÎªÖ¹¡£ÕâÊ±¸Ã¶ÔÏóµÄ±êÊ¶Î»±»ÉèÖÃÎª1£¬¸ÃÏß³Ì²ÅÄÜÖ´ĞĞÍ¬²½¿éÖĞµÄ´úÂë£¬²¢½«Object¶ÔÏóµÄ±êÊ¶Î»ÉèÖÃÎª0£¬·ÀÖ¹ÆäËûÏß³ÌÖ´ĞĞÍ¬²½¿éÖĞµÄ´úÂë¡£
 
@@ -12099,43 +12099,43 @@ synchronized void f() {}
 
 
 public class ThreadSafeTest implements Runnable {
-	int num = 10;
-	
-	public void run() {
-		while (true) {
-			//Ôö¼ÓÈçÏÂÓï¾ä£¬Èç¹ûÆ±ÊıÎª0£¬ÔòÍË³ö£¬·ñÔòËùÓĞÏß³Ì»áÒ»Ö±µÈ´ı×ÊÔ´£¬ÎŞ·¨½áÊøÍË³ö
-			if (num == 0) {
-				System.out.println("Thread exit");
-				break;
-			}
-			
-			sellTicket();
-		}
-	}
-	
-	private synchronized void sellTicket() {
-		if (num > 0) {
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println("³µÆ±»¹ÓĞ " + num-- + "ÕÅ");
-		}
+    int num = 10;
+    
+    public void run() {
+        while (true) {
+            //Ôö¼ÓÈçÏÂÓï¾ä£¬Èç¹ûÆ±ÊıÎª0£¬ÔòÍË³ö£¬·ñÔòËùÓĞÏß³Ì»áÒ»Ö±µÈ´ı×ÊÔ´£¬ÎŞ·¨½áÊøÍË³ö
+            if (num == 0) {
+                System.out.println("Thread exit");
+                break;
+            }
+            
+            sellTicket();
+        }
+    }
+    
+    private synchronized void sellTicket() {
+        if (num > 0) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("³µÆ±»¹ÓĞ " + num-- + "ÕÅ");
+        }
 
-	}
-	
-	public static void main(String[] args) {
-		ThreadSafeTest t = new ThreadSafeTest();
-		Thread tA = new Thread(t);
-		Thread tB = new Thread(t);
-		Thread tC = new Thread(t);
-		Thread tD = new Thread(t);
-		tA.start();
-		tB.start();
-		tC.start();
-		tD.start();
-	}
+    }
+    
+    public static void main(String[] args) {
+        ThreadSafeTest t = new ThreadSafeTest();
+        Thread tA = new Thread(t);
+        Thread tB = new Thread(t);
+        Thread tC = new Thread(t);
+        Thread tD = new Thread(t);
+        tA.start();
+        tB.start();
+        tC.start();
+        tD.start();
+    }
 }
 Êä³öÈçÏÂ£º
 ³µÆ±»¹ÓĞ 10ÕÅ
@@ -12165,134 +12165,134 @@ import javax.swing.JProgressBar;
 
 
 public class Communicate extends JFrame {
-	private Thread t1;
-	private Thread t2;
-	private final JProgressBar progressBar = new JProgressBar();
-	private int count = 0;
+    private Thread t1;
+    private Thread t2;
+    private final JProgressBar progressBar = new JProgressBar();
+    private int count = 0;
 
-	public Communicate() {
-		getContentPane().add(progressBar, BorderLayout.NORTH);
-		progressBar.setStringPainted(true);
-		
-		deValue();
-		addValue();
-		t1.start();
-		
-		try {
-			Thread.currentThread().sleep(1000);//Ê¹µ±Ç°Ïß³ÌĞİÃß1000ºÁÃë
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		t2.start();
-	}
-	
-	private void addValue() {
-		t1 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {				
-					if (count >= 100) {
-						System.out.println("½ø¶ÈÌõÒÑÂú£¬µİÔöÏß³ÌµÈ´ı");
-					}
-					
-					if (count == 0) {
-						progressBar.setValue(count += 100);
-						System.out.println("½ø¶ÈÌõµÄµ±Ç°ÖµÎª£º" + count);
-						
-						//È·±£Í¨Öªt2Ê±£¬t2Ïß³ÌÒÑ¾­Æô¶¯
-						try {
-							Thread.currentThread().sleep(5000);//Ê¹µ±Ç°Ïß³ÌĞİÃß100ºÁÃë
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						
-						synchronized (t2) { //ÕâÀïÎªÊ²Ã´ÒªÓÃt2£¿
-							System.out.println("½ø¶ÈÌõÒÑÓĞÖµ£¬¿ÉÒÔ½øĞĞµİ¼õ²Ù×÷");
-							t2.notify();
-						}
-					}
-					
-					try {
-						Thread.currentThread().sleep(500);//Ê¹µ±Ç°Ïß³ÌĞİÃß100ºÁÃë
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-		
-	}
+    public Communicate() {
+        getContentPane().add(progressBar, BorderLayout.NORTH);
+        progressBar.setStringPainted(true);
+        
+        deValue();
+        addValue();
+        t1.start();
+        
+        try {
+            Thread.currentThread().sleep(1000);//Ê¹µ±Ç°Ïß³ÌĞİÃß1000ºÁÃë
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        t2.start();
+    }
+    
+    private void addValue() {
+        t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {                
+                    if (count >= 100) {
+                        System.out.println("½ø¶ÈÌõÒÑÂú£¬µİÔöÏß³ÌµÈ´ı");
+                    }
+                    
+                    if (count == 0) {
+                        progressBar.setValue(count += 100);
+                        System.out.println("½ø¶ÈÌõµÄµ±Ç°ÖµÎª£º" + count);
+                        
+                        //È·±£Í¨Öªt2Ê±£¬t2Ïß³ÌÒÑ¾­Æô¶¯
+                        try {
+                            Thread.currentThread().sleep(5000);//Ê¹µ±Ç°Ïß³ÌĞİÃß100ºÁÃë
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        
+                        synchronized (t2) { //ÕâÀïÎªÊ²Ã´ÒªÓÃt2£¿
+                            System.out.println("½ø¶ÈÌõÒÑÓĞÖµ£¬¿ÉÒÔ½øĞĞµİ¼õ²Ù×÷");
+                            t2.notify();
+                        }
+                    }
+                    
+                    try {
+                        Thread.currentThread().sleep(500);//Ê¹µ±Ç°Ïß³ÌĞİÃß100ºÁÃë
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        
+    }
 
-	private void deValue() {
-		t2 = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					if (count == 0) {
-						synchronized (this) {
-							try {
-								wait();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}
-					
-					count -= 20; 
-					progressBar.setValue(count);
-					System.out.println("½ø¶ÈÌõµ±Ç°ÖµÎª£º" + count);
-					
-					try {
-						Thread.currentThread().sleep(1000);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
-	}
+    private void deValue() {
+        t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    if (count == 0) {
+                        synchronized (this) {
+                            try {
+                                wait();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    
+                    count -= 20; 
+                    progressBar.setValue(count);
+                    System.out.println("½ø¶ÈÌõµ±Ç°ÖµÎª£º" + count);
+                    
+                    try {
+                        Thread.currentThread().sleep(1000);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
 
-	public static void init(JFrame frame, int width, int height) {
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(width, height);
-		frame.setVisible(true);
-	}
-	
-	public static void main(String[] args) {
-		init(new Communicate(), 150, 100);
-	}
+    public static void init(JFrame frame, int width, int height) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setVisible(true);
+    }
+    
+    public static void main(String[] args) {
+        init(new Communicate(), 150, 100);
+    }
 }
 
 15.8.1 Ïß³ÌµÄ²å¶ÓÔËĞĞ P396
 
 public class EmergencyThread implements Runnable {
-	@Override
-	public void run() {
-		for (int i = 1; i < 6; ++i) {
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println("½ô¼±Çé¿ö£º" + i + "ºÅ³µ³ö·¢£¡");
-		}
-	}
+    @Override
+    public void run() {
+        for (int i = 1; i < 6; ++i) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("½ô¼±Çé¿ö£º" + i + "ºÅ³µ³ö·¢£¡");
+        }
+    }
 }
 
 
 public class EmergencyThread implements Runnable {
-	@Override
-	public void run() {
-		for (int i = 1; i < 6; ++i) {
-			try {
-				Thread.sleep(100);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println("½ô¼±Çé¿ö£º" + i + "ºÅ³µ³ö·¢£¡");
-		}
-	}
+    @Override
+    public void run() {
+        for (int i = 1; i < 6; ++i) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("½ô¼±Çé¿ö£º" + i + "ºÅ³µ³ö·¢£¡");
+        }
+    }
 }
 Êä³öÈçÏÂ£º£¨²»Î¨Ò»£©
 Õı³£Çé¿ö£º1ºÅ³µ³ö·¢£¡
@@ -12323,18 +12323,18 @@ import java.net.UnknownHostException;
 
 
 public class Address {
-	public static void main(String args[]) {
-		InetAddress ip;
-		try {
-			ip = InetAddress.getLocalHost();
-			String localName = ip.getHostName();
-			String localIp = ip.getHostAddress();
-			System.out.println("±¾µØÖ÷»úÃû£º" + localName);
-			System.out.println("±¾»úIPµØÖ·£º" + localIp);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String args[]) {
+        InetAddress ip;
+        try {
+            ip = InetAddress.getLocalHost();
+            String localName = ip.getHostName();
+            String localIp = ip.getHostAddress();
+            System.out.println("±¾µØÖ÷»úÃû£º" + localName);
+            System.out.println("±¾»úIPµØÖ·£º" + localIp);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 ±¾µØÖ÷»úÃû£ºBen-PC
@@ -12355,54 +12355,54 @@ import javax.swing.JOptionPane;
 
 
 public class MyTcp {
-	private BufferedReader reader;
-	private ServerSocket server;
-	private Socket socket;
-	
-	void getServer() {
-		try {
-			server = new ServerSocket(8998);
-			server.setSoTimeout(5000);//ÉèÖÃ³¬Ê±Ê±³¤
-			System.out.println("·şÎñÆ÷Ì×½Ó×ÖÒÑ¾­´´½¨³É¹¦");
-			while (true) {
-				System.out.println("µÈ´ı¿Í»§»úµÄÁ¬½Ó");
-				socket = server.accept();
-				reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				getClientMessage();
-			}
-		} catch (SocketTimeoutException e) {
-			System.out.println("Á¬½Ó³¬Ê±...");
-			JOptionPane.showMessageDialog(null, "Á¬½Ó³¬Ê±...");//¿ÉÒÔÖ±½Óµ¯³öÌáÊ¾Ãæ°å
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void getClientMessage() {
-		try {
-			while (true) {
-				System.out.println("¿Í»§»ú£º" + reader.readLine());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			if (reader != null) {
-				reader.close();
-			}
-			if (socket != null) {
-				socket.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void main(String args[]) {
-		MyTcp tcp = new MyTcp();
-		tcp.getServer();
-	}
+    private BufferedReader reader;
+    private ServerSocket server;
+    private Socket socket;
+    
+    void getServer() {
+        try {
+            server = new ServerSocket(8998);
+            server.setSoTimeout(5000);//ÉèÖÃ³¬Ê±Ê±³¤
+            System.out.println("·şÎñÆ÷Ì×½Ó×ÖÒÑ¾­´´½¨³É¹¦");
+            while (true) {
+                System.out.println("µÈ´ı¿Í»§»úµÄÁ¬½Ó");
+                socket = server.accept();
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                getClientMessage();
+            }
+        } catch (SocketTimeoutException e) {
+            System.out.println("Á¬½Ó³¬Ê±...");
+            JOptionPane.showMessageDialog(null, "Á¬½Ó³¬Ê±...");//¿ÉÒÔÖ±½Óµ¯³öÌáÊ¾Ãæ°å
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void getClientMessage() {
+        try {
+            while (true) {
+                System.out.println("¿Í»§»ú£º" + reader.readLine());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            if (reader != null) {
+                reader.close();
+            }
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void main(String args[]) {
+        MyTcp tcp = new MyTcp();
+        tcp.getServer();
+    }
 }
 
 Êä³öÈçÏÂ£º
@@ -12425,66 +12425,66 @@ import javax.swing.JTextField;
 
 
 public class MyClient extends JFrame {
-	private PrintWriter writer;
-	Socket socket;
-	private JTextArea ta = new JTextArea();
-	private JTextField tf = new JTextField();
-	Container cc;
-	
-	public MyClient(String title) {
-		super(title);
-		cc = this.getContentPane();
-		cc.add(ta, "North");
-		cc.add(tf, "South");
-		tf.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String inputText = tf.getText();
-				//Èç¹ûÊÇinfo£¬ÔòÏÔÊ¾¿Í»§¶ËºÍ·şÎñÆ÷µÄIP¼°¶Ë¿ÚºÅ
-				if (inputText.equals("info")) { //×Ö·û´®ÅĞ¶ÏÏàµÈĞèÒªÓÃeuqals
-					InetAddress netAddress = socket.getInetAddress();
-					String netIp = netAddress.getHostAddress();
-					int netPort = socket.getPort();
-					
-					InetAddress localAddress = socket.getLocalAddress();
-					String localIp = localAddress.getHostAddress();
-					int localPort = socket.getLocalPort();
-					
-					System.out.print("Ô¶³Ì·şÎñÆ÷µÄIPµØÖ·£º" + netIp + "\n");
-					System.out.print("Ô¶³Ì·şÎñÆ÷µÄ¶Ë¿ÚºÅ£º" + netPort + "\n");
-					System.out.print("¿Í»§»ú±¾µØµÄIPµØÖ·£º" + localIp + "\n");
-					System.out.print("¿Í»§»ú±¾µØµÄ¶Ë¿ÚºÅ£º" + localPort + "\n");
-//					ta.append("Ô¶³Ì·şÎñÆ÷µÄIPµØÖ·£º" + netIp + "\n");
-//					ta.append("Ô¶³Ì·şÎñÆ÷µÄ¶Ë¿ÚºÅ£º" + netPort + "\n");
-//					ta.append("¿Í»§»ú±¾µØµÄIPµØÖ·£º" + localIp + "\n");
-//					ta.append("¿Í»§»ú±¾µØµÄ¶Ë¿ÚºÅ£º" + localPort + "\n");
-					
-				} else {
-					writer.println(tf.getText());//½«socketÊä³öÁ÷ÖĞµÄÄÚÈİÊä³öµ½·şÎñÆ÷¶Ë
-					ta.append(tf.getText() + '\n');
-				}
-				tf.setText("");	
-			}
-		});
-	}
-	
-	private void connect() {
-		ta.append("³¢ÊÔÁ¬½Ó\n");
-		try {
-			socket = new Socket("192.168.1.106", 8998);
-			writer = new PrintWriter(socket.getOutputStream(), true);//´´½¨socketÊä³öÁ÷µÄ´òÓ¡¶ÔÏó
-			ta.append("Íê³ÉÁ¬½Ó\n");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void main(String args[]) {
-		MyClient client = new MyClient("Ïò·şÎñÆ÷·¢ËÍÊı¾İ");
-		client.setBounds(300, 260, 340, 220);
-		client.setVisible(true);
-		client.connect();
-	}
+    private PrintWriter writer;
+    Socket socket;
+    private JTextArea ta = new JTextArea();
+    private JTextField tf = new JTextField();
+    Container cc;
+    
+    public MyClient(String title) {
+        super(title);
+        cc = this.getContentPane();
+        cc.add(ta, "North");
+        cc.add(tf, "South");
+        tf.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String inputText = tf.getText();
+                //Èç¹ûÊÇinfo£¬ÔòÏÔÊ¾¿Í»§¶ËºÍ·şÎñÆ÷µÄIP¼°¶Ë¿ÚºÅ
+                if (inputText.equals("info")) { //×Ö·û´®ÅĞ¶ÏÏàµÈĞèÒªÓÃeuqals
+                    InetAddress netAddress = socket.getInetAddress();
+                    String netIp = netAddress.getHostAddress();
+                    int netPort = socket.getPort();
+                    
+                    InetAddress localAddress = socket.getLocalAddress();
+                    String localIp = localAddress.getHostAddress();
+                    int localPort = socket.getLocalPort();
+                    
+                    System.out.print("Ô¶³Ì·şÎñÆ÷µÄIPµØÖ·£º" + netIp + "\n");
+                    System.out.print("Ô¶³Ì·şÎñÆ÷µÄ¶Ë¿ÚºÅ£º" + netPort + "\n");
+                    System.out.print("¿Í»§»ú±¾µØµÄIPµØÖ·£º" + localIp + "\n");
+                    System.out.print("¿Í»§»ú±¾µØµÄ¶Ë¿ÚºÅ£º" + localPort + "\n");
+//                    ta.append("Ô¶³Ì·şÎñÆ÷µÄIPµØÖ·£º" + netIp + "\n");
+//                    ta.append("Ô¶³Ì·şÎñÆ÷µÄ¶Ë¿ÚºÅ£º" + netPort + "\n");
+//                    ta.append("¿Í»§»ú±¾µØµÄIPµØÖ·£º" + localIp + "\n");
+//                    ta.append("¿Í»§»ú±¾µØµÄ¶Ë¿ÚºÅ£º" + localPort + "\n");
+                    
+                } else {
+                    writer.println(tf.getText());//½«socketÊä³öÁ÷ÖĞµÄÄÚÈİÊä³öµ½·şÎñÆ÷¶Ë
+                    ta.append(tf.getText() + '\n');
+                }
+                tf.setText("");    
+            }
+        });
+    }
+    
+    private void connect() {
+        ta.append("³¢ÊÔÁ¬½Ó\n");
+        try {
+            socket = new Socket("192.168.1.106", 8998);
+            writer = new PrintWriter(socket.getOutputStream(), true);//´´½¨socketÊä³öÁ÷µÄ´òÓ¡¶ÔÏó
+            ta.append("Íê³ÉÁ¬½Ó\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void main(String args[]) {
+        MyClient client = new MyClient("Ïò·şÎñÆ÷·¢ËÍÊı¾İ");
+        client.setBounds(300, 260, 340, 220);
+        client.setVisible(true);
+        client.connect();
+    }
 }
 
 ÎªÁËÊ¹±¾ÊµÀıÄÜ¹»Õı³£ÔËĞĞ£¬±ØĞëÏÈÔËĞĞ16.3 µÄ·şÎñÆ÷¶Ë³ÌĞò£¬²¢ÇÒÊµÀıµÄ¶Ë¿ÚºÅÒªÓëÀı16.3 ·şÎñÆ÷¶Ë³ÌĞòÌ×½Ó×ÖµÄ¶Ë¿ÚºÅÒ»ÖÂ£¬·ñÔò³ÌĞò»á·¢Éú´íÎó¡£
@@ -12502,40 +12502,40 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 
 public class Weather extends Thread {
-	String weather = "½ÚÄ¿Ô¤±¨£º°ËµãÓĞ´óĞÍÍí»á£¬ÇëÊÕÌı";
-	int port = 9898;
-	InetAddress iAddress = null;
-	MulticastSocket socket = null;
-	public Weather() {
-		try {
-			iAddress = InetAddress.getByName("224.255.10.0");
-			socket = new MulticastSocket(port);
-			socket.setTimeToLive(1);
-			socket.joinGroup(iAddress);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void run() {
-		while (true) {
-			DatagramPacket packet = null;
-			byte data[] = weather.getBytes();
-			packet = new DatagramPacket(data, data.length, iAddress, port);
-			System.out.println(new String(data));
-			try {
-				socket.send(packet);
-				sleep(3000);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public static void main(String args[]) {
-		Weather w = new Weather();
-		w.start();
-	}
+    String weather = "½ÚÄ¿Ô¤±¨£º°ËµãÓĞ´óĞÍÍí»á£¬ÇëÊÕÌı";
+    int port = 9898;
+    InetAddress iAddress = null;
+    MulticastSocket socket = null;
+    public Weather() {
+        try {
+            iAddress = InetAddress.getByName("224.255.10.0");
+            socket = new MulticastSocket(port);
+            socket.setTimeToLive(1);
+            socket.joinGroup(iAddress);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void run() {
+        while (true) {
+            DatagramPacket packet = null;
+            byte data[] = weather.getBytes();
+            packet = new DatagramPacket(data, data.length, iAddress, port);
+            System.out.println(new String(data));
+            try {
+                socket.send(packet);
+                sleep(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public static void main(String args[]) {
+        Weather w = new Weather();
+        w.start();
+    }
 }
 
 //½ÓÊÕ³ÌĞò
@@ -12555,94 +12555,94 @@ import javax.swing.JTextArea;
 import javax.swing.WindowConstants;
 
 public class Receive extends JFrame implements Runnable, ActionListener {
-	int port;
-	InetAddress group = null;
-	MulticastSocket socket = null;
-	JButton start = new JButton("¿ªÊ¼½ÓÊÕ");
-	JButton stop = new JButton("Í£Ö¹½ÓÊÕ");
-	JTextArea inceAr = new JTextArea(10, 10);
-	JTextArea inced = new JTextArea(10, 10);
-	Thread thread;
-	boolean b = false;
-	
-	public Receive() {
-		super("¹ã²¥Êı¾İ±¨");
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		thread = new Thread(this);
-		start.addActionListener(this);
-		stop.addActionListener(this);
-		
-		inceAr.setForeground(Color.blue);
-		JPanel north = new JPanel();
-		north.add(start);
-		north.add(stop);
-		add(north, BorderLayout.NORTH);
-		
-		JPanel center = new JPanel();
-		center.setLayout(new GridLayout(1, 2));
-		center.add(inceAr);
-		center.add(inced);
-		add(center, BorderLayout.CENTER);
-		
-		validate();//Ë¢ĞÂ
-		port = 9898;
-		
-		try {
-			group = InetAddress.getByName("224.225.10.0");
-			socket = new MulticastSocket(port);
-			socket.joinGroup(group);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		setBounds(100, 50, 360, 380);
-		setVisible(true);
-	}
-	
-	public void run() {
-		while (true) {
-			byte data[] = new byte[1024];
-			DatagramPacket packet = null;
-			packet = new DatagramPacket(data, data.length, group, port);
-			try {
-				socket.setSoTimeout(2000);
-				socket.receive(packet);
-				String message = new String(packet.getData(), 0, packet.getLength());
-				inceAr.setText("ÕıÔÚ½ÓÊÕµÄÄÚÈİ£º\n" + message);
-				inced.append(message + "\n");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			if (b == true) {
-				break;
-			}
-		}
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == start) {
-			start.setBackground(Color.red);
-			stop.setBackground(Color.yellow);
-			if (!(thread.isAlive())) {
-				thread = new Thread(this);
-			}
-			thread.start();
-			b = false;
-		}
-		
-		if (e.getSource() == stop) {
-			start.setBackground(Color.yellow);
-			stop.setBackground(Color.red);
-			b = true;
-		}
-	}
-	
-	public static void main(String args[]) {
-		Receive rec = new Receive();
-		rec.setSize(460, 200);
-	}
+    int port;
+    InetAddress group = null;
+    MulticastSocket socket = null;
+    JButton start = new JButton("¿ªÊ¼½ÓÊÕ");
+    JButton stop = new JButton("Í£Ö¹½ÓÊÕ");
+    JTextArea inceAr = new JTextArea(10, 10);
+    JTextArea inced = new JTextArea(10, 10);
+    Thread thread;
+    boolean b = false;
+    
+    public Receive() {
+        super("¹ã²¥Êı¾İ±¨");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        thread = new Thread(this);
+        start.addActionListener(this);
+        stop.addActionListener(this);
+        
+        inceAr.setForeground(Color.blue);
+        JPanel north = new JPanel();
+        north.add(start);
+        north.add(stop);
+        add(north, BorderLayout.NORTH);
+        
+        JPanel center = new JPanel();
+        center.setLayout(new GridLayout(1, 2));
+        center.add(inceAr);
+        center.add(inced);
+        add(center, BorderLayout.CENTER);
+        
+        validate();//Ë¢ĞÂ
+        port = 9898;
+        
+        try {
+            group = InetAddress.getByName("224.225.10.0");
+            socket = new MulticastSocket(port);
+            socket.joinGroup(group);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        setBounds(100, 50, 360, 380);
+        setVisible(true);
+    }
+    
+    public void run() {
+        while (true) {
+            byte data[] = new byte[1024];
+            DatagramPacket packet = null;
+            packet = new DatagramPacket(data, data.length, group, port);
+            try {
+                socket.setSoTimeout(2000);
+                socket.receive(packet);
+                String message = new String(packet.getData(), 0, packet.getLength());
+                inceAr.setText("ÕıÔÚ½ÓÊÕµÄÄÚÈİ£º\n" + message);
+                inced.append(message + "\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+            if (b == true) {
+                break;
+            }
+        }
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == start) {
+            start.setBackground(Color.red);
+            stop.setBackground(Color.yellow);
+            if (!(thread.isAlive())) {
+                thread = new Thread(this);
+            }
+            thread.start();
+            b = false;
+        }
+        
+        if (e.getSource() == stop) {
+            start.setBackground(Color.yellow);
+            stop.setBackground(Color.red);
+            b = true;
+        }
+    }
+    
+    public static void main(String args[]) {
+        Receive rec = new Receive();
+        rec.setSize(460, 200);
+    }
 }
 Ò»Ö±Ã»ÓĞÊÕµ½£¬²»ÖªµÀÎªÊ²Ã´£¿£¿£¿
 
@@ -12663,22 +12663,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 public class ExampleFrame_01 extends JFrame {
-	public static void main(String args[]) {
-		ExampleFrame_01 frame = new ExampleFrame_01();
-		frame.setVisible(true);
-	}
-	
-	public ExampleFrame_01() {
-		super();
-		setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
-		setBounds(100, 100, 240, 150);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		String columnNames[] = {"A", "B"};
-		String tableValues[][] = {{"A1", "B1"}, {"A2", "B2"}, {"A3", "B3"}, {"A4", "B4"}, {"A5", "B5"}};
-		JTable table = new JTable(tableValues, columnNames);
-		JScrollPane scrollPane = new JScrollPane(table);
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-	}
+    public static void main(String args[]) {
+        ExampleFrame_01 frame = new ExampleFrame_01();
+        frame.setVisible(true);
+    }
+    
+    public ExampleFrame_01() {
+        super();
+        setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
+        setBounds(100, 100, 240, 150);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        String columnNames[] = {"A", "B"};
+        String tableValues[][] = {{"A1", "B1"}, {"A2", "B2"}, {"A3", "B3"}, {"A4", "B4"}, {"A5", "B5"}};
+        JTable table = new JTable(tableValues, columnNames);
+        JScrollPane scrollPane = new JScrollPane(table);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+    }
 }
 
 //Ö±½ÓÌí¼Óµ½ÈİÆ÷ÖĞ P454
@@ -12690,36 +12690,36 @@ import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 
 public class ExampleFrame_01 extends JFrame {
-	public static void main(String args[]) {
-		ExampleFrame_01 frame = new ExampleFrame_01();
-		frame.setVisible(true);
-	}
-	
-	public ExampleFrame_01() {
-		super();
-		setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
-		setBounds(100, 100, 240, 150);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		Vector<String> columnNameV = new Vector<>();
-		columnNameV.add("A");
-		columnNameV.add("B");
-		columnNameV.add("C");
-		
-		Vector<Vector<String>> tableValueV = new Vector<>();
-		for (int row = 1; row < 6; ++row) {
-			Vector<String> rowV = new Vector<>();
-			rowV.add("A" + row);
-			rowV.add("B" + row);
-			rowV.add("C" + row);
-			tableValueV.add(rowV);
-		}
-		JTable table = new JTable(tableValueV, columnNameV);
-		getContentPane().add(table, BorderLayout.CENTER);
-		JTableHeader tableHeader = table.getTableHeader();
-		getContentPane().add(tableHeader, BorderLayout.NORTH);//Ã»ÓĞÕâ¾ä£¬Ôò²»»áÏÔÊ¾³ö±êÌâ
-		
-		tableHeader.setReorderingAllowed(true);//¿ÉÒÔÉèÖÃÁĞÊÇ·ñ¿ÉÒÔÍÏ¶¯ÖØÅÅ
-	}
+    public static void main(String args[]) {
+        ExampleFrame_01 frame = new ExampleFrame_01();
+        frame.setVisible(true);
+    }
+    
+    public ExampleFrame_01() {
+        super();
+        setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
+        setBounds(100, 100, 240, 150);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Vector<String> columnNameV = new Vector<>();
+        columnNameV.add("A");
+        columnNameV.add("B");
+        columnNameV.add("C");
+        
+        Vector<Vector<String>> tableValueV = new Vector<>();
+        for (int row = 1; row < 6; ++row) {
+            Vector<String> rowV = new Vector<>();
+            rowV.add("A" + row);
+            rowV.add("B" + row);
+            rowV.add("C" + row);
+            tableValueV.add(rowV);
+        }
+        JTable table = new JTable(tableValueV, columnNameV);
+        getContentPane().add(table, BorderLayout.CENTER);
+        JTableHeader tableHeader = table.getTableHeader();
+        getContentPane().add(tableHeader, BorderLayout.NORTH);//Ã»ÓĞÕâ¾ä£¬Ôò²»»áÏÔÊ¾³ö±êÌâ
+        
+        tableHeader.setReorderingAllowed(true);//¿ÉÒÔÉèÖÃÁĞÊÇ·ñ¿ÉÒÔÍÏ¶¯ÖØÅÅ
+    }
 }
 
 //Í¨¹ı¶¨ÖÆ×Ô¼ºµÄ±í¸ñ£¬ÖØÔØÌØ¶¨µÄ·½·¨ÊµÏÖ±í¸ñµÄÌØ¶¨¹¦ÄÜ P455
@@ -12736,68 +12736,68 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 
 public class ExampleFrame_01 extends JFrame {
-	public static void main(String args[]) {
-		ExampleFrame_01 frame = new ExampleFrame_01();
-		frame.setVisible(true);
-	}
-	
-	public ExampleFrame_01() {
-		super();
-		setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
-		setBounds(100, 100, 240, 150);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		final JScrollPane scrollPane = new JScrollPane();
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-		
-		
-		Vector<String> columnNameV = new Vector<>();
-		columnNameV.add("A");
-		columnNameV.add("B");
-		columnNameV.add("C");
-		
-		Vector<Vector<String>> tableValueV = new Vector<>();
-		for (int row = 1; row < 6; ++row) {
-			Vector<String> rowV = new Vector<>();
-			rowV.add("A" + row);
-			rowV.add("B" + row);
-			rowV.add("C" + row);
-			tableValueV.add(rowV);
-		}
-		JTable table = new MyTable(tableValueV, columnNameV);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setSelectionBackground(Color.YELLOW);
-		table.setSelectionForeground(Color.RED);
-		table.setRowHeight(30);
-		scrollPane.setViewportView(table);
-	}
-	
-	class MyTable extends JTable {
-		public MyTable(Vector<Vector<String>> rowData, Vector<String> columnNames) {
-			super(rowData, columnNames);
-		}
-		
-		@Override
-		public JTableHeader getTableHeader() {
-			JTableHeader tableHeader = super.getTableHeader();
-			tableHeader.setReorderingAllowed(false);
-			DefaultTableCellRenderer hr = (DefaultTableCellRenderer) tableHeader.getDefaultRenderer();
-			hr.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
-			return tableHeader;
-		}
-		
-		@Override
-		public boolean isCellEditable(int row, int column) {
-			return false;
-		}
-		
-		@Override
-		public TableCellRenderer getDefaultRenderer(Class<?> columnClass) {
-			DefaultTableCellRenderer cr = (DefaultTableCellRenderer) super.getDefaultRenderer(columnClass);
-			cr.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-			return cr;
-		}
-	}
+    public static void main(String args[]) {
+        ExampleFrame_01 frame = new ExampleFrame_01();
+        frame.setVisible(true);
+    }
+    
+    public ExampleFrame_01() {
+        super();
+        setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
+        setBounds(100, 100, 240, 150);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        final JScrollPane scrollPane = new JScrollPane();
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        
+        
+        Vector<String> columnNameV = new Vector<>();
+        columnNameV.add("A");
+        columnNameV.add("B");
+        columnNameV.add("C");
+        
+        Vector<Vector<String>> tableValueV = new Vector<>();
+        for (int row = 1; row < 6; ++row) {
+            Vector<String> rowV = new Vector<>();
+            rowV.add("A" + row);
+            rowV.add("B" + row);
+            rowV.add("C" + row);
+            tableValueV.add(rowV);
+        }
+        JTable table = new MyTable(tableValueV, columnNameV);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setSelectionBackground(Color.YELLOW);
+        table.setSelectionForeground(Color.RED);
+        table.setRowHeight(30);
+        scrollPane.setViewportView(table);
+    }
+    
+    class MyTable extends JTable {
+        public MyTable(Vector<Vector<String>> rowData, Vector<String> columnNames) {
+            super(rowData, columnNames);
+        }
+        
+        @Override
+        public JTableHeader getTableHeader() {
+            JTableHeader tableHeader = super.getTableHeader();
+            tableHeader.setReorderingAllowed(false);
+            DefaultTableCellRenderer hr = (DefaultTableCellRenderer) tableHeader.getDefaultRenderer();
+            hr.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);
+            return tableHeader;
+        }
+        
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+        
+        @Override
+        public TableCellRenderer getDefaultRenderer(Class<?> columnClass) {
+            DefaultTableCellRenderer cr = (DefaultTableCellRenderer) super.getDefaultRenderer(columnClass);
+            cr.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+            return cr;
+        }
+    }
 }
 
 18.1.3 ²Ù×İ±í¸ñ P458
@@ -12820,109 +12820,109 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 public class TipFrame extends JFrame {
-	private JScrollPane scrollPane = null;
-	private JLabel label = null;
-	
-	public TipFrame() {
-		setTitle("´øÓĞÌáÊ¾ĞÅÏ¢µÄÁĞ±í");
-		setBounds(100, 100, 500, 375);
-		Container c = getContentPane();
-		scrollPane = new JScrollPane();
-		c.add(scrollPane, BorderLayout.NORTH);
-		
-		label = new JLabel();
-		label.setFont(new Font("Arial", Font.BOLD, 15));
-		c.add(label, BorderLayout.SOUTH);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		addWindowListener(new WindowListener() {
-			
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowActivated(WindowEvent e) {
-				String data[][] = new String[][] {
-						{"book1", "Edition1"},
-						{"book2", "Edition2"},
-						{"book3", "Edition3"},
-						{"book4", "Edition4"}};
-				
-				JList<Object> list = new ToolTipList(data);
-				list.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 16));
-				scrollPane.setViewportView(list);
-				list.addListSelectionListener(new ListSelectionListener() {
-					
-					@Override
-					public void valueChanged(ListSelectionEvent e) {
-						label.setText("Thanks for buying " + list.getSelectedValue());
-					}
-				});
-			}
-		});
-	}
-	
-	public static void main(String args[]) {
-		new TipFrame();
-	}
+    private JScrollPane scrollPane = null;
+    private JLabel label = null;
+    
+    public TipFrame() {
+        setTitle("´øÓĞÌáÊ¾ĞÅÏ¢µÄÁĞ±í");
+        setBounds(100, 100, 500, 375);
+        Container c = getContentPane();
+        scrollPane = new JScrollPane();
+        c.add(scrollPane, BorderLayout.NORTH);
+        
+        label = new JLabel();
+        label.setFont(new Font("Arial", Font.BOLD, 15));
+        c.add(label, BorderLayout.SOUTH);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        addWindowListener(new WindowListener() {
+            
+            @Override
+            public void windowOpened(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowIconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeiconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeactivated(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosing(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosed(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowActivated(WindowEvent e) {
+                String data[][] = new String[][] {
+                        {"book1", "Edition1"},
+                        {"book2", "Edition2"},
+                        {"book3", "Edition3"},
+                        {"book4", "Edition4"}};
+                
+                JList<Object> list = new ToolTipList(data);
+                list.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 16));
+                scrollPane.setViewportView(list);
+                list.addListSelectionListener(new ListSelectionListener() {
+                    
+                    @Override
+                    public void valueChanged(ListSelectionEvent e) {
+                        label.setText("Thanks for buying " + list.getSelectedValue());
+                    }
+                });
+            }
+        });
+    }
+    
+    public static void main(String args[]) {
+        new TipFrame();
+    }
 }
 
 
 class ToolTipList extends JList<Object> {
-	private static final long serialVersionUID = 3396510300808442967L;
-	private Object[][] data;
-	public ToolTipList(Object[][] data) {
-		this.data = data;
-		Object[] listData = new Object[data.length];
-		for (int i = 0; i < listData.length; ++i) {
-			listData[i] = data[i][0];
-		}
-		setListData(listData);
-	}
-	
-	@Override
-	public String getToolTipText(MouseEvent event) {
-		int index = locationToIndex(event.getPoint());
-		if (index > -1) {
-			return "<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + data[index][1] + "</font></html>";
-		} else {
-			return super.getToolTipText(event);
-		}
-	}
+    private static final long serialVersionUID = 3396510300808442967L;
+    private Object[][] data;
+    public ToolTipList(Object[][] data) {
+        this.data = data;
+        Object[] listData = new Object[data.length];
+        for (int i = 0; i < listData.length; ++i) {
+            listData[i] = data[i][0];
+        }
+        setListData(listData);
+    }
+    
+    @Override
+    public String getToolTipText(MouseEvent event) {
+        int index = locationToIndex(event.getPoint());
+        if (index > -1) {
+            return "<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + data[index][1] + "</font></html>";
+        } else {
+            return super.getToolTipText(event);
+        }
+    }
 }
 
 18.2.1 ÀûÓÃ±í¸ñÄ£ĞÍ´´½¨±í¸ñ P462
@@ -12936,27 +12936,27 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
 public class ExampleFrame_01 extends JFrame {
-	public static void main(String args[]) {
-		ExampleFrame_01 frame = new ExampleFrame_01();
-		frame.setVisible(true);
-	}
-	
-	public ExampleFrame_01() {
-		super();
-		setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
-		setBounds(100, 100, 240, 150);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		String columnNames[] = {"A", "B"};
-		String tableValues[][] = {{"A1", "B1"}, {"A2", "B2"}, {"A3", "B3"}, {"A4", "B4"}, {"A5", "B5"}};
-		
-		DefaultTableModel tableModel = new DefaultTableModel(tableValues, columnNames);
-		JTable table = new JTable(tableModel);
-		table.setRowSorter(new TableRowSorter<>(tableModel));
-		//JScrollPane scrollPane = new JScrollPane(table);//µÈÓÚÏÂÃæÁ½¾ä
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(table);
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-	}
+    public static void main(String args[]) {
+        ExampleFrame_01 frame = new ExampleFrame_01();
+        frame.setVisible(true);
+    }
+    
+    public ExampleFrame_01() {
+        super();
+        setTitle("´´½¨¿ÉÒÔ¹ö¶¯µÄ±í¸ñ");
+        setBounds(100, 100, 240, 150);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        String columnNames[] = {"A", "B"};
+        String tableValues[][] = {{"A1", "B1"}, {"A2", "B2"}, {"A3", "B3"}, {"A4", "B4"}, {"A5", "B5"}};
+        
+        DefaultTableModel tableModel = new DefaultTableModel(tableValues, columnNames);
+        JTable table = new JTable(tableModel);
+        table.setRowSorter(new TableRowSorter<>(tableModel));
+        //JScrollPane scrollPane = new JScrollPane(table);//µÈÓÚÏÂÃæÁ½¾ä
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setViewportView(table);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+    }
 }
 
 18.2.2 Î¬»¤±í¸ñÄ£ĞÍ P464
@@ -12969,54 +12969,54 @@ import java.util.TreeSet;
 import javax.swing.*;
 
 public class SortedListModelTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public static void main(String args[]) {
-		new SortedListModelTest();
-	}
-	
-	public SortedListModelTest() {
-		setTitle("×Ô¶¯ÅÅĞòµÄÁĞ±í");
-		setBounds(100, 100, 500, 375);
-		Container c = getContentPane();
-		JScrollPane scrollPane = new JScrollPane();
-		c.add(scrollPane, BorderLayout.NORTH);
-		
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		SortedListModel model = new SortedListModel();
-		model.add("a");
-		model.add("f");
-		model.add("c");
-		model.add("d");
-		model.add("e");
-		model.add("b");
-		
-		JList<Object> list = new JList<>(model);
-		scrollPane.setViewportView(list);
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public static void main(String args[]) {
+        new SortedListModelTest();
+    }
+    
+    public SortedListModelTest() {
+        setTitle("×Ô¶¯ÅÅĞòµÄÁĞ±í");
+        setBounds(100, 100, 500, 375);
+        Container c = getContentPane();
+        JScrollPane scrollPane = new JScrollPane();
+        c.add(scrollPane, BorderLayout.NORTH);
+        
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        SortedListModel model = new SortedListModel();
+        model.add("a");
+        model.add("f");
+        model.add("c");
+        model.add("d");
+        model.add("e");
+        model.add("b");
+        
+        JList<Object> list = new JList<>(model);
+        scrollPane.setViewportView(list);
+    }
 }
 
 class SortedListModel extends AbstractListModel<Object> {
-	private static final long serialVersionUID = 3396510300808442967L;
-	private TreeSet<Object> model = new TreeSet<Object>();
-	
-	@Override
-	public Object getElementAt(int index) {
-		return model.toArray()[index];
-	}
+    private static final long serialVersionUID = 3396510300808442967L;
+    private TreeSet<Object> model = new TreeSet<Object>();
+    
+    @Override
+    public Object getElementAt(int index) {
+        return model.toArray()[index];
+    }
 
-	@Override
-	public int getSize() {
-		return model.size();
-	}
-	
-	public void add(Object element) {
-		if (model.add(element)) {
-			fireContentsChanged(this, 0, getSize());//AbstractListModel ×ÓÀà±ØĞëÔÚÁĞ±íµÄÒ»¸ö»ò¶à¸öÔªËØ·¢Éú¸ü¸ÄÖ®ºóµ÷ÓÃ´Ë·½·¨
-		}
-	}
+    @Override
+    public int getSize() {
+        return model.size();
+    }
+    
+    public void add(Object element) {
+        if (model.add(element)) {
+            fireContentsChanged(this, 0, getSize());//AbstractListModel ×ÓÀà±ØĞëÔÚÁĞ±íµÄÒ»¸ö»ò¶à¸öÔªËØ·¢Éú¸ü¸ÄÖ®ºóµ÷ÓÃ´Ë·½·¨
+        }
+    }
 }
 
 18.2.4 ·¶Àı4£º¿ÉÒÔÔ¤ÀÀ×ÖÌåµÄÁĞ±í P467
@@ -13025,52 +13025,52 @@ import java.awt.*;
 import javax.swing.*;
 
 public class FontTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public static void main(String args[]) {
-		new FontTest();
-	}
-	
-	public FontTest() {
-		setTitle("×Ô¶¯ÅÅĞòµÄÁĞ±í");
-		setBounds(100, 100, 500, 700);
-		Container c = getContentPane();
-		JScrollPane scrollPane = new JScrollPane();
-		c.add(scrollPane, BorderLayout.NORTH);
-		
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		String fontNames[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-		DefaultListModel<Object> model = new DefaultListModel<>();
-//		for (String fontName : fontNames) {
-//			model.addElement(new Font(fontName, Font.PLAIN, 24));
-//		}
-		
-		for (int i = 0; i < 10; ++i) {
-			model.addElement(new Font(fontNames[i], Font.PLAIN, 24));
-		}
-		
-		JList<Object> list = new JList<>(model);
-		ListCellRenderer<Object> renderer = new FontListCellRenderer();
-		list.setCellRenderer(renderer);
-		scrollPane.setViewportView(list);
-		
-		revalidate();//ĞèÒªµ÷ÓÃÃæ°åµÄÖØĞÂË¢ĞÂ²Ù×÷£¬·ñÔòÎŞ·¨¿´µ½Éú³ÉµÄ×ÖÌå
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public static void main(String args[]) {
+        new FontTest();
+    }
+    
+    public FontTest() {
+        setTitle("×Ô¶¯ÅÅĞòµÄÁĞ±í");
+        setBounds(100, 100, 500, 700);
+        Container c = getContentPane();
+        JScrollPane scrollPane = new JScrollPane();
+        c.add(scrollPane, BorderLayout.NORTH);
+        
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        String fontNames[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        DefaultListModel<Object> model = new DefaultListModel<>();
+//        for (String fontName : fontNames) {
+//            model.addElement(new Font(fontName, Font.PLAIN, 24));
+//        }
+        
+        for (int i = 0; i < 10; ++i) {
+            model.addElement(new Font(fontNames[i], Font.PLAIN, 24));
+        }
+        
+        JList<Object> list = new JList<>(model);
+        ListCellRenderer<Object> renderer = new FontListCellRenderer();
+        list.setCellRenderer(renderer);
+        scrollPane.setViewportView(list);
+        
+        revalidate();//ĞèÒªµ÷ÓÃÃæ°åµÄÖØĞÂË¢ĞÂ²Ù×÷£¬·ñÔòÎŞ·¨¿´µ½Éú³ÉµÄ×ÖÌå
+    }
 }
 
 class FontListCellRenderer implements ListCellRenderer<Object> {
-	@Override
-	public Component getListCellRendererComponent(JList<? extends Object> list,
-			Object value, int index, boolean isSelected, boolean cellHasFocus) {
-		DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
-		JLabel renderer = (JLabel) defaultRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		Font font = (Font) value;
-		renderer.setFont(font);
-		renderer.setText(font.getFontName());
-		return renderer;
-	}
+    @Override
+    public Component getListCellRendererComponent(JList<? extends Object> list,
+            Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
+        JLabel renderer = (JLabel) defaultRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        Font font = (Font) value;
+        renderer.setFont(font);
+        renderer.setText(font.getFontName());
+        return renderer;
+    }
 }
 
 18.3.2 ·¶Àı5£ºÌá¹©ĞĞ±êÌâÀ¸µÄ±í¸ñ P469
@@ -13086,39 +13086,39 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
-		DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
-		root.add(nodeFirst);
-		
-		DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
-		nodeFirst.add(nodeSecond);
-		
-		root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
-		JTree treeRoot = new JTree(root);
-		getContentPane().add(treeRoot, BorderLayout.WEST);
-		
-		
-		DefaultTreeModel treeModelDefault = new DefaultTreeModel(root);
-		JTree treeDefault = new JTree(treeModelDefault);
-		getContentPane().add(treeDefault, BorderLayout.CENTER);
-		
-		
-		DefaultTreeModel treeModelPointed = new DefaultTreeModel(root, true);
-		JTree treePointed = new JTree(treeModelPointed);
-		getContentPane().add(treePointed, BorderLayout.EAST);
-		
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
+        DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
+        root.add(nodeFirst);
+        
+        DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
+        nodeFirst.add(nodeSecond);
+        
+        root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
+        JTree treeRoot = new JTree(root);
+        getContentPane().add(treeRoot, BorderLayout.WEST);
+        
+        
+        DefaultTreeModel treeModelDefault = new DefaultTreeModel(root);
+        JTree treeDefault = new JTree(treeModelDefault);
+        getContentPane().add(treeDefault, BorderLayout.CENTER);
+        
+        
+        DefaultTreeModel treeModelPointed = new DefaultTreeModel(root, true);
+        JTree treePointed = new JTree(treeModelPointed);
+        getContentPane().add(treePointed, BorderLayout.EAST);
+        
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 18.4.2 ´¦ÀíÑ¡ÖĞ½ÚµãÊÂ¼ş P473
@@ -13136,50 +13136,50 @@ import javax.swing.tree.TreeSelectionModel;
 
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
-		DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
-		root.add(nodeFirst);
-		
-		DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
-		nodeFirst.add(nodeSecond);
-		
-		root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
-		JTree treeRoot = new JTree(root);
-		getContentPane().add(treeRoot, BorderLayout.CENTER);
-		
-		TreeSelectionModel treeSelectionModel = treeRoot.getSelectionModel();
-		treeSelectionModel.setSelectionMode(TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
-		treeRoot.addTreeSelectionListener(new TreeSelectionListener() {
-			@Override
-			public void valueChanged(TreeSelectionEvent e) {
-				if (!treeRoot.isSelectionEmpty()) {
-					TreePath selectionPaths[] = treeRoot.getSelectionPaths();
-					for (int i = 0; i < selectionPaths.length; i++) {
-						TreePath treePath = selectionPaths[i];
-						Object path[] = treePath.getPath();
-						for (int j = 0; j < path.length; j++) {
-							DefaultMutableTreeNode node = (DefaultMutableTreeNode) path[j];
-							System.out.print(node.getUserObject() + (j == (path.length - 1) ? "" : "-->"));
-						}
-						System.out.println();
-					}
-					System.out.println();
-				}
-			}
-		});
-		
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
+        DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
+        root.add(nodeFirst);
+        
+        DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
+        nodeFirst.add(nodeSecond);
+        
+        root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
+        JTree treeRoot = new JTree(root);
+        getContentPane().add(treeRoot, BorderLayout.CENTER);
+        
+        TreeSelectionModel treeSelectionModel = treeRoot.getSelectionModel();
+        treeSelectionModel.setSelectionMode(TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
+        treeRoot.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                if (!treeRoot.isSelectionEmpty()) {
+                    TreePath selectionPaths[] = treeRoot.getSelectionPaths();
+                    for (int i = 0; i < selectionPaths.length; i++) {
+                        TreePath treePath = selectionPaths[i];
+                        Object path[] = treePath.getPath();
+                        for (int j = 0; j < path.length; j++) {
+                            DefaultMutableTreeNode node = (DefaultMutableTreeNode) path[j];
+                            System.out.print(node.getUserObject() + (j == (path.length - 1) ? "" : "-->"));
+                        }
+                        System.out.println();
+                    }
+                    System.out.println();
+                }
+            }
+        });
+        
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 
@@ -13199,42 +13199,42 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
-		DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
-		root.add(nodeFirst);
-		
-		DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
-		nodeFirst.add(nodeSecond);
-		
-		root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
-		JTree treeRoot = new JTree(root);
-		getContentPane().add(treeRoot, BorderLayout.CENTER);
-		
-		Enumeration<DefaultMutableTreeNode> enumeration;
-		//enumeration = root.preorderEnumeration();//Ç°Ğò±éÀú
-		//enumeration = root.postorderEnumeration();//ºóĞò±éÀú
-		//enumeration = root.breadthFirstEnumeration();//¹ã¶ÈÓÅÏÈ±éÀú
-		//enumeration = root.depthFirstEnumeration();//Éî¶ÈÓÅÏÈ±éÀú£¬Êä³öÓëºóĞò±éÀúÒ»Ñù
-		enumeration = root.children();//±éÀúÚÒ½ÚµãµÄ×Ó½Úµã£¬»ñÈ¡Ö±½Ó×Ó½Úµã
-		while (enumeration.hasMoreElements()) {
-			DefaultMutableTreeNode node = enumeration.nextElement();
-			for (int i = 0; i < node.getLevel(); ++i) {
-				System.out.print("-----");
-			}
-			System.out.println(node.getUserObject());
-		}
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
+        DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
+        root.add(nodeFirst);
+        
+        DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
+        nodeFirst.add(nodeSecond);
+        
+        root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
+        JTree treeRoot = new JTree(root);
+        getContentPane().add(treeRoot, BorderLayout.CENTER);
+        
+        Enumeration<DefaultMutableTreeNode> enumeration;
+        //enumeration = root.preorderEnumeration();//Ç°Ğò±éÀú
+        //enumeration = root.postorderEnumeration();//ºóĞò±éÀú
+        //enumeration = root.breadthFirstEnumeration();//¹ã¶ÈÓÅÏÈ±éÀú
+        //enumeration = root.depthFirstEnumeration();//Éî¶ÈÓÅÏÈ±éÀú£¬Êä³öÓëºóĞò±éÀúÒ»Ñù
+        enumeration = root.children();//±éÀúÚÒ½ÚµãµÄ×Ó½Úµã£¬»ñÈ¡Ö±½Ó×Ó½Úµã
+        while (enumeration.hasMoreElements()) {
+            DefaultMutableTreeNode node = enumeration.nextElement();
+            for (int i = 0; i < node.getLevel(); ++i) {
+                System.out.print("-----");
+            }
+            System.out.println(node.getUserObject());
+        }
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 18.4.4 ¶¨ÖÆÊ÷ P477
@@ -13250,45 +13250,45 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
-		DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
-		root.add(nodeFirst);
-		
-		DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
-		nodeFirst.add(nodeSecond);
-		
-		root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
-		JTree treeRoot = new JTree(root);
-		getContentPane().add(treeRoot, BorderLayout.CENTER);
-		
-		treeRoot.setRootVisible(false);//²»ÏÔÊ¾Ê÷µÄ¸ù½Úµã
-		treeRoot.setRowHeight(20);//Ê÷½ÚµãµÄĞĞ¸ßÎª20ÏñËØ
-		treeRoot.setFont(new Font("ËÎÌå", Font.BOLD, 14));//ÉèÖÃÊ÷½ÚµãµÄ×ÖÌå
-		treeRoot.putClientProperty("JTree.lineStyle", "None");//½Úµã¼ä²»²ÉÓÃÁ¬½ÓÏß
-		DefaultTreeCellRenderer treeCellRenderer = (DefaultTreeCellRenderer) treeRoot.getCellRenderer();//»ñµÃÊ÷½ÚµãµÄ»æÖÆ¶ÔÏó
-		treeCellRenderer.setLeafIcon(null);//ÉèÖÃÒ¶×Ó½Úµã²»²ÉÓÃÍ¼±ê
-		treeCellRenderer.setClosedIcon(null);//ÉèÖÃ½ÚµãÕÛµşÊ±²»²ÉÓÃÍ¼±ê
-		treeCellRenderer.setOpenIcon(null);//ÉèÖÃ½ÚµãÕ¹¿ªÊ±²»²ÉÓÃÍ¼±ê
-		Enumeration<DefaultMutableTreeNode> enumeration = root.preorderEnumeration();//°´Ç°Ğò±éÀúËùÓĞÊ÷½Úµã
-		while (enumeration.hasMoreElements()) {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) enumeration.nextElement();
-			if (!node.isLeaf()) {
-				TreePath path = new TreePath(node.getPath());
-				treeRoot.expandPath(path);
-			}
-		}
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
+        DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
+        root.add(nodeFirst);
+        
+        DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
+        nodeFirst.add(nodeSecond);
+        
+        root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
+        JTree treeRoot = new JTree(root);
+        getContentPane().add(treeRoot, BorderLayout.CENTER);
+        
+        treeRoot.setRootVisible(false);//²»ÏÔÊ¾Ê÷µÄ¸ù½Úµã
+        treeRoot.setRowHeight(20);//Ê÷½ÚµãµÄĞĞ¸ßÎª20ÏñËØ
+        treeRoot.setFont(new Font("ËÎÌå", Font.BOLD, 14));//ÉèÖÃÊ÷½ÚµãµÄ×ÖÌå
+        treeRoot.putClientProperty("JTree.lineStyle", "None");//½Úµã¼ä²»²ÉÓÃÁ¬½ÓÏß
+        DefaultTreeCellRenderer treeCellRenderer = (DefaultTreeCellRenderer) treeRoot.getCellRenderer();//»ñµÃÊ÷½ÚµãµÄ»æÖÆ¶ÔÏó
+        treeCellRenderer.setLeafIcon(null);//ÉèÖÃÒ¶×Ó½Úµã²»²ÉÓÃÍ¼±ê
+        treeCellRenderer.setClosedIcon(null);//ÉèÖÃ½ÚµãÕÛµşÊ±²»²ÉÓÃÍ¼±ê
+        treeCellRenderer.setOpenIcon(null);//ÉèÖÃ½ÚµãÕ¹¿ªÊ±²»²ÉÓÃÍ¼±ê
+        Enumeration<DefaultMutableTreeNode> enumeration = root.preorderEnumeration();//°´Ç°Ğò±éÀúËùÓĞÊ÷½Úµã
+        while (enumeration.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) enumeration.nextElement();
+            if (!node.isLeaf()) {
+                TreePath path = new TreePath(node.getPath());
+                treeRoot.expandPath(path);
+            }
+        }
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 18.4.5 Î¬»¤Ê÷Ä£ĞÍ P479
@@ -13313,82 +13313,82 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
-		DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
-		root.add(nodeFirst);
-		
-		DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
-		nodeFirst.add(nodeSecond);
-		
-		root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
-		JTree treeRoot = new JTree(root);
-		getContentPane().add(treeRoot, BorderLayout.NORTH);
-		
-		JPanel panel = new JPanel();
-		getContentPane().add(panel, BorderLayout.SOUTH);
-		
-		JTextField textField = new JTextField(10);
-		panel.add(textField);
-		
-		DefaultTreeModel treeModel = new DefaultTreeModel(root);
-		
-		final JButton addButton = new JButton("Ìí¼Ó");
-		addButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				DefaultMutableTreeNode node = new DefaultMutableTreeNode(textField.getText());
-				TreePath selectionPath = treeRoot.getSelectionPath();
-				DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-				treeModel.insertNodeInto(node, parentNode, parentNode.getChildCount());
-				TreePath path = selectionPath.pathByAddingChild(node);
-				if (!treeRoot.isVisible(path)) {
-					treeRoot.makeVisible(path);
-				}
-			}
-		});
-		panel.add(addButton);
-		
-		final JButton updButton = new JButton("ĞŞ¸Ä");
-		updButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				TreePath selectionPath = treeRoot.getSelectionPath();
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-				node.setUserObject(textField.getText());
-				treeModel.nodeChanged(node);
-				treeRoot.setSelectionPath(selectionPath);
-			}
-		});
-		panel.add(updButton);
-		
-		final JButton delButton = new JButton("É¾³ı");
-		delButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
-				if (!node.isRoot()) {
-					DefaultMutableTreeNode nextSelectedNode = node.getNextSibling();
-					if (nextSelectedNode == null) {
-						nextSelectedNode = (DefaultMutableTreeNode) node.getParent();
-						treeModel.removeNodeFromParent(node);
-						treeRoot.setSelectionPath(new TreePath(nextSelectedNode.getPath()));
-					}
-				}
-			}
-		});
-		panel.add(delButton);
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
+        DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
+        root.add(nodeFirst);
+        
+        DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
+        nodeFirst.add(nodeSecond);
+        
+        root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
+        JTree treeRoot = new JTree(root);
+        getContentPane().add(treeRoot, BorderLayout.NORTH);
+        
+        JPanel panel = new JPanel();
+        getContentPane().add(panel, BorderLayout.SOUTH);
+        
+        JTextField textField = new JTextField(10);
+        panel.add(textField);
+        
+        DefaultTreeModel treeModel = new DefaultTreeModel(root);
+        
+        final JButton addButton = new JButton("Ìí¼Ó");
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(textField.getText());
+                TreePath selectionPath = treeRoot.getSelectionPath();
+                DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
+                treeModel.insertNodeInto(node, parentNode, parentNode.getChildCount());
+                TreePath path = selectionPath.pathByAddingChild(node);
+                if (!treeRoot.isVisible(path)) {
+                    treeRoot.makeVisible(path);
+                }
+            }
+        });
+        panel.add(addButton);
+        
+        final JButton updButton = new JButton("ĞŞ¸Ä");
+        updButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TreePath selectionPath = treeRoot.getSelectionPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
+                node.setUserObject(textField.getText());
+                treeModel.nodeChanged(node);
+                treeRoot.setSelectionPath(selectionPath);
+            }
+        });
+        panel.add(updButton);
+        
+        final JButton delButton = new JButton("É¾³ı");
+        delButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) treeRoot.getLastSelectedPathComponent();
+                if (!node.isRoot()) {
+                    DefaultMutableTreeNode nextSelectedNode = node.getNextSibling();
+                    if (nextSelectedNode == null) {
+                        nextSelectedNode = (DefaultMutableTreeNode) node.getParent();
+                        treeModel.removeNodeFromParent(node);
+                        treeRoot.setSelectionPath(new TreePath(nextSelectedNode.getPath()));
+                    }
+                }
+            }
+        });
+        panel.add(delButton);
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 18.4.6 ´¦ÀíÕ¹¿ª½ÚµãÊÂ¼ş P481
@@ -13403,62 +13403,62 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
-		DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
-		root.add(nodeFirst);
-		
-		DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
-		nodeFirst.add(nodeSecond);
-		
-		root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
-		JTree treeRoot = new JTree(root);
-		getContentPane().add(treeRoot, BorderLayout.CENTER);
-		
-		treeRoot.addTreeWillExpandListener(new TreeWillExpandListener() {
-			@Override
-			public void treeWillExpand(TreeExpansionEvent e) {
-				TreePath path = e.getPath();
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-				System.out.println("½Úµã\"" + node + "\"½«Òª±»Õ¹¿ª£¡");
-			}
-			
-			@Override
-			public void treeWillCollapse(TreeExpansionEvent e) {
-				TreePath path = e.getPath();
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-				System.out.println("½Úµã\"" + node + "\"½«Òª±»ÕÛµş£¡");
-			}
-		});
-		
-		treeRoot.addTreeExpansionListener(new TreeExpansionListener() {
-			@Override
-			public void treeExpanded(TreeExpansionEvent e) {
-				TreePath path = e.getPath();
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-				System.out.println("½Úµã\"" + node + "\"ÒÑ±»Õ¹¿ª£¡");
-				System.out.println();
-			}
-			
-			@Override
-			public void treeCollapsed(TreeExpansionEvent e) {
-				TreePath path = e.getPath();
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-				System.out.println("½Úµã\"" + node + "\"ÒÑ±»ÕÛµş£¡");
-				System.out.println();
-			}
-		});
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("¸ù½Úµã");
+        DefaultMutableTreeNode nodeFirst = new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãA");
+        root.add(nodeFirst);
+        
+        DefaultMutableTreeNode nodeSecond = new DefaultMutableTreeNode("¶ş¼¶×Ó½Úµã", false);
+        nodeFirst.add(nodeSecond);
+        
+        root.add(new DefaultMutableTreeNode("Ò»¼¶×Ó½ÚµãB"));
+        JTree treeRoot = new JTree(root);
+        getContentPane().add(treeRoot, BorderLayout.CENTER);
+        
+        treeRoot.addTreeWillExpandListener(new TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(TreeExpansionEvent e) {
+                TreePath path = e.getPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                System.out.println("½Úµã\"" + node + "\"½«Òª±»Õ¹¿ª£¡");
+            }
+            
+            @Override
+            public void treeWillCollapse(TreeExpansionEvent e) {
+                TreePath path = e.getPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                System.out.println("½Úµã\"" + node + "\"½«Òª±»ÕÛµş£¡");
+            }
+        });
+        
+        treeRoot.addTreeExpansionListener(new TreeExpansionListener() {
+            @Override
+            public void treeExpanded(TreeExpansionEvent e) {
+                TreePath path = e.getPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                System.out.println("½Úµã\"" + node + "\"ÒÑ±»Õ¹¿ª£¡");
+                System.out.println();
+            }
+            
+            @Override
+            public void treeCollapsed(TreeExpansionEvent e) {
+                TreePath path = e.getPath();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                System.out.println("½Úµã\"" + node + "\"ÒÑ±»ÕÛµş£¡");
+                System.out.println();
+            }
+        });
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 18.4.7 ·¶Àı6£ºÎªÊ÷½ÚµãÔö¼ÓÌáÊ¾ĞÅÏ¢ P483
@@ -13478,101 +13478,101 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		JTree tree = new JTree();
-		getContentPane().add(tree, BorderLayout.CENTER);
-		
-		addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowActivated(WindowEvent e) {
-				DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ã÷ÈÕ¿Æ¼¼ĞÂÊé");
-				DefaultMutableTreeNode parent1 = new DefaultMutableTreeNode("´ÓÈëÃÅµ½¾«Í¨ÏµÁĞ");
-				parent1.add(new DefaultMutableTreeNode("¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·"));
-				root.add(parent1);
-				
-				DefaultMutableTreeNode parent2 = new DefaultMutableTreeNode("±à³Ì´ÊµäÏµÁĞ");
-				parent2.add(new DefaultMutableTreeNode("¡¶Java±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶PHP±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶Visual Basic±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶Visual C++±à³Ì´Êµä¡·"));
-				root.add(parent2);
-				
-				DefaultTreeModel model = new DefaultTreeModel(root);
-				tree.setModel(model);
-				ToolTipManager.sharedInstance().registerComponent(tree);//ÎªÊ÷×¢²áÌáÊ¾ĞÅÏ¢¹ÜÀíÆ÷
-				Map<DefaultMutableTreeNode, String> map = new HashMap<DefaultMutableTreeNode, String>();
-				map.put(root, "Ã÷ÈÕ¿Æ¼¼");
-				map.put(parent1, "µç×Ó¹¤Òµ");
-				map.put(parent2, "ÈËÃñ½ÌÓı");
-				tree.setCellRenderer(new ToolTipNode(map));
-			}
-		});
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        JTree tree = new JTree();
+        getContentPane().add(tree, BorderLayout.CENTER);
+        
+        addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowIconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeiconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeactivated(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosing(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosed(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowActivated(WindowEvent e) {
+                DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ã÷ÈÕ¿Æ¼¼ĞÂÊé");
+                DefaultMutableTreeNode parent1 = new DefaultMutableTreeNode("´ÓÈëÃÅµ½¾«Í¨ÏµÁĞ");
+                parent1.add(new DefaultMutableTreeNode("¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·"));
+                root.add(parent1);
+                
+                DefaultMutableTreeNode parent2 = new DefaultMutableTreeNode("±à³Ì´ÊµäÏµÁĞ");
+                parent2.add(new DefaultMutableTreeNode("¡¶Java±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶PHP±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶Visual Basic±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶Visual C++±à³Ì´Êµä¡·"));
+                root.add(parent2);
+                
+                DefaultTreeModel model = new DefaultTreeModel(root);
+                tree.setModel(model);
+                ToolTipManager.sharedInstance().registerComponent(tree);//ÎªÊ÷×¢²áÌáÊ¾ĞÅÏ¢¹ÜÀíÆ÷
+                Map<DefaultMutableTreeNode, String> map = new HashMap<DefaultMutableTreeNode, String>();
+                map.put(root, "Ã÷ÈÕ¿Æ¼¼");
+                map.put(parent1, "µç×Ó¹¤Òµ");
+                map.put(parent2, "ÈËÃñ½ÌÓı");
+                tree.setCellRenderer(new ToolTipNode(map));
+            }
+        });
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 class ToolTipNode implements TreeCellRenderer {
-	private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-	private Map<DefaultMutableTreeNode, String> map;
-	public ToolTipNode(Map<DefaultMutableTreeNode, String> map) {
-		this.map = map;
-	}
-	@Override
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean selected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
-		renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-		renderer.setToolTipText("<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + map.get(value) + "</font></html>");
-		return renderer;
-	}
+    private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+    private Map<DefaultMutableTreeNode, String> map;
+    public ToolTipNode(Map<DefaultMutableTreeNode, String> map) {
+        this.map = map;
+    }
+    @Override
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean selected, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
+        renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        renderer.setToolTipText("<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + map.get(value) + "</font></html>");
+        return renderer;
+    }
 }
 
 18.4.8 ·¶Àı7£ºË«»÷±à¼­Ê÷½Úµã¹¦ÄÜ P484
@@ -13596,108 +13596,108 @@ import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		JTree tree = new JTree();
-		getContentPane().add(tree, BorderLayout.CENTER);
-		
-		addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowActivated(WindowEvent e) {
-				DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ã÷ÈÕ¿Æ¼¼ĞÂÊé");
-				DefaultMutableTreeNode parent1 = new DefaultMutableTreeNode("´ÓÈëÃÅµ½¾«Í¨ÏµÁĞ");
-				parent1.add(new DefaultMutableTreeNode("¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·"));
-				root.add(parent1);
-				
-				DefaultMutableTreeNode parent2 = new DefaultMutableTreeNode("±à³Ì´ÊµäÏµÁĞ");
-				parent2.add(new DefaultMutableTreeNode("¡¶Java±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶PHP±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶Visual Basic±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶Visual C++±à³Ì´Êµä¡·"));
-				root.add(parent2);
-				
-				DefaultTreeModel model = new DefaultTreeModel(root);
-				tree.setModel(model);
-				ToolTipManager.sharedInstance().registerComponent(tree);//ÎªÊ÷×¢²áÌáÊ¾ĞÅÏ¢¹ÜÀíÆ÷
-				Map<DefaultMutableTreeNode, String> map = new HashMap<DefaultMutableTreeNode, String>();
-				map.put(root, "Ã÷ÈÕ¿Æ¼¼");
-				map.put(parent1, "µç×Ó¹¤Òµ");
-				map.put(parent2, "ÈËÃñ½ÌÓı");
-				tree.setCellRenderer(new ToolTipNode(map));
-				
-				JTextField textField = new JTextField();
-				textField.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 16));
-				TreeCellEditor editor = new DefaultCellEditor(textField);
-				tree.setEditable(true);
-				tree.setCellEditor(editor);
-				tree.setShowsRootHandles(true);//Èç¹û²»ÉèÖÃÉÏ¸ù½ÚµãµÄÏÔÊ¾ÊÖ±ú£¬ÔòÃ»ÓĞ°ì·¨½«¸ù½ÚµãÕÛµşÁË£¬ÒòÎªË«»÷»á±à¼­ÎÄ±¾¿ò P477
-			}
-		});
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        JTree tree = new JTree();
+        getContentPane().add(tree, BorderLayout.CENTER);
+        
+        addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowIconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeiconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeactivated(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosing(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosed(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowActivated(WindowEvent e) {
+                DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ã÷ÈÕ¿Æ¼¼ĞÂÊé");
+                DefaultMutableTreeNode parent1 = new DefaultMutableTreeNode("´ÓÈëÃÅµ½¾«Í¨ÏµÁĞ");
+                parent1.add(new DefaultMutableTreeNode("¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·"));
+                root.add(parent1);
+                
+                DefaultMutableTreeNode parent2 = new DefaultMutableTreeNode("±à³Ì´ÊµäÏµÁĞ");
+                parent2.add(new DefaultMutableTreeNode("¡¶Java±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶PHP±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶Visual Basic±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶Visual C++±à³Ì´Êµä¡·"));
+                root.add(parent2);
+                
+                DefaultTreeModel model = new DefaultTreeModel(root);
+                tree.setModel(model);
+                ToolTipManager.sharedInstance().registerComponent(tree);//ÎªÊ÷×¢²áÌáÊ¾ĞÅÏ¢¹ÜÀíÆ÷
+                Map<DefaultMutableTreeNode, String> map = new HashMap<DefaultMutableTreeNode, String>();
+                map.put(root, "Ã÷ÈÕ¿Æ¼¼");
+                map.put(parent1, "µç×Ó¹¤Òµ");
+                map.put(parent2, "ÈËÃñ½ÌÓı");
+                tree.setCellRenderer(new ToolTipNode(map));
+                
+                JTextField textField = new JTextField();
+                textField.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 16));
+                TreeCellEditor editor = new DefaultCellEditor(textField);
+                tree.setEditable(true);
+                tree.setCellEditor(editor);
+                tree.setShowsRootHandles(true);//Èç¹û²»ÉèÖÃÉÏ¸ù½ÚµãµÄÏÔÊ¾ÊÖ±ú£¬ÔòÃ»ÓĞ°ì·¨½«¸ù½ÚµãÕÛµşÁË£¬ÒòÎªË«»÷»á±à¼­ÎÄ±¾¿ò P477
+            }
+        });
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 class ToolTipNode implements TreeCellRenderer {
-	private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-	private Map<DefaultMutableTreeNode, String> map;
-	public ToolTipNode(Map<DefaultMutableTreeNode, String> map) {
-		this.map = map;
-	}
-	@Override
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean selected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
-		renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-		renderer.setToolTipText("<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + map.get(value) + "</font></html>");
-		return renderer;
-	}
+    private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+    private Map<DefaultMutableTreeNode, String> map;
+    public ToolTipNode(Map<DefaultMutableTreeNode, String> map) {
+        this.map = map;
+    }
+    @Override
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean selected, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
+        renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        renderer.setToolTipText("<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + map.get(value) + "</font></html>");
+        return renderer;
+    }
 }
 
 18.5.2 ¾­µä·¶Àı2£º¼àÌı½ÚµãµÄÑ¡ÔñÊÂ¼ş P486
@@ -13725,131 +13725,131 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 public class TreeTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TreeTest() {
-		JTree tree = new JTree();
-		getContentPane().add(tree, BorderLayout.WEST);
-		
-		JTextArea textArea = new JTextArea(20, 20);
-		getContentPane().add(textArea, BorderLayout.EAST);
-		
-		addWindowListener(new WindowListener() {
-			@Override
-			public void windowOpened(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowIconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeiconified(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowDeactivated(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void windowActivated(WindowEvent e) {
-				DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ã÷ÈÕ¿Æ¼¼ĞÂÊé");
-				DefaultMutableTreeNode parent1 = new DefaultMutableTreeNode("´ÓÈëÃÅµ½¾«Í¨ÏµÁĞ");
-				parent1.add(new DefaultMutableTreeNode("¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·"));
-				parent1.add(new DefaultMutableTreeNode("¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·"));
-				root.add(parent1);
-				
-				DefaultMutableTreeNode parent2 = new DefaultMutableTreeNode("±à³Ì´ÊµäÏµÁĞ");
-				parent2.add(new DefaultMutableTreeNode("¡¶Java±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶PHP±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶Visual Basic±à³Ì´Êµä¡·"));
-				parent2.add(new DefaultMutableTreeNode("¡¶Visual C++±à³Ì´Êµä¡·"));
-				root.add(parent2);
-				
-				DefaultTreeModel model = new DefaultTreeModel(root);
-				tree.setModel(model);
-				ToolTipManager.sharedInstance().registerComponent(tree);//ÎªÊ÷×¢²áÌáÊ¾ĞÅÏ¢¹ÜÀíÆ÷
-				Map<DefaultMutableTreeNode, String> map = new HashMap<DefaultMutableTreeNode, String>();
-				map.put(root, "Ã÷ÈÕ¿Æ¼¼");
-				map.put(parent1, "µç×Ó¹¤Òµ");
-				map.put(parent2, "ÈËÃñ½ÌÓı");
-				tree.setCellRenderer(new ToolTipNode(map));
-				
-				JTextField textField = new JTextField();
-				textField.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 16));
-				TreeCellEditor editor = new DefaultCellEditor(textField);
-				tree.setEditable(true);
-				tree.setCellEditor(editor);
-				tree.setShowsRootHandles(true);//Èç¹û²»ÉèÖÃÉÏ¸ù½ÚµãµÄÏÔÊ¾ÊÖ±ú£¬ÔòÃ»ÓĞ°ì·¨½«¸ù½ÚµãÕÛµşÁË£¬ÒòÎªË«»÷»á±à¼­ÎÄ±¾¿ò P477
-				
-				tree.addTreeSelectionListener(new TreeSelectionListener() {
-					@Override
-					public void valueChanged(TreeSelectionEvent e) {
-						TreePath path = tree.getSelectionPath();
-						if (path == null) {
-							return;
-						}
-						
-						DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
-						String text1 = "¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·\n¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·\n¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·\n¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·";
-						String text2 = "¡¶Java±à³Ì´Êµä¡·\n¡¶PHP±à³Ì´Êµä¡·\n¡¶Visual Basic±à³Ì´Êµä¡·\n¡¶Visual C++±à³Ì´Êµä¡·";
-						
-						if (node.toString().equals(parent1.toString())) {
-							textArea.setText(text1);
-						} else if (node.toString().equals(parent2.toString())) {
-							textArea.setText(text2);
-						}
-					}
-				});
-			}
-		});
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new TreeTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TreeTest() {
+        JTree tree = new JTree();
+        getContentPane().add(tree, BorderLayout.WEST);
+        
+        JTextArea textArea = new JTextArea(20, 20);
+        getContentPane().add(textArea, BorderLayout.EAST);
+        
+        addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowIconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeiconified(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowDeactivated(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosing(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowClosed(WindowEvent arg0) {
+                // TODO Auto-generated method stub
+                
+            }
+            
+            @Override
+            public void windowActivated(WindowEvent e) {
+                DefaultMutableTreeNode root = new DefaultMutableTreeNode("Ã÷ÈÕ¿Æ¼¼ĞÂÊé");
+                DefaultMutableTreeNode parent1 = new DefaultMutableTreeNode("´ÓÈëÃÅµ½¾«Í¨ÏµÁĞ");
+                parent1.add(new DefaultMutableTreeNode("¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·"));
+                parent1.add(new DefaultMutableTreeNode("¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·"));
+                root.add(parent1);
+                
+                DefaultMutableTreeNode parent2 = new DefaultMutableTreeNode("±à³Ì´ÊµäÏµÁĞ");
+                parent2.add(new DefaultMutableTreeNode("¡¶Java±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶PHP±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶Visual Basic±à³Ì´Êµä¡·"));
+                parent2.add(new DefaultMutableTreeNode("¡¶Visual C++±à³Ì´Êµä¡·"));
+                root.add(parent2);
+                
+                DefaultTreeModel model = new DefaultTreeModel(root);
+                tree.setModel(model);
+                ToolTipManager.sharedInstance().registerComponent(tree);//ÎªÊ÷×¢²áÌáÊ¾ĞÅÏ¢¹ÜÀíÆ÷
+                Map<DefaultMutableTreeNode, String> map = new HashMap<DefaultMutableTreeNode, String>();
+                map.put(root, "Ã÷ÈÕ¿Æ¼¼");
+                map.put(parent1, "µç×Ó¹¤Òµ");
+                map.put(parent2, "ÈËÃñ½ÌÓı");
+                tree.setCellRenderer(new ToolTipNode(map));
+                
+                JTextField textField = new JTextField();
+                textField.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 16));
+                TreeCellEditor editor = new DefaultCellEditor(textField);
+                tree.setEditable(true);
+                tree.setCellEditor(editor);
+                tree.setShowsRootHandles(true);//Èç¹û²»ÉèÖÃÉÏ¸ù½ÚµãµÄÏÔÊ¾ÊÖ±ú£¬ÔòÃ»ÓĞ°ì·¨½«¸ù½ÚµãÕÛµşÁË£¬ÒòÎªË«»÷»á±à¼­ÎÄ±¾¿ò P477
+                
+                tree.addTreeSelectionListener(new TreeSelectionListener() {
+                    @Override
+                    public void valueChanged(TreeSelectionEvent e) {
+                        TreePath path = tree.getSelectionPath();
+                        if (path == null) {
+                            return;
+                        }
+                        
+                        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+                        String text1 = "¡¶Java´ÓÈëÃÅµ½¾«Í¨¡·\n¡¶PHP´ÓÈëÃÅµ½¾«Í¨¡·\n¡¶Visual Basic´ÓÈëÃÅµ½¾«Í¨¡·\n¡¶Visual C++´ÓÈëÃÅµ½¾«Í¨¡·";
+                        String text2 = "¡¶Java±à³Ì´Êµä¡·\n¡¶PHP±à³Ì´Êµä¡·\n¡¶Visual Basic±à³Ì´Êµä¡·\n¡¶Visual C++±à³Ì´Êµä¡·";
+                        
+                        if (node.toString().equals(parent1.toString())) {
+                            textArea.setText(text1);
+                        } else if (node.toString().equals(parent2.toString())) {
+                            textArea.setText(text2);
+                        }
+                    }
+                });
+            }
+        });
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new TreeTest();
+    }
 }
 
 class ToolTipNode implements TreeCellRenderer {
-	private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-	private Map<DefaultMutableTreeNode, String> map;
-	public ToolTipNode(Map<DefaultMutableTreeNode, String> map) {
-		this.map = map;
-	}
-	@Override
-	public Component getTreeCellRendererComponent(JTree tree, Object value,
-			boolean selected, boolean expanded, boolean leaf, int row,
-			boolean hasFocus) {
-		renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-		renderer.setToolTipText("<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + map.get(value) + "</font></html>");
-		return renderer;
-	}
+    private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+    private Map<DefaultMutableTreeNode, String> map;
+    public ToolTipNode(Map<DefaultMutableTreeNode, String> map) {
+        this.map = map;
+    }
+    @Override
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+            boolean selected, boolean expanded, boolean leaf, int row,
+            boolean hasFocus) {
+        renderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        renderer.setToolTipText("<html><font face=Î¢ÈíÑÅºÚ size=16 color=red>" + map.get(value) + "</font></html>");
+        return renderer;
+    }
 }
 //------------------------------------------------------------------------------------------------
 //Java´ÓÈëÃÅµ½¾«Í¨ µÚ19ÕÂ ¸ß¼¶²¼¾Ö¹ÜÀíÆ÷ P488
@@ -13866,53 +13866,53 @@ import javax.swing.JTextField;
 
 
 public class BoxTest extends JFrame {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public BoxTest() {
-		Box topicBox = Box.createHorizontalBox();
-		getContentPane().add(topicBox, BorderLayout.NORTH);
-		topicBox.add(Box.createHorizontalStrut(5));//Ìí¼ÓÒ»¸ö5ÏñËØ¿íµÄË®Æ½Ö§Öù
-		JLabel topicLabel = new JLabel("Ö÷Ìâ£º");
-		topicBox.add(topicLabel);
-		topicBox.add(Box.createHorizontalStrut(5));
-		JTextField topicTextField = new JTextField(30);
-		topicBox.add(topicTextField);
-		
-		//ÒÔÏÂÄÚÈİ¶¼ÓÉ´¹Ö±box¿ØÖÆ
-		Box box = Box.createVerticalBox();
-		getContentPane().add(box, BorderLayout.CENTER);
-		box.add(Box.createVerticalStrut(5));
-		
-		Box contentBox = Box.createHorizontalBox();
-		contentBox.setAlignmentX(1);//ÉèÖÃ×é¼şµÄË®Æ½µ÷ÕûÖµ£¬¿¿ÓÒ²à¶ÔÆë£»0ÊÇ¿¿×ó²à¶ÔÆë
-		box.add(contentBox);
-		
-		contentBox.add(Box.createHorizontalStrut(5));//createHorizontalGlue()¿ÉÒÔÊÔÏÂĞ§¹û
-		
-		JLabel contentLabel = new JLabel("ÄÚÈİ£º");
-		contentLabel.setAlignmentY(0);
-		contentBox.add(contentLabel);
-		contentBox.add(Box.createHorizontalStrut(5));
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setAlignmentY(0);
-		contentBox.add(scrollPane);
-		
-		JTextArea contentTextArea = new JTextArea();
-		scrollPane.setViewportView(contentTextArea);
-		box.add(Box.createVerticalStrut(5));
-		JButton submitButton = new JButton("È·¶¨");
-		submitButton.setAlignmentX(1);
-		box.add(submitButton);
-		
-		setSize(500, 600);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	public static void main(String args[]) {
-		new BoxTest();
-	}
+    public BoxTest() {
+        Box topicBox = Box.createHorizontalBox();
+        getContentPane().add(topicBox, BorderLayout.NORTH);
+        topicBox.add(Box.createHorizontalStrut(5));//Ìí¼ÓÒ»¸ö5ÏñËØ¿íµÄË®Æ½Ö§Öù
+        JLabel topicLabel = new JLabel("Ö÷Ìâ£º");
+        topicBox.add(topicLabel);
+        topicBox.add(Box.createHorizontalStrut(5));
+        JTextField topicTextField = new JTextField(30);
+        topicBox.add(topicTextField);
+        
+        //ÒÔÏÂÄÚÈİ¶¼ÓÉ´¹Ö±box¿ØÖÆ
+        Box box = Box.createVerticalBox();
+        getContentPane().add(box, BorderLayout.CENTER);
+        box.add(Box.createVerticalStrut(5));
+        
+        Box contentBox = Box.createHorizontalBox();
+        contentBox.setAlignmentX(1);//ÉèÖÃ×é¼şµÄË®Æ½µ÷ÕûÖµ£¬¿¿ÓÒ²à¶ÔÆë£»0ÊÇ¿¿×ó²à¶ÔÆë
+        box.add(contentBox);
+        
+        contentBox.add(Box.createHorizontalStrut(5));//createHorizontalGlue()¿ÉÒÔÊÔÏÂĞ§¹û
+        
+        JLabel contentLabel = new JLabel("ÄÚÈİ£º");
+        contentLabel.setAlignmentY(0);
+        contentBox.add(contentLabel);
+        contentBox.add(Box.createHorizontalStrut(5));
+        
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setAlignmentY(0);
+        contentBox.add(scrollPane);
+        
+        JTextArea contentTextArea = new JTextArea();
+        scrollPane.setViewportView(contentTextArea);
+        box.add(Box.createVerticalStrut(5));
+        JButton submitButton = new JButton("È·¶¨");
+        submitButton.setAlignmentX(1);
+        box.add(submitButton);
+        
+        setSize(500, 600);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    
+    public static void main(String args[]) {
+        new BoxTest();
+    }
 }
 
 19.2 ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷ P491
@@ -13927,66 +13927,66 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class CardLayoutTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private JPanel cardPanel;
-	private CardLayout cardLayout;
-	
-	
-	public CardLayoutTest() {
-		super();
-		setTitle("Ê¹ÓÃ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷");
-		setBounds(100, 100, 600, 400);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		cardLayout = new CardLayout();
-		cardPanel = new JPanel(cardLayout);//´´½¨Ò»¸ö²ÉÓÃ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷µÄÃæ°å¶ÔÏó
-		getContentPane().add(cardPanel, BorderLayout.CENTER);
-		String labelNames[] = {"Card A", "Card B", "Card C"};
-		for (int i = 0; i < labelNames.length; ++i) {
-			final JLabel label = new JLabel(labelNames[i]);
-			cardPanel.add(label, labelNames[i]);//Ïò²ÉÓÃ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷µÄÃæ°åÖĞÌí¼Ó¿¨Æ¬
-		}
-		
-		final JPanel buttonPanel = new JPanel();
-		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		String buttonNames[] = {"First", "Previous", "Card A", "Card B", "Card C", "Next", "Last"};
-		for (int i = 0; i < buttonNames.length; ++i) {
-			final JButton button = new JButton(buttonNames[i]);
-			button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String buttonText = button.getText();
-					if (buttonText.equals(buttonNames[0])) {
-						cardLayout.first(cardPanel);
-					}
-					else if (buttonText.equals(buttonNames[1])) {
-						cardLayout.previous(cardPanel);
-					}
-					else if (buttonText.equals(buttonNames[2])) {
-						cardLayout.show(cardPanel, buttonNames[2]);
-					}
-					else if (buttonText.equals(buttonNames[3])) {
-						cardLayout.show(cardPanel, buttonNames[3]);
-					}
-					else if (buttonText.equals(buttonNames[4])) {
-						cardLayout.show(cardPanel, buttonNames[4]);
-					}
-					else if (buttonText.equals(buttonNames[5])) {
-						cardLayout.next(cardPanel);
-					}
-					else {
-						cardLayout.last(cardPanel);
-					}
-				}
-			});
-			buttonPanel.add(button);
-		}
-	}
-	
-	public static void main(String args[]) {
-		new CardLayoutTest();
-	}
+    private static final long serialVersionUID = 1L;
+    private JPanel cardPanel;
+    private CardLayout cardLayout;
+    
+    
+    public CardLayoutTest() {
+        super();
+        setTitle("Ê¹ÓÃ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷");
+        setBounds(100, 100, 600, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        cardLayout = new CardLayout();
+        cardPanel = new JPanel(cardLayout);//´´½¨Ò»¸ö²ÉÓÃ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷µÄÃæ°å¶ÔÏó
+        getContentPane().add(cardPanel, BorderLayout.CENTER);
+        String labelNames[] = {"Card A", "Card B", "Card C"};
+        for (int i = 0; i < labelNames.length; ++i) {
+            final JLabel label = new JLabel(labelNames[i]);
+            cardPanel.add(label, labelNames[i]);//Ïò²ÉÓÃ¿¨Æ¬²¼¾Ö¹ÜÀíÆ÷µÄÃæ°åÖĞÌí¼Ó¿¨Æ¬
+        }
+        
+        final JPanel buttonPanel = new JPanel();
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+        String buttonNames[] = {"First", "Previous", "Card A", "Card B", "Card C", "Next", "Last"};
+        for (int i = 0; i < buttonNames.length; ++i) {
+            final JButton button = new JButton(buttonNames[i]);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String buttonText = button.getText();
+                    if (buttonText.equals(buttonNames[0])) {
+                        cardLayout.first(cardPanel);
+                    }
+                    else if (buttonText.equals(buttonNames[1])) {
+                        cardLayout.previous(cardPanel);
+                    }
+                    else if (buttonText.equals(buttonNames[2])) {
+                        cardLayout.show(cardPanel, buttonNames[2]);
+                    }
+                    else if (buttonText.equals(buttonNames[3])) {
+                        cardLayout.show(cardPanel, buttonNames[3]);
+                    }
+                    else if (buttonText.equals(buttonNames[4])) {
+                        cardLayout.show(cardPanel, buttonNames[4]);
+                    }
+                    else if (buttonText.equals(buttonNames[5])) {
+                        cardLayout.next(cardPanel);
+                    }
+                    else {
+                        cardLayout.last(cardPanel);
+                    }
+                }
+            });
+            buttonPanel.add(button);
+        }
+    }
+    
+    public static void main(String args[]) {
+        new CardLayoutTest();
+    }
 }
 
 19.3 Íø¸ñ×é²¼¾Ö¹ÜÀíÆ÷ P493
@@ -13997,86 +13997,86 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class ExampleFrame_11 extends JFrame {
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+    
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-	public static void main(String args[]) {
-		ExampleFrame_11 frame = new ExampleFrame_11();
-		frame.setVisible(true);
-	}
-	
-	public ExampleFrame_11() {
-		super();
-		getContentPane().setLayout(new GridBagLayout());
-		setTitle("Ê¹ÓÃ½ø¶ÈÌõ");
-		setBounds(100, 100, 500, 375);
-		setBounds(100, 100, 266, 132);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		final JLabel label = new JLabel();
-		label.setForeground(new Color(255, 0, 0));
-		label.setFont(new Font("", Font.BOLD, 16));
-		label.setText("»¶Ó­Ê¹ÓÃÔÚÏßÉı¼¶¹¦ÄÜ£¡");
-		final GridBagConstraints gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.gridy = 0;
-		gridBagConstraints.gridx = 0;
-		getContentPane().add(label, gridBagConstraints);
-		
-		final JProgressBar progressBar = new JProgressBar();// ´´½¨½ø¶ÈÌõ¶ÔÏó
-		progressBar.setStringPainted(true);// ÉèÖÃÏÔÊ¾ÌáÊ¾ĞÅÏ¢
-		progressBar.setIndeterminate(true);// ÉèÖÃ²ÉÓÃ²»È·¶¨½ø¶ÈÌõ
-		progressBar.setString("Éı¼¶½øĞĞÖĞ......");// ÉèÖÃÌáÊ¾ĞÅÏ¢
-		final GridBagConstraints gridBagConstraints_1 = new GridBagConstraints();
-		gridBagConstraints_1.insets = new Insets(5, 0, 0, 0);
-		gridBagConstraints_1.gridy = 1;
-		gridBagConstraints_1.gridx = 0;
-		getContentPane().add(progressBar, gridBagConstraints_1);
-		
-		final JButton button = new JButton();
-		button.setText("Íê³É");
-		button.setEnabled(false);
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		});
-		final GridBagConstraints gridBagConstraints_2 = new GridBagConstraints();
-		gridBagConstraints_2.insets = new Insets(5, 0, 0, 0);
-		gridBagConstraints_2.gridy = 2;
-		gridBagConstraints_2.gridx = 1;
-		getContentPane().add(button, gridBagConstraints_2);
-		new Progress(progressBar, button).start();// ÀûÓÃÏß³ÌÄ£ÄâÒ»¸öÔÚÏßÉı¼¶ÈÎÎñ
-	}
-	
-	class Progress extends Thread {// ÀûÓÃÏß³ÌÄ£ÄâÒ»¸öÔÚÏßÉı¼¶ÈÎÎñ
-		private final int[] progressValue = { 6, 18, 27, 39, 51, 66, 81,
-				100 };// Ä£ÄâÈÎÎñÍê³É°Ù·Ö±È
-		private JProgressBar progressBar;// ½ø¶ÈÌõ¶ÔÏó
-		private JButton button;// Íê³É°´Å¥¶ÔÏó
-		
-		public Progress(JProgressBar progressBar, JButton button) {
-			this.progressBar = progressBar;
-			this.button = button;
-		}
-		
-		public void run() {
-			// Í¨¹ıÑ­»·¸üĞÂÈÎÎñÍê³É°Ù·Ö±È
-			for (int i = 0; i < progressValue.length; i++) {
-				try {
-					Thread.sleep(1000);// ÁîÏß³ÌĞİÃß1Ãë
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				progressBar.setValue(progressValue[i]);// ÉèÖÃÈÎÎñÍê³É°Ù·Ö±È
-			}
-			progressBar.setIndeterminate(false);// ÉèÖÃ²ÉÓÃÈ·¶¨½ø¶ÈÌõ
-			progressBar.setString("Éı¼¶Íê³É£¡");// ÉèÖÃÌáÊ¾ĞÅÏ¢
-			button.setEnabled(true);// ÉèÖÃ°´Å¥¿ÉÓÃ
-		}
-	}
+    public static void main(String args[]) {
+        ExampleFrame_11 frame = new ExampleFrame_11();
+        frame.setVisible(true);
+    }
+    
+    public ExampleFrame_11() {
+        super();
+        getContentPane().setLayout(new GridBagLayout());
+        setTitle("Ê¹ÓÃ½ø¶ÈÌõ");
+        setBounds(100, 100, 500, 375);
+        setBounds(100, 100, 266, 132);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        final JLabel label = new JLabel();
+        label.setForeground(new Color(255, 0, 0));
+        label.setFont(new Font("", Font.BOLD, 16));
+        label.setText("»¶Ó­Ê¹ÓÃÔÚÏßÉı¼¶¹¦ÄÜ£¡");
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridx = 0;
+        getContentPane().add(label, gridBagConstraints);
+        
+        final JProgressBar progressBar = new JProgressBar();// ´´½¨½ø¶ÈÌõ¶ÔÏó
+        progressBar.setStringPainted(true);// ÉèÖÃÏÔÊ¾ÌáÊ¾ĞÅÏ¢
+        progressBar.setIndeterminate(true);// ÉèÖÃ²ÉÓÃ²»È·¶¨½ø¶ÈÌõ
+        progressBar.setString("Éı¼¶½øĞĞÖĞ......");// ÉèÖÃÌáÊ¾ĞÅÏ¢
+        final GridBagConstraints gridBagConstraints_1 = new GridBagConstraints();
+        gridBagConstraints_1.insets = new Insets(5, 0, 0, 0);
+        gridBagConstraints_1.gridy = 1;
+        gridBagConstraints_1.gridx = 0;
+        getContentPane().add(progressBar, gridBagConstraints_1);
+        
+        final JButton button = new JButton();
+        button.setText("Íê³É");
+        button.setEnabled(false);
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+        final GridBagConstraints gridBagConstraints_2 = new GridBagConstraints();
+        gridBagConstraints_2.insets = new Insets(5, 0, 0, 0);
+        gridBagConstraints_2.gridy = 2;
+        gridBagConstraints_2.gridx = 1;
+        getContentPane().add(button, gridBagConstraints_2);
+        new Progress(progressBar, button).start();// ÀûÓÃÏß³ÌÄ£ÄâÒ»¸öÔÚÏßÉı¼¶ÈÎÎñ
+    }
+    
+    class Progress extends Thread {// ÀûÓÃÏß³ÌÄ£ÄâÒ»¸öÔÚÏßÉı¼¶ÈÎÎñ
+        private final int[] progressValue = { 6, 18, 27, 39, 51, 66, 81,
+                100 };// Ä£ÄâÈÎÎñÍê³É°Ù·Ö±È
+        private JProgressBar progressBar;// ½ø¶ÈÌõ¶ÔÏó
+        private JButton button;// Íê³É°´Å¥¶ÔÏó
+        
+        public Progress(JProgressBar progressBar, JButton button) {
+            this.progressBar = progressBar;
+            this.button = button;
+        }
+        
+        public void run() {
+            // Í¨¹ıÑ­»·¸üĞÂÈÎÎñÍê³É°Ù·Ö±È
+            for (int i = 0; i < progressValue.length; i++) {
+                try {
+                    Thread.sleep(1000);// ÁîÏß³ÌĞİÃß1Ãë
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                progressBar.setValue(progressValue[i]);// ÉèÖÃÈÎÎñÍê³É°Ù·Ö±È
+            }
+            progressBar.setIndeterminate(false);// ÉèÖÃ²ÉÓÃÈ·¶¨½ø¶ÈÌõ
+            progressBar.setString("Éı¼¶Íê³É£¡");// ÉèÖÃÌáÊ¾ĞÅÏ¢
+            button.setEnabled(true);// ÉèÖÃ°´Å¥¿ÉÓÃ
+        }
+    }
 }
 
 //Íø¸ñ×é¼ş¹ÜÀíÆ÷P499£¬ÕâÃ´Ò»¸öÒ»¸öÉèÖÃ¸Ğ¾õĞ§ÂÊºÜµÍ£¿
@@ -14088,106 +14088,106 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 public class GridBagLayoutTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public GridBagLayoutTest() {
-		super();
-		setTitle("Ê¹ÓÃÍø¸ñ²¼¾Ö¹ÜÀíÆ÷");
-		setBounds(100, 100, 600, 400);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		getContentPane().setLayout(new GridBagLayout());
-		
-		final JButton button = new JButton("A");
-		final GridBagConstraints gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.gridy = 0;//ÆğÊ¼µãÎªµÚ1ĞĞ
-		gridBagConstraints.gridx = 0;//ÆğÊ¼µãÎªµÚ1ÁĞ
-		//gridBagConstraints.insets = new Insets(0, 5, 0, 0);//ÉèÖÃ×é¼ş×ó²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints.weightx = 10;//µÚ1ÁĞµÄ·Ö²¼·½Ê½Îª10%
-		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-		getContentPane().add(button, gridBagConstraints);
-		
-		final JButton button_1 = new JButton("B");
-		final GridBagConstraints gridBagConstraints_1 = new GridBagConstraints();
-		gridBagConstraints_1.gridy = 0;
-		gridBagConstraints_1.gridx = 1;
-		gridBagConstraints_1.insets = new Insets(0, 5, 0, 0);//ÉèÖÃ×é¼ş×ó²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints_1.weightx = 20;//µÚ1ÁĞµÄ·Ö²¼·½Ê½Îª20%
-		gridBagConstraints_1.fill = GridBagConstraints.HORIZONTAL;
-		getContentPane().add(button_1, gridBagConstraints_1);
-		
-		final JButton button_2 = new JButton("C");
-		final GridBagConstraints gridBagConstraints_2 = new GridBagConstraints();
-		gridBagConstraints_2.gridy = 0;
-		gridBagConstraints_2.gridx = 2;
-		gridBagConstraints_2.gridheight = 2;//×é¼şÕ¼ÓÃÁ½ĞĞ
-		gridBagConstraints_2.insets = new Insets(0, 5, 0, 0);
-		gridBagConstraints_2.weightx = 30;//µÚ1ÁĞµÄ·Ö²¼·½Ê½ Îª30%
-		gridBagConstraints_2.fill = GridBagConstraints.BOTH;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
-		getContentPane().add(button_2, gridBagConstraints_2);
-		
-		final JButton button_3 = new JButton("D");
-		final GridBagConstraints gridBagConstraints_3 = new GridBagConstraints();
-		gridBagConstraints_3.gridy = 0;
-		gridBagConstraints_3.gridx = 3;
-		gridBagConstraints_3.gridheight = 4;//×é¼şÕ¼ÓÃËÄĞĞ
-		gridBagConstraints_3.insets = new Insets(0, 5, 0, 5);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints_3.weightx = 40;//µÚ1ÁĞµÄ·Ö²¼·½Ê½ Îª40%
-		gridBagConstraints_3.fill = GridBagConstraints.BOTH;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
-		getContentPane().add(button_3, gridBagConstraints_3);
-		
-		final JButton button_4 = new JButton("E");
-		final GridBagConstraints gridBagConstraints_4 = new GridBagConstraints();
-		gridBagConstraints_4.gridy = 1;
-		gridBagConstraints_4.gridx = 0;
-		gridBagConstraints_4.gridwidth = 2;//×é¼şÕ¼ÓÃÁ½ÁĞ
-		gridBagConstraints_4.insets = new Insets(5, 0, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints_4.fill = GridBagConstraints.HORIZONTAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
-		getContentPane().add(button_4, gridBagConstraints_4);
-		
-		final JButton button_5 = new JButton("F");
-		final GridBagConstraints gridBagConstraints_5 = new GridBagConstraints();
-		gridBagConstraints_5.gridy = 2;
-		gridBagConstraints_5.gridx = 0;
-		gridBagConstraints_5.insets = new Insets(5, 0, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints_5.fill = GridBagConstraints.HORIZONTAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶È
-		getContentPane().add(button_5, gridBagConstraints_5);
-		
-		final JButton button_6 = new JButton("G");
-		final GridBagConstraints gridBagConstraints_6 = new GridBagConstraints();
-		gridBagConstraints_6.gridy = 2;
-		gridBagConstraints_6.gridx = 1;
-		gridBagConstraints_6.gridwidth = 2;//×é¼şÕ¼ÓÃÁ½ÁĞ
-		gridBagConstraints_6.gridheight = 2;//×é¼şÕ¼ÓÃÁ½ĞĞ
-		gridBagConstraints_6.insets = new Insets(5, 5, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints_6.fill = GridBagConstraints.BOTH;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
-		getContentPane().add(button_6, gridBagConstraints_6);
-		
-//		final JButton button_6 = new JButton("G");
-//		final GridBagConstraints gridBagConstraints_6 = new GridBagConstraints();
-//		gridBagConstraints_6.gridy = 2;
-//		gridBagConstraints_6.gridx = 1;
-//		gridBagConstraints_6.gridwidth = 2;//×é¼şÕ¼ÓÃÁ½ÁĞ
-//		gridBagConstraints_6.gridheight = 2;//×é¼şÕ¼ÓÃÁ½ĞĞ
-//		gridBagConstraints_6.insets = new Insets(5, 5, 0, 0);//ÉèÖÃ×é¼şÉÏ²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
-//		gridBagConstraints_6.fill = GridBagConstraints.VERTICAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
-//		gridBagConstraints_6.ipadx = 30;//Ôö¼Ó×é¼şµÄÊ×Ñ¡¿í¶È£¬ÔÚÄ¬ÈÏ»ù´¡ÉÏ¿í¶ÈÔö¼ÓvalueÖµ£¬¿ÉÒÔÎª¸º
-//		gridBagConstraints_6.anchor = GridBagConstraints.EAST;//ÏÔÊ¾ÔÚ¶«·½
-//		getContentPane().add(button_6, gridBagConstraints_6);
-		
-		final JButton button_7 = new JButton("G");
-		final GridBagConstraints gridBagConstraints_7 = new GridBagConstraints();
-		gridBagConstraints_7.gridy = 3;
-		gridBagConstraints_7.gridx = 0;
-		gridBagConstraints_7.insets = new Insets(5, 0, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
-		gridBagConstraints_7.fill = GridBagConstraints.HORIZONTAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
-		getContentPane().add(button_7, gridBagConstraints_7);
-	}
-	
-	public static void main(String args[]) {
-		new GridBagLayoutTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public GridBagLayoutTest() {
+        super();
+        setTitle("Ê¹ÓÃÍø¸ñ²¼¾Ö¹ÜÀíÆ÷");
+        setBounds(100, 100, 600, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        getContentPane().setLayout(new GridBagLayout());
+        
+        final JButton button = new JButton("A");
+        final GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridy = 0;//ÆğÊ¼µãÎªµÚ1ĞĞ
+        gridBagConstraints.gridx = 0;//ÆğÊ¼µãÎªµÚ1ÁĞ
+        //gridBagConstraints.insets = new Insets(0, 5, 0, 0);//ÉèÖÃ×é¼ş×ó²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints.weightx = 10;//µÚ1ÁĞµÄ·Ö²¼·½Ê½Îª10%
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        getContentPane().add(button, gridBagConstraints);
+        
+        final JButton button_1 = new JButton("B");
+        final GridBagConstraints gridBagConstraints_1 = new GridBagConstraints();
+        gridBagConstraints_1.gridy = 0;
+        gridBagConstraints_1.gridx = 1;
+        gridBagConstraints_1.insets = new Insets(0, 5, 0, 0);//ÉèÖÃ×é¼ş×ó²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints_1.weightx = 20;//µÚ1ÁĞµÄ·Ö²¼·½Ê½Îª20%
+        gridBagConstraints_1.fill = GridBagConstraints.HORIZONTAL;
+        getContentPane().add(button_1, gridBagConstraints_1);
+        
+        final JButton button_2 = new JButton("C");
+        final GridBagConstraints gridBagConstraints_2 = new GridBagConstraints();
+        gridBagConstraints_2.gridy = 0;
+        gridBagConstraints_2.gridx = 2;
+        gridBagConstraints_2.gridheight = 2;//×é¼şÕ¼ÓÃÁ½ĞĞ
+        gridBagConstraints_2.insets = new Insets(0, 5, 0, 0);
+        gridBagConstraints_2.weightx = 30;//µÚ1ÁĞµÄ·Ö²¼·½Ê½ Îª30%
+        gridBagConstraints_2.fill = GridBagConstraints.BOTH;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
+        getContentPane().add(button_2, gridBagConstraints_2);
+        
+        final JButton button_3 = new JButton("D");
+        final GridBagConstraints gridBagConstraints_3 = new GridBagConstraints();
+        gridBagConstraints_3.gridy = 0;
+        gridBagConstraints_3.gridx = 3;
+        gridBagConstraints_3.gridheight = 4;//×é¼şÕ¼ÓÃËÄĞĞ
+        gridBagConstraints_3.insets = new Insets(0, 5, 0, 5);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints_3.weightx = 40;//µÚ1ÁĞµÄ·Ö²¼·½Ê½ Îª40%
+        gridBagConstraints_3.fill = GridBagConstraints.BOTH;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
+        getContentPane().add(button_3, gridBagConstraints_3);
+        
+        final JButton button_4 = new JButton("E");
+        final GridBagConstraints gridBagConstraints_4 = new GridBagConstraints();
+        gridBagConstraints_4.gridy = 1;
+        gridBagConstraints_4.gridx = 0;
+        gridBagConstraints_4.gridwidth = 2;//×é¼şÕ¼ÓÃÁ½ÁĞ
+        gridBagConstraints_4.insets = new Insets(5, 0, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints_4.fill = GridBagConstraints.HORIZONTAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
+        getContentPane().add(button_4, gridBagConstraints_4);
+        
+        final JButton button_5 = new JButton("F");
+        final GridBagConstraints gridBagConstraints_5 = new GridBagConstraints();
+        gridBagConstraints_5.gridy = 2;
+        gridBagConstraints_5.gridx = 0;
+        gridBagConstraints_5.insets = new Insets(5, 0, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints_5.fill = GridBagConstraints.HORIZONTAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶È
+        getContentPane().add(button_5, gridBagConstraints_5);
+        
+        final JButton button_6 = new JButton("G");
+        final GridBagConstraints gridBagConstraints_6 = new GridBagConstraints();
+        gridBagConstraints_6.gridy = 2;
+        gridBagConstraints_6.gridx = 1;
+        gridBagConstraints_6.gridwidth = 2;//×é¼şÕ¼ÓÃÁ½ÁĞ
+        gridBagConstraints_6.gridheight = 2;//×é¼şÕ¼ÓÃÁ½ĞĞ
+        gridBagConstraints_6.insets = new Insets(5, 5, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints_6.fill = GridBagConstraints.BOTH;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
+        getContentPane().add(button_6, gridBagConstraints_6);
+        
+//        final JButton button_6 = new JButton("G");
+//        final GridBagConstraints gridBagConstraints_6 = new GridBagConstraints();
+//        gridBagConstraints_6.gridy = 2;
+//        gridBagConstraints_6.gridx = 1;
+//        gridBagConstraints_6.gridwidth = 2;//×é¼şÕ¼ÓÃÁ½ÁĞ
+//        gridBagConstraints_6.gridheight = 2;//×é¼şÕ¼ÓÃÁ½ĞĞ
+//        gridBagConstraints_6.insets = new Insets(5, 5, 0, 0);//ÉèÖÃ×é¼şÉÏ²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
+//        gridBagConstraints_6.fill = GridBagConstraints.VERTICAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
+//        gridBagConstraints_6.ipadx = 30;//Ôö¼Ó×é¼şµÄÊ×Ñ¡¿í¶È£¬ÔÚÄ¬ÈÏ»ù´¡ÉÏ¿í¶ÈÔö¼ÓvalueÖµ£¬¿ÉÒÔÎª¸º
+//        gridBagConstraints_6.anchor = GridBagConstraints.EAST;//ÏÔÊ¾ÔÚ¶«·½
+//        getContentPane().add(button_6, gridBagConstraints_6);
+        
+        final JButton button_7 = new JButton("G");
+        final GridBagConstraints gridBagConstraints_7 = new GridBagConstraints();
+        gridBagConstraints_7.gridy = 3;
+        gridBagConstraints_7.gridx = 0;
+        gridBagConstraints_7.insets = new Insets(5, 0, 0, 0);//ÉèÖÃ×é¼ş×ó²àºÍÓÒ²àµÄ×îĞ¡¾àÀë
+        gridBagConstraints_7.fill = GridBagConstraints.HORIZONTAL;//Í¬Ê±µ÷Õû×é¼şµÄ¿í¶ÈºÍ¸ß¶È
+        getContentPane().add(button_7, gridBagConstraints_7);
+    }
+    
+    public static void main(String args[]) {
+        new GridBagLayoutTest();
+    }
 }
 
 
@@ -14203,62 +14203,62 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
 public class SpringLayoutTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public SpringLayoutTest() {
-		super();
-		setTitle("Ê¹ÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷");
-		setBounds(100, 100, 600, 400);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		SpringLayout springLayout = new SpringLayout();
-		Container contentPane = getContentPane();
-		contentPane.setLayout(springLayout);//ĞŞ¸Ä´°ÌåÈİÆ÷Îª²ÉÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷
-		
-		JLabel topicLabel = new JLabel("Ö÷Ìâ£º");
-		contentPane.add(topicLabel);
-		springLayout.putConstraint(SpringLayout.NORTH, topicLabel, 5, SpringLayout.NORTH, contentPane);//Ö÷Ìâ±êÇ©±±²à->ÈİÆ÷±±²à
-		springLayout.putConstraint(SpringLayout.WEST, topicLabel, 5, SpringLayout.WEST, contentPane);//Ö÷Ìâ±êÇ©Î÷²à->ÈİÆ÷Î÷²à
-		
-		JTextField topicTextField = new JTextField();
-		contentPane.add(topicTextField);
-		//¼¸¸öÈë²ÎÊıÀí½âÎªµÚÒ»¸ö¶ÔÏó(para2)µÄÄÄÒ»²à(para1)µ½µÚ¶ş¸ö¶ÔÏó(p5)µÄÄÄÒ»²à(p4)µÄ¾àÀë(ÕıÊıÎª->£¬¸ºÊıÎª<-)
-		springLayout.putConstraint(SpringLayout.NORTH, topicTextField, 5, SpringLayout.NORTH, contentPane);//Ö÷ÌâÎÄ±¾¿ò±±²à->ÈİÆ÷±±²à
-		springLayout.putConstraint(SpringLayout.WEST, topicTextField, 5, SpringLayout.EAST, topicLabel);//Ö÷ÌâÎÄ±¾¿òÎ÷²à->ÈİÆ÷Î÷²à
-		springLayout.putConstraint(SpringLayout.EAST, topicTextField, -5, SpringLayout.EAST, contentPane);//Ö÷ÌâÎÄ±¾¿ò¶«²à->ÈİÆ÷¶«²à
-		
-		JLabel contentLabel = new JLabel("ÄÚÈİ£º");
-		contentPane.add(contentLabel);
-		springLayout.putConstraint(SpringLayout.NORTH, contentLabel, 5, SpringLayout.SOUTH, topicTextField);
-		springLayout.putConstraint(SpringLayout.WEST, contentLabel, 5, SpringLayout.WEST, contentPane);
-		
-		JScrollPane contentScrollPane = new JScrollPane();
-		contentScrollPane.setViewportView(new JTextArea());
-		contentPane.add(contentScrollPane);
-		springLayout.putConstraint(SpringLayout.NORTH, contentScrollPane, 5, SpringLayout.SOUTH, topicTextField);
-		springLayout.putConstraint(SpringLayout.WEST, contentScrollPane, 5, SpringLayout.EAST, contentLabel);
-		springLayout.putConstraint(SpringLayout.EAST, contentScrollPane, -5, SpringLayout.EAST, contentPane);
-		
-		JButton resetButton = new JButton("Çå¿Õ");
-		contentPane.add(resetButton);
-		springLayout.putConstraint(SpringLayout.SOUTH, resetButton, -5, SpringLayout.SOUTH, contentPane);
-		
-		JButton submitButton = new JButton("È·¶¨");
-		contentPane.add(submitButton);
-		springLayout.putConstraint(SpringLayout.SOUTH, submitButton, -5, SpringLayout.SOUTH, contentPane);
-		springLayout.putConstraint(SpringLayout.EAST, submitButton, -5, SpringLayout.EAST, contentPane);
-		springLayout.putConstraint(SpringLayout.SOUTH, contentScrollPane, -5, SpringLayout.NORTH, submitButton);
-		springLayout.putConstraint(SpringLayout.EAST, resetButton, -5, SpringLayout.WEST, submitButton);//Èç¹û²»¼ÓÕâ¾ä»°£¬ÔòresetButton½«»áÄ¬ÈÏÌùÔÚ×ó²à¡£Èç¹û-5´íĞ´³É5£¬Ôò»áÊ¹Á½¸ö×é¼şÏàÌù
-		//¸ÄÎªÏÂ¾ä½«Ê¹Çå¿Õ°´Å¥ÌùÔÚ×ó²à£¬È·¶¨°´Å¥À­³¤ÖÁÕû¸ö¿í¶È
-		//springLayout.putConstraint(SpringLayout.WEST, submitButton, 5, SpringLayout.EAST, resetButton);//Èç¹û²»¼ÓÕâ¾ä»°£¬ÔòresetButton½«»áÄ¬ÈÏÌùÔÚ×ó²à
-		
-		validate();//²»¼ÓÕâ¾ä»°ÎŞ·¨Ë¢ĞÂ³öÀ´
-	}
-	
-	public static void main(String args[]) {
-		new SpringLayoutTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public SpringLayoutTest() {
+        super();
+        setTitle("Ê¹ÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷");
+        setBounds(100, 100, 600, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        SpringLayout springLayout = new SpringLayout();
+        Container contentPane = getContentPane();
+        contentPane.setLayout(springLayout);//ĞŞ¸Ä´°ÌåÈİÆ÷Îª²ÉÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷
+        
+        JLabel topicLabel = new JLabel("Ö÷Ìâ£º");
+        contentPane.add(topicLabel);
+        springLayout.putConstraint(SpringLayout.NORTH, topicLabel, 5, SpringLayout.NORTH, contentPane);//Ö÷Ìâ±êÇ©±±²à->ÈİÆ÷±±²à
+        springLayout.putConstraint(SpringLayout.WEST, topicLabel, 5, SpringLayout.WEST, contentPane);//Ö÷Ìâ±êÇ©Î÷²à->ÈİÆ÷Î÷²à
+        
+        JTextField topicTextField = new JTextField();
+        contentPane.add(topicTextField);
+        //¼¸¸öÈë²ÎÊıÀí½âÎªµÚÒ»¸ö¶ÔÏó(para2)µÄÄÄÒ»²à(para1)µ½µÚ¶ş¸ö¶ÔÏó(p5)µÄÄÄÒ»²à(p4)µÄ¾àÀë(ÕıÊıÎª->£¬¸ºÊıÎª<-)
+        springLayout.putConstraint(SpringLayout.NORTH, topicTextField, 5, SpringLayout.NORTH, contentPane);//Ö÷ÌâÎÄ±¾¿ò±±²à->ÈİÆ÷±±²à
+        springLayout.putConstraint(SpringLayout.WEST, topicTextField, 5, SpringLayout.EAST, topicLabel);//Ö÷ÌâÎÄ±¾¿òÎ÷²à->ÈİÆ÷Î÷²à
+        springLayout.putConstraint(SpringLayout.EAST, topicTextField, -5, SpringLayout.EAST, contentPane);//Ö÷ÌâÎÄ±¾¿ò¶«²à->ÈİÆ÷¶«²à
+        
+        JLabel contentLabel = new JLabel("ÄÚÈİ£º");
+        contentPane.add(contentLabel);
+        springLayout.putConstraint(SpringLayout.NORTH, contentLabel, 5, SpringLayout.SOUTH, topicTextField);
+        springLayout.putConstraint(SpringLayout.WEST, contentLabel, 5, SpringLayout.WEST, contentPane);
+        
+        JScrollPane contentScrollPane = new JScrollPane();
+        contentScrollPane.setViewportView(new JTextArea());
+        contentPane.add(contentScrollPane);
+        springLayout.putConstraint(SpringLayout.NORTH, contentScrollPane, 5, SpringLayout.SOUTH, topicTextField);
+        springLayout.putConstraint(SpringLayout.WEST, contentScrollPane, 5, SpringLayout.EAST, contentLabel);
+        springLayout.putConstraint(SpringLayout.EAST, contentScrollPane, -5, SpringLayout.EAST, contentPane);
+        
+        JButton resetButton = new JButton("Çå¿Õ");
+        contentPane.add(resetButton);
+        springLayout.putConstraint(SpringLayout.SOUTH, resetButton, -5, SpringLayout.SOUTH, contentPane);
+        
+        JButton submitButton = new JButton("È·¶¨");
+        contentPane.add(submitButton);
+        springLayout.putConstraint(SpringLayout.SOUTH, submitButton, -5, SpringLayout.SOUTH, contentPane);
+        springLayout.putConstraint(SpringLayout.EAST, submitButton, -5, SpringLayout.EAST, contentPane);
+        springLayout.putConstraint(SpringLayout.SOUTH, contentScrollPane, -5, SpringLayout.NORTH, submitButton);
+        springLayout.putConstraint(SpringLayout.EAST, resetButton, -5, SpringLayout.WEST, submitButton);//Èç¹û²»¼ÓÕâ¾ä»°£¬ÔòresetButton½«»áÄ¬ÈÏÌùÔÚ×ó²à¡£Èç¹û-5´íĞ´³É5£¬Ôò»áÊ¹Á½¸ö×é¼şÏàÌù
+        //¸ÄÎªÏÂ¾ä½«Ê¹Çå¿Õ°´Å¥ÌùÔÚ×ó²à£¬È·¶¨°´Å¥À­³¤ÖÁÕû¸ö¿í¶È
+        //springLayout.putConstraint(SpringLayout.WEST, submitButton, 5, SpringLayout.EAST, resetButton);//Èç¹û²»¼ÓÕâ¾ä»°£¬ÔòresetButton½«»áÄ¬ÈÏÌùÔÚ×ó²à
+        
+        validate();//²»¼ÓÕâ¾ä»°ÎŞ·¨Ë¢ĞÂ³öÀ´
+    }
+    
+    public static void main(String args[]) {
+        new SpringLayoutTest();
+    }
 }
 
 19.4.2 Ê¹ÓÃµ¯»ÉºÍÖ§Öù P502
@@ -14271,37 +14271,37 @@ import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
 public class SpringLayoutTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public SpringLayoutTest() {
-		super();
-		setTitle("Ê¹ÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷");
-		setBounds(100, 100, 600, 400);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		SpringLayout springLayout = new SpringLayout();
-		Container contentPane = getContentPane();
-		contentPane.setLayout(springLayout);//ĞŞ¸Ä´°ÌåÈİÆ÷Îª²ÉÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷
-		
-		Spring vST = Spring.constant(20);//´´½¨Ò»¸öÖ§Öù
-		Spring hSP = Spring.constant(20, 100, 500);//´´½¨Ò»¸öµ¯»É
-		
-		JButton lButton = new JButton("°´Å¥L");
-		contentPane.add(lButton);
-		springLayout.putConstraint(SpringLayout.NORTH, lButton, vST, SpringLayout.NORTH, contentPane);
-		springLayout.putConstraint(SpringLayout.WEST, lButton, hSP, SpringLayout.WEST, contentPane);
-		
-		JButton rButton = new JButton("°´Å¥R");
-		contentPane.add(rButton);
-		springLayout.putConstraint(SpringLayout.NORTH, rButton, 0, SpringLayout.NORTH, lButton);//¸ÃÓï¾ä±íÊ¾rButtonÓëlButtonµ½±±²àµÄ¾àÀëÒ»ÖÂ£¬Èç¹û²»ÉèÖÃ£¬ÔòrButton½«»á½ôÌù±±²à
-		springLayout.putConstraint(SpringLayout.EAST, rButton, Spring.scale(hSP, 10), SpringLayout.EAST, lButton);//ÖĞ¼ä¾àÀë°´±ß¾àµÄÁ½±¶À­Éì
-		springLayout.putConstraint(SpringLayout.EAST, contentPane, hSP, SpringLayout.EAST, rButton);
-	}
-	
-	public static void main(String args[]) {
-		new SpringLayoutTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public SpringLayoutTest() {
+        super();
+        setTitle("Ê¹ÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷");
+        setBounds(100, 100, 600, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        SpringLayout springLayout = new SpringLayout();
+        Container contentPane = getContentPane();
+        contentPane.setLayout(springLayout);//ĞŞ¸Ä´°ÌåÈİÆ÷Îª²ÉÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷
+        
+        Spring vST = Spring.constant(20);//´´½¨Ò»¸öÖ§Öù
+        Spring hSP = Spring.constant(20, 100, 500);//´´½¨Ò»¸öµ¯»É
+        
+        JButton lButton = new JButton("°´Å¥L");
+        contentPane.add(lButton);
+        springLayout.putConstraint(SpringLayout.NORTH, lButton, vST, SpringLayout.NORTH, contentPane);
+        springLayout.putConstraint(SpringLayout.WEST, lButton, hSP, SpringLayout.WEST, contentPane);
+        
+        JButton rButton = new JButton("°´Å¥R");
+        contentPane.add(rButton);
+        springLayout.putConstraint(SpringLayout.NORTH, rButton, 0, SpringLayout.NORTH, lButton);//¸ÃÓï¾ä±íÊ¾rButtonÓëlButtonµ½±±²àµÄ¾àÀëÒ»ÖÂ£¬Èç¹û²»ÉèÖÃ£¬ÔòrButton½«»á½ôÌù±±²à
+        springLayout.putConstraint(SpringLayout.EAST, rButton, Spring.scale(hSP, 10), SpringLayout.EAST, lButton);//ÖĞ¼ä¾àÀë°´±ß¾àµÄÁ½±¶À­Éì
+        springLayout.putConstraint(SpringLayout.EAST, contentPane, hSP, SpringLayout.EAST, rButton);
+    }
+    
+    public static void main(String args[]) {
+        new SpringLayoutTest();
+    }
 }
 
 19.4.3 ÀûÓÃµ¯»É¿ØÖÆ×é¼ş´óĞ¡ P503
@@ -14314,49 +14314,49 @@ import javax.swing.SpringLayout;
 import javax.swing.SpringLayout.Constraints;
 
 public class SpringLayoutTest extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public SpringLayoutTest() {
-		super();
-		setTitle("Ê¹ÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷");
-		setBounds(100, 100, 600, 400);
-		setVisible(true);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		SpringLayout springLayout = new SpringLayout();
-		Container contentPane = getContentPane();
-		contentPane.setLayout(springLayout);//ĞŞ¸Ä´°ÌåÈİÆ÷Îª²ÉÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷
-		
-		Spring vST = Spring.constant(20);//´´½¨Ò»¸öÖ§Öù
-		Spring hSP = Spring.constant(20, 100, 500);//´´½¨Ò»¸öµ¯»É
-		
-		JButton lButton = new JButton("°´Å¥L");
-		contentPane.add(lButton);
-		springLayout.putConstraint(SpringLayout.NORTH, lButton, vST, SpringLayout.NORTH, contentPane);
-		springLayout.putConstraint(SpringLayout.WEST, lButton, hSP, SpringLayout.WEST, contentPane);
-		
-		JButton rButton = new JButton("°´Å¥R");
-		contentPane.add(rButton);
-		springLayout.putConstraint(SpringLayout.NORTH, rButton, 0, SpringLayout.NORTH, lButton);//¸ÃÓï¾ä±íÊ¾rButtonÓëlButtonµ½±±²àµÄ¾àÀëÒ»ÖÂ£¬Èç¹û²»ÉèÖÃ£¬ÔòrButton½«»á½ôÌù±±²à
-		springLayout.putConstraint(SpringLayout.EAST, rButton, Spring.scale(hSP, 10), SpringLayout.EAST, lButton);//ÖĞ¼ä¾àÀë°´±ß¾àµÄÁ½±¶À­Éì
-		springLayout.putConstraint(SpringLayout.EAST, contentPane, hSP, SpringLayout.EAST, rButton);
-		
-		//ÓÃµ¯»ÉºÍÖ§Öù·Ö±ğ¿ÉÒÔÉèÖÃ°´Å¥Îª¿í¶È¿ÉÀ­Éì£¬¸ß¶È²»±ä
-		Spring widthSP = Spring.constant(60, 300, 600);//´´½¨Ò»¸öµ¯»É
-		Spring heightST = Spring.constant(60);//´´½¨Ò»¸öÖ§Öù
-		
-		Constraints lButtonCons = springLayout.getConstraints(lButton);//»ñÈ¡¡°°´Å¥L¡±µÄConstraints¶ÔÏó
-		lButtonCons.setWidth(widthSP);//ÉèÖÃ¿ØÖÆ×é¼ş¿í¶ÈµÄµ¯»É
-		lButtonCons.setHeight(heightST);//ÉèÖÃ¿ØÖÆ×é¼ş¸ß¶ÈµÄÖ§Öù
-		
-		Constraints rButtonCons = springLayout.getConstraints(rButton);//»ñÈ¡¡°°´Å¥R¡±µÄConstraints¶ÔÏó
-		rButtonCons.setWidth(widthSP);
-		rButtonCons.setHeight(heightST);
-	}
-	
-	public static void main(String args[]) {
-		new SpringLayoutTest();
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public SpringLayoutTest() {
+        super();
+        setTitle("Ê¹ÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷");
+        setBounds(100, 100, 600, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        SpringLayout springLayout = new SpringLayout();
+        Container contentPane = getContentPane();
+        contentPane.setLayout(springLayout);//ĞŞ¸Ä´°ÌåÈİÆ÷Îª²ÉÓÃµ¯»É²¼¾Ö¹ÜÀíÆ÷
+        
+        Spring vST = Spring.constant(20);//´´½¨Ò»¸öÖ§Öù
+        Spring hSP = Spring.constant(20, 100, 500);//´´½¨Ò»¸öµ¯»É
+        
+        JButton lButton = new JButton("°´Å¥L");
+        contentPane.add(lButton);
+        springLayout.putConstraint(SpringLayout.NORTH, lButton, vST, SpringLayout.NORTH, contentPane);
+        springLayout.putConstraint(SpringLayout.WEST, lButton, hSP, SpringLayout.WEST, contentPane);
+        
+        JButton rButton = new JButton("°´Å¥R");
+        contentPane.add(rButton);
+        springLayout.putConstraint(SpringLayout.NORTH, rButton, 0, SpringLayout.NORTH, lButton);//¸ÃÓï¾ä±íÊ¾rButtonÓëlButtonµ½±±²àµÄ¾àÀëÒ»ÖÂ£¬Èç¹û²»ÉèÖÃ£¬ÔòrButton½«»á½ôÌù±±²à
+        springLayout.putConstraint(SpringLayout.EAST, rButton, Spring.scale(hSP, 10), SpringLayout.EAST, lButton);//ÖĞ¼ä¾àÀë°´±ß¾àµÄÁ½±¶À­Éì
+        springLayout.putConstraint(SpringLayout.EAST, contentPane, hSP, SpringLayout.EAST, rButton);
+        
+        //ÓÃµ¯»ÉºÍÖ§Öù·Ö±ğ¿ÉÒÔÉèÖÃ°´Å¥Îª¿í¶È¿ÉÀ­Éì£¬¸ß¶È²»±ä
+        Spring widthSP = Spring.constant(60, 300, 600);//´´½¨Ò»¸öµ¯»É
+        Spring heightST = Spring.constant(60);//´´½¨Ò»¸öÖ§Öù
+        
+        Constraints lButtonCons = springLayout.getConstraints(lButton);//»ñÈ¡¡°°´Å¥L¡±µÄConstraints¶ÔÏó
+        lButtonCons.setWidth(widthSP);//ÉèÖÃ¿ØÖÆ×é¼ş¿í¶ÈµÄµ¯»É
+        lButtonCons.setHeight(heightST);//ÉèÖÃ¿ØÖÆ×é¼ş¸ß¶ÈµÄÖ§Öù
+        
+        Constraints rButtonCons = springLayout.getConstraints(rButton);//»ñÈ¡¡°°´Å¥R¡±µÄConstraints¶ÔÏó
+        rButtonCons.setWidth(widthSP);
+        rButtonCons.setHeight(heightST);
+    }
+    
+    public static void main(String args[]) {
+        new SpringLayoutTest();
+    }
 }
 
 19.5.1 ÖÆ×÷Ô²ĞÎ²¼¾Ö¹ÜÀíÆ÷ P504
@@ -14371,39 +14371,39 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawCircle extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private final int OVAL_WIDTH = 80;
-	private final int OVAL_HEIGHT = 80;
-	
-	public DrawCircle() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(300, 200);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setContentPane(new DrawPanel());
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new DrawCircle().setVisible(true);;
-	}
-	
-	class DrawPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			super.paint(g);
-			g.drawOval(10, 10, OVAL_WIDTH, OVAL_HEIGHT);
-			g.drawOval(80, 10, OVAL_WIDTH, OVAL_HEIGHT);
-			g.drawOval(150, 10, OVAL_WIDTH, OVAL_HEIGHT);
-			g.drawOval(50, 70, OVAL_WIDTH, OVAL_HEIGHT);
-			g.drawOval(120, 70, OVAL_WIDTH, OVAL_HEIGHT);//g.fillOval(120, 70, OVAL_WIDTH, OVAL_HEIGHT);//ÊµĞÄÍÖÔ²
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    private final int OVAL_WIDTH = 80;
+    private final int OVAL_HEIGHT = 80;
+    
+    public DrawCircle() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setContentPane(new DrawPanel());
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new DrawCircle().setVisible(true);;
+    }
+    
+    class DrawPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            g.drawOval(10, 10, OVAL_WIDTH, OVAL_HEIGHT);
+            g.drawOval(80, 10, OVAL_WIDTH, OVAL_HEIGHT);
+            g.drawOval(150, 10, OVAL_WIDTH, OVAL_HEIGHT);
+            g.drawOval(50, 70, OVAL_WIDTH, OVAL_HEIGHT);
+            g.drawOval(120, 70, OVAL_WIDTH, OVAL_HEIGHT);//g.fillOval(120, 70, OVAL_WIDTH, OVAL_HEIGHT);//ÊµĞÄÍÖÔ²
+        }
+    }
 }
 
 GraphicsÀà³£ÓÃµÄÍ¼ĞÎ»æÖÆ·½·¨ P510
@@ -14413,8 +14413,8 @@ Graphics2D¼Ì³ĞGraphicsÀà£¬ÊµÏÖÁË¹¦ÄÜ¸üÇ¿´óµÄ»æÍ¼²Ù×÷µÄ¼¯ºÏ¡£
 Graphics2DÊÇÍÆ¼öÊ¹ÓÃµÄ»æÍ¼Àà£¬µ«ÊÇ³ÌĞòÉè¼ÆÖĞÌá¹©µÄ»æÍ¼¶ÔÏó´ó¶àÊÇGraphicsÀàµÄÊµÀı¶ÔÏó£¬ÕâÊ±Ó¦¸ÃÊ¹ÓÃÇ¿ÖÆÀàĞÍ×ª»»½«Æä×ª»»ÎªGraphics2DÀàĞÍ¡£
 ÀıÈç£º
 public void paint(Graphics g) {
-	Graphics2D g2 = (Graphics2D) g;//Ç¿ÖÆ»ûĞÎ×ª»»ÎªGraphics2DÀàĞÍ
-	g2.¡­¡­
+    Graphics2D g2 = (Graphics2D) g;//Ç¿ÖÆ»ûĞÎ×ª»»ÎªGraphics2DÀàĞÍ
+    g2.¡­¡­
 }
 
 P512
@@ -14428,47 +14428,47 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public DrawFrame() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(300, 200);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new CanvasPanel());
-		this.setTitle("»æÍ¼ÊµÀı2");
-	}
-	
-	public static void main(String args[]) {
-		new DrawFrame().setVisible(true);;
-	}
-	
-	class CanvasPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			super.paint(g);
-			Graphics2D g2 = (Graphics2D) g;
-			Shape shapes[] = new Shape[4];
-			shapes[0] = new Ellipse2D.Double(5, 5, 100, 100);//Ô²ĞÎ£¬Ç°Á½¸ö²ÎÊı·Ö±ğÎªÖĞĞÄ×ø±ê£¬ºóÁ½¸ö²ÎÊıÎª³¤¶ÌÖáÖµ£¬Ò»ÑùÔòÎªÔ²£¬²»Ò»ÑùÔòÎªÍÖÔ²
-			shapes[1] = new Rectangle2D.Double(110, 5, 100, 100);//¾ØĞÎ
-			shapes[2] = new Rectangle2D.Double(15, 15, 80, 80);//¾ØĞÎ
-			shapes[3] = new Ellipse2D.Double(120, 15, 80, 80);//Ô²ĞÎ
-			for (Shape shape : shapes) { //±éÀúÍ¼ĞÎÊı×é
-				Rectangle2D bounds = shape.getBounds2D();
-				if (bounds.getWidth() == 80) {
-					g2.fill(shape);
-				}
-				else {
-					g2.draw(shape);
-				}
-			}
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public DrawFrame() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new CanvasPanel());
+        this.setTitle("»æÍ¼ÊµÀı2");
+    }
+    
+    public static void main(String args[]) {
+        new DrawFrame().setVisible(true);;
+    }
+    
+    class CanvasPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            Graphics2D g2 = (Graphics2D) g;
+            Shape shapes[] = new Shape[4];
+            shapes[0] = new Ellipse2D.Double(5, 5, 100, 100);//Ô²ĞÎ£¬Ç°Á½¸ö²ÎÊı·Ö±ğÎªÖĞĞÄ×ø±ê£¬ºóÁ½¸ö²ÎÊıÎª³¤¶ÌÖáÖµ£¬Ò»ÑùÔòÎªÔ²£¬²»Ò»ÑùÔòÎªÍÖÔ²
+            shapes[1] = new Rectangle2D.Double(110, 5, 100, 100);//¾ØĞÎ
+            shapes[2] = new Rectangle2D.Double(15, 15, 80, 80);//¾ØĞÎ
+            shapes[3] = new Ellipse2D.Double(120, 15, 80, 80);//Ô²ĞÎ
+            for (Shape shape : shapes) { //±éÀúÍ¼ĞÎÊı×é
+                Rectangle2D bounds = shape.getBounds2D();
+                if (bounds.getWidth() == 80) {
+                    g2.fill(shape);
+                }
+                else {
+                    g2.draw(shape);
+                }
+            }
+        }
+    }
 }
 
 20.1.3 »æÖÆÖ¸¶¨½Ç¶ÈµÄÌî³äÉÈĞÎ P513
@@ -14478,36 +14478,36 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawSector extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public DrawSector() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(300, 200);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setContentPane(new DrawSectorPanel());//add(new DrawSectorPanel());Ğ§¹ûÒ»Ñù
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new DrawSector().setVisible(true);;
-	}
-	
-	class DrawSectorPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			//super.paint(g);
-			g.fillArc(40, 20, 80, 80, 0, 150);//6¸ö²ÎÊı·Ö±ğÎª£º×ø±êx£¬×ø±êy£¬width£¬height£¬ÆğÊ¼½Ç¶È£¬½Ç¶È·¶Î§
-			g.fillArc(140, 20, 80, 80, 180, -150);
-			g.fillArc(40, 40, 80, 80, 0, -110);
-			g.fillArc(140, 40, 80, 80, 180, 110);
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public DrawSector() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setContentPane(new DrawSectorPanel());//add(new DrawSectorPanel());Ğ§¹ûÒ»Ñù
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new DrawSector().setVisible(true);;
+    }
+    
+    class DrawSectorPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            //super.paint(g);
+            g.fillArc(40, 20, 80, 80, 0, 150);//6¸ö²ÎÊı·Ö±ğÎª£º×ø±êx£¬×ø±êy£¬width£¬height£¬ÆğÊ¼½Ç¶È£¬½Ç¶È·¶Î§
+            g.fillArc(140, 20, 80, 80, 180, -150);
+            g.fillArc(40, 40, 80, 80, 0, -110);
+            g.fillArc(140, 40, 80, 80, 180, 110);
+        }
+    }
 }
 
 20.1.4 »æÖÆ¶à±ßĞÎ P513
@@ -14517,47 +14517,47 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawSector extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public DrawSector() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(600, 400);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new DrawPolygonPanel());
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new DrawSector().setVisible(true);;
-	}
-	
-	class DrawPolygonPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			int x1[] = {100, 120, 180, 140, 150, 100, 50, 60, 20, 80};//¶à±ßĞÎµÄºá×ø±ê£¬¸÷¸ö¹ÕµãµÄ×ø±êÎ»ÖÃ
-			int y1[] = {20, 85, 90, 120, 180, 140, 180, 120, 90, 85};//¶à±ßĞÎµÄ×İ×ø±ê
-			int n1 = 10;//¶à±ßĞÎµÄ±ßÊı£¬ÓëÁ½¸öÊı×é¸öÊıÆ¥ÅäÉÏµÄ
-			g.fillPolygon(x1, y1, n1);//Îå½ÇĞÎ
+    private static final long serialVersionUID = 1L;
+    
+    public DrawSector() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new DrawPolygonPanel());
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new DrawSector().setVisible(true);;
+    }
+    
+    class DrawPolygonPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            int x1[] = {100, 120, 180, 140, 150, 100, 50, 60, 20, 80};//¶à±ßĞÎµÄºá×ø±ê£¬¸÷¸ö¹ÕµãµÄ×ø±êÎ»ÖÃ
+            int y1[] = {20, 85, 90, 120, 180, 140, 180, 120, 90, 85};//¶à±ßĞÎµÄ×İ×ø±ê
+            int n1 = 10;//¶à±ßĞÎµÄ±ßÊı£¬ÓëÁ½¸öÊı×é¸öÊıÆ¥ÅäÉÏµÄ
+            g.fillPolygon(x1, y1, n1);//Îå½ÇĞÎ
 
-			//g.setColor(Color.RED);ÉèÖÃÑÕÉ«ÎªºìÉ«£¬°üÀ¨Ìî³äÑÕÉ«ºÍ±ß¿òÑÕÉ«£¬Ö®ºó¶¼ÊÇÕâ¸öÑÕÉ«£¬³ı·ÇÔÙ´ÎsetColorÉèÖÃ
-			
-			int x2[] = {210, 270, 310, 270, 210, 170};
-			int y2[] = {20, 20, 65, 110, 110, 65};
-			int n2 = 6;
-			g.fillPolygon(x2, y2, n2);
-			
-			int x3[] = {180, 220, 260, 240, 260, 220, 180, 200};
-			int y3[] = {120, 140, 120, 160, 200, 180, 200, 160};
-			int n3 = 8;
-			g.drawPolygon(x3, y3, n3);
-		}
-	}
+            //g.setColor(Color.RED);ÉèÖÃÑÕÉ«ÎªºìÉ«£¬°üÀ¨Ìî³äÑÕÉ«ºÍ±ß¿òÑÕÉ«£¬Ö®ºó¶¼ÊÇÕâ¸öÑÕÉ«£¬³ı·ÇÔÙ´ÎsetColorÉèÖÃ
+            
+            int x2[] = {210, 270, 310, 270, 210, 170};
+            int y2[] = {20, 20, 65, 110, 110, 65};
+            int n2 = 6;
+            g.fillPolygon(x2, y2, n2);
+            
+            int x3[] = {180, 220, 260, 240, 260, 220, 180, 200};
+            int y3[] = {120, 140, 120, 160, 200, 180, 200, 160};
+            int n3 = 8;
+            g.drawPolygon(x3, y3, n3);
+        }
+    }
 }
 
 20.2 »æÍ¼ÑÕÉ«Óë±Ê»­ÊôĞÔ P514
@@ -14572,36 +14572,36 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawSector extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public DrawSector() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(600, 400);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new FillGradientPanel());
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new DrawSector().setVisible(true);;
-	}
-	
-	class FillGradientPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			Rectangle2D.Float rect = new Rectangle2D.Float(20, 20, 280, 140);
-			GradientPaint paint = new GradientPaint(20, 20, Color.BLUE, 100, 80, Color.RED, true);
-			g2.setPaint(paint);
-			g2.fill(rect);
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public DrawSector() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new FillGradientPanel());
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new DrawSector().setVisible(true);;
+    }
+    
+    class FillGradientPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            Rectangle2D.Float rect = new Rectangle2D.Float(20, 20, 280, 140);
+            GradientPaint paint = new GradientPaint(20, 20, Color.BLUE, 100, 80, Color.RED, true);
+            g2.setPaint(paint);
+            g2.fill(rect);
+        }
+    }
 }
 
 20.2.4 ÉèÖÃ±Ê»­µÄ´ÖÏ¸ P517
@@ -14614,53 +14614,53 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawSector extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public DrawSector() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(600, 400);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new ChangeStrokeWidthPanel());
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new DrawSector().setVisible(true);;
-	}
-	
-	class ChangeStrokeWidthPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			
-			BasicStroke stroke = new BasicStroke(1);//¿í¶ÈÎª1µÄ±Ê»­¶ÔÏó
-			g2.setStroke(stroke);
-			Ellipse2D.Float ellipse = new Ellipse2D.Float(20, 20, 100, 60);
-			g2.draw(ellipse);
-			
-			stroke = new BasicStroke(4);
-			g2.setStroke(stroke);
-			ellipse = new Ellipse2D.Float(160, 20, 100, 60);
-			g2.draw(ellipse);
-			
-			stroke = new BasicStroke(6);
-			g2.setStroke(stroke);
-			ellipse = new Ellipse2D.Float(20, 100, 100, 60);
-			g2.draw(ellipse);
-			
-			stroke = new BasicStroke(8);
-			g2.setStroke(stroke);
-			ellipse = new Ellipse2D.Float(160, 100, 100, 60);
-			g2.draw(ellipse);
-			
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public DrawSector() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new ChangeStrokeWidthPanel());
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new DrawSector().setVisible(true);;
+    }
+    
+    class ChangeStrokeWidthPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            
+            BasicStroke stroke = new BasicStroke(1);//¿í¶ÈÎª1µÄ±Ê»­¶ÔÏó
+            g2.setStroke(stroke);
+            Ellipse2D.Float ellipse = new Ellipse2D.Float(20, 20, 100, 60);
+            g2.draw(ellipse);
+            
+            stroke = new BasicStroke(4);
+            g2.setStroke(stroke);
+            ellipse = new Ellipse2D.Float(160, 20, 100, 60);
+            g2.draw(ellipse);
+            
+            stroke = new BasicStroke(6);
+            g2.setStroke(stroke);
+            ellipse = new Ellipse2D.Float(20, 100, 100, 60);
+            g2.draw(ellipse);
+            
+            stroke = new BasicStroke(8);
+            g2.setStroke(stroke);
+            ellipse = new Ellipse2D.Float(160, 100, 100, 60);
+            g2.draw(ellipse);
+            
+        }
+    }
 }
 
 20.3 »æÖÆÎÄ±¾ P518
@@ -14677,40 +14677,40 @@ import java.util.Date;
 import javax.swing.JFrame;
 
 public class DrawString extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private Shape rect;
-	private Font font;
-	private Date date;
-	
-	public DrawString() {
-		rect = new Rectangle2D.Double(10, 10, 200, 80);
-		font = new Font("ËÎÌå", Font.BOLD, 16);
-		date = new Date();
-		
-		this.setSize(230, 140);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new CanvasPanel());
-	}
-	
-	public static void main(String args[]) {
-		new DrawString().setVisible(true);;
-	}
-	
-	class CanvasPanel extends Canvas {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			super.paint(g);
-			Graphics2D g2 = (Graphics2D) g;
-			g2.setColor(Color.CYAN);
-			g2.fill(rect);
-			g2.setColor(Color.BLUE);
-			g2.setFont(font);
-			g2.drawString("ÏÖÔÚÊ±¼äÊÇ", 20, 30);
-			g2.drawString(String.format("%tr", date), 50, 60);
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    private Shape rect;
+    private Font font;
+    private Date date;
+    
+    public DrawString() {
+        rect = new Rectangle2D.Double(10, 10, 200, 80);
+        font = new Font("ËÎÌå", Font.BOLD, 16);
+        date = new Date();
+        
+        this.setSize(230, 140);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new CanvasPanel());
+    }
+    
+    public static void main(String args[]) {
+        new DrawString().setVisible(true);;
+    }
+    
+    class CanvasPanel extends Canvas {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setColor(Color.CYAN);
+            g2.fill(rect);
+            g2.setColor(Color.BLUE);
+            g2.setFont(font);
+            g2.drawString("ÏÖÔÚÊ±¼äÊÇ", 20, 30);
+            g2.drawString(String.format("%tr", date), 50, 60);
+        }
+    }
 }
 
 20.3.3 ÉèÖÃÎÄ±¾µÄ×ÖÌå P520
@@ -14721,44 +14721,44 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class TextFontFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TextFontFrame() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(600, 400);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new ChangeTextFontPanel());
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new TextFontFrame().setVisible(true);;
-	}
-	
-	class ChangeTextFontPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			String value = "Ã÷ÈÕ±à³Ì´ÊµäÉçÇø";
-			int x = 40;
-			int y = 50;
-			Font font = new Font("»ªÎÄĞĞ¿¬", Font.BOLD + Font.ITALIC, 26);
-			g.setFont(font);
-			g.drawString(value, x, y);
-			
-			value = "http://community.mrbccd.com";
-			x = 10;
-			y = 100;
-			font = new Font("ËÎÌå", Font.BOLD, 20);
-			g.setFont(font);
-			g.drawString(value, x, y);
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TextFontFrame() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new ChangeTextFontPanel());
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new TextFontFrame().setVisible(true);;
+    }
+    
+    class ChangeTextFontPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            String value = "Ã÷ÈÕ±à³Ì´ÊµäÉçÇø";
+            int x = 40;
+            int y = 50;
+            Font font = new Font("»ªÎÄĞĞ¿¬", Font.BOLD + Font.ITALIC, 26);
+            g.setFont(font);
+            g.drawString(value, x, y);
+            
+            value = "http://community.mrbccd.com";
+            x = 10;
+            y = 100;
+            font = new Font("ËÎÌå", Font.BOLD, 20);
+            g.setFont(font);
+            g.drawString(value, x, y);
+        }
+    }
 }
 
 
@@ -14770,49 +14770,49 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class TextFontFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	
-	public TextFontFrame() {
-		super();
-		initialize();
-	}
-	
-	private void initialize() {
-		this.setSize(600, 400);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new TextAndShapeColorPanel());
-		this.setTitle("»æÍ¼ÊµÀı");
-	}
-	
-	public static void main(String args[]) {
-		new TextFontFrame().setVisible(true);;
-	}
-	
-	class TextAndShapeColorPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			String value = "Ö»ÒªÅ¬Á¦¡ª¡ª¡ª¡ª";
-			int x = 60;
-			int y = 60;
-			Color color = new Color(255, 0, 0);
-			g.setColor(color);
-			g.drawString(value, x, y);
-			
-			value = "Ò»ÇĞ½ÔÓĞ¿ÉÄÜ";
-			x = 140;
-			y = 100;
-			color = new Color(0, 0, 255);
-			g.setColor(color);
-			g.drawString(value, x, y);
-			
-			color = Color.ORANGE;
-			g.setColor(color);
-			g.drawRoundRect(40, 30, 200, 100, 40, 30);//ÍâÈ¦
-			g.drawRoundRect(45, 35, 190, 90, 36, 26);//ÄÚÈ¦
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    
+    public TextFontFrame() {
+        super();
+        initialize();
+    }
+    
+    private void initialize() {
+        this.setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new TextAndShapeColorPanel());
+        this.setTitle("»æÍ¼ÊµÀı");
+    }
+    
+    public static void main(String args[]) {
+        new TextFontFrame().setVisible(true);;
+    }
+    
+    class TextAndShapeColorPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            String value = "Ö»ÒªÅ¬Á¦¡ª¡ª¡ª¡ª";
+            int x = 60;
+            int y = 60;
+            Color color = new Color(255, 0, 0);
+            g.setColor(color);
+            g.drawString(value, x, y);
+            
+            value = "Ò»ÇĞ½ÔÓĞ¿ÉÄÜ";
+            x = 140;
+            y = 100;
+            color = new Color(0, 0, 255);
+            g.setColor(color);
+            g.drawString(value, x, y);
+            
+            color = Color.ORANGE;
+            g.setColor(color);
+            g.drawRoundRect(40, 30, 200, 100, 40, 30);//ÍâÈ¦
+            g.drawRoundRect(45, 35, 190, 90, 36, 26);//ÄÚÈ¦
+        }
+    }
 }
 
 
@@ -14828,38 +14828,38 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class DrawImage extends JFrame {
-	private static final long serialVersionUID = 1L;
-	Image img;
-	
-	public DrawImage() {
-		super();
-		initialize();
-		
-		URL imaUrl = DrawImage.class.getResource("sjtu.jpg");
-		img = Toolkit.getDefaultToolkit().getImage(imaUrl);
-	}
-	
-	private void initialize() {
-		this.setSize(800, 500);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		add(new CanvasPanel());
-		this.setTitle("»æÖÆÍ¼Æ¬");
-	}
-	
-	public static void main(String args[]) {
-		new DrawImage().setVisible(true);;
-	}
-	
-	class CanvasPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
-		
-		@Override
-		public void paint(Graphics g) {
-			super.paint(g);
-			Graphics2D g2 = (Graphics2D) g;
-			g2.drawImage(img, 0, 0, this);//ËÄ¸ö²ÎÊı£ºÒªÏÔÊ¾µÄÍ¼Æ¬¶ÔÏó£¬Ë®Æ½Î»ÖÃ£¬´¹Ö±Î»ÖÃ£¬ÒªÍ¨ÖªµÄÍ¼Ïñ¹Û²ìÕß
-		}
-	}
+    private static final long serialVersionUID = 1L;
+    Image img;
+    
+    public DrawImage() {
+        super();
+        initialize();
+        
+        URL imaUrl = DrawImage.class.getResource("sjtu.jpg");
+        img = Toolkit.getDefaultToolkit().getImage(imaUrl);
+    }
+    
+    private void initialize() {
+        this.setSize(800, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        add(new CanvasPanel());
+        this.setTitle("»æÖÆÍ¼Æ¬");
+    }
+    
+    public static void main(String args[]) {
+        new DrawImage().setVisible(true);;
+    }
+    
+    class CanvasPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.drawImage(img, 0, 0, this);//ËÄ¸ö²ÎÊı£ºÒªÏÔÊ¾µÄÍ¼Æ¬¶ÔÏó£¬Ë®Æ½Î»ÖÃ£¬´¹Ö±Î»ÖÃ£¬ÒªÍ¨ÖªµÄÍ¼Ïñ¹Û²ìÕß
+        }
+    }
 }
 
 20.4.2 ·Å´óÓëËõĞ¡ P523
@@ -14868,74 +14868,74 @@ import java.awt.*;
 import java.net.*;
 import javax.swing.*;
 public class ImageZoom extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	Image img;
-	private JPanel contentPanel = null;
-	private JSlider jSlider = null;
-	private int imgWidth, imgHeight;
-	private Canvas canvas = null;
-	public ImageZoom() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		URL imgUrl = ImageZoom.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
-		img = Toolkit.getDefaultToolkit().getImage(imgUrl);// »ñÈ¡Í¼Æ¬×ÊÔ´
-		canvas = new MyCanvas();
-		this.setBounds(100, 100, 800, 600); // ÉèÖÃ´°Ìå´óĞ¡ºÍÎ»ÖÃ
-		this.setContentPane(getContentPanel()); // ÉèÖÃÄÚÈİÃæ°å
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("»æÖÆÍ¼Æ¬"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-	// ÄÚÈİÃæ°åµÄ²¼¾Ö
-	private JPanel getContentPanel() { //ÕâÊÇĞÂĞ´µÄ·½·¨£¬ÓëJFrameµÄgetContentPane()²»Ò»Ñù
-		if (contentPanel == null) {
-			contentPanel = new JPanel();
-			contentPanel.setLayout(new BorderLayout());
-			contentPanel.add(getJSlider(), BorderLayout.SOUTH);
-			contentPanel.add(canvas, BorderLayout.CENTER);
-		}
-		return contentPanel;
-	}
-	// »ñÈ¡»¬¿é×é¼ş
-	private JSlider getJSlider() {
-		if (jSlider == null) {
-			jSlider = new JSlider();
-			jSlider.setMaximum(1000);
-			jSlider.setValue(100);
-			jSlider.setMinimum(1);
-			jSlider.addChangeListener(new javax.swing.event.ChangeListener() {
-				public void stateChanged(javax.swing.event.ChangeEvent e) {
-					canvas.repaint();//½«µ÷ÓÃpaint()·½·¨
-				}
-			});
-		}
-		return jSlider;
-	}
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new ImageZoom().setVisible(true);
-	}
-	// »­°åÀà
-	class MyCanvas extends Canvas {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    Image img;
+    private JPanel contentPanel = null;
+    private JSlider jSlider = null;
+    private int imgWidth, imgHeight;
+    private Canvas canvas = null;
+    public ImageZoom() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        URL imgUrl = ImageZoom.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
+        img = Toolkit.getDefaultToolkit().getImage(imgUrl);// »ñÈ¡Í¼Æ¬×ÊÔ´
+        canvas = new MyCanvas();
+        this.setBounds(100, 100, 800, 600); // ÉèÖÃ´°Ìå´óĞ¡ºÍÎ»ÖÃ
+        this.setContentPane(getContentPanel()); // ÉèÖÃÄÚÈİÃæ°å
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("»æÖÆÍ¼Æ¬"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+    // ÄÚÈİÃæ°åµÄ²¼¾Ö
+    private JPanel getContentPanel() { //ÕâÊÇĞÂĞ´µÄ·½·¨£¬ÓëJFrameµÄgetContentPane()²»Ò»Ñù
+        if (contentPanel == null) {
+            contentPanel = new JPanel();
+            contentPanel.setLayout(new BorderLayout());
+            contentPanel.add(getJSlider(), BorderLayout.SOUTH);
+            contentPanel.add(canvas, BorderLayout.CENTER);
+        }
+        return contentPanel;
+    }
+    // »ñÈ¡»¬¿é×é¼ş
+    private JSlider getJSlider() {
+        if (jSlider == null) {
+            jSlider = new JSlider();
+            jSlider.setMaximum(1000);
+            jSlider.setValue(100);
+            jSlider.setMinimum(1);
+            jSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+                public void stateChanged(javax.swing.event.ChangeEvent e) {
+                    canvas.repaint();//½«µ÷ÓÃpaint()·½·¨
+                }
+            });
+        }
+        return jSlider;
+    }
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new ImageZoom().setVisible(true);
+    }
+    // »­°åÀà
+    class MyCanvas extends Canvas {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			int newW = 0, newH = 0;
-			imgWidth = img.getWidth(this); // »ñÈ¡Í¼Æ¬¿í¶È
-			imgHeight = img.getHeight(this); // »ñÈ¡Í¼Æ¬¸ß¶È
-			float value = jSlider.getValue();// »¬¿é×é¼şµÄÈ¡Öµ
-			newW = (int) (imgWidth * value / 100);// ¼ÆËãÍ¼Æ¬·Å´óºóµÄ¿í¶È
-			newH = (int) (imgHeight * value / 100);// ¼ÆËãÍ¼Æ¬·Å´óºóµÄ¸ß¶È
-			g.drawImage(img, 0, 0, newW, newH, this);// »æÖÆÖ¸¶¨´óĞ¡µÄÍ¼Æ¬
-		}
-	}
+        public void paint(Graphics g) {
+            int newW = 0, newH = 0;
+            imgWidth = img.getWidth(this); // »ñÈ¡Í¼Æ¬¿í¶È
+            imgHeight = img.getHeight(this); // »ñÈ¡Í¼Æ¬¸ß¶È
+            float value = jSlider.getValue();// »¬¿é×é¼şµÄÈ¡Öµ
+            newW = (int) (imgWidth * value / 100);// ¼ÆËãÍ¼Æ¬·Å´óºóµÄ¿í¶È
+            newH = (int) (imgHeight * value / 100);// ¼ÆËãÍ¼Æ¬·Å´óºóµÄ¸ß¶È
+            g.drawImage(img, 0, 0, newW, newH, this);// »æÖÆÖ¸¶¨´óĞ¡µÄÍ¼Æ¬
+        }
+    }
 }
 
 repaint()·½·¨½«µ÷ÓÃpaint()·½·¨£¬ÊµÏÖ×é¼ş»ò»­°åµÄÖØ»­¹¦ÄÜ£¬ÀàËÆÓÚ½çÃæË¢ĞÂ
@@ -14947,119 +14947,119 @@ import java.net.URL;
 import javax.swing.*;
 
 public class PartImage extends JFrame {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private Image img;
-	private int dx1, dy1, dx2, dy2;
-	private int sx1, sy1, sx2, sy2;
-	private JPanel jPanel = null;
-	private JPanel jPanel1 = null;
-	private JButton jButton = null;
-	private JButton jButton1 = null;
-	private MyCanvas canvasPanel = null;
-	
-	private final int MaxWidth = 600;
-	private final int MaxHeight = 400;
-	
-	public PartImage() {
-		dx2 = sx2 = MaxWidth; // ³õÊ¼»¯Í¼Ïñ´óĞ¡
-		dy2 = sy2 = MaxHeight;
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		URL imgUrl = PartImage.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
-		img = Toolkit.getDefaultToolkit().getImage(imgUrl); // »ñÈ¡Í¼Æ¬×ÊÔ´
-		this.setBounds(100, 100, MaxWidth, MaxHeight + 60); // ÉèÖÃ´°Ìå´óĞ¡ºÍÎ»ÖÃ
-		this.setContentPane(getJPanel());
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("Í¼Æ¬·­×ª"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-	
-	// »ñÈ¡ÄÚÈİÃæ°åµÄ·½·¨
-	private JPanel getJPanel() {
-		if (jPanel == null) {
-			jPanel = new JPanel();
-			jPanel.setLayout(new BorderLayout());
-			jPanel.add(getControlPanel(), BorderLayout.SOUTH);
-			jPanel.add(getMyCanvas1(), BorderLayout.CENTER);
-		}
-		return jPanel;
-	}
-	
-	// »ñÈ¡°´Å¥¿ØÖÆÃæ°åµÄ·½·¨
-	private JPanel getControlPanel() {
-		if (jPanel1 == null) {
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.gridx = 1;
-			gridBagConstraints.gridy = 0;
-			jPanel1 = new JPanel();
-			jPanel1.setLayout(new GridBagLayout());
-			jPanel1.add(getJButton(), new GridBagConstraints());
-			jPanel1.add(getJButton1(), gridBagConstraints);
-		}
-		return jPanel1;
-	}
-	
-	// »ñÈ¡Ë®Æ½·­×ª°´Å¥
-	private JButton getJButton() {
-		if (jButton == null) {
-			jButton = new JButton();
-			jButton.setText("Ë®Æ½·­×ª");
-			jButton.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent e) {
-					sx1 = Math.abs(sx1 - MaxWidth);
-					sx2 = Math.abs(sx2 - MaxWidth);
-					canvasPanel.repaint();
-				}
-			});
-		}
-		return jButton;
-	}
-	
-	// »ñÈ¡´¹Ö±·­×ª°´Å¥
-	private JButton getJButton1() {
-		if (jButton1 == null) {
-			jButton1 = new JButton();
-			jButton1.setText("´¹Ö±·­×ª");
-			jButton1.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent e) {
-					sy1 = Math.abs(sy1 - MaxHeight);
-					sy2 = Math.abs(sy2 - MaxHeight);
-					canvasPanel.repaint();
-				}
-			});
-		}
-		return jButton1;
-	}
-	
-	// »ñÈ¡»­°åÃæ°å
-	private MyCanvas getMyCanvas1() {
-		if (canvasPanel == null) {
-			canvasPanel = new MyCanvas();
-		}
-		return canvasPanel;
-	}
-	
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new PartImage().setVisible(true);
-	}
-	
-	// »­°å
-	class MyCanvas extends JPanel {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private Image img;
+    private int dx1, dy1, dx2, dy2;
+    private int sx1, sy1, sx2, sy2;
+    private JPanel jPanel = null;
+    private JPanel jPanel1 = null;
+    private JButton jButton = null;
+    private JButton jButton1 = null;
+    private MyCanvas canvasPanel = null;
+    
+    private final int MaxWidth = 600;
+    private final int MaxHeight = 400;
+    
+    public PartImage() {
+        dx2 = sx2 = MaxWidth; // ³õÊ¼»¯Í¼Ïñ´óĞ¡
+        dy2 = sy2 = MaxHeight;
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        URL imgUrl = PartImage.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
+        img = Toolkit.getDefaultToolkit().getImage(imgUrl); // »ñÈ¡Í¼Æ¬×ÊÔ´
+        this.setBounds(100, 100, MaxWidth, MaxHeight + 60); // ÉèÖÃ´°Ìå´óĞ¡ºÍÎ»ÖÃ
+        this.setContentPane(getJPanel());
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("Í¼Æ¬·­×ª"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+    
+    // »ñÈ¡ÄÚÈİÃæ°åµÄ·½·¨
+    private JPanel getJPanel() {
+        if (jPanel == null) {
+            jPanel = new JPanel();
+            jPanel.setLayout(new BorderLayout());
+            jPanel.add(getControlPanel(), BorderLayout.SOUTH);
+            jPanel.add(getMyCanvas1(), BorderLayout.CENTER);
+        }
+        return jPanel;
+    }
+    
+    // »ñÈ¡°´Å¥¿ØÖÆÃæ°åµÄ·½·¨
+    private JPanel getControlPanel() {
+        if (jPanel1 == null) {
+            GridBagConstraints gridBagConstraints = new GridBagConstraints();
+            gridBagConstraints.gridx = 1;
+            gridBagConstraints.gridy = 0;
+            jPanel1 = new JPanel();
+            jPanel1.setLayout(new GridBagLayout());
+            jPanel1.add(getJButton(), new GridBagConstraints());
+            jPanel1.add(getJButton1(), gridBagConstraints);
+        }
+        return jPanel1;
+    }
+    
+    // »ñÈ¡Ë®Æ½·­×ª°´Å¥
+    private JButton getJButton() {
+        if (jButton == null) {
+            jButton = new JButton();
+            jButton.setText("Ë®Æ½·­×ª");
+            jButton.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    sx1 = Math.abs(sx1 - MaxWidth);
+                    sx2 = Math.abs(sx2 - MaxWidth);
+                    canvasPanel.repaint();
+                }
+            });
+        }
+        return jButton;
+    }
+    
+    // »ñÈ¡´¹Ö±·­×ª°´Å¥
+    private JButton getJButton1() {
+        if (jButton1 == null) {
+            jButton1 = new JButton();
+            jButton1.setText("´¹Ö±·­×ª");
+            jButton1.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    sy1 = Math.abs(sy1 - MaxHeight);
+                    sy2 = Math.abs(sy2 - MaxHeight);
+                    canvasPanel.repaint();
+                }
+            });
+        }
+        return jButton1;
+    }
+    
+    // »ñÈ¡»­°åÃæ°å
+    private MyCanvas getMyCanvas1() {
+        if (canvasPanel == null) {
+            canvasPanel = new MyCanvas();
+        }
+        return canvasPanel;
+    }
+    
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new PartImage().setVisible(true);
+    }
+    
+    // »­°å
+    class MyCanvas extends JPanel {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			g.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, this);// »æÖÆÖ¸¶¨´óĞ¡µÄÍ¼Æ¬
-		}
-	}
+        public void paint(Graphics g) {
+            g.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, this);// »æÖÆÖ¸¶¨´óĞ¡µÄÍ¼Æ¬
+        }
+    }
 } // @jve:decl-index=0:visual-constraint="10,10"
 
 20.4.4 Í¼Æ¬Ğı×ª P527
@@ -15069,44 +15069,44 @@ import java.net.URL;
 import javax.swing.*;
 
 public class RotateImage extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private Image img;
-	private MyCanvas canvasPanel = null;
-	
-	public RotateImage() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		URL imgUrl = RotateImage.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
-		img = Toolkit.getDefaultToolkit().getImage(imgUrl); // »ñÈ¡Í¼Æ¬×ÊÔ´
-		canvasPanel = new MyCanvas();
-		add(canvasPanel);
-		this.setBounds(100, 100, 400, 350);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("Í¼Æ¬Ğı×ª"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-		
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new RotateImage().setVisible(true);
-	}
-	
-	// »­°å
-	class MyCanvas extends JPanel {
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private Image img;
+    private MyCanvas canvasPanel = null;
+    
+    public RotateImage() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        URL imgUrl = RotateImage.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
+        img = Toolkit.getDefaultToolkit().getImage(imgUrl); // »ñÈ¡Í¼Æ¬×ÊÔ´
+        canvasPanel = new MyCanvas();
+        add(canvasPanel);
+        this.setBounds(100, 100, 400, 350);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("Í¼Æ¬Ğı×ª"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+        
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new RotateImage().setVisible(true);
+    }
+    
+    // »­°å
+    class MyCanvas extends JPanel {
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			g2.rotate(Math.toRadians(5));
-			g2.drawImage(img, 70, 10, 300, 200, this);
-			g2.rotate(Math.toRadians(5));
-			g2.drawImage(img, 70, 10, 300, 200, this);
-			g2.rotate(Math.toRadians(5));
-			g2.drawImage(img, 70, 10, 300, 200, this);
-		}
-	}
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.rotate(Math.toRadians(5));
+            g2.drawImage(img, 70, 10, 300, 200, this);
+            g2.rotate(Math.toRadians(5));
+            g2.drawImage(img, 70, 10, 300, 200, this);
+            g2.rotate(Math.toRadians(5));
+            g2.drawImage(img, 70, 10, 300, 200, this);
+        }
+    }
 }
 
 
@@ -15116,40 +15116,40 @@ import java.net.URL;
 import javax.swing.*;
 
 public class TiltImage extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private Image img;
-	private MyCanvas canvasPanel = null;
-	
-	public TiltImage() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		URL imgUrl = TiltImage.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
-		img = Toolkit.getDefaultToolkit().getImage(imgUrl); // »ñÈ¡Í¼Æ¬×ÊÔ´
-		canvasPanel = new MyCanvas();
-		add(canvasPanel);
-		this.setBounds(100, 100, 400, 300);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("Í¼Æ¬ÇãĞ±"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-		
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new TiltImage().setVisible(true);
-	}
-	
-	// »­°å
-	class MyCanvas extends JPanel {
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private Image img;
+    private MyCanvas canvasPanel = null;
+    
+    public TiltImage() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        URL imgUrl = TiltImage.class.getResource("sjtu.jpg");// »ñÈ¡Í¼Æ¬×ÊÔ´µÄÂ·¾¶
+        img = Toolkit.getDefaultToolkit().getImage(imgUrl); // »ñÈ¡Í¼Æ¬×ÊÔ´
+        canvasPanel = new MyCanvas();
+        add(canvasPanel);
+        this.setBounds(100, 100, 400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("Í¼Æ¬ÇãĞ±"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+        
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new TiltImage().setVisible(true);
+    }
+    
+    // »­°å
+    class MyCanvas extends JPanel {
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			g2.shear(0.4, 0.2);//Í¬Ê±Ë®Æ½ÇãĞ±ºÍÊúÆğÇãĞ±
-			g2.drawImage(img, 0, 0, 300, 200, this);
-		}
-	}
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.shear(0.4, 0.2);//Í¬Ê±Ë®Æ½ÇãĞ±ºÍÊúÆğÇãĞ±
+            g2.drawImage(img, 0, 0, 300, 200, this);
+        }
+    }
 }
 
 20.4.6 Í¼ĞÎµÄ½»ÔËËã P530
@@ -15161,48 +15161,48 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.*;
 
 public class IntersectOperationImage extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private IntersectOperationPanel jPanel = null;
-	
-	public IntersectOperationImage() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		jPanel = new IntersectOperationPanel();
-		add(jPanel);
-		this.setBounds(100, 100, 400, 300);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("Í¼Æ¬½»"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-		
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new IntersectOperationImage().setVisible(true);
-	}
-	
-	// »­°å
-	class IntersectOperationPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private IntersectOperationPanel jPanel = null;
+    
+    public IntersectOperationImage() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        jPanel = new IntersectOperationPanel();
+        add(jPanel);
+        this.setBounds(100, 100, 400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("Í¼Æ¬½»"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+        
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new IntersectOperationImage().setVisible(true);
+    }
+    
+    // »­°å
+    class IntersectOperationPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			Rectangle2D.Float rect = new Rectangle2D.Float(30, 30, 160, 120);
-			Ellipse2D.Float ellipse = new Ellipse2D.Float(20, 30, 180, 180);
-			Area area1 = new Area(rect);
-			Area area2 = new Area(ellipse);
-			area1.intersect(area2);
-			g2.draw(area1);
-				
-			Ellipse2D.Float ellipse1 = new Ellipse2D.Float(190, 20, 100, 140);
-			Ellipse2D.Float ellipse2 = new Ellipse2D.Float(240, 20, 100, 140);
-			Area area3 = new Area(ellipse1);
-			Area area4 = new Area(ellipse2);
-			area3.intersect(area4);
-			g2.fill(area3);
-		}
-	}
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            Rectangle2D.Float rect = new Rectangle2D.Float(30, 30, 160, 120);
+            Ellipse2D.Float ellipse = new Ellipse2D.Float(20, 30, 180, 180);
+            Area area1 = new Area(rect);
+            Area area2 = new Area(ellipse);
+            area1.intersect(area2);
+            g2.draw(area1);
+                
+            Ellipse2D.Float ellipse1 = new Ellipse2D.Float(190, 20, 100, 140);
+            Ellipse2D.Float ellipse2 = new Ellipse2D.Float(240, 20, 100, 140);
+            Area area3 = new Area(ellipse1);
+            Area area4 = new Area(ellipse2);
+            area3.intersect(area4);
+            g2.fill(area3);
+        }
+    }
 }
 
 
@@ -15214,48 +15214,48 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.*;
 
 public class ExclusiveOrOperationImage extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private ExclusiveOrOperationPanel jPanel = null;
-	
-	public ExclusiveOrOperationImage() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		jPanel = new ExclusiveOrOperationPanel();
-		add(jPanel);
-		this.setBounds(100, 100, 400, 300);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("Í¼Æ¬Òì»ò"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-		
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new ExclusiveOrOperationImage().setVisible(true);
-	}
-	
-	// »­°å
-	class ExclusiveOrOperationPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private ExclusiveOrOperationPanel jPanel = null;
+    
+    public ExclusiveOrOperationImage() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        jPanel = new ExclusiveOrOperationPanel();
+        add(jPanel);
+        this.setBounds(100, 100, 400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("Í¼Æ¬Òì»ò"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+        
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new ExclusiveOrOperationImage().setVisible(true);
+    }
+    
+    // »­°å
+    class ExclusiveOrOperationPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			Ellipse2D.Float ellipse1 = new Ellipse2D.Float(20, 70, 160, 60);
-			Ellipse2D.Float ellipse2 = new Ellipse2D.Float(120, 20, 60, 160);
-			Area area1 = new Area(ellipse1);
-			Area area2 = new Area(ellipse2);
-			area1.exclusiveOr(area2);
-			g2.fill(area1);
-				
-			Ellipse2D.Float ellipse3 = new Ellipse2D.Float(200, 70, 160, 60);
-			Ellipse2D.Float ellipse4 = new Ellipse2D.Float(250, 20, 60, 160);
-			Area area3 = new Area(ellipse3);
-			Area area4 = new Area(ellipse4);
-			area3.exclusiveOr(area4);
-			g2.fill(area3);
-		}
-	}
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            Ellipse2D.Float ellipse1 = new Ellipse2D.Float(20, 70, 160, 60);
+            Ellipse2D.Float ellipse2 = new Ellipse2D.Float(120, 20, 60, 160);
+            Area area1 = new Area(ellipse1);
+            Area area2 = new Area(ellipse2);
+            area1.exclusiveOr(area2);
+            g2.fill(area1);
+                
+            Ellipse2D.Float ellipse3 = new Ellipse2D.Float(200, 70, 160, 60);
+            Ellipse2D.Float ellipse4 = new Ellipse2D.Float(250, 20, 60, 160);
+            Area area3 = new Area(ellipse3);
+            Area area4 = new Area(ellipse4);
+            area3.exclusiveOr(area4);
+            g2.fill(area3);
+        }
+    }
 }
 
 20.5.1 »æÖÆ»¨°ê P531
@@ -15265,79 +15265,79 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.*;
 
 public class DrawFlowerFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private DrawFlowerPanel drawFlowerPanel = null;
-	
-	public DrawFlowerFrame() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		drawFlowerPanel = new DrawFlowerPanel();
-		add(drawFlowerPanel);
-		this.setBounds(100, 100, 400, 300);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("»æÖÆ»¨°ê"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-		
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new DrawFlowerFrame().setVisible(true);
-	}
-	
-	// »­°å
-	class DrawFlowerPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private DrawFlowerPanel drawFlowerPanel = null;
+    
+    public DrawFlowerFrame() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        drawFlowerPanel = new DrawFlowerPanel();
+        add(drawFlowerPanel);
+        this.setBounds(100, 100, 400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("»æÖÆ»¨°ê"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+        
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new DrawFlowerFrame().setVisible(true);
+    }
+    
+    // »­°å
+    class DrawFlowerPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			//Æ½ºâ×ø±êÖá£¬°Ñ(0, 0)×ø±êÔ­µãÒÆµ½»­°åÖĞÖĞĞÄÎ»ÖÃ
-			g2.translate(drawFlowerPanel.getWidth() / 2, drawFlowerPanel.getHeight() / 2);
-			
-			//»æÖÆÂÌÉ«»¨°ê
-			Ellipse2D.Float ellipse = new Ellipse2D.Float(30, 0, 70, 20);
-			Color color = new Color(0, 255, 0);
-			g2.setColor(color);
-			g2.fill(ellipse);
-			int i = 0;
-			while (i < 8) {
-				g2.rotate(30);//g2.rotate(Math.toRadians(30));ÕâÊ±ºò´«ÈëµÄÊÇ½Ç¶È£¬ÔòĞèÒª12¸ö²ÅÄÜ×ªÂúÒ»È¦¡£360¶È=2Pi»¡¶È
-				g2.fill(ellipse);
-				++i;
-			}
-			
-			//»æÖÆºìÉ«»¨°ê
-			ellipse = new Ellipse2D.Float(20, 0, 60, 15);
-			color = new Color(255, 0, 0);
-			g2.setColor(color);
-			g2.fill(ellipse);
-			i = 0;
-			while (i < 15) {
-				g2.rotate(75);
-				g2.fill(ellipse);
-				++i;
-			}
-			
-			//»æÖÆ»ÆÉ«»¨°ê
-			ellipse = new Ellipse2D.Float(10, 0, 50, 15);
-			color = new Color(255, 255, 0);
-			g2.setColor(color);
-			g2.fill(ellipse);
-			i = 0;
-			while (i < 8) {
-				g2.rotate(30);
-				g2.fill(ellipse);
-				++i;
-			}
-			
-			//»æÖÆºìÉ«ÖĞĞÄµã
-			color = new Color(255, 0, 0);
-			g2.setColor(color);
-			ellipse = new Ellipse2D.Float(-10, -10, 20, 20);
-			g2.fill(ellipse);
-		}
-	}
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            //Æ½ºâ×ø±êÖá£¬°Ñ(0, 0)×ø±êÔ­µãÒÆµ½»­°åÖĞÖĞĞÄÎ»ÖÃ
+            g2.translate(drawFlowerPanel.getWidth() / 2, drawFlowerPanel.getHeight() / 2);
+            
+            //»æÖÆÂÌÉ«»¨°ê
+            Ellipse2D.Float ellipse = new Ellipse2D.Float(30, 0, 70, 20);
+            Color color = new Color(0, 255, 0);
+            g2.setColor(color);
+            g2.fill(ellipse);
+            int i = 0;
+            while (i < 8) {
+                g2.rotate(30);//g2.rotate(Math.toRadians(30));ÕâÊ±ºò´«ÈëµÄÊÇ½Ç¶È£¬ÔòĞèÒª12¸ö²ÅÄÜ×ªÂúÒ»È¦¡£360¶È=2Pi»¡¶È
+                g2.fill(ellipse);
+                ++i;
+            }
+            
+            //»æÖÆºìÉ«»¨°ê
+            ellipse = new Ellipse2D.Float(20, 0, 60, 15);
+            color = new Color(255, 0, 0);
+            g2.setColor(color);
+            g2.fill(ellipse);
+            i = 0;
+            while (i < 15) {
+                g2.rotate(75);
+                g2.fill(ellipse);
+                ++i;
+            }
+            
+            //»æÖÆ»ÆÉ«»¨°ê
+            ellipse = new Ellipse2D.Float(10, 0, 50, 15);
+            color = new Color(255, 255, 0);
+            g2.setColor(color);
+            g2.fill(ellipse);
+            i = 0;
+            while (i < 8) {
+                g2.rotate(30);
+                g2.fill(ellipse);
+                ++i;
+            }
+            
+            //»æÖÆºìÉ«ÖĞĞÄµã
+            color = new Color(255, 0, 0);
+            g2.setColor(color);
+            ellipse = new Ellipse2D.Float(-10, -10, 20, 20);
+            g2.fill(ellipse);
+        }
+    }
 }
 
 
@@ -15350,57 +15350,57 @@ import java.util.Random;
 import javax.swing.*;
 
 public class ArtDesignFrame extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private ArtDesignPanel drawFlowerPanel = null;
-	
-	public ArtDesignFrame() {
-		initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
-	}
-	
-	// ½çÃæ³õÊ¼»¯·½·¨
-	private void initialize() {
-		drawFlowerPanel = new ArtDesignPanel();
-		add(drawFlowerPanel);
-		this.setBounds(100, 100, 400, 300);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
-		this.setTitle("»æÖÆ»¨°ê"); // ÉèÖÃ´°Ìå±êÌâ
-	}
-		
-	// Ö÷·½·¨
-	public static void main(String[] args) {
-		new ArtDesignFrame().setVisible(true);
-	}
-	
-	// »­°å
-	class ArtDesignPanel extends JPanel {
-		private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private ArtDesignPanel drawFlowerPanel = null;
+    
+    public ArtDesignFrame() {
+        initialize(); // µ÷ÓÃ³õÊ¼»¯·½·¨
+    }
+    
+    // ½çÃæ³õÊ¼»¯·½·¨
+    private void initialize() {
+        drawFlowerPanel = new ArtDesignPanel();
+        add(drawFlowerPanel);
+        this.setBounds(100, 100, 400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // ÉèÖÃ´°Ìå¹Ø±ÕÄ£Ê½
+        this.setTitle("»æÖÆ»¨°ê"); // ÉèÖÃ´°Ìå±êÌâ
+    }
+        
+    // Ö÷·½·¨
+    public static void main(String[] args) {
+        new ArtDesignFrame().setVisible(true);
+    }
+    
+    // »­°å
+    class ArtDesignPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
 
-		public void paint(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
-			//Æ½ºâ×ø±êÖá£¬°Ñ(0, 0)×ø±êÔ­µãÒÆµ½»­°åÖĞÖĞĞÄÎ»ÖÃ
-			g2.translate(drawFlowerPanel.getWidth() / 2, drawFlowerPanel.getHeight() / 2);
-			
-			Ellipse2D.Float ellipse = new Ellipse2D.Float(-80, 5, 160, 10);
-			Random random = new Random();
-			
-			//drawRandomColor(g2, random, ellipse);
-			int i = 0;
-			while (i < 100) {
-				drawRandomColor(g2, random, ellipse);
-				++i;
-			}
-		}
-		
-		private void drawRandomColor(Graphics2D g2, Random random, Ellipse2D.Float ellipse) {
-			int R = random.nextInt(256);
-			int G = random.nextInt(256);
-			int B = random.nextInt(256);
-			Color color = new Color(R, G, B);
-			g2.rotate(10);
-			g2.setColor(color);
-			g2.draw(ellipse);
-		}
-	}
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
+            //Æ½ºâ×ø±êÖá£¬°Ñ(0, 0)×ø±êÔ­µãÒÆµ½»­°åÖĞÖĞĞÄÎ»ÖÃ
+            g2.translate(drawFlowerPanel.getWidth() / 2, drawFlowerPanel.getHeight() / 2);
+            
+            Ellipse2D.Float ellipse = new Ellipse2D.Float(-80, 5, 160, 10);
+            Random random = new Random();
+            
+            //drawRandomColor(g2, random, ellipse);
+            int i = 0;
+            while (i < 100) {
+                drawRandomColor(g2, random, ellipse);
+                ++i;
+            }
+        }
+        
+        private void drawRandomColor(Graphics2D g2, Random random, Ellipse2D.Float ellipse) {
+            int R = random.nextInt(256);
+            int G = random.nextInt(256);
+            int B = random.nextInt(256);
+            Color color = new Color(R, G, B);
+            g2.rotate(10);
+            g2.setColor(color);
+            g2.draw(ellipse);
+        }
+    }
 }
 //------------------------------------------------------------------------------------------------
 Eclipseµ¼³öµÄ¿ÉÖ´ĞĞjar°ü£¬ÓÃÈçÏÂÓï¾ä¿ÉÖ±½ÓÔËĞĞ£º
@@ -15415,20 +15415,20 @@ P169 5.2.4 ·ÃÎÊ¿ØÖÆ·û
 package mypackage;
 
 public class HelloJava {
-	public static void show() {
-		HelloJavaImpl.show();
-	}
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		HelloJava.show();
-	}
+    public static void show() {
+        HelloJavaImpl.show();
+    }
+    
+    public static void main(String[] args) {
+        // TODO Auto-generated method stub
+        HelloJava.show();
+    }
 }
 
 class HelloJavaImpl {
-	public static void show() {
-		System.out.println("hello, world!");
-	}
+    public static void show() {
+        System.out.println("hello, world!");
+    }
 }
 
 //Test.java
@@ -15437,10 +15437,10 @@ import mypackage.HelloJavaImpl;//±àÒë´íÎó£¬Ë½ÓĞÀà½«²»¿É¼û£¬ÎŞ·¨ÒıÓÃ
 
 public class Test
 {
-	public static void main(String args[])
-	{
-		HelloJava.show();
-	}
+    public static void main(String args[])
+    {
+        HelloJava.show();
+    }
 }
 
 P170 ÓÃprotectedĞŞÊÎµÄ³ÉÔ±±äÁ¿¿ÉÒÔ±»3ÖÖÀàËùÒıÓÃ£º¸ÃÀà×ÔÉí¡¢ÓëËüÔÚÍ¬Ò»¸ö°üÖĞµÄÆäËûÀà¡¢ÔÚÆäËû°üÖĞµÄ¸ÃÀàµÄ×ÓÀà¡£Ê¹ÓÃprotectedĞŞÊÎ·ûµÄÖ÷Òª×÷ÓÃÊÇÔÊĞíÆäËû°üÖĞ¸ÃÀàµÄ×ÓÀàÀ´·ÃÎÊ¸¸ÀàµÄÌØ¶¨ÊôĞÔ¡£
@@ -15453,27 +15453,27 @@ import java.awt.Point;
 
 public class Test
 {
-	public static void main(String args[])
-	{
-		int a = 1;
-		int b = 2;
-		Point x = new Point(0, 0);
-		Point y = new Point(1, 1);
-		System.out.println("a is " + a);
-		System.out.println("b is " + b);
-		System.out.println("x is " + x);
-		System.out.println("y is " + y);
-		
-		System.out.println("¸Ä±äÎ»ÖÃ...");
-		a = b;
-		a++;
-		x = y;
-		x.setLocation(5, 5);
-		System.out.println("a is " + a);
-		System.out.println("b is " + b);
-		System.out.println("x is " + x);
-		System.out.println("y is " + y);
-	}
+    public static void main(String args[])
+    {
+        int a = 1;
+        int b = 2;
+        Point x = new Point(0, 0);
+        Point y = new Point(1, 1);
+        System.out.println("a is " + a);
+        System.out.println("b is " + b);
+        System.out.println("x is " + x);
+        System.out.println("y is " + y);
+        
+        System.out.println("¸Ä±äÎ»ÖÃ...");
+        a = b;
+        a++;
+        x = y;
+        x.setLocation(5, 5);
+        System.out.println("a is " + a);
+        System.out.println("b is " + b);
+        System.out.println("x is " + x);
+        System.out.println("y is " + y);
+    }
 }
 Êä³öÈçÏÂ£º
 a is 1
@@ -15492,92 +15492,92 @@ import java.io.IOException;
 
 public class Test
 {
-	public static void main(String args[]) throws IOException {
-		char a;
-		outer: //±ØĞëÏÈÔÚÕâÀï¶¨Òå£¬·ñÔòbreak outerºÍcontinue outerÎŞ·¨Ê¶±ğ
-			for (int i = 0; i < 10; i++) {
-				for (int j = 0; j < 10; j++) {
-					a = (char) System.in.read();
-					if (a == 'b') {
-						break outer;//Ö±½ÓÌø³öËùÓĞÑ­»·
-					}
-					if (a == 'c') {
-						continue outer;//Ìøµ½outer±êºÅ´¦
-					}
-				}
-			}
-	}
+    public static void main(String args[]) throws IOException {
+        char a;
+        outer: //±ØĞëÏÈÔÚÕâÀï¶¨Òå£¬·ñÔòbreak outerºÍcontinue outerÎŞ·¨Ê¶±ğ
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 10; j++) {
+                    a = (char) System.in.read();
+                    if (a == 'b') {
+                        break outer;//Ö±½ÓÌø³öËùÓĞÑ­»·
+                    }
+                    if (a == 'c') {
+                        continue outer;//Ìøµ½outer±êºÅ´¦
+                    }
+                }
+            }
+    }
 }
 //------------------------------------------------------------------------------------------------
 //JavaºËĞÄ±à³Ì¼¼Êõ µÚ6¿Î JavaÃæÏò¶ÔÏó±à³Ì
 //6.1 ·â×° P203
 public class HelloWorld
 {
-	private String world = "World";
+    private String world = "World";
 
-	public void setWorld(String world)
-	{
-		this.world = world;
-	}
+    public void setWorld(String world)
+    {
+        this.world = world;
+    }
 
-	public void say()
-	{
-		System.out.println("Hello " + world + "!");
-	}
+    public void say()
+    {
+        System.out.println("Hello " + world + "!");
+    }
 
-	public static void main(String args[])
-	{
-		HelloWorld inst = new HelloWorld();
-		inst.setWorld("China");
-		inst.say();
+    public static void main(String args[])
+    {
+        HelloWorld inst = new HelloWorld();
+        inst.setWorld("China");
+        inst.say();
 
-		//mainº¯ÊıÊÇHelloWorldÖĞµÄº¯Êı£¬ËùÒÔ¿ÉÒÔÖ±½Ó·ÃÎÊÆäË½ÓĞ±äÁ¿world£¬ÔÚÆäËûÀàÖĞÔòÎŞ·¨ÓÃ´Ë·½·¨À´·ÃÎÊÆäË½ÓĞ±äÁ¿£¬½¨ÒéÔÚ¿ÉÄÜµÄÇé¿öÏÂ¾¡¿ÉÄÜÊ¹ÓÃ·½·¨µ÷ÓÃ
-		String value = new HelloWorld().world;
-		System.out.println(value);
-	}
+        //mainº¯ÊıÊÇHelloWorldÖĞµÄº¯Êı£¬ËùÒÔ¿ÉÒÔÖ±½Ó·ÃÎÊÆäË½ÓĞ±äÁ¿world£¬ÔÚÆäËûÀàÖĞÔòÎŞ·¨ÓÃ´Ë·½·¨À´·ÃÎÊÆäË½ÓĞ±äÁ¿£¬½¨ÒéÔÚ¿ÉÄÜµÄÇé¿öÏÂ¾¡¿ÉÄÜÊ¹ÓÃ·½·¨µ÷ÓÃ
+        String value = new HelloWorld().world;
+        System.out.println(value);
+    }
 }
 
 //6.2 ¼Ì³Ğ P204
 6.2.1 ¼Ì³ĞµÄ¸ÅÄî¡ª¡ª³¬ÀàºÍ×ÓÀà
 class Car
 {
-	int v;
-	void drive()
-	{
-		System.out.println("Car ËÙ¶È£º" + v);
-	}
+    int v;
+    void drive()
+    {
+        System.out.println("Car ËÙ¶È£º" + v);
+    }
 }
 
 class Bus extends Car
 {
-	int p;
-	void carry()
-	{
-		System.out.println("Bus ÔØÈË£º" + p);
-	}
-	
-	void sum()
-	{
-		System.out.println("Bus ËÙ¶È£º" + v);
-		System.out.println("Bus ÔØÈË£º" + p);
-	}
+    int p;
+    void carry()
+    {
+        System.out.println("Bus ÔØÈË£º" + p);
+    }
+    
+    void sum()
+    {
+        System.out.println("Bus ËÙ¶È£º" + v);
+        System.out.println("Bus ÔØÈË£º" + p);
+    }
 }
 
 public class TestCar
 {
-	public static void main(String args[])
-	{
-		Car car = new Car();
-		car.v = 60;
-		Bus bus = new Bus();
-		bus.v = 40;
-		bus.p = 20;
-		
-		car.drive();
-		bus.drive();
-		bus.carry();
-		bus.sum();
-	}
+    public static void main(String args[])
+    {
+        Car car = new Car();
+        car.v = 60;
+        Bus bus = new Bus();
+        bus.v = 40;
+        bus.p = 20;
+        
+        car.drive();
+        bus.drive();
+        bus.carry();
+        bus.sum();
+    }
 }
 Êä³öÈçÏÂ£º
 Car ËÙ¶È£º60
@@ -15610,42 +15610,42 @@ Bus bus2 = (Bus)Car;
 6.2.6 ±ØĞë±»¼Ì³ĞµÄÀà¡ª¡ª³éÏóÀà£¨abstract£©
 abstract class Car//Ö»ÓĞ³éÏóÀà²ÅÄÜ¶¨Òå³éÏó·½·¨£¬ËùÒÔÕâÀïµÄabstract²»ÄÜÈ±ÉÙ
 {
-	int v;
-	abstract void drive();//ÕâÀïµÄabstract¿ÉÒÔ²»¶¨Òå£¬Ôò±ØĞëÒª¸ødrive()¶¨ÒåÊµÏÖ£¬µ«ÊÇÒªÇóCarÀà±ØĞë¼Ì³Ğ
+    int v;
+    abstract void drive();//ÕâÀïµÄabstract¿ÉÒÔ²»¶¨Òå£¬Ôò±ØĞëÒª¸ødrive()¶¨ÒåÊµÏÖ£¬µ«ÊÇÒªÇóCarÀà±ØĞë¼Ì³Ğ
 }
 
 class Bus extends Car
 {
-	int p;
-	void drive()//ÕâÀï²»ÄÜÔÙ¼Óabstract
-	{
-		System.out.println("Bus ËÙ¶È£º" + v);
-	}
-	
-	void carry()
-	{
-		System.out.println("Bus ÔØÈË£º" + p);
-	}
-	
-	void sum()
-	{
-		System.out.println("Bus ËÙ¶È£º" + v);
-		System.out.println("Bus ÔØÈË£º" + p);
-	}
+    int p;
+    void drive()//ÕâÀï²»ÄÜÔÙ¼Óabstract
+    {
+        System.out.println("Bus ËÙ¶È£º" + v);
+    }
+    
+    void carry()
+    {
+        System.out.println("Bus ÔØÈË£º" + p);
+    }
+    
+    void sum()
+    {
+        System.out.println("Bus ËÙ¶È£º" + v);
+        System.out.println("Bus ÔØÈË£º" + p);
+    }
 }
 
 public class TestCar
 {
-	public static void main(String args[])
-	{
-		Bus bus = new Bus();
-		bus.v = 40;
-		bus.p = 20;
-		
-		bus.drive();
-		bus.carry();
-		bus.sum();
-	}
+    public static void main(String args[])
+    {
+        Bus bus = new Bus();
+        bus.v = 40;
+        bus.p = 20;
+        
+        bus.drive();
+        bus.carry();
+        bus.sum();
+    }
 }
 
 6.2.7 ²»ÄÜ±»¼Ì³ĞµÄÀà¡ª¡ª×îÖÕÀà£¨final£©
@@ -15657,45 +15657,45 @@ public class TestCar
 ¸¸ÀàµÄprivate³ÉÔ±·½·¨ÊÇ²»ÄÜ±»×ÓÀà·½·¨¸²¸ÇµÄ£¬Òò´ËprivateÀàĞÍµÄ·½·¨Ä¬ÈÏÊÇfinalÀàĞÍµÄ¡££¨Õâ¾ä»°²»ÊÇºÜ¶Ô£©
 class Car
 {
-	int v;
-	private void drive()//final private void drive()ÕâÑù¶¨ÒåÒ²¿ÉÒÔ£¬µ«ÊÇÈç¹û¶¨ÒåÎªfinal public void drive()Ôò×ÓÀàÎŞ·¨¸²¸Ç
-	{
-		System.out.println("Car drive");
-	}
+    int v;
+    private void drive()//final private void drive()ÕâÑù¶¨ÒåÒ²¿ÉÒÔ£¬µ«ÊÇÈç¹û¶¨ÒåÎªfinal public void drive()Ôò×ÓÀàÎŞ·¨¸²¸Ç
+    {
+        System.out.println("Car drive");
+    }
 }
 
 class Bus extends Car
 {
-	int p;
-	void drive()//¿ÉÒÔÕâÑù¶¨Òådrive
-	{
-		System.out.println("Bus ËÙ¶È£º" + v);
-	}
-	
-	void carry()
-	{
-		System.out.println("Bus ÔØÈË£º" + p);
-	}
-	
-	void sum()
-	{
-		System.out.println("Bus ËÙ¶È£º" + v);
-		System.out.println("Bus ÔØÈË£º" + p);
-	}
+    int p;
+    void drive()//¿ÉÒÔÕâÑù¶¨Òådrive
+    {
+        System.out.println("Bus ËÙ¶È£º" + v);
+    }
+    
+    void carry()
+    {
+        System.out.println("Bus ÔØÈË£º" + p);
+    }
+    
+    void sum()
+    {
+        System.out.println("Bus ËÙ¶È£º" + v);
+        System.out.println("Bus ÔØÈË£º" + p);
+    }
 }
 
 public class TestCar
 {
-	public static void main(String args[])
-	{
-		Bus bus = new Bus();
-		bus.v = 40;
-		bus.p = 20;
-		
-		bus.drive();
-		bus.carry();
-		bus.sum();
-	}
+    public static void main(String args[])
+    {
+        Bus bus = new Bus();
+        bus.v = 40;
+        bus.p = 20;
+        
+        bus.drive();
+        bus.carry();
+        bus.sum();
+    }
 }
 
 2. final·½·¨µÄ¶¨Òå P214
@@ -15724,8 +15724,8 @@ JavaÓïÑÔ¹æ·¶ÖĞ£¬Ò»¸ö·½·¨µÄÌØÕ÷½ö°üÀ¨·½·¨µÄÃû×Ö¡¢²ÎÊıµÄÊıÄ¿ºÍÀàĞÍ£¬¶ø²»°üÀ¨·½·¨µÄ
 Java½Ó¿Ú¿ÉÒÔÊÇpublicµÄ£¬¾²Ì¬µÄºÍfinalÊôĞÔ¡£
 public interface ½Ó¿ÚÃû
 {
-	public static int a = 1;
-	public final int b = 2;
+    public static int a = 1;
+    public final int b = 2;
 }
 ¿ÉÒÔÍ¨¹ıimplements¹Ø¼ü×ÖÊµÏÖ¶à¸ö½Ó¿Ú£¬ÄÇÃ´¸ÃÀà±ØĞëÊµÏÖÕâĞ©½Ó¿ÚµÄËùÓĞ½Ó¿Ú·½·¨¡£
 
@@ -15736,23 +15736,23 @@ public interface ½Ó¿ÚÃû
 //(1)¶¨Òå¶¥²ã½Ó¿Ú
 public interface ClassName1
 {
-	public void func1();
+    public void func1();
 }
 //(2)¶¨ÒåÊµÏÖ³éÏóÀà
 public abstract class ClassName2
 {
-	public void func2()
-	{
-		
-	}
+    public void func2()
+    {
+        
+    }
 }
 //(3)¶¨ÒåÊµÏÖÀà
 public class ClassName3 extends ClassName2 implements ClassName1
 {
-	public void func1()//ÊµÏÖ½Ó¿Úº¯Êı
-	{
-		func2();//µ÷ÓÃ³éÏóÀàº¯Êı
-	}
+    public void func1()//ÊµÏÖ½Ó¿Úº¯Êı
+    {
+        func2();//µ÷ÓÃ³éÏóÀàº¯Êı
+    }
 }
 
 ½Ó¿ÚÔÚÄ³Ğ©µØ·½ºÍ³éÏóÀàÓĞÏàËÆµÄµØ·½£¬µ«ÊÇ²ÉÓÃÄÄÖÖ·½Ê½À´ÉùÃ÷ÀàÖ÷Òª²ÎÕÕÒÔÏÂÁ½µã£º
@@ -15766,7 +15766,7 @@ package calculator;
 
 public interface ICalculator
 {
-	public int calculate(String expression);
+    public int calculate(String expression);
 }
 
 //£¨2£©¼ÆËãÆ÷³éÏóÀà
@@ -15774,14 +15774,14 @@ package calculator;
 
 public abstract class AbstractCalculator
 {
-	public int[] split(String expression, String deliString)
-	{
-		String array[] = expression.split(deliString);
-		int arrayInt[] = new int[2];
-		arrayInt[0] = Integer.parseInt(array[0]);
-		arrayInt[1] = Integer.parseInt(array[1]);
-		return arrayInt;
-	}
+    public int[] split(String expression, String deliString)
+    {
+        String array[] = expression.split(deliString);
+        int arrayInt[] = new int[2];
+        arrayInt[0] = Integer.parseInt(array[0]);
+        arrayInt[1] = Integer.parseInt(array[1]);
+        return arrayInt;
+    }
 }
 
 //£¨3£©¼ÆËãÆ÷ÊµÏÖÀà£º¼Ó¡¢¼õ¡¢³Ë³ı£¬ÒÔ¼°Ä¬ÈÏ¼ÆËãÀà
@@ -15793,12 +15793,12 @@ import calculator.AbstractCalculator;
 
 public class Plus extends AbstractCalculator implements ICalculator
 {
-	@Override
-	public int calculate(String expression)
-	{
-		int arrayInt[] = split(expression, "\\+");//String.splitº¯ÊıÖĞµÄÈë²ÎÊÇÕıÔò±í´ïÊ½£¬+ºÍ*ÓĞÌØÊâº¬Òå£¬ËùÓĞÒªÓÃ½«Æä×ªÒå
-		return arrayInt[0] + arrayInt[1];
-	}
+    @Override
+    public int calculate(String expression)
+    {
+        int arrayInt[] = split(expression, "\\+");//String.splitº¯ÊıÖĞµÄÈë²ÎÊÇÕıÔò±í´ïÊ½£¬+ºÍ*ÓĞÌØÊâº¬Òå£¬ËùÓĞÒªÓÃ½«Æä×ªÒå
+        return arrayInt[0] + arrayInt[1];
+    }
 }
 
 //¼õ·¨¼ÆËãÀà
@@ -15809,12 +15809,12 @@ import calculator.AbstractCalculator;
 
 public class Minus extends AbstractCalculator implements ICalculator
 {
-	@Override
-	public int calculate(String expression)
-	{
-		int arrayInt[] = split(expression, "-");
-		return arrayInt[0] - arrayInt[1];
-	}
+    @Override
+    public int calculate(String expression)
+    {
+        int arrayInt[] = split(expression, "-");
+        return arrayInt[0] - arrayInt[1];
+    }
 }
 
 //³Ë·¨¼ÆËãÀà
@@ -15825,12 +15825,12 @@ import calculator.AbstractCalculator;
 
 public class Multiply extends AbstractCalculator implements ICalculator
 {
-	@Override
-	public int calculate(String expression)
-	{
-		int arrayInt[] = split(expression, "\\*");//String.splitº¯ÊıÖĞµÄÈë²ÎÊÇÕıÔò±í´ïÊ½£¬+ºÍ*ÓĞÌØÊâº¬Òå£¬ËùÓĞÒªÓÃ½«Æä×ªÒå
-		return arrayInt[0] * arrayInt[1];
-	}
+    @Override
+    public int calculate(String expression)
+    {
+        int arrayInt[] = split(expression, "\\*");//String.splitº¯ÊıÖĞµÄÈë²ÎÊÇÕıÔò±í´ïÊ½£¬+ºÍ*ÓĞÌØÊâº¬Òå£¬ËùÓĞÒªÓÃ½«Æä×ªÒå
+        return arrayInt[0] * arrayInt[1];
+    }
 }
 
 //³ı·¨¼ÆËãÀà
@@ -15841,12 +15841,12 @@ import calculator.ICalculator;
 
 public class Devide extends AbstractCalculator implements ICalculator
 {
-	@Override
-	public int calculate(String expression)
-	{
-		int arrayInt[] = split(expression, "/");
-		return arrayInt[0] / arrayInt[1];
-	}
+    @Override
+    public int calculate(String expression)
+    {
+        int arrayInt[] = split(expression, "/");
+        return arrayInt[0] / arrayInt[1];
+    }
 }
 
 //Ä¬ÈÏ¼ÆËãÀà
@@ -15857,12 +15857,12 @@ import calculator.ICalculator;
 
 public class Default extends AbstractCalculator implements ICalculator
 {
-	@Override
-	public int calculate(String expression)
-	{
-		System.out.println("Input is illegal!");
-		return 0;
-	}
+    @Override
+    public int calculate(String expression)
+    {
+        System.out.println("Input is illegal!");
+        return 0;
+    }
 }
 
 //£¨4£©²âÊÔÀà
@@ -15879,57 +15879,57 @@ import calculator.impl.Default;
 
 public class Test
 {
-	public static void main(String args[])
-	{
-		while (true)
-		{
-			//System.out.println("Ready to input:");
-			//String expression = System.console().readLine();//ÊéÖĞµÄÕâÖÖ·½·¨Å×³öÁË¿ÕÖ¸ÕëÒì³£
-			String expression = readDataFromConsole("Ready to input:");
-			if (expression.equals("exit"))
-			{
-				break;
-			}
-			
-			ICalculator calculator;
-			if (expression.indexOf("+") != -1)
-			{
-				calculator = new Plus();
-			}
-			else if (expression.indexOf("-") != -1)
-			{
-				calculator = new Minus();
-			}
-			else if (expression.indexOf("*") != -1)
-			{
-				calculator = new Multiply();
-			}
-			else if (expression.indexOf("/") != -1)
-			{
-				calculator = new Devide();
-			}
-			else
-			{
-				calculator = new Default();
-			}
-			
-			int value = calculator.calculate(expression);
-			System.out.println(expression + "=" + value);
-		}
-	}
-	
-	private static String readDataFromConsole(String prompt)
-	{
-//		Console console = System.console();
+    public static void main(String args[])
+    {
+        while (true)
+        {
+            //System.out.println("Ready to input:");
+            //String expression = System.console().readLine();//ÊéÖĞµÄÕâÖÖ·½·¨Å×³öÁË¿ÕÖ¸ÕëÒì³£
+            String expression = readDataFromConsole("Ready to input:");
+            if (expression.equals("exit"))
+            {
+                break;
+            }
+            
+            ICalculator calculator;
+            if (expression.indexOf("+") != -1)
+            {
+                calculator = new Plus();
+            }
+            else if (expression.indexOf("-") != -1)
+            {
+                calculator = new Minus();
+            }
+            else if (expression.indexOf("*") != -1)
+            {
+                calculator = new Multiply();
+            }
+            else if (expression.indexOf("/") != -1)
+            {
+                calculator = new Devide();
+            }
+            else
+            {
+                calculator = new Default();
+            }
+            
+            int value = calculator.calculate(expression);
+            System.out.println(expression + "=" + value);
+        }
+    }
+    
+    private static String readDataFromConsole(String prompt)
+    {
+//        Console console = System.console();
 //        if (console == null) //±àÒëÄÜ¹ı£¬ÔËĞĞÊ±Ã¿´Î¶¼Îªnull£¬Å×Òì³£
 //        {  
 //            throw new IllegalStateException("Console is not available!");  
 //        }  
 //        return console.readLine(prompt);  
-		Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
-		System.out.println(prompt);  
-		return scanner.nextLine();  
-	}
+        Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
+        System.out.println(prompt);  
+        return scanner.nextLine();  
+    }
 }
 //------------------------------------------------------------------------------------------------
 //JavaºËĞÄ±à³Ì¼¼Êõ µÚ7¿Î JavaÃæÏò¶ÔÏó±à³ÌÀ©Õ¹ P225
@@ -15947,45 +15947,45 @@ static±äÁ¿ÓĞµãÀàËÆÓÚCÖĞµÄÈ«¾Ö±äÁ¿µÄ¸ÅÄî£¬ÖµµÃÌ½ÌÖµÄÊÇ¾²Ì¬±äÁ¿µÄ³õÊ¼»¯ÎÊÌâ¡£
 ÁíÍâ£¬static¶¨ÒåµÄ±äÁ¿»áÓÅÏÈÓÚÈÎºÎÆäËû·Çstatic±äÁ¿£¬²»ÂÛÆä³öÏÖµÄË³ĞòÈçºÎ¡£²¢ÇÒÔÚÉæ¼°µ½¼Ì³ĞµÄÊ±ºò£¬»áÏÈ³õÊ¼»¯¸¸ÀàµÄstatic±äÁ¿£¬È»ºóÊÇ×ÓÀàµÄ£¬ÒÔ´ËÀàÍÆ¡£
 class StaticClass
 {
-	public static int i = 0;
-	public StaticClass()
-	{
-		i = 15;
-	}
-	public StaticClass(int n)
-	{
-		i = n;
-	}
-	public static void inc()
-	{
-		i++;
-	}
+    public static int i = 0;
+    public StaticClass()
+    {
+        i = 15;
+    }
+    public StaticClass(int n)
+    {
+        i = n;
+    }
+    public static void inc()
+    {
+        i++;
+    }
 }
 
 public class Test
 {
-	StaticClass v = new StaticClass(10);
-	static StaticClass v1, v2;
-	
-	//¾²Ì¬´úÂë¿éÔÚÏµÍ³Æô¶¯Ê±Ö´ĞĞ
-	static
-	{
-		System.out.println("³õÊ¼»¯£ºv1.c = " + v1.i + ", v2.i = " + v2.i);
-		v1 = new StaticClass(27);
-		System.out.println("³õÊ¼»¯£ºv1.c = " + v1.i + ", v2.i = " + v2.i);
-		v2 = new StaticClass(15);
-		System.out.println("³õÊ¼»¯£ºv1.c = " + v1.i + ", v2.i = " + v2.i);
-	}
-	
-	public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
-	{
-		Test test = new Test();
-		System.out.println("test.i = " + test.v.i);
-		System.out.println("v1.c = " + v1.i + ", v2.i = " + v2.i);
-		v1.inc();
-		System.out.println("v1.c = " + v1.i + ", v2.i = " + v2.i);
-		System.out.println("test.i = " + test.v.i);
-	}
+    StaticClass v = new StaticClass(10);
+    static StaticClass v1, v2;
+    
+    //¾²Ì¬´úÂë¿éÔÚÏµÍ³Æô¶¯Ê±Ö´ĞĞ
+    static
+    {
+        System.out.println("³õÊ¼»¯£ºv1.c = " + v1.i + ", v2.i = " + v2.i);
+        v1 = new StaticClass(27);
+        System.out.println("³õÊ¼»¯£ºv1.c = " + v1.i + ", v2.i = " + v2.i);
+        v2 = new StaticClass(15);
+        System.out.println("³õÊ¼»¯£ºv1.c = " + v1.i + ", v2.i = " + v2.i);
+    }
+    
+    public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
+    {
+        Test test = new Test();
+        System.out.println("test.i = " + test.v.i);
+        System.out.println("v1.c = " + v1.i + ", v2.i = " + v2.i);
+        v1.inc();
+        System.out.println("v1.c = " + v1.i + ", v2.i = " + v2.i);
+        System.out.println("test.i = " + test.v.i);
+    }
 }
 Êä³öÈçÏÂ£º
 ³õÊ¼»¯£ºv1.c = 0, v2.i = 0
@@ -16003,24 +16003,24 @@ staticÔÚÀàµÄÄÚ²¿¶¨Òå¾²Ì¬±äÁ¿¡¢¾²Ì¬·½·¨ºÍ¾²Ì¬´úÂë¿éµÄÊ¹ÓÃÇéĞÎ£¬Ëü»¹¿ÉÒÔĞŞÊÎclassµ
 ÈçÏÂ´úÂëËùÊ¾£¬¶¨ÒåÁËÒ»¸ö¾²Ì¬ÄÚ²¿ÀàInnerClass£¬Ö»ĞèÒªÍ¨¹ı¡°Íâ²¿Àà.ÄÚ²¿Àà¡±µÄĞÎÊ½ÒıÓÃ¸ÃÀà
 class Test
 {
-	//¶¨ÒåÒ»¸ö¾²Ì¬ÄÚ²¿Àà
-	public static class InnerClass
-	{
-		public InnerClass()
-		{
-			System.out.println("InnerClass");
-		}
-		public void print(String string)
-		{
-			System.out.println(string);
-		}
-	}
-	
-	public static void main(String args[])
-	{
-		Test.InnerClass ic = new Test.InnerClass();//ÒıÓÃ¾²Ì¬ÄÚ²¿Àà
-		ic.print("this is a string");
-	}
+    //¶¨ÒåÒ»¸ö¾²Ì¬ÄÚ²¿Àà
+    public static class InnerClass
+    {
+        public InnerClass()
+        {
+            System.out.println("InnerClass");
+        }
+        public void print(String string)
+        {
+            System.out.println(string);
+        }
+    }
+    
+    public static void main(String args[])
+    {
+        Test.InnerClass ic = new Test.InnerClass();//ÒıÓÃ¾²Ì¬ÄÚ²¿Àà
+        ic.print("this is a string");
+    }
 }
 Êä³öÈçÏÂ£º
 InnerClass
@@ -16029,37 +16029,37 @@ this is a string
 7.2 JavaÄäÃûÀà£¨Anonymous Class£© P228
 public class A
 {
-	public void f()
-	{
-		class B extends Thread//¶¨ÒåÒ»¸öÄÚ²¿Àà
-		{
-			public void run() {...}//¾ßÌåÊµÏÖ
-		}
+    public void f()
+    {
+        class B extends Thread//¶¨ÒåÒ»¸öÄÚ²¿Àà
+        {
+            public void run() {...}//¾ßÌåÊµÏÖ
+        }
 
-		class C implements Runnable//¶¨ÒåÒ»¸öÄÚ²¿½Ó¿Ú
-		{
-			public void run() {...}//¾ßÌåÊµÏÖ
-		}
-		
-		B b = new B();
-		C c = new C();
-	}
+        class C implements Runnable//¶¨ÒåÒ»¸öÄÚ²¿½Ó¿Ú
+        {
+            public void run() {...}//¾ßÌåÊµÏÖ
+        }
+        
+        B b = new B();
+        C c = new C();
+    }
 }
 ÔÚ·½·¨ÖĞÔÙ¶¨ÒåÄÚ²¿ÀàÍùÍùÏÔµÃÀÛ×¸£¬ÓÚÊÇÉÏÃæµÄ´úÂë¾Í¿ÉÒÔÓÃÄäÃûÄÚ²¿ÀàÖØĞ´³É£º
 public class A
 {
-	public void f()
-	{
-		Thread b = new Thread()//ÄäÃûÄÚ²¿Àà
-		{
-			public void run() {...}//¾ßÌåÊµÏÖ
-		}
-		
-		Runnable c = new Runnable()//ÄäÃûÄÚ²¿½Ó¿Ú
-		{
-			public void run() {...}//¾ßÌåÊµÏÖ
-		}
-	}
+    public void f()
+    {
+        Thread b = new Thread()//ÄäÃûÄÚ²¿Àà
+        {
+            public void run() {...}//¾ßÌåÊµÏÖ
+        }
+        
+        Runnable c = new Runnable()//ÄäÃûÄÚ²¿½Ó¿Ú
+        {
+            public void run() {...}//¾ßÌåÊµÏÖ
+        }
+    }
 }
 ÄäÃûÄÚ²¿ÀàÍ¨¹ıÓÃÔÚGUI±à³ÌÌí¼ÓÊÂ¼ş¼àÌıÆ÷ÖĞ£¬Ä¿µÄÊÇ¼ò»¯´úÂë±àĞ´¡£
 
@@ -16104,68 +16104,68 @@ new<Àà»ò½Ó¿Ú><ÀàµÄÖ÷Ìå>
 
 interface IContent
 {
-	String getContent();
+    String getContent();
 }
 
 interface IAddress
 {
-	String getAddress();
+    String getAddress();
 }
 
 class Mail
 {
-	//ÓÊ¼şÄÚ²¿ÄÚ²¿Àà
-	private class Content implements IContent
-	{
-		private String content;
-		
-		private Content(String content)
-		{
-			this.content = content;
-		}
-		
-		public String getContent()
-		{
-			return content;
-		}
-	}
-	
-	//½ÓÊÕµØÖ·ÄÚ²¿Àà
-	protected class Address implements IAddress
-	{
-		private String address;
-		
-		private Address(String address) 
-		{
-			this.address = address;
-		}
-		
-		public String getAddress()
-		{
-			return address;
-		}
-	}
-	
-	public IContent getContent(String s)
-	{
-		return new Content(s);
-	}
-	
-	public IAddress getAddress(String s)
-	{
-		return new Address(s);
-	}
+    //ÓÊ¼şÄÚ²¿ÄÚ²¿Àà
+    private class Content implements IContent
+    {
+        private String content;
+        
+        private Content(String content)
+        {
+            this.content = content;
+        }
+        
+        public String getContent()
+        {
+            return content;
+        }
+    }
+    
+    //½ÓÊÕµØÖ·ÄÚ²¿Àà
+    protected class Address implements IAddress
+    {
+        private String address;
+        
+        private Address(String address) 
+        {
+            this.address = address;
+        }
+        
+        public String getAddress()
+        {
+            return address;
+        }
+    }
+    
+    public IContent getContent(String s)
+    {
+        return new Content(s);
+    }
+    
+    public IAddress getAddress(String s)
+    {
+        return new Address(s);
+    }
 }
 
 
 public class TestMail
 {
-	public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
-	{
-		Mail mail = new Mail();
-		IContent content = mail.getContent("ÕâÊÇÓÊ¼şÕıÎÄ");//È¡µÃÓÊ¼şÕıÎÄÊµÀı
-		IAddress address = mail.getAddress("bigben0204@163.com");//È¡µÃ½ÓÊÕµØÖ·ÊµÀı
-	}
+    public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
+    {
+        Mail mail = new Mail();
+        IContent content = mail.getContent("ÕâÊÇÓÊ¼şÕıÎÄ");//È¡µÃÓÊ¼şÕıÎÄÊµÀı
+        IAddress address = mail.getAddress("bigben0204@163.com");//È¡µÃ½ÓÊÕµØÖ·ÊµÀı
+    }
 }
 ÔÚÕâ¸öÀı×ÓÀï£¬ÀàContentºÍAddress±»¶¨ÒåÔÚÁËÀàMailÄÚ²¿£¬²¢ÇÒÓÉprotectedºÍprivateĞŞÊÎ·ûÀ´¿ØÖÆ·ÃÎÊ¼¶±ğ¡£ÔÚºóÃæµÄmail·½·¨Àï£¬Ö±½ÓÓÃIContent contentºÍIAddress address½øĞĞ²Ù×÷£¬ÄãÉõÖÁÁ¬ÕâÁ½¸öÄÚ²¿ÀàµÄÃû×Ö¶¼Ã»ÓĞ¿´¼û¡£ÕâÑù£¬ÄÚ²¿ÀàµÄµÚÒ»¸öºÃ´¦¾ÍÌåÏÖ³öÀ´ÁË¡ª¡ªÒş²ØÁËÄã²»ÏëÈÃ±ğÈËÖªµÀµÄ²Ù×÷£¬ºÃ·â×°ĞÔ¡£
 Í¬Ê±£¬Ò²·¢ÏÖÁËÔÚÍâ²¿Àà×÷ÓÃ·¶Î§Ö®ÍâµÃµ½ÄÚ²¿Àà¶ÔÏóµÄÒ»µÚÒ»¸ö·½·¨£¬ÄÇ¾ÍÊÇÀûÓÃÆäÍâ²¿ÀàµÄ·½·¨´´½¨²¢·µ»Ø¡£
@@ -16176,68 +16176,68 @@ public class TestMail
 µ±ÄÚ²¿Àà¶¨Òå·ÅÔÚº¯ÊıÄÚ²¿Ê±£¬classÇ°²»ÄÜ¹»Ê¹ÓÃprivate¡¢protectedºÍpublicĞŞÊÎ·û£¬ÒòÎª´ËÊ±µÄÀà½ö½öÔÚ¸Ã´úÂë¿é×÷ÓÃ¿É¼û£¬²»ĞèÒª¶ÔÍâ²¿¿ª·¢¿ÉÊÓÈ¨ÏŞ¡£
 interface IContent
 {
-	String getContent();
+    String getContent();
 }
 
 interface IAddress
 {
-	String getAddress();
+    String getAddress();
 }
 
 class Mail
 {
-	public IContent getContent(String s)
-	{
-		//ÓÊ¼şÄÚ²¿ÄÚ²¿Àà
-		class Content implements IContent//Èç¹û¶¨Òå³É¾Ö²¿Àà£¬Ôò²»ÄÜÓÃĞŞÊÎ·ûpublic/protected/private£¬Ö»ÄÜÓÃabstract/final
-		{
-			private String content;
-			
-			private Content(String content)
-			{
-				this.content = content;
-			}
-			
-			public String getContent()
-			{
-				return content;
-			}
-		}
-		
-		return new Content(s);
-	}
-	
-	public IAddress getAddress(String s)
-	{
-		//½ÓÊÕµØÖ·ÄÚ²¿Àà
-		class Address implements IAddress
-		{
-			private String address;
-			
-			private Address(String address) 
-			{
-				this.address = address;
-			}
-			
-			public String getAddress()
-			{
-				return address;
-			}
-		}
-		
-		return new Address(s);
-	}
+    public IContent getContent(String s)
+    {
+        //ÓÊ¼şÄÚ²¿ÄÚ²¿Àà
+        class Content implements IContent//Èç¹û¶¨Òå³É¾Ö²¿Àà£¬Ôò²»ÄÜÓÃĞŞÊÎ·ûpublic/protected/private£¬Ö»ÄÜÓÃabstract/final
+        {
+            private String content;
+            
+            private Content(String content)
+            {
+                this.content = content;
+            }
+            
+            public String getContent()
+            {
+                return content;
+            }
+        }
+        
+        return new Content(s);
+    }
+    
+    public IAddress getAddress(String s)
+    {
+        //½ÓÊÕµØÖ·ÄÚ²¿Àà
+        class Address implements IAddress
+        {
+            private String address;
+            
+            private Address(String address) 
+            {
+                this.address = address;
+            }
+            
+            public String getAddress()
+            {
+                return address;
+            }
+        }
+        
+        return new Address(s);
+    }
 }
 
 
 public class TestMail
 {
-	public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
-	{
-		Mail mail = new Mail();
-		IContent content = mail.getContent("ÕâÊÇÓÊ¼şÕıÎÄ");//È¡µÃÓÊ¼şÕıÎÄÊµÀı
-		IAddress address = mail.getAddress("bigben0204@163.com");//È¡µÃ½ÓÊÕµØÖ·ÊµÀı
-	}
+    public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
+    {
+        Mail mail = new Mail();
+        IContent content = mail.getContent("ÕâÊÇÓÊ¼şÕıÎÄ");//È¡µÃÓÊ¼şÕıÎÄÊµÀı
+        IAddress address = mail.getAddress("bigben0204@163.com");//È¡µÃ½ÓÊÕµØÖ·ÊµÀı
+    }
 }
 
 »¹¿ÉÒÔ½«ÄÚ²¿Àà·ÅÔÚ´úÂë¿éÖĞ£¬Èç¹ûs²»Îª¿ÕÔò¶¨ÒåÄÚ²¿Àà²¢·µ»ØÊµÀı£¬·ñÔò·µ»Ø¿Õ¡£²»ÄÜÔÚifÖ®Íâ´´½¨Õâ¸öÄÚ²¿ÀàµÄ¶ÔÏó£¬ÒòÎªÕâÒÑ¾­³¬³öÁËËüµÄ×÷ÓÃÓò¡£²»¹ıÔÚ±àÒëµÄÊ±ºò£¬ÄÚ²¿ÀàContent¡¢AddressºÍÆäËûÀàÒ»ÑùÍ¬Ê±±»±àÒë£¬Ö»²»¹ıËüÓĞ×Ô¼ºµÄ×÷ÓÃÓò£¬³¬³öÁËÕâ¸ö·¶Î§¾ÍÎŞĞ§£¬³ı´ËÖ®ÍâËüºÍÆäËûÄÚ²¿Àà²¢Ã»ÓĞÊ²Ã´Çø±ğ¡£
@@ -16294,30 +16294,30 @@ finallyÓï¾ä¿é£º½ô¸úcatchÓï¾äºóµÄÓï¾ä¿é£¬Õâ¸öÓï¾ä¿é×ÜÊÇ»áÔÚ·½·¨·µ»ØÇ°Ö´ĞĞ£¬¶ø²»¹Ü
 //ÈçÏÂ£¬¼´Ê¹Î´½øÈëcatchÓï¾ä¿éÖĞ£¬finallyÖĞµÄÓï¾ä»¹ÊÇ»áÖ´ĞĞµ½
 public class TestMail
 {
-	public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
-	{
-		int r = 30;
-		try
-		{
-			if (r <= 20)
-			{
-				throw new Exception("³ÌĞòÒì³££º\n°ë¾¶Îª£º" + r + "\n°ë¾¶²»ÄÜĞ¡ÓÚ20¡£");
-			}
-			else
-			{
-				return;
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return;
-		}
-		finally
-		{
-			System.out.println("before return");
-		}
-	}
+    public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
+    {
+        int r = 30;
+        try
+        {
+            if (r <= 20)
+            {
+                throw new Exception("³ÌĞòÒì³££º\n°ë¾¶Îª£º" + r + "\n°ë¾¶²»ÄÜĞ¡ÓÚ20¡£");
+            }
+            else
+            {
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return;
+        }
+        finally
+        {
+            System.out.println("before return");
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 before return
@@ -16325,31 +16325,31 @@ before return
 ÔÙÈçÏÂ£¬Èç¹ûÃ»ÓĞ·¢ÉúÒì³££¬ÔòfinallyÓï¾ä»¹ÊÇ»á°´Ë³ĞòÖ´ĞĞ
 public class TestMail
 {
-	public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
-	{
-		int r = 30;
-		try
-		{
-			if (r <= 20)
-			{
-				throw new Exception("³ÌĞòÒì³££º\n°ë¾¶Îª£º" + r + "\n°ë¾¶²»ÄÜĞ¡ÓÚ20¡£");
-			}
-//			else
-//			{
-//				return;
-//			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			//return;
-		}
-		finally
-		{
-			System.out.println("before return");
-		}
-		System.out.println("last sentence");
-	}
+    public static void main(String args[])//main·½·¨±ØĞë¶¨ÒåÔÚÓëÎÄ¼şÃû³ÆÒ»ÖÂµÄpublicÀàÖĞ
+    {
+        int r = 30;
+        try
+        {
+            if (r <= 20)
+            {
+                throw new Exception("³ÌĞòÒì³££º\n°ë¾¶Îª£º" + r + "\n°ë¾¶²»ÄÜĞ¡ÓÚ20¡£");
+            }
+//            else
+//            {
+//                return;
+//            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            //return;
+        }
+        finally
+        {
+            System.out.println("before return");
+        }
+        System.out.println("last sentence");
+    }
 }
 Êä³öÈçÏÂ£º
 before return
@@ -16369,61 +16369,61 @@ throws¹Ø¼ü×ÖÓÃÓÚ·½·¨ÌåÍâ²¿µÄ·½·¨ÉùÃ÷²¿·Ö£¬ÓÃÀ´ÉùÃ÷·½·¨¿ÉÄÜ»áÅ×³öÄ³Ğ©Òì³£¡£½öµ±Å×
 Ò»¸ö¼òµ¥µÄÀı×Ó£º
 public static void test() throws Exception
 {
-	throw new Exception("·½·¨test()ÖĞµÄException");
+    throw new Exception("·½·¨test()ÖĞµÄException");
 }
 
 7.4.3 Ê¹ÓÃÒì³£ºÍ×Ô¶¨ÒåÒì³£ P241
 1. Ê¹ÓÃÒÑÓĞµÄÒì³£Àà
 try
 {
-	
+    
 }
 catch(IOException ioe)
 {
-	
+    
 }
 catch(SQLException sqle)
 {
-	
+    
 }
 finally
 {
-	
+    
 }
 2. ×Ô¶¨ÒåÒì³£Àà
 public class MyException extends Exception
 {
-	public MyException() {}
-	public MyException(String msg)
-	{
-		super(msg);
-		System.out.println(msg);
-	}
+    public MyException() {}
+    public MyException(String msg)
+    {
+        super(msg);
+        System.out.println(msg);
+    }
 }
 ÔÚÒì³£ÀàÖĞ£¬¿ÉÒÔ¸²¸Ç»òÖØÔØ¸¸ÀàExceptionÖĞµÄº¯Êı£¬ÓÃĞÄÊµÏÖ×Ô¼ºµÄ´úÂë¡£
 3. Ê¹ÓÃ×Ô¶¨ÒåµÄÒì³£
 ÓÃthrowsÉùÃ÷·½·¨¿ÉÄÜÅ×³ö×Ô¶¨ÒåµÄÒì³££¬²¢ÓÃthrowÓï¾äÔÚÊÊµ±µÄµØ·½Å×³ö×Ô¶¨ÒåµÄÒì³£¡£
 public void test() throws MyException
 {
-	...
-	if (...)
-	{
-		throw new MyException();
-	}
+    ...
+    if (...)
+    {
+        throw new MyException();
+    }
 }
 Ò²¿ÉÒÔ½«Òì³£×ªĞÍ£¨Ò²½Ğ×ªÒë£©£¬Ê¹µÃÒì³£¸üÒ×¶ÁÒ×ÓÚÀí½â¡£ËùÎ½×ªĞÍ£¬¼´ÔÚ²¶×½µ½Ä³Ò»¸öÒì³£Ê±£¬Å×³öÁíÍâµÄÒ»¸ö×Ô¶¨ÒåµÄÒì³££¬ÕâÑùÊÇÎªÁËÍâ²¿¸ü¼ÓÍ³Ò»µØ½ÓÊÕÒì³£¡£
 public void test() throws MyException
 {
-	...
-	try
-	{
-		...
-	}
-	catch (SQLException e)
-	{
-		...
-		throw new MyException();
-	}
+    ...
+    try
+    {
+        ...
+    }
+    catch (SQLException e)
+    {
+        ...
+        throw new MyException();
+    }
 }
 
 7.5.4 ÉÏ»ú×÷Òµ²Î¿¼ P245
@@ -16433,10 +16433,10 @@ package calculator;
 
 public class CalculatorException extends Exception
 {
-	public CalculatorException(String msg)
-	{
-		super("Êı×Ö×ª»»Òì³££º" + msg);
-	}
+    public CalculatorException(String msg)
+    {
+        super("Êı×Ö×ª»»Òì³££º" + msg);
+    }
 }
 
 £¨2£©²¶»ñAbstractCalulatorÖĞµÄjava.lang.NumberFormatExceptionÒì³££¬²¢×ªÒë³ÉCalculatorExceptionÒì³£Å×³ö¡£
@@ -16444,23 +16444,23 @@ package calculator;
 
 public abstract class AbstractCalculator
 {
-	public int[] split(String expression, String deliString) throws CalculatorException
-	{
-		String array[] = expression.split(deliString);
-		int arrayInt[] = new int[2];
-		
-		try
-		{
-			arrayInt[0] = Integer.parseInt(array[0]);
-			arrayInt[1] = Integer.parseInt(array[1]);
-		}
-		catch (NumberFormatException e)
-		{
-			throw new CalculatorException(e.getMessage());
-		}
-		
-		return arrayInt;
-	}
+    public int[] split(String expression, String deliString) throws CalculatorException
+    {
+        String array[] = expression.split(deliString);
+        int arrayInt[] = new int[2];
+        
+        try
+        {
+            arrayInt[0] = Integer.parseInt(array[0]);
+            arrayInt[1] = Integer.parseInt(array[1]);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new CalculatorException(e.getMessage());
+        }
+        
+        return arrayInt;
+    }
 }
 
 £¨3£©¼Ó¼õ³Ë³ı¼ÆËãÒòÔö¼Ó¼ÆËãº¯ÊıÅ×³öÒì³£´¦Àí¡£
@@ -16472,12 +16472,12 @@ import calculator.AbstractCalculator;
 
 public class Plus extends AbstractCalculator implements ICalculator
 {
-	@Override
-	public int calculate(String expression) throws CalculatorException
-	{
-		int arrayInt[] = split(expression, "\\+");//String.splitº¯ÊıÖĞµÄÈë²ÎÊÇÕıÔò±í´ïÊ½£¬+ºÍ*ÓĞÌØÊâº¬Òå£¬ËùÓĞÒªÓÃ½«Æä×ªÒå
-		return arrayInt[0] + arrayInt[1];
-	}
+    @Override
+    public int calculate(String expression) throws CalculatorException
+    {
+        int arrayInt[] = split(expression, "\\+");//String.splitº¯ÊıÖĞµÄÈë²ÎÊÇÕıÔò±í´ïÊ½£¬+ºÍ*ÓĞÌØÊâº¬Òå£¬ËùÓĞÒªÓÃ½«Æä×ªÒå
+        return arrayInt[0] + arrayInt[1];
+    }
 }
 
 ½Ó¿ÚÀàICalulatorµÄ½Ó¿Úº¯ÊıÅ×³öÒì³££º
@@ -16485,7 +16485,7 @@ package calculator;
 
 public interface ICalculator
 {
-	public int calculate(String expression) throws CalculatorException;
+    public int calculate(String expression) throws CalculatorException;
 }
 
 £¨4£©²âÊÔÀàTestÖĞ²¶×½¼ÆËãÀàÅ×³öµÄ×Ô¶¨ÒåÒì³££¬Êä³öµ½¿ØÖÆÌ¨£º
@@ -16502,58 +16502,58 @@ import calculator.impl.Default;
 
 public class Test
 {
-	public static void main(String args[])
-	{
-		while (true)
-		{
-			//System.out.println("Ready to input:");
-			//String expression = System.console().readLine();
-			String expression = readDataFromConsole("Ready to input:");
-			if (expression.equals("exit"))
-			{
-				break;
-			}
-			
-			ICalculator calculator;
-			if (expression.indexOf("+") != -1)
-			{
-				calculator = new Plus();
-			}
-			else if (expression.indexOf("-") != -1)
-			{
-				calculator = new Minus();
-			}
-			else if (expression.indexOf("*") != -1)
-			{
-				calculator = new Multiply();
-			}
-			else if (expression.indexOf("/") != -1)
-			{
-				calculator = new Devide();
-			}
-			else
-			{
-				calculator = new Default();
-			}
-			
-			try
-			{
-				int value = calculator.calculate(expression);
-				System.out.println(expression + "=" + value);
-			}
-			catch (CalculatorException e)
-			{
-				System.out.println(e);
-			}
-		}
-	}
-	
-	private static String readDataFromConsole(String prompt)
-	{ 
-		Scanner scanner = new Scanner(System.in);  
+    public static void main(String args[])
+    {
+        while (true)
+        {
+            //System.out.println("Ready to input:");
+            //String expression = System.console().readLine();
+            String expression = readDataFromConsole("Ready to input:");
+            if (expression.equals("exit"))
+            {
+                break;
+            }
+            
+            ICalculator calculator;
+            if (expression.indexOf("+") != -1)
+            {
+                calculator = new Plus();
+            }
+            else if (expression.indexOf("-") != -1)
+            {
+                calculator = new Minus();
+            }
+            else if (expression.indexOf("*") != -1)
+            {
+                calculator = new Multiply();
+            }
+            else if (expression.indexOf("/") != -1)
+            {
+                calculator = new Devide();
+            }
+            else
+            {
+                calculator = new Default();
+            }
+            
+            try
+            {
+                int value = calculator.calculate(expression);
+                System.out.println(expression + "=" + value);
+            }
+            catch (CalculatorException e)
+            {
+                System.out.println(e);
+            }
+        }
+    }
+    
+    private static String readDataFromConsole(String prompt)
+    { 
+        Scanner scanner = new Scanner(System.in);  
         System.out.println(prompt);  
         return scanner.nextLine();  
-	}
+    }
 }
 //------------------------------------------------------------------------------------------------
 //JavaºËĞÄ±à³Ì¼¼Êõ µÚ8¿Î Java±àÂë¹æ·¶ÓëÑùÊ½ P249
@@ -16564,18 +16564,18 @@ package calculator;
 
 class DbTest
 {
-	public void show()
-	{
-		System.out.println("this is dbTest");
-	}
+    public void show()
+    {
+        System.out.println("this is dbTest");
+    }
 }
 
 class DbTest2
 {
-	public void show()
-	{
-		System.out.println("this is dbTest2");
-	}
+    public void show()
+    {
+        System.out.println("this is dbTest2");
+    }
 }
 
 //Test.java
@@ -16583,11 +16583,11 @@ package calculator;
 
 public class Test
 {
-	public static void main(String args[])
-	{
-		DbTest dbTest = new DbTest();//ÔÚÍ¬Ò»¸ö°üÖĞµÄÔ´³ÌĞòÀà¿ÉÒÔÖ±½ÓÒıÓÃ£¬¼´±ãÃ»ÓĞ¼Ópublic·ÃÎÊ¿ØÖÆ·û
-		dbTest.show();
-	}
+    public static void main(String args[])
+    {
+        DbTest dbTest = new DbTest();//ÔÚÍ¬Ò»¸ö°üÖĞµÄÔ´³ÌĞòÀà¿ÉÒÔÖ±½ÓÒıÓÃ£¬¼´±ãÃ»ÓĞ¼Ópublic·ÃÎÊ¿ØÖÆ·û
+        dbTest.show();
+    }
 }
 ÀàµÄ·ÃÎÊ¿ØÖÆ·ûÖ»ÓĞpublic¡¢abstract¡¢finalÈıÖÖ¡£ºóÁ½ÖÖ²»ËµÁË£¬publicÀà²ÅÄÜ±»ÆäËû°üimport½ø²¢Ê¹ÓÃ£¬²»¼ÓpublicÔòÎŞ·¨±»ÆäËû°üÊ¹ÓÃ£¬Ö»ÄÜÔÚ±¾°üÖĞÊ¹ÓÃ¡£
 
@@ -16643,7 +16643,7 @@ Tips£º}Óï¾äÓÀÔ¶µ¥¶À×÷ÎªÒ»ĞĞ¡£
 Ëõ½øÅÅ°æÍ¨³£ÒÔ4¸ö¿Õ¸ñ×÷ÎªÒ»¸öµ¥Î»
 --Ã¿¸öÓï¾ä¿éÏòºóËõ½ø4¸ö¿Õ¸ñÎ»ÖÃ
 --ÔÚÓï¾äºÜ³¤µÄÇé¿öÏÂ£¬¹ØÓÚ»»ĞĞµÄËõ½ø
-	Ã¿Ò»ĞĞJava´úÂë¶¼Ó¦¸ÃÏŞÖÆÔÚ80¸ö×Ö·ûÒÔÄÚ¡£µ±Ò»ĞĞ´úÂë¹ı³¤Ê±£¬Òª¿¼ÂÇÕÛĞĞ¡£ÕÛĞĞºó£¬µÚ2ĞĞµÄ¿ªÍ·Ó¦µ±ÓëµÚ1ĞĞÓï¾äÍ¬µÈµØÎ»µÄ´ÊËõ½ø¶ÔÆë£¨Ê¹ÓÃ¡°Tab¡±¼üÎŞ·¨¶ÔÆëÊ±£¬²»Òª¼õĞ¡Ëõ½øµÄ¿Õ¸ñÊıÄ¿£¬¶øÊÇ´í¿ª£¬ÒÔ¡°Tab¡±¼üËõ½øµÄ¿Õ¸ñÎª×¼£©¡£»»¶àĞĞÊ±£¬µÚ2ĞĞÒÔºóµÄ¸÷ĞĞÒ»¶¨Òª¶ÔÆë¡£
+    Ã¿Ò»ĞĞJava´úÂë¶¼Ó¦¸ÃÏŞÖÆÔÚ80¸ö×Ö·ûÒÔÄÚ¡£µ±Ò»ĞĞ´úÂë¹ı³¤Ê±£¬Òª¿¼ÂÇÕÛĞĞ¡£ÕÛĞĞºó£¬µÚ2ĞĞµÄ¿ªÍ·Ó¦µ±ÓëµÚ1ĞĞÓï¾äÍ¬µÈµØÎ»µÄ´ÊËõ½ø¶ÔÆë£¨Ê¹ÓÃ¡°Tab¡±¼üÎŞ·¨¶ÔÆëÊ±£¬²»Òª¼õĞ¡Ëõ½øµÄ¿Õ¸ñÊıÄ¿£¬¶øÊÇ´í¿ª£¬ÒÔ¡°Tab¡±¼üËõ½øµÄ¿Õ¸ñÎª×¼£©¡£»»¶àĞĞÊ±£¬µÚ2ĞĞÒÔºóµÄ¸÷ĞĞÒ»¶¨Òª¶ÔÆë¡£
 --×¢ÊÍÓ¦¸ÃºÍ±»×¢ÊÍµÄ´úÂëµÄËõ½øÁĞÊıÏàÍ¬
 
 8.2.4 Ò³¿í
@@ -16703,62 +16703,62 @@ read()ÓÃÓÚ´Ó¿ØÖÆÌ¨¶ÁÈëÒ»¸ö×Ö½Ú£¨8bit£©¡£
 
 public class TestSystemInRead
 {
-	public static void main(String args[])
-	{
-		try
-		{
-			int c;
-			while ((c = System.in.read()) != 0)
-			{
-				System.out.write(c);
-			}
-		}
-		catch (Exception e)
-		{
-		}
-	}
+    public static void main(String args[])
+    {
+        try
+        {
+            int c;
+            while ((c = System.in.read()) != 0)
+            {
+                System.out.write(c);
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
 }
 £¨2£©read(byte[] b)¶ÁÈ¡Ò»¸ö×Ö½ÚÊı×é
 ÉÏÃæµÄº¯ÊıÒ»´Î½ö½öÄÜ¹»¶ÁÈ¡Ò»¸ö×Ö½Ú¡£¿ÉÒÔÊ¹ÓÃread(byte[] b)À´¶ÁÈ¡Ò»¸ö×Ö½ÚÊı×é¡£Ê×ÏÈ´´½¨ÁËÒ»¸ö³¤¶ÈÎª100µÄ×Ö½ÚÊı×é£¬±íÊ¾Ò»´Î¿ÉÒÔ¶ÁÈ¡100¸ö×Ö½Ú£¬È»ºóÊ¹ÓÃread(byte[] b)¶ÁÈ¡100¸ö×Ö½Úµ½byteÖĞ£¬ÔÙµ÷ÓÃwrite()º¯ÊıÊä³öÕâ¸ö×Ö½ÚÊı×éµ½¿ØÖÆÌ¨ÖĞ¡£
 
 public class TestSystemInReadByte
 {
-	public static void main(String args[])
-	{
-		try
-		{
-			byte[] b = new byte[100];//Èç¹ûÊäÈëµÄ×Ö·û´®³¤¶È´óÓÚ100£¬¶àÓàµÄ×Ö½Ú¾Í»á±»Å×Æú¡£
-			System.in.read(b);
-			System.out.write(b, 0, 100);
-			//¿ÉÒÔ½«¶ÁÈëµÄ×Ö½ÚÊı×éb×ª»¯Îª×Ö·û´®Êä³ö
-			//String str = new String(b);
-			//System.out.println(str);
-		}
-		catch (Exception e)
-		{
-		}
-	}
+    public static void main(String args[])
+    {
+        try
+        {
+            byte[] b = new byte[100];//Èç¹ûÊäÈëµÄ×Ö·û´®³¤¶È´óÓÚ100£¬¶àÓàµÄ×Ö½Ú¾Í»á±»Å×Æú¡£
+            System.in.read(b);
+            System.out.write(b, 0, 100);
+            //¿ÉÒÔ½«¶ÁÈëµÄ×Ö½ÚÊı×éb×ª»¯Îª×Ö·û´®Êä³ö
+            //String str = new String(b);
+            //System.out.println(str);
+        }
+        catch (Exception e)
+        {
+        }
+    }
 }
 
 //Ñ­»·ÊäÈë
 public class TestSystemInReadByte
 {
-	public static void main(String args[])
-	{
-		try
-		{
-			while (true)
-			{
-				byte[] b = new byte[100];
-				System.in.read(b);
-				String str = new String(b);
-				System.out.println(str);
-			}
-		}
-		catch (Exception e)
-		{
-		}
-	}
+    public static void main(String args[])
+    {
+        try
+        {
+            while (true)
+            {
+                byte[] b = new byte[100];
+                System.in.read(b);
+                String str = new String(b);
+                System.out.println(str);
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
 }
 
 Tips£ºSystem.inµÄread()º¯Êı¶ÁÈ¡£¬ÊÇÔÚ¿ØÖÆÌ¨ÖĞ°´»Ø¹úºó¿ªÊ¼Ö´ĞĞµÄ¡£Òò´Ë£¬Èç¹ûÔÚÉÏÃæµÄ³ÌĞòÖĞÊ¹ÓÃread()º¯Êı¶ÁÈ¡Ò»¸ö×Ö½ÚÊ±£¬²»ÊÇÔÚÓÃ»§ÊäÈëÒ»¸ö×Ö·ûºó¶ÁÈ¡µÄ£¬¶øÊÇÔÚ°´»Ø³µ¼üºóÒ»´ÎĞÔ¶ÁÈ¡µÄ¡£
@@ -16768,14 +16768,14 @@ Tips£ºSystem.inµÄread()º¯Êı¶ÁÈ¡£¬ÊÇÔÚ¿ØÖÆÌ¨ÖĞ°´»Ø¹úºó¿ªÊ¼Ö´ĞĞµÄ¡£Òò´Ë£¬Èç¹ûÔÚÉÏÃ
 
 public class TestConsole
 {
-	public static void main(String args[])
-	{
-		while (true)
-		{
-			String str = System.console().readLine();//ÓÃEclipse½«»áÅ×³öconsole¿ÕÖ¸ÕëÒì³££¬Ê¹ÓÃcmdÔËĞĞjava TestConsole¿ÉÒÔÕı³£ÔËĞĞ
-			System.out.println(str);
-		}
-	}
+    public static void main(String args[])
+    {
+        while (true)
+        {
+            String str = System.console().readLine();//ÓÃEclipse½«»áÅ×³öconsole¿ÕÖ¸ÕëÒì³££¬Ê¹ÓÃcmdÔËĞĞjava TestConsole¿ÉÒÔÕı³£ÔËĞĞ
+            System.out.println(str);
+        }
+    }
 }
 ÕâÀïÊ¹ÓÃÁËSystem.console()º¯ÊıÈ¡µÃÁËConsole¶ÔÏó£¬È»ºóÊ¹ÓÃreadLine()º¯Êı¼´¿É¶ÁÈ¡Ò»ĞĞ×Ö·û´®µÄÊäÈë¡£¸Ãº¯ÊıÔÚÓÃ»§Ö´ĞĞ»Ø³µÊ±µ÷ÓÃ¡£
 --²»ĞèÒª²¶×½Òì³££¬¸Ãº¯ÊıÃ»ÓĞÅ×³öÒì³£¡£
@@ -16795,14 +16795,14 @@ System.console().printf(str);
 
 public class TestConsolePassword
 {
-	public static void main(String args[])
-	{
-		while (true)
-		{
-			char password[] = System.console().readPassword();//System.console().readPassword("[%s]", "Please input password");½«ÓĞ"[Please input password]"×÷ÎªÌáÊ¾ĞÅÏ¢ÏÔÊ¾ÔÚ¿ØÖÆÌ¨´°¿ÚÖĞ
-			System.out.println(password);
-		}
-	}
+    public static void main(String args[])
+    {
+        while (true)
+        {
+            char password[] = System.console().readPassword();//System.console().readPassword("[%s]", "Please input password");½«ÓĞ"[Please input password]"×÷ÎªÌáÊ¾ĞÅÏ¢ÏÔÊ¾ÔÚ¿ØÖÆÌ¨´°¿ÚÖĞ
+            System.out.println(password);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 D:\Program Files\eclipseJava workspace\LearningProject\bin>java TestConsolePassword
@@ -16830,21 +16830,21 @@ isFile()£ºÊÇ·ñÊÇÎÄ¼ş
 Èç£º
 if (path.isDirectory())
 {
-	
+    
 }
 if (file.isFile())
 {
-	
+    
 }
 
 £¨3£©¼ì²éÄ¿Â¼»òÎÄ¼şÊÇ·ñ´æÔÚ
 if (path.exists())
 {
-	
+    
 }
 if (file.exists())
 {
-	
+    
 }
 
 £¨4£©´´½¨Ä¿Â¼»òÎÄ¼ş
@@ -16855,19 +16855,19 @@ if (file.exists())
 ÆäÖĞ£¬´´½¨¶à²ãÄ¿Â¼µÄÊ±ºòÒªÓÃmkdirs()£¬mkdir()Ö»ÄÜÔÚÒÑÓĞÄ¿Â¼ÏÂ´´½¨Ò»¸ö×ÓÄ¿Â¼£¬¶ø¶ÔÓÚcreateNewFile()ÔòĞèÒª²¶×½IOException¡£Èç£º
 if (!path.exists())
 {
-	path.mkdir();
-	path.mkdirs();
+    path.mkdir();
+    path.mkdirs();
 }
 if (!file.exists())
 {
-	try
-	{
-		file.createNewFile();
-	}
-	catch (IOException e)
-	{
-		
-	}
+    try
+    {
+        file.createNewFile();
+    }
+    catch (IOException e)
+    {
+        
+    }
 }
 £¨5£©²é¿´Ä¿Â¼ÏÂµÄÎÄ¼şÁĞ±í£¬²¢Êä³öÂ·¾¶Ãû
 ¶ÔÓÚÄ¿Â¼À´Ëµ£¬¿ÉÒÔÊ¹ÓÃlistFiles()È¡µÃ¸ÃÄ¿Â¼ÏÂµÄÎÄ¼şÁĞ±í£¬Ëü·µ»ØµÄÊÇÒ»¸öFileÀàĞÍµÄÊı×é£¬¿ÉÒÔÑ­»·¸ÃÊı×éÈ¡µÃÃ¿Ò»¸öÎÄ¼ş¶ÔÏó£¬²¢Ê¹ÓÃgetAbsolutePath()È¡µÃ¸Ã¶ÔÏóµÄÂ·¾¶Ãû¡£
@@ -16875,7 +16875,7 @@ if (!file.exists())
 File[] filelist = path.listFiles();
 for (int i = 0; i < filelist.length; ++i)
 {
-	System.out.println(filelist[i].getAbsolutePath());
+    System.out.println(filelist[i].getAbsolutePath());
 }
 
 //Àı
@@ -16883,15 +16883,15 @@ import java.io.File;
 
 public class TestConsolePassword
 {
-	public static void main(String args[])
-	{
-		File path = new File("f:\\PTDownload");
-		File[] fileList = path.listFiles();//½«»áµÃµ½ËùÓĞÎÄ¼şºÍÎÄ¼ş¼Ğ£¬°üÀ¨Òş²ØÎÄ¼ş¼Ğ
-		for (File f : fileList)
-		{ 
-			System.out.println(f.getAbsolutePath());
-		}
-	}
+    public static void main(String args[])
+    {
+        File path = new File("f:\\PTDownload");
+        File[] fileList = path.listFiles();//½«»áµÃµ½ËùÓĞÎÄ¼şºÍÎÄ¼ş¼Ğ£¬°üÀ¨Òş²ØÎÄ¼ş¼Ğ
+        for (File f : fileList)
+        { 
+            System.out.println(f.getAbsolutePath());
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 f:\PTDownload\f
@@ -16910,7 +16910,7 @@ f:\PTDownload\ÃÀÊ½¼«¶ËBD1280¸ßÇåÖĞÓ¢Ë«×Ö.rmvb
 File newFile = new File("D:/demo/test2.txt");
 if (file.isFile())
 {
-	file.renameTo(newFile);
+    file.renameTo(newFile);
 }
 
 £¨7£©É¾³ıÄ¿Â¼»òÎÄ¼ş
@@ -16936,37 +16936,37 @@ import java.io.FileFilter;
 
 public class ExtensionFilter implements FileFilter
 {
-	private String extension;
-	
-	public ExtensionFilter(String extension)
-	{
-		this.extension = extension;
-	}
+    private String extension;
+    
+    public ExtensionFilter(String extension)
+    {
+        this.extension = extension;
+    }
 
-	@Override
-	public boolean accept(File file)
-	{
-		if (file.isDirectory())
-		{
-			return false;
-		}
-		
-		String name = file.getName();
-		//À©Õ¹ÃûÇ°µÄ·ûºÅ¡°.¡±
-		int index = name.lastIndexOf(".");
-		if (index == -1)//Ã»ÓĞÀ©Õ¹ÃûÔò·µ»Øfalse
-		{
-			return false;
-		}
-		else if (index == name.length() - 1)//ÒÔµãºÅ½áÎ²Ôò·µ»Øfalse
-		{
-			return false;
-		}
-		else
-		{
-			return extension.equals(name.substring(index + 1));
-		}
-	}
+    @Override
+    public boolean accept(File file)
+    {
+        if (file.isDirectory())
+        {
+            return false;
+        }
+        
+        String name = file.getName();
+        //À©Õ¹ÃûÇ°µÄ·ûºÅ¡°.¡±
+        int index = name.lastIndexOf(".");
+        if (index == -1)//Ã»ÓĞÀ©Õ¹ÃûÔò·µ»Øfalse
+        {
+            return false;
+        }
+        else if (index == name.length() - 1)//ÒÔµãºÅ½áÎ²Ôò·µ»Øfalse
+        {
+            return false;
+        }
+        else
+        {
+            return extension.equals(name.substring(index + 1));
+        }
+    }
 }
 
 //TestFile.java
@@ -16976,16 +16976,16 @@ import java.io.File;
 
 public class TestFile
 {
-	public static void main(String[] args)
-	{
-		File file = new File("f:/PTDownload");
-		ExtensionFilter mp4Filter = new ExtensionFilter("mp4");
-		File[] files = file.listFiles(mp4Filter);
-		for (int i = 0; i < files.length; ++i)
-		{
-			System.out.println(files[i].getAbsolutePath());
-		}
-	}
+    public static void main(String[] args)
+    {
+        File file = new File("f:/PTDownload");
+        ExtensionFilter mp4Filter = new ExtensionFilter("mp4");
+        File[] files = file.listFiles(mp4Filter);
+        for (int i = 0; i < files.length; ++i)
+        {
+            System.out.println(files[i].getAbsolutePath());
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 f:\PTDownload\Ê¹ÃüÕÙ»½.BD1280³¬ÇåÖĞÓ¢Ë«×Ö.mp4
@@ -17002,47 +17002,47 @@ import java.io.FilenameFilter;
 
 public class ImageFilter implements FilenameFilter
 {
-	public boolean isGif(String filename)
-	{
-		if (filename.toLowerCase().endsWith(".gif"))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	public boolean isJpg(String filename)
-	{
-		if (filename.toLowerCase().endsWith(".jpg"))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	public boolean isPng(String filename) 
-	{
-		if (filename.toLowerCase().endsWith(".png"))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	@Override
-	public boolean accept(File dir, String filename)
-	{
-		return (isGif(filename) || isJpg(filename) || isPng(filename));
-	}
+    public boolean isGif(String filename)
+    {
+        if (filename.toLowerCase().endsWith(".gif"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    public boolean isJpg(String filename)
+    {
+        if (filename.toLowerCase().endsWith(".jpg"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    public boolean isPng(String filename) 
+    {
+        if (filename.toLowerCase().endsWith(".png"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    @Override
+    public boolean accept(File dir, String filename)
+    {
+        return (isGif(filename) || isJpg(filename) || isPng(filename));
+    }
 }
 
 //TestFile.java
@@ -17052,16 +17052,16 @@ import java.io.File;
 
 public class TestFile
 {
-	public static void main(String[] args)
-	{
-		File file = new File("d:/Program Files/eclipseJava workspace/LearningProject/src");
-		ImageFilter imageFilter= new ImageFilter();
-		File[] images = file.listFiles(imageFilter);
-		for (int i = 0; i < images.length; ++i)
-		{
-			System.out.println(images[i].getAbsolutePath());
-		}
-	}
+    public static void main(String[] args)
+    {
+        File file = new File("d:/Program Files/eclipseJava workspace/LearningProject/src");
+        ImageFilter imageFilter= new ImageFilter();
+        File[] images = file.listFiles(imageFilter);
+        for (int i = 0; i < images.length; ++i)
+        {
+            System.out.println(images[i].getAbsolutePath());
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 d:\Program Files\eclipseJava workspace\LearningProject\src\imageButton.jpg
@@ -17077,31 +17077,31 @@ import java.io.FilenameFilter;
 
 public class ImageFilter implements FilenameFilter
 {
-	@Override
-	public boolean accept(File dir, String filename)
-	{
-		return (isGif(filename) || isJpg(filename) || isPng(filename));
-	}
-	
-	private boolean isExtensionType(String filename, String extension)
-	{
-		return filename.toLowerCase().endsWith(extension);
-	}
-	
-	private boolean isGif(String filename)
-	{
-		return isExtensionType(filename, ".gif");
-	}
-	
-	private boolean isJpg(String filename)
-	{
-		return isExtensionType(filename, ".jpg");
-	}
-	
-	private boolean isPng(String filename) 
-	{
-		return isExtensionType(filename, ".Png");
-	}
+    @Override
+    public boolean accept(File dir, String filename)
+    {
+        return (isGif(filename) || isJpg(filename) || isPng(filename));
+    }
+    
+    private boolean isExtensionType(String filename, String extension)
+    {
+        return filename.toLowerCase().endsWith(extension);
+    }
+    
+    private boolean isGif(String filename)
+    {
+        return isExtensionType(filename, ".gif");
+    }
+    
+    private boolean isJpg(String filename)
+    {
+        return isExtensionType(filename, ".jpg");
+    }
+    
+    private boolean isPng(String filename) 
+    {
+        return isExtensionType(filename, ".Png");
+    }
 }
 
 Tips£ºÍ¨³£½¨ÒéÊ¹ÓÃFilenameFilterÀà½øĞĞÎÄ¼ş¹ıÂË¡£
@@ -17175,35 +17175,35 @@ import java.io.RandomAccessFile;
 
 public class TestFile
 {
-	public static void main(String[] args) throws IOException
-	{
-		RandomAccessFile file = null;
-		try
-		{
-			file = new RandomAccessFile("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/abc.txt", "r");
-			int c = file.read();
-			System.out.println((char)c);
-			
-			byte[] b = new byte[3];
-			file.read(b);
-			String str = new String(b);
-			System.out.println(str);
-			
-			System.out.println(file.readLine());//µ±Ç°ĞĞÊ£Óà×Ö·û¶ÁÈ¡³öÀ´£¬²»°üº¬¸ÃĞĞÒÑ¶ÁÈ¡µÄ×Ö·û
-			System.out.println(file.readLine());
-		}
-		catch (Exception e)
-		{
-			System.err.println(e.getMessage());
-		}
-		finally
-		{
-			if (file != null)
-			{
-				file.close();
-			}
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        RandomAccessFile file = null;
+        try
+        {
+            file = new RandomAccessFile("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/abc.txt", "r");
+            int c = file.read();
+            System.out.println((char)c);
+            
+            byte[] b = new byte[3];
+            file.read(b);
+            String str = new String(b);
+            System.out.println(str);
+            
+            System.out.println(file.readLine());//µ±Ç°ĞĞÊ£Óà×Ö·û¶ÁÈ¡³öÀ´£¬²»°üº¬¸ÃĞĞÒÑ¶ÁÈ¡µÄ×Ö·û
+            System.out.println(file.readLine());
+        }
+        catch (Exception e)
+        {
+            System.err.println(e.getMessage());
+        }
+        finally
+        {
+            if (file != null)
+            {
+                file.close();
+            }
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 a
@@ -17262,27 +17262,27 @@ import java.io.IOException;
 
 public class TestByteArrayInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		byte[] buf = new byte[3];
-		buf[0] = 100;
-		buf[1] = 101;
-		buf[2] = 102;//'f'
-		try
-		{
-			ByteArrayInputStream is = new ByteArrayInputStream(buf);
-			
-			byte[] b = new byte[3];
-			is.read(b);
-			System.out.println(new String(b));
-			
-			is.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        byte[] buf = new byte[3];
+        buf[0] = 100;
+        buf[1] = 101;
+        buf[2] = 102;//'f'
+        try
+        {
+            ByteArrayInputStream is = new ByteArrayInputStream(buf);
+            
+            byte[] b = new byte[3];
+            is.read(b);
+            System.out.println(new String(b));
+            
+            is.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 def
@@ -17301,24 +17301,24 @@ import java.io.IOException;
 
 public class TestFileInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileInputStream is = new FileInputStream("D:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
-			while (is.available() > 0)
-			{
-				int c = is.read();
-				System.out.print((char)c);
-			}
-			
-			is.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileInputStream is = new FileInputStream("D:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
+            while (is.available() > 0)
+            {
+                int c = is.read();
+                System.out.print((char)c);
+            }
+            
+            is.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 
 3. ¶ÔÏó×÷ÎªÊäÈëÔ´¡ª¡ªObjectInputStream
@@ -17353,28 +17353,28 @@ import java.io.PipedOutputStream;
 
 public class TestPipedInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			PipedOutputStream os = new PipedOutputStream();
-			PipedInputStream is = new PipedInputStream(os);
-			
-			byte[] b = new byte[] {'d', 'e', 'f'};
-			os.write(b);
-			
-			while (is.available() > 0)
-			{
-				int c = is.read();
-				System.out.print((char)c);
-			}
-			
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            PipedOutputStream os = new PipedOutputStream();
+            PipedInputStream is = new PipedInputStream(os);
+            
+            byte[] b = new byte[] {'d', 'e', 'f'};
+            os.write(b);
+            
+            while (is.available() > 0)
+            {
+                int c = is.read();
+                System.out.print((char)c);
+            }
+            
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 def
@@ -17395,32 +17395,32 @@ import java.util.Vector;
 
 public class TestSequenceInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileInputStream fis1 = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
-			FileInputStream fis2 = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/c.txt");
-			Vector<FileInputStream> vector = new Vector<FileInputStream>();
-			vector.add(fis1);
-			vector.add(fis2);
-			Enumeration<FileInputStream> e = vector.elements();
-			
-			SequenceInputStream is = new SequenceInputStream(e);
-			
-			while (is.available() > 0)
-			{
-				int c = is.read();
-				System.out.print((char)c);
-			}
-			
-			is.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileInputStream fis1 = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
+            FileInputStream fis2 = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/c.txt");
+            Vector<FileInputStream> vector = new Vector<FileInputStream>();
+            vector.add(fis1);
+            vector.add(fis2);
+            Enumeration<FileInputStream> e = vector.elements();
+            
+            SequenceInputStream is = new SequenceInputStream(e);
+            
+            while (is.available() > 0)
+            {
+                int c = is.read();
+                System.out.print((char)c);
+            }
+            
+            is.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 b.txt:
 It is a nice day.
@@ -17448,27 +17448,27 @@ import java.io.IOException;
 
 public class TestBufferedInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileInputStream is = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
-			BufferedInputStream bis = new BufferedInputStream(is);
-			
-			while (bis.available() > 0)
-			{
-				int c = bis.read();
-				System.out.print((char) c);
-			}
-			
-			bis.close();
-			is.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileInputStream is = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
+            BufferedInputStream bis = new BufferedInputStream(is);
+            
+            while (bis.available() > 0)
+            {
+                int c = bis.read();
+                System.out.print((char) c);
+            }
+            
+            bis.close();
+            is.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 Tips£ºÊäÈëÁ÷¶ÔÏóµÄ¹Ø±ÕË³Ğò±ØĞëÓëÆä´´½¨µÄË³ĞòÏà·´£¬ºóÃæµÄÊä³öÁ÷Ò²ÊÇÈç´Ë¡£
 
@@ -17488,29 +17488,29 @@ import java.io.LineNumberInputStream;
 
 public class TestLineNumberInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileInputStream fis = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");//ÎÄ¼şµÄ×îºóÒ»ĞĞÒ»¶¨ÒªÊÇ¸ö¿Õ»»ĞĞ·û£¬·ñÔò×îºóÒ»ĞĞÃ»ÓĞ¶Áµ½»»ĞĞ·û£¬Ôò×îºóÒ»ĞĞµÄĞĞºÅ²»»á¼Ó1
-			LineNumberInputStream lis = new LineNumberInputStream(fis);//´ËÀàÆúÓÃ£¬²»½¨ÒéÊ¹ÓÃ
-			DataInputStream dis = new DataInputStream(lis);
-			
-			String line;
-			while ((line = dis.readLine()) != null)
-			{
-				System.out.println(lis.getLineNumber() + ":" + line);
-			}
-			
-			dis.close();
-			lis.close();
-			fis.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileInputStream fis = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");//ÎÄ¼şµÄ×îºóÒ»ĞĞÒ»¶¨ÒªÊÇ¸ö¿Õ»»ĞĞ·û£¬·ñÔò×îºóÒ»ĞĞÃ»ÓĞ¶Áµ½»»ĞĞ·û£¬Ôò×îºóÒ»ĞĞµÄĞĞºÅ²»»á¼Ó1
+            LineNumberInputStream lis = new LineNumberInputStream(fis);//´ËÀàÆúÓÃ£¬²»½¨ÒéÊ¹ÓÃ
+            DataInputStream dis = new DataInputStream(lis);
+            
+            String line;
+            while ((line = dis.readLine()) != null)
+            {
+                System.out.println(lis.getLineNumber() + ":" + line);
+            }
+            
+            dis.close();
+            lis.close();
+            fis.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 1:It is a nice day.
@@ -17529,28 +17529,28 @@ import java.io.PushbackInputStream;
 
 public class TestPushbackInputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileInputStream fis = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
-			PushbackInputStream pis = new PushbackInputStream(fis);//¸ÃÀàÆúÓÃ£¬²»½¨ÒéÊ¹ÓÃ
-			
-			int c = pis.read();
-			System.out.print((char)c);
-			
-			pis.unread(c);
-			c = pis.read();
-			System.out.print((char)c);
-			
-			pis.close();
-			fis.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileInputStream fis = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/b.txt");
+            PushbackInputStream pis = new PushbackInputStream(fis);//¸ÃÀàÆúÓÃ£¬²»½¨ÒéÊ¹ÓÃ
+            
+            int c = pis.read();
+            System.out.print((char)c);
+            
+            pis.unread(c);
+            c = pis.read();
+            System.out.print((char)c);
+            
+            pis.close();
+            fis.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 
 12. ×Ü½á P296
@@ -17587,77 +17587,77 @@ import java.io.PipedOutputStream;
 
 public class TestPipedOutputStream
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			Sender t1 = new Sender();
-			PipedOutputStream out = t1.getOutStream();
-			
-			Receiver t2 = new Receiver();
-			PipedInputStream in = t2.getInputStream();
-			
-			out.connect(in);
-			
-			new Thread(t1).start();
-			new Thread(t2).start();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            Sender t1 = new Sender();
+            PipedOutputStream out = t1.getOutStream();
+            
+            Receiver t2 = new Receiver();
+            PipedInputStream in = t2.getInputStream();
+            
+            out.connect(in);
+            
+            new Thread(t1).start();
+            new Thread(t2).start();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 
 class Sender extends Thread
 {
-	private PipedOutputStream out = new PipedOutputStream();
-	
-	public PipedOutputStream getOutStream()
-	{
-		return out;
-	}
-	
-	public void run()
-	{
-		String s = new String("hello, receiver, how are you");
-		try
-		{
-			out.write(s.getBytes());
-			out.close();
-		}
-		catch (IOException e)
-		{
-			System.out.println(e.getMessage());
-		}
-	}
+    private PipedOutputStream out = new PipedOutputStream();
+    
+    public PipedOutputStream getOutStream()
+    {
+        return out;
+    }
+    
+    public void run()
+    {
+        String s = new String("hello, receiver, how are you");
+        try
+        {
+            out.write(s.getBytes());
+            out.close();
+        }
+        catch (IOException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
 }
 
 class Receiver extends Thread
 {
-	private PipedInputStream in = new PipedInputStream();
-	
-	public PipedInputStream getInputStream()
-	{
-		return in;
-	}
-	
-	public void run()
-	{
-		String s = null;
-		byte[] buf = new byte[1024];
-		try
-		{
-			int len = in.read(buf);
-			s = new String(buf, 0, len);
-			System.out.println("from:\n" + s);
-			in.close();
-		}
-		catch (Exception e)
-		{
-			System.out.println(e.getMessage());
-		}
-	}
+    private PipedInputStream in = new PipedInputStream();
+    
+    public PipedInputStream getInputStream()
+    {
+        return in;
+    }
+    
+    public void run()
+    {
+        String s = null;
+        byte[] buf = new byte[1024];
+        try
+        {
+            int len = in.read(buf);
+            s = new String(buf, 0, len);
+            System.out.println("from:\n" + s);
+            in.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 from:
@@ -17694,24 +17694,24 @@ import java.io.IOException;
 
 public class TestCharArrayReader
 {
-	public static void main(String[] args) throws IOException
-	{
-		char[] buf = new char[] {'a', 'b', 'c'};
-		try
-		{
-			CharArrayReader is = new CharArrayReader(buf);
+    public static void main(String[] args) throws IOException
+    {
+        char[] buf = new char[] {'a', 'b', 'c'};
+        try
+        {
+            CharArrayReader is = new CharArrayReader(buf);
 
-			char[] b = new char[3];
-			is.read(b);
-			System.out.println(new String(b));
+            char[] b = new char[3];
+            is.read(b);
+            System.out.println(new String(b));
 
-			is.close();
-		}
-		catch (IOException e)
-		{
-			// TODO: handle exception
-		}
-	}
+            is.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: handle exception
+        }
+    }
 }
 ´Ó¸ÃÀàµÄÊ¹ÓÃÊµÀıÀ´¿´£¬ËüÖ»ÊÇ½«×Ö·ûÊı×é×ª»»ÎªÁË×Ö·ûÊı×é£¬²¢Ã»ÓĞÊ²Ã´Êµ¼ÊÒâÒå¡£Êµ¼ÊÉÏ£¬Ëü½«×Ö·ûÊı×é×ª»¯³ÉÁËÁ÷Ê½¶ÁÈ¡£¬ÕâÑù¾Í¿ÉÒÔÍ¨¹ıÁ÷Ê½µÄ·½Ê½´ÓÄÚ´æÖĞ¶ÁÈ¡Ò»¸ö×Ö·û£¬¶ø²»ĞèÒªÖ±½ÓÊı×é£¬Õâ¾ÍÊÇ×ª»¯µÄºÃ´¦¡£
 
@@ -17722,31 +17722,31 @@ import java.io.IOException;
 
 public class TestFileReader
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileReader is = new FileReader("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/abc.txt");
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileReader is = new FileReader("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/abc.txt");
 
-			while (is.ready())
-			{
-				int c = is.read();
-				System.out.print((char)c);
-			}
-			//ÕâÀïµÄwhileĞ´·¨Í¬ÏÂ
-			// int c;
-			// while ((c = is.read()) > 0)
-			// {
-				// System.out.print((char)c);
-			// }
-			
-			is.close();
-		}
-		catch (IOException e)
-		{
-			
-		}
-	}
+            while (is.ready())
+            {
+                int c = is.read();
+                System.out.print((char)c);
+            }
+            //ÕâÀïµÄwhileĞ´·¨Í¬ÏÂ
+            // int c;
+            // while ((c = is.read()) > 0)
+            // {
+                // System.out.print((char)c);
+            // }
+            
+            is.close();
+        }
+        catch (IOException e)
+        {
+            
+        }
+    }
 }
 Tips£º¸Ã³ÌĞòÄÜ¹»ÕıÈ·Êä³öÖĞÎÄÎÄ£¬ÒòÎªFileReaderÊÇ°´ÕÕ×Ö·û¶ÁÈ¡µÄ£»¶øFileInputStream»áÊä³öÂÒÂë£¬ÒòÎªËüÊÇ°´ÕÕ×Ö½Ú¶ÁÈ¡µÄ¡£ËùÒÔ£¬Èç¹ûÒª¶ÁÈ¡ÖĞÎÄÎÄ¼ş£¬ÇëÊ¹ÓÃFileReader¡£
 
@@ -17765,7 +17765,7 @@ LineNumberReader lis = new LineNumberReader(fis);
 String line;
 while((line = lis.readLine()) != null)
 {
-	System.out.println(lis.getLineNumber() + ":" + line);
+    System.out.println(lis.getLineNumber() + ":" + line);
 }
 lis.close;
 fis.close;
@@ -17804,27 +17804,27 @@ import java.io.IOException;
 
 public class TestBufferedWriter
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileWriter os = new FileWriter("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");
-			BufferedWriter bos = new BufferedWriter(os);
-			
-			char[] buf = new char[] {'a', 'b', 'ÖĞ'};
-			bos.write(buf);
-			bos.newLine();
-			bos.write("ÄãºÃÂğ£¿");
-			bos.write("hello, world");
-			
-			bos.close();
-			os.close();
-		}
-		catch (IOException e)
-		{
-			// TODO: handle exception
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileWriter os = new FileWriter("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");
+            BufferedWriter bos = new BufferedWriter(os);
+            
+            char[] buf = new char[] {'a', 'b', 'ÖĞ'};
+            bos.write(buf);
+            bos.newLine();
+            bos.write("ÄãºÃÂğ£¿");
+            bos.write("hello, world");
+            
+            bos.close();
+            os.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: handle exception
+        }
+    }
 }
 
 
@@ -17839,27 +17839,27 @@ import java.util.Date;
 
 public class TestPrintWriter
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileWriter fos = new FileWriter("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");
-			PrintWriter pos = new PrintWriter(fos);
-			
-			pos.format("%1$tYÄê%1$tmÔÂ%1$tdÈÕ%1$tHÊ±%1$tm·Ö%1$tSÃë", new Date());
-			pos.println();
-			pos.println(12345);
-			pos.println(true);
-			pos.println(1000.0f);
-			
-			pos.close();
-			fos.close();
-		}
-		catch (IOException e)
-		{
-			// TODO: handle exception
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileWriter fos = new FileWriter("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");
+            PrintWriter pos = new PrintWriter(fos);
+            
+            pos.format("%1$tYÄê%1$tmÔÂ%1$tdÈÕ%1$tHÊ±%1$tm·Ö%1$tSÃë", new Date());
+            pos.println();
+            pos.println(12345);
+            pos.println(true);
+            pos.println(1000.0f);
+            
+            pos.close();
+            fos.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: handle exception
+        }
+    }
 }
 Éú³ÉÎÄ¼şÄÚÈİÈçÏÂ£º
 2015Äê12ÔÂ05ÈÕ00Ê±12·Ö11Ãë
@@ -17892,29 +17892,29 @@ import java.io.InputStreamReader;
 
 public class TestInputStreamReader
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileInputStream fis = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");//ÒÔ×Ö½Ú·½Ê½¶ÁÈ¡ÎÄ¼ş
-			InputStreamReader is = new InputStreamReader(fis);//½«¶ÁÈ¡µÄ×Ö½Ú×ª»»³ÉÎª×Ö·û
-			BufferedReader bis = new BufferedReader(is);
-			
-			while (bis.ready())
-			{
-				int c = bis.read();
-				System.out.print((char)c);
-			}
-			
-			bis.close();
-			is.close();
-			fis.close();
-		}
-		catch (IOException e)
-		{
-			// TODO: handle exception
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileInputStream fis = new FileInputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");//ÒÔ×Ö½Ú·½Ê½¶ÁÈ¡ÎÄ¼ş
+            InputStreamReader is = new InputStreamReader(fis);//½«¶ÁÈ¡µÄ×Ö½Ú×ª»»³ÉÎª×Ö·û
+            BufferedReader bis = new BufferedReader(is);
+            
+            while (bis.ready())
+            {
+                int c = bis.read();
+                System.out.print((char)c);
+            }
+            
+            bis.close();
+            is.close();
+            fis.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: handle exception
+        }
+    }
 }
 
 Tips£º¸Ã³ÌĞòÓëÖ±½ÓÊ¹ÓÃFileReader¶ÁÈ¡ÎÄ¼şÄÚÈİ²¢Ê¹ÓÃBufferedReader°ü×°µÄĞ§¹ûÏàÍ¬£¬¶¼ÄÜ¹»Êä³ö´øÖĞÎÄµÄÎÄ¼şÄÚÈİ¡£µ«ÊÇ´Ë´¦ÊÇÍ¨¹ı×Ö½ÚÁ÷À´¶ÁÈ¡ÎÄ¼şµÄ£¬ÖĞ¼ä¾­¹ıÁË×Ö½ÚÁ÷Ïò×Ö·ûÁ÷µÄ×ª»»£»¶øFileReaderÊÇÍ¨¹ı×Ö·ûÁ÷À´¶ÁÈ¡ÎÄ¼şµÄ£¬Ã»ÓĞ¾­¹ıÁ÷µÄ×ª»»¡£ËùÒÔÍ¨¹ıFileReaderµÄ·½Ê½±È¸Ã³ÌĞòÖĞµÄ×ª»»·½Ê½Ğ§ÂÊ»á¸ßÒ»Ğ©¡£
@@ -17928,26 +17928,26 @@ import java.io.OutputStreamWriter;
 
 public class TestOutputStreamWriter
 {
-	public static void main(String[] args) throws IOException
-	{
-		try
-		{
-			FileOutputStream fos = new FileOutputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");//ÒÔ×Ö½ÚµÄ·½Ê½Ğ´ÈëÎÄ¼ş
-			OutputStreamWriter os = new OutputStreamWriter(fos);//½«×Ö·û×ª»»Îª×Ö½Ú
-			BufferedWriter bos = new BufferedWriter(os);
-			
-			char[] buf = new char[] {'a', 'b', 'ÖĞ'};
-			bos.write(buf);
-			
-			bos.close();
-			os.close();
-			fos.close();
-		}
-		catch (IOException e)
-		{
-			// TODO: handle exception
-		}
-	}
+    public static void main(String[] args) throws IOException
+    {
+        try
+        {
+            FileOutputStream fos = new FileOutputStream("d:/Program Files/eclipseJava workspace/LearningProject/dbTest/test.txt");//ÒÔ×Ö½ÚµÄ·½Ê½Ğ´ÈëÎÄ¼ş
+            OutputStreamWriter os = new OutputStreamWriter(fos);//½«×Ö·û×ª»»Îª×Ö½Ú
+            BufferedWriter bos = new BufferedWriter(os);
+            
+            char[] buf = new char[] {'a', 'b', 'ÖĞ'};
+            bos.write(buf);
+            
+            bos.close();
+            os.close();
+            fos.close();
+        }
+        catch (IOException e)
+        {
+            // TODO: handle exception
+        }
+    }
 }
 Tips£º¸Ã³ÌĞòÓëÖ±½ÓÊ¹ÓÃFileWriterĞ´ÈëÎÄ¼şÄÚÈİ²¢Ê¹ÓÃBufferWriter°ü×°µÄĞ§¹ûÏàÍ¬£¬¶¼ÄÜ¹»Ğ´Èë´øÖĞÎÄµÄÎÄ¼şÄÚÈİ¡£µ«ÊÇ´Ë´¦ÊÇÍ¨¹ı×Ö½ÚÁ÷À´Ğ´ÈëÎÄ¼şµÄ£¬ÖĞ¼ä¾­¹ıÁË×Ö·ûÁ÷Ïò×Ö½ÚÁ÷µÄ×ª»»£»¶øFileWriterÊÇÍ¨¹ı×Ö·ûÁ÷À´Ğ´ÈëÎÄ¼şµÄ£¬Ã»ÓĞ¾­¹ıÁ÷µÄ×ª»»¡£ËùÒÔÍ¨¹ıFileWriterµÄ·½Ê½±È¸Ã³ÌĞòÖĞµÄ×ª»»·½Ê½Ğ§ÂÊ»á¸ßÒ»Ğ©¡£
 
@@ -17962,98 +17962,98 @@ import java.util.Scanner;
 
 public class VI
 {
-	public static void main(String[] args)
-	{
-		String pathname = "D:/Downloads";//ÕâÀïĞ´"D:"£¬½«»á½âÎö²»µ½Õı³£µÄÂ·¾¶£¬ÏÂÃæµÄfile.getCanonicalPath()»áÄÃµ½µ±Ç°³ÌĞòËùÔÚµÄÎÄ¼şÂ·¾¶
-		while (true)
-		{
-			try
-			{
-				// String str = System.console().readLine();
-				String str = readDataFromConsole();
+    public static void main(String[] args)
+    {
+        String pathname = "D:/Downloads";//ÕâÀïĞ´"D:"£¬½«»á½âÎö²»µ½Õı³£µÄÂ·¾¶£¬ÏÂÃæµÄfile.getCanonicalPath()»áÄÃµ½µ±Ç°³ÌĞòËùÔÚµÄÎÄ¼şÂ·¾¶
+        while (true)
+        {
+            try
+            {
+                // String str = System.console().readLine();
+                String str = readDataFromConsole();
 
-				if (str.equals("list"))
-				{
-					File path = new File(pathname);
-					File[] filelist = path.listFiles();
-					for (File file : filelist)
-					{
-						String filepath = file.getCanonicalPath();
-						if (file.isDirectory())
-						{
-							System.out.println("Ä¿Â¼£º" + filepath);
-						}
-						else
-						{
-							System.out.println("ÎÄ¼ş£º" + filepath);
-						}
-					}
-				}
-				else if (str.startsWith("cd"))
-				{
-					String[] param = str.split(" ");// Èç¹ûÎÄ¼ş¼ĞµÄÃû×ÖÖĞÓĞ¿Õ¸ñ£¬ÕâÀï½«Ã»ÓĞ°ì·¨Õı³£½âÎö
-					pathname = param[1];
-				}
-				else if (str.startsWith("mkdir"))
-				{
-					String[] param = str.split(" ");
-					File path = new File(pathname + "/" + param[1]);
-					path.mkdir();
-				}
-				else if (str.startsWith("vi")) // ×·¼ÓÄÚÈİ
-				{
-					String[] param = str.split(" ");
-					File file = new File(pathname, param[1]);
+                if (str.equals("list"))
+                {
+                    File path = new File(pathname);
+                    File[] filelist = path.listFiles();
+                    for (File file : filelist)
+                    {
+                        String filepath = file.getCanonicalPath();
+                        if (file.isDirectory())
+                        {
+                            System.out.println("Ä¿Â¼£º" + filepath);
+                        }
+                        else
+                        {
+                            System.out.println("ÎÄ¼ş£º" + filepath);
+                        }
+                    }
+                }
+                else if (str.startsWith("cd"))
+                {
+                    String[] param = str.split(" ");// Èç¹ûÎÄ¼ş¼ĞµÄÃû×ÖÖĞÓĞ¿Õ¸ñ£¬ÕâÀï½«Ã»ÓĞ°ì·¨Õı³£½âÎö
+                    pathname = param[1];
+                }
+                else if (str.startsWith("mkdir"))
+                {
+                    String[] param = str.split(" ");
+                    File path = new File(pathname + "/" + param[1]);
+                    path.mkdir();
+                }
+                else if (str.startsWith("vi")) // ×·¼ÓÄÚÈİ
+                {
+                    String[] param = str.split(" ");
+                    File file = new File(pathname, param[1]);
 
-					if (!file.exists())
-					{
-						file.createNewFile();
-					}
+                    if (!file.exists())
+                    {
+                        file.createNewFile();
+                    }
 
-					RandomAccessFile afile = new RandomAccessFile(file, "rw");
-					afile.seek(afile.length());
-					afile.writeUTF(param[2]);//Ğ´ÈëµÄÎÄ¼ş»á´øÓĞÁ½¸öÎ´Öª·ûºÅ
-					afile.close();
-				}
-				else if (str.startsWith("more")) // ÏÔÊ¾ÄÚÈİ£¬ÕâÀïÎŞ·¨Ö§³ÖÖĞÎÄÏÔÊ¾
-				{
-					String[] param = str.split(" ");
-					File file = new File(pathname, param[1]);
+                    RandomAccessFile afile = new RandomAccessFile(file, "rw");
+                    afile.seek(afile.length());
+                    afile.writeUTF(param[2]);//Ğ´ÈëµÄÎÄ¼ş»á´øÓĞÁ½¸öÎ´Öª·ûºÅ
+                    afile.close();
+                }
+                else if (str.startsWith("more")) // ÏÔÊ¾ÄÚÈİ£¬ÕâÀïÎŞ·¨Ö§³ÖÖĞÎÄÏÔÊ¾
+                {
+                    String[] param = str.split(" ");
+                    File file = new File(pathname, param[1]);
 
-					RandomAccessFile afile = new RandomAccessFile(file, "rw");
-					String line;
-					while ((line = afile.readLine()) != null)
-					{
-						System.out.println(line);
-					}
-					afile.close();
-				}
-				else if (str.equals("pwd"))
-				{
-					System.out.println(pathname);
-				}
-				else if (str.equals("bye"))
-				{
-					System.exit(0);;
-				}
-				else
-				{
-					System.out.println("ÊäÈëÃüÁî²»Ö§³Ö£¬ÇëÊäÈëÆäËüÖ¸Áî£º");
-				}
-			}
-			catch (Exception e)
-			{
-				System.out.println("ÃüÁî½âÎöÓĞÎó£¬ÇëÖØĞÂÊäÈë£º");
-				e.printStackTrace();
-			}
-		}
-	}
+                    RandomAccessFile afile = new RandomAccessFile(file, "rw");
+                    String line;
+                    while ((line = afile.readLine()) != null)
+                    {
+                        System.out.println(line);
+                    }
+                    afile.close();
+                }
+                else if (str.equals("pwd"))
+                {
+                    System.out.println(pathname);
+                }
+                else if (str.equals("bye"))
+                {
+                    System.exit(0);;
+                }
+                else
+                {
+                    System.out.println("ÊäÈëÃüÁî²»Ö§³Ö£¬ÇëÊäÈëÆäËüÖ¸Áî£º");
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println("ÃüÁî½âÎöÓĞÎó£¬ÇëÖØĞÂÊäÈë£º");
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private static String readDataFromConsole()
-	{
-		Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
-		return scanner.nextLine();
-	}
+    private static String readDataFromConsole()
+    {
+        Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
+        return scanner.nextLine();
+    }
 }
 ÔËĞĞ¸Ã³ÌĞò£¬¿ÉÒÔÍùÎÄ±¾ÎÄ¼şÖĞĞ´ÈëÓ¢ÎÄ×Ö·û´®£¬Ò²¿ÉÒÔÏÔÊ¾Ó¢ÎÄÎÄ±¾ÄÚÈİ£¬µ«ÊÇ²»ÄÜ¹»Ğ´ÈëºÍÏÔÊ¾ÖĞÎÄ£¬ÖĞÎÄ»áÏÔÊ¾ÂÒÂë¡£
 
@@ -18072,106 +18072,106 @@ import java.util.Scanner;
 
 public class ByteVI
 {
-	public static void main(String[] args)
-	{
-		String pathname = "D:/Downloads";//ÕâÀïĞ´"D:"£¬½«»á½âÎö²»µ½Õı³£µÄÂ·¾¶£¬ÏÂÃæµÄfile.getCanonicalPath()»áÄÃµ½µ±Ç°³ÌĞòËùÔÚµÄÎÄ¼şÂ·¾¶
-		while (true)
-		{
-			try
-			{
-				// String str = System.console().readLine();
-				String str = readDataFromConsole();
+    public static void main(String[] args)
+    {
+        String pathname = "D:/Downloads";//ÕâÀïĞ´"D:"£¬½«»á½âÎö²»µ½Õı³£µÄÂ·¾¶£¬ÏÂÃæµÄfile.getCanonicalPath()»áÄÃµ½µ±Ç°³ÌĞòËùÔÚµÄÎÄ¼şÂ·¾¶
+        while (true)
+        {
+            try
+            {
+                // String str = System.console().readLine();
+                String str = readDataFromConsole();
 
-				if (str.equals("list"))
-				{
-					File path = new File(pathname);
-					File[] filelist = path.listFiles();
-					for (File file : filelist)
-					{
-						String filepath = file.getCanonicalPath();
-						if (file.isDirectory())
-						{
-							System.out.println("Ä¿Â¼£º" + filepath);
-						}
-						else
-						{
-							System.out.println("ÎÄ¼ş£º" + filepath);
-						}
-					}
-				}
-				else if (str.startsWith("cd"))
-				{
-					String[] param = str.split(" ");// Èç¹ûÎÄ¼ş¼ĞµÄÃû×ÖÖĞÓĞ¿Õ¸ñ£¬ÕâÀï½«Ã»ÓĞ°ì·¨Õı³£½âÎö
-					pathname = param[1];
-				}
-				else if (str.startsWith("mkdir"))
-				{
-					String[] param = str.split(" ");
-					File path = new File(pathname + "/" + param[1]);
-					path.mkdir();
-				}
-				else if (str.startsWith("vi")) // ×·¼ÓÄÚÈİ
-				{
-					String[] param = str.split(" ");
-					File file = new File(pathname, param[1]);
+                if (str.equals("list"))
+                {
+                    File path = new File(pathname);
+                    File[] filelist = path.listFiles();
+                    for (File file : filelist)
+                    {
+                        String filepath = file.getCanonicalPath();
+                        if (file.isDirectory())
+                        {
+                            System.out.println("Ä¿Â¼£º" + filepath);
+                        }
+                        else
+                        {
+                            System.out.println("ÎÄ¼ş£º" + filepath);
+                        }
+                    }
+                }
+                else if (str.startsWith("cd"))
+                {
+                    String[] param = str.split(" ");// Èç¹ûÎÄ¼ş¼ĞµÄÃû×ÖÖĞÓĞ¿Õ¸ñ£¬ÕâÀï½«Ã»ÓĞ°ì·¨Õı³£½âÎö
+                    pathname = param[1];
+                }
+                else if (str.startsWith("mkdir"))
+                {
+                    String[] param = str.split(" ");
+                    File path = new File(pathname + "/" + param[1]);
+                    path.mkdir();
+                }
+                else if (str.startsWith("vi")) // ×·¼ÓÄÚÈİ
+                {
+                    String[] param = str.split(" ");
+                    File file = new File(pathname, param[1]);
 
-					if (!file.exists())
-					{
-						file.createNewFile();
-					}
+                    if (!file.exists())
+                    {
+                        file.createNewFile();
+                    }
 
-					FileOutputStream os = new FileOutputStream(file, true);//µÚ¶ş¸ö²ÎÊıappend£¬±íÊ¾ÊÇ·ñ×·¼Ó·½Ê½
-					BufferedOutputStream bos = new BufferedOutputStream(os);
-					PrintStream pos = new PrintStream(bos);
-					pos.print(param[2]);
-					
-					pos.close();
-					bos.close();
-					os.close();
-				}
-				else if (str.startsWith("more")) // ÏÔÊ¾ÄÚÈİ£¬ÕâÀïÎŞ·¨Ö§³ÖÖĞÎÄÏÔÊ¾
-				{
-					String[] param = str.split(" ");
-					File file = new File(pathname, param[1]);
+                    FileOutputStream os = new FileOutputStream(file, true);//µÚ¶ş¸ö²ÎÊıappend£¬±íÊ¾ÊÇ·ñ×·¼Ó·½Ê½
+                    BufferedOutputStream bos = new BufferedOutputStream(os);
+                    PrintStream pos = new PrintStream(bos);
+                    pos.print(param[2]);
+                    
+                    pos.close();
+                    bos.close();
+                    os.close();
+                }
+                else if (str.startsWith("more")) // ÏÔÊ¾ÄÚÈİ£¬ÕâÀïÎŞ·¨Ö§³ÖÖĞÎÄÏÔÊ¾
+                {
+                    String[] param = str.split(" ");
+                    File file = new File(pathname, param[1]);
 
-					FileInputStream is = new FileInputStream(file);
-					BufferedInputStream bis = new BufferedInputStream(is);
-					
-					while (bis.available() > 0)
-					{
-						int c = bis.read();
-						System.out.print((char)c);
-					}
-					
-					bis.close();
-					is.close();
-				}
-				else if (str.equals("pwd"))
-				{
-					System.out.println(pathname);
-				}
-				else if (str.equals("bye"))
-				{
-					System.exit(0);;
-				}
-				else
-				{
-					System.out.println("ÊäÈëÃüÁî²»Ö§³Ö£¬ÇëÊäÈëÆäËüÖ¸Áî£º");
-				}
-			}
-			catch (Exception e)
-			{
-				System.out.println("ÃüÁî½âÎöÓĞÎó£¬ÇëÖØĞÂÊäÈë£º");
-				e.printStackTrace();
-			}
-		}
-	}
+                    FileInputStream is = new FileInputStream(file);
+                    BufferedInputStream bis = new BufferedInputStream(is);
+                    
+                    while (bis.available() > 0)
+                    {
+                        int c = bis.read();
+                        System.out.print((char)c);
+                    }
+                    
+                    bis.close();
+                    is.close();
+                }
+                else if (str.equals("pwd"))
+                {
+                    System.out.println(pathname);
+                }
+                else if (str.equals("bye"))
+                {
+                    System.exit(0);;
+                }
+                else
+                {
+                    System.out.println("ÊäÈëÃüÁî²»Ö§³Ö£¬ÇëÊäÈëÆäËüÖ¸Áî£º");
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println("ÃüÁî½âÎöÓĞÎó£¬ÇëÖØĞÂÊäÈë£º");
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private static String readDataFromConsole()
-	{
-		Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
-		return scanner.nextLine();
-	}
+    private static String readDataFromConsole()
+    {
+        Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
+        return scanner.nextLine();
+    }
 }
 ÔËĞĞ¸Ã³ÌĞò£¬¿ÉÒÔÎÄ±¾ÖĞÎÄ¼şÖĞĞ´ÈëÖĞÓ¢ÎÄ×Ö·û´®£¬Ò²¿ÉÒÔÏÔÊ¾Ó¢ÎÄÎÄ±¾ÄÚÈİ£¬µ«²»ÄÜÏÔÊ¾ÖĞÎÄÄÚÈİ¡£ÄÜ¹»Ğ´ÈëÖĞÎÄÊÇÒòÎªPrintStreamÀàµÄprint()º¯ÊıÊµÏÖÁË¶ÔÖĞÎÄµÄĞ´Èë¡£
 
@@ -18193,111 +18193,111 @@ import java.util.Scanner;
 
 public class ByteVI
 {
-	public static void main(String[] args)
-	{
-		String pathname = "D:/Downloads";//ÕâÀïĞ´"D:"£¬½«»á½âÎö²»µ½Õı³£µÄÂ·¾¶£¬ÏÂÃæµÄfile.getCanonicalPath()»áÄÃµ½µ±Ç°³ÌĞòËùÔÚµÄÎÄ¼şÂ·¾¶
-		while (true)
-		{
-			try
-			{
-				// String str = System.console().readLine();
-				String str = readDataFromConsole();
+    public static void main(String[] args)
+    {
+        String pathname = "D:/Downloads";//ÕâÀïĞ´"D:"£¬½«»á½âÎö²»µ½Õı³£µÄÂ·¾¶£¬ÏÂÃæµÄfile.getCanonicalPath()»áÄÃµ½µ±Ç°³ÌĞòËùÔÚµÄÎÄ¼şÂ·¾¶
+        while (true)
+        {
+            try
+            {
+                // String str = System.console().readLine();
+                String str = readDataFromConsole();
 
-				if (str.equals("list"))
-				{
-					File path = new File(pathname);
-					File[] filelist = path.listFiles();
-					for (File file : filelist)
-					{
-						String filepath = file.getCanonicalPath();
-						if (file.isDirectory())
-						{
-							System.out.println("Ä¿Â¼£º" + filepath);
-						}
-						else
-						{
-							System.out.println("ÎÄ¼ş£º" + filepath);
-						}
-					}
-				}
-				else if (str.startsWith("cd"))
-				{
-					String[] param = str.split(" ");// Èç¹ûÎÄ¼ş¼ĞµÄÃû×ÖÖĞÓĞ¿Õ¸ñ£¬ÕâÀï½«Ã»ÓĞ°ì·¨Õı³£½âÎö
-					pathname = param[1];
-				}
-				else if (str.startsWith("mkdir"))
-				{
-					String[] param = str.split(" ");
-					File path = new File(pathname + "/" + param[1]);
-					path.mkdir();
-				}
-				else if (str.startsWith("vi")) // ×·¼ÓÄÚÈİ
-				{
-					String[] param = str.split(" ");
-					File file = new File(pathname, param[1]);
+                if (str.equals("list"))
+                {
+                    File path = new File(pathname);
+                    File[] filelist = path.listFiles();
+                    for (File file : filelist)
+                    {
+                        String filepath = file.getCanonicalPath();
+                        if (file.isDirectory())
+                        {
+                            System.out.println("Ä¿Â¼£º" + filepath);
+                        }
+                        else
+                        {
+                            System.out.println("ÎÄ¼ş£º" + filepath);
+                        }
+                    }
+                }
+                else if (str.startsWith("cd"))
+                {
+                    String[] param = str.split(" ");// Èç¹ûÎÄ¼ş¼ĞµÄÃû×ÖÖĞÓĞ¿Õ¸ñ£¬ÕâÀï½«Ã»ÓĞ°ì·¨Õı³£½âÎö
+                    pathname = param[1];
+                }
+                else if (str.startsWith("mkdir"))
+                {
+                    String[] param = str.split(" ");
+                    File path = new File(pathname + "/" + param[1]);
+                    path.mkdir();
+                }
+                else if (str.startsWith("vi")) // ×·¼ÓÄÚÈİ
+                {
+                    String[] param = str.split(" ");
+                    File file = new File(pathname, param[1]);
 
-					if (!file.exists())
-					{
-						file.createNewFile();
-					}
+                    if (!file.exists())
+                    {
+                        file.createNewFile();
+                    }
 
-					FileWriter fos = new FileWriter(file, true);//µÚ¶ş¸ö²ÎÊıappend£¬±íÊ¾ÊÇ·ñ×·¼Ó·½Ê½
-					BufferedWriter bos = new BufferedWriter(fos);
-					PrintWriter pos = new PrintWriter(bos);
-					pos.print(param[2]);
-					
-					pos.close();
-					bos.close();
-					fos.close();
-				}
-				else if (str.startsWith("more")) // ÏÔÊ¾ÄÚÈİ£¬ÕâÀïÎŞ·¨Ö§³ÖÖĞÎÄÏÔÊ¾
-				{
-					String[] param = str.split(" ");
-					File file = new File(pathname, param[1]);
+                    FileWriter fos = new FileWriter(file, true);//µÚ¶ş¸ö²ÎÊıappend£¬±íÊ¾ÊÇ·ñ×·¼Ó·½Ê½
+                    BufferedWriter bos = new BufferedWriter(fos);
+                    PrintWriter pos = new PrintWriter(bos);
+                    pos.print(param[2]);
+                    
+                    pos.close();
+                    bos.close();
+                    fos.close();
+                }
+                else if (str.startsWith("more")) // ÏÔÊ¾ÄÚÈİ£¬ÕâÀïÎŞ·¨Ö§³ÖÖĞÎÄÏÔÊ¾
+                {
+                    String[] param = str.split(" ");
+                    File file = new File(pathname, param[1]);
 
-					FileReader is = new FileReader(file);
-					BufferedReader bis = new BufferedReader(is);
-					
-					String line;
-					while ((line = bis.readLine()) != null)//ÓÃreadLineº¯Êı±ÈÒ»¸öÒ»¸ö×Ö·û¶ÁÈ¡¿ì
-					{
-						System.out.println(line);
-					}
-//					while (bis.ready())
-//					{
-//						int c = bis.read();
-//						System.out.print((char)c);
-//					}
-					
-					bis.close();
-					is.close();
-				}
-				else if (str.equals("pwd"))
-				{
-					System.out.println(pathname);
-				}
-				else if (str.equals("bye"))
-				{
-					System.exit(0);;
-				}
-				else
-				{
-					System.out.println("ÊäÈëÃüÁî²»Ö§³Ö£¬ÇëÊäÈëÆäËüÖ¸Áî£º");
-				}
-			}
-			catch (Exception e)
-			{
-				System.out.println("ÃüÁî½âÎöÓĞÎó£¬ÇëÖØĞÂÊäÈë£º");
-				e.printStackTrace();
-			}
-		}
-	}
+                    FileReader is = new FileReader(file);
+                    BufferedReader bis = new BufferedReader(is);
+                    
+                    String line;
+                    while ((line = bis.readLine()) != null)//ÓÃreadLineº¯Êı±ÈÒ»¸öÒ»¸ö×Ö·û¶ÁÈ¡¿ì
+                    {
+                        System.out.println(line);
+                    }
+//                    while (bis.ready())
+//                    {
+//                        int c = bis.read();
+//                        System.out.print((char)c);
+//                    }
+                    
+                    bis.close();
+                    is.close();
+                }
+                else if (str.equals("pwd"))
+                {
+                    System.out.println(pathname);
+                }
+                else if (str.equals("bye"))
+                {
+                    System.exit(0);;
+                }
+                else
+                {
+                    System.out.println("ÊäÈëÃüÁî²»Ö§³Ö£¬ÇëÊäÈëÆäËüÖ¸Áî£º");
+                }
+            }
+            catch (Exception e)
+            {
+                System.out.println("ÃüÁî½âÎöÓĞÎó£¬ÇëÖØĞÂÊäÈë£º");
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private static String readDataFromConsole()
-	{
-		Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
-		return scanner.nextLine();
-	}
+    private static String readDataFromConsole()
+    {
+        Scanner scanner = new Scanner(System.in);//ÓĞ¸öscannerÎ´closeµÄÌáÊ¾
+        return scanner.nextLine();
+    }
 }
 ÔËĞĞ¸Ã³ÌĞò£¬¼È¿ÉÒÔÍùÎÄ±¾ÎÄ¼şÖĞĞ´ÈëÖĞÓ¢ÎÄ×Ö·û´®£¬ÓÖ¿ÉÒÔÏÔÊ¾ÖĞÓ¢ÎÄÎÄ±¾ÄÚÈİ¡£Õâ¾ÍÊÇ×Ö·ûÁ÷µÄ×î´óÓÅµã£¬ÄÜ¹»ÊµÏÖÖĞÎÄµÄ´¦Àí¡£
 
@@ -18343,17 +18343,17 @@ import java.util.Properties;
 
 public class SystemTest
 {
-	public static void main(String[] args)
-	{
-		Properties properties = System.getProperties();
-		Enumeration<Object> e = properties.keys();
-		while (e.hasMoreElements())
-		{
-			String key = (String)e.nextElement();
-			String value = properties.getProperty(key);
-			System.out.println(key + "=" + value);
-		}
-	}
+    public static void main(String[] args)
+    {
+        Properties properties = System.getProperties();
+        Enumeration<Object> e = properties.keys();
+        while (e.hasMoreElements())
+        {
+            String key = (String)e.nextElement();
+            String value = properties.getProperty(key);
+            System.out.println(key + "=" + value);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 java.runtime.name=Java(TM) SE Runtime Environment
@@ -18418,17 +18418,17 @@ package test.System;
 
 public class SystemTest
 {
-	public static void main(String[] args)
-	{
-		String osname = System.getProperty("os.name");
-		String osversion = System.getProperty("os.version");
-		String javaname = System.getProperty("java.vm.name");
-		String javaversion = System.getProperty("java.version");
-		System.out.println("²Ù×÷ÏµÍ³Ãû³Æ=" + osname);
-		System.out.println("²Ù×÷ÏµÍ³°æ±¾=" + osversion);
-		System.out.println("JVMÃû³Æ=" + javaname);
-		System.out.println("Java°æ±¾=" + javaversion);
-	}
+    public static void main(String[] args)
+    {
+        String osname = System.getProperty("os.name");
+        String osversion = System.getProperty("os.version");
+        String javaname = System.getProperty("java.vm.name");
+        String javaversion = System.getProperty("java.version");
+        System.out.println("²Ù×÷ÏµÍ³Ãû³Æ=" + osname);
+        System.out.println("²Ù×÷ÏµÍ³°æ±¾=" + osversion);
+        System.out.println("JVMÃû³Æ=" + javaname);
+        System.out.println("Java°æ±¾=" + javaversion);
+    }
 }
 Êä³öÈçÏÂ£º
 ²Ù×÷ÏµÍ³Ãû³Æ=Windows 8.1
@@ -18455,19 +18455,19 @@ package test.System;
 
 public class SystemTest
 {
-	public static void main(String[] args)
-	{
-		String javaversion2 = System.getProperty("java.version2", "no key");
-		System.out.println("Java°æ±¾2=" + javaversion2);
-		
-		System.setProperty("java.version2", "aa");
-		javaversion2 = System.getProperty("java.version2");
-		System.out.println("Java°æ±¾2=" + javaversion2);
-		
-		System.clearProperty("java.version2");
-		javaversion2 = System.getProperty("java.version2", "no key");
-		System.out.println("Java°æ±¾2=" + javaversion2);
-	}
+    public static void main(String[] args)
+    {
+        String javaversion2 = System.getProperty("java.version2", "no key");
+        System.out.println("Java°æ±¾2=" + javaversion2);
+        
+        System.setProperty("java.version2", "aa");
+        javaversion2 = System.getProperty("java.version2");
+        System.out.println("Java°æ±¾2=" + javaversion2);
+        
+        System.clearProperty("java.version2");
+        javaversion2 = System.getProperty("java.version2", "no key");
+        System.out.println("Java°æ±¾2=" + javaversion2);
+    }
 }
 Êä³öÈçÏÂ£º
 Java°æ±¾2=no key
@@ -18485,17 +18485,17 @@ import java.util.Map;
 
 public class TestSystemEnv
 {
-	public static void main(String[] args)
-	{
-		Map<String, String> map = System.getenv();
-		Iterator<String> it = map.keySet().iterator();
-		while (it.hasNext())
-		{
-			String key = it.next();
-			String value = map.get(key);
-			System.out.println(key + "=" + value);
-		}
-	}
+    public static void main(String[] args)
+    {
+        Map<String, String> map = System.getenv();
+        Iterator<String> it = map.keySet().iterator();
+        while (it.hasNext())
+        {
+            String key = it.next();
+            String value = map.get(key);
+            System.out.println(key + "=" + value);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 USERDOMAIN_ROAMINGPROFILE=DESKTOP-18O9S0P
@@ -18554,15 +18554,15 @@ package test.System;
 
 public class TestSystemEnv
 {
-	public static void main(String[] args)
-	{
-		String javahome = System.getenv("JAVA_HOME");
-		String path = System.getenv("PATH");
-		String classpath = System.getenv("CLASSPATH");
-		System.out.println("javahome=" + javahome);
-		System.out.println("path=" + path);
-		System.out.println("classpath=" + classpath);
-	}
+    public static void main(String[] args)
+    {
+        String javahome = System.getenv("JAVA_HOME");
+        String path = System.getenv("PATH");
+        String classpath = System.getenv("CLASSPATH");
+        System.out.println("javahome=" + javahome);
+        System.out.println("path=" + path);
+        System.out.println("classpath=" + classpath);
+    }
 }
 Êä³öÈçÏÂ£º
 javahome=null
@@ -18580,7 +18580,7 @@ Runtime.getRuntime().load("/home/avh/lib/libX11.so");
 Runtime.getRuntime().loadLibrary(name);
 ·½·¨System.loadLibrary(String)ÊÇµ÷ÓÃ´Ë·½·¨µÄÒ»ÖÖ´«Í³¶ø±ã½İµÄ·½Ê½¡£Èç¹ûÔÚÄ³¸öÀàÊµÏÖÖĞÊ¹ÓÃ±¾»ú·½·¨£¨JNIµ÷ÓÃ£©£¬Ôò±ê×¼µÄ²ßÂÔÊÇ½«±¾»ú´úÂë·ÅÈëÒ»¸ö¿âÎÄ¼şÖĞ£¨³ÆÎªLibFile£©£¬È»ºóÔÚÀàÉùÃ÷·ÅÈëÒ»¸ö¾²Ì¬µÄ³õÊ¼ÖµÉè¶¨Öµ£º
 static {
-	System.loadLibrary("LibFile");
+    System.loadLibrary("LibFile");
 }
 µ±¼ÓÔØ²¢³õÊ¼»¯Õâ¸öÀàÊ±£¬Ò²½«¼ÓÔØÊµÏÖ±¾»ú·½·¨ËùĞèµÄ±¾»ú´úÂë¡£Èç¹ûÓÃÏàÍ¬¿âÃû¶à´Îµ÷ÓÃ´Ë·½·¨£¬ÔòºöÂÔµÚ¶ş´Î¼°ºóĞøµÄµ÷ÓÃ¡£
 
@@ -18594,22 +18594,22 @@ package test.System;
 
 public class TestSystemArrayCopy
 {
-	public static void main(String[] args)
-	{
-		int[] a = new int[10];
-		for (int i = 0; i < 10; ++i)
-		{
-			a[i] = i + 1;
-		}
-		
-		int[] b = new int[5];
-		System.arraycopy(a, 2, b, 1, 4);
-		
-		for(int i = 0; i < 5; ++i)
-		{
-			System.out.println("b" + "=" + b[i]);
-		}
-	}
+    public static void main(String[] args)
+    {
+        int[] a = new int[10];
+        for (int i = 0; i < 10; ++i)
+        {
+            a[i] = i + 1;
+        }
+        
+        int[] b = new int[5];
+        System.arraycopy(a, 2, b, 1, 4);
+        
+        for(int i = 0; i < 5; ++i)
+        {
+            System.out.println("b" + "=" + b[i]);
+        }
+    }
 }
 Êä³öÈçÏÂ£º
 b=0
@@ -18641,34 +18641,34 @@ package test.System;
 
 public class TestSystemTime
 {
-	public static void main(String[] args)
-	{
-		long startMillisTime = System.currentTimeMillis();
-		long startNanoTime = System.nanoTime();
-		System.out.println("startMillisTime=" + startMillisTime);
-		System.out.println("startNanoTime=" + startNanoTime);
-		
-		int[] a = new int[10];
-		for (int i = 0; i < 10; ++i)
-		{
-			a[i] = i + 1;
-		}
-		
-		int[] b = new int[5];
-		System.arraycopy(a, 2, b, 1, 4);
-		
-		for(int i = 0; i < 5; ++i)
-		{
-			System.out.println("b" + "=" + b[i]);
-		}
-		long endMillisTime = System.currentTimeMillis();
-		long endNanoTime = System.nanoTime();
-		System.out.println("endMillisTime=" + endMillisTime);
-		System.out.println("endNanoTime=" + endNanoTime);
-		
-		System.out.println("MillisTime: " + (endMillisTime - startMillisTime));
-		System.out.println("NanoTime:" + (endNanoTime - startNanoTime));
-	}
+    public static void main(String[] args)
+    {
+        long startMillisTime = System.currentTimeMillis();
+        long startNanoTime = System.nanoTime();
+        System.out.println("startMillisTime=" + startMillisTime);
+        System.out.println("startNanoTime=" + startNanoTime);
+        
+        int[] a = new int[10];
+        for (int i = 0; i < 10; ++i)
+        {
+            a[i] = i + 1;
+        }
+        
+        int[] b = new int[5];
+        System.arraycopy(a, 2, b, 1, 4);
+        
+        for(int i = 0; i < 5; ++i)
+        {
+            System.out.println("b" + "=" + b[i]);
+        }
+        long endMillisTime = System.currentTimeMillis();
+        long endNanoTime = System.nanoTime();
+        System.out.println("endMillisTime=" + endMillisTime);
+        System.out.println("endNanoTime=" + endNanoTime);
+        
+        System.out.println("MillisTime: " + (endMillisTime - startMillisTime));
+        System.out.println("NanoTime:" + (endNanoTime - startNanoTime));
+    }
 }
 Êä³öÈçÏÂ£º
 startMillisTime=1457859199354
@@ -18692,27 +18692,27 @@ import java.io.InputStreamReader;
 
 public class TestSystemExit
 {
-	public static void main(String[] args)
-	{
-		try
-		{
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			String line;
-			while ((line = br.readLine()) != null)
-			{
-				System.out.println(line);
-				if (line.equals("bye"))
-				{
-					System.exit(0);
-				}
-			}
-			br.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
+    public static void main(String[] args)
+    {
+        try
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            String line;
+            while ((line = br.readLine()) != null)
+            {
+                System.out.println(line);
+                if (line.equals("bye"))
+                {
+                    System.exit(0);
+                }
+            }
+            br.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
 Tips£ºSystem.exit(0)»»³ÉbreakÒ²ÄÜ¹»ÍË³ö¡£System.exit(0)µÄ×÷ÓÃ²»Ö¹ÕâÒ»ÖÖÇé¿ö£¬ÔÚ¸´ÔÓµÄJavaÓ¦ÓÃ³ÌĞòÖĞ£¬Ëü¿ÉÒÔÇ¿ÖÆËùÓĞµÄ³ÌĞò¶¼ÍË³öÏµÍ³£¬Õâ¾ÍÊÇËüÓëÊ¹ÓÃbreak²»Í¬µÄµØ·½¡£
 
@@ -20774,10 +20774,10 @@ public class TestDOM {
     }
 }
 Êä³ö£º
-7506342605	¡¶Ë®ä°´«¡·	80	Ê©ÄÍâÖ	ÔªÄ©
-7020008720	¡¶Î÷ÓÎ¼Ç¡·	90	Îâ³Ğ¶÷	Ã÷´ú
-7111103033	¡¶Èı¹úÑİÒå¡·	75	ÂŞ¹áÖĞ	ÔªÄ©
-7807074930	¡¶ºìÂ¥ÃÎ¡·	79	²ÜÑ©ÇÛ	Çå´ú
+7506342605    ¡¶Ë®ä°´«¡·    80    Ê©ÄÍâÖ    ÔªÄ©
+7020008720    ¡¶Î÷ÓÎ¼Ç¡·    90    Îâ³Ğ¶÷    Ã÷´ú
+7111103033    ¡¶Èı¹úÑİÒå¡·    75    ÂŞ¹áÖĞ    ÔªÄ©
+7807074930    ¡¶ºìÂ¥ÃÎ¡·    79    ²ÜÑ©ÇÛ    Çå´ú
 20
 
 Tips£ºDOMÖ»Ìá¹©ÁË½âÎöXMLÎÄ¼şµÄ¹¦ÄÜ£¬²»ÄÜÊ¹ÓÃËüÀ´Ğ´ÈëÒ»¸öXMLÎÄ¼ş¡£
@@ -20850,37 +20850,37 @@ public class TestSAX extends DefaultHandler {
     }
 }
 Êä³ö£º
-7506342605	¡¶Ë®ä°´«¡·	
-        	80	
-        	Ê©ÄÍâÖ	
-        	ÔªÄ©
-	
+7506342605    ¡¶Ë®ä°´«¡·    
+            80    
+            Ê©ÄÍâÖ    
+            ÔªÄ©
     
-	
     
-7020008720	¡¶Î÷ÓÎ¼Ç¡·	
-        	90	
-        	Îâ³Ğ¶÷	
-        	Ã÷´ú
-	
     
-	
     
-7111103033	¡¶Èı¹úÑİÒå¡·	
-        	75	
-        	ÂŞ¹áÖĞ	
-        	ÔªÄ©
-	
+7020008720    ¡¶Î÷ÓÎ¼Ç¡·    
+            90    
+            Îâ³Ğ¶÷    
+            Ã÷´ú
     
-	
     
-7807074930	¡¶ºìÂ¥ÃÎ¡·	
-        	79	
-        	²ÜÑ©ÇÛ	
-        	Çå´ú
-	
     
-	
+    
+7111103033    ¡¶Èı¹úÑİÒå¡·    
+            75    
+            ÂŞ¹áÖĞ    
+            ÔªÄ©
+    
+    
+    
+    
+7807074930    ¡¶ºìÂ¥ÃÎ¡·    
+            79    
+            ²ÜÑ©ÇÛ    
+            Çå´ú
+    
+    
+    
 
 Time eclipsed: 17
 
@@ -20960,10 +20960,10 @@ public class TestJDOM {
     }
 }
 Êä³ö£º
-7506342605	¡¶Ë®ä°´«¡·	80	Ê©ÄÍâÖ	ÔªÄ©
-7020008720	¡¶Î÷ÓÎ¼Ç¡·	90	Îâ³Ğ¶÷	Ã÷´ú
-7111103033	¡¶Èı¹úÑİÒå¡·	75	ÂŞ¹áÖĞ	ÔªÄ©
-7807074930	¡¶ºìÂ¥ÃÎ¡·	79	²ÜÑ©ÇÛ	Çå´ú
+7506342605    ¡¶Ë®ä°´«¡·    80    Ê©ÄÍâÖ    ÔªÄ©
+7020008720    ¡¶Î÷ÓÎ¼Ç¡·    90    Îâ³Ğ¶÷    Ã÷´ú
+7111103033    ¡¶Èı¹úÑİÒå¡·    75    ÂŞ¹áÖĞ    ÔªÄ©
+7807074930    ¡¶ºìÂ¥ÃÎ¡·    79    ²ÜÑ©ÇÛ    Çå´ú
 Time eclipsed: 39
 
 JDOMÊÇÒ»¸ö¿ªÔ´ÏîÄ¿£¬Ëü»ùÓÚÊ÷ĞÍ½á¹¹£¬ÀûÓÃ´¿Java¼¼Êõ¶ÔXMLÎÄµµÊµÏÖ½âÎö¡¢Éú³É¡¢ĞòÁĞ»¯¼°¶àÖÖ²Ù×÷¡£°ÑSAXºÍDOMµÄ¹¦ÄÜÓĞĞ§µØ½áºÏÆğÀ´¡£
@@ -25069,12 +25069,12 @@ logout admin
 adminÒÑ×¢Ïú
 abc
 java.lang.ArrayIndexOutOfBoundsException: 1
-	at test.task.Test.main(Test.java:13)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144)
+    at test.task.Test.main(Test.java:13)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke(Method.java:498)
+    at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144)
     
 »ùÓÚ¸Ã¿ò¼Ü¿ÉÒÔÊµÏÖ¸ü¶àµÄÊµÏÖÀà£¬Õâ¾ÍÊÇÃæÏò½Ó¿Ú±à³ÌµÄºÃ´¦£¬ËüµÄºËĞÄÊÇÊ¹ÓÃÁËJavaµÄ·´Éä»úÖÆÀ´¶¯Ì¬¼ÓÔØÀà£¬ÔÚ¼ÓÔØÇ°µÄÀàÃûÊÇ¶¯Ì¬µÄ¡£
 Tips£ºÕâÖÖÄ£Ê½ÊÇÒ»ÖÖ¾­µäµÄ¹¤³§Ä£Ê½£¬ÔÚÀàËÆµÄÈÎÎñ´¦ÀíÄ£ĞÍÖĞ¶¼¿ÉÒÔÄÃ¹ıÀ´Ö±½ÓÊ¹ÓÃ¡£Ï£Íû¿ÉÒÔÑ§»á¡¢Àí½â²¢¼Ç×¡Õâ¸ö°¸Àı¡£
@@ -25315,13 +25315,13 @@ public class TestGenericExceptionMain implements TestGenericException<IOExceptio
 }
 Êä³ö£º
 java.io.IOException
-	at test.TestGenericExceptionMain.execute(TestGenericExceptionMain.java:10)
-	at test.TestGenericExceptionMain.main(TestGenericExceptionMain.java:17)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:498)
-	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144)
+    at test.TestGenericExceptionMain.execute(TestGenericExceptionMain.java:10)
+    at test.TestGenericExceptionMain.main(TestGenericExceptionMain.java:17)
+    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke(Method.java:498)
+    at com.intellij.rt.execution.application.AppMain.main(AppMain.java:144)
 
 Tips£º·ºĞÍÒì³£Ö»ÄÜÔÚ½Ó¿ÚÖĞ¶¨Òå£¬ÔÚÊµÏÖÀàÖĞÖ¸¶¨¾ßÌåµÄÒì³£¡£ÕâÖÖ×ö·¨µÄºÃ´¦ÊÇ£¬¿ÉÒÔ¸ù¾İ²»Í¬µÄÒì³£ÀàĞÍ¶¨Òå²»Í¬µÄÊµÏÖÀà¡£
 
@@ -33325,7 +33325,7 @@ public class AOPSchemaAdviceTest extends UnitTestBase {
             <aop:after method="after" pointcut-ref="moocPointcut"/>
             <aop:around method="around" pointcut-ref="moocPointcut"/>
             <aop:around method="aroundInit" pointcut="execution(* com.imooc.aop.schema.advice.biz.AspectBiz.init(String, int))
-             							and args(bizName, times)"/>
+                                         and args(bizName, times)"/>
 
             <!--<aop:declare-parents types-matching="com.imooc.aop.schema.advice.biz.*(+)"-->
             <!--implement-interface="com.imooc.aop.schema.advice.Fit"-->
@@ -33517,22 +33517,22 @@ public class AOPSchemaAdvisorsTest extends UnitTestBase {
         http://www.springframework.org/schema/aop 
         http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<context:component-scan base-package="com.imooc.aop.schema"></context:component-scan>
+    <context:component-scan base-package="com.imooc.aop.schema"></context:component-scan>
 
-	<aop:config>
-		<aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor">
-			<aop:pointcut id="idempotentOperation"
-				expression="execution(* com.imooc.aop.schema.advisors.service.*.*(..)) " />
-<!--      			expression="execution(* com.imooc.aop.schema.service.*.*(..)) and -->
-<!--         						@annotation(com.imooc.aop.schema.Idempotent)" /> -->
-			<aop:around pointcut-ref="idempotentOperation" method="doConcurrentOperation" />
-		</aop:aspect>
-	</aop:config>
-	
-	<bean id="concurrentOperationExecutor" class="com.imooc.aop.schema.advisors.ConcurrentOperationExecutor">
-		<property name="maxRetries" value="3" />
-		<property name="order" value="100" />
-	</bean>
+    <aop:config>
+        <aop:aspect id="concurrentOperationRetry" ref="concurrentOperationExecutor">
+            <aop:pointcut id="idempotentOperation"
+                expression="execution(* com.imooc.aop.schema.advisors.service.*.*(..)) " />
+<!--                  expression="execution(* com.imooc.aop.schema.service.*.*(..)) and -->
+<!--                                 @annotation(com.imooc.aop.schema.Idempotent)" /> -->
+            <aop:around pointcut-ref="idempotentOperation" method="doConcurrentOperation" />
+        </aop:aspect>
+    </aop:config>
+    
+    <bean id="concurrentOperationExecutor" class="com.imooc.aop.schema.advisors.ConcurrentOperationExecutor">
+        <property name="maxRetries" value="3" />
+        <property name="order" value="100" />
+    </bean>
 
  </beans>
 Êä³ö£º
@@ -34534,9 +34534,9 @@ public void testSaveStudents() {
     session.save(s);//±£´æ¶ÔÏó½øÊı¾İ¿â
 }
 ²»ÉèÖÃsetSid()£¬×ÔÔö
-1	ÕÅÈı·á	ÄĞ	2018-05-05 17:16:43	Îäµ±É½
-2	ÕÅÈı·á	ÄĞ	2018-05-05 17:17:45	Îäµ±É½
-3	ÕÅÈı·á	ÄĞ	2018-05-05 17:17:57	Îäµ±É½
+1    ÕÅÈı·á    ÄĞ    2018-05-05 17:16:43    Îäµ±É½
+2    ÕÅÈı·á    ÄĞ    2018-05-05 17:17:45    Îäµ±É½
+3    ÕÅÈı·á    ÄĞ    2018-05-05 17:17:57    Îäµ±É½
 
 //------------------------------------------------------------------------------------------------
 3-3 µ¥±íÓ³Éä »ù±¾ÀàĞÍ
@@ -34544,13 +34544,13 @@ public void testSaveStudents() {
     <column name="birthday" />
 </property>
 ĞŞ¸ÄÎªdate£¬´æ´¢Îª£º
-1	ÕÅÈı·á	ÄĞ	2018-05-06	Îäµ±É½
+1    ÕÅÈı·á    ÄĞ    2018-05-06    Îäµ±É½
 
 ĞŞ¸ÄÎªtime£¬´æ´¢Îª£º
-1	ÕÅÈı·á	ÄĞ	07:12:36	Îäµ±É½
+1    ÕÅÈı·á    ÄĞ    07:12:36    Îäµ±É½
 
 ĞŞ¸ÄÎªtimestamp£¬´æ´¢Îª£º
-1	ÕÅÈı·á	ÄĞ	2018-05-06 07:13:47	Îäµ±É½
+1    ÕÅÈı·á    ÄĞ    2018-05-06 07:13:47    Îäµ±É½
 
 //------------------------------------------------------------------------------------------------
 3-4 ¶ÔÏóÀàĞÍ
@@ -34800,7 +34800,7 @@ public class StudentsTest {
 
 //ÔÚresources/pics/boy.gifÓĞ¸öÍ¼Æ¬
 Ö´ĞĞÍêÁ½¸ö²âÊÔÓÃÀı£¬ÔÚ"e:/dest.gif"Â·¾¶ÏÂÓĞ¸öÓëÖ®Ç°Ò»ÑùµÄÕÕÆ¬ÎÄ¼ş
-1	ÕÅÈı·á	ÄĞ	2018-05-06 07:52:39	Îäµ±É½	(BLOB) 11.74 KB
+1    ÕÅÈı·á    ÄĞ    2018-05-06 07:52:39    Îäµ±É½    (BLOB) 11.74 KB
 //------------------------------------------------------------------------------------------------
 3-5 ×é¼şÊôĞÔ
 ÊµÀıÀàÖĞµÄÄ³¸öÊôĞÔÊôÓÚÓÃ»§×Ô¶¨ÒåµÄÀàµÄ¶ÔÏó
@@ -35036,7 +35036,7 @@ public class StudentsTest {
     }
 }
 Êı¾İ¿â£º
-1	ÕÅÈı·á	ÄĞ	2018-05-06 08:30:26	Î÷°²ÊĞ		266100	021-55667788
+1    ÕÅÈı·á    ÄĞ    2018-05-06 08:30:26    Î÷°²ÊĞ        266100    021-55667788
 
 //------------------------------------------------------------------------------------------------
 3-6 µ¥±í²Ù×÷CRUDÊµÀı
@@ -37334,29 +37334,29 @@ public class StudentsTest {
 }
 
 //t_students
-"sid"	"birthday"	"gender"	"major"	"sname"
-"1"	"12/5/2018 14:49:02"	"ÄĞ"	"Ì«¼«È­"	"ÕÅÈı"
-"2"	"12/5/2018 14:49:02"	"ÄĞ"	"Ì«¼«È­"	"ÀîËÄ"
-"3"	"12/5/2018 14:49:02"	"Å®"	"Ì«¼«È­"	"ÍõÎå"
-"4"	"12/5/2018 14:49:02"	"Å®"	"Ì«¼«È­"	"ÕÔÁù"
+"sid"    "birthday"    "gender"    "major"    "sname"
+"1"    "12/5/2018 14:49:02"    "ÄĞ"    "Ì«¼«È­"    "ÕÅÈı"
+"2"    "12/5/2018 14:49:02"    "ÄĞ"    "Ì«¼«È­"    "ÀîËÄ"
+"3"    "12/5/2018 14:49:02"    "Å®"    "Ì«¼«È­"    "ÍõÎå"
+"4"    "12/5/2018 14:49:02"    "Å®"    "Ì«¼«È­"    "ÕÔÁù"
 
 //t_teachers
-"tid"	"tname"
-"T001"	"ÕÅÀÏÊ¦"
-"T002"	"ÀîÀÏÊ¦"
-"T003"	"³ÂÀÏÊ¦"
-"T004"	"ÁõÀÏÊ¦"
+"tid"    "tname"
+"T001"    "ÕÅÀÏÊ¦"
+"T002"    "ÀîÀÏÊ¦"
+"T003"    "³ÂÀÏÊ¦"
+"T004"    "ÁõÀÏÊ¦"
 
 //t_teachers_students
-"fk_sid"	"fk_tid"
-"1"	"T001"
-"1"	"T002"
-"2"	"T002"
-"4"	"T002"
-"2"	"T003"
-"3"	"T003"
-"3"	"T004"
-"4"	"T004"
+"fk_sid"    "fk_tid"
+"1"    "T001"
+"1"    "T002"
+"2"    "T002"
+"4"    "T002"
+"2"    "T003"
+"3"    "T003"
+"3"    "T004"
+"4"    "T004"
 
 //------------------------------------------------------------------------------------------------
 3-12 ¶à¶Ô¶àË«ÏòÍâ¼ü
@@ -40888,25 +40888,25 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <!DOCTYPE html>
 <html>
 <head>
-	<title>µ¼º½Ê÷</title>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<style type="text/css">@import url('components/dtree/dtree.css');</style>
-	<script type="text/javascript">var dtreeIconBasePath = "components/dtree";</script>
-	<script type="text/javascript"  src="components/dtree/dtree.js"></script>
+    <title>µ¼º½Ê÷</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <style type="text/css">@import url('components/dtree/dtree.css');</style>
+    <script type="text/javascript">var dtreeIconBasePath = "components/dtree";</script>
+    <script type="text/javascript"  src="components/dtree/dtree.js"></script>
 </head>
 <body>
 <script type="text/javascript">
 <%--Ñ§Éú¹ÜÀíÁĞ±íµÄlinkĞ´ÈçÏÂµÄ¾ø¶ÔÂ·¾¶Ò²¿ÉÒÔ£º<%=path%>/students/Students_query.action--%>
 var treeMenu = [
-	{ level:1, name:"Ñ§Éú¹ÜÀí"},
-	{ level:2, name:"Ñ§ÉúÁĞ±í", ico:"images/icon_default.gif",link:"students/Students_query.action"},
-	{ level:1, name:"½ÌÊ¦¹ÜÀí"},
-	{ level:2, name:"½ÌÊ¦ÁĞ±í", ico:"images/icon_default.gif",link:"role_list.html"},
-	{ level:1, name:"ĞÅÏ¢¹ÜÀí"},
-	{ level:2, name:"ĞÂÎÅ¹ÜÀí", ico:"images/icon_default.gif",link:"news_list.html"},
-	{ level:2, name:"¹«¸æ¹ÜÀí", ico:"images/icon_default.gif",link:"bulletin_list.html"},
-	{ level:1, name:"ÏµÍ³ÓÊ¼ş", ico:"images/icon_default.gif"},
-	{ level:1, name:"ÍøÂçÎÄ¼ş", ico:"images/icon_default.gif",link:"complaint_list.html"}
+    { level:1, name:"Ñ§Éú¹ÜÀí"},
+    { level:2, name:"Ñ§ÉúÁĞ±í", ico:"images/icon_default.gif",link:"students/Students_query.action"},
+    { level:1, name:"½ÌÊ¦¹ÜÀí"},
+    { level:2, name:"½ÌÊ¦ÁĞ±í", ico:"images/icon_default.gif",link:"role_list.html"},
+    { level:1, name:"ĞÅÏ¢¹ÜÀí"},
+    { level:2, name:"ĞÂÎÅ¹ÜÀí", ico:"images/icon_default.gif",link:"news_list.html"},
+    { level:2, name:"¹«¸æ¹ÜÀí", ico:"images/icon_default.gif",link:"bulletin_list.html"},
+    { level:1, name:"ÏµÍ³ÓÊ¼ş", ico:"images/icon_default.gif"},
+    { level:1, name:"ÍøÂçÎÄ¼ş", ico:"images/icon_default.gif",link:"complaint_list.html"}
 ];
 </script>
 <style>
@@ -40916,20 +40916,20 @@ var treeMenu = [
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #menuControll{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0 10px;
-	font-size:14px;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0 10px;
+    font-size:14px;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
@@ -40954,32 +40954,32 @@ var pLevelIdArray = new Array();
 pLevelIdArray[1] = 0;
 var currLevel = 1;
 for (var i=0; i<treeMenu.length; i++) {
-	var item = treeMenu[i];
-	var itemLevel = item.level;
-	pLevelIdArray[itemLevel+1] = ++count;
-	if (item.link!=null && item.link!="") {
-		if (item.ico!=null) {
-			tree.add(count, pLevelIdArray[itemLevel], item.name, item.link, null, null, item.ico, item.ico);
-		} else {
-			tree.add(count, pLevelIdArray[itemLevel], item.name, item.link);
-		}
-	} else {
-		if (item.ico!=null) {
-			tree.add(count, pLevelIdArray[itemLevel], item.name, null, null, null, item.ico, item.ico);
-		} else {
-			tree.add(count, pLevelIdArray[itemLevel], item.name);
-		}
-	}
-	if (item.select) {
-		selNum = count;
-		link = item.link;
-	}
+    var item = treeMenu[i];
+    var itemLevel = item.level;
+    pLevelIdArray[itemLevel+1] = ++count;
+    if (item.link!=null && item.link!="") {
+        if (item.ico!=null) {
+            tree.add(count, pLevelIdArray[itemLevel], item.name, item.link, null, null, item.ico, item.ico);
+        } else {
+            tree.add(count, pLevelIdArray[itemLevel], item.name, item.link);
+        }
+    } else {
+        if (item.ico!=null) {
+            tree.add(count, pLevelIdArray[itemLevel], item.name, null, null, null, item.ico, item.ico);
+        } else {
+            tree.add(count, pLevelIdArray[itemLevel], item.name);
+        }
+    }
+    if (item.select) {
+        selNum = count;
+        link = item.link;
+    }
 }
 document.write(tree);
 tree.openAll();
 if (selNum != -1) {
-	tree.openTo(selNum,true);
-	top.document.frames["MainFrame"].location.href=link;
+    tree.openTo(selNum,true);
+    top.document.frames["MainFrame"].location.href=link;
 }
 </script>
 </div>
@@ -41003,200 +41003,200 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 </head>
 <style type="text/css">
 body{
-	margin:0px;
-	padding:0px;
-	overflow:hidden;
+    margin:0px;
+    padding:0px;
+    overflow:hidden;
 }
 #wrapper{
-	position:absolute;
-	width:100%;
-	height:100%;
-	min-width:1280px;
-	min-height:680px;
-	overflow-x:hidden;
-	overflow-y:hidden;
+    position:absolute;
+    width:100%;
+    height:100%;
+    min-width:1280px;
+    min-height:680px;
+    overflow-x:hidden;
+    overflow-y:hidden;
     background-image: -moz-linear-gradient(top,#77D1F6, #2F368F);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #77D1F6),color-stop(1, #2F368F));
 }
 #header{
-	height:100px;
-	width:100%;
+    height:100px;
+    width:100%;
 }
 #logo{
-	position:absolute;
-	float:left;
-	margin-left:5%;
-	margin-top:30px;
-	height:40px;
-	width:160px;
-	text-align:center;
+    position:absolute;
+    float:left;
+    margin-left:5%;
+    margin-top:30px;
+    height:40px;
+    width:160px;
+    text-align:center;
 }
 #heading{
-	position:relative;
-	float:left;
-	margin-left:20%;
-	margin-top:-18px;
-	height:110px;
-	width:60%;
-	border-radius: 18px;
-	background-color:#1C75BC;
-	opacity:0.6;
+    position:relative;
+    float:left;
+    margin-left:20%;
+    margin-top:-18px;
+    height:110px;
+    width:60%;
+    border-radius: 18px;
+    background-color:#1C75BC;
+    opacity:0.6;
 }
 #heading #title{
-	margin-top:40px;
-	text-align:center;
-	font-family:Î¢ÈíÑÅºÚ;
-	font-size:24px;
-	font-weight:bold;
+    margin-top:40px;
+    text-align:center;
+    font-family:Î¢ÈíÑÅºÚ;
+    font-size:24px;
+    font-weight:bold;
 }
 #heading #subTitle{
-	margin-top:10px;
-	text-align:center;
-	font-family:Courier New;
+    margin-top:10px;
+    text-align:center;
+    font-family:Courier New;
 }
 #main{
-	margin-top:20px;
-	height:500px;
-	width:100%;
+    margin-top:20px;
+    height:500px;
+    width:100%;
 }
 #mainBg{
-	position:relative;
-	float:left;
-	margin-left:20%;
-	margin-top:0px;
-	height:500px;
-	width:60%;
+    position:relative;
+    float:left;
+    margin-left:20%;
+    margin-top:0px;
+    height:500px;
+    width:60%;
     border-radius: 18px;
     background-color:#000000;
     opacity:0.5;
 }
 #mainPanel{
     position:relative;
-	margin:25px;
-	height:450px;
+    margin:25px;
+    height:450px;
     border-radius: 18px;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainPanel #left{
-	float:left;
-	border-right:2px solid #F6F6F6;
-	position:relative;
-	top:10%;
-	height:80%;
-	width:49%;
-	border-right-style:groove;
+    float:left;
+    border-right:2px solid #F6F6F6;
+    position:relative;
+    top:10%;
+    height:80%;
+    width:49%;
+    border-right-style:groove;
 }
 #mainPanel #image{
-	position:relative;
-	height:256px;
-	width:256px;
-	left:15%;
-	top:12%;
-	background-image:url('../images/admin.png');
+    position:relative;
+    height:256px;
+    width:256px;
+    left:15%;
+    top:12%;
+    background-image:url('../images/admin.png');
 }
 #mainPanel #right{
-	float:left;
-	position:relative;
-	height:90%;
-	width:49%;
-	top:5%;
+    float:left;
+    position:relative;
+    height:90%;
+    width:49%;
+    top:5%;
 }
 #welcome{
-	margin-top:20px;
-	height:60px;
-	width:100%;
-	vertical-align: middle;
-	display: inline-block;
-	line-height: 60px;
-	text-align:center;
+    margin-top:20px;
+    height:60px;
+    width:100%;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 60px;
+    text-align:center;
 }
 #welcome #welcome-text{
-	font-size:38px;
-	font-weight:bold;
-	font-family:Î¢ÈíÑÅºÚ;
-	text-shadow: 0 1px 1px #F6F6F6;
+    font-size:38px;
+    font-weight:bold;
+    font-family:Î¢ÈíÑÅºÚ;
+    text-shadow: 0 1px 1px #F6F6F6;
 }
 #user-name{
-	height:35px;
-	width:100%;
-	margin-top:20px;
-	vertical-align: middle;
-	display: inline-block;
-	line-height: 35px;
+    height:35px;
+    width:100%;
+    margin-top:20px;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 35px;
 }
 #user-password{
-	margin-top:20px;
-	height:35px;
-	width:100%;
-	vertical-align: middle;
-	display: inline-block;
-	line-height: 35px;
+    margin-top:20px;
+    height:35px;
+    width:100%;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 35px;
 }
 #user-checkcode{
-	margin-top:20px;
-	height:35px;
-	width:100%;
-	vertical-align: middle;
-	display: inline-block;
-	line-height: 35px;
+    margin-top:20px;
+    height:35px;
+    width:100%;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 35px;
 }
 #button-group{
-	margin-top:10px;
-	height:35px;
-	width:100%;
-	vertical-align: middle;
-	display: inline-block;
-	line-height: 35px;
-	text-align:center;
+    margin-top:10px;
+    height:35px;
+    width:100%;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 35px;
+    text-align:center;
 }
 #error-tip{
-	margin-top:20px;
-	margin-left:5%;
-	height:40px;
-	width:90%;
-	vertical-align: middle;
-	display: inline-block;
-	line-height: 35px;
-	text-align:center;
-	border-bottom:2px solid #F6F6F6;
-	border-bottom-style:groove;
+    margin-top:20px;
+    margin-left:5%;
+    height:40px;
+    width:90%;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 35px;
+    text-align:center;
+    border-bottom:2px solid #F6F6F6;
+    border-bottom-style:groove;
 }
 #error-tip #tip-text{
-	font-size:18px;
-	font-weight:bold;
-	font-family:Î¢ÈíÑÅºÚ;
-	color:red;
+    font-size:18px;
+    font-weight:bold;
+    font-family:Î¢ÈíÑÅºÚ;
+    color:red;
 }
 .item{
-	margin-left:20px;
-	font-family:Î¢ÈíÑÅºÚ;
-	font-size:20px;
-	font-weight:bold;
-	float: left;
-	width:80px;
-	margin-top: 3px;
-	text-align: center;
-	text-shadow: 0 1px 1px #F6F6F6;
+    margin-left:20px;
+    font-family:Î¢ÈíÑÅºÚ;
+    font-size:20px;
+    font-weight:bold;
+    float: left;
+    width:80px;
+    margin-top: 3px;
+    text-align: center;
+    text-shadow: 0 1px 1px #F6F6F6;
 }
 .input{
-	vertical-align: middle;
-	display: inline-block;
+    vertical-align: middle;
+    display: inline-block;
 }
 #checkcode-img{
-	margin-top:3px;
-	height:20px;
-	width:60px;
+    margin-top:3px;
+    height:20px;
+    width:60px;
 }
 .form-input{
-	height:20px;
+    height:20px;
 }
 .btn{
     border:1px solid #cccccc;
     cursor:pointer;
     margin:10px 5px;
     height:40px;
-	width:80px;
+    width:80px;
     text-align:center;
     border-radius: 4px;
     border-color: #636263 #464647 #A1A3A5;
@@ -41205,63 +41205,63 @@ body{
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #D9D9D9),color-stop(1, #A6A6A6));
 }
 #footer{
-	margin-top:20px;
-	width:100%;
+    margin-top:20px;
+    width:100%;
 }
 #footer #text{
-	text-align:center;
-	font-size:14px;
-	font-family:Î¢ÈíÑÅºÚ;
-	font-weight:bold;
+    text-align:center;
+    font-size:14px;
+    font-family:Î¢ÈíÑÅºÚ;
+    font-weight:bold;
 }
 </style>
 <body>
 <div id="wrapper">
-	<div id="header">
-		<div id="logo"></div>
-		<div id="heading">
-			<div id="title">ºóÌ¨¹ÜÀíÏµÍ³</div>
-			<div id="subTitle">Ver 1.0</div>
-		</div>
-	</div>
-	<div id="main">
-		<div id="mainBg">
-			<div id="mainPanel">
-				<div id="left">
-					<div id="image"></div>
-				</div>
-				<div id="right">
-					
-					<form name="loginForm" action="<%=path%>/users/Users_login.action" method="post">
-					<!-- start of login form -->
-					<div id="welcome">
-						<span id="welcome-text">¹Ü&nbsp;Àí&nbsp;µÇ&nbsp;Â¼</span>
-					</div>
-					<div id="user-name">
-						<span class="item">ÓÃ»§Ãû:</span>
-						<span><input type="text" name="username" class="form-input"></span>
-					</div>
-					<div id="user-password">
-						<span class="item">ÃÜ&nbsp;&nbsp;&nbsp;Âë:</span>
-						<span class="input"><input type="password" name="password" class="form-input"></span>
-					</div>
-					<div id="button-group">
-						<input type="submit" class="btn" value="µÇÂ¼"/>
-						<input type="reset" class="btn" value="ÖØÖÃ"/>
-					</div>
-					<div>
-					  <s:fielderror/> <!-- ÏÔÊ¾±íµ¥ÑéÖ¤µÄ³ö´íĞÅÏ¢ -->
-					</div>
-					<!-- end of form -->
-					</form>
-					
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="footer">
-		<div id="text">Copyright ? 2009-2015 All Rights Reserved Powered By Simoniu</div>
-	</div>
+    <div id="header">
+        <div id="logo"></div>
+        <div id="heading">
+            <div id="title">ºóÌ¨¹ÜÀíÏµÍ³</div>
+            <div id="subTitle">Ver 1.0</div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="mainBg">
+            <div id="mainPanel">
+                <div id="left">
+                    <div id="image"></div>
+                </div>
+                <div id="right">
+                    
+                    <form name="loginForm" action="<%=path%>/users/Users_login.action" method="post">
+                    <!-- start of login form -->
+                    <div id="welcome">
+                        <span id="welcome-text">¹Ü&nbsp;Àí&nbsp;µÇ&nbsp;Â¼</span>
+                    </div>
+                    <div id="user-name">
+                        <span class="item">ÓÃ»§Ãû:</span>
+                        <span><input type="text" name="username" class="form-input"></span>
+                    </div>
+                    <div id="user-password">
+                        <span class="item">ÃÜ&nbsp;&nbsp;&nbsp;Âë:</span>
+                        <span class="input"><input type="password" name="password" class="form-input"></span>
+                    </div>
+                    <div id="button-group">
+                        <input type="submit" class="btn" value="µÇÂ¼"/>
+                        <input type="reset" class="btn" value="ÖØÖÃ"/>
+                    </div>
+                    <div>
+                      <s:fielderror/> <!-- ÏÔÊ¾±íµ¥ÑéÖ¤µÄ³ö´íĞÅÏ¢ -->
+                    </div>
+                    <!-- end of form -->
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="footer">
+        <div id="text">Copyright ? 2009-2015 All Rights Reserved Powered By Simoniu</div>
+    </div>
 </div>
 </body>
 </html>
@@ -41274,8 +41274,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <!DOCTYPE html>
 <html>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
 <style type="text/css">
 * {
     background: none repeat scroll 0 0 transparent;
@@ -41283,50 +41283,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #navi{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
 }
 #naviDiv{
-	font-size:14px;
-	color:#333;
-	padding-left:10px;
+    font-size:14px;
+    color:#333;
+    padding-left:10px;
 }
 #tips{
-	margin-top:10px;
-	width:100%;
-	height:40px;
+    margin-top:10px;
+    width:100%;
+    height:40px;
 }
 #buttonGroup{
-	padding-left:10px;
-	float:left;
-	height:35px;
+    padding-left:10px;
+    float:left;
+    height:35px;
 }
 .button{
-	float:left;
-	margin-right:10px;
-	padding-left:10px;
-	padding-right:10px;
-	font-size:14px;
-	width:70px;
-	height:30px;
-	line-height:30px;
-	vertical-align:middle;
-	text-align:center;
-	cursor:pointer;
+    float:left;
+    margin-right:10px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:14px;
+    width:70px;
+    height:30px;
+    line-height:30px;
+    vertical-align:middle;
+    text-align:center;
+    cursor:pointer;
     border-color: #77D1F6;
     border-width: 1px;
     border-style: solid;
@@ -41337,19 +41337,19 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainContainer{
-	padding-left:10px;
-	padding-right:10px;
-	text-align:center;
-	width:98%;
-	font-size:12px;
+    padding-left:10px;
+    padding-right:10px;
+    text-align:center;
+    width:98%;
+    font-size:12px;
 }
 </style>
 <body>
 <div id="navi">
-	<!-- µ¼º½¿Õ°× -->
+    <!-- µ¼º½¿Õ°× -->
 </div>
 <div id="tips">
-	<!-- µ¼º½¿Õ°× -->
+    <!-- µ¼º½¿Õ°× -->
 </div>
 <div id="mainContainer">
    <img src="../images/welcome.jpg">
@@ -41368,47 +41368,47 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <!DOCTYPE html>
 <html>
 <head>
-	<title>ºóÌ¨¹ÜÀí</title>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <title>ºóÌ¨¹ÜÀí</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
 </head>
 <body>
 <div id="wrapper">
-	<div id="header">
-		<div id="logo">LOGO</div>
-		<div id="title">ºóÌ¨¹ÜÀíÏµÍ³</div>
-		<div id="menu">
-			<div id="menu_container">
-				<ul id="menu_items">
-					<li class="menu_item on" style="border-radius:8px 0 0 8px" onmouseout="this.style.backgroundColor=''" onmouseover="this.style.backgroundColor='#77D1F6';this.style.borderRadius='8px 0 0 8px'"><a>ÏµÍ³¹ÜÀí</a></li>
-					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>Ñ§Éú¹ÜÀí</a></li>
-					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>ĞÂÎÅ¹ÜÀí</a></li>
-					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>ÍøÅÌ¹ÜÀí</a></li>
-					<li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>Ïà²á¹ÜÀí</a></li>
-					<li class="menu_item" style="border-radius:8px 0 0 8px;border:0px;" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.borderRadius='0 8px 8px 0';this.style.fontWeight='bold'"><a>ÓÊ¼ş¹ÜÀí</a></li>
-				</ul>
-			</div>
-		</div>
-		<div id="user_info">
-			<div id="welcome">»¶Ó­${sessionScope.loginUserName}Ê¹ÓÃ±¾ÏµÍ³</div>
-			<div id="logout"><a href="<%=path%>/users/Users_logout.action">°²È«ÍË³ö</a></div>
-		</div>
-	</div>
-	<div id="navigator">
-		<iframe src="../tree.jsp"></iframe>
-	</div>
-	<div id="main">
-		<iframe name="MainFrame" src="Users_login_main.jsp"></iframe>
-	</div>
-	<div id="footer">Copyright ? 2009-2015 All Rights Reserved Powered By Somoniu</div>
+    <div id="header">
+        <div id="logo">LOGO</div>
+        <div id="title">ºóÌ¨¹ÜÀíÏµÍ³</div>
+        <div id="menu">
+            <div id="menu_container">
+                <ul id="menu_items">
+                    <li class="menu_item on" style="border-radius:8px 0 0 8px" onmouseout="this.style.backgroundColor=''" onmouseover="this.style.backgroundColor='#77D1F6';this.style.borderRadius='8px 0 0 8px'"><a>ÏµÍ³¹ÜÀí</a></li>
+                    <li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>Ñ§Éú¹ÜÀí</a></li>
+                    <li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>ĞÂÎÅ¹ÜÀí</a></li>
+                    <li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>ÍøÅÌ¹ÜÀí</a></li>
+                    <li class="menu_item" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'"><a>Ïà²á¹ÜÀí</a></li>
+                    <li class="menu_item" style="border-radius:8px 0 0 8px;border:0px;" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.borderRadius='0 8px 8px 0';this.style.fontWeight='bold'"><a>ÓÊ¼ş¹ÜÀí</a></li>
+                </ul>
+            </div>
+        </div>
+        <div id="user_info">
+            <div id="welcome">»¶Ó­${sessionScope.loginUserName}Ê¹ÓÃ±¾ÏµÍ³</div>
+            <div id="logout"><a href="<%=path%>/users/Users_logout.action">°²È«ÍË³ö</a></div>
+        </div>
+    </div>
+    <div id="navigator">
+        <iframe src="../tree.jsp"></iframe>
+    </div>
+    <div id="main">
+        <iframe name="MainFrame" src="Users_login_main.jsp"></iframe>
+    </div>
+    <div id="footer">Copyright ? 2009-2015 All Rights Reserved Powered By Somoniu</div>
 </div>
 </body>
 <script type="text/javascript">
 function screenAdapter(){
-	document.getElementById('footer').style.top=document.documentElement.scrollTop+document.documentElement.clientHeight- document.getElementById('footer').offsetHeight+"px";
-		document.getElementById('navigator').style.height=document.documentElement.clientHeight-100+"px";
-		document.getElementById('main').style.height=document.documentElement.clientHeight-100+"px";
-		document.getElementById('main').style.width=window.screen.width-330+"px";
+    document.getElementById('footer').style.top=document.documentElement.scrollTop+document.documentElement.clientHeight- document.getElementById('footer').offsetHeight+"px";
+        document.getElementById('navigator').style.height=document.documentElement.clientHeight-100+"px";
+        document.getElementById('main').style.height=document.documentElement.clientHeight-100+"px";
+        document.getElementById('main').style.width=window.screen.width-330+"px";
 }
 
 window.onscroll=function(){screenAdapter();};
@@ -41426,8 +41426,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <!DOCTYPE html>
 <html>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
 <style type="text/css">
 * {
     background: none repeat scroll 0 0 transparent;
@@ -41435,49 +41435,49 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #navi{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
 }
 #naviDiv{
-	font-size:14px;
-	color:#333;
-	padding-left:10px;
+    font-size:14px;
+    color:#333;
+    padding-left:10px;
 }
 #tips{
-	margin-top:10px;
-	width:100%;
-	height:40px;
+    margin-top:10px;
+    width:100%;
+    height:40px;
 }
 #buttonGroup{
-	padding-left:10px;
-	float:left;
-	height:35px;
+    padding-left:10px;
+    float:left;
+    height:35px;
 }
 .button{
-	margin-top:20px;
-	padding-left:10px;
-	padding-right:10px;
-	font-size:14px;
-	width:70px;
-	height:30px;
-	line-height:30px;
-	vertical-align:middle;
-	text-align:center;
-	cursor:pointer;
+    margin-top:20px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:14px;
+    width:70px;
+    height:30px;
+    line-height:30px;
+    vertical-align:middle;
+    text-align:center;
+    cursor:pointer;
     border-color: #77D1F6;
     border-width: 1px;
     border-style: solid;
@@ -41488,22 +41488,22 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainContainer{
-	padding-left:10px;
-	padding-right:10px;
-	text-align:left;
-	width:98%;
-	font-size:16px;
+    padding-left:10px;
+    padding-right:10px;
+    text-align:left;
+    width:98%;
+    font-size:16px;
 }
 </style>
 <body>
 <script type="text/javascript" src="../js/Calendar3.js"></script>
 
 <div id="navi">
-	<div id='naviDiv'>
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
+    <div id='naviDiv'>
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
         <%--ÓÃÈçÏÂhref="students/Students_query.action" ¿ÉÒÔÏÔÊ¾³öÊı¾İ£¬µ«ÊÇÃ»ÓĞÑùÊ½--%>
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
-	</div>
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
+    </div>
 </div>
 <div id="tips">
 </div>
@@ -41549,8 +41549,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <!DOCTYPE html>
 <html>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
 <style type="text/css">
 * {
     background: none repeat scroll 0 0 transparent;
@@ -41558,50 +41558,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #navi{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
 }
 #naviDiv{
-	font-size:14px;
-	color:#333;
-	padding-left:10px;
+    font-size:14px;
+    color:#333;
+    padding-left:10px;
 }
 #tips{
-	margin-top:10px;
-	width:100%;
-	height:40px;
+    margin-top:10px;
+    width:100%;
+    height:40px;
 }
 #buttonGroup{
-	padding-left:10px;
-	float:left;
-	height:35px;
+    padding-left:10px;
+    float:left;
+    height:35px;
 }
 .button{
-	float:left;
-	margin-right:10px;
-	padding-left:10px;
-	padding-right:10px;
-	font-size:14px;
-	width:70px;
-	height:30px;
-	line-height:30px;
-	vertical-align:middle;
-	text-align:center;
-	cursor:pointer;
+    float:left;
+    margin-right:10px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:14px;
+    width:70px;
+    height:30px;
+    line-height:30px;
+    vertical-align:middle;
+    text-align:center;
+    cursor:pointer;
     border-color: #77D1F6;
     border-width: 1px;
     border-style: solid;
@@ -41612,23 +41612,23 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainContainer{
-	padding-left:10px;
-	padding-right:10px;
-	text-align:center;
-	width:98%;
-	font-size:12px;
+    padding-left:10px;
+    padding-right:10px;
+    text-align:center;
+    width:98%;
+    font-size:12px;
 }
 </style>
 <body>
 <div id="navi">
-	<!-- µ¼º½¿Õ°× -->
-	<div id='naviDiv'>
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
-	</div>
+    <!-- µ¼º½¿Õ°× -->
+    <div id='naviDiv'>
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
+    </div>
 </div>
 <div id="tips">
-	<!-- µ¼º½¿Õ°× -->
+    <!-- µ¼º½¿Õ°× -->
 </div>
 <div id="mainContainer">
    <strong>Ìí¼Ó³É¹¦£¬<a href="<%=path%>/students/Students_add.jsp">¼ÌĞøÌí¼Ó£¿</a>»ò<a href="<%=path%>/students/Students_query.action">·µ»ØÑ§ÉúÁĞ±í£¿</a></strong>
@@ -41646,8 +41646,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <!DOCTYPE html>
 <html>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
 <style type="text/css">
 * {
     background: none repeat scroll 0 0 transparent;
@@ -41655,49 +41655,49 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #navi{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
 }
 #naviDiv{
-	font-size:14px;
-	color:#333;
-	padding-left:10px;
+    font-size:14px;
+    color:#333;
+    padding-left:10px;
 }
 #tips{
-	margin-top:10px;
-	width:100%;
-	height:40px;
+    margin-top:10px;
+    width:100%;
+    height:40px;
 }
 #buttonGroup{
-	padding-left:10px;
-	float:left;
-	height:35px;
+    padding-left:10px;
+    float:left;
+    height:35px;
 }
 .button{
-	margin-top:20px;
-	padding-left:10px;
-	padding-right:10px;
-	font-size:14px;
-	width:70px;
-	height:30px;
-	line-height:30px;
-	vertical-align:middle;
-	text-align:center;
-	cursor:pointer;
+    margin-top:20px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:14px;
+    width:70px;
+    height:30px;
+    line-height:30px;
+    vertical-align:middle;
+    text-align:center;
+    cursor:pointer;
     border-color: #77D1F6;
     border-width: 1px;
     border-style: solid;
@@ -41708,21 +41708,21 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainContainer{
-	padding-left:10px;
-	padding-right:10px;
-	text-align:left;
-	width:98%;
-	font-size:16px;
+    padding-left:10px;
+    padding-right:10px;
+    text-align:left;
+    width:98%;
+    font-size:16px;
 }
 </style>
 <body>
 <script type="text/javascript" src="../js/Calendar3.js"></script>
 
 <div id="navi">
-	<div id='naviDiv'>
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
-	</div>
+    <div id='naviDiv'>
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
+    </div>
 </div>
 <div id="tips">
 </div>
@@ -41786,8 +41786,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <!DOCTYPE html>
 <html>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
 <style type="text/css">
 * {
     background: none repeat scroll 0 0 transparent;
@@ -41795,50 +41795,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #navi{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
 }
 #naviDiv{
-	font-size:14px;
-	color:#333;
-	padding-left:10px;
+    font-size:14px;
+    color:#333;
+    padding-left:10px;
 }
 #tips{
-	margin-top:10px;
-	width:100%;
-	height:40px;
+    margin-top:10px;
+    width:100%;
+    height:40px;
 }
 #buttonGroup{
-	padding-left:10px;
-	float:left;
-	height:35px;
+    padding-left:10px;
+    float:left;
+    height:35px;
 }
 .button{
-	float:left;
-	margin-right:10px;
-	padding-left:10px;
-	padding-right:10px;
-	font-size:14px;
-	width:70px;
-	height:30px;
-	line-height:30px;
-	vertical-align:middle;
-	text-align:center;
-	cursor:pointer;
+    float:left;
+    margin-right:10px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:14px;
+    width:70px;
+    height:30px;
+    line-height:30px;
+    vertical-align:middle;
+    text-align:center;
+    cursor:pointer;
     border-color: #77D1F6;
     border-width: 1px;
     border-style: solid;
@@ -41849,23 +41849,23 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainContainer{
-	padding-left:10px;
-	padding-right:10px;
-	text-align:center;
-	width:98%;
-	font-size:12px;
+    padding-left:10px;
+    padding-right:10px;
+    text-align:center;
+    width:98%;
+    font-size:12px;
 }
 </style>
 <body>
 <div id="navi">
-	<!-- µ¼º½¿Õ°× -->
-	<div id='naviDiv'>
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
-	</div>
+    <!-- µ¼º½¿Õ°× -->
+    <div id='naviDiv'>
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
+    </div>
 </div>
 <div id="tips">
-	<!-- µ¼º½¿Õ°× -->
+    <!-- µ¼º½¿Õ°× -->
 </div>
 <div id="mainContainer">
    <strong>ĞŞ¸Ä³É¹¦£¬<a href="<%=path%>/students/Students_query.action">·µ»ØÑ§ÉúÁĞ±í</a></strong>
@@ -41883,8 +41883,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 %>
 <!DOCTYPE html>
 <html>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="../css/default.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/default.css" />
 <style type="text/css">
 * {
     background: none repeat scroll 0 0 transparent;
@@ -41892,50 +41892,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     margin: 0;
     padding: 0;
     vertical-align: baseline;
-	font-family:Î¢ÈíÑÅºÚ;
-	overflow:hidden;
+    font-family:Î¢ÈíÑÅºÚ;
+    overflow:hidden;
 }
 #navi{
-	width:100%;
-	position:relative;
-	word-wrap:break-word;
-	border-bottom:1px solid #065FB9;
-	margin:0;
-	padding:0;
-	height:40px;
-	line-height:40px;
-	vertical-align:middle;
+    width:100%;
+    position:relative;
+    word-wrap:break-word;
+    border-bottom:1px solid #065FB9;
+    margin:0;
+    padding:0;
+    height:40px;
+    line-height:40px;
+    vertical-align:middle;
     background-image: -moz-linear-gradient(top,#EBEBEB, #BFBFBF);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, 
 #BFBFBF));
 }
 #naviDiv{
-	font-size:14px;
-	color:#333;
-	padding-left:10px;
+    font-size:14px;
+    color:#333;
+    padding-left:10px;
 }
 #tips{
-	margin-top:10px;
-	width:100%;
-	height:40px;
+    margin-top:10px;
+    width:100%;
+    height:40px;
 }
 #buttonGroup{
-	padding-left:10px;
-	float:left;
-	height:35px;
+    padding-left:10px;
+    float:left;
+    height:35px;
 }
 .button{
-	float:left;
-	margin-right:10px;
-	padding-left:10px;
-	padding-right:10px;
-	font-size:14px;
-	width:70px;
-	height:30px;
-	line-height:30px;
-	vertical-align:middle;
-	text-align:center;
-	cursor:pointer;
+    float:left;
+    margin-right:10px;
+    padding-left:10px;
+    padding-right:10px;
+    font-size:14px;
+    width:70px;
+    height:30px;
+    line-height:30px;
+    vertical-align:middle;
+    text-align:center;
+    cursor:pointer;
     border-color: #77D1F6;
     border-width: 1px;
     border-style: solid;
@@ -41946,61 +41946,61 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #EBEBEB),color-stop(1, #BFBFBF));
 }
 #mainContainer{
-	padding-left:10px;
-	padding-right:10px;
-	text-align:center;
-	width:98%;
-	font-size:12px;
+    padding-left:10px;
+    padding-right:10px;
+    text-align:center;
+    width:98%;
+    font-size:12px;
 }
 </style>
 <body>
 <div id="navi">
-	<div id='naviDiv'>
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
-		<span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
-	</div>
+    <div id='naviDiv'>
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;Ñ§Éú¹ÜÀí<span>&nbsp;
+        <span><img src="../images/arror.gif" width="7" height="11" border="0" alt=""></span>&nbsp;<a href="<%=path%>/students/Students_query.action">Ñ§ÉúÁĞ±í</a><span>&nbsp;
+    </div>
 </div>
 <div id="tips">
-	<div id="buttonGroup">
-		<div class="button" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'">
-			<a href="<%=path%>/students/Students_add.jsp">Ìí¼ÓÑ§Éú</a>
-		</div>
-		<div class="button" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'">
-			<a>²éÕÒÑ§Éú</a>
-		</div>
-	</div>
+    <div id="buttonGroup">
+        <div class="button" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'">
+            <a href="<%=path%>/students/Students_add.jsp">Ìí¼ÓÑ§Éú</a>
+        </div>
+        <div class="button" onmouseout="this.style.backgroundColor='';this.style.fontWeight='normal'" onmouseover="this.style.backgroundColor='#77D1F6';this.style.fontWeight='bold'">
+            <a>²éÕÒÑ§Éú</a>
+        </div>
+    </div>
 </div>
 <div id="mainContainer">
 <!-- ´ÓsessionÖĞ»ñÈ¡Ñ§Éú¼¯ºÏ -->
 
 <table class="default" width="100%">
-	<col width="10%">
-	<col width="20%">
-	<col width="5%">
-	<col width="20%">
-	<col width="30%">
-	<col width="15%">
-	<tr class="title">
-		<td>Ñ§ºÅ</td>
-		<td>ĞÕÃû</td>
-		<td>ĞÔ±ğ</td>
-		<td>³öÉúÈÕÆÚ</td>
-		<td>µØÖ·</td>
-		<td>²Ù×÷</td>
-	</tr>
-	
-	<!-- ±éÀú¿ªÊ¼ -->
-	<s:iterator value="#session.students_list" var="stu">
-	<tr class="list">
-		<td><s:property value="#stu.sid"/></td>
-		<td><a href="<%=path%>/students/Students_modify.action?sid=<s:property value="#stu.sid"/>"><s:property value="#stu.sname"/></a></td>
-		<td><s:property value="#stu.gender"/></td>
-		<td><s:date name="#stu.birthday" format="yyyyÄêMMÔÂddÈÕ"/></td>
-		<td><s:property value="#stu.address"/></td>
-		<td><a href="<%=path%>/students/Students_delete.action?sid=<s:property value="#stu.sid"/>" onclick="javascript: return confirm('ÕæµÄÒªÉ¾³ıÂğ£¿');">É¾³ı</a></td>
-	</tr>
-	</s:iterator>
-	<!-- ±éÀú½áÊø -->
+    <col width="10%">
+    <col width="20%">
+    <col width="5%">
+    <col width="20%">
+    <col width="30%">
+    <col width="15%">
+    <tr class="title">
+        <td>Ñ§ºÅ</td>
+        <td>ĞÕÃû</td>
+        <td>ĞÔ±ğ</td>
+        <td>³öÉúÈÕÆÚ</td>
+        <td>µØÖ·</td>
+        <td>²Ù×÷</td>
+    </tr>
+    
+    <!-- ±éÀú¿ªÊ¼ -->
+    <s:iterator value="#session.students_list" var="stu">
+    <tr class="list">
+        <td><s:property value="#stu.sid"/></td>
+        <td><a href="<%=path%>/students/Students_modify.action?sid=<s:property value="#stu.sid"/>"><s:property value="#stu.sname"/></a></td>
+        <td><s:property value="#stu.gender"/></td>
+        <td><s:date name="#stu.birthday" format="yyyyÄêMMÔÂddÈÕ"/></td>
+        <td><s:property value="#stu.address"/></td>
+        <td><a href="<%=path%>/students/Students_delete.action?sid=<s:property value="#stu.sid"/>" onclick="javascript: return confirm('ÕæµÄÒªÉ¾³ıÂğ£¿');">É¾³ı</a></td>
+    </tr>
+    </s:iterator>
+    <!-- ±éÀú½áÊø -->
 </table>
 </div>
 </body>
@@ -43060,8 +43060,8 @@ SSHÊµÏÖÔ±¹¤¹ÜÀíÏµÍ³Ö®°¸ÀıÊµÏÖÆª
 //login2.jsp
 <%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8"%>
 <%
-	String path = request.getContextPath();
-	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+    String path = request.getContextPath();
+    String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
 %>
 <!doctype html>
 <html>
@@ -43078,52 +43078,52 @@ SSHÊµÏÖÔ±¹¤¹ÜÀíÏµÍ³Ö®°¸ÀıÊµÏÖÆª
 
 <body>
 <div class="headerBar">
-	<div class="logoBar login_logo">
-		<div class="comWidth">
-			<div class="logo fl">
-				<a href="#"><img src="<%=path%>/images/logo.jpg" alt="Ä½¿ÎÍø"></a>
-			</div>
-			<h3 class="welcome_title">»¶Ó­µÇÂ½</h3>
-		</div>
-	</div>
+    <div class="logoBar login_logo">
+        <div class="comWidth">
+            <div class="logo fl">
+                <a href="#"><img src="<%=path%>/images/logo.jpg" alt="Ä½¿ÎÍø"></a>
+            </div>
+            <h3 class="welcome_title">»¶Ó­µÇÂ½</h3>
+        </div>
+    </div>
 </div>
 <form action="frame.html" method="post">
 <div class="loginBox">
-	<div class="login_cont">
-		<ul class="login">
-			<li class="l_tit">ÓÃ»§Ãû</li>
-			<li class="mb_10"><input type="text" class="login_input user_icon"></li>
-			<li class="l_tit">ÃÜÂë</li>
-			<li class="mb_10"><input type="text" class="login_input user_icon"></li>
-			
-			<li><input type="submit" value="" class="login_btn"></li>
-		</ul>
-		<div class="login_partners">
-			<p class="l_tit">Ê¹ÓÃºÏ×÷·½ÕËºÅµÇÂ½ÍøÕ¾</p>
-			<ul class="login_list clearfix">
-				<li><a href="#">QQ</a></li>
-				<li><span>|</span></li>
-				<li><a href="#">ÍøÒ×</a></li>
-				<li><span>|</span></li>
-				<li><a href="#">ĞÂÀËÎ¢²©</a></li>
-				<li><span>|</span></li>
-				<li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
-				<li><span>|</span></li>
-				<li><a href="#">ĞÂÀËÎ¢²©</a></li>
-				<li><span>|</span></li>
-				<li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
-			</ul>
-		</div>
-	</div>
-	
+    <div class="login_cont">
+        <ul class="login">
+            <li class="l_tit">ÓÃ»§Ãû</li>
+            <li class="mb_10"><input type="text" class="login_input user_icon"></li>
+            <li class="l_tit">ÃÜÂë</li>
+            <li class="mb_10"><input type="text" class="login_input user_icon"></li>
+            
+            <li><input type="submit" value="" class="login_btn"></li>
+        </ul>
+        <div class="login_partners">
+            <p class="l_tit">Ê¹ÓÃºÏ×÷·½ÕËºÅµÇÂ½ÍøÕ¾</p>
+            <ul class="login_list clearfix">
+                <li><a href="#">QQ</a></li>
+                <li><span>|</span></li>
+                <li><a href="#">ÍøÒ×</a></li>
+                <li><span>|</span></li>
+                <li><a href="#">ĞÂÀËÎ¢²©</a></li>
+                <li><span>|</span></li>
+                <li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
+                <li><span>|</span></li>
+                <li><a href="#">ĞÂÀËÎ¢²©</a></li>
+                <li><span>|</span></li>
+                <li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
+            </ul>
+        </div>
+    </div>
+    
 </div>
 </form>
 
 <div class="hr_25"></div>
 <div class="footer">
-	<p><a href="#">Ä½¿Î¼ò½é</a><i>|</i><a href="#">Ä½¿Î¹«¸æ</a><i>|</i> <a href="#">ÕĞÄÉÏÍÊ¿</a><i>|</i><a href="#">ÁªÏµÎÒÃÇ</a><i>|</i>¿Í·şÈÈÏß£º400-675-1234</p>
-	<p>Copyright &copy; 2006 - 2014 Ä½¿Î°æÈ¨ËùÓĞ&nbsp;&nbsp;&nbsp;¾©ICP±¸09037834ºÅ&nbsp;&nbsp;&nbsp;¾©ICPÖ¤B1034-8373ºÅ&nbsp;&nbsp;&nbsp;Ä³ÊĞ¹«°²¾ÖXX·Ö¾Ö±¸°¸±àºÅ£º123456789123</p>
-	<p class="web"><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a></p>
+    <p><a href="#">Ä½¿Î¼ò½é</a><i>|</i><a href="#">Ä½¿Î¹«¸æ</a><i>|</i> <a href="#">ÕĞÄÉÏÍÊ¿</a><i>|</i><a href="#">ÁªÏµÎÒÃÇ</a><i>|</i>¿Í·şÈÈÏß£º400-675-1234</p>
+    <p>Copyright &copy; 2006 - 2014 Ä½¿Î°æÈ¨ËùÓĞ&nbsp;&nbsp;&nbsp;¾©ICP±¸09037834ºÅ&nbsp;&nbsp;&nbsp;¾©ICPÖ¤B1034-8373ºÅ&nbsp;&nbsp;&nbsp;Ä³ÊĞ¹«°²¾ÖXX·Ö¾Ö±¸°¸±àºÅ£º123456789123</p>
+    <p class="web"><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="<%=path%>/images/webLogo.jpg" alt="logo"></a></p>
 </div>
 </body>
 </html>
@@ -44559,53 +44559,53 @@ log4j.category.org.hibernate.type=trace
 
 <body>
 <div class="headerBar">
-	<div class="logoBar login_logo">
-		<div class="comWidth">
-			<div class="logo fl">
-				<a href="#"><img src="${ pageContext.request.contextPath }/images/logo.jpg" alt="Ä½¿ÎÍø"></a>
-			</div>
-			<h3 class="welcome_title">»¶Ó­µÇÂ½</h3>
-		</div>
-	</div>
+    <div class="logoBar login_logo">
+        <div class="comWidth">
+            <div class="logo fl">
+                <a href="#"><img src="${ pageContext.request.contextPath }/images/logo.jpg" alt="Ä½¿ÎÍø"></a>
+            </div>
+            <h3 class="welcome_title">»¶Ó­µÇÂ½</h3>
+        </div>
+    </div>
 </div>
 <s:form action="employee_login" method="post" namespace="/">
-	<div class="loginBox">
-		<h3><s:actionerror/></h3>
-		<div class="login_cont">
-			<ul class="login">
-				<li class="l_tit">ÓÃ»§Ãû</li>
-				<li class="mb_10"><input type="text" name="username" class="login_input user_icon"></li>
-				<li class="l_tit">ÃÜÂë</li>
-				<li class="mb_10"><input type="text" name="password" class="login_input user_icon"></li>
+    <div class="loginBox">
+        <h3><s:actionerror/></h3>
+        <div class="login_cont">
+            <ul class="login">
+                <li class="l_tit">ÓÃ»§Ãû</li>
+                <li class="mb_10"><input type="text" name="username" class="login_input user_icon"></li>
+                <li class="l_tit">ÃÜÂë</li>
+                <li class="mb_10"><input type="text" name="password" class="login_input user_icon"></li>
 
-				<li><input type="submit" value="" class="login_btn"></li>
-			</ul>
-			<div class="login_partners">
-				<p class="l_tit">Ê¹ÓÃºÏ×÷·½ÕËºÅµÇÂ½ÍøÕ¾</p>
-				<ul class="login_list clearfix">
-					<li><a href="#">QQ</a></li>
-					<li><span>|</span></li>
-					<li><a href="#">ÍøÒ×</a></li>
-					<li><span>|</span></li>
-					<li><a href="#">ĞÂÀËÎ¢²©</a></li>
-					<li><span>|</span></li>
-					<li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
-					<li><span>|</span></li>
-					<li><a href="#">ĞÂÀËÎ¢²©</a></li>
-					<li><span>|</span></li>
-					<li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
-				</ul>
-			</div>
-		</div>
+                <li><input type="submit" value="" class="login_btn"></li>
+            </ul>
+            <div class="login_partners">
+                <p class="l_tit">Ê¹ÓÃºÏ×÷·½ÕËºÅµÇÂ½ÍøÕ¾</p>
+                <ul class="login_list clearfix">
+                    <li><a href="#">QQ</a></li>
+                    <li><span>|</span></li>
+                    <li><a href="#">ÍøÒ×</a></li>
+                    <li><span>|</span></li>
+                    <li><a href="#">ĞÂÀËÎ¢²©</a></li>
+                    <li><span>|</span></li>
+                    <li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
+                    <li><span>|</span></li>
+                    <li><a href="#">ĞÂÀËÎ¢²©</a></li>
+                    <li><span>|</span></li>
+                    <li><a href="#">ÌÚÑ¶Î¢±¡</a></li>
+                </ul>
+            </div>
+        </div>
 
-	</div>
+    </div>
 </s:form>
 
 <div class="hr_25"></div>
 <div class="footer">
-	<p><a href="#">Ä½¿Î¼ò½é</a><i>|</i><a href="#">Ä½¿Î¹«¸æ</a><i>|</i> <a href="#">ÕĞÄÉÏÍÊ¿</a><i>|</i><a href="#">ÁªÏµÎÒÃÇ</a><i>|</i>¿Í·şÈÈÏß£º400-675-1234</p>
-	<p>Copyright &copy; 2006 - 2014 Ä½¿Î°æÈ¨ËùÓĞ&nbsp;&nbsp;&nbsp;¾©ICP±¸09037834ºÅ&nbsp;&nbsp;&nbsp;¾©ICPÖ¤B1034-8373ºÅ&nbsp;&nbsp;&nbsp;Ä³ÊĞ¹«°²¾ÖXX·Ö¾Ö±¸°¸±àºÅ£º123456789123</p>
-	<p class="web"><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a></p>
+    <p><a href="#">Ä½¿Î¼ò½é</a><i>|</i><a href="#">Ä½¿Î¹«¸æ</a><i>|</i> <a href="#">ÕĞÄÉÏÍÊ¿</a><i>|</i><a href="#">ÁªÏµÎÒÃÇ</a><i>|</i>¿Í·şÈÈÏß£º400-675-1234</p>
+    <p>Copyright &copy; 2006 - 2014 Ä½¿Î°æÈ¨ËùÓĞ&nbsp;&nbsp;&nbsp;¾©ICP±¸09037834ºÅ&nbsp;&nbsp;&nbsp;¾©ICPÖ¤B1034-8373ºÅ&nbsp;&nbsp;&nbsp;Ä³ÊĞ¹«°²¾ÖXX·Ö¾Ö±¸°¸±àºÅ£º123456789123</p>
+    <p class="web"><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a><a href="#"><img src="${ pageContext.request.contextPath }/images/webLogo.jpg" alt="logo"></a></p>
 </div>
 </body>
 </html>
@@ -46496,56 +46496,56 @@ public class FirstAppDemoApplication {
 //pom.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.imooc</groupId>
-	<artifactId>first-app-demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <groupId>com.imooc</groupId>
+    <artifactId>first-app-demo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<name>first-app-demo</name>
-	<description>Demo project for Spring Boot</description>
+    <name>first-app-demo</name>
+    <description>Demo project for Spring Boot</description>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.0.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.0.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 //------------------------------------------------------------------------------------------------
 //Spring Boot 2.0Éî¶ÈÊµ¼ù
@@ -46596,70 +46596,70 @@ http://localhost:8080/person/find/all
 //first-app-demo pom.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.imooc</groupId>
-	<artifactId>first-app-demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<modules>
-		<module>web</module>
-		<module>persistence</module>
+    <groupId>com.imooc</groupId>
+    <artifactId>first-app-demo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <modules>
+        <module>web</module>
+        <module>persistence</module>
         <module>model</module>
     </modules>
 
-	<!--ĞŞ¸Ä³Épom-->
-	<!--
-		Ä£ĞÍ²ã£ºmodel
-		³Ö¾Ã²ã£ºpersistence
-		±íÊ¾²ã£ºweb
-		web ÒÀÀµÓÚ persistence£¬persistence ÒÀÀµÓÚ model
-		web UserController -> UserRepository -> User
-	-->
-	<packaging>pom</packaging>
+    <!--ĞŞ¸Ä³Épom-->
+    <!--
+        Ä£ĞÍ²ã£ºmodel
+        ³Ö¾Ã²ã£ºpersistence
+        ±íÊ¾²ã£ºweb
+        web ÒÀÀµÓÚ persistence£¬persistence ÒÀÀµÓÚ model
+        web UserController -> UserRepository -> User
+    -->
+    <packaging>pom</packaging>
 
-	<name>first-app-demo</name>
-	<description>Demo project for Spring Boot</description>
+    <name>first-app-demo</name>
+    <description>Demo project for Spring Boot</description>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.0.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.0.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 
 //web module
@@ -46915,9 +46915,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ImoocApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ImoocApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ImoocApplication.class, args);
+    }
 }
 
 //UserController.java
@@ -47429,31 +47429,31 @@ spring.mvc.static-path-pattern=/static/**
     <meta charset="UTF-8" />
     <title></title>
     
- 	<!--<script th:src="@{/static/js/test.js}"></script>-->
+     <!--<script th:src="@{/static/js/test.js}"></script>-->
     
 </head>
 <body>
 
 <div>
-	ÓÃ»§ĞÕÃû£º<input th:id="${user.name}" th:name="${user.name}" th:value="${user.name}"/>
-	<br/>
-	ÓÃ»§ÄêÁä£º<input th:value="${user.age}"/>
-	<br/>
-	ÓÃ»§ÉúÈÕ£º<input th:value="${user.birthday}"/>
-	<br/>
-	ÓÃ»§ÉúÈÕ£º<input th:value="${#dates.format(user.birthday, 'yyyy-MM-dd')}"/>
-	<br/>
+    ÓÃ»§ĞÕÃû£º<input th:id="${user.name}" th:name="${user.name}" th:value="${user.name}"/>
+    <br/>
+    ÓÃ»§ÄêÁä£º<input th:value="${user.age}"/>
+    <br/>
+    ÓÃ»§ÉúÈÕ£º<input th:value="${user.birthday}"/>
+    <br/>
+    ÓÃ»§ÉúÈÕ£º<input th:value="${#dates.format(user.birthday, 'yyyy-MM-dd')}"/>
+    <br/>
 </div>
 
 <br/>
 
 <div th:object="${user}">
-	ÓÃ»§ĞÕÃû£º<input th:id="*{name}" th:name="*{name}" th:value="*{name}"/>
-	<br/>
-	ÓÃ»§ÄêÁä£º<input th:value="*{age}"/>
-	<br/>
-	ÓÃ»§ÉúÈÕ£º<input th:value="*{#dates.format(birthday, 'yyyy-MM-dd hh:mm:ss')}"/>
-	<br/>
+    ÓÃ»§ĞÕÃû£º<input th:id="*{name}" th:name="*{name}" th:value="*{name}"/>
+    <br/>
+    ÓÃ»§ÄêÁä£º<input th:value="*{age}"/>
+    <br/>
+    ÓÃ»§ÉúÈÕ£º<input th:value="*{#dates.format(birthday, 'yyyy-MM-dd hh:mm:ss')}"/>
+    <br/>
 </div>
 
 <br/>
@@ -47579,13 +47579,13 @@ public class IMoocExceptionHandler {
 
     public static final String IMOOC_ERROR_VIEW = "error";
 
-//	@ExceptionHandler(value = Exception.class)
+//    @ExceptionHandler(value = Exception.class)
 //    public Object errorHandler(HttpServletRequest reqest, 
-//    		HttpServletResponse response, Exception e) throws Exception {
-//    	
-//    	e.printStackTrace();
-//    	
-//		ModelAndView mav = new ModelAndView();
+//            HttpServletResponse response, Exception e) throws Exception {
+//        
+//        e.printStackTrace();
+//        
+//        ModelAndView mav = new ModelAndView();
 //        mav.addObject("exception", e);
 //        mav.addObject("url", reqest.getRequestURL());
 //        mav.setViewName(IMOOC_ERROR_VIEW);
@@ -47657,31 +47657,31 @@ import com.imooc.pojo.IMoocJSONResult;
 @RestControllerAdvice
 public class IMoocAjaxExceptionHandler {
 
-	@ExceptionHandler(value = Exception.class)
-	public IMoocJSONResult defaultErrorHandler(HttpServletRequest req, 
-			Exception e) throws Exception {
+    @ExceptionHandler(value = Exception.class)
+    public IMoocJSONResult defaultErrorHandler(HttpServletRequest req, 
+            Exception e) throws Exception {
 
-		e.printStackTrace();
-		return IMoocJSONResult.errorException(e.getMessage());
-	}
+        e.printStackTrace();
+        return IMoocJSONResult.errorException(e.getMessage());
+    }
 }
 
 //ajaxerror.js
 $.ajax({
-    	url: "/err/getAjaxerror",
-    	type: "POST",
-    	async: false,
-    	success: function(data) {
-    		debugger;
+        url: "/err/getAjaxerror",
+        type: "POST",
+        async: false,
+        success: function(data) {
+            debugger;
             if(data.status == 200 && data.msg == "OK") {
-            	alert("success");
+                alert("success");
             } else {
-            	alert("·¢ÉúÒì³££º" + data.msg);
+                alert("·¢ÉúÒì³££º" + data.msg);
             }
-    	},
+        },
         error: function (response, ajaxOptions, thrownError) {
-        	debugger;
-        	alert("error");       
+            debugger;
+            alert("error");       
         }
     });
     
@@ -47708,24 +47708,24 @@ Mybatis¿ªÔ´¿ò¼Ü£ºhttps://github.com/abel533/MyBatis-Spring-Boot
 //sys_user½¨±íÓï¾ä£º
 create table sys_user
 (
-	id varchar(20) not null,
-	username varchar(50) not null comment 'ÓÃ»§Ãû£¬µÇÂ¼Ãû',
-	password varchar(30) null comment 'ÃÜÂë',
-	nickname varchar(50) null comment 'êÇ³Æ',
-	age int null comment 'ÄêÁä',
-	sex int null comment 'ĞÔ±ğ',
-	job int null,
-	face_image varchar(1000) null,
-	province varchar(10) null,
-	city varchar(10) null,
-	district varchar(10) null,
-	address varchar(50) null,
-	auth_salt varchar(10) null,
-	last_login_ip varchar(32) null,
-	last_login_time timestamp null,
-	is_delete int null,
-	regist_time timestamp null,
-	PRIMARY KEY(id)
+    id varchar(20) not null,
+    username varchar(50) not null comment 'ÓÃ»§Ãû£¬µÇÂ¼Ãû',
+    password varchar(30) null comment 'ÃÜÂë',
+    nickname varchar(50) null comment 'êÇ³Æ',
+    age int null comment 'ÄêÁä',
+    sex int null comment 'ĞÔ±ğ',
+    job int null,
+    face_image varchar(1000) null,
+    province varchar(10) null,
+    city varchar(10) null,
+    district varchar(10) null,
+    address varchar(50) null,
+    auth_salt varchar(10) null,
+    last_login_ip varchar(32) null,
+    last_login_time timestamp null,
+    is_delete int null,
+    regist_time timestamp null,
+    PRIMARY KEY(id)
 );
 
 //GeneratorDisplay.java ÓÃÀ´¶ÁÈ¡sys_user±íÉú³ÉSysUserMapper.xml¡¢SysUser.java¡¢SysUserMapper.java
@@ -47811,7 +47811,7 @@ public class GeneratorDisplay {
 </generatorConfiguration>
 //------------------------------------------------------------------------------------------------
 //SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
-//7-4 ÕûºÏMyBatis - ÊµÏÖ»ùÓÚmybatisµÄCRUD¹¦ÄÜ https://www.imooc.com/video/16788
+//8-1 ÕûºÏMyBatis - ÊµÏÖ»ùÓÚmybatisµÄCRUD¹¦ÄÜ https://www.imooc.com/video/16788
 
 ÕâÀï°Ñdevtools¸ø×¢µôÁË£¬ÔÚÕûºÏmybatisÊ±£¬Èç¹û¼ÓÔØdevtoolsÊ±£¬Èç¹ûctrl+F9»áÌáÊ¾tk.mybatis.mapper.provider.EmptyProviderÖĞÈ±ÉÙselectOne·½·¨£¬Ã»ÕÒµ½½â¾ö·½·¨¡£
 <!--<dependency>-->
@@ -47821,6 +47821,30 @@ public class GeneratorDisplay {
         <!--Ö®ºóÒÀÀµbootÏîÄ¿µÄÏîÄ¿Èç¹ûÏëÒªÊ¹ÓÃdevtools, ĞèÒªÖØĞÂÒıÈë &ndash;&gt;-->
     <!--<optional>true</optional>-->
 <!--</dependency>-->
+
+//UserService.java
+package com.imooc.service;
+
+import java.util.List;
+
+import com.imooc.pojo.SysUser;
+
+public interface UserService {
+    void saveUser(SysUser user) throws Exception;
+
+    void updateUser(SysUser user);
+
+    void deleteUser(String userId);
+
+    SysUser queryUserById(String userId);
+
+    List<SysUser> queryUserList(SysUser user);
+
+    List<SysUser> queryUserListPaged(SysUser user, Integer page, Integer pageSize);
+
+    SysUser queryUserByIdCustom(String userId);
+}
+
 
 //MyBatisCRUDController.java
 package com.imooc.controller;
@@ -47907,46 +47931,51 @@ public class MyBatisCRUDController {
         return IMoocJSONResult.ok(userList);
     }
 
-	@RequestMapping("/queryUserListPaged")
-	public IMoocJSONResult queryUserListPaged(Integer page) {
+    @RequestMapping("/queryUserListPaged")
+    public IMoocJSONResult queryUserListPaged(Integer page) {
 
-		if (page == null) {
-			page = 1;
-		}
+        if (page == null) {
+            page = 1;
+        }
 
-		int pageSize = 5;
+        int pageSize = 5;
 
-		SysUser user = new SysUser();
-//		user.setNickname("lee");
+        SysUser user = new SysUser();
+    //        user.setNickname("lee");
 
-		List<SysUser> userList = userService.queryUserListPaged(user, page, pageSize);
+        List<SysUser> userList = userService.queryUserListPaged(user, page, pageSize);
 
-		return IMoocJSONResult.ok(userList);
-	}
+        return IMoocJSONResult.ok(userList);
+    }
 //
-//	@RequestMapping("/queryUserByIdCustom")
-//	public IMoocJSONResult queryUserByIdCustom(String userId) {
+//    @RequestMapping("/queryUserByIdCustom")
+//    public IMoocJSONResult queryUserByIdCustom(String userId) {
 //
-//		return IMoocJSONResult.ok(userService.queryUserByIdCustom(userId));
-//	}
+//        return IMoocJSONResult.ok(userService.queryUserByIdCustom(userId));
+//    }
 //
-//	@RequestMapping("/saveUserTransactional")
-//	public IMoocJSONResult saveUserTransactional() {
-//
-//		String userId = sid.nextShort();
-//
-//		SysUser user = new SysUser();
-//		user.setId(userId);
-//		user.setUsername("lee" + new Date());
-//		user.setNickname("lee" + new Date());
-//		user.setPassword("abc123");
-//		user.setIsDelete(0);
-//		user.setRegistTime(new Date());
-//
-//		userService.saveUserTransactional(user);
-//
-//		return IMoocJSONResult.ok("±£´æ³É¹¦");
-//	}
+    @RequestMapping("/saveUserTransactional")
+    public IMoocJSONResult saveUserTransactional() {
+
+        String userId = sid.nextShort();
+
+        SysUser user = new SysUser();
+        user.setId(userId);
+        user.setUsername("lee" + new Date());
+        user.setNickname("lee" + new Date());
+        user.setPassword("abc123");
+        user.setIsDelete(0);
+        user.setRegistTime(new Date());
+
+        userService.saveUserTransactional(user);
+
+        return IMoocJSONResult.ok("±£´æ³É¹¦");
+    }
+
+    @RequestMapping("/queryUserByIdCustom")
+    public IMoocJSONResult queryUserByIdCustom(String userId) {
+        return IMoocJSONResult.ok(userService.queryUserByIdCustom(userId));
+    }
 }
 
 
@@ -47959,10 +47988,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
 
 import com.github.pagehelper.PageHelper;
 import com.imooc.mapper.SysUserMapper;
+import com.imooc.mapper.SysUserMapperCustom;
 import com.imooc.pojo.SysUser;
 import com.imooc.service.UserService;
 
@@ -47972,12 +48004,17 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SysUserMapper userMapper;
 
+    @Autowired
+    private SysUserMapperCustom userMapperCustom;
+
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void saveUser(SysUser user) throws Exception {
         userMapper.insert(user);
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateUser(SysUser user) {
         //SelectiveÖ»»á¸üĞÂÓĞÖµµÄÊôĞÔ£¬ÎŞÖµÊôĞÔÔò²»¸üĞÂ¡£Èç¹û²»´øSelectiveÔò»á°ÑuserÖĞµÄnull¶ÔÏóÖµÒ²¸üĞÂµ½Êı¾İ¿â¶ÔÏóÖĞ
 //        userMapper.updateByPrimaryKey(user);
@@ -47985,11 +48022,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteUser(String userId) {
         userMapper.deleteByPrimaryKey(userId);
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public SysUser queryUserById(String userId) {
         try {
             Thread.sleep(6000);
@@ -48000,6 +48039,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public List<SysUser> queryUserList(SysUser user) {
         try {
             Thread.sleep(11000);
@@ -48011,7 +48051,7 @@ public class UserServiceImpl implements UserService {
         Example.Criteria criteria = example.createCriteria();
 
         if (!StringUtils.isEmptyOrWhitespace(user.getUsername())) {
-//			criteria.andEqualTo("username", user.getUsername());
+//            criteria.andEqualTo("username", user.getUsername());
             criteria.andLike("username", "%" + user.getUsername() + "%");
         }
 
@@ -48023,6 +48063,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
     public List<SysUser> queryUserListPaged(SysUser user, Integer page, Integer pageSize) {
         // ¿ªÊ¼·ÖÒ³
         PageHelper.startPage(page, pageSize);
@@ -48038,26 +48079,635 @@ public class UserServiceImpl implements UserService {
 
         return userList;
     }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public SysUser queryUserByIdCustom(String userId) {
+        List<SysUser> userList = userMapperCustom.queryUserSimplyInfoById(userId);
+        if (userList != null && !userList.isEmpty()) {
+            return userList.get(0);
+        }
+
+        return null;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveUserTransactional(SysUser user) {
+        userMapper.insert(user);
+        int a = 1 / 0;
+        user.setIsDelete(1);
+        userMapper.updateByPrimaryKeySelective(user);
+    }
 }
 
-//------------------------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------------------------
+//SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
+//8-4 ÕûºÏMyBatis - ×Ô¶¨ÒåmapperµÄÊµÏÖ https://www.imooc.com/video/16789
 
+//SysUserMapper.java
+package com.imooc.mapper;
+
+import org.springframework.stereotype.Component;
+
+import com.imooc.pojo.SysUser;
+import com.imooc.utils.MyMapper;
+
+@Component
+public interface SysUserMapper extends MyMapper<SysUser> {
+}
+
+//SysUserMapper.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imooc.mapper.SysUserMapper">
+  <resultMap id="BaseResultMap" type="com.imooc.pojo.SysUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="sex" jdbcType="INTEGER" property="sex" />
+    <result column="job" jdbcType="INTEGER" property="job" />
+    <result column="face_image" jdbcType="VARCHAR" property="faceImage" />
+    <result column="province" jdbcType="VARCHAR" property="province" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="district" jdbcType="VARCHAR" property="district" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="auth_salt" jdbcType="VARCHAR" property="authSalt" />
+    <result column="last_login_ip" jdbcType="VARCHAR" property="lastLoginIp" />
+    <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+    <result column="regist_time" jdbcType="TIMESTAMP" property="registTime" />
+  </resultMap>
+</mapper>
+
+//SysUserMapperCustom.java
+package com.imooc.mapper;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.imooc.pojo.SysUser;
+
+@Component
+public interface SysUserMapperCustom {
+    List<SysUser> queryUserSimplyInfoById(String id);
+}
+
+//SysUserMapperCustom.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.imooc.mapper.SysUserMapperCustom">
+
+    <!-- ²éÑ¯¼òµ¥µÄÓÃ»§ĞÅÏ¢ -->
+    <select id="queryUserSimplyInfoById" resultType="com.imooc.pojo.SysUser"
+            parameterType="java.lang.String">
+        select 
+            *
+        from 
+            sys_user
+        where 
+            id = #{id,jdbcType=VARCHAR}
+    </select>
+</mapper>
 
 //------------------------------------------------------------------------------------------------
+//SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
+//8-5 ÕûºÏMyBatis - ÒıÈëÊÂÎñÖ´ĞĞ»Ø¹ö https://www.imooc.com/video/16731
+*ÊÂÎñµÄ¸ôÀë¼¶±ğ£º
+DEFAULT READ_UNCOMMITTED READ_COMMITTED REPEATABLE_READ SERIALIZABLE
+*ÊÂÎñµÄ´«²¥ĞĞÎª£º
+REQUIRED SUPPORTS MANDATORY REQUIRES_NEW NOT_SUPPORTED NEVER NESTED
 
-
+//Ôö¼Ó@Transactional
+@Override
+@Transactional(propagation = Propagation.REQUIRED)
+public void saveUserTransactional(SysUser user) {
+    userMapper.insert(user);
+    int a = 1 / 0;
+    user.setIsDelete(1);
+    userMapper.updateByPrimaryKeySelective(user);
+}
 //------------------------------------------------------------------------------------------------
+//SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
+//9-1 SpringBootÕûºÏ»º´æRedis https://www.imooc.com/video/16790
+*pom.xmlÖĞĞèÒªÒıÈëÏà¹ØÒÀÀµ
+*×ÊÔ´ÎÄ¼şÖĞ¶Ôredis½øĞĞÅäÖÃ
+*ÒıÈëredis¹¤¾ßÀà
+
+//RedisController.java
+package com.imooc.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.pojo.IMoocJSONResult;
+import com.imooc.pojo.SysUser;
+import com.imooc.pojo.User;
+import com.imooc.utils.JsonUtils;
+import com.imooc.utils.RedisOperator;
+
+@RestController
+@RequestMapping("redis")
+public class RedisController {
+
+    @Autowired
+    private StringRedisTemplate strRedis;
+
+    @Autowired
+    private RedisOperator redis;
+
+    @RequestMapping("/test")
+    public IMoocJSONResult test() {
+        ValueOperations<String, String> valueOperations = strRedis.opsForValue();
+//        valueOperations.set("imooc-cache", "hello Ä½¿ÎÍø~~~");
+//        return IMoocJSONResult.ok(valueOperations.get("imooc-cache"));
+
+        SysUser user = new SysUser();
+        user.setId("1001110");
+        user.setUsername("lee");
+        user.setNickname("lee");
+        user.setPassword("abc123");
+        user.setIsDelete(0);
+        user.setRegistTime(new Date());
+        valueOperations.set("json:user", JsonUtils.objectToJson(user));
+
+        SysUser jsonUser = JsonUtils.jsonToPojo(valueOperations.get("json:user"), SysUser.class);
+        return IMoocJSONResult.ok(jsonUser);
+    }
+
+    @RequestMapping("/getJsonList")
+    public IMoocJSONResult getJsonList() {
+        User user = new User();
+        user.setAge(18);
+        user.setName("Ä½¿ÎÍø");
+        user.setPassword("123456");
+        user.setBirthday(new Date());
+
+        User u1 = new User();
+        u1.setAge(19);
+        u1.setName("imooc");
+        u1.setPassword("123456");
+        u1.setBirthday(new Date());
+
+        User u2 = new User();
+        u2.setAge(17);
+        u2.setName("hello imooc");
+        u2.setPassword("123456");
+        u2.setBirthday(new Date());
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        userList.add(u1);
+        userList.add(u2);
+
+        redis.set("json:info:userlist", JsonUtils.objectToJson(userList), 2000);
+
+        String userListJson = redis.get("json:info:userlist");
+        List<User> userListBorn = JsonUtils.jsonToList(userListJson, User.class);
+
+        return IMoocJSONResult.ok(userListBorn);
+    }
+}
 
 
+#¹Ø±Õ»º´æ, ¼´Ê±Ë¢ĞÂ
+#spring.freemarker.cache=false
+#spring.thymeleaf.cache=true
+
+#ÈÈ²¿ÊğÉúĞ§
+spring.devtools.restart.enabled=false
+#ÉèÖÃÖØÆôµÄÄ¿Â¼,Ìí¼ÓÄÇ¸öÄ¿Â¼µÄÎÄ¼şĞèÒªrestart
+spring.devtools.restart.additional-paths=src/main/java
+# ÎªmybatisÉèÖÃ£¬Éú²ú»·¾³¿ÉÉ¾³ı
+restart.include.mapper=/mapper-[\\w-\\.]+jar
+restart.include.pagehelper=/pagehelper-[\\w-\\.]+jar
+#ÅÅ³ıÄÇ¸öÄ¿Â¼µÄÎÄ¼ş²»ĞèÒªrestart
+spring.devtools.restart.exclude=static/**,public/**,WEB-INF/**      */
+#classpathÄ¿Â¼ÏÂµÄWEB-INFÎÄ¼ş¼ĞÄÚÈİĞŞ¸Ä²»ÖØÆô
+#spring.devtools.restart.exclude=WEB-INF/**     */
+#
+############################################################
+#
+# REDIS ÅäÖÃ
+#
+############################################################
+# RedisÊı¾İ¿âË÷Òı£¨Ä¬ÈÏÎª0£©
+spring.redis.database=1
+# Redis·şÎñÆ÷µØÖ·
+spring.redis.host=192.168.100.129
+# Redis·şÎñÆ÷Á¬½Ó¶Ë¿Ú
+spring.redis.port=6379
+# Redis·şÎñÆ÷Á¬½ÓÃÜÂë£¨Ä¬ÈÏÎª¿Õ£©
+spring.redis.password=
+# Á¬½Ó³Ø×î´óÁ¬½ÓÊı£¨Ê¹ÓÃ¸ºÖµ±íÊ¾Ã»ÓĞÏŞÖÆ£©
+#spring.redis.pool.max-active=1000
+spring.redis.jedis.pool.max-idle=1000
+# Á¬½Ó³Ø×î´ó×èÈûµÈ´ıÊ±¼ä£¨Ê¹ÓÃ¸ºÖµ±íÊ¾Ã»ÓĞÏŞÖÆ£©
+#spring.redis.pool.max-wait=-1
+spring.redis.jedis.pool.max-wait=-1
+# Á¬½Ó³ØÖĞµÄ×î´ó¿ÕÏĞÁ¬½Ó
+#spring.redis.pool.max-idle=10
+# Á¬½Ó³ØÖĞµÄ×îĞ¡¿ÕÏĞÁ¬½Ó
+#spring.redis.pool.min-idle=2
+spring.redis.jedis.pool.min-idle=2
+# Á¬½Ó³¬Ê±Ê±¼ä£¨ºÁÃë£©
+spring.redis.timeout=1000
+#
+#
+#
+############################################################
+#
+# ÅäÖÃÊı¾İÔ´Ïà¹Ø    Ê¹ÓÃ°¢Àï°Í°ÍµÄ druid Êı¾İÔ´
+#
+############################################################
+#spring.datasource.url=jdbc:mysql://localhost:3306/leecx
+spring.datasource.url=jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=root123
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.druid.initial-size=1
+spring.datasource.druid.min-idle=1
+spring.datasource.druid.max-active=20
+spring.datasource.druid.test-on-borrow=true
+spring.datasource.druid.stat-view-servlet.allow=true
+#
+#
+############################################################
+#
+# mybatis ÅäÖÃ
+#
+############################################################
+# mybatis ÅäÖÃ
+mybatis.type-aliases-package=com.imooc.pojo
+mybatis.mapper-locations=classpath:mapper/*.xml     */
+# Í¨ÓÃ Mapper ÅäÖÃ
+mapper.mappers=com.imooc.utils.MyMapper
+mapper.not-empty=false
+mapper.identity=MYSQL
+# ·ÖÒ³²å¼şÅäÖÃ
+pagehelper.helperDialect=mysql
+pagehelper.reasonable=true
+pagehelper.supportMethodsArguments=true
+pagehelper.params=count=countSql
+
+
+############################################################
+#
+# ÅäÖÃi18n ×ÊÔ´ÎÄ¼ş£¬¹©thymeleaf ¶ÁÈ¡
+#
+############################################################
+spring.messages.basename=i18n/messages
+#spring.messages.cache-seconds=3600 ÒÑ¾­±»·ÏÆú
+spring.messages.cache-duration=3600
+spring.messages.encoding=UTF-8
+
+
+#Éè¶¨¾²Ì¬ÎÄ¼şÂ·¾¶£¬js,cssµÈ
+spring.mvc.static-path-pattern=/static/**
+
+############################################################
+#
+# freemarker ¾²Ì¬×ÊÔ´ÅäÖÃ
+#
+############################################################
+#Éè¶¨ftlÎÄ¼şÂ·¾¶
+spring.freemarker.template-loader-path=classpath:/templates
+# ¹Ø±Õ»º´æ, ¼´Ê±Ë¢ĞÂ, ÉÏÏßÉú²ú»·¾³ĞèÒª¸ÄÎªtrue
+spring.freemarker.cache=false
+spring.freemarker.charset=UTF-8
+spring.freemarker.check-template-location=true
+spring.freemarker.content-type=text/html
+spring.freemarker.expose-request-attributes=true
+spring.freemarker.expose-session-attributes=true
+spring.freemarker.request-context-attribute=request
+spring.freemarker.suffix=.ftl
+
+
+############################################################
+#
+# thymeleaf ¾²Ì¬×ÊÔ´ÅäÖÃ
+#
+############################################################
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+spring.thymeleaf.mode=HTML
+spring.thymeleaf.encoding=UTF-8
+spring.thymeleaf.servlet.content-type=text/html
+#spring.thymeleaf.content-type=text/html ÒÑ¾­±»·ÏÆú
+# ¹Ø±Õ»º´æ, ¼´Ê±Ë¢ĞÂ, ÉÏÏßÉú²ú»·¾³ĞèÒª¸ÄÎªtrue
+spring.thymeleaf.cache=false
+
+
+############################################################
+#
+# Server ·şÎñ¶ËÏà¹ØÅäÖÃ
+#
+############################################################
+# ÅäÖÃapi¶Ë¿ÚºÅ
+#server.port=8080
+# ÅäÖÃcontext-path, Ò»°ãÀ´ËµÕâ¸öÅäÖÃÔÚÕıÊ½·¢²¼µÄÊ±ºò²»ÅäÖÃ
+#server.context-path=/IMooc server.context-pathÒÑ¾­±»·ÏÆú
+#server.servlet.context-path=/IMooc
+# ´íÎóÒ³£¬Ö¸¶¨·¢Éú´íÎóÊ±£¬Ìø×ªµÄURL --> BasicErrorController
+#server.error.path=/error
+# session×î´ó³¬Ê±Ê±¼ä(·ÖÖÓ)£¬Ä¬ÈÏÎª30·ÖÖÓ
+server.session-timeout=60
+# ¸Ã·şÎñ°ó¶¨IPµØÖ·£¬Æô¶¯·şÎñÆ÷Ê±Èç±¾»ú²»ÊÇ¸ÃIPµØÖ·ÔòÅ×³öÒì³£Æô¶¯Ê§°Ü,
+# Ö»ÓĞÌØÊâĞèÇóµÄÇé¿öÏÂ²ÅÅäÖÃ, ¾ßÌå¸ù¾İ¸÷×ÔµÄÒµÎñÀ´ÉèÖÃ ²é¿´±¾µØIPºó£¬Ê¹ÓÃhttp://192.168.100.102:8088/IMooc/hello·ÃÎÊ
+#server.address=192.168.100.102
+
+############################################################
+# Server - tomcat Ïà¹Ø³£ÓÃÅäÖÃ
+############################################################
+# tomcat×î´óÏß³ÌÊı, Ä¬ÈÏÎª200
+#server.tomcat.max-threads=250
+# tomcatµÄURI±àÂë
+server.tomcat.uri-encoding=UTF-8
+# ´æ·ÅTomcatµÄÈÕÖ¾¡¢DumpµÈÎÄ¼şµÄÁÙÊ±ÎÄ¼ş¼Ğ£¬Ä¬ÈÏÎªÏµÍ³µÄtmpÎÄ¼ş¼Ğ
+#£¨Èç£ºC:\Users\Shanhy\AppData\Local\Temp£©
+#server.tomcat.basedir=H:/springboot-tomcat-tmp
+# ´ò¿ªTomcatµÄAccessÈÕÖ¾£¬²¢¿ÉÒÔÉèÖÃÈÕÖ¾¸ñÊ½µÄ·½·¨£º
+#server.tomcat.access-log-enabled=true
+#server.tomcat.access-log-pattern=
+# accesslogÄ¿Â¼£¬Ä¬ÈÏÔÚbasedir/logs
+#server.tomcat.accesslog.directory=
+# ÈÕÖ¾ÎÄ¼şÄ¿Â¼
+#logging.path=H:/springboot-tomcat-tmp
+# ÈÕÖ¾ÎÄ¼şÃû³Æ£¬Ä¬ÈÏÎªspring.log
+#logging.file=myapp.log
 //------------------------------------------------------------------------------------------------
+//SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
+//9-2 SpringBootÊ¹ÓÃÒÑ·â×°ºÃµÄredis¹¤¾ßÀà½øĞĞ²Ù×÷ https://www.imooc.com/video/16791
 
+·ÃÎÊ£ºhttp://localhost:8080/redis/getJsonList
+//RedisOperator.java
+package com.imooc.utils;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+
+/**
+ * 
+ * @Title: RedisOperator.java
+ * @Package com.itzixi.web.component
+ * @Description: Ê¹ÓÃredisTemplateµÄ²Ù×÷ÊµÏÖÀà Copyright: Copyright (c) 2016
+ *               Company:FURUIBOKE.SCIENCE.AND.TECHNOLOGY
+ * 
+ * @author leechenxiang
+ * @date 2017Äê9ÔÂ29ÈÕ ÏÂÎç2:25:03
+ * @version V1.0
+ */
+@Component
+public class RedisOperator {
+    
+//    @Autowired
+//    private RedisTemplate<String, Object> redisTemplate;
+    
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+    
+    // Key£¨¼ü£©£¬¼òµ¥µÄkey-value²Ù×÷
+
+    /**
+     * ÊµÏÖÃüÁî£ºTTL key£¬ÒÔÃëÎªµ¥Î»£¬·µ»Ø¸ø¶¨ keyµÄÊ£ÓàÉú´æÊ±¼ä(TTL, time to live)¡£
+     * 
+     * @param key
+     * @return
+     */
+    public long ttl(String key) {
+        return redisTemplate.getExpire(key);
+    }
+    
+    /**
+     * ÊµÏÖÃüÁî£ºexpire ÉèÖÃ¹ıÆÚÊ±¼ä£¬µ¥Î»Ãë
+     * 
+     * @param key
+     * @return
+     */
+    public void expire(String key, long timeout) {
+        redisTemplate.expire(key, timeout, TimeUnit.SECONDS);
+    }
+    
+    /**
+     * ÊµÏÖÃüÁî£ºINCR key£¬Ôö¼ÓkeyÒ»´Î
+     * 
+     * @param key
+     * @return
+     */
+    public long incr(String key, long delta) {
+        return redisTemplate.opsForValue().increment(key, delta);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºKEYS pattern£¬²éÕÒËùÓĞ·ûºÏ¸ø¶¨Ä£Ê½ patternµÄ key
+     */
+    public Set<String> keys(String pattern) {
+        return redisTemplate.keys(pattern);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºDEL key£¬É¾³ıÒ»¸ökey
+     * 
+     * @param key
+     */
+    public void del(String key) {
+        redisTemplate.delete(key);
+    }
+
+    // String£¨×Ö·û´®£©
+
+    /**
+     * ÊµÏÖÃüÁî£ºSET key value£¬ÉèÖÃÒ»¸ökey-value£¨½«×Ö·û´®Öµ value¹ØÁªµ½ key£©
+     * 
+     * @param key
+     * @param value
+     */
+    public void set(String key, String value) {
+        redisTemplate.opsForValue().set(key, value);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºSET key value EX seconds£¬ÉèÖÃkey-valueºÍ³¬Ê±Ê±¼ä£¨Ãë£©
+     * 
+     * @param key
+     * @param value
+     * @param timeout
+     *            £¨ÒÔÃëÎªµ¥Î»£©
+     */
+    public void set(String key, String value, long timeout) {
+        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºGET key£¬·µ»Ø keyËù¹ØÁªµÄ×Ö·û´®Öµ¡£
+     * 
+     * @param key
+     * @return value
+     */
+    public String get(String key) {
+        return (String)redisTemplate.opsForValue().get(key);
+    }
+
+    // Hash£¨¹şÏ£±í£©
+
+    /**
+     * ÊµÏÖÃüÁî£ºHSET key field value£¬½«¹şÏ£±í keyÖĞµÄÓò fieldµÄÖµÉèÎª value
+     * 
+     * @param key
+     * @param field
+     * @param value
+     */
+    public void hset(String key, String field, Object value) {
+        redisTemplate.opsForHash().put(key, field, value);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºHGET key field£¬·µ»Ø¹şÏ£±í keyÖĞ¸ø¶¨Óò fieldµÄÖµ
+     * 
+     * @param key
+     * @param field
+     * @return
+     */
+    public String hget(String key, String field) {
+        return (String) redisTemplate.opsForHash().get(key, field);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºHDEL key field [field ...]£¬É¾³ı¹şÏ£±í key ÖĞµÄÒ»¸ö»ò¶à¸öÖ¸¶¨Óò£¬²»´æÔÚµÄÓò½«±»ºöÂÔ¡£
+     * 
+     * @param key
+     * @param fields
+     */
+    public void hdel(String key, Object... fields) {
+        redisTemplate.opsForHash().delete(key, fields);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºHGETALL key£¬·µ»Ø¹şÏ£±í keyÖĞ£¬ËùÓĞµÄÓòºÍÖµ¡£
+     * 
+     * @param key
+     * @return
+     */
+    public Map<Object, Object> hgetall(String key) {
+        return redisTemplate.opsForHash().entries(key);
+    }
+
+    // List£¨ÁĞ±í£©
+
+    /**
+     * ÊµÏÖÃüÁî£ºLPUSH key value£¬½«Ò»¸öÖµ value²åÈëµ½ÁĞ±í keyµÄ±íÍ·
+     * 
+     * @param key
+     * @param value
+     * @return Ö´ĞĞ LPUSHÃüÁîºó£¬ÁĞ±íµÄ³¤¶È¡£
+     */
+    public long lpush(String key, String value) {
+        return redisTemplate.opsForList().leftPush(key, value);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºLPOP key£¬ÒÆ³ı²¢·µ»ØÁĞ±í keyµÄÍ·ÔªËØ¡£
+     * 
+     * @param key
+     * @return ÁĞ±íkeyµÄÍ·ÔªËØ¡£
+     */
+    public String lpop(String key) {
+        return (String)redisTemplate.opsForList().leftPop(key);
+    }
+
+    /**
+     * ÊµÏÖÃüÁî£ºRPUSH key value£¬½«Ò»¸öÖµ value²åÈëµ½ÁĞ±í keyµÄ±íÎ²(×îÓÒ±ß)¡£
+     * 
+     * @param key
+     * @param value
+     * @return Ö´ĞĞ LPUSHÃüÁîºó£¬ÁĞ±íµÄ³¤¶È¡£
+     */
+    public long rpush(String key, String value) {
+        return redisTemplate.opsForList().rightPush(key, value);
+    }
+}
 //------------------------------------------------------------------------------------------------
+//SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
+//10-1 SpringBootÕûºÏ¶¨Ê±ÈÎÎñtask https://www.imooc.com/video/16734
+*Ê¹ÓÃ×¢½â@EnableScheduling¿ªÆô¶¨Ê±ÈÎÎñ£¬»á×Ô¶¯É¨Ãè
+*¶¨Òå@Component×÷Îª×é¼ş±»ÈİÆ÷É¨Ãè
 
+//ImoocApplication.java
+package com.imooc;
 
+import tk.mybatis.spring.annotation.MapperScan;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@SpringBootApplication
+//É¨Ãèmybatis mapper°üÂ·¾¶
+@MapperScan(basePackages = "com.imooc.mapper")
+//É¨ÃèËùÓĞĞèÒªµÄ°ü£¬°üº¬Ò»Ğ©×ÔÓÃµÄ¹¤¾ßÀà°üËùÔÚµÄÂ·¾¶
+@ComponentScan(basePackages = {"com.imooc", "org.n3r.idworker"})
+//¿ª»§¶¨Ê±ÈÎÎñ£¬»á×Ô¶¯É¨Ãèµ½@Scheduledº¯Êı½øĞĞÖ´ĞĞ
+@EnableScheduling
+public class ImoocApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ImoocApplication.class, args);
+    }
+}
+
+//TestTask.java
+package com.imooc.tasks;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TestTask {
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
+
+    //¶¨ÒåÃ¿¹ı3ÃëÖ´ĞĞÈÎÎñ
+    @Scheduled(fixedRate = 3000)
+    public void reportCurrentTime() {
+        System.out.println("ÏÖÔÚÊ±¼ä£º" + DATE_FORMAT.format(new Date()));
+    }
+
+    //¶¨ÒåÃ¿¹ı5ÃëÖ´ĞĞÈÎÎñ
+    @Scheduled(fixedRate = 5000)
+    public void reportCurrentTime2() {
+        System.out.println("ÏÖÔÚÊ±¼ä2£º" + DATE_FORMAT.format(new Date()));
+    }
+}
+//------------------------------------------------------------------------------------------------
+//SpringBoot¿ª·¢³£ÓÃ¼¼ÊõÕûºÏ
+//10-2 SpringBootÕûºÏ¶¨Ê±ÈÎÎñ ¶¨Ê±ÈÎÎñ±í´ïÊ½¼òµ¥½²½âÓëÓ¦ÓÃ https://www.imooc.com/video/16792
+*±í´ïÊ½Éú³ÉµØÖ·£ºhttp://cron.qqe2.com
+
+//cron±í´ïÊ½
+@Scheduled(cron = "4-40 * * * * ?") //Ã¿·ÖÖÓµÄ4Ãëµ½40ÃëÖ´ĞĞ
+Ãë ·ÖÖÓ Ğ¡Ê± ÈÕ ÔÂ ĞÇÆÚ Ö»Ö§³ÖÕâ6¶Î£¬²»Ö§³ÖÄê
 //------------------------------------------------------------------------------------------------
 
 
