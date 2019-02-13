@@ -56,3 +56,16 @@
     ;~ MsgBox You pressed Control+Alt+e in a window other than Total_cmd
     ;~ return
 ;~ }
+
+#IfWinActive ahk_class Chrome_WidgetWin_1
+^;::
+{
+    SendInput {End}
+    return
+}
+!;::
+{
+    SendInput {Home}
+    return
+}
+#IfWinActive

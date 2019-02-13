@@ -17,6 +17,70 @@ Lambda是一个匿名函数，可以把Lambda表达式理解为是一段可以�
 参考<http://www.365yg.com/i6411483273897181698/#mid=1559096720023553>
 
 ```java
+//Employee.java
+package test;
+
+public class Employee {
+    private String name;
+    private int age;
+    private double salary;
+
+    public Employee(String name, int age, double salary) {
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+            "name='" + name + '\'' +
+            ", age=" + age +
+            ", salary=" + salary +
+            '}';
+    }
+}
+
+//MyPredicate.java
+package test;
+
+public interface MyPredicate<T> {
+    boolean predicate(T t);
+}
+
+//EmployeeByAgeFilter.java
+package test;
+
+public class EmployeeByAgeFilter implements MyPredicate<Employee> {
+    @Override
+    public boolean predicate(Employee employee) {
+        return employee.getAge() > 35;
+    }
+}
+
+//EmployeeBySalaryFilter.java
+package test;
+
+public class EmployeeBySalaryFilter implements MyPredicate<Employee> {
+    @Override
+    public boolean predicate(Employee employee) {
+        return employee.getSalary() > 5000;
+    }
+}
+
+//TestLambda.java
 package test;
 
 import java.util.ArrayList;
@@ -161,6 +225,134 @@ public class TestLambda {
         //取名字集合
         List<String> nameList = employees.stream().map(Employee::getName).collect(Collectors.toList());
         nameList.forEach(System.out::println);
+    }
+}
+```
+
+### 1.2.1. 一、Lambda表达式的基础语法：Java8中引入了一个新的操作符"->"，该操作符称为箭头操作符或Lambda操作符。
+
+>**左侧**：Lambda表达式的参数列表
+>
+>**右侧**：Lambda表达式中所需执行的功能，即Lambda体
+
+Lambda表达式箭头左侧是接口函数的参数列表，箭头右侧是接口函数的实现。
+
+语法格式：
+
+> 1.无参数，无返回值
+>
+>> () -> System.out.println("Hello, world")
+
+```java
+@Test
+public void testNoParameterNoReturnLambda() {
+    int num = 3;//jdk 1.8前必须显示声明为final
+    Runnable r1 = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println("hello, world" + num);//这里如果是num++依旧会报错，编译器要求num必须为final
+        }
+    };
+    r1.run();
+
+    System.out.println("------------------------");
+
+    Runnable r2 = () -> System.out.println("hello, lambda" + num);
+    r2.run();
+}
+
+输出：
+hello, world0
+------------------------
+hello, lambda0
+```
+
+> 2.有一个参数，并且无返回值，**若只有一个参数，则小括号可以不写**
+>
+>> (x) -> System.out.println(x)
+>>
+>> 或 x -> System.out.println(x)
+
+```java
+@Test
+public void testOneParameterNoReturnLambda() {
+    Consumer<String> consumer = x -> System.out.println(x);
+    consumer.accept("Good luck!");
+    Consumer<String> consumer1 = consumer.andThen(x -> System.out.println(x + x));
+    consumer1.accept("hello");
+}
+
+输出：
+Good luck!
+hello
+hellohello
+```
+
+> 3.有两个以上参数，有返回值，并且Lambda体中有多条语句
+>
+>> (x, y) -> {
+>>
+>>     //...
+>>     //...
+>>     return ...;
+>>
+>> }
+
+```java
+@Test
+public void testMultiParametersReturnLambda() {
+    Comparator<Integer> comparator = (x, y) -> {
+        System.out.println("函数式接口");
+        return Integer.compare(x, y);
+    };
+    System.out.println(comparator.compare(3, 2));
+}
+
+输出：
+1
+```
+
+> 4.若有返回值，且Lambda体中只有一条return语句，则return和大括号都可以省略不写
+>
+>> (x, y) -> x + y
+
+```java
+@Test
+public void testMultiParametersOneReturnSentenceLambda() {
+    Comparator<Integer> comparator = (x, y) -> Integer.compare(x, y);
+    System.out.println(comparator.compare(3, 2));
+}
+
+输出：
+1
+```
+
+> 5.Lambda表达式的参数列表的数据类型可以省略不写，因为JVM编译器可以通过上下文推断出数据类型，这个过程称为“类型推断”，如果显示指定参数列表的数据类型，则所有的参数类型都必须指定。
+>
+>> (Integer x, Integer y) -> Integer.compare(x, y);
+
+上联：**左右遇一括号省**
+
+下联：**左侧推断类型省**
+
+横批：**能省则省**
+
+### 1.2.2. 二、Lambda表达式需要“函数式接口”的支持
+
+函数式接口：接口中只有一个抽象方法的接口，称为函数式接口。
+
+可以使用**注解@FunctionalInterface修饰**，用以检查是否是函数式接口。
+
+使用@FunctionalInterface修饰过的接口，可以在额外的default函数。如下例：
+
+```java
+package test;
+
+@FunctionalInterface
+public interface MyPredicate<T> {
+    boolean predicate(T t);
+    default boolean predicate2(T t) {
+        return true;
     }
 }
 ```
