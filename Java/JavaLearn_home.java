@@ -1,4 +1,72 @@
 //------------------------------------------------------------------------------------------------
+//CAS https://blog.csdn.net/v123411739/article/details/79561458
+CAS（Compare-and-Swap），即比较并替换，是一种实现并发算法时常用到的技术，Java并发包中的很多类都使用了CAS技术。CAS也是现在面试经常问的问题，本文将深入的介绍CAS的原理。
+
+//VolatileTest.java
+package test;
+
+import java.util.concurrent.CountDownLatch;
+
+public class VolatileTest {
+    public static volatile int race = 0;
+
+    public static void increase() {
+        ++race;
+    }
+
+    private static final int THREADS_COUNT = 20;
+    private static final int THREAD_COUNT_NUMBER = 10000;
+
+    public static void main(String[] args) {
+        Thread[] threads = new Thread[THREADS_COUNT];
+        CountDownLatch countDownLatch = new CountDownLatch(THREADS_COUNT);
+        for (int i = 0; i < THREADS_COUNT; i++) {
+            threads[i] = new Thread(() -> {
+                for (int i1 = 0; i1 < THREAD_COUNT_NUMBER; i1++) {
+                    increase();
+//                    System.out.printf(String.format("ThreadName: %s, loopNumber: %d%n", Thread.currentThread().getName(), i1));
+                }
+                countDownLatch.countDown();
+            });
+            threads[i].start();
+        }
+        //等待所有累加线程都结束
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(race);
+    }
+}
+输出：68293 （每次不一样）
+
+通过分析字节码我们知道，这是因为volatile只能保证可见性，无法保证原子性，而自增操作并不是一个原子操作（如下图所示），在并发的情况下，putstatic指令可能把较小的race值同步回主内存之中，导致我们每次都无法获得想要的结果。那么，应该怎么解决这个问题了？
+
+解决方法1：
+public static synchronized void increase() {
+    ++race;
+}
+使用synchronized修饰后，increase方法变成了一个原子操作，因此是肯定能得到正确的结果。但是，我们知道，每次自增都进行加锁，性能可能会稍微差了点，有更好的方案吗？
+
+解决方法2：
+//    public static volatile int race = 0;
+public static AtomicInteger race = new AtomicInteger(0);
+
+public static void increase() {
+//    ++race;//非原子操作，取值，加1，写值
+    race.getAndIncrement();//原子操作
+}
+我们将例子中的代码稍做修改：race改成使用AtomicInteger定义，“race++”改成使用“race.getAndIncrement()”，AtomicInteger.getAndIncrement()是原子操作，因此我们可以确保每次都可以获得正确的结果，并且在性能上有不错的提升
+
+CAS是什么？
+CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。
+
+CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。
+
+
+
+//------------------------------------------------------------------------------------------------
 //有一个100G的文件每一行记录一个URL地址，只用一台只有1G内存的电脑，计算出哪个URL地址出现次数最多
 //MyFileReader.java
 package test;
@@ -48709,11 +48777,441 @@ public class TestTask {
 @Scheduled(cron = "4-40 * * * * ?") //每分钟的4秒到40秒执行
 秒 分钟 小时 日 月 星期 只支持这6段，不支持年
 //------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//11-1 SpringBoot整合异步任务以及使用场景 https://www.imooc.com/video/16793
+*使用注解@EnableAsync开启异步，会自动扫描
+*定义@Component @Async作为组件被容器扫描执行
+*使用场景：
+--发送短信
+--发送邮件
+--App消息推送
+--节省运维凌晨发布任务时间提供效率
+
+//ImoocApplication.java
+package com.imooc;
+
+import tk.mybatis.spring.annotation.MapperScan;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
+
+@SpringBootApplication
+//扫描mybatis mapper包路径
+@MapperScan(basePackages = "com.imooc.mapper")
+//扫描所有需要的包，包含一些自用的工具类包所在的路径
+@ComponentScan(basePackages = {"com.imooc", "org.n3r.idworker"})
+//开户定时任务
+//@EnableScheduling
+//开启异步任务
+@EnableAsync
+public class ImoocApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ImoocApplication.class, args);
+    }
+}
+
+//AsyncTask.java
+package com.imooc.tasks;
+
+import java.util.concurrent.Future;
+
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.stereotype.Component;
+
+@Component
+public class AsyncTask {
+    @Async
+    public Future<Boolean> doTask1() throws InterruptedException {
+        long start = System.currentTimeMillis();
+        Thread.sleep(1000);
+        long end = System.currentTimeMillis();
+        System.out.printf("任务1耗时：%d毫秒", end - start);
+        return new AsyncResult<>(true);
+    }
+
+    @Async
+    public Future<Boolean> doTask2() throws InterruptedException {
+        long start = System.currentTimeMillis();
+        Thread.sleep(700);
+        long end = System.currentTimeMillis();
+        System.out.printf("任务2耗时：%d毫秒", end - start);
+        return new AsyncResult<>(true);
+    }
+
+    @Async
+    public Future<Boolean> doTask3() throws InterruptedException {
+        long start = System.currentTimeMillis();
+        Thread.sleep(600);
+        long end = System.currentTimeMillis();
+        System.out.printf("任务3耗时：%d毫秒", end - start);
+        return new AsyncResult<>(true);
+    }
+}
 
 
+//DoTask.java
+package com.imooc.tasks;
+
+import java.util.concurrent.Future;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("task")
+public class DoTask {
+    @Autowired
+    private AsyncTask asyncTask;
+
+    @RequestMapping("test1")
+    public String test1() throws Exception {
+        long start = System.currentTimeMillis();
+
+        Future<Boolean> a = asyncTask.doTask1();
+        Future<Boolean> b = asyncTask.doTask2();
+        Future<Boolean> c = asyncTask.doTask3();//如果注释掉@Async，则三个运行任务的函数变成同步任务，总耗时为2300毫秒
+
+        while (!a.isDone() || !b.isDone() || !c.isDone()) {
+            if (a.isDone() && b.isDone() && c.isDone()) {
+                break;
+            }
+        }
+
+        long end = System.currentTimeMillis();
+
+        String times = String.format("任务全部完成，总耗时：%d毫秒", end - start);
+        System.out.println(times);
+        return times;
+    }
+}
+
+访问的URL：http://localhost:8080/task/test1
+任务全部完成，总耗时：1001毫秒
 //------------------------------------------------------------------------------------------------
+//SpringBoot开发常用技术整合
+//12-1 SpringBoot拦截器的使用 https://www.imooc.com/video/16794
+*使用注解@Configuration配置拦截器
+*继承WebMvcConfigurerAdapter
+*重写addInterceptors添加需要的拦截器地址
+
+//MyWebMvcConfigurer.java
+package com.imooc.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.imooc.controller.interceptor.OneInterceptor;
+import com.imooc.controller.interceptor.TwoInterceptor;
+
+@Configuration
+public class MyWebMvcConfigurer implements WebMvcConfigurer { //原视频教程里用到的WebMvcConfigurerAdapter已废弃，可以用WebMvcConfigurer替换
+//public class MyWebMvcConfigurer extends WebMvcConfigurerAdapter {
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        /**
+         * 拦截器按照顺序执行
+         */
+        registry.addInterceptor(new OneInterceptor()).addPathPatterns("/one/**");// /*/**则所有的调用都可以拦截
+        registry.addInterceptor(new TwoInterceptor()).addPathPatterns("/two/**")
+                                                     .addPathPatterns("/one/**");//可以级联增加多个PathPattern
+//        super.addInterceptors(registry); //WebMvcConfigurerAdapter::addInterceptors()方法为空实现，所以不需要调用
+    }
+}
+
+//OneController.java
+package com.imooc.controller.interceptor;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.imooc.pojo.User;
+
+@Controller
+@RequestMapping("one")
+public class OneController {
+
+    @RequestMapping("/index")
+    public String index(ModelMap map) {
+        map.addAttribute("name", "imooc22");
+        return "thymeleaf/index";
+    }
+
+    @RequestMapping("center")
+    public String center() {
+        return "thymeleaf/center/center";
+    }
+
+    @RequestMapping("test")
+    public String test(ModelMap map) {
+
+        User user = new User();
+        user.setAge(18);
+        user.setName("manager");
+        user.setPassword("123456");
+        user.setBirthday(new Date());
+
+        map.addAttribute("user", user);
 
 
+        User u1 = new User();
+        u1.setAge(19);
+        u1.setName("imooc");
+        u1.setPassword("123456");
+        u1.setBirthday(new Date());
+
+        User u2 = new User();
+        u2.setAge(17);
+        u2.setName("LeeCX");
+        u2.setPassword("123456");
+        u2.setBirthday(new Date());
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        userList.add(u1);
+        userList.add(u2);
+
+        map.addAttribute("userList", userList);
+
+        return "thymeleaf/test";
+    }
+
+    @PostMapping("postform")
+    public String postform(User user) {
+        System.out.println(user.getName());
+        return "redirect:/th/test";
+    }
+}
+
+//OneInterceptor.java
+package com.imooc.controller.interceptor;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.imooc.pojo.IMoocJSONResult;
+import com.imooc.utils.JsonUtils;
+
+public class OneInterceptor implements HandlerInterceptor {
+
+    /**
+     * 在请求处理之前进行调用（Controller方法调用之前）
+     */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+                             Object object) throws Exception {
+
+        System.out.println("被one拦截，放行...");
+        return true; //true则可以正常访问url
+
+        /*if (true) {
+            returnErrorResponse(response, IMoocJSONResult.errorMsg("被one拦截..."));
+        }
+        
+        return false;*/
+    }
+
+    /**
+     * 请求处理之后进行调用，但是在视图被渲染之前（Controller方法调用之后）
+     */
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response,
+                           Object object, ModelAndView mv)
+        throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * 在整个请求结束之后被调用，也就是在DispatcherServlet 渲染了对应的视图之后执行
+     * （主要是用于进行资源清理工作）
+     */
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object object, Exception ex)
+        throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void returnErrorResponse(HttpServletResponse response, IMoocJSONResult result)
+        throws IOException, UnsupportedEncodingException {
+        OutputStream out = null;
+        try {
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/json");
+            out = response.getOutputStream();
+            out.write(JsonUtils.objectToJson(result).getBytes("utf-8"));
+            out.flush();
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+}
+
+//TwoController.java
+package com.imooc.controller.interceptor;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.imooc.pojo.User;
+
+@Controller
+@RequestMapping("two")
+public class TwoController {
+
+    @RequestMapping("/index")
+    public String index(ModelMap map) {
+        map.addAttribute("name", "itzixi22");
+        return "thymeleaf/index";
+    }
+
+    @RequestMapping("center")
+    public String center() {
+        return "thymeleaf/center/center";
+    }
+
+    @RequestMapping("test")
+    public String test(ModelMap map) {
+
+        User user = new User();
+        user.setAge(18);
+        user.setName("manager");
+        user.setPassword("123456");
+        user.setBirthday(new Date());
+
+        map.addAttribute("user", user);
+
+
+        User u1 = new User();
+        u1.setAge(19);
+        u1.setName("itzixi");
+        u1.setPassword("123456");
+        u1.setBirthday(new Date());
+
+        User u2 = new User();
+        u2.setAge(17);
+        u2.setName("LeeCX");
+        u2.setPassword("123456");
+        u2.setBirthday(new Date());
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        userList.add(u1);
+        userList.add(u2);
+
+        map.addAttribute("userList", userList);
+
+        return "thymeleaf/test";
+    }
+
+    @PostMapping("postform")
+    public String postform(User user) {
+        System.out.println(user.getName());
+        return "redirect:/th/test";
+    }
+}
+
+//TwoInterceptor.java
+package com.imooc.controller.interceptor;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.imooc.pojo.IMoocJSONResult;
+import com.imooc.utils.JsonUtils;
+
+public class TwoInterceptor implements HandlerInterceptor {
+
+    final static Logger log = LoggerFactory.getLogger(TwoInterceptor.class);
+
+    /**
+     * 在请求处理之前进行调用（Controller方法调用之前）
+     */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
+
+        if (true) {
+            returnErrorResponse(response, IMoocJSONResult.errorMsg("被two拦截..."));
+        }
+
+        System.out.println("被two拦截...");
+
+        return false; //这里return false，则不会继续进行url的访问
+    }
+
+    /**
+     * 请求处理之后进行调用，但是在视图被渲染之前（Controller方法调用之后）
+     */
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object object, ModelAndView mv)
+        throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * 在整个请求结束之后被调用，也就是在DispatcherServlet 渲染了对应的视图之后执行（主要是用于进行资源清理工作）
+     */
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object object, Exception ex)
+        throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void returnErrorResponse(HttpServletResponse response, IMoocJSONResult result) throws IOException, UnsupportedEncodingException {
+        OutputStream out = null;
+        try {
+            response.setCharacterEncoding("utf-8");
+            response.setContentType("text/json");
+            out = response.getOutputStream();
+            out.write(JsonUtils.objectToJson(result).getBytes("utf-8"));
+            out.flush();
+        } finally {
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+}
+
+访问url：http://localhost:8080/one/index
 //------------------------------------------------------------------------------------------------
 
 

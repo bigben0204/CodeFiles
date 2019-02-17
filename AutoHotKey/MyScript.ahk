@@ -50,6 +50,18 @@
     fileContent := ""
     return
 }
+#IfWinActive ahk_class Chrome_WidgetWin_1
+^;::
+{
+    SendInput {End}
+    return
+}
+^+;::
+{
+    SendInput {Home}
+    return
+}
+
 #IfWinActive
 ;~ ^!e::
 ;~ {
@@ -57,15 +69,8 @@
     ;~ return
 ;~ }
 
-#IfWinActive ahk_class Chrome_WidgetWin_1
-^;::
-{
-    SendInput {End}
-    return
-}
-!;::
-{
-    SendInput {Home}
-    return
-}
-#IfWinActive
+;屏蔽屏蔽Win+l键：https://blog.csdn.net/sxwxyfp/article/details/78222191
+#j::SendInput {Left}
+#l::SendInput {Right}
+#k::SendInput {Down}
+#i::SendInput {Up}

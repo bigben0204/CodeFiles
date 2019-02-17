@@ -1837,3 +1837,38 @@ class FunctionObject {
     ;~ FileAppend, %Contents%, C:\Address List (alphabetical).txt
     ;~ Contents =  ; 清空占用的内存.
 ;~ }
+
+;$^c::
+;Send,^c
+;Send,^!d
+;return
+;前面加一个$就不会递归了 https://www.zhihu.com/question/21568668/answer/54531030
+
+;Space & i::
+;{
+;    SendInput {Up}
+;    Return
+;}
+;
+;Space & k::
+;{
+;    SendInput {Down}
+;    Return
+;}
+;
+;Space & j::
+;{
+;    SendInput {Left}
+;    Return
+;}
+;
+;Space & l::
+;{
+;    SendInput {Right}
+;    Return
+;}
+;
+;$Space::
+;{
+;    SendInput {Space}
+;}
