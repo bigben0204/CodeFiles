@@ -1201,13 +1201,127 @@ public class TestTransaction {
 }
 ```
 
-## 1.3. 强大的Stream API
+## 1.3. 并行流与串行流
 
-## 1.4. 便于并行
+原来的多线程如果一个线程阻塞了，其它多线程即便执行完了，也会等待全部线程完成。
 
-## 1.5. 最大化减少空指针异常
+fork/join模式，采用“工作窃取”模式（work-stealing）：
 
-## 1.6. 优化了内存结构
+当执行新的任务时它可以将其拆分分成更小的任务执行，并将小任务加到线程队列中，然后再从一个随机线程的队列中偷一个并把它放在自己的队列中。
+
+相对于一般的线程池实现,fork/join框架的优势体现在对其中包含的任务的处理方式上.在一般的线程池中,如果一个线程正在执行的任务由于某些原因无法继续运行,那么该线程会处于等待状态.而在fork/join框架实现中,如果某个子问题由于等待另外一个子问题的完成而无法继续运行.那么处理该子问题的线程会主动寻找其他尚未运行的子问题来执行.这种方式减少了线程的等待时间,提高了性能。
+
+```java
+//ForJoinCalculate.java
+package test;
+
+import java.util.concurrent.RecursiveTask;
+import java.util.stream.LongStream;
+
+//递归任务
+public class ForJoinCalculate extends RecursiveTask<Long> {
+    private static final long serialVersionUID = 6347643815009683165L;
+
+    private long start;
+    private long end;
+
+    private static final long THRESHOLD = 10000;
+
+    public ForJoinCalculate(long start, long end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    protected Long compute() {
+        long length = end - start;
+        if (length <= THRESHOLD) {
+            return LongStream.rangeClosed(start, end).sum();
+        } else {
+            long middle = (start + end) / 2;
+            ForJoinCalculate left = new ForJoinCalculate(start, middle);
+            left.fork();//拆分子任务，同时压入线程队列
+
+            ForJoinCalculate right = new ForJoinCalculate(middle + 1, end);
+            right.fork();
+
+            return left.join() + right.join();
+        }
+    }
+}
+
+//ForJoinCalculateTest.java
+package test;
+
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.stream.LongStream;
+
+import org.junit.Test;
+
+public class ForJoinCalculateTest {
+
+    private static final long END_VALUE = 20000000000L;
+
+    /**
+     * ForkJoin 框架，1e8:85，1e10:2605，拆线程耗时，所以数字越大，效果越明显
+     */
+    @Test
+    public void test1() {
+        Instant start = Instant.now();
+
+        ForkJoinPool pool = new ForkJoinPool();
+        ForkJoinTask<Long> task = new ForJoinCalculate(0, END_VALUE);
+        Long sum = pool.invoke(task);
+        System.out.println(sum);
+
+        Instant end = Instant.now();
+        System.out.println(String.format("耗费时间为：%s", Duration.between(start, end).toMillis())); //85
+    }
+
+    /**
+     * 普通 for，1e8:49，1e10:2799，但是经本地实验，发现for也会用8个线程，而不是单线程，是否JVM或Windows10做了什么优化？
+     */
+    @Test
+    public void test2() {
+        Instant start = Instant.now();
+
+        long sum = 0L;
+        for (long i = 0; i <= END_VALUE; i++) {
+            sum += i;
+        }
+        System.out.println(sum);
+
+        Instant end = Instant.now();
+        System.out.println(String.format("耗费时间为：%s", Duration.between(start, end).toMillis())); //49
+    }
+
+    /**
+     * Java8 2e10:parallel():1889, sequential()或者不写:7172
+     */
+    @Test
+    public void test3() {
+        Instant start = Instant.now();
+
+        long sum = LongStream.rangeClosed(0, END_VALUE).parallel().sum();
+        System.out.println(sum);
+
+        Instant end = Instant.now();
+        System.out.println(String.format("耗费时间为：%s", Duration.between(start, end).toMillis())); //49
+    }
+}
+```
+
+## 1.4. 强大的Stream API
+
+## 1.5. 便于并行
+
+## 1.6. 最大化减少空指针异常
+
+## 1.7. 优化了内存结构
 
 方法区由堆中的永久区移到了物理内存中。
 
