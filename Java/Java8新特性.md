@@ -1315,13 +1315,333 @@ public class ForJoinCalculateTest {
 }
 ```
 
-## 1.4. 强大的Stream API
+## 1.4. Optional 容器类
 
-## 1.5. 便于并行
+```java
+//TestOptional.java
+package test;
 
-## 1.6. 最大化减少空指针异常
+import test.Employee.Status;
 
-## 1.7. 优化了内存结构
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class TestOptional {
+
+    private static final String NO_WIFE = "没有老婆";
+
+    /**
+     * Optional.of(T t) : 创建一个 Optional 实例
+     * Optional.empty() : 创建一个空的 Optional 实例
+     * Optional.ofNullable(T t):若 t 不为 null,创建 Optional 实例,否则创建空实例
+     * isPresent() : 判断是否包含值
+     * orElse(T t) : 如果调用对象包含值，返回该值，否则返回t
+     * orElseGet(Supplier s) :如果调用对象包含值，返回该值，否则返回 s 获取的值
+     * map(Function f): 如果有值对其处理，并返回处理后的Optional，否则返回 Optional.empty()
+     * flatMap(Function mapper):与 map 类似，要求返回值必须是Optional
+     */
+    @Test(expected= NoSuchElementException.class)
+    public void testOptionalEmpty() {
+        Optional<Employee> op = Optional.empty();
+        System.out.println(op); //Optional.empty
+        Employee employee = op.get(); //Optional.empty调用get方法抛NoSuchElementException异常
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void testOptionalNullable() {
+        Optional<Object> o = Optional.ofNullable(null); //同Optional.empty()
+        System.out.println(o); //Optional.empty
+        System.out.println(o.isPresent()); //false
+        Object o1 = o.get(); //Optional.empty调用get方法抛NoSuchElementException异常
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testOptionalNull() {
+        Optional<Object> o = Optional.of(null);//抛出java.lang.NullPointerException异常
+    }
+
+    @Test
+    public void testOptionalPresent() {
+        Optional<Employee> employee = Optional.of(new Employee());
+        employee.ifPresent(System.out::println);
+        //同上
+        if (employee.isPresent()) {
+            System.out.println(employee.get());
+        }
+    }
+
+    @Test
+    public void testOrElse() {
+        Employee employee = new Employee("张三", 23, 1234.56, Status.VOCATIONAL);
+        Optional<Employee> emptyEmployee = Optional.empty();
+        Employee employee1 = emptyEmployee.orElse(employee);
+        System.out.println(employee1); //Employee{id=0, name='张三', age=23, salary=1234.56, status=VOCATIONAL}
+
+        Optional<Employee> realEmployee = Optional.of(new Employee());
+        Employee employee2 = realEmployee.orElse(employee);
+        System.out.println(employee2); //Employee{id=0, name='null', age=0, salary=0.0, status=null}
+    }
+
+    @Test
+    public void testOrElseGet() {
+        Optional<Employee> emptyEmployee = Optional.empty();
+        //orElseGet参数为供给型接口Supplier，与orElse的区别主要在于Supplier可以根据条件返回各种不同的对象，而orElse只能返回固定的对象
+        Employee employee = emptyEmployee.orElseGet(() -> new Employee("张三", 23, 1234.56, Status.VOCATIONAL));
+        System.out.println(employee);
+    }
+
+    @Test
+    public void testMap() {
+        Optional<Employee> op = Optional.ofNullable(new Employee("张三", 23, 1234.56, Status.VOCATIONAL));
+        Optional<String> name = op.map(Employee::getName);
+        System.out.println(name); //Optional[张三]
+
+        Optional<Employee> empty = Optional.empty();
+        Optional<String> emptyName = empty.map(Employee::getName);
+        System.out.println(emptyName); //Optional.empty
+
+        Optional<Employee> employee = Optional.ofNullable(new Employee());
+        System.out.println(employee);
+        Optional<Status> nullStatus = employee.map(Employee::getStatus); //如果返回对象也是null，那么也会得到Optional.empty
+        System.out.println(nullStatus); //Optional.empty
+    }
+
+    @Test
+    public void testFlatMap() {
+        Optional<Employee> op = Optional.ofNullable(new Employee("张三", 23, 1234.56, Status.VOCATIONAL));
+        Optional<String> name = op.flatMap(e -> Optional.of(e.getName()));
+        System.out.println(name);
+
+        Optional<Employee> employee = Optional.ofNullable(new Employee());
+        //如果返回对象也是null，那么也会得到Optional.ofNullable可以正常得到Optional.empty对象
+        //但是如果返回对象也是null，那么使用Optional.of将会抛出异常
+        Optional<Status> nullStatus = employee.flatMap(e -> Optional.ofNullable(e.getStatus()));
+        System.out.println(nullStatus); //Optional.empty
+    }
+
+    @Test
+    public void testManWifeName() {
+        Man man = new Man();
+        String wifeName = getWifeName(man);
+        assertEquals(NO_WIFE, wifeName);
+
+        assertEquals(NO_WIFE, getWifeName2(null));
+
+        NewMan newManNoWife = new NewMan();
+        String wifeName1 = getWifeName2(newManNoWife);
+        assertEquals(NO_WIFE, wifeName1);
+
+        NewMan newManWithWife = new NewMan("李雷", Optional.of(new Wife("韩美美")));
+        String wifeName2 = getWifeName2(newManWithWife);
+        assertEquals("韩美美", wifeName2);
+    }
+
+    //获取老婆名字
+    private String getWifeName(Man man) {
+        if (man != null) {
+            Wife wife = man.getWife();
+            if (wife != null) {
+                return wife.getName();
+            }
+        }
+
+        return NO_WIFE;
+    }
+
+    private String getWifeName2(NewMan man) {
+        return Optional.ofNullable(man).orElse(new NewMan()) //这里肯定不会有空指针man了
+            .getWife() //这里返回Optional<Wife>
+            .map(Wife::getName) //这里返回Optional<String>，可能有值，可能为Optional.empty
+            .orElse(NO_WIFE); //有值，则返回字符串名字，如果为Optional.empty则返回"没有老婆"
+    }
+}
+
+//Man.java
+package test;
+
+public class Man {
+    private String name;
+    private Wife wife;
+
+    public Man() {
+    }
+
+    public Man(String name) {
+        this.name = name;
+    }
+
+    public Man(String name, Wife wife) {
+        this.name = name;
+        this.wife = wife;
+    }
+
+    public Wife getWife() {
+        return wife;
+    }
+
+    public void setWife(Wife wife) {
+        this.wife = wife;
+    }
+}
+
+//Wife.java
+package test;
+
+public class Wife {
+    private String name;
+
+    public Wife(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Wife{" +
+            "name='" + name + '\'' +
+            '}';
+    }
+}
+
+//NewMan.java
+package test;
+
+import java.util.Optional;
+
+public class NewMan {
+    private String name;
+    //对于可能为空的对象，则可以定义为Optional
+    private Optional<Wife> wife = Optional.empty();//对于Optional对象，如果不初始化则为null，那么使用Optional也没什么意义了，一般会初始化empty
+
+    public NewMan() {
+    }
+
+    public NewMan(String name, Optional<Wife> wife) {
+        this.name = name;
+        this.wife = wife;
+    }
+
+    public Optional<Wife> getWife() {
+        return wife;
+    }
+
+    public void setWife(Optional<Wife> wife) {
+        this.wife = wife;
+    }
+
+    @Override
+    public String toString() {
+        return "NewMan{" +
+            "wife=" + wife +
+            '}';
+    }
+}
+```
+
+## 1.5. 接口中的默认方法与静态方法
+
+接口默认方法的” 类优先” 原则
+
+若一个接口中定义了一个默认方法，而另外一个父类或接口中又定义了一个同名的方法时：
+
+* 选择父类中的方法。如果一个父类提供了具体的实现，那么**接口中具有相同名称和参数的默认方法会被忽略**。
+* 接口冲突。如果一个父接口提供一个默认方法，而另一个接口也提供了一个具有相同名称和参数列表的方法（不管方法是否是默认方法）， 那么必须覆盖该方法来解决冲突
+
+```java
+//MyInterface.java
+package test;
+
+public interface MyInterface {
+    default String getName() {
+        return "MyInterface.getName";
+    }
+
+    default String getName2() {
+        return "MyInterface.getName2";
+    }
+}
+
+//MyClass.java
+package test;
+
+public abstract class MyClass {
+    public String getName() {
+        return "MyClass.getName";
+    }
+}
+
+//MySubClass.java
+package test;
+
+public class MySubClass extends MyClass implements MyInterface {
+
+}
+
+//MySubClassTest
+package test;
+
+
+import org.junit.Test;
+
+public class MySubClassTest {
+    @Test
+    public void test1() {
+        MySubClass mySubClass = new MySubClass();
+        System.out.println(mySubClass.getName()); //MyClass.getName
+        System.out.println(mySubClass.getName2()); //MyInterface.getName2
+    }
+}
+
+//---------------------
+//MyInterface2.java
+package test;
+
+public interface MyInterface2 {
+    default String getName() {
+        return "MyInterface2.getName";
+    }
+
+    static void show() {
+        System.out.println("MyInterface2.show");
+    }
+}
+
+//MySubClass.java
+package test;
+
+public class MySubClass implements MyInterface, MyInterface2 {
+    @Override
+    public String getName() { //继承了两个接口都有default方法时，必须覆盖getName的方法
+        return MyInterface.super.getName();
+    }
+}
+
+//Test输出：
+MyInterface.getName
+MyInterface.getName2
+
+//调用MyInterface2.show()方法输出：
+MyInterface2.show
+```
+
+## 1.6. 强大的Stream API
+
+## 1.7. 便于并行
+
+## 1.8. 最大化减少空指针异常
+
+## 1.9. 优化了内存结构
 
 方法区由堆中的永久区移到了物理内存中。
 
