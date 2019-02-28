@@ -1635,13 +1635,352 @@ MyInterface.getName2
 MyInterface2.show
 ```
 
-## 1.6. 强大的Stream API
+## 1.6. 传统时间格式化的线程安全问题
 
-## 1.7. 便于并行
+传统的时间类有线程安全问题，如下：
 
-## 1.8. 最大化减少空指针异常
+```java
+//TestSimpleDateFormat.java
+package test;
 
-## 1.9. 优化了内存结构
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class TestSimpleDateFormat {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+        Callable<Date> task = new Callable<Date>() {
+            @Override
+            public Date call() throws Exception {
+                return sdf.parse("20161218");
+            }
+        };
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
+        List<Future<Date>> results = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            results.add(pool.submit(task));
+        }
+
+        for (Future<Date> future : results) {
+            System.out.println(future.get());
+        }
+
+        pool.shutdown();
+    }
+}
+//运行抛异常
+
+//修改为如下（传统的解决方式）：
+//DateFormatThreadLocal.java
+package test;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class DateFormatThreadLocal {
+//    private static final ThreadLocal<DateFormat> DATE_FORMAT_THREAD_LOCAL = new ThreadLocal<DateFormat>() {
+//        @Override
+//        protected DateFormat initialValue() {
+//            return new SimpleDateFormat("yyyyMMdd");
+//        }
+//    };
+    private static final ThreadLocal<DateFormat> DATE_FORMAT_THREAD_LOCAL = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyyMMdd"));
+
+    public static Date convert(String source) throws ParseException {
+        return DATE_FORMAT_THREAD_LOCAL.get().parse(source);
+    }
+}
+
+//TestSimpleDateFormat.java
+package test;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class TestSimpleDateFormat {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        Callable<Date> task = () -> DateFormatThreadLocal.convert("20161218");
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
+        List<Future<Date>> results = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            results.add(pool.submit(task));
+        }
+
+        for (Future<Date> future : results) {
+            System.out.println(future.get());
+        }
+
+        pool.shutdown();
+    }
+}
+//运行输出如下：
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+Sun Dec 18 00:00:00 CST 2016
+```
+
+使用新的日期格式：
+
+```java
+//TestSimpleDateFormat.java
+package test;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class TestSimpleDateFormat {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");//DateTimeFormatter.ISO_LOCAL_DATE;
+
+        Callable<LocalDate> task = () -> LocalDate.parse("20161218", dtf);
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+
+        List<Future<LocalDate>> results = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            results.add(pool.submit(task));
+        }
+
+        for (Future<LocalDate> future : results) {
+            System.out.println(future.get());
+        }
+
+        pool.shutdown();
+    }
+}
+//输出：
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+2016-12-18
+```
+
+## 1.7. 新时间与日期API-本地时间与时间戳
+
+见TestLocalDateTime.java
+
+## 1.8. 新时间与日期API-时间校正器
+
+见TestLocalDateTime.java
+
+## 1.9. 新时间与日期API-时间格式化与时区的处理
+
+```java
+//TestLocalDateTime.java
+package test;
+
+import java.time.DayOfWeek;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Set;
+
+import org.junit.Test;
+
+public class TestLocalDateTime {
+    //1. LocalDate LocalTime LocalDateTime
+    @Test
+    public void test1() {
+        LocalDateTime ldt = LocalDateTime.now();
+        System.out.println(ldt);
+
+        //构造特定时间
+        LocalDateTime ldt2 = LocalDateTime.of(2019, 2, 27, 22, 46, 01);
+        System.out.println(ldt2);
+
+        LocalDateTime ldt3 = ldt.plusYears(2);
+        System.out.println(ldt3);
+
+        LocalDateTime ldt4 = ldt.minusMonths(2);
+        System.out.println(ldt4);
+
+        System.out.println(ldt.getYear());
+        System.out.println(ldt.getMonth());//FEBRUARY
+        System.out.println(ldt.getMonthValue());//2
+        System.out.println(ldt.getDayOfMonth());
+        System.out.println(ldt.getHour());
+        System.out.println(ldt.getMinute());
+        System.out.println(ldt.getSecond());
+    }
+
+    //2. Instant:时间戳（以Unix元年：1970年1月1日 00：00：00到某个时间之间的毫秒值）
+    @Test
+    public void test2() {
+        Instant ins1 = Instant.now(); //默认获取UTC时区
+        System.out.println(ins1); //2019-02-27T15:06:03.158Z
+
+        OffsetDateTime odt = ins1.atOffset(ZoneOffset.ofHours(8));
+        System.out.println(odt); //2019-02-27T23:06:03.158+08:00
+
+        System.out.println(ins1.toEpochMilli()); //毫秒时间戳 1551280058667
+
+        Instant ins2 = Instant.ofEpochSecond(1000);
+        System.out.println(ins2); //1970-01-01T00:16:40Z
+    }
+
+    //3.
+    //Duration:计算两个“时间”之间的间隔
+    //Period:计算两个“日期”之间的间隔
+    @Test
+    public void test3() {
+        Instant ins1 = Instant.now();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+
+        Instant ins2 = Instant.now();
+
+        Duration duration = Duration.between(ins1, ins2);
+        System.out.println(duration.toMillis());
+
+        System.out.println("------------------------------------");
+
+        LocalTime lt1 = LocalTime.now();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+
+        LocalTime lt2 = LocalTime.now();
+        System.out.println(Duration.between(lt1, lt2).toMillis());
+    }
+
+    @Test
+    public void test4() {
+        LocalDate ld1 = LocalDate.of(2018, 1, 1);
+        LocalDate ld2 = LocalDate.now(); //2019-2-27
+
+        Period period = Period.between(ld1, ld2);
+        System.out.println(period); //P1Y1M26D 1年1个月26天
+        System.out.println(period.getYears()); //1
+        System.out.println(period.getMonths()); //1
+        System.out.println(period.getDays()); //26
+    }
+
+    //TemporalAdjuster:时间校正器
+    @Test
+    public void test5() {
+        LocalDateTime ldt = LocalDateTime.now();
+        System.out.println(ldt); //2019-02-28T23:15:54.688
+
+        LocalDateTime ldt2 = ldt.withDayOfMonth(10);
+        System.out.println(ldt2); //2019-02-10T23:15:54.688
+
+        LocalDateTime ldt3 = ldt.with(TemporalAdjusters.next(DayOfWeek.SUNDAY));
+        System.out.println(ldt3); //2019-03-03T23:18:18.686
+
+        //自定义：下一个工作日
+        LocalDateTime ldt5 = ldt.with((l) -> {
+            LocalDateTime ldt4 = (LocalDateTime) l;
+            DayOfWeek dayOfWeek = ldt4.getDayOfWeek();
+            if (dayOfWeek == DayOfWeek.FRIDAY) {
+                return ldt4.plusDays(3);
+            } else if (dayOfWeek == DayOfWeek.SATURDAY) {
+                return ldt4.plusDays(2);
+            }
+            return ldt4.plusDays(1);
+        });
+        System.out.println(ldt5); //2019-03-01T23:18:18.686
+    }
+
+    //DateTimeFormatter:格式化时间或日期
+    @Test
+    public void test6() {
+        DateTimeFormatter dtf = DateTimeFormatter.ISO_DATE;
+        LocalDateTime ldt = LocalDateTime.now();
+
+        String strDate = ldt.format(dtf); //LocalDateTime.format()方法
+        System.out.println(strDate); //2019-02-28
+
+        System.out.println("---------------------");
+
+        DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss");
+        String strDate2 = dtf2.format(ldt); //DateTimeFormatter.format()方法
+        System.out.println(strDate2); //2019年02月28日 23:31:22
+
+        //解析字符串转换回LocalDateTime对象
+        LocalDateTime newDate = ldt.parse(strDate2, dtf2);
+        System.out.println(newDate); //2019-02-28T23:31:22
+    }
+
+    //ZonedDate、ZonedTime、ZonedDateTime
+    @Test
+    public void test7() {
+        Set<String> zoneIds = ZoneId.getAvailableZoneIds();
+        System.out.println(zoneIds); //查看所有可用时区
+    }
+
+    @Test
+    public void test8() {
+        LocalDateTime ldt = LocalDateTime.now(ZoneId.of("Europe/London"));
+        System.out.println(ldt); //2019-02-28T15:37:27.575 伦敦时间
+
+        LocalDateTime ldt2 = LocalDateTime.now(ZoneId.of("Asia/Shanghai"));
+        ZonedDateTime zdt = ldt2.atZone(ZoneId.of("Asia/Shanghai"));
+        System.out.println(zdt); //2019-02-28T23:43:00.769+08:00[Asia/Shanghai] 带时区的时间日期
+    }
+}
+```
+
+## 1.10. 强大的Stream API
+
+## 1.11. 便于并行
+
+## 1.12. 最大化减少空指针异常
+
+## 1.13. 优化了内存结构
 
 方法区由堆中的永久区移到了物理内存中。
 
