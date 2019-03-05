@@ -234,7 +234,7 @@ java -jar target\girl-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 java -jar target\girl-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev
 ```
 
-### 4-1 Controller使用
+### 1.1.3. 4-1 Controller使用
 
 Controller的使用
 
@@ -455,4 +455,155 @@ public class HelloController {
 @PostMapping(value = "/hello")
 @DeleteMapping(value = "/hello")
 @PutMapping(value = "/hello")
+```
+
+### 1.1.4. 数据库操作
+
+#### 1.1.4.1. Spring-Data-Jpa
+
+JPA(Java Persistence API)定义了一系列对象持久化的标准，目前实现这一规范的产品有Hiberante、TopLink等。
+
+请求类型|请求路径|功能
+-|-|-
+GET|/girls|获取女生列表
+POST|/girls|创建一个女生
+GET|/girls/id|通过id查询一个女生
+PUT|/girls/id|通过id更新一个女生
+DELETE|/girls/id|通过id删除一个女生
+
+问题1：
+
+总创建一个hibernate_sequence表，参考<https://blog.csdn.net/danchaofan0534/article/details/53608832>
+
+解决：将@GeneratedValue修改为@GeneratedValue(strategy = GenerationType.IDENTITY)
+
+问题2：
+
+没有自动创建girl表
+
+解决：
+明确指定dependency版本号version，而不要不带版本号：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+    <version>2.1.3.RELEASE</version>
+</dependency>
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <version>8.0.15</version>
+</dependency>
+<dependency>
+    <groupId>javax.persistence</groupId>
+    <artifactId>javax.persistence-api</artifactId>
+    <version>2.2</version>
+</dependency>
+```
+
+样例代码：
+
+```java
+//Girl.java
+package com.imooc.data;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="t_girls")
+public class Girl {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String cupSize;
+
+    private Integer age;
+
+    public Girl() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getCupSize() {
+        return cupSize;
+    }
+
+    public void setCupSize(String cupSize) {
+        this.cupSize = cupSize;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+}
+
+//application.yml
+spring:
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hibernate?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: root123
+  jpa:
+    hibernate:
+      ddl-auto: update
+      format_sql: true
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL55Dialect
+    open-in-view: false
+//其中ddl-auto: update，没有表时就自动创建，有表就不创建；create：每次都会创建，如果有表则删除；create-drop：启动时创建，结束时删除；validate：验证表和Entity是否一样，不一样则报错
+//open-in-view：解决一个警告 spring.jpa.open-in-view is enabled by default
+
+//pom.xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+        <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+        <version>2.1.3.RELEASE</version>
+    </dependency>
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.15</version>
+    </dependency>
+    <dependency>
+        <groupId>javax.persistence</groupId>
+        <artifactId>javax.persistence-api</artifactId>
+        <version>2.2</version>
+    </dependency>
+</dependencies>
 ```
