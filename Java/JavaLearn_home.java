@@ -1,4 +1,260 @@
 //------------------------------------------------------------------------------------------------
+//汉诺塔
+//HanoiTower.java
+package test;
+
+public class HanoiTower {
+    /**
+     * |1     |     |
+     * |2     |     |
+     * |3     |     |
+     * |4     |     |
+     * |5     |     |
+     * a:src  b:tmp c:dst
+     */
+
+    private int stepNum = 1;
+
+    private static final char SRC_POS = 'a';
+    private static final char TMP_POS = 'b';
+    private static final char DST_POS = 'c';
+
+    private void move(int towerNum) {
+        move(SRC_POS, DST_POS, TMP_POS, towerNum);
+    }
+
+    private void move(char srcPos, char dstPos, char tmpPos, int towerNum) {
+        if (towerNum == 1) {
+            System.out.printf("Step%d: move plate(%d) from pos(%s) to pos(%s)%n", stepNum++, towerNum, srcPos, dstPos);
+            return;
+        }
+
+        move(srcPos, tmpPos, dstPos, towerNum - 1);
+        System.out.printf("Step%d: move plate(%d) from pos(%s) to pos(%s)%n", stepNum++, towerNum, srcPos, dstPos);
+        move(tmpPos, dstPos, srcPos, towerNum - 1);
+    }
+
+    public static void main(String[] args) {
+        new HanoiTower().move(3);
+    }
+}
+//
+Step1: move plate(1) from pos(a) to pos(c)
+Step2: move plate(2) from pos(a) to pos(b)
+Step3: move plate(1) from pos(c) to pos(b)
+Step4: move plate(3) from pos(a) to pos(c)
+Step5: move plate(1) from pos(b) to pos(a)
+Step6: move plate(2) from pos(b) to pos(c)
+Step7: move plate(1) from pos(a) to pos(c)
+//------------------------------------------------------------------------------------------------
+//迷宫最短路径
+//Point.java
+package huawei;
+
+import java.util.Objects;
+
+public class Point {
+
+    int x = 0;
+    int y = 0;
+
+    public Point() {
+        this(0, 0);
+    }
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Point point = (Point) o;
+        return x == point.x &&
+            y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+}
+
+//PointUtils.java
+package huawei;
+
+public class PointUtils {
+    private int maxX;
+    private int maxY;
+
+    public PointUtils(int maxX, int maxY) {
+        this.maxX = maxX;
+        this.maxY = maxY;
+    }
+
+    public Point getUpPoint(Point currentPoint) {
+        if (currentPoint.getX() != 0) {
+            return new Point(currentPoint.getX() - 1, currentPoint.getY());
+        }
+        return null;
+    }
+
+    public Point getDownPoint(Point currentPoint) {
+        if (currentPoint.getX() != maxX) {
+            return new Point(currentPoint.getX() + 1, currentPoint.getY());
+        }
+        return null;
+    }
+
+
+    public Point getLeftPoint(Point currentPoint) {
+        if (currentPoint.getY() != 0) {
+            return new Point(currentPoint.getX(), currentPoint.getY() - 1);
+        }
+        return null;
+    }
+
+    public Point getRightPoint(Point currentPoint) {
+        if (currentPoint.getY() != maxY) {
+            return new Point(currentPoint.getX(), currentPoint.getY() + 1);
+        }
+        return null;
+    }
+}
+
+//Demo.java
+package huawei;
+
+import java.util.Stack;
+
+public final class Demo {
+    //保存路径的栈
+    private Stack<Point> stack = new Stack<>();
+    private Stack<Point> tmpStack = new Stack<>();
+    private Point endPoint;
+    private PointUtils pointUtils;
+    private int[][] maze;
+
+    public Demo() {
+    }
+
+    /*
+      功能:从一个迷宫走出的最短路徑
+
+      输入:
+          一个N*M的数组,int[][] maze迷宫图作为输入，如
+          {0, 1, 0, 0, 0},
+          {0, 1, 0, 1, 0},
+          {0, 0, 0, 0, 0},
+          {0, 1, 1, 1, 0},
+          {0, 0, 0, 1, 0}};
+
+      输出:从左上角到右下角的最短路线：(0, 0)(1, 0)(2, 0)(2, 1)(2, 2)(2, 3)(2, 4)(3, 4)(4, 4)
+
+    */
+    public Stack<Point> go(int[][] maze) {
+        this.maze = maze;
+
+        int maxX = maze.length - 1;
+        int maxY = maze[0].length - 1;
+        pointUtils = new PointUtils(maxX, maxY);
+
+        endPoint = new Point(maxX, maxY);//出口
+        Point in = new Point(0, 0); //入口
+
+        tmpStack.add(in);
+        addNextPoint();
+
+        return stack;
+    }
+
+    private void addNextPoint() {
+        Point currentPoint = tmpStack.peek();
+        if (currentPoint.equals(endPoint)) {
+            if (stack.empty() || stack.size() > tmpStack.size()) {
+                stack.clear();
+                stack.addAll(tmpStack);
+            }
+            return;
+        }
+
+        addNotNullPoint(pointUtils.getUpPoint(currentPoint));
+        addNotNullPoint(pointUtils.getRightPoint(currentPoint));
+        addNotNullPoint(pointUtils.getDownPoint(currentPoint));
+        addNotNullPoint(pointUtils.getLeftPoint(currentPoint));
+    }
+
+    private void addNotNullPoint(Point nextPoint) {
+        if (nextPoint != null && !isPointInStack(nextPoint) && isPointValid(nextPoint)) {
+            tmpStack.add(nextPoint);
+            addNextPoint();
+            tmpStack.pop();
+        }
+    }
+
+    private boolean isPointValid(Point point) {
+        return maze[point.getX()][point.getY()] == 0;
+    }
+
+    private boolean isPointInStack(Point point) {
+        return tmpStack.contains(point);
+    }
+}
+
+//DemoTest.java
+package huawei;
+
+import java.util.Stack;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class DemoTest {
+    @Test
+    public void testGo1() {
+        int[][] maze = {
+            {0, 1, 0, 0, 0},
+            {0, 1, 0, 1, 0},
+            {0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 0},
+            {0, 0, 0, 1, 0}};
+
+        Stack<Point> stack = new Demo().go(maze);
+        assertTrue(stack.size() == 9);
+
+        Point point = new Point(3, 4);
+        assertEquals(point, stack.elementAt(7));
+
+        Point point1 = new Point(2, 1);
+        assertEquals(point1, stack.elementAt(3));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //CAS https://blog.csdn.net/v123411739/article/details/79561458
 CAS（Compare-and-Swap），即比较并替换，是一种实现并发算法时常用到的技术，Java并发包中的很多类都使用了CAS技术。CAS也是现在面试经常问的问题，本文将深入的介绍CAS的原理。
 
@@ -63,8 +319,6 @@ CAS是什么？
 CAS是英文单词CompareAndSwap的缩写，中文意思是：比较并替换。CAS需要有3个操作数：内存地址V，旧的预期值A，即将要更新的目标值B。
 
 CAS指令执行时，当且仅当内存地址V的值与预期值A相等时，将内存地址V的值修改为B，否则就什么都不做。整个比较并替换的操作是一个原子操作。
-
-
 
 //------------------------------------------------------------------------------------------------
 //有一个100G的文件每一行记录一个URL地址，只用一台只有1G内存的电脑，计算出哪个URL地址出现次数最多

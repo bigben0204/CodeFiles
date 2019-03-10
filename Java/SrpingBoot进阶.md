@@ -140,7 +140,7 @@ girl:
   age: 18
 
 //GirlProperties.java
-package com.imooc.data;
+package com.imooc.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -178,7 +178,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.imooc.data.GirlProperties;
+import com.imooc.properties.GirlProperties;
 
 @RestController
 public class HelloController {
@@ -506,7 +506,7 @@ DELETE|/girls/id|通过id删除一个女生
 
 ```java
 //Girl.java
-package com.imooc.data;
+package com.imooc.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -606,4 +606,172 @@ spring:
         <version>2.2</version>
     </dependency>
 </dependencies>
+
+//GirlRepository.java
+package com.imooc.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.imooc.domain.Girl;
+
+public interface GirlRepository extends JpaRepository<Girl, Integer> {
+
+    //通过age来查询，方法名ByXXX必须是真实的参数
+    List<Girl> findByAge(Integer age);
+}
+
+
+//GirlController.java
+package com.imooc.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.domain.Girl;
+import com.imooc.repository.GirlRepository;
+import com.imooc.service.GirlService;
+
+@RestController
+public class GirlController {
+
+    @Autowired
+    private GirlRepository girlRepository;
+
+    @Autowired
+    private GirlService girlService;
+
+    /**
+     * 查询所有女生列表 GET http://localhost:8080/girls
+     *
+     * @return
+     */
+    @GetMapping(value = "/girls")
+    public List<Girl> getGirlList() {
+        return girlRepository.findAll();
+    }
+
+    /**
+     * 添加一个女生 POST http://localhost:8080/girls?cupSize=B&age=17
+     *
+     * @param cupSize
+     * @param age
+     * @return
+     */
+    @PostMapping(value = "/girls")
+    public Girl addGirl(@RequestParam("cupSize") String cupSize, @RequestParam("age") Integer age) {
+        Girl girl = new Girl();
+        girl.setCupSize(cupSize);
+        girl.setAge(age);
+
+        return girlRepository.save(girl);
+    }
+
+    /**
+     * 查询一个女生 GET http://localhost:8080/girls/3
+     */
+    @GetMapping(value = "/girls/{id}")
+    public Girl findOneGirl(@PathVariable("id") Integer id) {
+        Optional<Girl> girl = girlRepository.findById(id);
+        return girl.orElse(null);
+    }
+
+    /**
+     * 更新一个女生 PUT http://localhost:8080/girls/3?cupSize=A&age=19 或在Body里以Form格式添加参数
+     */
+    @PutMapping(value = "/girls/{id}")
+    public Girl updateGirl(@PathVariable("id") Integer id, @RequestParam("cupSize") String cupSize, @RequestParam("age") Integer age) {
+        Girl girl = new Girl();
+        girl.setId(id);
+        girl.setCupSize(cupSize);
+        girl.setAge(age);
+
+        return girlRepository.save(girl);
+    }
+
+    /**
+     * 删除一个女生 DELETE http://localhost:8080/girls/3
+     */
+    @DeleteMapping(value = "/girls/{id}")
+    public void deleteGirl(@PathVariable("id") Integer id) {
+        girlRepository.deleteById(id);
+    }
+
+    //通过age查询女生列表 GET http://localhost:8080/girls/age/35
+    @GetMapping(value = "/girls/age/{age}")
+    public List<Girl> findGirlsByAge(@PathVariable("age") Integer age) {
+        return girlRepository.findByAge(age);
+    }
+
+    //增加两个女生，需要做事务管理 POST http://localhost:8080/girls/two 执行会抛异常
+    @PostMapping(value = "/girls/two")
+    public void insertTwoGirls() {
+        girlService.insertTwo();
+    }
+}
 ```
+
+### 1.1.5. 事务管理
+
+插入两条数据，要么一起成功，要么一起失败：
+
+```java
+//增加一个Service层用来做事务管理：
+//GirlService.java
+package com.imooc.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.imooc.domain.Girl;
+import com.imooc.repository.GirlRepository;
+
+@Service
+public class GirlService {
+    @Autowired
+    private GirlRepository girlRepository;
+
+    @Transactional //增加了@Transactional注解后，尽管会抛异常，但是数据要么一起入库，要么一起不入库
+    public void insertTwo() {
+        Girl girlA = new Girl();
+        girlA.setCupSize("A");
+        girlA.setAge(18);
+        girlRepository.save(girlA);
+
+        Girl girlB = new Girl();
+        girlB.setCupSize("BBBB"); //把数据库表cupSize字段长度修改为1
+        girlB.setAge(19);
+        girlRepository.save(girlB);
+    }
+}
+```
+
+### 1.1.6. 总结
+
+1. SpringBoot介绍
+2. 安装，使用Idea的Spring Initializer
+3. 配置，推荐使用配置分组
+4. Controller的使用
+5. 数据库操作
+6. 事务管理
+
+## 1.2. SprintBoot进阶
+
+### 1.2.1. 使用@Valid表单验证
+
+### 1.2.2. 使用AOP处理请求
+
+### 1.2.3. 统一异常处理
+
+### 1.2.4. 单元测试
