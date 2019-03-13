@@ -1,4 +1,541 @@
 //------------------------------------------------------------------------------------------------
+//总结深度优先与广度优先的区别 
+//树 https://blog.csdn.net/u010412301/article/details/79949730
+总结深度优先与广度优先的区别
+1、区别
+1） 二叉树的深度优先遍历的非递归的通用做法是采用栈，广度优先遍历的非递归的通用做法是采用队列。
+2） 深度优先遍历：对每一个可能的分支路径深入到不能再深入为止，而且每个结点只能访问一次。要特别注意的是，二叉树的深度优先遍历比较特殊，可以细分为先序遍历、中序遍历、后序遍历。具体说明如下：
+
+先序遍历：对任一子树，先访问根，然后遍历其左子树，最后遍历其右子树。
+中序遍历：对任一子树，先遍历其左子树，然后访问根，最后遍历其右子树。
+后序遍历：对任一子树，先遍历其左子树，然后遍历其右子树，最后访问根。
+广度优先遍历：又叫层次遍历，从上往下对每一层依次访问，在每一层中，从左往右（也可以从右往左）访问结点，访问完一层就进入下一层，直到没有结点可以访问为止。　　　
+
+3）深度优先搜素算法：不全部保留结点，占用空间少；有回溯操作(即有入栈、出栈操作)，运行速度慢。
+
+广度优先搜索算法：保留全部结点，占用空间大； 无回溯操作(即无入栈、出栈操作)，运行速度快。
+
+通常 深度优先搜索法不全部保留结点，扩展完的结点从数据库中弹出删去，这样，一般在数据库中存储的结点数就是深度值，因此它占用空间较少。
+
+所以，当搜索树的结点较多，用其它方法易产生内存溢出时，深度优先搜索不失为一种有效的求解方法。 　
+
+广度优先搜索算法，一般需存储产生的所有结点，占用的存储空间要比深度优先搜索大得多，因此，程序设计中，必须考虑溢出和节省内存空间的问题。
+
+但广度优先搜索法一般无回溯操作，即入栈和出栈的操作，所以运行速度比深度优先搜索要快些
+
+//BinaryTreeTraverseTest.java
+package test;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
+/**
+ * 二叉树的深度优先遍历和广度优先遍历
+ *
+ * @author Fantasy
+ * @version 1.0 2016/10/05 - 2016/10/07
+ */
+public class BinaryTreeTraverseTest {
+    public static void main(String[] args) {
+
+        BinarySortTree<Integer> tree = new BinarySortTree<Integer>();
+
+        tree.insertNode(35);
+        tree.insertNode(20);
+        tree.insertNode(15);
+        tree.insertNode(16);
+        tree.insertNode(29);
+        tree.insertNode(28);
+        tree.insertNode(30);
+        tree.insertNode(40);
+        tree.insertNode(50);
+        tree.insertNode(45);
+        tree.insertNode(55);
+
+        System.out.print("先序遍历（递归）：");
+        tree.preOrderTraverse(tree.getRoot());
+        System.out.println();
+        System.out.print("中序遍历（递归）：");
+        tree.inOrderTraverse(tree.getRoot());
+        System.out.println();
+        System.out.print("后序遍历（递归）：");
+        tree.postOrderTraverse(tree.getRoot());
+        System.out.println();
+
+        System.out.print("先序遍历（非递归）：");
+        tree.preOrderTraverseNoRecursion(tree.getRoot());
+        System.out.println();
+        System.out.print("中序遍历（非递归）：");
+        tree.inOrderTraverseNoRecursion(tree.getRoot());
+        System.out.println();
+        System.out.print("后序遍历（非递归）：");
+        tree.postOrderTraverseNoRecursion(tree.getRoot());
+        System.out.println();
+
+        System.out.print("广度优先遍历：");
+        tree.breadthFirstTraverse(tree.getRoot());
+    }
+}
+
+/**
+ * 结点
+ */
+class Node<E extends Comparable<E>> {
+
+    E value;
+    Node<E> left;
+    Node<E> right;
+
+    Node(E value) {
+        this.value = value;
+        left = null;
+        right = null;
+    }
+
+}
+
+/**
+ * 使用一个先序序列构建一棵二叉排序树（又称二叉查找树）
+ */
+class BinarySortTree<E extends Comparable<E>> {
+
+    private Node<E> root;
+
+    BinarySortTree() {
+        root = null;
+    }
+
+    public void insertNode(E value) {
+        if (root == null) {
+            root = new Node<E>(value);
+            return;
+        }
+        Node<E> currentNode = root;
+        while (true) {
+            if (value.compareTo(currentNode.value) > 0) {
+                if (currentNode.right == null) {
+                    currentNode.right = new Node<E>(value);
+                    break;
+                }
+                currentNode = currentNode.right;
+            } else {
+                if (currentNode.left == null) {
+                    currentNode.left = new Node<E>(value);
+                    break;
+                }
+                currentNode = currentNode.left;
+            }
+        }
+    }
+
+    public Node<E> getRoot() {
+        return root;
+    }
+
+    /**
+     * 先序遍历二叉树（递归）
+     *
+     * @param node
+     */
+    public void preOrderTraverse(Node<E> node) {
+        System.out.print(node.value + " ");
+        if (node.left != null)
+            preOrderTraverse(node.left);
+        if (node.right != null)
+            preOrderTraverse(node.right);
+    }
+
+    /**
+     * 中序遍历二叉树（递归）
+     *
+     * @param node
+     */
+    public void inOrderTraverse(Node<E> node) {
+        if (node.left != null)
+            inOrderTraverse(node.left);
+        System.out.print(node.value + " ");
+        if (node.right != null)
+            inOrderTraverse(node.right);
+    }
+
+    /**
+     * 后序遍历二叉树（递归）
+     *
+     * @param node
+     */
+    public void postOrderTraverse(Node<E> node) {
+        if (node.left != null)
+            postOrderTraverse(node.left);
+        if (node.right != null)
+            postOrderTraverse(node.right);
+        System.out.print(node.value + " ");
+    }
+
+    /**
+     * 先序遍历二叉树（非递归）
+     *
+     * @param root
+     */
+    public void preOrderTraverseNoRecursion(Node<E> root) {
+        LinkedList<Node<E>> stack = new LinkedList<Node<E>>();
+        Node<E> currentNode = null;
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            currentNode = stack.pop();
+            System.out.print(currentNode.value + " ");
+            if (currentNode.right != null)
+                stack.push(currentNode.right);
+            if (currentNode.left != null)
+                stack.push(currentNode.left);
+        }
+    }
+
+    /**
+     * 中序遍历二叉树（非递归）
+     *
+     * @param root
+     */
+    public void inOrderTraverseNoRecursion(Node<E> root) {
+        LinkedList<Node<E>> stack = new LinkedList<Node<E>>();
+        Node<E> currentNode = root;
+        while (currentNode != null || !stack.isEmpty()) {
+            // 一直循环到二叉排序树最左端的叶子结点（currentNode是null）  
+            while (currentNode != null) {
+                stack.push(currentNode);
+                currentNode = currentNode.left;
+            }
+            currentNode = stack.pop();
+            System.out.print(currentNode.value + " ");
+            currentNode = currentNode.right;
+        }
+    }
+
+    /**
+     * 后序遍历二叉树（非递归）
+     *
+     * @param root
+     */
+    public void postOrderTraverseNoRecursion(Node<E> root) {
+        LinkedList<Node<E>> stack = new LinkedList<Node<E>>();
+        Node<E> currentNode = root;
+        Node<E> rightNode = null;
+        while (currentNode != null || !stack.isEmpty()) {
+            // 一直循环到二叉排序树最左端的叶子结点（currentNode是null）  
+            while (currentNode != null) {
+                stack.push(currentNode);
+                currentNode = currentNode.left;
+            }
+            currentNode = stack.pop();
+            // 当前结点没有右结点或上一个结点（已经输出的结点）是当前结点的右结点，则输出当前结点  
+            while (currentNode.right == null || currentNode.right == rightNode) {
+                System.out.print(currentNode.value + " ");
+                rightNode = currentNode;
+                if (stack.isEmpty()) {
+                    return; //root以输出，则遍历结束  
+                }
+                currentNode = stack.pop();
+            }
+            stack.push(currentNode); //还有右结点没有遍历  
+            currentNode = currentNode.right;
+        }
+    }
+
+    /**
+     * 广度优先遍历二叉树，又称层次遍历二叉树
+     *
+     * @param node
+     */
+    public void breadthFirstTraverse(Node<E> root) {
+        Queue<Node<E>> queue = new LinkedList<Node<E>>();
+        Node<E> currentNode = null;
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            currentNode = queue.poll();
+            System.out.print(currentNode.value + " ");
+            if (currentNode.left != null)
+                queue.offer(currentNode.left);
+            if (currentNode.right != null)
+                queue.offer(currentNode.right);
+        }
+    }
+
+}
+输出：
+先序遍历（递归）：35 20 15 16 29 28 30 40 50 45 55 
+中序遍历（递归）：15 16 20 28 29 30 35 40 45 50 55 
+后序遍历（递归）：16 15 28 30 29 20 45 55 50 40 35 
+先序遍历（非递归）：35 20 15 16 29 28 30 40 50 45 55 
+中序遍历（非递归）：15 16 20 28 29 30 35 40 45 50 55 
+后序遍历（非递归）：16 15 28 30 29 20 45 55 50 40 35 
+广度优先遍历：35 20 40 15 29 50 16 28 30 45 55
+
+//图 https://www.cnblogs.com/skywang12345/p/3711483.html
+//MatrixUDG.java
+package test; 
+/**
+ * Java: 邻接矩阵表示的"无向图(Matrix Undirected Graph)"
+ *
+ * @author skywang
+ * @date 2014/04/19
+ */
+
+import java.io.IOException;
+import java.util.Scanner;
+
+public class MatrixUDG {
+
+    private char[] mVexs;       // 顶点集合
+    private int[][] mMatrix;    // 邻接矩阵
+
+    /*
+     * 创建图(自己输入数据)
+     */
+    public MatrixUDG() {
+
+        // 输入"顶点数"和"边数"
+        System.out.printf("input vertex number: ");
+        int vlen = readInt();
+        System.out.printf("input edge number: ");
+        int elen = readInt();
+        if (vlen < 1 || elen < 1 || (elen > (vlen * (vlen - 1)))) {
+            System.out.printf("input error: invalid parameters!\n");
+            return;
+        }
+
+        // 初始化"顶点"
+        mVexs = new char[vlen];
+        for (int i = 0; i < mVexs.length; i++) {
+            System.out.printf("vertex(%d): ", i);
+            mVexs[i] = readChar();
+        }
+
+        // 初始化"边"
+        mMatrix = new int[vlen][vlen];
+        for (int i = 0; i < elen; i++) {
+            // 读取边的起始顶点和结束顶点
+            System.out.printf("edge(%d):", i);
+            char c1 = readChar();
+            char c2 = readChar();
+            int p1 = getPosition(c1);
+            int p2 = getPosition(c2);
+
+            if (p1 == -1 || p2 == -1) {
+                System.out.printf("input error: invalid edge!\n");
+                return;
+            }
+
+            mMatrix[p1][p2] = 1;
+            mMatrix[p2][p1] = 1;
+        }
+    }
+
+    /*
+     * 创建图(用已提供的矩阵)
+     *
+     * 参数说明：
+     *     vexs  -- 顶点数组
+     *     edges -- 边数组
+     */
+    public MatrixUDG(char[] vexs, char[][] edges) {
+
+        // 初始化"顶点数"和"边数"
+        int vlen = vexs.length;
+        int elen = edges.length;
+
+        // 初始化"顶点"
+        mVexs = new char[vlen];
+        for (int i = 0; i < mVexs.length; i++)
+            mVexs[i] = vexs[i];
+
+        // 初始化"边"
+        mMatrix = new int[vlen][vlen];
+        for (int i = 0; i < elen; i++) {
+            // 读取边的起始顶点和结束顶点
+            int p1 = getPosition(edges[i][0]);
+            int p2 = getPosition(edges[i][1]);
+
+            mMatrix[p1][p2] = 1;
+            mMatrix[p2][p1] = 1;
+        }
+    }
+
+    /*
+     * 返回ch位置
+     */
+    private int getPosition(char ch) {
+        for (int i = 0; i < mVexs.length; i++)
+            if (mVexs[i] == ch)
+                return i;
+        return -1;
+    }
+
+    /*
+     * 读取一个输入字符
+     */
+    private char readChar() {
+        char ch = '0';
+
+        do {
+            try {
+                ch = (char) System.in.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } while (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')));
+
+        return ch;
+    }
+
+    /*
+     * 读取一个输入字符
+     */
+    private int readInt() {
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextInt();
+    }
+
+    /*
+     * 返回顶点v的第一个邻接顶点的索引，失败则返回-1
+     */
+    private int firstVertex(int v) {
+
+        if (v < 0 || v > (mVexs.length - 1))
+            return -1;
+
+        for (int i = 0; i < mVexs.length; i++)
+            if (mMatrix[v][i] == 1)
+                return i;
+
+        return -1;
+    }
+
+    /*
+     * 返回顶点v相对于w的下一个邻接顶点的索引，失败则返回-1
+     */
+    private int nextVertex(int v, int w) {
+
+        if (v < 0 || v > (mVexs.length - 1) || w < 0 || w > (mVexs.length - 1))
+            return -1;
+
+        for (int i = w + 1; i < mVexs.length; i++)
+            if (mMatrix[v][i] == 1)
+                return i;
+
+        return -1;
+    }
+
+    /*
+     * 深度优先搜索遍历图的递归实现
+     */
+    private void DFS(int i, boolean[] visited) {
+
+        visited[i] = true;
+        System.out.printf("%c ", mVexs[i]);
+        // 遍历该顶点的所有邻接顶点。若是没有访问过，那么继续往下走
+        for (int w = firstVertex(i); w >= 0; w = nextVertex(i, w)) {
+            if (!visited[w])
+                DFS(w, visited);
+        }
+    }
+
+    /*
+     * 深度优先搜索遍历图
+     */
+    public void DFS() {
+        boolean[] visited = new boolean[mVexs.length];       // 顶点访问标记
+
+        // 初始化所有顶点都没有被访问
+        for (int i = 0; i < mVexs.length; i++)
+            visited[i] = false;
+
+        System.out.printf("DFS: ");
+        for (int i = 0; i < mVexs.length; i++) {
+            if (!visited[i])
+                DFS(i, visited);
+        }
+        System.out.printf("\n");
+    }
+
+    /*
+     * 广度优先搜索（类似于树的层次遍历）
+     */
+    public void BFS() {
+        int head = 0;
+        int rear = 0;
+        int[] queue = new int[mVexs.length];            // 辅组队列
+        boolean[] visited = new boolean[mVexs.length];  // 顶点访问标记
+
+        for (int i = 0; i < mVexs.length; i++)
+            visited[i] = false;
+
+        System.out.printf("BFS: ");
+        for (int i = 0; i < mVexs.length; i++) {
+            if (!visited[i]) {
+                visited[i] = true;
+                System.out.printf("%c ", mVexs[i]);
+                queue[rear++] = i;  // 入队列
+            }
+
+            while (head != rear) {
+                int j = queue[head++];  // 出队列
+                for (int k = firstVertex(j); k >= 0; k = nextVertex(j, k)) { //k是为访问的邻接顶点
+                    if (!visited[k]) {
+                        visited[k] = true;
+                        System.out.printf("%c ", mVexs[k]);
+                        queue[rear++] = k;
+                    }
+                }
+            }
+        }
+        System.out.printf("\n");
+    }
+
+    /*
+     * 打印矩阵队列图
+     */
+    public void print() {
+        System.out.printf("Martix Graph:\n");
+        for (int i = 0; i < mVexs.length; i++) {
+            for (int j = 0; j < mVexs.length; j++)
+                System.out.printf("%d ", mMatrix[i][j]);
+            System.out.printf("\n");
+        }
+    }
+
+    public static void main(String[] args) {
+        char[] vexs = {'A', 'B', 'C', 'D', 'E', 'F', 'G'};
+        char[][] edges = new char[][]{
+            {'A', 'C'},
+            {'A', 'D'},
+            {'A', 'F'},
+            {'B', 'C'},
+            {'C', 'D'},
+            {'E', 'G'},
+            {'F', 'G'}};
+        MatrixUDG pG;
+
+        // 自定义"图"(输入矩阵队列)
+        //pG = new MatrixUDG();
+        // 采用已有的"图"
+        pG = new MatrixUDG(vexs, edges);
+
+        pG.print();   // 打印图
+        pG.DFS();     // 深度优先遍历
+        pG.BFS();     // 广度优先遍历
+    }
+}
+输出：
+Martix Graph:
+0 0 1 1 0 1 0 
+0 0 1 0 0 0 0 
+1 1 0 1 0 0 0 
+1 0 1 0 0 0 0 
+0 0 0 0 0 0 1 
+1 0 0 0 0 0 1 
+0 0 0 0 1 1 0 
+DFS: A C B D F G E 
+BFS: A C D F B G E 
+//------------------------------------------------------------------------------------------------
 //汉诺塔
 //HanoiTower.java
 package test;
@@ -145,58 +682,70 @@ public class PointUtils {
     }
 }
 
-//Demo.java
+//MazeSolver.java
 package huawei;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 import java.util.Stack;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public final class Demo {
-    //保存路径的栈
-    private Stack<Point> stack = new Stack<>();
+/*
+  功能:从一个迷宫走出的最短路徑
+
+  输入:
+      一个N*M的数组,int[][] maze迷宫图作为输入，如
+      {0, 1, 0, 0, 0},
+      {0, 1, 0, 1, 0},
+      {0, 0, 0, 0, 0},
+      {0, 1, 1, 1, 0},
+      {0, 0, 0, 1, 0}};
+
+  输出:从左上角到右下角的最短路线：(0, 0)(1, 0)(2, 0)(2, 1)(2, 2)(2, 3)(2, 4)(3, 4)(4, 4)
+
+*/
+public final class MazeSolver {
+    //保存路径的List
+    private List<Point> outWayList = new Stack<>();
+
     private Stack<Point> tmpStack = new Stack<>();
+    private int maxX;
+    private int maxY;
+    private Point startPoint;
     private Point endPoint;
     private PointUtils pointUtils;
     private int[][] maze;
 
-    public Demo() {
+    private List<List<Point>> mazePoint; //储存每个位置的点是否被访问过，如果访问过是由哪个点访问的
+    private Queue<Point> queue = new ArrayDeque<>();
+
+    public MazeSolver(int[][] maze, Point startPoint, Point endPoint) {
+        this.maze = maze;
+        this.startPoint = startPoint; //入口
+        this.endPoint = endPoint;//出口
+
+        maxX = maze.length - 1;
+        maxY = maze[0].length - 1;
+        pointUtils = new PointUtils(maxX, maxY);
     }
 
-    /*
-      功能:从一个迷宫走出的最短路徑
-
-      输入:
-          一个N*M的数组,int[][] maze迷宫图作为输入，如
-          {0, 1, 0, 0, 0},
-          {0, 1, 0, 1, 0},
-          {0, 0, 0, 0, 0},
-          {0, 1, 1, 1, 0},
-          {0, 0, 0, 1, 0}};
-
-      输出:从左上角到右下角的最短路线：(0, 0)(1, 0)(2, 0)(2, 1)(2, 2)(2, 3)(2, 4)(3, 4)(4, 4)
-
-    */
-    public Stack<Point> go(int[][] maze) {
-        this.maze = maze;
-
-        int maxX = maze.length - 1;
-        int maxY = maze[0].length - 1;
-        pointUtils = new PointUtils(maxX, maxY);
-
-        endPoint = new Point(maxX, maxY);//出口
-        Point in = new Point(0, 0); //入口
-
-        tmpStack.add(in);
+    //深度搜索
+    public List<Point> goByDfs() {
+        tmpStack.add(startPoint);
         addNextPoint();
-
-        return stack;
+        return outWayList;
     }
 
     private void addNextPoint() {
         Point currentPoint = tmpStack.peek();
         if (currentPoint.equals(endPoint)) {
-            if (stack.empty() || stack.size() > tmpStack.size()) {
-                stack.clear();
-                stack.addAll(tmpStack);
+            if (outWayList.isEmpty() || outWayList.size() > tmpStack.size()) {
+                outWayList.clear();
+                outWayList.addAll(tmpStack);
             }
             return;
         }
@@ -222,19 +771,83 @@ public final class Demo {
     private boolean isPointInStack(Point point) {
         return tmpStack.contains(point);
     }
+
+    //广度搜索
+    public List<Point> goByBfs() {
+        mazePoint = initMazePoint(maxX, maxY);
+        loopToFindWay();
+        return getWayPoints();
+    }
+
+    private void loopToFindWay() {
+        queue.add(startPoint);
+        while (!queue.isEmpty()) {
+            Point point = queue.poll();
+            if (addPointToQueue(point, pointUtils.getUpPoint(point))
+                || addPointToQueue(point, pointUtils.getRightPoint(point))
+                || addPointToQueue(point, pointUtils.getDownPoint(point))
+                || addPointToQueue(point, pointUtils.getLeftPoint(point))) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * @param currentPoint
+     * @param nextPoint
+     * @return 是否找到了终点
+     */
+    private boolean addPointToQueue(Point currentPoint, Point nextPoint) {
+        if (nextPoint != null && isPointValid(nextPoint) && isPointNotVisited(nextPoint)) {
+            queue.offer(nextPoint);
+            mazePoint.get(nextPoint.getX()).set(nextPoint.getY(), currentPoint);
+            return nextPoint.equals(endPoint);
+        }
+        return false;
+    }
+
+    private boolean isPointNotVisited(Point point) {
+        return mazePoint.get(point.getX()).get(point.getY()) == null;
+    }
+
+    private List<List<Point>> initMazePoint(int maxX, int maxY) {
+        List<List<Point>> mazePoint = Stream.generate(() -> Stream.generate(() -> (Point) null).limit(maxY + 1).collect(Collectors.toList()))
+            .limit(maxX + 1).collect(Collectors.toList());
+        mazePoint.get(startPoint.getX()).set(startPoint.getY(), startPoint);//设置起点
+        return mazePoint;
+    }
+
+    private List<Point> getWayPoints() {
+        Point point = mazePoint.get(endPoint.getX()).get(endPoint.getY());
+        List<Point> points = new ArrayList<>();
+        //查看mazePoint上的对应endPoint位置是不是有点，如果没有点，说明未找到出口
+        if (point == null) {
+            return points;
+        }
+
+        //如果有点，则需要生成完整路径
+        points.add(endPoint);
+        for (; point != null && !point.equals(startPoint); point = mazePoint.get(point.getX()).get(point.getY())) {
+            points.add(point);
+        }
+        points.add(startPoint);
+
+        Collections.reverse(points);
+        return points;
+    }
 }
 
-//DemoTest.java
+//MazeSolverTest.java
 package huawei;
 
-import java.util.Stack;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-public class DemoTest {
+public class MazeSolverTest {
     @Test
     public void testGo1() {
         int[][] maze = {
@@ -244,14 +857,51 @@ public class DemoTest {
             {0, 1, 1, 1, 0},
             {0, 0, 0, 1, 0}};
 
-        Stack<Point> stack = new Demo().go(maze);
-        assertTrue(stack.size() == 9);
+        MazeSolver mazeSolver = new MazeSolver(maze, new Point(0, 0), new Point(4, 4));
+        List<Point> outWayExpected = Arrays.asList(
+            new Point(0, 0),
+            new Point(1, 0),
+            new Point(2, 0),
+            new Point(2, 1),
+            new Point(2, 2),
+            new Point(2, 3),
+            new Point(2, 4),
+            new Point(3, 4),
+            new Point(4, 4));
 
-        Point point = new Point(3, 4);
-        assertEquals(point, stack.elementAt(7));
+        List<Point> outWayList1 = mazeSolver.goByDfs();
+        assertEquals(outWayExpected, outWayList1);
 
-        Point point1 = new Point(2, 1);
-        assertEquals(point1, stack.elementAt(3));
+        List<Point> outWayList2 = mazeSolver.goByBfs();
+        assertEquals(outWayExpected, outWayList2);
+    }
+
+    @Test
+    public void testGo2() {
+        int[][] maze = {
+            {0, 0, 0, 0, 0},
+            {0, 1, 1, 1, 0},
+            {0, 0, 0, 0, 0},
+            {1, 0, 1, 1, 0},
+            {0, 0, 0, 1, 0}};
+
+        MazeSolver mazeSolver = new MazeSolver(maze, new Point(4, 4), new Point(4, 2));
+        List<Point> outWayExpected = Arrays.asList(
+            new Point(4, 4),
+            new Point(3, 4),
+            new Point(2, 4),
+            new Point(2, 3),
+            new Point(2, 2),
+            new Point(2, 1),
+            new Point(3, 1),
+            new Point(4, 1),
+            new Point(4, 2));
+
+        List<Point> outWayList1 = mazeSolver.goByDfs();
+        assertEquals(outWayExpected, outWayList1);
+
+        List<Point> outWayList2 = mazeSolver.goByBfs();
+        assertEquals(outWayExpected, outWayList2);
     }
 }
 //------------------------------------------------------------------------------------------------
