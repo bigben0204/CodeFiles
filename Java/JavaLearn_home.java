@@ -1,4 +1,72 @@
 //------------------------------------------------------------------------------------------------
+//任务优先级输出队列
+//TaskSorter.java
+package huawei;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class TaskSorter {
+    public String sort(int n, int[][] orderArray) {
+        Map<Integer, Set<Integer>> taskDependencyMap =
+            Arrays.stream(orderArray).collect(Collectors.groupingBy(e -> e[1],
+                Collectors.mapping(e -> e[0], Collectors.toSet())));
+        IntStream.rangeClosed(1, n).forEach(e -> taskDependencyMap.putIfAbsent(e, new HashSet<>()));
+
+        List<Integer> taskOrder = new ArrayList<>();
+
+        while (!taskDependencyMap.isEmpty()) {
+            Integer firstTask = getEmptyDependencyTask(taskDependencyMap);
+            if (firstTask == null) {
+                return null;
+            }
+
+            taskOrder.add(firstTask);
+            taskDependencyMap.remove(firstTask);
+            taskDependencyMap.forEach((k, v) -> v.remove(firstTask));
+        }
+
+        return taskOrder.stream().map(String::valueOf).collect(Collectors.joining(" "));
+    }
+
+    private Integer getEmptyDependencyTask(Map<Integer, Set<Integer>> taskDependencyMap) {
+        for (Map.Entry<Integer, Set<Integer>> taskDependencyEntry : taskDependencyMap.entrySet()) {
+            if (taskDependencyEntry.getValue().isEmpty()) {
+                return taskDependencyEntry.getKey();
+            }
+        }
+        return null;
+    }
+}
+
+//TaskSorterTest.java
+package huawei;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class TaskSorterTest {
+    private TaskSorter taskSorter = new TaskSorter();
+
+    @Test
+    public void test1() {
+        int[][] orderArray = {
+            {5, 4},
+            {4, 3},
+            {3, 2},
+            {2, 1}};
+        String tasksOrder = taskSorter.sort(5, orderArray);
+        assertEquals("5 4 3 2 1", tasksOrder);
+    }
+}
+//------------------------------------------------------------------------------------------------
 //总结深度优先与广度优先的区别 
 //树 https://blog.csdn.net/u010412301/article/details/79949730
 总结深度优先与广度优先的区别
