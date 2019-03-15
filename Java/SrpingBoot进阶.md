@@ -770,7 +770,470 @@ public class GirlService {
 
 ### 1.2.1. 使用@Valid表单验证
 
-### 1.2.2. 使用AOP处理请求
+在成员变量前使用注解@Min定义校验范围，在入参数前增加@Valid，即可获得校验失败时的提示信息
+
+```java
+//GirlController.java
+package com.imooc.controller;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.domain.Girl;
+import com.imooc.repository.GirlRepository;
+import com.imooc.service.GirlService;
+
+@RestController
+public class GirlController {
+
+    @Autowired
+    private GirlRepository girlRepository;
+
+    @Autowired
+    private GirlService girlService;
+
+    /**
+     * 查询所有女生列表 GET http://localhost:8080/girls
+     *
+     * @return
+     */
+    @GetMapping(value = "/girls")
+    public List<Girl> getGirlList() {
+        return girlRepository.findAll();
+    }
+
+    /**
+     * 添加一个女生 POST http://localhost:8080/girls?cupSize=B&age=17
+     *
+     * @param girl 可以自动将参数值生成在Girl对象中
+     * @return
+     */
+    @PostMapping(value = "/girls")
+    public Girl addGirl(@Valid Girl girl, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            System.out.println(bindingResult.getFieldError().getDefaultMessage());
+            return null;
+        }
+        girl.setCupSize(girl.getCupSize());
+        girl.setAge(girl.getAge());
+
+        return girlRepository.save(girl);
+    }
+
+    /**
+     * 查询一个女生 GET http://localhost:8080/girls/3
+     */
+    @GetMapping(value = "/girls/{id}")
+    public Girl findOneGirl(@PathVariable("id") Integer id) {
+        Optional<Girl> girl = girlRepository.findById(id);
+        return girl.orElse(null);
+    }
+
+    /**
+     * 更新一个女生 PUT http://localhost:8080/girls/3?cupSize=A&age=19 或在Body里以Form格式添加参数
+     */
+    @PutMapping(value = "/girls/{id}")
+    public Girl updateGirl(@PathVariable("id") Integer id, @RequestParam("cupSize") String cupSize, @RequestParam("age") Integer age) {
+        Girl girl = new Girl();
+        girl.setId(id);
+        girl.setCupSize(cupSize);
+        girl.setAge(age);
+
+        return girlRepository.save(girl);
+    }
+
+    /**
+     * 删除一个女生 DELETE http://localhost:8080/girls/3
+     */
+    @DeleteMapping(value = "/girls/{id}")
+    public void deleteGirl(@PathVariable("id") Integer id) {
+        girlRepository.deleteById(id);
+    }
+
+    //通过age查询女生列表 GET http://localhost:8080/girls/age/35
+    @GetMapping(value = "/girls/age/{age}")
+    public List<Girl> findGirlsByAge(@PathVariable("age") Integer age) {
+        return girlRepository.findByAge(age);
+    }
+
+    //增加两个女生，需要做事务管理 POST http://localhost:8080/girls/two 执行会抛异常
+    @PostMapping(value = "/girls/two")
+    public void insertTwoGirls() {
+        girlService.insertTwo();
+    }
+}
+
+//Girl.java
+package com.imooc.domain;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.Min;
+
+@Entity
+@Table(name="t_girls")
+public class Girl {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String cupSize;
+
+    @Min(value = 18, message = "未成年少女禁止入内")
+    private Integer age;
+
+    public Girl() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getCupSize() {
+        return cupSize;
+    }
+
+    public void setCupSize(String cupSize) {
+        this.cupSize = cupSize;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Girl{" +
+            "id=" + id +
+            ", cupSize='" + cupSize + '\'' +
+            ", age=" + age +
+            '}';
+    }
+}
+```
+
+### 1.2.2. 使用AOP处理请求 <https://www.imooc.com/video/14343>
+
+也谈AOP
+
+* AOP是一种编程范式
+
+与语言无关，是一种程序设计思想
+
+面向切面（AOP）Aspect Oriented Programming
+
+面向对象（OOP）Object Oriented Programming
+
+面向过程（POP）Procedure Oriented Programming
+
+* 面向过程到面向对象
+
+面向过程：假如下雨了，我打开了雨伞
+
+面向对象：
+> 天气->下雨
+>
+> 我->打伞
+
+* 换个角度看世界，换个姿势处理问题
+
+* 将通用逻辑从业务逻辑中分离出来
+
+具体实例：
+
+* 记录每一个http请求
+
+```java
+//pom.xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+    <version>2.1.3.RELEASE</version>
+</dependency>
+
+//HttpAspect.java
+package com.imooc.aspect;
+
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class HttpAspect {
+    //如果方法被@Valid拦截住，也会先走到Aspect切面方法中，再打印拦截日志:1111111111\n未成年少女禁止入内
+    //@Before在方法执行之前执行Aspect切面。com.imooc.controller.GirlController.getGirlList 指定方法
+    @Before("execution(public * com.imooc.controller.GirlController.*(..))")
+    public void log() {
+        System.out.println(1111111111);
+    }
+
+    //@After在方法执行之后执行Aspect切面
+    @After("execution(public * com.imooc.controller.GirlController.*(..))")
+    public void doAfter() {
+        System.out.println(222222222);
+    }
+}
+//输出
+1111111111
+getGirlList
+2019-03-15 22:57:17.733  INFO 6792 --- [nio-8080-exec-1] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+Hibernate: select girl0_.id as id1_0_, girl0_.age as age2_0_, girl0_.cup_size as cup_size3_0_ from t_girls girl0_
+222222222
+```
+
+重复Aspect方法抽成PointCut：
+
+```java
+//HttpAspect.java
+package com.imooc.aspect;
+
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class HttpAspect {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpAspect.class);
+
+    //定义切点
+    @Pointcut("execution(public * com.imooc.controller.GirlController.*(..))")
+    public void log() {
+    }
+
+    @Before("log()")
+    public void deBefore() {
+        LOGGER.info("1111111111111");
+    }
+
+    @After("log()")
+    public void doAfter() {
+        LOGGER.info("2222222222222");
+    }
+}
+
+//GirlController.java
+package com.imooc.controller;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.imooc.domain.Girl;
+import com.imooc.repository.GirlRepository;
+import com.imooc.service.GirlService;
+
+@RestController
+public class GirlController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GirlController.class); //这里使用哪个类，日志打印时就显示该的完整包路径
+
+    @Autowired
+    private GirlRepository girlRepository;
+
+    @Autowired
+    private GirlService girlService;
+
+    /**
+     * 查询所有女生列表 GET http://localhost:8080/girls
+     *
+     * @return
+     */
+    @GetMapping(value = "/girls")
+    public List<Girl> getGirlList() {
+        LOGGER.info("getGirlList");
+        return girlRepository.findAll();
+    }
+
+    /**
+     * 添加一个女生 POST http://localhost:8080/girls?cupSize=B&age=17
+     *
+     * @param girl 可以自动将参数值生成在Girl对象中
+     * @return
+     */
+    @PostMapping(value = "/girls")
+    public Girl addGirl(@Valid Girl girl, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            System.out.println(bindingResult.getFieldError().getDefaultMessage());
+            return null;
+        }
+        girl.setCupSize(girl.getCupSize());
+        girl.setAge(girl.getAge());
+
+        return girlRepository.save(girl);
+    }
+
+    /**
+     * 查询一个女生 GET http://localhost:8080/girls/3
+     */
+    @GetMapping(value = "/girls/{id}")
+    public Girl findOneGirl(@PathVariable("id") Integer id) {
+        Optional<Girl> girl = girlRepository.findById(id);
+        return girl.orElse(null);
+    }
+
+    /**
+     * 更新一个女生 PUT http://localhost:8080/girls/3?cupSize=A&age=19 或在Body里以Form格式添加参数
+     */
+    @PutMapping(value = "/girls/{id}")
+    public Girl updateGirl(@PathVariable("id") Integer id, @RequestParam("cupSize") String cupSize, @RequestParam("age") Integer age) {
+        Girl girl = new Girl();
+        girl.setId(id);
+        girl.setCupSize(cupSize);
+        girl.setAge(age);
+
+        return girlRepository.save(girl);
+    }
+
+    /**
+     * 删除一个女生 DELETE http://localhost:8080/girls/3
+     */
+    @DeleteMapping(value = "/girls/{id}")
+    public void deleteGirl(@PathVariable("id") Integer id) {
+        girlRepository.deleteById(id);
+    }
+
+    //通过age查询女生列表 GET http://localhost:8080/girls/age/35
+    @GetMapping(value = "/girls/age/{age}")
+    public List<Girl> findGirlsByAge(@PathVariable("age") Integer age) {
+        return girlRepository.findByAge(age);
+    }
+
+    //增加两个女生，需要做事务管理 POST http://localhost:8080/girls/two 执行会抛异常
+    @PostMapping(value = "/girls/two")
+    public void insertTwoGirls() {
+        girlService.insertTwo();
+    }
+}
+
+//输出：GET http://localhost:8080/girls/
+2019-03-15 23:05:34.417  INFO 4696 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : 1111111111111
+2019-03-15 23:05:34.420  INFO 4696 --- [nio-8080-exec-1] com.imooc.controller.GirlController      : getGirlList
+2019-03-15 23:05:34.444  INFO 4696 --- [nio-8080-exec-1] o.h.h.i.QueryTranslatorFactoryInitiator  : HHH000397: Using ASTQueryTranslatorFactory
+Hibernate: select girl0_.id as id1_0_, girl0_.age as age2_0_, girl0_.cup_size as cup_size3_0_ from t_girls girl0_
+2019-03-15 23:05:34.513  INFO 4696 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : 2222222222222
+```
+
+修改Aspect来记录日志：
+
+```java
+//HttpAspect.java
+package com.imooc.aspect;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+@Aspect
+@Component
+public class HttpAspect {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpAspect.class);
+
+    //定义切点
+    @Pointcut("execution(public * com.imooc.controller.GirlController.*(..))")
+    public void log() {
+    }
+
+    @Before("log()")
+    public void deBefore(JoinPoint joinPoint) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+
+        //url
+        LOGGER.info("url={}", request.getRequestURL());
+
+        //method
+        LOGGER.info("method={}", request.getMethod());
+
+        //ip
+        LOGGER.info("ip={}", request.getRemoteAddr());
+
+        //类方法
+        LOGGER.info("class_method={}.{}", joinPoint.getSignature().getDeclaringTypeName(),
+            joinPoint.getSignature().getName());
+
+        //参数
+        LOGGER.info("args={}", joinPoint.getArgs());
+    }
+
+    @After("log()")
+    public void doAfter() {
+        LOGGER.info("2222222222222");
+    }
+
+    @AfterReturning(returning ="object", pointcut = "log()")
+    public void doAfterReturning(Object object) {
+        LOGGER.info("response={}", object);
+    }
+}
+
+//输出 POST http://localhost:8080/girls/
+2019-03-15 23:17:29.522  INFO 11768 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : url=http://localhost:8080/girls/
+2019-03-15 23:17:29.522  INFO 11768 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : method=POST
+2019-03-15 23:17:29.522  INFO 11768 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : ip=0:0:0:0:0:0:0:1
+2019-03-15 23:17:29.523  INFO 11768 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : class_method=com.imooc.controller.GirlController.addGirl
+2019-03-15 23:17:29.523  INFO 11768 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : args=Girl{id=null, cupSize='D', age=21}
+
+//GET http://localhost:8080/girls/10
+2019-03-15 23:25:02.635  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : url=http://localhost:8080/girls/10
+2019-03-15 23:25:02.635  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : method=GET
+2019-03-15 23:25:02.635  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : ip=0:0:0:0:0:0:0:1
+2019-03-15 23:25:02.636  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : class_method=com.imooc.controller.GirlController.findOneGirl
+2019-03-15 23:25:02.636  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : args=10
+Hibernate: select girl0_.id as id1_0_0_, girl0_.age as age2_0_0_, girl0_.cup_size as cup_size3_0_0_ from t_girls girl0_ where girl0_.id=?
+2019-03-15 23:25:02.676  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : 2222222222222
+2019-03-15 23:25:02.676  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : response=Girl{id=10, cupSize='F', age=35}
+```
 
 ### 1.2.3. 统一异常处理
 
