@@ -1,4 +1,210 @@
 //------------------------------------------------------------------------------------------------
+//165. Compare Version Numbers https://leetcode.com/problems/compare-version-numbers/
+通过这个例子，发现使用BigDecimal耗时也多，耗内存也多。
+
+Integer.parseInt返回int，Integer.valueOf返回Integer（内部调用了parseInt），从效率上考虑，建议首先考虑parseInt方法。
+package test;
+
+class Solution {
+    public int compareVersion(String version1, String version2) {
+        String[] versionArray1 = version1.split("\\.");
+        String[] versionArray2 = version2.split("\\.");
+
+        int length1 = versionArray1.length;
+        int length2 = versionArray2.length;
+
+        int minLength = Math.min(length1, length2);
+        for (int i = 0; i < minLength; i++) {
+            int i1 = Integer.parseInt(versionArray1[i]);
+            int i2 = Integer.parseInt(versionArray2[i]);
+            if (i1 == i2) {
+                continue;
+            } else {
+                return i1 > i2 ? 1 : -1;
+            }
+        }
+
+        //之前所有的位都相同
+        int maxLength = Math.max(length1, length2);
+        String[] longerVersionArray;
+        int flag;
+
+        if (length1 > length2) {
+            longerVersionArray = versionArray1;
+            flag = 1;
+        } else {
+            longerVersionArray = versionArray2;
+            flag = -1;
+        }
+        for (int i = minLength; i < maxLength; i++) {
+            int i1 = Integer.parseInt(longerVersionArray[i]);
+            if (i1 == 0) {
+                continue;
+            } else {
+                return flag * (i1 > 0 ? 1 : -1);
+            }
+        }
+
+        return 0;
+    }
+//    public int compareVersion(String version1, String version2) {
+//        String[] versionArray1 = version1.split("\\.");
+//        String[] versionArray2 = version2.split("\\.");
+//
+//        int length1 = versionArray1.length;
+//        int length2 = versionArray2.length;
+//
+//        int minLength = Math.min(length1, length2);
+//        for (int i = 0; i < minLength; i++) {
+//            BigDecimal bigDecimal1 = new BigDecimal(versionArray1[i]);
+//            BigDecimal bigDecimal2 = new BigDecimal(versionArray2[i]);
+//            if (bigDecimal1.equals(bigDecimal2)) {
+//                continue;
+//            } else {
+//                return bigDecimal1.compareTo(bigDecimal2);
+//            }
+//        }
+//
+//        //之前所有的位都相同
+//        int maxLength = Math.max(length1, length2);
+//        String[] longerVersionArray;
+//        BigDecimal bigDecimalZero = new BigDecimal("0");
+//        int flag;
+//
+//        if (length1 > length2) {
+//            longerVersionArray = versionArray1;
+//            flag = 1;
+//        } else {
+//            longerVersionArray = versionArray2;
+//            flag = -1;
+//        }
+//        for (int i = minLength; i < maxLength; i++) {
+//            BigDecimal bigDecimal = new BigDecimal(longerVersionArray[i]);
+//            if (bigDecimal.equals(bigDecimalZero)) {
+//                continue;
+//            } else {
+//                return flag * bigDecimal.compareTo(bigDecimalZero);
+//            }
+//        }
+//
+//        return 0;
+//    }
+}
+//------------------------------------------------------------------------------------------------
+//493. Reverse Pairs
+Given an array nums, we call (i, j) an important reverse pair if i < j and nums[i] > 2*nums[j].
+
+You need to return the number of important reverse pairs in the given array.
+
+Example1:
+
+Input: [1,3,2,3,1]
+Output: 2
+Example2:
+
+Input: [2,4,3,5,1]
+Output: 3
+Note:
+The length of the given array will not exceed 50,000.
+All the numbers in the input array are in the range of 32-bit integer.
+
+//Solution.java
+public class Solution {
+
+    private int ret;
+
+    public int reversePairs(int[] nums) {
+        ret = 0;
+        mergeSort(nums, 0, nums.length - 1);
+        return ret;
+    }
+
+    public void mergeSort(int[] nums, int left, int right) {
+        if (right <= left) {
+            return;
+        }
+        int middle = left + (right - left) / 2;
+        mergeSort(nums, left, middle);
+        mergeSort(nums, middle + 1, right);
+
+        //合并排序，中间节点及之前的元素都是排好序的，中间节点之后的节点都是排好序的。
+        //每次针对中间元素及之前的元素和中间节点之后元素比较，看是否满足nums[l] > 2 * num[r]
+        //count elements
+        int count = 0;
+        for (int l = left, r = middle + 1; l <= middle; ) {
+            //如果中间节点前的某个元素l值已经大于2*中间节点后的某个元素r值就做count++操作，则中间节点l及之后的所有元素都满足这个条件，这是每次可以做ret += count的原因
+            //如果r已经大于right了，则说明中间节点后的元素已经检查完了，l~中间节点的值都满足count的个数，也可以直接ret += count
+            if (r > right || (long) nums[l] <= 2 * (long) nums[r]) {
+                l++;
+                ret += count;
+            } else {
+                r++;
+                count++;
+            }
+        }
+
+        //merge sort
+        int[] temp = new int[right - left + 1];
+        for (int l = left, r = middle + 1, k = 0; l <= middle || r <= right; ) {
+            if (l <= middle && ((r > right) || nums[l] < nums[r])) {
+                temp[k++] = nums[l++];
+            } else {
+                temp[k++] = nums[r++];
+            }
+        }
+        for (int i = 0; i < temp.length; i++) {
+            nums[left + i] = temp[i];
+        }
+    }
+}
+
+//效率低的算法
+class Solution {
+   public int reversePairs(int[] nums) {
+       List<Long> numList =
+           Arrays.stream(nums).mapToObj(Long::valueOf).collect(Collectors.toCollection(LinkedList::new));
+       int pairNum = 0;
+       while (!numList.isEmpty()) {
+           Long first = numList.get(0);
+           numList.remove(0);
+
+           pairNum += numList.stream().mapToInt(e -> (first > e * 2) ? 1 : 0).sum();
+       }
+
+       return pairNum;
+   }
+}
+
+//SolutionTest
+package test;
+
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        int[] ints = {1, 3, 2, 3, 1};
+        assertEquals(2, SOLUTION.reversePairs(ints));
+    }
+
+    @Test
+    public void test2() {
+        int[] ints = {7, 10, 3, 5, 1, 2};
+        assertEquals(9, SOLUTION.reversePairs(ints));
+    }
+
+    @Test
+    public void test3() {
+        int[] ints = {2147483647, 2147483647, 2147483647, 2147483647, 2147483647, 2147483647};
+        assertEquals(0, SOLUTION.reversePairs(ints));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //任务优先级输出队列
 //TaskSorter.java
 package huawei;
@@ -970,6 +1176,249 @@ public class MazeSolverTest {
 
         List<Point> outWayList2 = mazeSolver.goByBfs();
         assertEquals(outWayExpected, outWayList2);
+    }
+}
+
+//同类题目：营救公主
+//Demo.java
+package huawei;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Demo {
+    /*
+     * 每组测试数据以三个整数N,M,T(0<n, m≤20, t>0)开头，分别代表迷宫的长和高，
+     * 以及公主能坚持的天数。紧接着有M行，N列字符，由"."，"*"，"P"，"S"组成。
+     * 其中 "." 代表能够行走的空地。 "*" 代表墙壁，Jesse不能从此通过。
+     * "P" 是公主所在的位置。 "S" 是Jesse的起始位置。 每个时间段里Jesse
+     * 只能选择“上、下、左、右”任意一方向走一步。
+     * 迷宫布局（这里用二维数组实现布局） M 迷宫（数组）行数 N 迷宫（数组）列数
+     * T 公主能坚持的天数
+     * Return Value 0 可以救出公主 -1 不可以救出公主
+     */
+    private static final char START_CHAR = 'S';
+    private static final char END_CHAR = 'P';
+    private static final char WAY_CHAR = '.';
+    private static final char BLOCK_CHAR = '*';
+    private int maxX;
+    private int maxY;
+    private int maxStep;
+    private char[][] maze;
+    private Point startPoint;
+    private Point endPoint;
+
+    private PointUtils pointUtils;
+    private Stack<Point> tmpWay = new Stack<>();
+    private List<Point> shortestWay = new Stack<>();
+
+    private List<List<Point>> mazePoint;
+    private Queue<Point> queue = new ArrayDeque<>();
+
+    public int SSavepDfs(char[][] visited, int t, int n, int m) {
+        this.maxX = m - 1;
+        this.maxY = n - 1;
+        this.maxStep = t;
+        this.maze = visited;
+        pointUtils = new PointUtils(maxX, maxY);
+        initStartAndEndPoint();
+
+        List<Point> shortestWay = goByDfs();
+        return shortestWay.isEmpty() || (shortestWay.size() > maxStep + 1) ? -1 : 0;
+    }
+
+    private void initStartAndEndPoint() {
+        for (int i = 0; i <= maxX; ++i) {
+            for (int j = 0; j <= maxY; j++) {
+                char mazeValue = maze[i][j];
+                if (mazeValue == START_CHAR) {
+                    startPoint = new Point(i, j);
+                } else if (mazeValue == END_CHAR) {
+                    endPoint = new Point(i, j);
+                }
+
+                if (startPoint != null && endPoint != null) {
+                    return;
+                }
+            }
+        }
+    }
+
+    //深度搜索
+    private List<Point> goByDfs() {
+        tmpWay.add(startPoint);
+        addNextPoint();
+        return shortestWay;
+    }
+
+    private void addNextPoint() {
+        Point currentPoint = tmpWay.peek();
+        if (currentPoint.equals(endPoint)) {
+            if (shortestWay.isEmpty() || shortestWay.size() > tmpWay.size()) {
+                shortestWay.clear();
+                shortestWay.addAll(tmpWay);
+            }
+            return;
+        }
+
+        addNotNullPoint(pointUtils.getUpPoint(currentPoint));
+        addNotNullPoint(pointUtils.getRightPoint(currentPoint));
+        addNotNullPoint(pointUtils.getDownPoint(currentPoint));
+        addNotNullPoint(pointUtils.getLeftPoint(currentPoint));
+    }
+
+    private void addNotNullPoint(Point nextPoint) {
+        if (nextPoint != null && !isPointInStack(nextPoint) && isPointValid(nextPoint)) {
+            tmpWay.add(nextPoint);
+            addNextPoint();
+            tmpWay.pop();
+        }
+    }
+
+    private boolean isPointValid(Point point) {
+        char mazeValue = maze[point.getX()][point.getY()];
+        return mazeValue == WAY_CHAR || mazeValue == END_CHAR;
+    }
+
+    private boolean isPointInStack(Point point) {
+        return tmpWay.contains(point);
+    }
+
+    public int SSavepBfs(char[][] visited, int t, int n, int m) {
+        this.maxX = m - 1;
+        this.maxY = n - 1;
+        this.maxStep = t;
+        this.maze = visited;
+        pointUtils = new PointUtils(maxX, maxY);
+        initStartAndEndPoint();
+
+        List<Point> shortestWay = goByBfs();
+        return shortestWay.isEmpty() || (shortestWay.size() > maxStep + 1) ? -1 : 0;
+    }
+
+    //广度搜索
+    private List<Point> goByBfs() {
+        mazePoint = initMazePoint(maxX, maxY);
+        loopToFindWay();
+        return getWayPoints();
+    }
+
+    private void loopToFindWay() {
+        queue.add(startPoint);
+        while (!queue.isEmpty()) {
+            Point point = queue.poll();
+            if (addPointToQueue(point, pointUtils.getUpPoint(point))
+                || addPointToQueue(point, pointUtils.getRightPoint(point))
+                || addPointToQueue(point, pointUtils.getDownPoint(point))
+                || addPointToQueue(point, pointUtils.getLeftPoint(point))) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * @param currentPoint
+     * @param nextPoint
+     * @return 是否找到了终点
+     */
+    private boolean addPointToQueue(Point currentPoint, Point nextPoint) {
+        if (nextPoint != null && isPointValid(nextPoint) && isPointNotVisited(nextPoint)) {
+            queue.offer(nextPoint);
+            mazePoint.get(nextPoint.getX()).set(nextPoint.getY(), currentPoint);
+            return nextPoint.equals(endPoint);
+        }
+        return false;
+    }
+
+    private boolean isPointNotVisited(Point point) {
+        return mazePoint.get(point.getX()).get(point.getY()) == null;
+    }
+
+    private List<List<Point>> initMazePoint(int maxX, int maxY) {
+        List<List<Point>> mazePoint = Stream.generate(() -> Stream.generate(() -> (Point) null).limit(maxY + 1).collect(Collectors.toList()))
+            .limit(maxX + 1).collect(Collectors.toList());
+        mazePoint.get(startPoint.getX()).set(startPoint.getY(), startPoint);//设置起点
+        return mazePoint;
+    }
+
+    private List<Point> getWayPoints() {
+        Point point = mazePoint.get(endPoint.getX()).get(endPoint.getY());
+        List<Point> points = new ArrayList<>();
+        //查看mazePoint上的对应endPoint位置是不是有点，如果没有点，说明未找到出口
+        if (point == null) {
+            return points;
+        }
+
+        //如果有点，则需要生成完整路径
+        points.add(endPoint);
+        for (; point != null && !point.equals(startPoint); point = mazePoint.get(point.getX()).get(point.getY())) {
+            points.add(point);
+        }
+        points.add(startPoint);
+
+        Collections.reverse(points);
+        return points;
+    }
+}
+
+
+//DemoTest.java
+package huawei;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
+
+public class DemoTest {
+    @Test
+    public void testCase01() {
+        int N = 4;
+        int M = 4;
+        int T = 5;
+        char a[][] = {
+            {'.', '.', '.', '.'},
+            {'.', '.', '.', '.'},
+            {'.', '.', '.', '.'},
+            {'S', '*', '*', 'P'}};
+        Demo demo = new Demo();
+        int Ret = demo.SSavepBfs(a, T, N, M);
+        assertTrue(Ret == 0);
+    }
+
+    @Test
+    public void testCase02() {
+        int N = 4;
+        int M = 4;
+        int T = 1;
+        char a[][] = {
+            {'.', '.', '.', '.'},
+            {'.', '.', '.', '.'},
+            {'.', '.', '.', '.'},
+            {'S', 'P', '*', '*'}};
+        Demo demo = new Demo();
+        int Ret = demo.SSavepBfs(a, T, N, M);
+        assertTrue(Ret == 0);
+    }
+
+    @Test
+    public void testCase03() {
+        int N = 4;
+        int M = 4;
+        int T = 100;
+        char a[][] = {
+            {'.', '.', '.', '.'},
+            {'.', '.', '.', '.'},
+            {'*', '.', '.', '.'},
+            {'S', '*', '*', 'P'}};
+        Demo demo = new Demo();
+        int Ret = demo.SSavepBfs(a, T, N, M);
+        assertTrue(Ret == -1);
     }
 }
 //------------------------------------------------------------------------------------------------

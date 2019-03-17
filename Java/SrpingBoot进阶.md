@@ -730,6 +730,8 @@ public class GirlController {
 //GirlService.java
 package com.imooc.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -753,6 +755,18 @@ public class GirlService {
         girlB.setCupSize("BBBB"); //把数据库表cupSize字段长度修改为1
         girlB.setAge(19);
         girlRepository.save(girlB);
+    }
+
+    public void getAge(Integer id) throws Exception {
+        Optional<Girl> girl = girlRepository.findById(id);
+        Integer age = girl.map(Girl::getAge).orElse(null);
+        if (age < 10) {
+            //返回“你还在上小学吧”
+            throw new Exception("你还在上小学吧");
+        } else if (age >= 10 && age < 16) {
+            //返回“你可能在上初中”
+            throw new Exception("你可能在上初中");
+        }
     }
 }
 ```
@@ -825,8 +839,6 @@ public class GirlController {
             System.out.println(bindingResult.getFieldError().getDefaultMessage());
             return null;
         }
-        girl.setCupSize(girl.getCupSize());
-        girl.setAge(girl.getAge());
 
         return girlRepository.save(girl);
     }
@@ -1097,8 +1109,6 @@ public class GirlController {
             System.out.println(bindingResult.getFieldError().getDefaultMessage());
             return null;
         }
-        girl.setCupSize(girl.getCupSize());
-        girl.setAge(girl.getAge());
 
         return girlRepository.save(girl);
     }
@@ -1235,6 +1245,511 @@ Hibernate: select girl0_.id as id1_0_0_, girl0_.age as age2_0_0_, girl0_.cup_siz
 2019-03-15 23:25:02.676  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : response=Girl{id=10, cupSize='F', age=35}
 ```
 
-### 1.2.3. 统一异常处理
+### 1.2.3. 统一异常处理 <https://www.imooc.com/video/14339>
+
+* 什么是异常处理？
+
+*为什么要统一异常处理？
+
+如下例子：
+
+```java
+//在调用POST http://localhost:8080/girls?cupSize=B&age=17
+
+@AfterReturning(returning ="object", pointcut = "log()")
+public void doAfterReturning(Object object) {
+    LOGGER.info("response={}", object.toString());//将object修改为object.toString()
+}
+
+//由于校验age失败，return null，又在doAfterReturning函数中调用了.toString方法，Console将显示：
+java.lang.NullPointerException: null
+
+//Web界面显示：
+{
+"timestamp": "2019-03-16T14:58:04.919+0000",
+"status": 500,
+"error": "Internal Server Error",
+"message": "No message available",
+"path": "/girls"
+}
+```
+
+为了统一显示返回数据，增加如下Result类，并将数据封闭在Result对象中返回显示：
+
+```java
+//Result.java
+package com.imooc.domain;
+
+/**
+ * http请求返回的最外层对象
+ */
+public class Result<T> {
+    /**
+     * 错误码.
+     */
+    private Integer code;
+
+    /**
+     * 提示信息.
+     */
+    private String msg;
+
+    /**
+     * 具体的内容.
+     */
+    private T data;
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+}
+
+//ResultUtil.java
+package com.imooc.utils;
+
+import com.imooc.domain.Result;
+
+public class ResultUtil {
+    public static <T> Result<T> success(T object) {
+        Result<T> result = new Result<>();
+        result.setCode(0);
+        result.setMsg("成功");
+        result.setData(object);
+        return result;
+    }
+
+    public static <T> Result<T> success() {
+        return success(null);
+    }
+
+    public static <T> Result<T> error(Integer code, String msg) {
+        Result<T> result = new Result<>();
+        result.setCode(code);
+        result.setMsg(msg);
+        return result;
+    }
+}
+
+//GirlController.java
+@PostMapping(value = "/girls")
+public Result<Girl> addGirl(@Valid Girl girl, BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+        return ResultUtil.error(1, bindingResult.getFieldError().getDefaultMessage());
+    }
+
+    return ResultUtil.success(girlRepository.save(girl));
+}
+
+//调用POST http://localhost:8080/girls?cupSize=A&age=19
+{
+"code": 0,
+"msg": "成功",
+"data":{
+"id": 18,
+"cupSize": "A",
+"age": 19
+}
+}
+//调用POST http://localhost:8080/girls?cupSize=A&age=17
+{
+"code": 1,
+"msg": "未成年少女禁止入内",
+"data": null
+}
+```
+
+有时候如果对每一种场景都做判断根据返回值做分支处理，会比较麻烦，所以统一使用异常处理。
+
+```java
+
+//GirlController.java 中增加：
+@GetMapping(value = "/girls/getAge/{id}")
+public void getAge(@PathVariable("id") Integer id) throws Exception {
+    girlService.getAge(id);
+}
+
+//调用 GET http://localhost:8080/girls/getAge/2，Web显示
+{
+"timestamp": "2019-03-16T15:54:31.779+0000",
+"status": 500,
+"error": "Internal Server Error",
+"message": "你还在上小学吧",
+"path": "/girls/getAge/2"
+}
+```
+
+如上显示方式，可能不是我们想要的统一显示方式，所以增加如下异常处理类：
+
+```java
+//GirlExceptionHandler.java
+package com.imooc.handler;
+
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.imooc.domain.Result;
+import com.imooc.utils.ResultUtil;
+
+@RestControllerAdvice //= @ControllerAdvice + @ResponseBody
+public class GirlExceptionHandler {
+    @ExceptionHandler(value = Exception.class)
+//    @ResponseBody //由于要返回给Json格式给浏览器，类前如果又没有@RestController注解，所以这里要增加@ResponseBody
+    public Result handle(Exception e) {
+        return ResultUtil.error(100, e.getMessage());
+    }
+}
+
+//调用 GET http://localhost:8080/girls/getAge/2
+{
+"code": 100,
+"msg": "你还在上小学吧",
+"data": null
+}
+```
+
+想对不同的错误类型进行不同的Code定义，增加自定义Exception类：
+
+```java
+//GirlException.java
+package com.imooc.exception;
+
+//SpringBoot只会对RuntimeException进行事务回滚，不会对Exception进行回滚，这里要定义为RuntimeException
+public class GirlException extends RuntimeException {
+    private Integer code;
+
+    public GirlException(int code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
+}
+
+//GirlService.java
+package com.imooc.service;
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.imooc.domain.Girl;
+import com.imooc.exception.GirlException;
+import com.imooc.repository.GirlRepository;
+
+@Service
+public class GirlService {
+    @Autowired
+    private GirlRepository girlRepository;
+
+    @Transactional //增加了@Transactional注解后，尽管会抛异常，但是数据要么一起入库，要么一起不入库
+    public void insertTwo() {
+        Girl girlA = new Girl();
+        girlA.setCupSize("A");
+        girlA.setAge(18);
+        girlRepository.save(girlA);
+
+        Girl girlB = new Girl();
+        girlB.setCupSize("BBBB"); //把数据库表cupSize字段长度修改为1
+        girlB.setAge(19);
+        girlRepository.save(girlB);
+    }
+
+    public void getAge(Integer id) throws Exception {
+        Optional<Girl> girl = girlRepository.findById(id);
+        Integer age = girl.map(Girl::getAge).orElse(null);
+        if (age < 10) {
+            //返回“你还在上小学吧” code=100
+            throw new GirlException(100, "你还在上小学吧");
+        } else if (age >= 10 && age < 16) {
+            //返回“你可能在上初中” code=101
+            throw new GirlException(101, "你可能在上初中");
+        }
+    }
+}
+
+//GirlExceptionHandler.java
+package com.imooc.handler;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.imooc.domain.Result;
+import com.imooc.exception.GirlException;
+import com.imooc.utils.ResultUtil;
+
+@RestControllerAdvice //= @ControllerAdvice + @ResponseBody
+public class GirlExceptionHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GirlExceptionHandler.class);
+
+    @ExceptionHandler(value = Exception.class)
+//    @ResponseBody //由于要返回给Json格式给浏览器，类前又没有@RestController注解，所以这里要增加@ResponseBody
+    public Result handle(Exception e) {
+        if (e instanceof GirlException) {
+            GirlException girlException = (GirlException) e;
+            return ResultUtil.error(girlException.getCode(), girlException.getMessage());
+        }
+        LOGGER.info("【系统异常】：", e);
+        return ResultUtil.error(-1, "未知错误");
+    }
+}
+
+
+// 调用 GET http://localhost:8080/girls/getAge/2
+{
+"code": 100,
+"msg": "你还在上小学吧",
+"data": null
+}
+// 调用 GET http://localhost:8080/girls/getAge/10
+{
+"code": 101,
+"msg": "你可能在上初中",
+"data": null
+}
+
+//如果发生非GirException异常，则显示：
+{
+"code": -1,
+"msg": "未知错误",
+"data": null
+}
+```
+
+建议对给Web界面显示的都是自定义异常内容，未知异常则用日志打印在后台
+
+如果每次都写着魔鬼数字100，101，可能会写重，也不方便管理，定义一个ResultEnum类：
+
+```java
+//ResultEnum.java
+package com.imooc.enums;
+
+public enum ResultEnum {
+    UNKNOWN_ERROR(-1, "未知错误"),
+    SUCCESS(0, "成功"),
+    PRIMARY_SCHOOL(100, "你可能还在上小学"),
+    MIDDLE_SCHOOL(101, "你可能在上初中");
+
+    private Integer code;
+    private String msg;
+
+    ResultEnum(Integer code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+}
+
+//GirlException.java
+package com.imooc.exception;
+
+import com.imooc.enums.ResultEnum;
+
+//SpringBoot只会对RuntimeException进行事务回滚，不会对Exception进行回滚，这里要定义为RuntimeException
+public class GirlException extends RuntimeException {
+    private Integer code;
+
+    public GirlException(ResultEnum resultEnum) {
+        super(resultEnum.getMsg());
+        this.code = resultEnum.getCode();
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
+}
+
+//GirlService.java
+package com.imooc.service;
+
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.imooc.domain.Girl;
+import com.imooc.exception.GirlException;
+import com.imooc.repository.GirlRepository;
+
+import static com.imooc.enums.ResultEnum.MIDDLE_SCHOOL;
+import static com.imooc.enums.ResultEnum.PRIMARY_SCHOOL;
+
+@Service
+public class GirlService {
+    @Autowired
+    private GirlRepository girlRepository;
+
+    @Transactional //增加了@Transactional注解后，尽管会抛异常，但是数据要么一起入库，要么一起不入库
+    public void insertTwo() {
+        Girl girlA = new Girl();
+        girlA.setCupSize("A");
+        girlA.setAge(18);
+        girlRepository.save(girlA);
+
+        Girl girlB = new Girl();
+        girlB.setCupSize("BBBB"); //把数据库表cupSize字段长度修改为1
+        girlB.setAge(19);
+        girlRepository.save(girlB);
+    }
+
+    public void getAge(Integer id) throws Exception {
+        Optional<Girl> girl = girlRepository.findById(id);
+        Integer age = girl.map(Girl::getAge).orElse(null);
+        if (age < 10) {
+            //返回“你还在上小学吧” code=100
+            throw new GirlException(PRIMARY_SCHOOL);
+        } else if (age >= 10 && age < 16) {
+            //返回“你可能在上初中” code=101
+            throw new GirlException(MIDDLE_SCHOOL);
+        }
+    }
+}
+
+```
 
 ### 1.2.4. 单元测试
+
+* 测试Service
+
+使用
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+
+```java
+//GirlServiceTest.java
+package com.imooc.service;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.imooc.domain.Girl;
+
+import static org.junit.Assert.assertEquals;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class GirlServiceTest {
+    @Autowired
+    private GirlService girlService;
+
+    @Test
+    public void testFindOne() {
+        Girl girl = girlService.findOne(10);
+        assertEquals(new Integer(13), girl.getAge());
+    }
+}
+```
+
+* 测试API
+
+使用
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+
+```java
+//GirlControllerTest.java
+package com.imooc.controller;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+public class GirlControllerTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Test
+    public void getGirlListStatusIsOk() throws Exception {
+        //MockMvcResultMatchers.content().json(returnContent) 如果比较失败，则显示失败的节点值
+        //MockMvcResultMatchers.content().string(returnContent) 如果比较失败，则显示全部的字符串值
+        String returnContent = "[{\"id\":1,\"cupSize\":\"1\",\"age\":1},{\"id\":2,\"cupSize\":\"2\",\"age\":2}," +
+            "{\"id\":10,\"cupSize\":\"F\",\"age\":13},{\"id\":11,\"cupSize\":\"C\",\"age\":20}]";
+        mvc.perform(MockMvcRequestBuilders.get("/girls"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().json(returnContent));
+    }
+
+    @Test
+    public void getGirlListStatusIsNotFound() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/girlsabc"))
+            .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+}
+```
+
+在进行maven项目打包时，会自动执行全部测试用例：
+
+1. 在项目根目录执行: mvn clean package
+2. Idea -> Maven -> LifeCycle -> package
+
+如果不想执行测试用例，则如下操作：(耗时会少很多)
+
+1. 在项目根目录执行：mvn clean package -Dmaven.test.skip=true
+2. Idea -> Maven -> Toggle 'Skip Tests' Mode -> LifeCycle -> package
+
+### 1.2.5. 课程总结 <https://www.imooc.com/video/14337>
+
+web进阶:
+
+1. 使用@Valid表单验证
+2. 使用AOP处理请求
+3. 统一异常处理
+4. 单元测试
