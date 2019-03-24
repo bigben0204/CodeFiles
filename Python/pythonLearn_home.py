@@ -9130,8 +9130,34 @@ python pdbtest.py
  (Pdb) !b="afdfd"
  (Pdb)
 #-----------------------------------------------------------------------------------------
+# python 3.5引入的TypeHint 只能做静态检查，无法对输入或输出报错
+# https://blog.csdn.net/sunt2018/article/details/83022493
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# 入参类型是str，返回类型是str
+def get(param: str) -> object:
+    if param == "hello":
+        return 1
+    return param * 2
 
 
+class Test(object):
+    @staticmethod
+    def hello() -> None:
+        print("hello")
+
+
+if __name__ == '__main__':
+    my_str = get("hello")
+    print(my_str)
+
+    i: int = get(5)
+    print(i)
+
+    Test.hello()
+    hello: Test = Test() # 所有的变量后都可以冒号来指明类型
+    hello.hello()
 #-----------------------------------------------------------------------------------------
 
 
