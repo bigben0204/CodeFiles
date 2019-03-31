@@ -309,34 +309,40 @@ p The Dormouse's story
 * 页面编码：UTF-8
 
 ## 1.15. 调度程序
-
 ```python
+#spider_main.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from baike_spider import url_manager, html_downloader, html_parser, html_outputer
 
 
+def save_html_cont(text):
+    with open('tmp.html', 'w', encoding='utf-8') as f:
+        f.write(text.decode("utf-8"))
+
+
 class SpiderMain(object):
-    __MAX_URL_NUM = 1000
+    __MAX_URL_NUM = 10
 
     def __init__(self):
-        self.urls = url_manager.UrlManager()
-        self.downloader = html_downloader.HtmlDownloader()
-        self.parser = html_parser.HtmlParser()
-        self.outputer = html_outputer.HtmlOutputer()
+        self.__urls = url_manager.UrlManager()
+        self.__downloader = html_downloader.HtmlDownloader()
+        self.__parser = html_parser.HtmlParser()
+        self.__outputer = html_outputer.HtmlOutputer()
 
     def craw(self, root_url):
         count = 1
-        self.urls.add_new_url(root_url)
-        while self.urls.has_new_url():
+        self.__urls.add_new_url(root_url)
+        while self.__urls.has_new_url():
             try:
-                new_url = self.urls.get_new_url()
+                new_url = self.__urls.get_new_url()
                 print(f'craw {count} : {new_url}')
-                html_cont = self.downloader.download(new_url)
-                new_urls, new_data = self.parser.parse(new_url, html_cont)
-                self.urls.add_new_urls(new_urls)
-                self.outputer.collect_data(new_data)
+                html_cont = self.__downloader.download(new_url)
+                save_html_cont(html_cont)  # 用来查看当次下载的网页response
+                new_urls, new_data = self.__parser.parse(new_url, html_cont)
+                self.__urls.add_new_urls(new_urls)
+                self.__outputer.collect_data(new_data)
 
                 if count == self.__MAX_URL_NUM:
                     break
@@ -345,32 +351,32 @@ class SpiderMain(object):
             except Exception as e:
                 print(f'craw failed. url={new_url}, error={e}')
 
-        self.outputer.output_html()
+        self.__outputer.output_html()
 
 
 if __name__ == '__main__':
     root_url = "https://baike.baidu.com/item/Python/407313"
     obj_spider = SpiderMain()
     obj_spider.craw(root_url)
-
 ```
 
 ## 1.16. URL管理器
 ```python
+#url_manager.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
 class UrlManager(object):
     def __init__(self) -> None:
-        self.new_urls = set()
-        self.old_urls = set()
+        self.__new_urls = set()
+        self.__old_urls = set()
 
     def add_new_url(self, url: str) -> None:
         if url is None:
             return
-        if url not in self.new_urls and url not in self.old_urls:
-            self.new_urls.add(url)
+        if url not in self.__new_urls and url not in self.__old_urls:
+            self.__new_urls.add(url)
 
     def add_new_urls(self, urls) -> None:
         if urls is None or len(urls) == 0:
@@ -379,31 +385,126 @@ class UrlManager(object):
             self.add_new_url(url)
 
     def has_new_url(self) -> bool:
-        return len(self.new_urls) != 0
+        return len(self.__new_urls) != 0
 
     def get_new_url(self) -> str:
-        new_url = self.new_urls.pop()
-        self.old_urls.add(new_url)
+        new_url = self.__new_urls.pop()
+        self.__old_urls.add(new_url)
         return new_url
 ```
 
-## HTML下载器html_downloader
+## 1.17. HTML下载器html_downloader
 ```python
+#html_downloader.py
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import ssl
 import urllib.request
 
 
 class HtmlDownloader(object):
+
+    def __init__(self) -> None:
+        """这里必须要导入ssl并设置context，否则urlopen无法解析https网站"""
+        ssl._create_default_https_context = ssl._create_unverified_context
+
     def download(self, url):
         if url is None:
             return None
 
-        response = urllib.request.urlopen(url)
-        if response.getcode() != 200:
-            return None
+        with urllib.request.urlopen(url) as response:
+            if response.getcode() != 200:
+                return None
 
-        return response.read()
+            return response.read()
+
 ```
 
-## HTML解析器html_parser
+## 1.18. HTML解析器html_parser
+```python
+#html_parser.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import re
+from urllib.parse import urljoin
+
+from bs4 import BeautifulSoup
+
+
+class HtmlParser(object):
+    def parse(self, page_url, html_cont):
+        if page_url is None or html_cont is None:
+            return
+
+        soup = BeautifulSoup(html_cont, 'html.parser')
+        new_urls = self.__get_new_urls(page_url, soup)
+        new_data = self.__get_new_data(page_url, soup)
+        return new_urls, new_data
+
+    def __get_new_urls(self, page_url, soup):
+        new_urls = set()
+        links = soup.find_all('a', href=re.compile(r'/item/.*'))
+        for link in links:
+            new_url = link['href']
+            new_full_url = urljoin(page_url, new_url)  # 拼接URL
+            new_urls.add(new_full_url)
+        return new_urls
+
+    def __get_new_data(self, page_url, soup):
+        res_data = {}
+
+        # url
+        res_data['url'] = page_url
+
+        # <dd class="lemmaWgt-lemmaTitle-title"> <h1>Python</h1>
+        title_node = soup.find('dd', class_='lemmaWgt-lemmaTitle-title').find('h1')
+        res_data['title'] = title_node.get_text()
+
+        # <div class="lemma-summary" label-module="lemmaSummary">
+        summary_node = soup.find('div', class_='lemma-summary')
+        res_data['summary'] = summary_node.get_text()
+
+        return res_data
+```
+
+## 1.19. HTML输出器
+```python
+#html_outputer.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+
+class HtmlOutputer(object):
+    def __init__(self):
+        self.__datas = []
+
+    def collect_data(self, data):
+        if data is None:
+            return
+        self.__datas.append(data)
+
+    def output_html(self):
+        with open('output.html', 'w', encoding='utf-8') as fout:
+            fout.write("<html>")
+            fout.write("<body>")
+            fout.write("<table>")
+
+            # ascii
+            for data in self.__datas:
+                fout.write("<tr>")
+                fout.write("<td>{}</td>".format(data['url']))
+                fout.write("<td>{}</td>".format(data['title']))
+                fout.write("<td>{}</td>".format(data['summary']))
+                fout.write("</tr>")
+
+            fout.write("</table>")
+            fout.write("</body>")
+            fout.write("</html>")
+```
+
+## 1.20. 课程总结
+* 简单爬虫架构
+* URL管理器
+* 网页下载器，urllib
+* 网页解析器，BeautifulSoup
+* 实战编写爬取百度百科页面

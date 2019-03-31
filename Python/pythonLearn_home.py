@@ -6322,7 +6322,7 @@ if __name__ == '__main__':
 这样就可以把mydict_test.py当做正常的python脚本运行：
 
 另一种方法是在命令行通过参数-m unittest直接运行单元测试：
-E:\Program Files\JetBrains\PythonProject\Py3TestProject>python -m unittest src/main.py
+E:\Program Files\JetBrains\PythonProject\Py3TestProject>python -m unittest src\main.py
 .....
 ----------------------------------------------------------------------
 Ran 5 tests in 0.001s
@@ -7737,7 +7737,6 @@ if __name__=='__main__':
 
 #https://www.cnblogs.com/DswCnblog/p/6126588.html
 with真正强大之处是它可以处理异常。可能你已经注意到Sample类的__exit__方法有三个参数- val, type 和 trace。 这些参数在异常处理中相当有用。我们来改一下代码，看看具体如何工作的。
-复制代码
 #!/usr/bin/env python
 # with_example02.py
  
@@ -7756,10 +7755,10 @@ class Sample:
  
 with Sample() as sample:
     sample.do_something()
-复制代码
+
 这个例子中，with后面的get_sample()变成了Sample()。这没有任何关系，只要紧跟with后面的语句所返回的对象有__enter__()和__exit__()方法即可。此例中，Sample()的__enter__()方法返回新创建的Sample对象，并赋值给变量sample。
 代码执行后：
-复制代码
+
 bash-3.2$ ./with_example02.py
 type: <type 'exceptions.ZeroDivisionError'>
 value: integer division or modulo by zero
@@ -7770,7 +7769,7 @@ Traceback (most recent call last):
   File "./with_example02.py", line 15, in do_something
     bar = 1/0
 ZeroDivisionError: integer division or modulo by zero
-复制代码
+
 实际上，在with后面的代码块抛出任何异常时，__exit__()方法被执行。正如例子所示，异常抛出时，与之关联的type，value和stack trace传给__exit__()方法，因此抛出的ZeroDivisionError异常被打印出来了。开发库时，清理资源，关闭文件等等操作，都可以放在__exit__方法当中。
 因此，Python的with语句是提供一个有效的机制，让代码更简练，同时在异常产生时，清理工作更简单。
 
@@ -9159,16 +9158,183 @@ if __name__ == '__main__':
     hello: Test = Test() # 所有的变量后都可以冒号来指明类型
     hello.hello()
 #-----------------------------------------------------------------------------------------
+# Python3中使用urllib访问https网站
+import ssl
+import urllib.request
 
+if __name__ == '__main__':
+    url = "http://baike.baidu.com/item/Python/407313"
 
+    ssl._create_default_https_context = ssl._create_unverified_context
+    with urllib.request.urlopen(url) as response1:
+        print(response1.getcode())
+        print(len(response1.read()))
 #-----------------------------------------------------------------------------------------
+# Python3 urljoin
+#
+from urllib.parse import urljoin
+
+if __name__ == '__main__':
+    url = r'https://baike.baidu.com/item/Python/407313'
+    new_url = r'/item/秒懂星课堂'
+    new_full_url = urljoin(url, new_url)  # 拼接URL
+    print(new_full_url)
+输出：
+https://baike.baidu.com/item/秒懂星课堂
+
+#
+from posixpath import normpath
+from urllib.parse import urljoin
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
 
 
+def myjoin(base, url):
+    url1 = urljoin(base, url)
+    arr = urlparse(url1)
+    path = normpath(arr[2])
+    return urlunparse((arr.scheme, arr.netloc, path, arr.params, arr.query, arr.fragment))
+
+
+if __name__ == '__main__':
+    print(myjoin("http://www.baidu.com/lmn", "def/lmn/abc.html"))
+    print(myjoin("http://www.baidu.com", "/../../abc.html"))
+    print(myjoin("http://www.baidu.com/xxx", "./../../abc.html"))
+    print(myjoin("http://www.baidu.com", "abc.html?key=value&m=x"))
+输出：
+http://www.baidu.com/def/lmn/abc.html
+http://www.baidu.com/abc.html
+http://www.baidu.com/abc.html
+http://www.baidu.com/abc.html?key=value&m=x
 #-----------------------------------------------------------------------------------------
+# urlopen读出来的bytes和string转换
+# 参考 https://blog.csdn.net/haoxizh/article/details/44649451
+import contextlib
+import urllib.request
 
-
+if __name__ == '__main__':
+    url = 'http://www.baidu.com'
+    with contextlib.closing(urllib.request.urlopen(url)) as response:  # 使用contextlib.closing()也可以，直接使用with as 也可以，说明urlopen()返回的对象既有__enter__()方法和__exit__()，又有close()方法，可以通过help(response)来查看
+        page = response.read()
+        the_page = page.decode("UTF-8")
+        b_page = the_page.encode("UTF-8")
+        print(f"page type is {type(page)}, the_page type is {type(the_page)}, b_page type is {type(b_page)}")
+输出：
+page type is <class 'bytes'>, the_page type is <class 'str'>, b_page type is <class 'bytes'>
 #-----------------------------------------------------------------------------------------
+# unitteset 方法 https://blog.csdn.net/xiaoxinyu316/article/details/53170463
+# 1、通过unittest.main()来执行测试用例的方式：
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+
+import unittest
+
+
+class UCTestCase(unittest.TestCase):
+    def setUp(self):
+        # 测试前需执行的操作
+        print("setUp")
+        pass
+
+    def tearDown(self):
+        # 测试用例执行完后所需执行的操作
+        print("tearDown")
+        pass
+
+    # 测试用例1
+    def testCreateFolder(self):
+        # 具体的测试脚本
+        print("testCreateFolder")
+
+    # 测试用例2
+    def testDeleteFolder(self): # 只有以test开始的函数，才会运行，如果把函数名改为t2estXXX，则不会运行
+        # 具体的测试脚本
+        print("testDeleteFolder")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+    
+# 2、通过testsuit来执行测试用例的方式：
+if __name__ == "__main__":
+    # 构造测试集
+    suite = unittest.TestSuite()
+    suite.addTest(UCTestCase("testCreateFolder"))
+    # suite.addTest(UCTestCase("testDeleteFolder"))
+    # 执行测试
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+
+# 在PyCharm中运行
+经测试，直接使用PyCharm Ctrl+Shift+F10运行，即使只add一个Test，仍会运行全部测试用例，此时是用的Configuration里的Python tests运行的。
+
+如果将Configuration中修改为Python运行，则会按正常的addTest来运行。
+
+# 在命令行中运行
+可以以命令行方式运行，python src\test\unitest_learn.py 此时只会运行一个测试用例，如下：
+D:\Program Files\JetBrains\PythonProject\Py3TestProject>python src\test\unitest_learn.py
+setUp
+testCreateFolder
+tearDown
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+OK
+
+如果加参数 -m unittest，则仍会运行全部用例：
+D:\Program Files\JetBrains\PythonProject\Py3TestProject>python -m unittest src\test\unitest_learn.py
+setUp
+testCreateFolder
+tearDown
+.setUp
+testDeleteFolder
+tearDown
+.
+----------------------------------------------------------------------
+Ran 2 tests in 0.005s
+
+OK
+
+说明：以suite.addTest(UCTestCase("testCreateFolder"))这种方式来运行测试用例，即使函数名不以test开关，仍可以正常运行。
+
+
+# 3、通过testLoader方式：
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+
+
+class TestCase1(unittest.TestCase):
+    # def setUp(self):
+    # def tearDown(self):
+    def testCase1(self):
+        print('aaa')
+
+    def testCase2(self):
+        print('bbb')
+
+
+class TestCase2(unittest.TestCase):
+    # def setUp(self):
+    # def tearDown(self):
+    def testCase1(self):
+        print('aaa1')
+
+    def testCase2(self):
+        print('bbb1')
+
+
+if __name__ == "__main__":
+    # 此用法可以同时测试多个类
+    suite1 = unittest.TestLoader().loadTestsFromTestCase(TestCase1)
+    suite2 = unittest.TestLoader().loadTestsFromTestCase(TestCase2)
+    suite = unittest.TestSuite([suite1, suite2])
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+说明：unittest.TextTestRunner(verbosity=2).run(suite)运行用例，TextTestRunner类将用例执行的结果以text形式输出，verbosity默认值为1，不限制完整结果，即单个用例成功输出’.’,失败输出’F’,错误输出’E’;verbosity=2将输出完整的信息，verbosity=2是指测试结果的输出的详细程度，有0-6级，具体代码实现可看Python27\Lib\unittest\runner.py源代码。 （https://cloud.tencent.com/info/2ab386c4b78655f1f5d277023d702983.html）
 
 #-----------------------------------------------------------------------------------------
 
