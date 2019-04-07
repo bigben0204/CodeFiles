@@ -1,0 +1,100 @@
+1. Python3使用urllib访问https网站报错：urllib不支持https网站
+解决方案：
+参考：
+https://blog.csdn.net/xiong1000/article/details/80281157
+https://www.jianshu.com/p/ac0d1d9b932e
+需要在代码中导入SSL，即可：
+
+import ssl
+import urllib.request
+
+if __name__ == '__main__':
+    url = "http://baike.baidu.com/item/Python/407313"
+
+    ssl._create_default_https_context = ssl._create_unverified_context
+    response1 = urllib.request.urlopen(url)
+    print(response1.getcode())
+    print(len(response1.read()))
+输出：
+200
+201560
+
+2. import ssl报错：
+    import _ssl             # if we can't import it, let the error propagate
+ModuleNotFoundError: No module named '_ssl'
+解决方案：
+参考：
+https://blog.csdn.net/u011426236/article/details/88864469
+
+安装Win64OpenSSL_Light-1_1_1b.msi，即可正常导入ssl。
+
+3. PyCharm打开控制台报错："IPython History requires SQLite, your history will not be saved"。并且print()命令使用报错：AttributeError: 'NoneType' object has no attribute 'pydev_do_not_trace'
+解决方案：
+参考：
+https://blog.csdn.net/sqlserverdiscovery/article/details/53870955
+https://blog.csdn.net/frostime/article/details/86762858
+把sqlite-dll-win64-x64-3270200.zip中的sqlite3.dll拷贝到D:\Anaconda3\DLLs\sqlite3.dll，即可解决。
+
+
+4. 使用conda update --all后，进行unittest测试，报错：
+from . import _mklinit
+DLL load failed
+解决方案：
+参考：https://blog.csdn.net/zhangpeterx/article/details/84872125
+pip uninstall numpy
+pip install numpy
+
+
+5. 安装Scrapy：
+https://blog.csdn.net/YBK233/article/details/81293762
+安装：
+conda install scrapy
+验证是是否安装成功
+scrapy -h
+
+创建项目：
+https://blog.csdn.net/yhnobody/article/details/81032248
+(base) C:\Users\Ben>cd D:\Program Files\JetBrains\PythonProject
+(base) C:\Users\Ben>d:
+
+# 创建项目
+(base) D:\Program Files\JetBrains\PythonProject>scrapy startproject douban
+New Scrapy project 'douban', using template directory 'd:\\Anaconda3\\lib\\site-packages\\scrapy\\templates\\project', created in:
+    D:\Program Files\JetBrains\PythonProject\douban
+
+You can start your first spider with:
+    cd douban
+    scrapy genspider example example.com
+
+(base) D:\Program Files\JetBrains\PythonProject>
+(base) C:\Users\Ben>cd D:\Program Files\JetBrains\PythonProject\douban\douban\spiders
+
+# 生成spider文件
+(base) D:\Program Files\JetBrains\PythonProject\douban\douban\spiders>scrapy genspider douban_spider movie.douban.com
+Created spider 'douban_spider' using template 'basic' in module:
+  douban.spiders.douban_spider
+
+(base) D:\Program Files\JetBrains\PythonProject\douban\douban\spiders
+
+
+运行项目：
+https://www.cnblogs.com/llssx/p/8378832.html
+
+# 运行
+(base) D:\Program Files\JetBrains\PythonProject\douban\douban>scrapy crawl douban_spider
+或新建main函数：
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from scrapy import cmdline
+
+if __name__ == '__main__':
+    cmdline.execute('scrapy crawl douban_spider'.split())
+    # cmdline.execute(['scrapy', 'crawl', 'douban_spider'])
+
+    
+6. scrapy 爬取 https网站报错：
+2019-04-07 22:17:11 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://movie.douban.com/top250>: HTTP status code is not handled or not allowed
+解决方案：
+https://www.imooc.com/video/17517
+把豆瓣网站的User-Agent内容修改到settings.py里：
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'

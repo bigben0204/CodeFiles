@@ -9335,10 +9335,44 @@ if __name__ == "__main__":
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 说明：unittest.TextTestRunner(verbosity=2).run(suite)运行用例，TextTestRunner类将用例执行的结果以text形式输出，verbosity默认值为1，不限制完整结果，即单个用例成功输出’.’,失败输出’F’,错误输出’E’;verbosity=2将输出完整的信息，verbosity=2是指测试结果的输出的详细程度，有0-6级，具体代码实现可看Python27\Lib\unittest\runner.py源代码。 （https://cloud.tencent.com/info/2ab386c4b78655f1f5d277023d702983.html）
-
 #-----------------------------------------------------------------------------------------
+# scrapy xpath()中的/与//的区别 https://blog.csdn.net/changer_WE/article/details/84553986
 
+from lxml import etree
+myhtml = """
+    <body>
+        <div id="div1">
+            <div id="div2">
+                <p>hello world</p>
+                <div id="div3">
+                    <a href="xxxA.com">转到A</a>
+                    <a href="xxxB.com">转到B</a>
+                </div>    
+            </div>
+            <h1>你好世界</h1>
+        </div>
+    </body>
+    """
+selector = etree.HTML(myhtml)
+content1 = selector.xpath('//div[@id="div1"]/p/text()')  # 用/提取p标签的内容，提取不到 
+print(content1)      # /情况下的xpath的内容
+content2 = selector.xpath('//div[@id="div1"]//p/text()')  # 用//提取p标签的内容
+print(content2)      # //情况下的xpath的内容
+content3 = selector.xpath('//div[@id="div1"]/div[@id="div2"]/div[@id="div3"]/a/text()')  # 用/提取a标签的内容
+print(content3)
+content4 = selector.xpath('//div[@id="div1"]//a/text()')  # 用//提取a标签的内容
 
+这个实验可以看出：
+/ ? ?就类似于我们所说的绝对路径
+// ? 是一种容错性更高的写法，可以不很具体，可以跨过很多层
+所以说，爬虫可以用 ?// ? 写的，就尽量别用 ?/ ?，提高自己代码的一些容错，指不定就会出现我自己做的时候的错误（一些网页div包着div）
+这三种模式：
+
+//a//b/@abc 指的是文档中所有a元素的属性为abc的后代b元素（包括子代元素）（多级）；
+//a/b/@abc 指的是文档中所有a元素的属性为abc的子代b元素（一级）；
+/a/b/@abc 指的是根节点b元素的属性为abc的子代b元素（一级）；
+
+通常用第一种就好了
 #-----------------------------------------------------------------------------------------
 
 
