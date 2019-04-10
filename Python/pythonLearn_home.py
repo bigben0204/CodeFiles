@@ -9374,8 +9374,43 @@ content4 = selector.xpath('//div[@id="div1"]//a/text()')  # 用//提取a标签的内容
 
 通常用第一种就好了
 #-----------------------------------------------------------------------------------------
+# pymysql连接mysql http://www.runoob.com/python3/python3-mysql.html
+# mysql_test.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import pymysql
 
+if __name__ == '__main__':
+    connect = pymysql.connect(host='localhost', port=3306, user='root', passwd='root123',
+                              db='hibernate', charset='utf8')
+    cursor = connect.cursor()
+    # 使用 execute()  方法执行 SQL 查询
+    cursor.execute("SELECT VERSION()")
 
+    # 使用 fetchone() 方法获取单条数据.
+    # data = cursor.fetchone()
+    #
+    # print("Database version : %s " % data)  # Database version : 8.0.11 
+
+    data = {'serial_number': '248', 'movie_name': '枪火', 'introduce': '1999/香港/剧情动作犯罪', 'star': '8.7',
+            'evaluate': '126052人评价', 'description': '一群演技精湛的戏骨，奉献出一个精致的黑帮小品，成就杜琪峰群戏的巅峰之作。'}
+
+    sql_list = """
+    insert into douban_movie(serial_number, movie_name, introduce, star, evaluate, description)
+        values(%s, %s, %s, %s, %s, %s)
+    """
+
+    cursor.execute(sql_list, (data['serial_number'], data['movie_name'], data['introduce'], data['star'], data['evaluate'], data['description']))
+
+    # sql_dict = """
+    # insert into douban_movie(%(name)s, %(name)s, %(name)s, %(name)s, %(name)s, %(name)s)
+    #     values(%s, %s, %s, %s, %s, %s)
+    # """
+    # cursor.execute(sql_dict, data)  # 没找到dict使用样例
+
+    connect.commit()
+    # 关闭数据库连接
+    connect.close()
 #-----------------------------------------------------------------------------------------
 
 
