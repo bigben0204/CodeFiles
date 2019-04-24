@@ -62,6 +62,32 @@
     return
 }
 
+generateVscCode(ByRef language)
+{
+    SendInput, ``````%language%
+    SendInput, {Enter 2}
+    SendInput, ``````
+    SendInput, {Left 4}
+}
+
+:o:``p::
+{
+    generateVscCode("python")
+    return
+}
+
+:o:``j::
+{
+    generateVscCode("java")
+    return
+}
+
+:o:``c::
+{
+    generateVscCode("c{+}{+}") ;+要用{+}转义
+    return
+}
+
 #IfWinActive
 ;~ ^!e::
 ;~ {
@@ -74,3 +100,4 @@
 #l::SendInput {Right}
 #k::SendInput {Down}
 #i::SendInput {Up}
+
