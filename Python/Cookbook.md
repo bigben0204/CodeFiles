@@ -1,4 +1,6 @@
-# 1. Python3 Cookbook
+Python3 Cookbook
+
+# 1. 数据结构与算法
 
 ## 1.1. 解压序列赋值给多个变量
 
@@ -622,7 +624,7 @@ with open(somefile,'r') as f:
 
 
 if __name__ == '__main__':
-    ######    0123456789012345678901234567890123456789012345678901234567890'
+    #####    0123456789012345678901234567890123456789012345678901234567890'
     record = '....................100 .......513.25 ..........'
     cost = int(record[20:23]) * float(record[31:37])
     print(cost)
@@ -1402,3 +1404,618 @@ ChainMap 使用原来的字典，它自己不创建新的字典。所以它并�
 >>> merged['x'] # Notice change to merged dicts
 42
 ```
+
+# 2. 字符串与文本
+
+## 2.1. 使用多个界定符分割字符串
+
+string 对象的 split() 方法只适应于非常简单的字符串分割情形， 它并不允许有多个分隔符或者是分隔符周围不确定的空格。 当你需要更加灵活的切割字符串的时候，最好使用 re.split() 方法：
+
+```python
+>>> line = 'asdf fjdk; afed, fjek,asdf, foo'
+>>> import re
+>>> re.split(r'[;,\s]\s*', line)
+['asdf', 'fjdk', 'afed', 'fjek', 'asdf', 'foo']
+```
+
+函数 re.split() 是非常实用的，因为它允许你为分隔符指定多个正则模式。 比如，在上面的例子中，分隔符可以是逗号，分号或者是空格，并且后面紧跟着任意个的空格。 只要这个模式被找到，那么匹配的分隔符两边的实体都会被当成是结果中的元素返回。 返回结果为一个字段列表，这个跟 str.split() 返回值类型是一样的。
+
+当你使用 re.split() 函数时候，需要特别注意的是正则表达式中是否包含一个括号捕获分组。 如果使用了捕获分组，那么被匹配的文本也将出现在结果列表中。比如，观察一下这段代码运行后的结果：
+
+```python
+>>> fields = re.split(r'(;|,|\s)\s*', line)
+>>> fields
+['asdf', ' ', 'fjdk', ';', 'afed', ',', 'fjek', ',', 'asdf', ',', 'foo']
+```
+
+获取分割字符在某些情况下也是有用的。 比如，你可能想保留分割字符串，用来在后面重新构造一个新的输出字符串：
+
+```python
+>>> values = fields[::2]
+>>> delimiters = fields[1::2] + ['']
+>>> values
+['asdf', 'fjdk', 'afed', 'fjek', 'asdf', 'foo']
+>>> delimiters
+[' ', ';', ',', ',', ',', '']
+>>> # Reform the line using the same delimiters
+>>> ''.join(v+d for v,d in zip(values, delimiters))
+'asdf fjdk;afed,fjek,asdf,foo'
+```
+
+如果你不想保留分割字符串到结果列表中去，但仍然需要使用到括号来分组正则表达式的话， 确保你的分组是非捕获分组，形如 (?:...) 。比如：
+
+使用[]只能匹配里面的一个字符，使用(?:)的形式可以在|中匹配多个字符：
+
+```python
+>>> re.split(r'(?:,|;|\s)\s*', line)
+['asdf', 'fjdk', 'afed', 'fjek', 'asdf', 'foo']
+```
+
+## 2.2. 字符串开头或结尾匹配
+
+你需要通过指定的文本模式去检查字符串的开头或者结尾，比如文件名后缀，URL Scheme等等。
+
+检查字符串开头或结尾的一个简单方法是使用 str.startswith() 或者是 str.endswith() 方法。比如：
+
+```python
+>>> filename = 'spam.txt'
+>>> filename.endswith('.txt')
+True
+>>> filename.startswith('file:')
+False
+>>> url = 'http://www.python.org'
+>>> url.startswith('http:')
+True
+```
+
+如果你想检查多种匹配可能，只需要将所有的匹配项放入到一个元组中去， 然后传给 startswith() 或者 endswith() 方法：
+
+```python
+>>> import os
+>>> filenames = os.listdir('.')
+>>> filenames
+[ 'Makefile', 'foo.c', 'bar.py', 'spam.c', 'spam.h' ]
+>>> [name for name in filenames if name.endswith(('.c', '.h')) ]
+['foo.c', 'spam.c', 'spam.h'
+>>> any(name.endswith('.py') for name in filenames)
+True
+```
+
+下面是另一个例子：
+
+```python
+from urllib.request import urlopen
+
+def read_data(name):
+    if name.startswith(('http:', 'https:', 'ftp:')):
+        return urlopen(name).read()
+    else:
+        with open(name) as f:
+            return f.read()
+```
+
+奇怪的是，这个方法中必须要输入一个元组作为参数。 如果你恰巧有一个 list 或者 set 类型的选择项， 要确保传递参数前先调用 tuple() 将其转换为元组类型。比如：
+
+```python
+>>> choices = ['http:', 'ftp:']
+>>> url = 'http://www.python.org'
+>>> url.startswith(choices)
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+TypeError: startswith first arg must be str or a tuple of str, not list
+>>> url.startswith(tuple(choices))
+True
+```
+
+startswith() 和 endswith() 方法提供了一个非常方便的方式去做字符串开头和结尾的检查。 类似的操作也可以使用切片来实现，但是代码看起来没有那么优雅。比如：
+
+```python
+>>> filename = 'spam.txt'
+>>> filename[-4:] == '.txt'
+True
+>>> url = 'http://www.python.org'
+>>> url[:5] == 'http:' or url[:6] == 'https:' or url[:4] == 'ftp:'
+True
+```
+
+你可以能还想使用正则表达式去实现，比如：
+
+```python
+>>> import re
+>>> url = 'http://www.python.org'
+>>> re.match('http:|https:|ftp:', url)
+<_sre.SRE_Match object at 0x101253098>
+```
+
+这种方式也行得通，但是对于简单的匹配实在是有点小材大用了，本节中的方法更加简单并且运行会更快些。
+
+最后提一下，当和其他操作比如普通数据聚合相结合的时候 startswith() 和 endswith() 方法是很不错的。 比如，下面这个语句检查某个文件夹中是否存在指定的文件类型：
+
+```python
+if any(name.endswith(('.c', '.h')) for name in listdir(dirname)):
+...
+```
+
+## 2.3. 用Shell通配符匹配字符串
+
+你想使用 Unix Shell 中常用的通配符(比如 *.py , Dat[0-9]*.csv 等)去匹配文本字符串
+
+fnmatch 模块提供了两个函数—— fnmatch() 和 fnmatchcase() ，可以用来实现这样的匹配。用法如下：
+
+```python
+>>> from fnmatch import fnmatch, fnmatchcase
+>>> fnmatch('foo.txt', '*.txt')
+True
+>>> fnmatch('foo.txt', '?oo.txt')
+True
+>>> fnmatch('Dat45.csv', 'Dat[0-9]*')
+True
+>>> names = ['Dat1.csv', 'Dat2.csv', 'config.ini', 'foo.py']
+>>> [name for name in names if fnmatch(name, 'Dat*.csv')]
+['Dat1.csv', 'Dat2.csv']
+```
+
+fnmatch() 函数使用底层操作系统的大小写敏感规则(不同的系统是不一样的)来匹配模式。比如：
+
+```python
+>>> # On OS X (Mac)
+>>> fnmatch('foo.txt', '*.TXT')
+False
+>>> # On Windows
+>>> fnmatch('foo.txt', '*.TXT')
+True
+```
+
+如果你对这个区别很在意，可以使用 fnmatchcase() 来代替。它完全使用你的模式大小写匹配。比如：
+
+```python
+>>> fnmatchcase('foo.txt', '*.TXT')
+False
+```
+
+这两个函数通常会被忽略的一个特性是在处理非文件名的字符串时候它们也是很有用的。 比如，假设你有一个街道地址的列表数据：
+
+```python
+addresses = [
+    '5412 N CLARK ST',
+    '1060 W ADDISON ST',
+    '1039 W GRANVILLE AVE',
+    '2122 N CLARK ST',
+    '4802 N BROADWAY',
+]
+```
+
+你可以像这样写列表推导：
+
+```python
+>>> from fnmatch import fnmatchcase
+>>> [addr for addr in addresses if fnmatchcase(addr, '* ST')]
+['5412 N CLARK ST', '1060 W ADDISON ST', '2122 N CLARK ST']
+>>> [addr for addr in addresses if fnmatchcase(addr, '54[0-9][0-9] *CLARK*')]
+['5412 N CLARK ST']
+```
+
+fnmatch() 函数匹配能力介于简单的字符串方法和强大的正则表达式之间。 如果在数据处理操作中只需要简单的通配符就能完成的时候，这通常是一个比较合理的方案。
+
+如果你的代码需要做文件名的匹配，最好使用 glob 模块。参考5.13小节。
+
+## 2.4. 字符串匹配和搜索
+
+如果你想匹配的是字面字符串，那么你通常只需要调用基本字符串方法就行， 比如 str.find() , str.endswith() , str.startswith() 或者类似的方法：
+
+```python
+>>> text = 'yeah, but no, but yeah, but no, but yeah'
+>>> # Exact match
+>>> text == 'yeah'
+False
+>>> # Match at start or end
+>>> text.startswith('yeah')
+True
+>>> text.endswith('no')
+False
+>>> # Search for the location of the first occurrence
+>>> text.find('no')
+10
+```
+
+对于复杂的匹配需要使用正则表达式和 re 模块。 为了解释正则表达式的基本原理，假设你想匹配数字格式的日期字符串比如 11/27/2012 ，你可以这样做：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import re
+
+if __name__ == '__main__':
+    text1 = '11/27/2012'
+    text2 = 'Nov 27, 2012'
+    # Simple matching: \d+ means match one or more digits
+    if re.match(r'\d+/\d+/\d+', text1):
+        print('yes')
+    else:
+        print('no')
+
+    if re.match(r'\d+/\d+/\d+', text2):
+        print('yes')
+    else:
+        print('no')
+输出：
+yes
+no
+```
+
+如果你想使用同一个模式去做多次匹配，你应该先将模式字符串预编译为模式对象。比如：
+
+```python
+import re
+
+if __name__ == '__main__':
+    text1 = '11/27/2012'
+    text2 = 'Nov 27, 2012'
+    datepat = re.compile(r'\d+/\d+/\d+')
+    if datepat.match(text1):
+        print('yes')
+    else:
+        print('no')
+
+    if datepat.match(text2):
+        print('yes')
+    else:
+        print('no')
+```
+
+match() 总是从字符串开始去匹配，如果你想查找字符串任意部分的模式出现位置， 使用 findall() 方法去代替（**我觉得应该是search()方法来代替**）。比如：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import re
+
+if __name__ == '__main__':
+    text1 = '11/27/2012'
+    text2 = 'Nov 27, 2012'
+    text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    datepat = re.compile(r'\d+/\d+/\d+')
+    m = datepat.search(text)
+    if m:
+        print(m.group())
+
+    l = datepat.findall(text)
+    print(l)
+输出：
+11/27/2012
+['11/27/2012', '3/13/2013']
+```
+
+在定义正则式的时候，通常会利用括号去捕获分组。比如：
+
+`>>> datepat = re.compile(r'(\d+)/(\d+)/(\d+)')`
+
+捕获分组可以使得后面的处理更加简单，因为可以分别将每个组的内容提取出来。比如：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import re
+
+if __name__ == '__main__':
+    datepat = re.compile(r'(\d+)/(\d+)/(\d+)')
+    m = datepat.match('11/27/2012')
+    print(m.group())  # 当前正则表达式匹配的全部内容
+    print(m.group(0))  # 同group()
+    print(m.group(1))
+    print(m.group(2))
+    print(m.group(3))
+    print(m.groups())
+    month, day, year = m.groups()
+    # Find all matches (notice splitting into tuples)
+    text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    print(datepat.findall(text))
+    for month, day, year in datepat.findall(text):
+        print('{}-{}-{}'.format(year, month, day))
+输出：
+11/27/2012
+11/27/2012
+11
+27
+2012
+('11', '27', '2012')
+[('11', '27', '2012'), ('3', '13', '2013')]
+2012-11-27
+2013-3-13
+```
+
+```python
+import re
+
+if __name__ == '__main__':
+    datepat = re.compile(r'((\d+)/(\d+)/(\d+))')
+    m = datepat.match('11/27/2012')
+    print(m.group())  # 当前正则表达式匹配的全部内容
+    print(m.group(0))  # 同group()
+    print(m.group(1))  # 第1个括号匹配内容
+    print(m.group(2))  # 第2个括号匹配内容
+    print(m.group(3))
+    print(m.groups())
+    _, month, day, year = m.groups()
+    # Find all matches (notice splitting into tuples)
+    text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    print(datepat.findall(text))
+    for _, month, day, year in datepat.findall(text):
+        print('{}-{}-{}'.format(year, month, day))
+输出：
+11/27/2012
+11/27/2012
+11/27/2012
+11
+27
+('11/27/2012', '11', '27', '2012')
+[('11/27/2012', '11', '27', '2012'), ('3/13/2013', '3', '13', '2013')]
+2012-11-27
+2013-3-13
+```
+
+findall() 方法会搜索文本并以**字符串列表形式**返回**所有小括号**的匹配。 如果你想以迭代方式返回匹配，可以使用 finditer() 方法来代替，**每个迭代对象是match对象**，比如：
+
+```python
+import re
+
+if __name__ == '__main__':
+    datepat = re.compile(r'((\d+)/(\d+)/(\d+))')
+    text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    for m in datepat.finditer(text):
+        # _, month, day, year = m.group(1, 2, 3, 4)
+        month, day, year = m.group(2, 3, 4)  # 这里要写group(2, 3, 4)，不能写group(2, 4)
+        print('{}-{}-{}'.format(year, month, day))
+        print(m.groups())
+输出：
+2012-11-27
+('11/27/2012', '11', '27', '2012')
+2013-3-13
+('3/13/2013', '3', '13', '2013')
+```
+
+关于正则表达式理论的教程已经超出了本书的范围。 不过，这一节阐述了使用re模块进行匹配和搜索文本的最基本方法。 核心步骤就是先使用 re.compile() 编译正则表达式字符串， 然后使用 match() , findall() 或者 finditer() 等方法。
+
+当写正则式字符串的时候，相对普遍的做法是使用原始字符串比如 r'(\d+)/(\d+)/(\d+)' 。 这种字符串将不去解析反斜杠，这在正则表达式中是很有用的。 如果不这样做的话，你必须使用两个反斜杠，类似 '(\\d+)/(\\d+)/(\\d+)' 。
+
+需要注意的是 match() 方法仅仅检查字符串的开始部分。它的匹配结果有可能并不是你期望的那样。比如：
+
+```python
+import re
+
+if __name__ == '__main__':
+    datepat = re.compile(r'(\d+)/(\d+)/(\d+)')
+    m = datepat.match('11/27/2012abcdef')
+    print(m.group())
+
+    # 如果你想精确匹配，确保你的正则表达式以$结尾，就像这么这样：
+    datepat = re.compile(r'(\d+)/(\d+)/(\d+)$')
+    m = datepat.match('11/27/2012abcdef')
+    # print(m.group())  # m is None
+
+    m = datepat.match('11/27/2012')
+    print(m.group())
+输出：
+11/27/2012
+11/27/2012
+```
+
+最后，如果你仅仅是做一次简单的文本匹配/搜索操作的话，可以略过编译部分，直接使用 re 模块级别的函数。比如：
+
+```python
+>>> re.findall(r'(\d+)/(\d+)/(\d+)', text)
+[('11', '27', '2012'), ('3', '13', '2013')]
+```
+
+但是需要注意的是，如果你打算做大量的匹配和搜索操作的话，最好先编译正则表达式，然后再重复使用它。 模块级别的函数会将最近编译过的模式缓存起来，因此并不会消耗太多的性能， 但是如果使用预编译模式的话，你将会减少查找和一些额外的处理损耗。
+
+## 2.5. 字符串搜索和替换
+
+你想在字符串中搜索和匹配指定的文本模式
+
+对于简单的字面模式，直接使用 str.replace() 方法即可，比如：
+
+```python
+>>> text = 'yeah, but no, but yeah, but no, but yeah'
+>>> text.replace('yeah', 'yep')
+'yep, but no, but yep, but no, but yep'
+```
+
+对于复杂的模式，请使用 re 模块中的 sub() 函数。 为了说明这个，假设你想将形式为 11/27/2012 的日期字符串改成 2012-11-27 。示例如下：
+
+```python
+text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+print(re.sub(r'(\d+)/(\d+)/(\d+)', r'\3-\1-\2', text))
+输出：
+Today is 2012-11-27. PyCon starts 2013-3-13.
+```
+
+sub() 函数中的第一个参数是被匹配的模式，第二个参数是替换模式。反斜杠数字比如 \3 指向前面模式的捕获组号。
+
+如果你打算用相同的模式做多次替换，考虑先编译它来提升性能。比如：
+
+```python
+import re
+
+if __name__ == '__main__':
+    text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    datepat = re.compile(r'(\d+)/(\d+)/(\d+)')
+    print(datepat.sub(r'\3-\1-\2', text))
+```
+
+对于更加复杂的替换，可以传递一个替换回调函数来代替，比如：
+
+```python
+import re
+from calendar import month_abbr
+
+
+def change_date(m):
+    mon_name = month_abbr[int(m.group(1))]
+    return '{} {} {}'.format(m.group(2), mon_name, m.group(3))
+
+
+if __name__ == '__main__':
+    text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    datepat = re.compile(r'(\d+)/(\d+)/(\d+)')
+    print(datepat.sub(change_date, text))
+
+    new_text, n = datepat.subn(change_date, text)
+    print(new_text, n)
+输出：
+Today is 27 Nov 2012. PyCon starts 13 Mar 2013.
+Today is 27 Nov 2012. PyCon starts 13 Mar 2013. 2
+```
+
+一个替换回调函数的参数是一个 match 对象，也就是 match() 或者 find() 返回的对象。 使用 group() 方法来提取特定的匹配部分。回调函数最后返回替换字符串。
+
+如果除了替换后的结果外，你还想知道有多少替换发生了，可以使用 re.subn() 来代替。比如：
+
+```python
+>>> newtext, n = datepat.subn(r'\3-\1-\2', text)
+>>> newtext
+'Today is 2012-11-27. PyCon starts 2013-3-13.'
+>>> n
+2
+```
+
+## 2.6. 字符串忽略大小写的搜索替换
+
+为了在文本操作时忽略大小写，你需要在使用 re 模块的时候给这些操作提供 re.IGNORECASE 标志参数。比如：
+
+```python
+import re
+
+if __name__ == '__main__':
+    text = 'UPPER PYTHON, lower python, Mixed Python'
+    print(re.findall('python', text, flags=re.IGNORECASE))
+    print(re.sub('python', 'snake', text, flags=re.IGNORECASE))
+输出：
+['PYTHON', 'python', 'Python']
+UPPER snake, lower snake, Mixed snake
+```
+
+最后的那个例子揭示了一个小缺陷，替换字符串并不会自动跟被匹配字符串的大小写保持一致。 为了修复这个，你可能需要一个辅助函数，就像下面的这样：
+
+```python
+import re
+
+
+def matchcase(word):
+    def replace(m):
+        text = m.group()
+        if text.isupper():
+            return word.upper()
+        elif text.islower():
+            return word.lower()
+        elif text[0].isupper():
+            return word.capitalize()
+        else:
+            return word
+
+    return replace
+
+
+if __name__ == '__main__':
+    text = 'UPPER PYTHON, lower python, Mixed Python'
+    print(re.sub('python', matchcase('snake'), text, flags=re.IGNORECASE))
+
+    # 编译模式：
+    datepat = re.compile('python', flags=re.IGNORECASE)
+    print(datepat.sub(matchcase('snake'), text))
+输出：
+UPPER SNAKE, lower snake, Mixed Snake
+UPPER SNAKE, lower snake, Mixed Snake
+```
+
+matchcase('snake') 返回了一个回调函数(参数必须是 match 对象)，前面一节提到过， sub() 函数除了接受替换字符串外，还能接受一个回调函数。
+
+对于一般的忽略大小写的匹配操作，简单的传递一个 re.IGNORECASE 标志参数就已经足够了。 但是需要注意的是，这个对于某些需要大小写转换的Unicode匹配可能还不够， 参考2.10小节了解更多细节。
+
+## 2.7. 最短匹配模式
+
+这个问题一般出现在需要匹配一对分隔符之间的文本的时候(比如引号包含的字符串)。 为了说明清楚，考虑如下的例子：
+
+```python
+import re
+
+if __name__ == '__main__':
+    str_pat = re.compile(r'"(.*)"')
+    text1 = 'Computer says "no."'
+    print(str_pat.findall(text1))
+    text2 = 'Computer says "no." Phone says "yes."'
+    print(str_pat.findall(text2))
+输出：
+['no.']
+['no." Phone says "yes.']
+```
+
+在这个例子中，模式 r'\"(.*)\"' 的意图是匹配被双引号包含的文本。 但是在正则表达式中*操作符是贪婪的，因此匹配操作会查找最长的可能匹配。 于是在第二个例子中搜索 text2 的时候返回结果并不是我们想要的。
+
+为了修正这个问题，可以在模式中的*操作符后面加上?修饰符，就像这样：
+
+```python
+str_pat = re.compile(r'"(.*?)"')
+text2 = 'Computer says "no." Phone says "yes."'
+print(str_pat.findall(text2))
+输出：
+['no.', 'yes.']
+```
+
+这样就使得匹配变成非贪婪模式，从而得到最短的匹配，也就是我们想要的结果。
+
+这一节展示了在写包含点(.)字符的正则表达式的时候遇到的一些常见问题。 在一个模式字符串中，点(.)匹配除了换行外的任何字符。 然而，如果你将点(.)号放在开始与结束符(比如引号)之间的时候，那么匹配操作会查找符合模式的最长可能匹配。 这样通常会导致很多中间的被开始与结束符包含的文本被忽略掉，并最终被包含在匹配结果字符串中返回。 通过在 * 或者 + 这样的操作符后面添加一个 ? 可以强制匹配算法改成寻找最短的可能匹配。
+
+## 2.8. 多行匹配模式
+
+这个问题很典型的出现在当你用点(.)去匹配任意字符的时候，忘记了点(.)不能匹配换行符的事实。 比如，假设你想试着去匹配C语言分割的注释：
+
+```python
+import re
+
+if __name__ == '__main__':
+    comment = re.compile(r'/\*(.*?)\*/')
+    text1 = '/* this is a comment */'
+    text2 = '''/* this is a
+    multiline comment */
+    '''
+    print(comment.findall(text1))
+    print(comment.findall(text2))
+输出：
+[' this is a comment ']
+[]
+```
+
+为了修正这个问题，你可以修改模式字符串，增加对换行的支持。比如：
+
+```python
+comment = re.compile(r'/\*((?:.|\n)*?)\*/')
+text1 = '/* this is a comment */'
+text2 = '''/* this is a
+multiline comment */
+'''
+print(comment.findall(text1))
+print(comment.findall(text2))
+输出：
+[' this is a comment ']
+[' this is a\n    multiline comment ']
+```
+
+在这个模式中， (?:.|\n) 指定了一个非捕获组 (也就是它定义了一个仅仅用来做匹配，而不能通过单独捕获或者编号的组)。
+
+```python
+comment = re.compile(r'/\*(.*?)\*/', re.DOTALL)
+print(comment.findall(text2))
+输出：
+[' this is a\n    multiline comment ']
+```
+
+对于简单的情况使用 re.DOTALL 标记参数工作的很好， 但是如果模式非常复杂或者是为了构造字符串令牌而将多个模式合并起来(2.18节有详细描述)， 这时候使用这个标记参数就可能出现一些问题。 如果让你选择的话，最好还是定义自己的正则表达式模式，这样它可以在不需要额外的标记参数下也能工作的很好。
+
+## 2.9. 将Unicode文本标准化
+
+<https://python3-cookbook.readthedocs.io/zh_CN/latest/c02/p09_normalize_unicode_text_to_regexp.html>
+
+## 2.10. 在正则式中使用Unicode
+
+<https://python3-cookbook.readthedocs.io/zh_CN/latest/c02/p10_work_with_unicode_in_regexp.html>
