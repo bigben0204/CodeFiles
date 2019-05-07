@@ -2019,3 +2019,1330 @@ print(comment.findall(text2))
 ## 2.10. 在正则式中使用Unicode
 
 <https://python3-cookbook.readthedocs.io/zh_CN/latest/c02/p10_work_with_unicode_in_regexp.html>
+
+## 2.11. 删除字符串中不需要的字符
+
+strip() 方法能用于删除开始或结尾的字符。 lstrip() 和 rstrip() 分别从左和从右执行删除操作。 默认情况下，这些方法会去除空白字符，但是你也可以指定其他字符。比如：
+
+```python
+>>> # Whitespace stripping
+>>> s = ' hello world \n'
+>>> s.strip()
+'hello world'
+>>> s.lstrip()
+'hello world \n'
+>>> s.rstrip()
+' hello world'
+>>>
+>>> # Character stripping
+>>> t = '-----hello====='
+>>> t.lstrip('-')
+'hello====='
+>>> t.strip('-=')
+'hello'
+```
+
+这些 strip() 方法在读取和清理数据以备后续处理的时候是经常会被用到的。 比如，你可以用它们来去掉空格，引号和完成其他任务。
+
+但是需要注意的是去除操作不会对字符串的中间的文本产生任何影响。比如：
+
+```python
+>>> s = ' hello     world \n'
+>>> s = s.strip()
+>>> s
+'hello     world'
+```
+
+如果你想处理中间的空格，那么你需要求助其他技术。比如使用 replace() 方法或者是用正则表达式替换。示例如下：
+
+```python
+>>> s.replace(' ', '')
+'helloworld'
+>>> import re
+>>> re.sub('\s+', ' ', s)
+'hello world'
+```
+
+通常情况下你想将字符串 strip 操作和其他迭代操作相结合，比如从文件中读取多行数据。 如果是这样的话，那么生成器表达式就可以大显身手了。比如：
+
+```python
+with open(filename) as f:
+    lines = (line.strip() for line in f)
+    for line in lines:
+        print(line)
+```
+
+在这里，表达式 lines = (line.strip() for line in f) 执行数据转换操作。 这种方式非常高效，因为它不需要预先读取所有数据放到一个临时的列表中去。 它仅仅只是创建一个生成器，并且每次返回行之前会先执行 strip 操作。
+
+对于更高阶的strip，你可能需要使用 translate() 方法。请参阅下一节了解更多关于字符串清理的内容。
+
+## 2.12. 审查清理文本字符串
+
+文本清理问题会涉及到包括文本解析与数据处理等一系列问题。 在非常简单的情形下，你可能会选择使用字符串函数(比如 str.upper() 和 str.lower() )将文本转为标准格式。 使用 str.replace() 或者 re.sub() 的简单替换操作能删除或者改变指定的字符序列。 你同样还可以使用2.9小节的 unicodedata.normalize() 函数将unicode文本标准化。
+
+然后，有时候你可能还想在清理操作上更进一步。比如，你可能想消除整个区间上的字符或者去除变音符。 为了这样做，你可以使用经常会被忽视的 str.translate() 方法。 为了演示，假设你现在有下面这个凌乱的字符串：
+
+```python
+s = 'pýtĥöñ\fis\tawesome\r\n'
+print(s)
+
+remap = {
+    ord('\t'): ' ',
+    ord('\f'): ' ',
+    ord('\r'): None  # Deleted
+}
+a = s.translate(remap)
+print(a)
+输出：
+pýtĥöñis	awesome
+
+pýtĥöñ is awesome
+
+```
+
+正如你看的那样，空白字符 \t 和 \f 已经被重新映射到一个空格。回车字符r直接被删除。
+
+你可以以这个表格为基础进一步构建更大的表格。比如，让我们删除所有的和音符：
+
+```python
+>>> import unicodedata
+>>> import sys
+>>> cmb_chrs = dict.fromkeys(c for c in range(sys.maxunicode)
+...                         if unicodedata.combining(chr(c)))
+...
+>>> b = unicodedata.normalize('NFD', a)
+>>> b
+'pýtĥöñ is awesome\n'
+>>> b.translate(cmb_chrs)
+'python is awesome\n'
+```
+
+上面例子中，通过使用 dict.fromkeys() 方法构造一个字典，每个Unicode和音符作为键，对应的值全部为 None 。
+
+然后使用 unicodedata.normalize() 将原始输入标准化为分解形式字符。 然后再调用 translate 函数删除所有重音符。 同样的技术也可以被用来删除其他类型的字符(比如控制字符等)。
+
+作为另一个例子，这里构造一个将所有Unicode数字字符映射到对应的ASCII字符上的表格：
+
+```python
+import sys
+import unicodedata
+
+if __name__ == '__main__':
+    digitmap = {c: ord('0') + unicodedata.digit(chr(c))
+                for c in range(sys.maxunicode)
+                if unicodedata.category(chr(c)) == 'Nd'}
+    print(len(digitmap))
+    # Arabic digits
+    x = '\u0661\u0662\u0663'
+    print(x.translate(digitmap))
+输出：
+610
+123
+```
+
+另一种清理文本的技术涉及到I/O解码与编码函数。这里的思路是先对文本做一些初步的清理， 然后再结合 encode() 或者 decode() 操作来清除或修改它。比如：
+
+```python
+import unicodedata
+
+if __name__ == '__main__':
+    a = 'pýtĥöñ is awesome\n'
+    b = unicodedata.normalize('NFD', a)
+    print(b)
+    print(b.encode('ascii', 'ignore').decode('ascii'))
+输出：
+pýtĥöñ is awesome
+
+python is awesome
+
+```
+
+这里的标准化操作将原来的文本分解为单独的和音符。接下来的ASCII编码/解码只是简单的一下子丢弃掉那些字符。 当然，这种方法仅仅只在最后的目标就是获取到文本对应ACSII表示的时候生效。
+
+文本字符清理一个最主要的问题应该是运行的性能。一般来讲，代码越简单运行越快。 对于简单的替换操作， str.replace() 方法通常是最快的，甚至在你需要多次调用的时候。 比如，为了清理空白字符，你可以这样做：
+
+```python
+def clean_spaces(s):
+    s = s.replace('\r', '')
+    s = s.replace('\t', ' ')
+    s = s.replace('\f', ' ')
+    return s
+```
+
+如果你去测试的话，你就会发现这种方式会比使用 translate() 或者正则表达式要快很多。
+
+另一方面，如果你需要执行任何复杂字符对字符的重新映射或者删除操作的话， tanslate() 方法会非常的快。
+
+从大的方面来讲，对于你的应用程序来说性能是你不得不去自己研究的东西。 不幸的是，我们不可能给你建议一个特定的技术，使它能够适应所有的情况。 因此实际情况中需要你自己去尝试不同的方法并评估它。
+
+尽管这一节集中讨论的是文本，但是类似的技术也可以适用于字节，包括简单的替换，转换和正则表达式。
+
+## 2.13. 字符串对齐
+
+对于基本的字符串对齐操作，可以使用字符串的 ljust() , rjust() 和 center() 方法。比如：
+
+```python
+text = 'Hello World'
+print(text.ljust(20))
+print(text.rjust(20))
+print(text.center(20))
+输出：
+Hello World         
+         Hello World
+    Hello World  
+```
+
+所有这些方法都能接受一个可选的填充字符。比如：
+
+```python
+print(text.rjust(20, '='))
+print(text.center(20, '*'))
+输出：
+=========Hello World
+****Hello World*****
+```
+
+函数 format() 同样可以用来很容易的对齐字符串。 你要做的就是使用 <,> 或者 ^ 字符后面紧跟一个指定的宽度。比如：
+
+```python
+text = 'Hello World'
+print(format(text, '20'))
+print(format(text, '>20'))
+print(format(text, '<20'))
+print(format(text, '^20'))
+输出：
+Hello World         
+         Hello World
+Hello World         
+    Hello World     
+```
+
+如果你想指定一个非空格的填充字符，将它写到对齐字符的前面即可：
+
+```python
+print(format(text, '=>20'))
+print(format(text, '*^20'))
+输出：
+=========Hello World
+****Hello World*****
+```
+
+当格式化多个值的时候，这些格式代码也可以被用在 format() 方法中。比如：
+
+```python
+print('{:=>10s} {:*>10s}'.format('Hello', 'World'))
+输出：
+=====Hello *****World
+```
+
+format() 函数的一个好处是它不仅适用于字符串。它可以用来格式化任何值，使得它非常的通用。 比如，你可以用它来格式化数字：
+
+```python
+>>> x = 1.2345
+>>> format(x, '>10')
+'    1.2345'
+>>> format(x, '^10.2f')
+'   1.23   '
+```
+
+在老的代码中，你经常会看到被用来格式化文本的 % 操作符。比如：
+
+```python
+>>> '%-20s' % text
+'Hello World         '
+>>> '%20s' % text
+'         Hello World'
+```
+
+但是，在新版本代码中，你应该优先选择 format() 函数或者方法。 format() 要比 % 操作符的功能更为强大。 并且 format() 也比使用 ljust() , rjust() 或 center() 方法更通用， 因为它可以用来格式化任意对象，而不仅仅是字符串。
+
+## 2.14. 合并拼接字符串
+
+如果你想要合并的字符串是在一个序列或者 iterable 中，那么最快的方式就是使用 join() 方法。比如：
+
+```python
+>>> parts = ['Is', 'Chicago', 'Not', 'Chicago?']
+>>> ' '.join(parts)
+'Is Chicago Not Chicago?'
+>>> ','.join(parts)
+'Is,Chicago,Not,Chicago?'
+>>> ''.join(parts)
+'IsChicagoNotChicago?'
+```
+
+初看起来，这种语法看上去会比较怪，但是 join() 被指定为字符串的一个方法。 这样做的部分原因是你想去连接的对象可能来自各种不同的数据序列(比如列表，元组，字典，文件，集合或生成器等)， 如果在所有这些对象上都定义一个 join() 方法明显是冗余的。 因此你只需要指定你想要的分割字符串并调用他的 join() 方法去将文本片段组合起来。
+
+如果你仅仅只是合并少数几个字符串，使用加号(+)通常已经足够了：
+
+```python
+>>> a = 'Is Chicago'
+>>> b = 'Not Chicago?'
+>>> a + ' ' + b
+'Is Chicago Not Chicago?'
+```
+
+加号(+)操作符在作为一些复杂字符串格式化的替代方案的时候通常也工作的很好，比如：
+
+```python
+>>> print('{} {}'.format(a,b))
+Is Chicago Not Chicago?
+>>> print(a + ' ' + b)
+Is Chicago Not Chicago?
+```
+
+如果你想在源码中将两个字面字符串合并起来，你只需要简单的将它们放到一起，不需要用加号(+)。比如：
+
+```python
+>>> a = 'Hello' 'World'
+>>> a
+'HelloWorld'
+```
+
+字符串合并可能看上去并不需要用一整节来讨论。 但是不应该小看这个问题，程序员通常在字符串格式化的时候因为选择不当而给应用程序带来严重性能损失。
+
+最重要的需要引起注意的是，当我们使用加号(+)操作符去连接大量的字符串的时候是非常低效率的， 因为加号连接会引起内存复制以及垃圾回收操作。 特别的，你永远都不应像下面这样写字符串连接代码：
+
+```python
+s = ''
+for p in parts:
+    s += p
+```
+
+这种写法会比使用 join() 方法运行的要慢一些，因为每一次执行+=操作的时候会创建一个新的字符串对象。 你最好是先收集所有的字符串片段然后再将它们连接起来。
+
+一个相对比较聪明的技巧是利用生成器表达式(参考1.19小节)转换数据为字符串的同时合并字符串，比如：
+
+```python
+>>> data = ['ACME', 50, 91.1]
+>>> ','.join(str(d) for d in data)
+'ACME,50,91.1'
+```
+
+同样还得注意不必要的字符串连接操作。有时候程序员在没有必要做连接操作的时候仍然多此一举。比如在打印的时候：
+
+```python
+a = 'a'
+b = 'b'
+c = 'c'
+
+print(a + ':' + b + ':' + c)  # Ugly
+print(':'.join([a, b, c]))  # Still ugly
+print(a, b, c, sep=':')  # Better
+```
+
+当混合使用I/O操作和字符串连接操作的时候，有时候需要仔细研究你的程序。 比如，考虑下面的两端代码片段：
+
+```python
+# Version 1 (string concatenation)
+f.write(chunk1 + chunk2)
+
+# Version 2 (separate I/O operations)
+f.write(chunk1)
+f.write(chunk2)
+```
+
+如果两个字符串很小，那么第一个版本性能会更好些，因为I/O系统调用天生就慢。 另外一方面，如果两个字符串很大，那么第二个版本可能会更加高效， 因为它避免了创建一个很大的临时结果并且要复制大量的内存块数据。 还是那句话，有时候是需要根据你的应用程序特点来决定应该使用哪种方案。
+
+最后谈一下，如果你准备编写构建大量小字符串的输出代码， 你最好考虑下使用生成器函数，利用yield语句产生输出片段。比如：
+
+```python
+def sample():
+    yield 'Is'
+    yield 'Chicago'
+    yield 'Not'
+    yield 'Chicago?'
+```
+
+这种方法一个有趣的方面是它并没有对输出片段到底要怎样组织做出假设。 例如，你可以简单的使用 join() 方法将这些片段合并起来：
+
+```python
+text = ''.join(sample())
+```
+
+或者你也可以将字符串片段重定向到I/O：
+
+```p
+for part in sample():
+    f.write(part)
+```
+
+再或者你还可以写出一些结合I/O操作的混合方案：
+
+```python
+def combine(source, maxsize):
+    parts = []
+    size = 0
+    for part in source:
+        parts.append(part)
+        size += len(part)
+        if size > maxsize:
+            yield ''.join(parts)
+            parts = []
+            size = 0
+    yield ''.join(parts)
+
+# 结合文件操作
+with open('filename', 'w') as f:
+    for part in combine(sample(), 32768):
+        f.write(part)
+```
+
+这里的关键点在于原始的生成器函数并不需要知道使用细节，它只负责生成字符串片段就行了。
+
+## 2.15. 字符串中插入变量
+
+Python并没有对在字符串中简单替换变量值提供直接的支持。 但是通过使用字符串的 format() 方法来解决这个问题。比如：
+
+```python
+s = '{name} has {n} messages.'
+print(s.format(name='Guido', n=37))  # Guido has 37 messages.
+
+name = 'Guido'
+n = 37
+message = f'{name} has {n} messages.'
+print(message)  # Guido has 37 messages.
+```
+
+或者，如果要被替换的变量能在变量域中找到， 那么你可以结合使用 format_map() 和 vars() 。就像下面这样：
+
+```python
+s = '{name} has {n} messages.'
+name = 'Guido'
+n = 37
+print(s.format_map(vars()))  # Guido has 37 messages.
+
+d = {'name': name, 'n': n}
+print(s.format_map(d))  # Guido has 37 messages.
+```
+
+vars() 还有一个有意思的特性就是它也适用于对象实例。比如：
+
+```python
+class Info:
+    def __init__(self, name, n):
+        self.name = name
+        self.n = n
+
+
+if __name__ == '__main__':
+    s = '{name} has {n} messages.'
+    a = Info('Guido', 37)
+    print(s.format_map(vars(a)))
+输出：
+'Guido has 37 messages.'
+```
+
+format 和 format_map() 的一个缺陷就是它们并不能很好的处理变量缺失的情况，比如：
+
+```python
+>>> s.format(name='Guido')
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+KeyError: 'n'
+```
+
+一种避免这种错误的方法是另外定义一个含有 __missing__() 方法的字典对象，就像下面这样，现在你可以利用这个类包装输入后传递给 format_map() ：
+
+```python
+class Safesub(dict):
+    """防止key找不到"""
+
+    def __missing__(self, key):
+        return '{' + key + '}'
+
+
+if __name__ == '__main__':
+    s = '{name} has {n} messages.'
+    name = 'Guido'
+    print(s.format_map(Safesub(vars())))
+输出：
+Guido has {n} messages.
+```
+
+如果你发现自己在代码中频繁的执行这些步骤，你可以将变量替换步骤用一个工具函数封装起来。就像下面这样：
+
+```python
+import sys
+
+
+class Safesub(dict):
+    """防止key找不到"""
+    def __missing__(self, key):
+        return '{' + key + '}'
+
+
+def sub(text):
+    return text.format_map(Safesub(sys._getframe(1).f_locals))
+
+
+if __name__ == '__main__':
+    name = 'Guido'
+    n = 37
+    print(sub('Hello {name}'))
+    print(sub('You have {n} messages.'))
+    print(sub('Your favorite color is {color}'))
+输出：
+Hello Guido
+You have 37 messages.
+Your favorite color is {color}
+```
+
+多年以来由于Python缺乏对变量替换的内置支持而导致了各种不同的解决方案。 作为本节中展示的一个可能的解决方案，你可以有时候会看到像下面这样的字符串格式化代码：
+
+```python
+>>> name = 'Guido'
+>>> n = 37
+>>> '%(name) has %(n) messages.' % vars()
+'Guido has 37 messages.'
+```
+
+你可能还会看到字符串模板的使用：
+
+```python
+>>> import string
+>>> s = string.Template('$name has $n messages.')
+>>> s.substitute(vars())
+'Guido has 37 messages.'
+```
+
+然而， format() 和 format_map() 相比较上面这些方案而已更加先进，因此应该被优先选择。 使用 format() 方法还有一个好处就是你可以获得对字符串格式化的所有支持(对齐，填充，数字格式化等待)， 而这些特性是使用像模板字符串之类的方案不可能获得的。
+
+本机还部分介绍了一些高级特性。映射或者字典类中鲜为人知的 __missing__() 方法可以让你定义如何处理缺失的值。 在 SafeSub 类中，这个方法被定义为对缺失的值返回一个占位符。 你可以发现缺失的值会出现在结果字符串中(在调试的时候可能很有用)，而不是产生一个 KeyError 异常。
+
+sub() 函数使用 sys._getframe(1) 返回调用者的栈帧。可以从中访问属性 f_locals 来获得局部变量。 毫无疑问绝大部分情况下在代码中去直接操作栈帧应该是不推荐的。 但是，对于像字符串替换工具函数而言它是非常有用的。 另外，值得注意的是 f_locals 是一个复制调用函数的本地变量的字典。 尽管你可以改变 f_locals 的内容，但是这个修改对于后面的变量访问没有任何影响。 所以，虽说访问一个栈帧看上去很邪恶，但是对它的任何操作不会覆盖和改变调用者本地变量的值。
+
+## 2.16. 以指定列宽格式化字符串
+
+你有一些长字符串，想以指定的列宽将它们重新格式化。
+
+使用 textwrap 模块来格式化字符串的输出。比如，假如你有下列的长字符串：
+
+下面演示使用 textwrap 格式化字符串的多种方式：
+
+```python
+import textwrap
+
+if __name__ == '__main__':
+    s = "Look into my eyes, look into my eyes, the eyes, the eyes, \
+    the eyes, not around the eyes, don't look around the eyes, \
+    look into my eyes, you're under."
+    print(textwrap.fill(s, 70))
+    print('====================')
+    print(textwrap.fill(s, 40))
+    print('====================')
+    print(textwrap.fill(s, 40, initial_indent='    '))
+    print('====================')
+    print(textwrap.fill(s, 40, subsequent_indent='    '))
+    print('====================')
+输出：
+Look into my eyes, look into my eyes, the eyes, the eyes,     the
+eyes, not around the eyes, don't look around the eyes,     look into
+my eyes, you're under.
+====================
+Look into my eyes, look into my eyes,
+the eyes, the eyes,     the eyes, not
+around the eyes, don't look around the
+eyes,     look into my eyes, you're
+under.
+====================
+    Look into my eyes, look into my
+eyes, the eyes, the eyes,     the eyes,
+not around the eyes, don't look around
+the eyes,     look into my eyes, you're
+under.
+====================
+Look into my eyes, look into my eyes,
+    the eyes, the eyes,     the eyes,
+    not around the eyes, don't look
+    around the eyes,     look into my
+    eyes, you're under.
+====================
+```
+
+textwrap 模块对于字符串打印是非常有用的，特别是当你希望输出自动匹配终端大小的时候。 你可以使用 os.get_terminal_size() 方法来获取终端的大小尺寸。比如：
+
+```python
+>>> import os
+>>> os.get_terminal_size().columns
+80
+```
+
+fill() 方法接受一些其他可选参数来控制tab，语句结尾等。 参阅 textwrap.TextWrapper文档 获取更多内容。
+
+## 2.17. 在字符串中处理html和xml
+
+你想将HTML或者XML实体如 &entity; 或 &#code; 替换为对应的文本。 再者，你需要转换文本中特定的字符(比如<, >, 或 &)。
+
+如果你想替换文本字符串中的 ‘<’ 或者 ‘>’ ，使用 html.escape() 函数可以很容易的完成。比如：
+
+```python
+import html
+
+if __name__ == '__main__':
+    s = 'Elements are written as "<tag>text</tag>".'
+    print(s)
+    print(html.escape(s))
+
+    # Disable escaping of quotes
+    print(html.escape(s, quote=False))
+输出：
+Elements are written as "<tag>text</tag>".
+Elements are written as &quot;&lt;tag&gt;text&lt;/tag&gt;&quot;.
+Elements are written as "&lt;tag&gt;text&lt;/tag&gt;".
+```
+
+如果你正在处理的是ASCII文本，并且想将非ASCII文本对应的编码实体嵌入进去， 可以给某些I/O函数传递参数 errors='xmlcharrefreplace' 来达到这个目。比如：
+
+```python
+s = 'Spicy Jalapeño'
+print(s.encode('ascii', errors='xmlcharrefreplace'))
+输出：
+b'Spicy Jalape&#241;o'
+```
+
+为了替换文本中的编码实体，你需要使用另外一种方法。 如果你正在处理HTML或者XML文本，试着先使用一个合适的HTML或者XML解析器。 通常情况下，这些工具会自动替换这些编码值，你无需担心。
+
+有时候，如果你接收到了一些含有编码值的原始文本，需要手动去做替换， 通常你只需要使用HTML或者XML解析器的一些相关工具函数/方法即可。比如：
+
+```python
+import html
+from xml.sax.saxutils import unescape
+
+if __name__ == '__main__':
+    s = 'Spicy &quot;Jalape&#241;o&quot.'
+    # p = HTMLParser()
+    # p.unescape(s)  # 3.5之后使用html.unescape(s)
+    print(html.unescape(s))
+    t = 'The prompt is &gt;&gt;&gt;'
+    print(unescape(t))
+输出：
+Spicy "Jalapeño".
+The prompt is >>>
+```
+
+在生成HTML或者XML文本的时候，如果正确的转换特殊标记字符是一个很容易被忽视的细节。 特别是当你使用 print() 函数或者其他字符串格式化来产生输出的时候。 使用像 html.escape() 的工具函数可以很容易的解决这类问题。
+
+如果你想以其他方式处理文本，还有一些其他的工具函数比如 xml.sax.saxutils.unescapge() 可以帮助你。 然而，你应该先调研清楚怎样使用一个合适的解析器。 比如，如果你在处理HTML或XML文本， 使用某个解析模块比如 html.parse 或 xml.etree.ElementTree 已经帮你自动处理了相关的替换细节。
+
+## 2.18. 字符串令牌解析
+
+为了令牌化字符串，你不仅需要匹配模式，还得指定模式的类型。 比如，你可能想将字符串像下面这样转换为序列对：
+
+`tokens = [('NAME', 'foo'), ('EQ','='), ('NUM', '23'), ('PLUS','+'),
+          ('NUM', '42'), ('TIMES', '*'), ('NUM', '10')]`
+
+为了执行这样的切分，第一步就是像下面这样利用命名捕获组的正则表达式来定义所有可能的令牌，包括空格：
+
+```python
+import re
+NAME = r'(?P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
+NUM = r'(?P<NUM>\d+)'
+PLUS = r'(?P<PLUS>\+)'
+TIMES = r'(?P<TIMES>\*)'
+EQ = r'(?P<EQ>=)'
+WS = r'(?P<WS>\s+)'
+
+master_pat = re.compile('|'.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
+```
+
+在上面的模式中， `?P<TOKENNAME>` 用于给一个模式命名，供后面使用。
+
+下一步，为了令牌化，使用模式对象很少被人知道的 scanner() 方法。 这个方法会创建一个 scanner 对象， 在这个对象上不断的调用 match() 方法会一步步的扫描目标文本，每步一个匹配。 下面是演示一个 scanner 对象如何工作的交互式例子：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import re
+
+if __name__ == '__main__':
+    tokens = [('NAME', 'foo'), ('EQ', '='), ('NUM', '23'), ('PLUS', '+'),
+              ('NUM', '42'), ('TIMES', '*'), ('NUM', '10')]
+
+    NAME = r'(?P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
+    NUM = r'(?P<NUM>\d+)'
+    PLUS = r'(?P<PLUS>\+)'
+    TIMES = r'(?P<TIMES>\*)'
+    EQ = r'(?P<EQ>=)'
+    WS = r'(?P<WS>\s+)'
+
+    master_pat = re.compile('|'.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
+
+    scanner = master_pat.scanner('foo = 42')
+    _ = scanner.match()
+    print(_.lastgroup, _.group(), sep=', ')
+    _ = scanner.match()
+    print(_.lastgroup, _.group(), sep=', ')
+    _ = scanner.match()
+    print(_.lastgroup, _.group(), sep=', ')
+    _ = scanner.match()
+    print(_.lastgroup, _.group(), sep=', ')
+    _ = scanner.match()
+    print(_.lastgroup, _.group(), sep=', ')
+输出：
+NAME, foo
+WS,  
+EQ, =
+WS,  
+NUM, 42
+```
+
+实际使用这种技术的时候，可以很容易的像下面这样将上述代码打包到一个生成器中：
+
+```python
+import re
+from collections import namedtuple
+
+
+def generate_tokens(pat, text):
+    Token = namedtuple('Token', ['type', 'value'])
+    scanner = pat.scanner(text)
+    for m in iter(scanner.match, None):
+        yield Token(m.lastgroup, m.group())
+
+
+if __name__ == '__main__':
+    tokens = [('NAME', 'foo'), ('EQ', '='), ('NUM', '23'), ('PLUS', '+'),
+              ('NUM', '42'), ('TIMES', '*'), ('NUM', '10')]
+
+    NAME = r'(?P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
+    NUM = r'(?P<NUM>\d+)'
+    PLUS = r'(?P<PLUS>\+)'
+    TIMES = r'(?P<TIMES>\*)'
+    EQ = r'(?P<EQ>=)'
+    WS = r'(?P<WS>\s+)'
+
+    master_pat = re.compile('|'.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
+
+    # Example use
+    for tok in generate_tokens(master_pat, 'foo = 42'):
+        print(tok)
+输出：
+Token(type='NAME', value='foo')
+Token(type='WS', value=' ')
+Token(type='EQ', value='=')
+Token(type='WS', value=' ')
+Token(type='NUM', value='42')
+```
+
+==============================================
+
+注：iter方法介绍：<https://www.cnblogs.com/yitouniu/p/5243136.html>
+
+iter(object, sentinel)
+
+这句话的意思是说：如果传递了第二个参数，则object必须是一个可调用的对象（如，函数）。此时，iter创建了一个迭代器对象，每次调用这个迭代器对象的__next__()方法时，都会调用object。
+
+如果__next__的返回值等于sentinel，则抛出StopIteration异常，否则返回下一个值。
+
+```python
+class Counter:
+    def __init__(self, _start, _end):
+        self.start = _start
+        self.end = _end
+
+    def get_next(self):
+        s = self.start
+        if self.start < self.end:
+            self.start += 1
+        else:
+            raise StopIteration
+        return s
+
+c = Counter(1, 5)
+iterator = iter(c.get_next, 3)
+print(type(iterator))
+for i in iterator:
+    print(i)
+输出：
+<class 'callable_iterator'>
+1
+2  
+```
+
+```python
+# 错误的使用样例
+def counter(n):
+    def inner():
+        i = 1
+        while i < n:
+            yield i
+            i += 1
+
+    return inner
+
+if __name__ == '__main__':
+    c = counter(10)  # 返回一个闭包函数
+    for i in iter(c, None):  # 每次调用c()，返回一个新的generator，永远不等于None，所以死循环
+        print(i)
+
+# 修改如下：
+def counter(n):
+    i = 0
+
+    def inner():
+        nonlocal i
+        i += 1
+        if i < n:
+            return i
+
+    return inner
+
+
+if __name__ == '__main__':
+    c = counter(10)  # 返回一个闭包函数
+    for i in iter(c, None):  # 每次调用c()，得到一个int
+        print(i)
+```
+
+==============================================
+
+如果你想过滤令牌流，你可以定义更多的生成器函数或者使用一个生成器表达式。 比如，下面演示怎样过滤所有的空白令牌：
+
+```python
+tokens = (tok for tok in generate_tokens(master_pat, 'foo = 42')
+            if tok.type != 'WS')
+for tok in tokens:
+    print(tok)
+输出：
+Token(type='NAME', value='foo')
+Token(type='EQ', value='=')
+Token(type='NUM', value='42')
+```
+
+通常来讲令牌化是很多高级文本解析与处理的第一步。 为了使用上面的扫描方法，你需要记住这里一些重要的几点。 第一点就是你必须确认你使用正则表达式指定了所有输入中可能出现的文本序列。 如果有任何不可匹配的文本出现了，扫描就会直接停止。这也是为什么上面例子中必须指定空白字符令牌的原因。
+
+令牌的顺序也是有影响的。 re 模块会按照指定好的顺序去做匹配。 因此，**如果一个模式恰好是另一个更长模式的子字符串，那么你需要确定长模式写在前面**。比如：
+
+```python
+LT = r'(?P<LT><)'
+LE = r'(?P<LE><=)'
+EQ = r'(?P<EQ>=)'
+
+master_pat = re.compile('|'.join([LE, LT, EQ])) # Correct
+# master_pat = re.compile('|'.join([LT, LE, EQ])) # Incorrect
+```
+
+第二个模式是错的，因为它会将文本<=匹配为令牌LT紧跟着EQ，而不是单独的令牌LE，这个并不是我们想要的结果。
+
+最后，你需要留意下子字符串形式的模式。比如，假设你有如下两个模式：
+
+```python
+PRINT = r'(?P<PRINT>print)'
+NAME = r'(?P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
+
+# 解析成两个字符串
+master_pat = re.compile('|'.join([PRINT, NAME]))  # Token(type='PRINT', value='print')\nToken(type='NAME', value='er')
+# 解析成一个字符串
+# master_pat = re.compile('|'.join([NAME, PRINT]))  # Token(type='NAME', value='printer')
+
+for tok in generate_tokens(master_pat, 'printer'):
+    print(tok)
+```
+
+关于更高阶的令牌化技术，你可能需要查看 PyParsing 或者 PLY 包。 一个调用PLY的例子在下一节会有演示。
+
+## 2.19. 实现一个简单的递归下降分析器
+
+<https://python3-cookbook.readthedocs.io/zh_CN/latest/c02/p19_writing_recursive_descent_parser.html>
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Topic: 下降解析器
+Desc :
+"""
+import collections
+import re
+
+# Token specification
+NUM = r'(?P<NUM>\d+)'
+PLUS = r'(?P<PLUS>\+)'
+MINUS = r'(?P<MINUS>-)'
+TIMES = r'(?P<TIMES>\*)'
+DIVIDE = r'(?P<DIVIDE>/)'
+LPAREN = r'(?P<LPAREN>\()'
+RPAREN = r'(?P<RPAREN>\))'
+WS = r'(?P<WS>\s+)'
+
+master_pat = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
+                                  DIVIDE, LPAREN, RPAREN, WS]))
+# Tokenizer
+Token = collections.namedtuple('Token', ['type', 'value'])
+
+
+def generate_tokens(text):
+    scanner = master_pat.scanner(text)
+    for m in iter(scanner.match, None):
+        tok = Token(m.lastgroup, m.group())
+        if tok.type != 'WS':
+            yield tok
+
+
+# Parser
+class ExpressionEvaluator:
+    '''
+    Implementation of a recursive descent parser. Each method
+    implements a single grammar rule. Use the ._accept() method
+    to test and accept the current lookahead token. Use the ._expect()
+    method to exactly match and discard the next token on on the input
+    (or raise a SyntaxError if it doesn't match).
+    '''
+
+    def parse(self, text):
+        self.tokens = generate_tokens(text)
+        self.tok = None  # Last symbol consumed
+        self.nexttok = None  # Next symbol tokenized
+        self._advance()  # Load first lookahead token
+        return self.expr()
+
+    def _advance(self):
+        'Advance one token ahead'
+        self.tok, self.nexttok = self.nexttok, next(self.tokens, None)
+
+    def _accept(self, toktype):
+        'Test and consume the next token if it matches toktype'
+        if self.nexttok and self.nexttok.type == toktype:
+            self._advance()
+            return True
+        else:
+            return False
+
+    def _expect(self, toktype):
+        'Consume next token if it matches toktype or raise SyntaxError'
+        if not self._accept(toktype):
+            raise SyntaxError('Expected ' + toktype)
+
+    # Grammar rules follow
+    def expr(self):
+        "expression ::= term { ('+'|'-') term }*"
+        exprval = self.term()
+        while self._accept('PLUS') or self._accept('MINUS'):
+            op = self.tok.type
+            right = self.term()
+            if op == 'PLUS':
+                exprval += right
+            elif op == 'MINUS':
+                exprval -= right
+        return exprval
+
+    def term(self):
+        "term ::= factor { ('*'|'/') factor }*"
+        termval = self.factor()
+        while self._accept('TIMES') or self._accept('DIVIDE'):
+            op = self.tok.type
+            right = self.factor()
+            if op == 'TIMES':
+                termval *= right
+            elif op == 'DIVIDE':
+                termval /= right
+        return termval
+
+    def factor(self):
+        "factor ::= NUM | ( expr )"
+        if self._accept('NUM'):
+            return int(self.tok.value)
+        elif self._accept('LPAREN'):
+            exprval = self.expr()
+            self._expect('RPAREN')
+            return exprval
+        else:
+            raise SyntaxError('Expected NUMBER or LPAREN')
+
+
+def descent_parser():
+    e = ExpressionEvaluator()
+    # print(e.parse('2'))
+    # print(e.parse('2 + 3'))
+    # print(e.parse('2 + 3 * 4'))
+    # print(e.parse('2 + (3 + 4) * 5'))
+    # print(e.parse('(3 + 4)'))
+    print(e.parse('3 * 4'))
+
+    # print(e.parse('2 + (3 + * 4)'))
+    # Traceback (most recent call last):
+    #    File "<stdin>", line 1, in <module>
+    #    File "exprparse.py", line 40, in parse
+    #    return self.expr()
+    #    File "exprparse.py", line 67, in expr
+    #    right = self.term()
+    #    File "exprparse.py", line 77, in term
+    #    termval = self.factor()
+    #    File "exprparse.py", line 93, in factor
+    #    exprval = self.expr()
+    #    File "exprparse.py", line 67, in expr
+    #    right = self.term()
+    #    File "exprparse.py", line 77, in term
+    #    termval = self.factor()
+    #    File "exprparse.py", line 97, in factor
+    #    raise SyntaxError("Expected NUMBER or LPAREN")
+    #    SyntaxError: Expected NUMBER or LPAREN
+
+
+if __name__ == '__main__':
+    descent_parser()
+```
+
+对于复杂的语法，你最好是选择某个解析工具比如PyParsing或者是PLY。 下面是使用PLY来重写表达式求值程序的代码：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from ply.lex import lex
+from ply.yacc import yacc
+
+# Token list
+tokens = ['NUM', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN']
+# Ignored characters
+t_ignore = ' \t\n'
+# Token specifications (as regexs)
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+
+
+# Token processing functions
+def t_NUM(t):
+    r'\d+'
+    t.value = int(t.value)
+    return t
+
+
+# Error handler
+def t_error(t):
+    print('Bad character: {!r}'.format(t.value[0]))
+    t.skip(1)
+
+
+# Build the lexer
+lexer = lex()
+
+
+# Grammar rules and handler functions
+def p_expr(p):
+    '''
+    expr : expr PLUS term
+        | expr MINUS term
+    '''
+    if p[2] == '+':
+        p[0] = p[1] + p[3]
+    elif p[2] == '-':
+        p[0] = p[1] - p[3]
+
+
+def p_expr_term(p):
+    '''
+    expr : term
+    '''
+    p[0] = p[1]
+
+
+def p_term(p):
+    '''
+    term : term TIMES factor
+    | term DIVIDE factor
+    '''
+    if p[2] == '*':
+        p[0] = p[1] * p[3]
+    elif p[2] == '/':
+        p[0] = p[1] / p[3]
+
+
+def p_term_factor(p):
+    '''
+    term : factor
+    '''
+    p[0] = p[1]
+
+
+def p_factor(p):
+    '''
+    factor : NUM
+    '''
+    p[0] = p[1]
+
+
+def p_factor_group(p):
+    '''
+    factor : LPAREN expr RPAREN
+    '''
+    p[0] = p[2]
+
+
+def p_error(p):
+    print('Syntax error')
+
+
+if __name__ == '__main__':
+    parser = yacc()
+    print(parser.parse('2+3'))
+    print(parser.parse('2'))
+    print(parser.parse('2+(3+4)*5'))
+```
+
+这个程序中，所有代码都位于一个比较高的层次。你只需要为令牌写正则表达式和规则匹配时的高阶处理函数即可。 而实际的运行解析器，接受令牌等等底层动作已经被库函数实现了。
+
+如果你想在你的编程过程中来点挑战和刺激，编写解析器和编译器是个不错的选择。 再次，一本编译器的书籍会包含很多底层的理论知识。不过很多好的资源也可以在网上找到。 Python自己的ast模块也值得去看一下。
+
+## 2.20. 字节字符串上的字符串操作
+
+你想在字节字符串上执行普通的文本操作(比如移除，搜索和替换)。
+
+解决方案
+字节字符串同样也支持大部分和文本字符串一样的内置操作。比如：
+
+```python
+>>> data = b'Hello World'
+>>> data[0:5]
+b'Hello'
+>>> data.startswith(b'Hello')
+True
+>>> data.split()
+[b'Hello', b'World']
+>>> data.replace(b'Hello', b'Hello Cruel')
+b'Hello Cruel World'
+```
+
+这些操作同样也适用于字节数组。比如：
+
+```python
+>>> data = bytearray(b'Hello World')
+>>> data[0:5]
+bytearray(b'Hello')
+>>> data.startswith(b'Hello')
+True
+>>> data.split()
+[bytearray(b'Hello'), bytearray(b'World')]
+>>> data.replace(b'Hello', b'Hello Cruel')
+bytearray(b'Hello Cruel World')
+```
+
+你可以使用正则表达式匹配字节字符串，但是正则表达式本身必须也是字节串。比如：
+
+```python
+>>> data = b'FOO:BAR,SPAM'
+>>> import re
+>>> re.split('[:,]',data)
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+File "/usr/local/lib/python3.3/re.py", line 191, in split
+return _compile(pattern, flags).split(string, maxsplit)
+TypeError: can't use a string pattern on a bytes-like object
+>>> re.split(b'[:,]',data) # Notice: pattern as bytes
+[b'FOO', b'BAR', b'SPAM']
+```
+
+大多数情况下，在文本字符串上的操作均可用于字节字符串。 然而，这里也有一些需要注意的不同点。首先，字节字符串的索引操作返回整数而不是单独字符。比如：
+
+```python
+>>> a = 'Hello World' # Text string
+>>> a[0]
+'H'
+>>> a[1]
+'e'
+>>> b = b'Hello World' # Byte string
+>>> b[0]
+72
+>>> b[1]
+101
+```
+
+这种语义上的区别会对于处理面向字节的字符数据有影响。
+
+第二点，字节字符串不会提供一个美观的字符串表示，也不能很好的打印出来，除非它们先被解码为一个文本字符串。比如：
+
+```python
+>>> s = b'Hello World'
+>>> print(s)
+b'Hello World' # Observe b'...'
+>>> print(s.decode('ascii'))
+Hello World
+```
+
+类似的，也不存在任何适用于字节字符串的格式化操作：
+
+```python
+>>> b'%10s %10d %10.2f' % (b'ACME', 100, 490.1)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: unsupported operand type(s) for %: 'bytes' and 'tuple'
+>>> b'{} {} {}'.format(b'ACME', 100, 490.1)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+AttributeError: 'bytes' object has no attribute 'format'
+```
+
+如果你想格式化字节字符串，你得先使用标准的文本字符串，然后将其编码为字节字符串。比如：
+
+```python
+>>> '{:10s} {:10d} {:10.2f}'.format('ACME', 100, 490.1).encode('ascii')
+b'ACME 100 490.10'
+```
+
+最后需要注意的是，使用字节字符串可能会改变一些操作的语义，特别是那些跟文件系统有关的操作。 比如，如果你使用一个编码为字节的文件名，而不是一个普通的文本字符串，会禁用文件名的编码/解码。比如：
+
+```python
+>>> # Write a UTF-8 filename
+>>> with open('jalape\xf1o.txt', 'w') as f:
+...     f.write('spicy')
+...
+>>> # Get a directory listing
+>>> import os
+>>> os.listdir('.') # Text string (names are decoded)
+['jalapeño.txt']
+>>> os.listdir(b'.') # Byte string (names left as bytes)
+[b'jalapen\xcc\x83o.txt']
+```
+
+注意例子中的最后部分给目录名传递一个字节字符串是怎样导致结果中文件名以未解码字节返回的。 在目录中的文件名包含原始的UTF-8编码。 参考5.15小节获取更多文件名相关的内容。
+
+最后提一点，一些程序员为了提升程序执行的速度会倾向于使用字节字符串而不是文本字符串。 尽管操作字节字符串确实会比文本更加高效(因为处理文本固有的Unicode相关开销)。 这样做通常会导致非常杂乱的代码。你会经常发现字节字符串并不能和Python的其他部分工作的很好， 并且你还得手动处理所有的编码/解码操作。 坦白讲，如果你在处理文本的话，就直接在程序中使用普通的文本字符串而不是字节字符串。不做死就不会死！
+
+# 3. 数字日期和时间
+
+## 数字的四舍五入
+
+你想对浮点数执行指定精度的舍入运算。
+
+对于简单的舍入运算，使用内置的 round(value, ndigits) 函数即可。比如：
+
+```python
+>>> round(1.23, 1)
+1.2
+>>> round(1.27, 1)
+1.3
+>>> round(-1.27, 1)
+-1.3
+>>> round(1.25361,3)
+1.254
+```
+
+当一个值刚好在两个边界的中间的时候， round 函数返回离它最近的偶数。 也就是说，对1.5或者2.5的舍入运算都会得到2。
+
+传给 round() 函数的 ndigits 参数可以是负数，这种情况下， 舍入运算会作用在十位、百位、千位等上面。比如：
+
+```python
+>>> a = 1627731
+>>> round(a, -1)
+1627730
+>>> round(a, -2)
+1627700
+>>> round(a, -3)
+1628000
+```
+
+不要将舍入和格式化输出搞混淆了。 如果你的目的只是简单的输出一定宽度的数，你不需要使用 round() 函数。 而仅仅只需要在格式化的时候指定精度即可。比如：
+
+```python
+>>> x = 1.23456
+>>> format(x, '0.2f')
+'1.23'
+>>> format(x, '0.3f')
+'1.235'
+>>> 'value is {:0.3f}'.format(x)
+'value is 1.235'
+```
+
+同样，不要试着去舍入浮点值来”修正”表面上看起来正确的问题。比如，你可能倾向于这样做：
+
+```python
+>>> a = 2.1
+>>> b = 4.2
+>>> c = a + b
+>>> c
+6.300000000000001
+>>> c = round(c, 2) # "Fix" result (???)
+>>> c
+6.3
+```
+
+对于大多数使用到浮点的程序，没有必要也不推荐这样做。 尽管在计算的时候会有一点点小的误差，但是这些小的误差是能被理解与容忍的。 如果不能允许这样的小误差(比如涉及到金融领域)，那么就得考虑使用 decimal 模块了，下一节我们会详细讨论。
+
+## 执行精确的浮点数运算
+
+你需要对浮点数执行精确的计算操作，并且不希望有任何小误差的出现。
+
+浮点数的一个普遍问题是它们并不能精确的表示十进制数。 并且，即使是最简单的数学运算也会产生小的误差，比如：
+
+```python
+>>> a = 4.2
+>>> b = 2.1
+>>> a + b
+6.300000000000001
+>>> (a + b) == 6.3
+False
+```
+
+这些错误是由底层CPU和IEEE 754标准通过自己的浮点单位去执行算术时的特征。 由于Python的浮点数据类型使用底层表示存储数据，因此你没办法去避免这样的误差。
+
+如果你想更加精确(并能容忍一定的性能损耗)，你可以使用 decimal 模块：
+
+```python
+>>> from decimal import Decimal
+>>> a = Decimal('4.2')
+>>> b = Decimal('2.1')
+>>> a + b
+Decimal('6.3')
+>>> print(a + b)
+6.3
+>>> (a + b) == Decimal('6.3')
+True
+>>> print(a + 1.2)  # TypeError: unsupported operand type(s) for +: 'decimal.Decimal' and 'float'
+```
+
+初看起来，上面的代码好像有点奇怪，比如我们用字符串来表示数字。 然而， Decimal 对象会像普通浮点数一样的工作(支持所有的常用数学运算)。 如果你打印它们或者在字符串格式化函数中使用它们，看起来跟普通数字没什么两样。
+
+decimal 模块的一个主要特征是允许你控制计算的每一方面，包括数字位数和四舍五入运算。 为了这样做，你先得创建一个本地上下文并更改它的设置，比如：
+
+```python
+from decimal import Decimal
+from decimal import localcontext
+
+if __name__ == '__main__':
+    a = Decimal('1.3')
+    b = Decimal('1.7')
+    print(a / b)
+    with localcontext() as ctx:
+        ctx.prec = 3
+        print(a / b)
+    with localcontext() as ctx:
+        ctx.prec = 50
+        print(a / b)
+
+    print(a / b)
+输出：
+0.7647058823529411764705882353
+0.765
+0.76470588235294117647058823529411764705882352941176
+0.7647058823529411764705882353
+```
+
+decimal 模块实现了IBM的”通用小数运算规范”。不用说，有很多的配置选项这本书没有提到。
+
+Python新手会倾向于使用 decimal 模块来处理浮点数的精确运算。 然而，先理解你的应用程序目的是非常重要的。 如果你是在做科学计算或工程领域的计算、电脑绘图，或者是科学领域的大多数运算， 那么使用普通的浮点类型是比较普遍的做法。 其中一个原因是，在真实世界中很少会要求精确到普通浮点数能提供的17位精度。 因此，计算过程中的那么一点点的误差是被允许的。 第二点就是，原生的浮点数计算要快的多-有时候你在执行大量运算的时候速度也是非常重要的。
+
+即便如此，你却不能完全忽略误差。数学家花了大量时间去研究各类算法，有些处理误差会比其他方法更好。 你也得注意下减法删除以及大数和小数的加分运算所带来的影响。比如：
+
+上面的错误可以利用 math.fsum() 所提供的更精确计算能力来解决：
+
+```python
+import math
+
+if __name__ == '__main__':
+    nums = [1.23e+18, 1, -1.23e+18]
+    print(sum(nums))  # Notice how 1 disappears
+    print(math.fsum(nums))
+输出：
+0.0
+1.0
+```
+
+然而，对于其他的算法，你应该仔细研究它并理解它的误差产生来源。
+
+总的来说， decimal 模块主要用在涉及到金融的领域。 在这类程序中，哪怕是一点小小的误差在计算过程中蔓延都是不允许的。 因此， decimal 模块为解决这类问题提供了方法。 当Python和数据库打交道的时候也通常会遇到 Decimal 对象，并且，通常也是在处理金融数据的时候。
+
+## 数字的格式化输出

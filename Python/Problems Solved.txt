@@ -98,3 +98,11 @@ if __name__ == '__main__':
 https://www.imooc.com/video/17517
 把豆瓣网站的User-Agent内容修改到settings.py里：
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'
+
+7. 使用插件：
+XPath Helper
+
+8. scrapy 503错误：
+解决方案：
+https://blog.csdn.net/qinfei0967/article/details/80959645
+设置User-Agent
