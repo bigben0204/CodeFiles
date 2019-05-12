@@ -3204,7 +3204,7 @@ b'ACME 100 490.10'
 
 # 3. 数字日期和时间
 
-## 数字的四舍五入
+## 3.1. 数字的四舍五入
 
 你想对浮点数执行指定精度的舍入运算。
 
@@ -3262,7 +3262,7 @@ b'ACME 100 490.10'
 
 对于大多数使用到浮点的程序，没有必要也不推荐这样做。 尽管在计算的时候会有一点点小的误差，但是这些小的误差是能被理解与容忍的。 如果不能允许这样的小误差(比如涉及到金融领域)，那么就得考虑使用 decimal 模块了，下一节我们会详细讨论。
 
-## 执行精确的浮点数运算
+## 3.2. 执行精确的浮点数运算
 
 你需要对浮点数执行精确的计算操作，并且不希望有任何小误差的出现。
 
@@ -3345,4 +3345,1593 @@ if __name__ == '__main__':
 
 总的来说， decimal 模块主要用在涉及到金融的领域。 在这类程序中，哪怕是一点小小的误差在计算过程中蔓延都是不允许的。 因此， decimal 模块为解决这类问题提供了方法。 当Python和数据库打交道的时候也通常会遇到 Decimal 对象，并且，通常也是在处理金融数据的时候。
 
-## 数字的格式化输出
+## 3.3. 数字的格式化输出
+
+格式化输出单个数字的时候，可以使用内置的 format() 函数，比如：
+
+```python
+>>> x = 1234.56789
+
+>>> # Two decimal places of accuracy
+>>> format(x, '0.2f')
+'1234.57'
+
+>>> # Right justified in 10 chars, one-digit accuracy
+>>> format(x, '>10.1f')
+'    1234.6'
+
+>>> # Left justified
+>>> format(x, '<10.1f')
+'1234.6    '
+
+>>> # Centered
+>>> format(x, '^10.1f')
+'  1234.6  '
+
+>>> # Inclusion of thousands separator
+>>> format(x, ',')
+'1,234.56789'
+>>> format(x, '0,.1f')
+'1,234.6'
+```
+
+如果你想使用指数记法，将f改成e或者E(取决于指数输出的大小写形式)。比如：
+
+```python
+>>> format(x, 'e')
+'1.234568e+03'
+>>> format(x, '0.2E')
+'1.23E+03'
+```
+
+同时指定宽度和精度的一般形式是 '[<>^]?width[,]?(.digits)?' ， 其中 width 和 digits 为整数，？代表可选部分。 同样的格式也被用在字符串的 format() 方法中。比如：
+
+```python
+>>> 'The value is {:0,.2f}'.format(x)
+'The value is 1,234.57'
+```
+
+数字格式化输出通常是比较简单的。上面演示的技术同时适用于浮点数和 decimal 模块中的 Decimal 数字对象。
+
+当指定数字的位数后，结果值会根据 round() 函数同样的规则进行四舍五入后返回。比如：
+
+```python
+>>> x
+1234.56789
+>>> format(x, '0.1f')
+'1234.6'
+>>> format(-x, '0.1f')
+'-1234.6'
+```
+
+包含千位符的格式化跟本地化没有关系。 如果你需要根据地区来显示千位符，你需要自己去调查下 locale 模块中的函数了。 你同样也可以使用字符串的 translate() 方法来交换千位符。比如：
+
+```python
+>>> swap_separators = { ord('.'):',', ord(','):'.' }
+>>> format(x, ',').translate(swap_separators)
+'1.234,56789'
+```
+
+在很多Python代码中会看到使用%来格式化数字的，比如：
+
+```python
+>>> '%0.2f' % x
+'1234.57'
+>>> '%10.1f' % x
+'    1234.6'
+>>> '%-10.1f' % x
+'1234.6    '
+```
+
+这种格式化方法也是可行的，不过比更加先进的 format() 要差一点。 比如，在使用%操作符格式化数字的时候，一些特性(添加千位符)并不能被支持。
+
+## 3.4. 二八十六进制整数
+
+为了将整数转换为二进制、八进制或十六进制的文本串， 可以分别使用 bin() , oct() 或 hex() 函数：
+
+```python
+>>> x = 1234
+>>> bin(x)
+'0b10011010010'
+>>> oct(x)
+'0o2322'
+>>> hex(x)
+'0x4d2'
+```
+
+另外，如果你不想输出 0b , 0o 或者 0x 的前缀的话，可以使用 format() 函数。比如：
+
+```python
+>>> format(x, 'b')
+'10011010010'
+>>> format(x, 'o')
+'2322'
+>>> format(x, 'x')
+'4d2'
+```
+
+整数是有符号的，所以如果你在处理负数的话，输出结果会包含一个负号。比如：
+
+```python
+>>> x = -1234
+>>> format(x, 'b')
+'-10011010010'
+>>> format(x, 'x')
+'-4d2'
+```
+
+如果你想产生一个无符号值，你需要增加一个指示最大位长度的值。比如为了显示32位的值，可以像下面这样写：
+
+```python
+>>> x = -1234
+>>> format(2**32 + x, 'b')
+'11111111111111111111101100101110'
+>>> format(2**32 + x, 'x')
+'fffffb2e'
+```
+
+为了以不同的进制转换整数字符串，简单的使用带有进制的 int() 函数即可：
+
+```python
+>>> int('4d2', 16)
+1234
+>>> int('10011010010', 2)
+1234
+```
+
+大多数情况下处理二进制、八进制和十六进制整数是很简单的。 只要记住这些转换属于整数和其对应的文本表示之间的转换即可。永远只有一种整数类型。
+
+最后，使用八进制的程序员有一点需要注意下。 Python指定八进制数的语法跟其他语言稍有不同。比如，如果你像下面这样指定八进制，会出现语法错误：
+
+```python
+>>> import os
+>>> os.chmod('script.py', 0755)
+    File "<stdin>", line 1
+        os.chmod('script.py', 0755)
+                            ^
+SyntaxError: invalid token
+```
+
+需确保八进制数的前缀是 0o ，就像下面这样：
+
+```python
+>>> os.chmod('script.py', 0o755)
+```
+
+## 3.5. 字节到大整数的打包与解包
+
+假设你的程序需要处理一个拥有128位长的16个元素的字节字符串。比如：
+
+```python
+data = b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
+```
+
+为了将bytes解析为整数，使用 int.from_bytes() 方法，并像下面这样指定字节顺序：
+
+```python
+>>> len(data)
+16
+>>> int.from_bytes(data, 'little')
+69120565665751139577663547927094891008
+>>> int.from_bytes(data, 'big')
+94522842520747284487117727783387188
+```
+
+为了将一个大整数转换为一个字节字符串，使用 int.to_bytes() 方法，并像下面这样指定字节数和字节顺序：
+
+```python
+>>> x = 94522842520747284487117727783387188
+>>> x.to_bytes(16, 'big')
+b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
+>>> x.to_bytes(16, 'little')
+b'4\x00#\x00\x01\xef\xcd\x00\xab\x90x\x00V4\x12\x00'
+```
+
+大整数和字节字符串之间的转换操作并不常见。 然而，在一些应用领域有时候也会出现，比如密码学或者网络。 例如，IPv6网络地址使用一个128位的整数表示。 如果你要从一个数据记录中提取这样的值的时候，你就会面对这样的问题。
+
+作为一种替代方案，你可能想使用6.11小节中所介绍的 struct 模块来解压字节。 这样也行得通，不过利用 struct 模块来解压对于整数的大小是有限制的。 因此，你可能想解压多个字节串并将结果合并为最终的结果，就像下面这样：
+
+```python
+>>> data
+b'\x00\x124V\x00x\x90\xab\x00\xcd\xef\x01\x00#\x004'
+>>> import struct
+>>> hi, lo = struct.unpack('>QQ', data)
+>>> (hi << 64) + lo
+94522842520747284487117727783387188
+```
+
+字节顺序规则(little或big)仅仅指定了构建整数时的字节的低位高位排列方式。 我们从下面精心构造的16进制数的表示中可以很容易的看出来：
+
+```python
+>>> x = 0x01020304
+>>> x.to_bytes(4, 'big')
+b'\x01\x02\x03\x04'
+>>> x.to_bytes(4, 'little')
+b'\x04\x03\x02\x01'
+```
+
+如果你试着将一个整数打包为字节字符串，那么它就不合适了，你会得到一个错误。 如果需要的话，你可以使用 int.bit_length() 方法来决定需要多少字节位来存储这个值。
+
+```python
+>>> x = 523 ** 23
+>>> x
+335381300113661875107536852714019056160355655333978849017944067
+>>> x.to_bytes(16, 'little')
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+OverflowError: int too big to convert
+>>> x.bit_length()
+208
+>>> nbytes, rem = divmod(x.bit_length(), 8)
+>>> if rem:
+... nbytes += 1
+...
+>>>
+>>> x.to_bytes(nbytes, 'little')
+b'\x03X\xf1\x82iT\x96\xac\xc7c\x16\xf3\xb9\xcf...\xd0'
+```
+
+## 3.6. 复数的数学运算
+
+复数可以用使用函数 complex(real, imag) 或者是带有后缀j的浮点数来指定。比如：
+
+```python
+>>> a = complex(2, 4)
+>>> b = 3 - 5j
+>>> a
+(2+4j)
+>>> b
+(3-5j)
+```
+
+对应的实部、虚部和共轭复数可以很容易的获取。就像下面这样：
+
+```python
+>>> a.real
+2.0
+>>> a.imag
+4.0
+>>> a.conjugate()
+(2-4j)
+```
+
+另外，所有常见的数学运算都可以工作：
+
+```python
+>>> a + b
+(5-1j)
+>>> a * b
+(26+2j)
+>>> a / b
+(-0.4117647058823529+0.6470588235294118j)
+>>> abs(a)
+4.47213595499958
+```
+
+如果要执行其他的复数函数比如正弦、余弦或平方根，使用 cmath 模块：
+
+```python
+>>> import cmath
+>>> cmath.sin(a)
+(24.83130584894638-11.356612711218174j)
+>>> cmath.cos(a)
+(-11.36423470640106-24.814651485634187j)
+>>> cmath.exp(a)
+(-4.829809383269385-5.5920560936409816j)
+```
+
+Python中大部分与数学相关的模块都能处理复数。 比如如果你使用 numpy ，可以很容易的构造一个复数数组并在这个数组上执行各种操作：
+
+```python
+>>> import numpy as np
+>>> a = np.array([2+3j, 4+5j, 6-7j, 8+9j])
+>>> a
+array([ 2.+3.j, 4.+5.j, 6.-7.j, 8.+9.j])
+>>> a + 2
+array([ 4.+3.j, 6.+5.j, 8.-7.j, 10.+9.j])
+>>> np.sin(a)
+array([ 9.15449915 -4.16890696j, -56.16227422 -48.50245524j,
+        -153.20827755-526.47684926j, 4008.42651446-589.49948373j])
+```
+
+Python的标准数学函数确实情况下并不能产生复数值，因此你的代码中不可能会出现复数返回值。比如：
+
+```python
+>>> import math
+>>> math.sqrt(-1)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+ValueError: math domain error
+```
+
+如果你想生成一个复数返回结果，你必须显示的使用 cmath 模块，或者在某个支持复数的库中声明复数类型的使用。比如：
+
+```python
+>>> import cmath
+>>> cmath.sqrt(-1)
+1j
+```
+
+## 3.7. 无穷大与NaN
+
+你想创建或测试正无穷、负无穷或NaN(非数字)的浮点数。
+
+Python并没有特殊的语法来表示这些特殊的浮点值，但是可以使用 float() 来创建它们。比如：
+
+```python
+>>> a = float('inf')
+>>> b = float('-inf')
+>>> c = float('nan')
+>>> a
+inf
+>>> b
+-inf
+>>> c
+nan
+```
+
+为了测试这些值的存在，使用 math.isinf() 和 math.isnan() 函数。比如：
+
+```python
+>>> math.isinf(a)
+True
+>>> math.isnan(c)
+True
+```
+
+想了解更多这些特殊浮点值的信息，可以参考IEEE 754规范。 然而，也有一些地方需要你特别注意，特别是跟比较和操作符相关的时候。
+
+无穷大数在执行数学计算的时候会传播，比如：
+
+```python
+>>> a = float('inf')
+>>> a + 45
+inf
+>>> a * 10
+inf
+>>> 10 / a
+0.0
+```
+
+但是有些操作时未定义的并会返回一个NaN结果。比如：
+
+```python
+>>> a = float('inf')
+>>> a/a
+nan
+>>> b = float('-inf')
+>>> a + b
+nan
+```
+
+NaN值会在所有操作中传播，而不会产生异常。比如：
+
+```python
+>>> c = float('nan')
+>>> c + 23
+nan
+>>> c / 2
+nan
+>>> c * 2
+nan
+>>> math.sqrt(c)
+nan
+```
+
+NaN值的一个特别的地方时它们之间的比较操作总是返回False。比如：
+
+```python
+>>> c = float('nan')
+>>> d = float('nan')
+>>> c == d
+False
+>>> c is d
+False
+```
+
+由于这个原因，测试一个NaN值得唯一安全的方法就是使用 math.isnan() ，也就是上面演示的那样。
+
+有时候程序员想改变Python默认行为，在返回无穷大或NaN结果的操作中抛出异常。 fpectl 模块可以用来改变这种行为，但是它在标准的Python构建中并没有被启用，它是平台相关的， 并且针对的是专家级程序员。可以参考在线的Python文档获取更多的细节。
+
+## 3.8. 分数运算
+
+你进入时间机器，突然发现你正在做小学家庭作业，并涉及到分数计算问题。 或者你可能需要写代码去计算在你的木工工厂中的测量值。
+
+fractions 模块可以被用来执行包含分数的数学运算。比如：
+
+```python
+>>> from fractions import Fraction
+>>> a = Fraction(5, 4)
+>>> b = Fraction(7, 16)
+>>> print(a + b)
+27/16
+>>> print(a * b)
+35/64
+
+>>> # Getting numerator/denominator
+>>> c = a * b
+>>> c.numerator
+35
+>>> c.denominator
+64
+
+>>> # Converting to a float
+>>> float(c)
+0.546875
+
+>>> # Limiting the denominator of a value
+>>> print(c.limit_denominator(8))
+4/7
+
+>>> # Converting a float to a fraction
+>>> x = 3.75
+>>> y = Fraction(*x.as_integer_ratio())
+>>> y
+Fraction(15, 4)
+```
+
+在大多数程序中一般不会出现分数的计算问题，但是有时候还是需要用到的。 比如，在一个允许接受分数形式的测试单位并以分数形式执行运算的程序中， 直接使用分数可以减少手动转换为小数或浮点数的工作。
+
+## 3.9. 大型数组运算
+
+涉及到数组的重量级运算操作，可以使用 NumPy 库。 NumPy 的一个主要特征是它会给Python提供一个数组对象，相比标准的Python列表而已更适合用来做数学运算。 下面是一个简单的小例子，向你展示标准列表对象和 NumPy 数组对象之间的差别：
+
+```python
+>>> # Python lists
+>>> x = [1, 2, 3, 4]
+>>> y = [5, 6, 7, 8]
+>>> x * 2
+[1, 2, 3, 4, 1, 2, 3, 4]
+>>> x + 10
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: can only concatenate list (not "int") to list
+>>> x + y
+[1, 2, 3, 4, 5, 6, 7, 8]
+
+>>> # Numpy arrays
+>>> import numpy as np
+>>> ax = np.array([1, 2, 3, 4])
+>>> ay = np.array([5, 6, 7, 8])
+>>> ax * 2
+array([2, 4, 6, 8])
+>>> ax + 10
+array([11, 12, 13, 14])
+>>> ax + ay
+array([ 6, 8, 10, 12])
+>>> ax * ay
+array([ 5, 12, 21, 32])
+```
+
+正如所见，两种方案中数组的基本数学运算结果并不相同。 特别的， NumPy 中的标量运算(比如 ax * 2 或 ax + 10 )会作用在每一个元素上。 另外，当两个操作数都是数组的时候执行元素对等位置计算，并最终生成一个新的数组。
+
+对整个数组中所有元素同时执行数学运算可以使得作用在整个数组上的函数运算简单而又快速。 比如，如果你想计算多项式的值，可以这样做：
+
+```python
+import numpy as np
+
+def f(x):
+    return 3 * x ** 2 - 2 * x + 7
+
+if __name__ == '__main__':
+    ax = np.array([1, 2, 3, 4])
+    print(f(ax))  # array([ 8, 15, 28, 47])
+```
+
+NumPy 还为数组操作提供了大量的通用函数，这些函数可以作为 math 模块中类似函数的替代。比如：
+
+```python
+>>> np.sqrt(ax)
+array([ 1. , 1.41421356, 1.73205081, 2. ])
+>>> np.cos(ax)
+array([ 0.54030231, -0.41614684, -0.9899925 , -0.65364362])
+```
+
+使用这些通用函数要比循环数组并使用 math 模块中的函数执行计算要快的多。 因此，只要有可能的话尽量选择 NumPy 的数组方案。
+
+底层实现中， NumPy 数组使用了C或者Fortran语言的机制分配内存。 也就是说，它们是一个非常大的连续的并由同类型数据组成的内存区域。 所以，你可以构造一个比普通Python列表大的多的数组。 比如，如果你想构造一个10,000*10,000的浮点数二维网格，很轻松：
+
+```python
+>>> grid = np.zeros(shape=(10000,10000), dtype=float)
+>>> grid
+    array([[ 0., 0., 0., ..., 0., 0., 0.],
+    [ 0., 0., 0., ..., 0., 0., 0.],
+    [ 0., 0., 0., ..., 0., 0., 0.],
+    ...,
+    [ 0., 0., 0., ..., 0., 0., 0.],
+    [ 0., 0., 0., ..., 0., 0., 0.],
+    [ 0., 0., 0., ..., 0., 0., 0.]])
+```
+
+所有的普通操作还是会同时作用在所有元素上：
+
+```python
+>>> grid += 10
+>>> grid
+array([[ 10., 10., 10., ..., 10., 10., 10.],
+    [ 10., 10., 10., ..., 10., 10., 10.],
+    [ 10., 10., 10., ..., 10., 10., 10.],
+    ...,
+    [ 10., 10., 10., ..., 10., 10., 10.],
+    [ 10., 10., 10., ..., 10., 10., 10.],
+    [ 10., 10., 10., ..., 10., 10., 10.]])
+>>> np.sin(grid)
+array([[-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
+        -0.54402111, -0.54402111],
+    [-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
+        -0.54402111, -0.54402111],
+    [-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
+        -0.54402111, -0.54402111],
+    ...,
+    [-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
+        -0.54402111, -0.54402111],
+    [-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
+        -0.54402111, -0.54402111],
+    [-0.54402111, -0.54402111, -0.54402111, ..., -0.54402111,
+        -0.54402111, -0.54402111]])
+```
+
+关于 NumPy 有一点需要特别的主意，那就是它扩展Python列表的索引功能 - 特别是对于多维数组。 为了说明清楚，先构造一个简单的二维数组并试着做些试验：
+
+```python
+>>> a = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
+>>> a
+array([[ 1, 2, 3, 4],
+[ 5, 6, 7, 8],
+[ 9, 10, 11, 12]])
+
+>>> # Select row 1
+>>> a[1]
+array([5, 6, 7, 8])
+
+>>> # Select column 1
+>>> a[:,1]
+array([ 2, 6, 10])
+
+>>> # Select a subregion and change it
+>>> a[1:3, 1:3]
+array([[ 6, 7],
+        [10, 11]])
+>>> a[1:3, 1:3] += 10
+>>> a
+array([[ 1, 2, 3, 4],
+        [ 5, 16, 17, 8],
+        [ 9, 20, 21, 12]])
+
+>>> # Broadcast a row vector across an operation on all rows
+>>> a + [100, 101, 102, 103]
+array([[101, 103, 105, 107],
+        [105, 117, 119, 111],
+        [109, 121, 123, 115]])
+>>> a
+array([[ 1, 2, 3, 4],
+        [ 5, 16, 17, 8],
+        [ 9, 20, 21, 12]])
+
+>>> # Conditional assignment on an array
+>>> np.where(a < 10, a, 10)
+array([[ 1, 2, 3, 4],
+        [ 5, 10, 10, 8],
+        [ 9, 10, 10, 10]])
+```
+
+NumPy 是Python领域中很多科学与工程库的基础，同时也是被广泛使用的最大最复杂的模块。 即便如此，在刚开始的时候通过一些简单的例子和玩具程序也能帮我们完成一些有趣的事情。
+
+通常我们导入 NumPy 模块的时候会使用语句 import numpy as np 。 这样的话你就不用再你的程序里面一遍遍的敲入 numpy ，只需要输入 np 就行了，节省了不少时间。
+
+如果想获取更多的信息，你当然得去 NumPy 官网逛逛了，网址是： <http://www.numpy.org>
+
+## 3.10. 矩阵与线性代数运算
+
+NumPy 库有一个矩阵对象可以用来解决这个问题。
+矩阵类似于3.9小节中数组对象，但是遵循线性代数的计算规则。下面的一个例子展示了矩阵的一些基本特性：
+
+```python
+>>> import numpy as np
+>>> m = np.matrix([[1,-2,3],[0,4,5],[7,8,-9]])
+>>> m
+matrix([[ 1, -2, 3],
+        [ 0, 4, 5],
+        [ 7, 8, -9]])
+
+>>> # Return transpose
+>>> m.T
+matrix([[ 1, 0, 7],
+        [-2, 4, 8],
+        [ 3, 5, -9]])
+
+>>> # Return inverse
+>>> m.I
+matrix([[ 0.33043478, -0.02608696, 0.09565217],
+        [-0.15217391, 0.13043478, 0.02173913],
+        [ 0.12173913, 0.09565217, -0.0173913 ]])
+
+>>> # Create a vector and multiply
+>>> v = np.matrix([[2],[3],[4]])
+>>> v
+matrix([[2],
+        [3],
+        [4]])
+>>> m * v
+matrix([[ 8],
+        [32],
+        [ 2]])
+```
+
+可以在 numpy.linalg 子包中找到更多的操作函数，比如：
+
+```python
+>>> import numpy.linalg
+
+>>> # Determinant
+>>> numpy.linalg.det(m)
+-229.99999999999983
+
+>>> # Eigenvalues
+>>> numpy.linalg.eigvals(m)
+array([-13.11474312, 2.75956154, 6.35518158])
+
+>>> # Solve for x in mx = v
+>>> x = numpy.linalg.solve(m, v)
+>>> x
+matrix([[ 0.96521739],
+        [ 0.17391304],
+        [ 0.46086957]])
+>>> m * x
+matrix([[ 2.],
+        [ 3.],
+        [ 4.]])
+>>> v
+matrix([[2],
+        [3],
+        [4]])
+```
+
+很显然线性代数是个非常大的主题，已经超出了本书能讨论的范围。 但是，如果你需要操作数组和向量的话， NumPy 是一个不错的入口点。 可以访问 NumPy 官网 <http://www.numpy.org> 获取更多信息。
+
+## 3.11. 随机选择
+
+random 模块有大量的函数用来产生随机数和随机选择元素。 比如，要想从一个序列中随机的抽取一个元素，可以使用 random.choice() ：
+
+```python
+>>> import random
+>>> values = [1, 2, 3, 4, 5, 6]
+>>> random.choice(values)
+2
+>>> random.choice(values)
+3
+>>> random.choice(values)
+1
+>>> random.choice(values)
+4
+>>> random.choice(values)
+6
+```
+
+为了提取出N个不同元素的样本用来做进一步的操作，可以使用 random.sample() ：
+
+```python
+>>> random.sample(values, 2)
+[6, 2]
+>>> random.sample(values, 2)
+[4, 3]
+>>> random.sample(values, 3)
+[4, 3, 1]
+>>> random.sample(values, 3)
+[5, 4, 1]
+```
+
+如果你仅仅只是想打乱序列中元素的顺序，可以使用 random.shuffle() ：
+
+```python
+>>> random.shuffle(values)
+>>> values
+[2, 4, 6, 5, 3, 1]
+>>> random.shuffle(values)
+>>> values
+[3, 5, 2, 1, 6, 4]
+```
+
+生成随机整数，请使用 random.randint() ：
+
+```python
+>>> random.randint(0,10)
+2
+>>> random.randint(0,10)
+5
+>>> random.randint(0,10)
+0
+>>> random.randint(0,10)
+7
+>>> random.randint(0,10)
+10
+>>> random.randint(0,10)
+3
+```
+
+为了生成0到1范围内均匀分布的浮点数，使用 random.random() ：
+
+```python
+>>> random.random()
+0.9406677561675867
+>>> random.random()
+0.133129581343897
+>>> random.random()
+0.4144991136919316
+```
+
+如果要获取N位随机位(二进制)的整数，使用 random.getrandbits() ：
+
+```python
+>>> random.getrandbits(200)
+335837000776573622800628485064121869519521710558559406913275
+```
+
+random 模块使用 Mersenne Twister 算法来计算生成随机数。这是一个确定性算法， 但是你可以通过 random.seed() 函数修改初始化种子。比如：
+
+```python
+random.seed() # Seed based on system time or os.urandom()
+random.seed(12345) # Seed based on integer given
+random.seed(b'bytedata') # Seed based on byte data
+```
+
+除了上述介绍的功能，random模块还包含基于均匀分布、高斯分布和其他分布的随机数生成函数。 比如， random.uniform() 计算均匀分布随机数， random.gauss() 计算正态分布随机数。 对于其他的分布情况请参考在线文档。
+
+在 random 模块中的函数不应该用在和密码学相关的程序中。 如果你确实需要类似的功能，可以使用ssl模块中相应的函数。 比如， ssl.RAND_bytes() 可以用来生成一个安全的随机字节序列。
+
+## 3.12. 基本的日期与时间转换
+
+为了执行不同时间单位的转换和计算，请使用 datetime 模块。 比如，为了表示一个时间段，可以创建一个 timedelta 实例，就像下面这样：
+
+```python
+from datetime import timedelta
+
+if __name__ == '__main__':
+    a = timedelta(days=2, hours=6)
+    b = timedelta(hours=4.5)
+    c = a + b
+    print(c.days)
+    print(c.seconds)
+    print(c.seconds / 3600)
+    print(c.total_seconds() / 3600)
+输出：
+2
+37800
+10.5
+58.5
+```
+
+如果你想表示指定的日期和时间，先创建一个 datetime 实例然后使用标准的数学运算来操作它们。比如：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from datetime import timedelta, datetime
+
+if __name__ == '__main__':
+    a = datetime(2012, 9, 23)
+    print(a + timedelta(days=10))
+
+    b = datetime(2012, 12, 21)
+    d = b - a
+    print(d.days)
+
+    now = datetime.today()
+    print(now)
+
+    print(now + timedelta(minutes=10))
+输出：
+2012-10-03 00:00:00
+89
+2019-05-12 13:49:04.126557
+2019-05-12 13:59:04.126557
+```
+
+在计算的时候，需要注意的是 datetime 会自动处理闰年。比如：
+
+```python
+>>> a = datetime(2012, 3, 1)
+>>> b = datetime(2012, 2, 28)
+>>> a - b
+datetime.timedelta(2)
+>>> (a - b).days
+2
+>>> c = datetime(2013, 3, 1)
+>>> d = datetime(2013, 2, 28)
+>>> (c - d).days
+1
+```
+
+对大多数基本的日期和时间处理问题， datetime 模块已经足够了。 如果你需要执行更加复杂的日期操作，比如处理时区，模糊时间范围，节假日计算等等， 可以考虑使用 dateutil模块
+
+许多类似的时间计算可以使用 dateutil.relativedelta() 函数代替。 但是，有一点需要注意的就是，它会在处理月份(还有它们的天数差距)的时候填充间隙。看例子最清楚：
+
+```python
+>>> a = datetime(2012, 9, 23)
+>>> a + timedelta(months=1)  # 不支持months参数
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+TypeError: 'months' is an invalid keyword argument for this function
+>>>
+>>> from dateutil.relativedelta import relativedelta
+>>> a + relativedelta(months=+1)
+datetime.datetime(2012, 10, 23, 0, 0)
+>>> a + relativedelta(months=+4)
+datetime.datetime(2013, 1, 23, 0, 0)
+>>>
+>>> # Time between two dates
+>>> b = datetime(2012, 12, 21)
+>>> d = b - a
+>>> d
+datetime.timedelta(89)
+>>> d = relativedelta(b, a)
+>>> d
+relativedelta(months=+2, days=+28)
+>>> d.months
+2
+>>> d.days
+28
+```
+
+## 3.13. 计算最后一个周五的日期
+
+Python的 datetime 模块中有工具函数和类可以帮助你执行这样的计算。 下面是对类似这样的问题的一个通用解决方案：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Topic: 最后的周五
+Desc :
+"""
+from datetime import datetime, timedelta
+
+weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
+            'Friday', 'Saturday', 'Sunday']
+
+
+def get_previous_byday(dayname, start_date=None):
+    if start_date is None:
+        start_date = datetime.today()
+    day_num = start_date.weekday()
+    day_num_target = weekdays.index(dayname)
+    days_ago = (7 + day_num - day_num_target) % 7
+    if days_ago == 0:
+        days_ago = 7
+    target_date = start_date - timedelta(days=days_ago)
+    return target_date
+
+
+if __name__ == '__main__':
+    print(datetime.today())
+    print(get_previous_byday('Monday'))
+    print(get_previous_byday('Tuesday'))
+    print(get_previous_byday('Friday'))
+
+    print(get_previous_byday('Sunday', datetime(2012, 12, 21)))
+输出：
+2019-05-12 14:13:02.356540
+2019-05-06 14:13:02.356540
+2019-05-07 14:13:02.356540
+2019-05-10 14:13:02.356540
+2012-12-16 00:00:00
+```
+
+上面的算法原理是这样的：先将开始日期和目标日期映射到星期数组的位置上(星期一索引为0)， 然后通过模运算计算出目标日期要经过多少天才能到达开始日期。然后用开始日期减去那个时间差即得到结果日期。
+
+如果你要像这样执行大量的日期计算的话，你最好安装第三方包 python-dateutil 来代替。 比如，下面是是使用 dateutil 模块中的 relativedelta() 函数执行同样的计算：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
+from dateutil.rrule import *
+
+if __name__ == '__main__':
+    d = datetime.now()
+    print(d)
+
+    # Next Friday
+    print(d + relativedelta(weekday=FR))
+
+    # Last Friday
+    print(d + relativedelta(weekday=FR(-1)))  # FR(-1)调用了__call__方法，新构造了一个FR对象
+输出：
+2019-05-12 14:38:11.741898
+2019-05-17 14:38:11.741898
+2019-05-10 14:38:11.741898
+```
+
+## 3.14. 计算当前月份的日期范围
+
+你的代码需要在当前月份中循环每一天，想找到一个计算这个日期范围的高效方法。
+
+在这样的日期上循环并需要事先构造一个包含所有日期的列表。 你可以先计算出开始日期和结束日期， 然后在你步进的时候使用 datetime.timedelta 对象递增这个日期变量即可。
+
+下面是一个接受任意 datetime 对象并返回一个由当前月份开始日和下个月开始日组成的元组对象。
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import calendar
+from datetime import date, timedelta
+
+
+def get_month_range(start_date=None):
+    if start_date is None:
+        start_date = date.today().replace(day=1)  # .replace把当前date用day=1替换
+    _, days_in_month = calendar.monthrange(start_date.year, start_date.month)
+    end_date = start_date + timedelta(days=days_in_month)
+    return (start_date, end_date)
+
+
+if __name__ == '__main__':
+    a_day = timedelta(days=1)
+    first_day, last_day = get_month_range()  # 增加入参date.today()则会从当天开始增加当月天数输出
+    while first_day < last_day:
+        print(first_day)
+        first_day += a_day
+输出：
+2019-05-01
+2019-05-02
+2019-05-03
+2019-05-04
+#... and so on...
+
+get_month_range(datetime.today())
+输出：
+2019-05-12 14:50:56.321440
+2019-05-13 14:50:56.321440
+2019-05-14 14:50:56.321440
+2019-05-15 14:50:56.321440
+#... and so on...
+```
+
+有了这个就可以很容易的在返回的日期范围上面做循环操作了。
+
+上面的代码先计算出一个对应月份第一天的日期。 一个快速的方法就是使用 date 或 datetime 对象的 replace() 方法简单的将 days 属性设置成1即可。 replace() 方法一个好处就是它会创建和你开始传入对象类型相同的对象。 所以，如果输入参数是一个 date 实例，那么结果也是一个 date 实例。 同样的，如果输入是一个 datetime 实例，那么你得到的就是一个 datetime 实例。
+
+然后，使用 calendar.monthrange() 函数来找出该月的总天数。 任何时候只要你想获得日历信息，那么 calendar 模块就非常有用了。 monthrange() 函数会返回包含星期和该月天数的元组。
+
+注：monthrange()返回的第1个值day1，调用的是如下函数，返回的是当月第1天是星期几：
+
+```python
+day1 = weekday(year, month, 1)
+
+def weekday(year, month, day):
+    """Return weekday (0-6 ~ Mon-Sun) for year, month (1-12), day (1-31)."""
+```
+
+一旦该月的天数已知了，那么结束日期就可以通过在开始日期上面加上这个天数获得。 有个需要注意的是结束日期并不包含在这个日期范围内(事实上它是下个月的开始日期)。 这个和Python的 slice 与 range 操作行为保持一致，同样也不包含结尾。
+
+为了在日期范围上循环，要使用到标准的数学和比较操作。 比如，可以利用 timedelta 实例来递增日期，小于号<用来检查一个日期是否在结束日期之前。
+
+理想情况下，如果能为日期迭代创建一个同内置的 range() 函数一样的函数就好了。 幸运的是，可以使用一个生成器来很容易的实现这个目标：
+
+```python
+def date_range(start, stop, step):
+    while start < stop:
+        yield start
+        start += step
+for d in date_range(datetime(2019, 5, 12), datetime(2019, 5, 15), timedelta(hours=6)):
+    print(d)
+输出：
+2019-05-12 00:00:00
+2019-05-12 06:00:00
+2019-05-12 12:00:00
+2019-05-12 18:00:00
+2019-05-13 00:00:00
+2019-05-13 06:00:00
+2019-05-13 12:00:00
+2019-05-13 18:00:00
+2019-05-14 00:00:00
+2019-05-14 06:00:00
+2019-05-14 12:00:00
+2019-05-14 18:00:00
+```
+
+这种实现之所以这么简单，还得归功于Python中的日期和时间能够使用标准的数学和比较操作符来进行运算。
+
+## 3.15. 字符串转换为日期
+
+你的应用程序接受字符串格式的输入，但是你想将它们转换为 datetime 对象以便在上面执行非字符串操作。
+
+使用Python的标准模块 datetime 可以很容易的解决这个问题。比如：
+
+```python
+from datetime import datetime
+
+if __name__ == '__main__':
+    text = '2019-05-11'
+    y = datetime.strptime(text, '%Y-%m-%d')
+    z = datetime.now()
+    print(z)
+    diff = z - y
+    print(diff)
+    print(type(diff))
+输出：
+2019-05-12 15:08:04.122641
+1 day, 15:08:04.122641
+<class 'datetime.timedelta'>
+```
+
+datetime.strptime() 方法支持很多的格式化代码， 比如 %Y 代表4位数年份， %m 代表两位数月份。 还有一点值得注意的是这些格式化占位符也可以反过来使用，将日期输出为指定的格式字符串形式。
+
+比如，假设你的代码中生成了一个 datetime 对象， 你想将它格式化为漂亮易读形式后放在自动生成的信件或者报告的顶部：
+
+```python
+from datetime import datetime
+
+if __name__ == '__main__':
+    z = datetime.today()
+    nice_z = datetime.strftime(z, '%A %B %d, %Y')
+    print(nice_z)
+输出：
+Sunday May 12, 2019
+```
+
+还有一点需要注意的是， strptime() 的性能要比你想象中的差很多， 因为它是使用纯Python实现，并且必须处理所有的系统本地设置。 如果你要在代码中需要解析大量的日期并且已经知道了日期字符串的确切格式，可以自己实现一套解析方案来获取更好的性能。 比如，如果你已经知道所以日期格式是 YYYY-MM-DD ，你可以像下面这样实现一个解析函数：
+
+```python
+from datetime import datetime, date
+
+
+def parse_ymd(s):
+    year_s, mon_s, day_s = s.split('-')
+    # return datetime(int(year_s), int(mon_s), int(day_s))
+    return date(int(year_s), int(mon_s), int(day_s))
+
+
+if __name__ == '__main__':
+    text = '2012-09-20'
+    print(parse_ymd(text))
+输出：
+2012-09-20
+```
+
+实际测试中，这个函数比 datetime.strptime() 快7倍多。 如果你要处理大量的涉及到日期的数据的话，那么最好考虑下这个方案！
+
+## 3.16. 结合时区的日期操作
+
+你有一个安排在2012年12月21日早上9:30的电话会议，地点在芝加哥。 而你的朋友在印度的班加罗尔，那么他应该在当地时间几点参加这个会议呢？
+
+解决方案
+对几乎所有涉及到时区的问题，你都应该使用 pytz 模块。这个包提供了Olson时区数据库， 它是时区信息的事实上的标准，在很多语言和操作系统里面都可以找到。
+
+pytz 模块一个主要用途是将 datetime 库创建的简单日期对象本地化。 比如，下面如何表示一个芝加哥时间的示例：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from datetime import datetime
+
+from pytz import timezone
+
+if __name__ == '__main__':
+    d = datetime(2019, 5, 12, 15, 20, 0)
+    print(d)
+
+    central = timezone('Asia/Shanghai')
+    loc_d = central.localize(d)
+    print(loc_d)
+输出：
+2019-05-12 15:20:00
+2019-05-12 15:20:00+08:00
+```
+
+一旦日期被本地化了， 它就可以转换为其他时区的时间了。 为了得到班加罗尔对应的时间，你可以这样做：
+
+```python
+bang_d = loc_d.astimezone(timezone('Asia/Tokyo'))  # 'Asia/Kolkata'
+print(bang_d)
+输出：
+2019-05-12 16:20:00+09:00
+```
+
+注：使用pytz样例：
+
+```python
+from pytz import country_timezones
+
+# https://www.cnblogs.com/makeabug/articles/3426876.html
+print(country_timezones('cn'))
+print(country_timezones('us'))
+输出：
+['Asia/Shanghai', 'Asia/Urumqi']
+['America/New_York', 'America/Detroit', 'America/Kentucky/Louisville', 'America/Kentucky/Monticello', 'America/Indiana/Indianapolis', 'America/Indiana/Vincennes', 'America/Indiana/Winamac', 'America/Indiana/Marengo', 'America/Indiana/Petersburg', 'America/Indiana/Vevay', 'America/Chicago', 'America/Indiana/Tell_City', 'America/Indiana/Knox', 'America/Menominee', 'America/North_Dakota/Center', 'America/North_Dakota/New_Salem', 'America/North_Dakota/Beulah', 'America/Denver', 'America/Boise', 'America/Phoenix', 'America/Los_Angeles', 'America/Anchorage', 'America/Juneau', 'America/Sitka', 'America/Metlakatla', 'America/Yakutat', 'America/Nome', 'America/Adak', 'Pacific/Honolulu']
+```
+
+如果你打算在本地化日期上执行计算，你需要特别注意夏令时转换和其他细节。 比如，在2013年，美国标准夏令时时间开始于本地时间3月13日凌晨2:00(在那时，时间向前跳过一小时)。 如果你正在执行本地计算，你会得到一个错误。比如：
+
+结果错误是因为它并没有考虑在本地时间中有一小时的跳跃。 为了修正这个错误，可以使用时区对象 normalize() 方法。比如：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
+
+from pytz import timezone
+
+if __name__ == '__main__':
+    d = datetime(2013, 3, 10, 1, 45)
+    print(d)
+
+    central = timezone('US/Central')
+    loc_d = central.localize(d)
+    print(loc_d)
+
+    later = loc_d + timedelta(minutes=30)
+    print(later)  # 2013-03-10 02:15:00-06:00 # WRONG! WRONG!
+
+    later = central.normalize(loc_d + timedelta(minutes=30))
+    print(later)
+输出：
+2013-03-10 01:45:00
+2013-03-10 01:45:00-06:00
+2013-03-10 02:15:00-06:00
+2013-03-10 03:15:00-05:00
+```
+
+为了不让你被这些东东弄的晕头转向，处理本地化日期的通常的策略先将所有日期转换为UTC时间， 并用它来执行所有的中间存储和操作。比如：
+
+```python
+>>> print(loc_d)
+2013-03-10 01:45:00-06:00
+>>> utc_d = loc_d.astimezone(pytz.utc)
+>>> print(utc_d)
+2013-03-10 07:45:00+00:00
+```
+
+一旦转换为UTC，你就不用去担心跟夏令时相关的问题了。 因此，你可以跟之前一样放心的执行常见的日期计算。 当你想将输出变为本地时间的时候，使用合适的时区去转换下就行了。比如：
+
+```python
+>>> later_utc = utc_d + timedelta(minutes=30)
+>>> print(later_utc.astimezone(central))
+2013-03-10 03:15:00-05:00
+```
+
+当涉及到时区操作的时候，有个问题就是我们如何得到时区的名称。 比如，在这个例子中，我们如何知道“Asia/Kolkata”就是印度对应的时区名呢？ 为了查找，可以使用ISO 3166国家代码作为关键字去查阅字典 pytz.country_timezones 。比如：
+
+通过如下网址查看国家代码：
+<http://doc.chacuo.net/iso-3166-1>
+
+```python
+>>> pytz.country_timezones['IN']
+['Asia/Kolkata']
+```
+
+注：当你阅读到这里的时候，有可能 pytz 模块已经不再建议使用了，因为PEP431提出了更先进的时区支持。 但是这里谈到的很多问题还是有参考价值的(比如使用UTC日期的建议等)。
+
+使用样例：
+
+```python
+from datetime import datetime, timedelta
+
+import pytz
+from pytz import timezone
+
+if __name__ == '__main__':
+    d = datetime(2019, 5, 12, 15, 30)
+    print(d)
+
+    central = timezone('Asia/Shanghai')
+    loc_d = central.localize(d)
+    print(loc_d)
+
+    utc_d = loc_d.astimezone(pytz.utc)
+    print(utc_d)
+
+    later_utc = utc_d + timedelta(minutes=30)
+    print(later_utc.astimezone(central))
+```
+
+# 4. 迭代器与生成器
+
+迭代是Python最强大的功能之一。初看起来，你可能会简单的认为迭代只不过是处理序列中元素的一种方法。 然而，绝非仅仅就是如此，还有很多你可能不知道的， 比如创建你自己的迭代器对象，在itertools模块中使用有用的迭代模式，构造生成器函数等等。 这一章目的就是向你展示跟迭代有关的各种常见问题。
+
+## 4.1. 手动遍历迭代器
+
+为了手动的遍历可迭代对象，使用 next() 函数并在代码中捕获 StopIteration 异常。 比如，下面的例子手动读取一个文件中的所有行：
+
+```python
+def manual_iter():
+    with open('test.txt') as f:
+        try:
+            while True:
+                line = next(f)
+                print(line, end='')
+        except StopIteration:
+            pass
+
+if __name__ == '__main__':
+    manual_iter()
+```
+
+通常来讲， StopIteration 用来指示迭代的结尾。 然而，如果你手动使用上面演示的 next() 函数的话，你还可以通过返回一个指定值来标记结尾，比如 None 。 下面是示例：
+
+```python
+def manual_iter():
+    with open('test.txt') as f:
+        while True:
+            line = next(f, None)
+            if line is None:
+                break
+            print(line, end='')
+
+# 使用f.readline函数
+with open('test.txt') as f:
+    line = f.readline()
+    while line:
+        print(line, end='')
+        line = f.readline()
+```
+
+大多数情况下，我们会使用 for 循环语句用来遍历一个可迭代对象。 但是，偶尔也需要对迭代做更加精确的控制，这时候了解底层迭代机制就显得尤为重要了。
+
+下面的交互示例向我们演示了迭代期间所发生的基本细节：
+
+```python
+>>> items = [1, 2, 3]
+>>> # Get the iterator
+>>> it = iter(items) # Invokes items.__iter__()
+>>> # Run the iterator
+>>> next(it) # Invokes it.__next__()
+1
+>>> next(it)
+2
+>>> next(it)
+3
+>>> next(it)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+StopIteration
+```
+
+## 4.2. 代理迭代
+
+你构建了一个自定义容器对象，里面包含有列表、元组或其他可迭代对象。 你想直接在你的这个新容器对象上执行迭代操作。
+
+实际上你只需要定义一个 __iter__() 方法，将迭代操作代理到容器内部的对象上去。比如：
+
+```python
+class Node:
+    def __init__(self, value):
+        self._value = value
+        self._children = []
+
+    def __repr__(self):
+        return 'Node({!r})'.format(self._value)
+
+    def add_child(self, node):
+        self._children.append(node)
+
+    def __iter__(self):
+        return iter(self._children)
+
+
+# Example
+if __name__ == '__main__':
+    root = Node(0)
+    child1 = Node(1)
+    child2 = Node(2)
+    root.add_child(child1)
+    root.add_child(child2)
+    # Outputs Node(1), Node(2)
+    for ch in root:
+        print(ch)
+输出：
+Node(1)
+Node(2)
+```
+
+在上面代码中， __iter__() 方法只是简单的将迭代请求传递给内部的 _children 属性。
+
+Python的迭代器协议需要 __iter__() 方法返回一个实现了 __next__() 方法的迭代器对象。 如果你只是迭代遍历其他容器的内容，你无须担心底层是怎样实现的。你所要做的只是传递迭代请求既可。
+
+这里的 iter() 函数的使用简化了代码， iter(s) 只是简单的通过调用 s.__iter__() 方法来返回对应的迭代器对象， 就跟 len(s) 会调用 s.__len__() 原理是一样的。
+
+注：x!r代表repr(x)，x!s代表str(x)，x!a代表ascii(x)
+
+<https://www.zhihu.com/question/48140853/answer/109343702>
+
+```python
+class Pair:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return 'Pair({0.x!r},{0.y!r})'.format(self)
+
+    def __str__(self):
+        return '({0.x!s},{0.y!s})'.format(self)
+
+
+# Example
+if __name__ == '__main__':
+    p = Pair(1, 2)
+    print(p)  # (1,2)
+```
+
+__str__和__repr__区别：
+
+<http://baijiahao.baidu.com/s?id=1596817611604972751&wfr=spider&for=pc>
+
+```python
+class Car(object):
+    def __init__(self, color, mileage):
+        self.color = color
+        self.mileage = mileage
+
+    def __repr__(self):
+        return (f'{self.__class__.__name__}('
+                f'{self.color!r}, {self.mileage!r})')
+
+    # 可选
+    def __str__(self):
+        return f'a {self.color} car'
+
+
+# Example
+if __name__ == '__main__':
+    car = Car('red', 37281)
+    print(car)
+    print(repr(car))
+输出：
+a red car
+Car('red', 37281)
+```
+
+* 我们可以使用__str__和__repr__方法定义类到字符串的转化方式，而不需要手动打印某些属性或是添加额外的方法。
+
+* 一般来说，__str__的返回结果在于强可读性，而__repr__的返回结果在于准确性。
+
+* 我们至少需要添加一个__repr__方法来保证类到字符串的自定义转化的有效性，__str__是可选的。因为默认情况下，在需要却找不到__str__方法的时候，会自动调用__repr__方法。
+
+## 4.3. 使用生成器创建新的迭代模式
+
+你想实现一个自定义迭代模式，跟普通的内置函数比如 range() , reversed() 不一样。
+
+如果你想实现一种新的迭代模式，使用一个生成器函数来定义它。 下面是一个生产某个范围内浮点数的生成器：
+
+```python
+def frange(start, stop, increment):
+    x = start
+    while x < stop:
+        yield x
+        x += increment
+```
+
+为了使用这个函数， 你可以用for循环迭代它或者使用其他接受一个可迭代对象的函数(比如 sum() , list() 等)。示例如下：
+
+```python
+>>> for n in frange(0, 4, 0.5):
+...     print(n)
+...
+0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+>>> list(frange(0, 1, 0.125))
+[0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]
+```
+
+一个函数中需要有一个 yield 语句即可将其转换为一个生成器。 跟普通函数不同的是，生成器只能用于迭代操作。 下面是一个实验，向你展示这样的函数底层工作机制：
+
+```python
+>>> def countdown(n):
+...     print('Starting to count from', n)
+...     while n > 0:
+...         yield n
+...         n -= 1
+...     print('Done!')
+...
+
+>>> # Create the generator, notice no output appears
+>>> c = countdown(3)
+>>> c
+<generator object countdown at 0x1006a0af0>
+
+>>> # Run to first yield and emit a value
+>>> next(c)
+Starting to count from 3
+3
+
+>>> # Run to the next yield
+>>> next(c)
+2
+
+>>> # Run to next yield
+>>> next(c)
+1
+
+>>> # Run to next yield (iteration stops)
+>>> next(c)
+Done!
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+StopIteration
+```
+
+一个生成器函数主要特征是它只会回应在迭代中使用到的 next 操作。 一旦生成器函数返回退出，迭代终止。我们在迭代中通常使用的for语句会自动处理这些细节，所以你无需担心。
+
+## 4.4. 实现迭代器协议
+
+你想构建一个能支持迭代操作的自定义对象，并希望找到一个能实现迭代协议的简单方法。
+
+目前为止，在一个对象上实现迭代最简单的方式是使用一个生成器函数。 在4.2小节中，使用Node类来表示树形数据结构。你可能想实现一个以深度优先方式遍历树形节点的生成器。 下面是代码示例：
+
+```python
+class Node:
+    def __init__(self, value):
+        self._value = value
+        self._children = []
+
+    def __repr__(self):
+        return 'Node({!r})'.format(self._value)
+
+    def add_child(self, node):
+        self._children.append(node)
+
+    def __iter__(self):
+        return iter(self._children)
+
+    def depth_first(self):
+        yield self
+        for c in self:
+            yield from c.depth_first()
+
+# Example
+if __name__ == '__main__':
+    root = Node(0)
+    child1 = Node(1)
+    child2 = Node(2)
+    root.add_child(child1)
+    root.add_child(child2)
+    child1.add_child(Node(3))
+    child1.add_child(Node(4))
+    child2.add_child(Node(5))
+
+    for ch in root.depth_first():
+        print(ch)
+    # Outputs Node(0), Node(1), Node(3), Node(4), Node(2), Node(5)
+```
+
+在这段代码中，depth_first() 方法简单直观。 它首先返回自己本身并迭代每一个子节点并 通过调用子节点的 depth_first() 方法(使用 yield from 语句)返回对应元素。
+
+Python的迭代协议要求一个__iter__()方法返回一个特殊的迭代器对象， 这个迭代器对象实现了__next__()方法并通过 StopIteration 异常标识迭代的完成。 但是，实现这些通常会比较繁琐。 下面我们演示下这种方式，如何使用一个关联迭代器类重新实现 depth_first() 方法：
+
+```python
+class Node2:
+    def __init__(self, value):
+        self._value = value
+        self._children = []
+
+    def __repr__(self):
+        return 'Node({!r})'.format(self._value)
+
+    def add_child(self, node):
+        self._children.append(node)
+
+    def __iter__(self):
+        return iter(self._children)
+
+    def depth_first(self):
+        return DepthFirstIterator(self)
+
+
+class DepthFirstIterator(object):
+    '''
+    Depth-first traversal
+    '''
+
+    def __init__(self, start_node):
+        self._node = start_node
+        self._children_iter = None
+        self._child_iter = None
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # Return myself if just started; create an iterator for children
+        if self._children_iter is None:
+            self._children_iter = iter(self._node)
+            return self._node
+        # If processing a child, return its next item
+        elif self._child_iter:
+            try:
+                nextchild = next(self._child_iter)
+                return nextchild
+            except StopIteration:
+                self._child_iter = None
+                return next(self)
+        # Advance to the next child and start its iteration
+        else:
+            self._child_iter = next(self._children_iter).depth_first()
+            return next(self)
+```
+
+DepthFirstIterator 类和上面使用生成器的版本工作原理类似， 但是它写起来很繁琐，因为迭代器必须在迭代处理过程中维护大量的状态信息。 坦白来讲，没人愿意写这么晦涩的代码。将你的迭代器定义为一个生成器后一切迎刃而解。
+
+## 4.5. 反向迭代
+
+使用内置的 reversed() 函数，比如：
+
+```python
+>>> a = [1, 2, 3, 4]
+>>> for x in reversed(a):
+...     print(x)
+...
+4
+3
+2
+1
+```
+
+反向迭代仅仅当对象的大小可预先确定或者对象实现了 __reversed__() 的特殊方法时才能生效。 如果两者都不符合，那你必须先将对象转换为一个列表才行，比如：
+
+```python
+# Print a file backwards
+f = open('somefile')
+for line in reversed(list(f)):
+    print(line, end='')
+
+# 如下报错：
+with open('test.txt', 'r') as f:
+    for line in reversed(f):
+        print(line, end='')
+TypeError: '_io.TextIOWrapper' object is not reversible
+```
+
+要注意的是如果可迭代对象元素很多的话，将其预先转换为一个列表要消耗大量的内存。
+
+很多程序员并不知道可以通过在自定义类上实现 __reversed__() 方法来实现反向迭代。比如：
+
+```python
+class Countdown:
+    def __init__(self, start):
+        self.start = start
+
+    # Forward iterator
+    def __iter__(self):
+        n = self.start
+        while n > 0:
+            yield n
+            n -= 1
+
+    # Reverse iterator
+    def __reversed__(self):
+        n = 1
+        while n <= self.start:
+            yield n
+            n += 1
+
+
+if __name__ == '__main__':
+    for rr in reversed(Countdown(5)):
+        print(rr)
+    for rr in Countdown(5):
+        print(rr)
+输出：
+1
+2
+3
+4
+5
+5
+4
+3
+2
+1
+```
+
+定义一个反向迭代器可以使得代码非常的高效， 因为它不再需要将数据填充到一个列表中然后再去反向迭代这个列表。
+
+## 4.6. 带有外部状态的生成器函数
