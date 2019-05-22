@@ -5009,3 +5009,459 @@ TypeError: 'linehistory' object is not an iterator
 >>> next(it)
 'this is a test\n'
 ```
+
+## 4.7. 迭代器切片
+
+你想得到一个由迭代器生成的切片对象，但是标准切片操作并不能做到。
+
+函数 itertools.islice() 正好适用于在迭代器和生成器上做切片操作。比如：
+
+```python
+>>> def count(n):
+...     while True:
+...         yield n
+...         n += 1
+...
+>>> c = count(0)
+>>> c[10:20]
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: 'generator' object is not subscriptable
+
+>>> # Now using islice()
+>>> import itertools
+>>> for x in itertools.islice(c, 10, 20):
+...     print(x)
+...
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+```
+
+迭代器和生成器不能使用标准的切片操作，因为它们的长度事先我们并不知道(并且也没有实现索引)。 函数 islice() 返回一个可以生成指定元素的迭代器，它通过遍历并丢弃直到切片开始索引位置的所有元素。 然后才开始一个个的返回元素，并直到切片结束索引位置。
+
+这里要着重强调的一点是 islice() 会消耗掉传入的迭代器中的数据。 必须考虑到迭代器是不可逆的这个事实。 所以如果你需要之后再次访问这个迭代器的话，那你就得先将它里面的数据放入一个列表中。
+
+迭代器使用切片样例：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import itertools
+
+
+class Countdown:
+    def __init__(self, start):
+        self.start = start
+
+    # Forward iterator
+    def __iter__(self):
+        n = self.start
+        while n > 0:
+            yield n
+            n -= 1
+
+
+def count(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+
+if __name__ == '__main__':
+    c = Countdown(10)
+    for x in itertools.islice(c, 3, 7):
+        print(x)
+
+    print('=======1')
+    for x in c:
+        print(x)
+
+    print('=======2')
+    iterC = iter(c)
+    for x in itertools.islice(c, 1, 4):
+        print(x)
+
+    print('=======3')
+    for x in iterC:
+        print(x)
+
+    print('=======4')
+    r = range(1, 5)
+    for i in itertools.islice(r, 0, 2):
+        print(i)
+
+    print('=======5')
+    for i in r:  # range对象不会被消耗
+        print(i)
+
+    print('=======6')
+    c = count(5)
+    for i in itertools.islice(c, 0, 3):
+        print(i)
+
+    print('=======7')
+    for i in c:  # 经过itertools.islice后，generator对象c被消耗，只能迭代出剩余对象
+        print(i)
+
+输出：
+7
+6
+5
+4
+=======1
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+=======2
+9
+8
+7
+=======3
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+=======4
+1
+2
+=======5
+1
+2
+3
+4
+=======6
+5
+4
+3
+=======7
+2
+1
+```
+
+## 4.8. 跳过可迭代对象的开始部分
+
+你想遍历一个可迭代对象，但是它开始的某些元素你并不感兴趣，想跳过它们。
+
+解决方案
+itertools 模块中有一些函数可以完成这个任务。 首先介绍的是 itertools.dropwhile() 函数。使用时，你给它传递一个函数对象和一个可迭代对象。 它会返回一个迭代器对象，丢弃原有序列中直到函数返回Flase之前的所有元素，然后返回后面所有元素。
+
+为了演示，假定你在读取一个开始部分是几行注释的源文件。比如：
+
+```python
+with open('test.txt') as f:
+    for line in f:
+        print(line, end='')
+输出：
+# test.txt
+# User Database
+#
+# Note that this file is consulted directly only when the system is running
+# in single-user mode. At other times, this information is provided by
+# Open Directory.
+#
+##
+nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
+root:*:0:0:System Administrator:/var/root:/bin/sh
+```
+
+如果你想跳过开始部分的注释行的话，可以这样做：
+
+```python
+import itertools
+
+if __name__ == '__main__':
+    with open('test.txt') as f:
+        for line in itertools.dropwhile(lambda line: line.startswith('#'), f):
+            print(line, end='')
+输出：
+nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
+root:*:0:0:System Administrator:/var/root:/bin/sh
+```
+
+这个例子是基于根据某个测试函数跳过开始的元素。 如果你已经明确知道了要跳过的元素的个数的话，那么可以使用 itertools.islice() 来代替。比如：
+
+```python
+import itertools
+
+if __name__ == '__main__':
+    items = ['a', 'b', 'c', 1, 4, 10, 15]
+    for x in itertools.islice(items, 3, None):
+        print(x)
+
+    for x in itertools.islice(items, None, 3):
+        print(x)
+输出：
+1
+4
+10
+15
+a
+b
+c
+```
+
+在这个例子中， islice() 函数最后那个 None 参数指定了你要获取从第3个到最后的所有元素， 如果 None 和3的位置对调，意思就是仅仅获取前三个元素恰恰相反， (这个跟切片的相反操作 [3:] 和 [:3] 原理是一样的)。
+
+函数 dropwhile() 和 islice() 其实就是两个帮助函数，为的就是避免写出下面这种冗余代码：
+
+```python
+with open('test.txt') as f:
+    # Skip over initial comments
+    while True:
+        line = next(f, '')
+        if not line.startswith('#'):
+            break
+
+    # Process remaining lines
+    while line:
+        # Replace with useful processing
+        print(line, end='')
+        line = next(f, None)
+```
+
+跳过一个可迭代对象的开始部分跟通常的过滤是不同的。 比如，上述代码的第一个部分可能会这样重写：
+
+```python
+with open('/etc/passwd') as f:
+    lines = (line for line in f if not line.startswith('#'))
+    for line in lines:
+        print(line, end='')
+```
+
+这样写确实可以跳过开始部分的注释行，但是同样也会跳过文件中其他所有的注释行。 换句话讲，我们的解决方案是仅仅跳过开始部分满足测试条件的行，在那以后，所有的元素不再进行测试和过滤了。
+
+最后需要着重强调的一点是，本节的方案适用于所有可迭代对象，包括那些事先不能确定大小的， 比如生成器，文件及其类似的对象。
+
+## 4.9. 排列组合的迭代
+
+你想迭代遍历一个集合中元素的所有可能的排列或组合
+
+itertools模块提供了三个函数来解决这类问题。 其中一个是 itertools.permutations() ， 它接受一个集合并产生一个元组序列，每个元组由集合中所有元素的一个可能排列组成。 也就是说通过打乱集合中元素排列顺序生成一个元组，比如：
+
+```python
+from itertools import permutations
+
+if __name__ == '__main__':
+    items = ['a', 'b', 'c']
+    for p in permutations(items):
+        print(p)
+输出：
+('a', 'b', 'c')
+('a', 'c', 'b')
+('b', 'a', 'c')
+('b', 'c', 'a')
+('c', 'a', 'b')
+('c', 'b', 'a')
+```
+
+如果你想得到指定长度的所有排列，你可以传递一个可选的长度参数。就像这样：
+
+```python
+>>> for p in permutations(items, 2):
+...     print(p)
+...
+('a', 'b')
+('a', 'c')
+('b', 'a')
+('b', 'c')
+('c', 'a')
+('c', 'b')
+```
+
+使用 itertools.combinations() 可得到输入集合中元素的所有的组合。比如：
+
+```python
+>>> from itertools import combinations
+>>> for c in combinations(items, 3):
+...     print(c)
+...
+('a', 'b', 'c')
+
+>>> for c in combinations(items, 2):
+...     print(c)
+...
+('a', 'b')
+('a', 'c')
+('b', 'c')
+
+>>> for c in combinations(items, 1):
+...     print(c)
+...
+('a',)
+('b',)
+('c',)
+```
+
+combinations是按先后顺序组成所有序列，可以理解为挑n个元素，后一个挑选的元素位置只能在前一个元素后：
+
+```python
+from itertools import combinations
+
+for c in combinations(range(0, 4), 3):
+    print(c)
+输出：
+(0, 1, 2)
+(0, 1, 3)
+(0, 2, 3)
+(1, 2, 3)
+```
+
+对于 combinations() 来讲，元素的顺序已经不重要了。 也就是说，组合 ('a', 'b') 跟 ('b', 'a') 其实是一样的(最终只会输出其中一个)。
+
+在计算组合的时候，一旦元素被选取就会从候选中剔除掉(比如如果元素’a’已经被选取了，那么接下来就不会再考虑它了)。 而函数 itertools.combinations_with_replacement() 允许同一个元素被选择多次，比如：
+
+combinations_with_replacement是按先后顺序组成所有序列，可以理解为挑n个元素，后一个挑选的元素位置只能是前一个元素或在前一个元素后：
+
+```python
+from itertools import combinations_with_replacement
+
+if __name__ == '__main__':
+    items = ['a', 'b', 'c']
+    for c in combinations_with_replacement(items, 3):
+        print(c)
+输出：
+('a', 'a', 'a')
+('a', 'a', 'b')
+('a', 'a', 'c')
+('a', 'b', 'b')
+('a', 'b', 'c')
+('a', 'c', 'c')
+('b', 'b', 'b')
+('b', 'b', 'c')
+('b', 'c', 'c')
+('c', 'c', 'c')
+```
+
+这一小节我们向你展示的仅仅是 itertools 模块的一部分功能。 尽管你也可以自己手动实现排列组合算法，但是这样做得要花点脑力。 当我们碰到看上去有些复杂的迭代问题时，最好可以先去看看itertools模块。 如果这个问题很普遍，那么很有可能会在里面找到解决方案！
+
+## 4.10. 序列上索引值迭代
+
+内置的 enumerate() 函数可以很好的解决这个问题：
+
+```python
+>>> my_list = ['a', 'b', 'c']
+>>> for idx, val in enumerate(my_list):
+...     print(idx, val)
+...
+0 a
+1 b
+2 c
+```
+
+为了按传统行号输出(行号从1开始)，你可以传递一个开始参数：
+
+```python
+>>> my_list = ['a', 'b', 'c']
+>>> for idx, val in enumerate(my_list, 1):
+...     print(idx, val)
+...
+1 a
+2 b
+3 c
+```
+
+这种情况在你遍历文件时想在错误消息中使用行号定位时候非常有用：
+
+```python
+def parse_data(filename):
+    with open(filename, 'rt') as f:
+        for lineno, line in enumerate(f, 1):
+            fields = line.split()
+            try:
+                count = int(fields[1])
+                ...
+            except ValueError as e:
+                print('Line {}: Parse error: {}'.format(lineno, e))
+```
+
+enumerate() 对于跟踪某些值在列表中出现的位置是很有用的。 所以，如果你想将一个文件中出现的单词映射到它出现的行号上去，可以很容易的利用 enumerate() 来完成：
+
+```python
+word_summary = defaultdict(list)
+
+with open('myfile.txt', 'r') as f:
+    lines = f.readlines()
+
+for idx, line in enumerate(lines):
+    # Create a list of words in current line
+    words = [w.strip().lower() for w in line.split()]
+    for word in words:
+        word_summary[word].append(idx)
+
+    print(word_summary)
+输出：
+defaultdict(<class 'list'>, {'#': [0, 1, 2, 3, 4, 5], 'user': [0], 'database': [0], 'note': [2], 'that': [2], 'this': [2, 3], 'file': [2], 'is': [2, 2, 3], 'consulted': [2], 'directly': [2], 'only': [2], 'when': [2], 'the': [2], 'system': [2], 'running': [2], 'in': [3], 'single-user': [3], 'mode.': [3], 'at': [3], 'other': [3], 'times,': [3], 'information': [3], 'provided': [3], 'by': [3], 'open': [4], 'directory.': [4], '##': [6], 'nobody:*:-2:-2:unprivileged': [7], 'user:/var/empty:/usr/bin/false': [7], 'root:*:0:0:system': [8], 'administrator:/var/root:/bin/sh': [8]})
+```
+
+如果你处理完文件后打印 word_summary ，会发现它是一个字典(准确来讲是一个 defaultdict )， 对于每个单词有一个 key ，每个 key 对应的值是一个由这个单词出现的行号组成的列表。 如果某个单词在一行中出现过两次，那么这个行号也会出现两次， 同时也可以作为文本的一个简单统计。
+
+当你想额外定义一个计数变量的时候，使用 enumerate() 函数会更加简单。你可能会像下面这样写代码：
+
+```python
+lineno = 1
+for line in f:
+    # Process line
+    ...
+    lineno += 1
+```
+
+但是如果使用 enumerate() 函数来代替就显得更加优雅了：
+
+```python
+for lineno, line in enumerate(f):
+    # Process line
+    ...
+```
+
+enumerate() 函数返回的是一个 enumerate 对象实例， 它是一个迭代器，返回连续的包含**一个计数和一个值**的元组， 元组中的值通过在传入序列上调用 next() 返回。
+
+还有一点可能并不很重要，但是也值得注意， 有时候当你在一个已经解压后的元组序列上使用 enumerate() 函数时很容易调入陷阱。 你得像下面正确的方式这样写：
+
+```python
+data = [(1, 2), (3, 4), (5, 6), (7, 8)]
+
+# Correct!
+for n, (x, y) in enumerate(data):
+    print(f'pos: {n}, value: {x, y}')
+# Error!
+for n, x, y in enumerate(data):
+    pass
+输出：
+pos: 0, value: (1, 2)
+pos: 1, value: (3, 4)
+pos: 2, value: (5, 6)
+pos: 3, value: (7, 8)
+
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 12, in <module>
+    for n, x, y in enumerate(data):
+ValueError: not enough values to unpack (expected 3, got 2)
+
+
+# 以上样例：
+t = (1, (2, 3))
+x, (y, z) = t  # 错误的解压方式 x, y, z = t
+```
+
+## 4.11. 同时迭代多个序列
