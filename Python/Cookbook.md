@@ -5465,3 +5465,772 @@ x, (y, z) = t  # 错误的解压方式 x, y, z = t
 ```
 
 ## 4.11. 同时迭代多个序列
+
+你想同时迭代多个序列，每次分别从一个序列中取一个元素。
+
+为了同时迭代多个序列，使用 zip() 函数。比如：
+
+```python
+>>> xpts = [1, 5, 4, 2, 10, 7]
+>>> ypts = [101, 78, 37, 15, 62, 99]
+>>> for x, y in zip(xpts, ypts):
+...     print(x,y)
+...
+1 101
+5 78
+4 37
+2 15
+10 62
+7 99
+```
+
+zip(a, b) 会生成一个可返回元组 (x, y) 的迭代器，其中x来自a，y来自b。 一旦其中某个序列到底结尾，迭代宣告结束。 因此迭代长度跟参数中最短序列长度一致。
+
+```python
+>>> a = [1, 2, 3]
+>>> b = ['w', 'x', 'y', 'z']
+>>> for i in zip(a,b):
+...     print(i)
+...
+(1, 'w')
+(2, 'x')
+(3, 'y')
+```
+
+如果这个不是你想要的效果，那么还可以使用 itertools.zip_longest() 函数来代替。比如：
+
+```python
+>>> from itertools import zip_longest
+>>> for i in zip_longest(a,b):
+...     print(i)
+...
+(1, 'w')
+(2, 'x')
+(3, 'y')
+(None, 'z')
+
+>>> for i in zip_longest(a, b, fillvalue=0):
+...     print(i)
+...
+(1, 'w')
+(2, 'x')
+(3, 'y')
+(0, 'z')
+```
+
+当你想成对处理数据的时候 zip() 函数是很有用的。 比如，假设你头列表和一个值列表，就像下面这样：
+
+```python
+headers = ['name', 'shares', 'price']
+values = ['ACME', 100, 490.1]
+```
+
+使用zip()可以让你将它们打包并生成一个字典：
+
+```python
+s = dict(zip(headers,values))
+
+# 可以如下方式构造dict
+d = dict((('a', 1), ('b', 2), ('c', 3)))
+print(d)  # {'a': 1, 'b': 2, 'c': 3}
+```
+
+或者你也可以像下面这样产生输出：
+
+```python
+for name, val in zip(headers, values):
+    print(name, '=', val)
+```
+
+虽然不常见，但是 zip() 可以接受多于两个的序列的参数。 这时候所生成的结果元组中元素个数跟输入序列个数一样。比如;
+
+```python
+>>> a = [1, 2, 3]
+>>> b = [10, 11, 12]
+>>> c = ['x','y','z']
+>>> for i in zip(a, b, c):
+...     print(i)
+...
+(1, 10, 'x')
+(2, 11, 'y')
+(3, 12, 'z')
+```
+
+最后强调一点就是， zip() 会创建一个迭代器来作为结果返回。 如果你需要将结对的值存储在列表中，要使用 list() 函数。比如：
+
+```python
+>>> zip(a, b)
+<zip object at 0x1007001b8>
+>>> list(zip(a, b))
+[(1, 10), (2, 11), (3, 12)]
+```
+
+## 4.12. 不同集合上元素的迭代
+
+你想在多个对象执行相同的操作，但是这些对象在不同的容器中，你希望代码在不失可读性的情况下避免写重复的循环。
+
+解决方案
+itertools.chain() 方法可以用来简化这个任务。 它接受一个可迭代对象列表作为输入，并返回一个迭代器，有效的屏蔽掉在多个容器中迭代细节。 为了演示清楚，考虑下面这个例子：
+
+```python
+>>> from itertools import chain
+>>> a = [1, 2, 3, 4]
+>>> b = ['x', 'y', 'z']
+>>> for x in chain(a, b):
+... print(x)
+...
+1
+2
+3
+4
+x
+y
+z
+```
+
+使用 chain() 的一个常见场景是当你想对不同的集合中所有元素执行某些操作的时候。比如：
+
+```python
+# Various working sets of items
+active_items = set()
+inactive_items = set()
+
+# Iterate over all items
+for item in chain(active_items, inactive_items):
+    # Process item
+```
+    
+这种解决方案要比像下面这样使用两个单独的循环更加优雅，
+
+```python
+for item in active_items:
+    # Process item
+    ...
+
+for item in inactive_items:
+    # Process item
+    ...
+```
+
+itertools.chain() 接受一个或多个可迭代对象作为输入参数。 然后创建一个迭代器，依次连续的返回每个可迭代对象中的元素。 这种方式要比先将序列合并再迭代要高效的多。比如：
+
+```python
+# Inefficent
+for x in a + b:
+    ...
+
+# Better
+for x in chain(a, b):
+    ...
+```
+
+第一种方案中， a + b 操作会创建一个全新的序列并要求a和b的类型一致。 chian() 不会有这一步，所以如果输入序列非常大的时候会很省内存。 并且当可迭代对象类型不一样的时候 chain() 同样可以很好的工作。
+
+```python
+from itertools import chain
+
+if __name__ == '__main__':
+    l = [1, 2, 3]
+    s = set([4, 5, 6])
+    t = (7, 8, 9)
+    # print(l + s)  # TypeError: can only concatenate list (not "set") to list
+    # print(l + t)  # TypeError: can only concatenate list (not "tuple") to list
+    print(chain(l, s, t))
+    for x in chain(l, s, t):
+        print(x)
+输出：
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+## 4.13. 创建数据处理管道
+
+<https://python3-cookbook.readthedocs.io/zh_CN/latest/c04/p13_create_data_processing_pipelines.html>
+
+你想以数据管道(类似Unix管道)的方式迭代处理数据。 比如，你有个大量的数据需要处理，但是不能将它们一次性放入内存中。
+
+生成器函数是一个实现管道机制的好办法。 为了演示，假定你要处理一个非常大的日志文件目录：
+
+```python
+log/
+    foo/
+        log-a.txt
+        log-b.txt
+        log-c.txt
+    bar/
+        log-d.txt
+        log-e.txt
+```
+
+假设每个日志文件包含这样的数据：
+
+```python
+# log-a.txt
+Hello, a
+How are you, Python a?
+Fine, thank you. And you?
+
+# log-b.txt
+Hello, b
+How are you, python b?
+Fine, thank you. And you?
+
+# log-c.txt
+Hello, c
+How are you
+Fine, thank you. And you?
+
+# log-d.txt
+Hello, d
+How are you
+Fine, thank you. And you?
+
+# log-e.txt
+Hello, e
+How are you, python e?
+Fine, thank you. And you?
+```
+
+为了处理这些文件，你可以定义一个由多个执行特定任务独立任务的简单生成器函数组成的容器。就像这样：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import fnmatch
+import os
+import re
+
+
+def gen_find(file_pat, top):
+    """
+    Find all filenames in a directory tree that match a shell wildcard pattern
+    """
+    for path, dir_list, file_list in os.walk(top):
+        for name in fnmatch.filter(file_list, file_pat):
+            yield os.path.join(path, name)
+
+
+def gen_opener(file_names):
+    """
+    Open a sequence of filenames one at a time producing a file object.
+    The file is closed immediately when proceeding to the next iteration.
+    """
+    for file_name in file_names:
+        with open(file_name) as f:
+            yield f
+
+
+def gen_concatenate(iterators):
+    """
+    Chain a sequence of iterators together into a single sequence.
+    """
+    for it in iterators:
+        yield from it  # 每一次yield from it，将获得f中的一行
+        # 同下
+        # for line in it:
+        #     yield line
+
+
+def gen_grep(pattern, lines):
+    """
+    Look for a regex pattern in a sequence of lines
+    """
+    pat = re.compile(pattern)
+    for line in lines:
+        if pat.search(line):
+            yield line
+```
+
+现在你可以很容易的将这些函数连起来创建一个处理管道。 比如，为了查找包含单词python的所有日志行，你可以这样做：
+
+```python
+if __name__ == '__main__':
+    log_names = gen_find('log*', 'log')
+    files = gen_opener(log_names)
+    lines = gen_concatenate(files)
+    pylines = gen_grep('(?i)python', lines)  # (?i)忽略大小写
+    for line in pylines:
+        print(line, end='')
+输出：
+How are you, Python a?
+How are you, python b?
+How are you, python e?
+```
+
+如果将来的时候你想扩展管道，你甚至可以在生成器表达式中包装数据。 比如，下面这个版本计算出传输的字节数并计算其总和。
+
+```python
+log_names = gen_find('log*', 'log')
+files = gen_opener(log_names)
+lines = gen_concatenate(files)
+pylines = gen_grep('(?i)python', lines)  # (?i)忽略大小写
+lines_length = (len(line.strip()) for line in pylines)
+print('Total length: ', sum(lines_length))
+输出：
+Total length:  66
+```
+
+以管道方式处理数据可以用来解决各类其他问题，包括解析，读取实时数据，定时轮询等。
+
+为了理解上述代码，重点是要明白 yield 语句作为数据的生产者而 for 循环语句作为数据的消费者。 当这些生成器被连在一起后，每个 yield 会将一个单独的数据元素传递给迭代处理管道的下一阶段。 在例子最后部分， sum() 函数是最终的程序驱动者，每次从生成器管道中提取出一个元素。
+
+这种方式一个非常好的特点是每个生成器函数很小并且都是独立的。这样的话就很容易编写和维护它们了。 很多时候，这些函数如果比较通用的话可以在其他场景重复使用。 并且最终将这些组件组合起来的代码看上去非常简单，也很容易理解。
+
+使用这种方式的内存效率也不得不提。上述代码即便是在一个超大型文件目录中也能工作的很好。 事实上，由于使用了迭代方式处理，代码运行过程中只需要很小很小的内存。
+
+在调用 gen_concatenate() 函数的时候你可能会有些不太明白。 这个函数的目的是将输入序列拼接成一个很长的行序列。 itertools.chain() 函数同样有类似的功能，但是它需要将所有可迭代对象最为参数传入。 在上面这个例子中，你可能会写类似这样的语句 lines = itertools.chain(*files) ， 这将导致 gen_opener() 生成器被提前全部消费掉。 但由于 gen_opener() 生成器每次生成一个打开过的文件， 等到下一个迭代步骤时文件就关闭了，因此 chain() 在这里不能这样使用。 上面的方案可以避免这种情况。
+
+gen_concatenate() 函数中出现过 yield from 语句，它将 yield 操作代理到父生成器上去。 语句 yield from it 简单的返回生成器 it 所产生的所有值。 关于这个我们在4.14小节会有更进一步的描述。
+
+最后还有一点需要注意的是，管道方式并不是万能的。 有时候你想立即处理所有数据。 然而，即便是这种情况，使用生成器管道也可以将这类问题从逻辑上变为工作流的处理方式。
+
+如可以使用list()，消费生成出全部txt内容：
+
+```python
+log_names = gen_find('log*', 'log')
+files = gen_opener(log_names)
+lines = gen_concatenate(files)
+print(list(lines))
+输出：
+['Hello, a\n', 'How are you, Python a?\n', 'Fine, thank you. And you?', 'Hello, b\n', 'How are you, python b?\n', 'Fine, thank you. And you?', 'Hello, c\n', 'How are you\n', 'Fine, thank you. And you?', 'Hello, d\n', 'How are you\n', 'Fine, thank you. And you?', 'Hello, e\n', 'How are you, python e?\n', 'Fine, thank you. And you?']
+
+```
+
+David Beazley 在他的 Generator Tricks for Systems Programmers 教程中对于这种技术有非常深入的讲解。可以参考这个教程获取更多的信息。
+
+## 4.14. 展开嵌套的序列
+
+你想将一个多层嵌套的序列展开成一个单层列表
+
+可以写一个包含 yield from 语句的递归生成器来轻松解决这个问题。比如：
+
+```python
+from collections.abc import Iterable
+
+
+def flatten(items, ignore_types=(str, bytes)):
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, ignore_types):
+            yield from flatten(x)
+        else:
+            yield x
+
+
+if __name__ == '__main__':
+    items = [1, 2, [3, 4, [5, 6], 7], 8]
+    # Produces 1 2 3 4 5 6 7 8
+    for x in flatten(items):
+        print(x)
+输出：
+1
+2
+3
+4
+5
+6
+7
+8
+```
+
+在上面代码中， isinstance(x, Iterable) 检查某个元素是否是可迭代的。 如果是的话， yield from 就会返回所有子例程的值。最终返回结果就是一个没有嵌套的简单序列了。
+
+额外的参数 ignore_types 和检测语句 isinstance(x, ignore_types) 用来将字符串和字节排除在可迭代对象外，防止将它们再展开成单个的字符。 这样的话字符串数组就能最终返回我们所期望的结果了。比如：
+
+```python
+>>> items = ['Dave', 'Paula', ['Thomas', 'Lewis']]
+>>> for x in flatten(items):
+...     print(x)
+...
+Dave
+Paula
+Thomas
+Lewis
+```
+
+语句 yield from 在你想在生成器中调用其他生成器作为子例程的时候非常有用。 如果你不使用它的话，那么就必须写额外的 for 循环了。比如：
+
+```python
+def flatten(items, ignore_types=(str, bytes)):
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, ignore_types):
+            for i in flatten(x):
+                yield i
+        else:
+            yield x
+```
+
+尽管只改了一点点，但是 yield from 语句看上去感觉更好，并且也使得代码更简洁清爽。
+
+之前提到的对于字符串和字节的额外检查是为了防止将它们再展开成单个字符。 如果还有其他你不想展开的类型，修改参数 ignore_types 即可。
+
+最后要注意的一点是， yield from 在涉及到基于协程和生成器的并发编程中扮演着更加重要的角色。 可以参考12.12小节查看另外一个例子。
+
+## 4.15. 顺序迭代合并后的排序迭代
+
+你有一系列排序序列，想将它们合并后得到一个排序序列并在上面迭代遍历。
+
+heapq.merge() 函数可以帮你解决这个问题。比如：
+
+```python
+import heapq
+
+if __name__ == '__main__':
+    a = [1, 4, 7, 10]
+    b = [2, 5, 6, 11]
+    for c in heapq.merge(a, b):
+        print(c)
+输出：
+1
+2
+4
+5
+6
+7
+10
+11
+```
+
+heapq.merge 可迭代特性意味着它不会立马读取所有序列。 这就意味着你可以在非常长的序列中使用它，而不会有太大的开销。 比如，下面是一个例子来演示如何合并两个排序文件：
+
+```python
+import heapq
+
+if __name__ == '__main__':
+    with open('sorted_file_1.txt', 'rt') as file1, open('sorted_file_2.txt', 'rt') as file2, open('merged_file.txt', 'wt') as outf:
+        for line in heapq.merge(file1, file2):
+            outf.write(line)
+```
+
+有一点要强调的是 heapq.merge() 需要所有输入序列必须是排过序的。 特别的，它并不会预先读取所有数据到堆栈中或者预先排序，也不会对输入做任何的排序检测。 它仅仅是检查所有序列的开始部分并返回最小的那个，这个过程一直会持续直到所有输入序列中的元素都被遍历完。
+
+## 4.16. 迭代器代替while无限循环
+
+你在代码中使用 while 循环来迭代处理数据，因为它需要调用某个函数或者和一般迭代模式不同的测试条件。 能不能用迭代器来重写这个循环呢？
+
+一个常见的IO操作程序可能会想下面这样：
+
+```python
+CHUNKSIZE = 8192
+
+def reader(s):
+    while True:
+        data = s.recv(CHUNKSIZE)
+        if data == b'':
+            break
+        process_data(data)
+```
+
+这种代码通常可以使用 iter() 来代替，如下所示：
+
+```python
+def reader2(s):
+    for chunk in iter(lambda: s.recv(CHUNKSIZE), b''):
+        pass
+        # process_data(data)
+```
+
+如果你怀疑它到底能不能正常工作，可以试验下一个简单的例子。比如：
+
+```python
+import sys
+
+if __name__ == '__main__':
+    f = open('test.txt')
+    for chunk in iter(lambda: f.read(10), ''):
+        n = sys.stdout.write(chunk)  # print(chunk, end='')
+输出：
+nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
+root:*:0:0:System Administrator:/var/root:/bin/sh
+daemon:*:1:1:System Services:/var/root:/usr/bin/false
+_uucp:*:4:4:Unix to Unix Copy Protocol:/var/spool/uucp:/usr/sbin/uucico
+```
+
+iter 函数一个鲜为人知的特性是它接受一个可选的 callable 对象和一个标记(结尾)值作为输入参数。 当以这种方式使用的时候，它会创建一个迭代器， 这个迭代器会不断调用 callable 对象直到返回值和标记值相等为止。
+
+这种特殊的方法对于一些特定的会被重复调用的函数很有效果，比如涉及到I/O调用的函数。 举例来讲，如果你想从套接字或文件中以数据块的方式读取数据，通常你得要不断重复的执行 read() 或 recv() ， 并在后面紧跟一个文件结尾测试来决定是否终止。这节中的方案使用一个简单的 iter() 调用就可以将两者结合起来了。 其中 lambda 函数参数是为了创建一个无参的 callable 对象，并为 recv 或 read() 方法提供了 size 参数。
+
+# 5. 文件与IO
+
+## 5.1. 读写文本数据
+
+你需要读写各种不同编码的文本数据，比如ASCII，UTF-8或UTF-16编码等。
+
+使用带有 rt 模式的 open() 函数读取文本文件。如下所示：
+
+```python
+# Read the entire file as a single string
+with open('test.txt', 'rt') as f:
+    data = f.read()
+    print(data)
+
+# Iterate over the lines of the file
+with open('somefile.txt', 'rt') as f:
+    for line in f:
+        # process line
+        ...
+```
+
+如果是在已存在文件中添加内容，使用模式为 at 的 open() 函数。
+
+文件的读写操作默认使用系统编码，可以通过调用 sys.getdefaultencoding() 来得到。 在大多数机器上面都是utf-8编码。如果你已经知道你要读写的文本是其他编码方式， 那么可以通过传递一个可选的 encoding 参数给open()函数。如下所示：
+
+```python
+with open('somefile.txt', 'rt', encoding='latin-1') as f:
+    ...
+```
+
+本地测试，但是open函数不加encoding函数，输出是乱码：
+
+```python
+print(sys.getdefaultencoding())
+with open('test.txt', 'rt', encoding='utf-8') as f:
+    data = f.read()
+    print(data)
+输出：
+utf-8
+你好
+```
+
+Python支持非常多的文本编码。几个常见的编码是ascii, latin-1, utf-8和utf-16。 在web应用程序中通常都使用的是UTF-8。 ascii对应从U+0000到U+007F范围内的7位字符。 latin-1是字节0-255到U+0000至U+00FF范围内Unicode字符的直接映射。 当读取一个未知编码的文本时使用latin-1编码永远不会产生解码错误。 使用latin-1编码读取一个文件的时候也许不能产生完全正确的文本解码数据， 但是它也能从中提取出足够多的有用数据。同时，如果你之后将数据回写回去，原先的数据还是会保留的。
+
+读写文本文件一般来讲是比较简单的。但是也几点是需要注意的。 首先，在例子程序中的with语句给被使用到的文件创建了一个上下文环境， 但 with 控制块结束时，文件会自动关闭。你也可以不使用 with 语句，但是这时候你就必须记得手动关闭文件：
+
+```python
+f = open('somefile.txt', 'rt')
+data = f.read()
+f.close()
+```
+
+另外一个问题是关于换行符的识别问题，在Unix和Windows中是不一样的(分别是 \n 和 \r\n )。 默认情况下，Python会以统一模式处理换行符。 这种模式下，在读取文本的时候，Python可以识别所有的普通换行符并将其转换为单个 \n 字符。 类似的，在输出时会将换行符 \n 转换为系统默认的换行符。 如果你不希望这种默认的处理方式，可以给 open() 函数传入参数 newline='' ，就像下面这样：
+
+```python
+# Read with disabled newline translation
+with open('somefile.txt', 'rt', newline='') as f:
+    ...
+```
+
+为了说明两者之间的差异，下面我在Unix机器上面读取一个Windows上面的文本文件，里面的内容是 hello world!\r\n ：
+
+```python
+>>> # Newline translation enabled (the default)
+>>> f = open('hello.txt', 'rt')
+>>> f.read()
+'hello world!\n'
+
+>>> # Newline translation disabled
+>>> g = open('hello.txt', 'rt', newline='')
+>>> g.read()
+'hello world!\r\n'
+```
+
+最后一个问题就是文本文件中可能出现的编码错误。 但你读取或者写入一个文本文件时，你可能会遇到一个编码或者解码错误。比如：
+
+```python
+>>> f = open('sample.txt', 'rt', encoding='ascii')
+>>> f.read()
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "/usr/local/lib/python3.3/encodings/ascii.py", line 26, in decode
+        return codecs.ascii_decode(input, self.errors)[0]
+UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position
+12: ordinal not in range(128)
+```
+
+如果出现这个错误，通常表示你读取文本时指定的编码不正确。 你最好仔细阅读说明并确认你的文件编码是正确的(比如使用UTF-8而不是Latin-1编码或其他)。 如果编码错误还是存在的话，你可以给 open() 函数传递一个可选的 errors 参数来处理这些错误。 下面是一些处理常见错误的方法：
+
+```python
+>>> # Replace bad chars with Unicode U+fffd replacement char
+>>> f = open('sample.txt', 'rt', encoding='ascii', errors='replace')
+>>> f.read()
+'Spicy Jalape?o!'
+>>> # Ignore bad chars entirely
+>>> g = open('sample.txt', 'rt', encoding='ascii', errors='ignore')
+>>> g.read()
+'Spicy Jalapeo!'
+```
+
+如果你经常使用 errors 参数来处理编码错误，可能会让你的生活变得很糟糕。 对于文本处理的首要原则是确保你总是使用的是正确编码。当模棱两可的时候，就使用默认的设置(通常都是UTF-8)。
+
+## 5.2. 打印输出至文件中
+
+你想将 print() 函数的输出重定向到一个文件中去。
+
+在 print() 函数中指定 file 关键字参数，像下面这样：
+
+```python
+with open('d:/work/test.txt', 'wt') as f:
+    print('Hello World!', file=f)
+```
+
+关于输出重定向到文件中就这些了。但是有一点要注意的就是文件必须是以文本模式打开。 如果文件是二进制模式的话，打印就会出错。
+
+```python
+with open('test.txt', 'wb') as f:
+    print(b'hello, world', file=f)
+报错：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 7, in <module>
+    print(b'hello, world', file=f)
+TypeError: a bytes-like object is required, not 'str'
+```
+
+## 5.3. 使用其他分隔符或行终止符打印
+
+你想使用 print() 函数输出数据，但是想改变默认的分隔符或者行尾符。
+
+可以使用在 print() 函数中使用 sep 和 end 关键字参数，以你想要的方式输出。比如：
+
+```python
+print('ACME', 50, 91.5)
+print('ACME', 50, 91.5, sep=',')
+print('ACME', 50, 91.5, sep=',', end='!!\n')
+输出：
+ACME 50 91.5
+ACME,50,91.5
+ACME,50,91.5!!
+```
+
+使用 end 参数也可以在输出中禁止换行。比如：
+
+```python
+>>> for i in range(5):
+...     print(i)
+...
+0
+1
+2
+3
+4
+>>> for i in range(5):
+...     print(i, end=' ')
+...
+0 1 2 3 4 >>>
+```
+
+当你想使用非空格分隔符来输出数据的时候，给 print() 函数传递一个 sep 参数是最简单的方案。 有时候你会看到一些程序员会使用 str.join() 来完成同样的事情。比如：
+
+```python
+>>> print(','.join(('ACME','50','91.5')))
+ACME,50,91.5
+```
+
+str.join() 的问题在于它仅仅适用于字符串。这意味着你通常需要执行另外一些转换才能让它正常工作。比如：
+
+```python
+>>> row = ('ACME', 50, 91.5)
+>>> print(','.join(row))
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: sequence item 1: expected str instance, int found
+>>> print(','.join(str(x) for x in row))
+ACME,50,91.5
+```
+
+你当然可以不用那么麻烦，只需要像下面这样写：
+
+```python
+>>> print(*row, sep=',')
+ACME,50,91.5
+```
+
+## 5.4. 读写字节数据
+
+你想读写二进制文件，比如图片，声音文件等等。
+
+使用模式为 rb 或 wb 的 open() 函数来读取或写入二进制数据。比如：
+
+```python
+# Read the entire file as a single byte string
+with open('somefile.bin', 'rb') as f:
+    data = f.read()
+
+# Write binary data to a file
+with open('somefile.bin', 'wb') as f:
+    f.write(b'Hello World')
+```
+
+在读取二进制数据时，需要指明的是所有返回的数据都是字节字符串格式的，而不是文本字符串。 类似的，在写入的时候，必须保证参数是以字节形式对外暴露数据的对象(比如字节字符串，字节数组对象等)。
+
+在读取二进制数据的时候，字节字符串和文本字符串的语义差异可能会导致一个潜在的陷阱。 特别需要注意的是，索引和迭代动作返回的是字节的值而不是字节字符串。比如：
+
+```python
+>>> # Text string
+>>> t = 'Hello World'
+>>> t[0]
+'H'
+>>> for c in t:
+...     print(c)
+...
+H
+e
+l
+l
+o
+...
+>>> # Byte string
+>>> b = b'Hello World'
+>>> b[0]
+72
+>>> for c in b:
+...     print(c)
+...
+72
+101
+108
+108
+111
+```
+
+如果你想从二进制模式的文件中读取或写入文本数据，必须确保要进行解码和编码操作。比如：
+
+```python
+with open('somefile.bin', 'rb') as f:
+    data = f.read(16)
+    text = data.decode('utf-8')  # 把bytes转成str
+
+with open('somefile.bin', 'wb') as f:
+    text = 'Hello World'
+    f.write(text.encode('utf-8'))  # 把str转成bytes
+```
+
+二进制I/O还有一个鲜为人知的特性就是数组和C结构体类型能直接被写入，而不需要中间转换为自己对象。比如：
+
+```python
+import array
+nums = array.array('i', [1, 2, 3, 4])
+with open('data.bin','wb') as f:
+    f.write(nums)
+```
+
+这个适用于任何实现了被称之为”缓冲接口”的对象，这种对象会直接暴露其底层的内存缓冲区给能处理它的操作。 二进制数据的写入就是这类操作之一。
+
+很多对象还允许通过使用文件对象的 readinto() 方法直接读取二进制数据到其底层的内存中去。比如：
+
+```python
+import array
+
+if __name__ == '__main__':
+    nums = array.array('i', [1, 2, 3, 4])
+    with open('test.txt', 'wb') as f:
+        f.write(nums)
+
+    a = array.array('i', [0, 0, 0, 0, 0, 0, 0])
+    print(a)
+    with open('test.txt', 'rb') as f:
+        f.readinto(a)
+    print(a)
+输出：
+array('i', [0, 0, 0, 0, 0, 0, 0])
+array('i', [1, 2, 3, 4, 0, 0, 0])
+```
+
+但是使用这种技术的时候需要格外小心，因为它通常具有平台相关性，并且可能会依赖字长和字节顺序(高位优先和低位优先)。 可以查看5.9小节中另外一个读取二进制数据到可修改缓冲区的例子。
+
+## 5.5. 文件不存在才能写入
