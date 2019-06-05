@@ -6234,3 +6234,736 @@ array('i', [1, 2, 3, 4, 0, 0, 0])
 但是使用这种技术的时候需要格外小心，因为它通常具有平台相关性，并且可能会依赖字长和字节顺序(高位优先和低位优先)。 可以查看5.9小节中另外一个读取二进制数据到可修改缓冲区的例子。
 
 ## 5.5. 文件不存在才能写入
+
+你想像一个文件中写入数据，但是前提必须是这个文件在文件系统上不存在。 也就是不允许覆盖已存在的文件内容。
+
+可以在 open() 函数中使用 x 模式来代替 w 模式的方法来解决这个问题。比如：
+
+```python
+with open('test.txt', 'wt') as f:
+    f.write('Hello')
+
+with open('test.txt', 'xt') as f:
+    f.write('Hello')
+```
+
+如果文件是二进制的，使用 xb 来代替 xt。
+
+这一小节演示了在写文件时通常会遇到的一个问题的完美解决方案(不小心覆盖一个已存在的文件)。 一个替代方案是先测试这个文件是否存在，像下面这样：
+
+```python
+if not os.path.exists('test.txt'):
+    with open('test.txt', 'wt') as f:
+        f.write('Hello')
+else:
+    print('File already exists!')
+```
+
+显而易见，使用x文件模式更加简单。要注意的是x模式是一个Python3对 open() 函数特有的扩展。 在Python的旧版本或者是Python实现的底层C函数库中都是没有这个模式的。
+
+## 5.6. 字符串的I/O操作
+
+你想使用操作类文件对象的程序来操作文本或二进制字符串。
+
+使用 io.StringIO() 和 io.BytesIO() 类来创建类文件对象操作字符串数据。比如：
+
+```python
+>>> s = io.StringIO()
+>>> s.write('Hello World\n')
+12
+>>> print('This is a test', file=s)
+15
+>>> # Get all of the data written so far
+>>> s.getvalue()
+'Hello World\nThis is a test\n'
+>>>
+
+>>> # Wrap a file interface around an existing string
+>>> s = io.StringIO('Hello\nWorld\n')
+>>> s.read(4)
+'Hell'
+>>> s.read()
+'o\nWorld\n'
+```
+
+可以像读文件一样，读取io.StringIO对象：
+
+```python
+import io
+
+
+def get_file_content(f):
+    return f.read()
+
+
+if __name__ == '__main__':
+    # Wrap a file interface around an existing string
+    s = io.StringIO('Hello\nWorld\n')
+    print(get_file_content(s))
+输出：
+Hello
+World
+```
+
+io.StringIO 只能用于文本。如果你要操作二进制数据，要使用 io.BytesIO 类来代替。比如：
+
+```python
+>>> s = io.BytesIO()
+>>> s.write(b'binary data')
+>>> s.getvalue()
+b'binary data'
+```
+
+当你想模拟一个普通的文件的时候 StringIO 和 BytesIO 类是很有用的。 比如，在单元测试中，你可以使用 StringIO 来创建一个包含测试数据的类文件对象， 这个对象可以被传给某个参数为普通文件对象的函数。
+
+需要注意的是， StringIO 和 BytesIO 实例并没有正确的整数类型的文件描述符。 因此，它们不能在那些需要使用真实的系统级文件如文件，管道或者是套接字的程序中使用。
+
+## 5.7. 读写压缩文件
+
+你想读写一个gzip或bz2格式的压缩文件。
+
+gzip 和 bz2 模块可以很容易的处理这些文件。 两个模块都为 open() 函数提供了另外的实现来解决这个问题。 比如，为了以文本形式读取压缩文件，可以这样做：
+
+```python
+# gzip compression
+import gzip
+with gzip.open('somefile.gz', 'rt') as f:
+    text = f.read()
+
+# bz2 compression
+import bz2
+with bz2.open('somefile.bz2', 'rt') as f:
+    text = f.read()
+```
+
+类似的，为了写入压缩数据，可以这样做：
+
+```python
+# gzip compression
+import gzip
+with gzip.open('somefile.gz', 'wt') as f:
+    f.write(text)
+
+# bz2 compression
+import bz2
+with bz2.open('somefile.bz2', 'wt') as f:
+    f.write(text)
+```
+
+如上，所有的I/O操作都使用文本模式并执行Unicode的编码/解码。 类似的，如果你想操作二进制数据，使用 rb 或者 wb 文件模式即可。
+
+大部分情况下读写压缩数据都是很简单的。但是要注意的是选择一个正确的文件模式是非常重要的。 如果你不指定模式，那么默认的就是二进制模式，如果这时候程序想要接受的是文本数据，那么就会出错。 gzip.open() 和 bz2.open() 接受跟内置的 open() 函数一样的参数， 包括 encoding，errors，newline 等等。
+
+当写入压缩数据时，可以使用 compresslevel 这个可选的关键字参数来指定一个压缩级别。比如：
+
+```python
+with gzip.open('somefile.gz', 'wt', compresslevel=5) as f:
+    f.write(text)
+```
+
+默认的等级是9，也是最高的压缩等级。等级越低性能越好，但是数据压缩程度也越低。
+
+最后一点， gzip.open() 和 bz2.open() 还有一个很少被知道的特性， 它们可以作用在一个已存在并以二进制模式打开的文件上。比如，下面代码是可行的：
+
+```python
+import gzip
+f = open('somefile.gz', 'rb')
+with gzip.open(f, 'rt') as g:
+    text = g.read()
+```
+
+这样就允许 gzip 和 bz2 模块可以工作在许多类文件对象上，比如套接字，管道和内存中文件等。
+
+## 5.8. 固定大小记录的文件迭代
+
+你想在一个固定长度记录或者数据块的集合上迭代，而不是在一个文件中一行一行的迭代。
+
+通过下面这个小技巧使用 iter 和 functools.partial() 函数：
+
+```python
+from functools import partial
+
+RECORD_SIZE = 5
+
+if __name__ == '__main__':
+    with open('test.txt', 'rb') as f:
+        records = iter(partial(f.read, RECORD_SIZE), b'')
+        # records = iter(lambda: f.read(RECORD_SIZE), b'')  # 该写法效果同上
+        for r in records:
+            print(r)
+输出：
+b'Hello'
+b' Worl'
+b'd\r\nGo'
+b'od lu'
+b'ck!'
+```
+
+这个例子中的 records 对象是一个可迭代对象，它会不断的产生固定大小的数据块，直到文件末尾。 要注意的是如果总记录大小不是块大小的整数倍的话，最后一个返回元素的字节数会比期望值少。
+
+注：functools.partial函数为偏函数，把参数绑定到函数上，例：
+
+```python
+from functools import partial
+
+if __name__ == '__main__':
+    p = partial(print, 'hello world')
+    p()
+    p('Good luck', sep=',')
+输出：
+hello world
+hello world,Good luck
+```
+
+## 5.9. 读取二进制数据到可变缓冲区中
+
+你想直接读取二进制数据到一个可变缓冲区中，而不需要做任何的中间复制操作。 或者你想原地修改数据并将它写回到一个文件中去。
+
+为了读取数据到一个可变数组中，使用文件对象的 readinto() 方法。比如：
+
+```python
+import os.path
+
+
+def read_into_buffer(filename):
+    buf = bytearray(os.path.getsize(filename))
+    with open(filename, 'rb') as f:
+        f.readinto(buf)
+    return buf
+
+
+if __name__ == '__main__':
+    buf = read_into_buffer('test.txt')
+    print(buf)
+
+    buf[0:5] = b'ABCDE'
+    print(buf)
+
+    with open('new_test.txt', 'wb') as f:
+        f.write(buf)
+
+# test.txt
+Hello World
+Good luck!
+
+输出：
+bytearray(b'Hello World\r\nGood luck!')
+bytearray(b'ABCDE World\r\nGood luck!')
+
+# new_test.txt
+ABCDE World
+Good luck!
+```
+
+文件对象的 readinto() 方法能被用来为预先分配内存的数组填充数据，甚至包括由 array 模块或 numpy 库创建的数组。 和普通 read() 方法不同的是， readinto() 填充已存在的缓冲区而不是为新对象重新分配内存再返回它们。 因此，你可以使用它来避免大量的内存分配操作。 比如，如果你读取一个由相同大小的记录组成的二进制文件时，你可以像下面这样写：
+
+```python
+record_size = 5  # Size of each record (adjust value)
+
+if __name__ == '__main__':
+    buf = bytearray(record_size)
+    with open('test.txt', 'rb') as f:
+        while True:
+            n = f.readinto(buf)
+            if n < record_size:
+                print(buf)
+                break
+            # Use the contents of buf
+            print(buf)
+输出：
+bytearray(b'Hello')
+bytearray(b' Worl')
+bytearray(b'd\r\nGo')
+bytearray(b'od lu')
+bytearray(b'ck!lu')  # 最后只填充了3位，所有lu还是上一次的od lu的最后2位
+```
+
+另外有一个有趣特性就是 memoryview ， 它可以通过零复制的方式对已存在的缓冲区执行切片操作，甚至还能修改它的内容。比如：
+
+```python
+buf = read_into_buffer('test.txt')
+print(buf)
+
+buf[0:5] = b'ABCDE'  # 可以直接对buf做切片操作
+buf[-5:] = b'DEBUG'
+print(buf)
+
+m1 = memoryview(buf)
+m2 = m1[-5:]
+m2[:] = b'WORLD'
+print(buf)
+输出：
+bytearray(b'Hello World\r\nGood luck!')
+bytearray(b'ABCDE World\r\nGood DEBUG')
+bytearray(b'ABCDE World\r\nGood WORLD')
+```
+
+使用 f.readinto() 时需要注意的是，你必须检查它的返回值，也就是实际读取的字节数。
+
+如果字节数小于缓冲区大小，表明数据被截断或者被破坏了(比如你期望每次读取指定数量的字节)。
+
+最后，留心观察其他函数库和模块中和 into 相关的函数(比如 recv_into() ， pack_into() 等)。 Python的很多其他部分已经能支持直接的I/O或数据访问操作，这些操作可被用来填充或修改数组和缓冲区内容。
+
+关于解析二进制结构和 memoryviews 使用方法的更高级例子，请参考6.12小节。
+
+## 5.10. 内存映射的二进制文件
+
+你想内存映射一个二进制文件到一个可变字节数组中，目的可能是为了随机访问它的内容或者是原地做些修改。
+
+使用 mmap 模块来内存映射文件。 下面是一个工具函数，向你演示了如何打开一个文件并以一种便捷方式内存映射这个文件。
+
+```python
+import mmap
+import os
+
+
+def memory_map(filen_name, access=mmap.ACCESS_WRITE):
+    size = os.path.getsize(filen_name)
+    fd = os.open(filen_name, os.O_RDWR)
+    return mmap.mmap(fd, size, access=access)
+```
+
+为了使用这个函数，你需要有一个已创建并且内容不为空的文件。 下面是一个例子，教你怎样初始创建一个文件并将其内容扩充到指定大小：
+
+```python
+if __name__ == '__main__':
+    size = 100
+    with open('test.txt', 'wb') as f:
+        f.seek(size - 1)
+        f.write(b'\x00')
+```
+
+下面是一个利用 memory_map() 函数类内存映射文件内容的例子：
+
+```python
+>>> m = memory_map('data')
+>>> len(m)
+100
+>>> m[0:10]
+b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+>>> m[0]
+0
+>>> # Reassign a slice
+>>> m[0:11] = b'Hello World'
+>>> m.close()
+
+>>> # Verify that changes were made
+>>> with open('data', 'rb') as f:
+... print(f.read(11))
+...
+b'Hello World'
+```
+
+mmap() 返回的 mmap 对象同样也可以作为一个上下文管理器来使用， 这时候底层的文件会被自动关闭。比如：
+
+```python
+with memory_map('test.txt') as m:
+    print(len(m))
+    print(m[0:11])
+
+print(m.closed)
+输出：
+100
+b'Hello World'
+True
+```
+
+默认情况下， memeory_map() 函数打开的文件同时支持读和写操作。 任何的修改内容都会复制回原来的文件中。 如果需要只读的访问模式，可以给参数 access 赋值为 mmap.ACCESS_READ 。比如：
+
+```python
+m = memory_map(filename, mmap.ACCESS_READ)
+
+# 以ACCESS_READ去写文件时，抛异常
+with memory_map('test.txt', mmap.ACCESS_READ) as m:
+    m[11:13] = b'OK'
+    print(m[0:20])
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 15, in <module>
+    m[11:13] = b'OK'
+TypeError: mmap can't modify a readonly memory map.
+```
+
+如果你想在本地修改数据，但是又不想将修改写回到原始文件中，可以使用 mmap.ACCESS_COPY ：
+
+```python
+m = memory_map(filename, mmap.ACCESS_COPY)
+
+# 使用样例
+with memory_map('test.txt', mmap.ACCESS_COPY) as m:
+    m[11:15] = b'Good'
+    print(m[0:20])
+
+with memory_map('test.txt', mmap.ACCESS_COPY) as m:
+    print(m[0:20])
+输出：
+b'Hello WorldGood\x00\x00\x00\x00\x00'
+b'Hello WorldOK\x00\x00\x00\x00\x00\x00\x00'
+```
+
+为了随机访问文件的内容，使用 mmap 将文件映射到内存中是一个高效和优雅的方法。 例如，你无需打开一个文件并执行大量的 seek() ， read() ， write() 调用， 只需要简单的映射文件并使用切片操作访问数据即可。
+
+一般来讲， mmap() 所暴露的内存看上去就是一个二进制数组对象。 但是，你可以使用一个内存视图来解析其中的数据。比如：
+
+```python
+m = memory_map('test.txt')
+v = memoryview(m).cast('I')
+m[0:4] = b'\x00\x00\x00\x00'
+print(v[0])
+
+v[0] = 7
+print(v[0])
+
+print(m[0:4])
+m[0:4] = b'\x07\x01\x00\x00'
+print(v[0])
+输出：
+0
+7
+b'\x07\x00\x00\x00'
+263
+```
+
+需要强调的一点是，内存映射一个文件并不会导致整个文件被读取到内存中。 也就是说，文件并没有被复制到内存缓存或数组中。相反，操作系统仅仅为文件内容保留了一段虚拟内存。 当你访问文件的不同区域时，这些区域的内容才根据需要被读取并映射到内存区域中。 而那些从没被访问到的部分还是留在磁盘上。所有这些过程是透明的，在幕后完成！
+
+如果多个Python解释器内存映射同一个文件，得到的 mmap 对象能够被用来在解释器直接交换数据。 也就是说，所有解释器都能同时读写数据，并且其中一个解释器所做的修改会自动呈现在其他解释器中。 很明显，这里需要考虑同步的问题。但是这种方法有时候可以用来在管道或套接字间传递数据。
+
+这一小节中函数尽量写得很通用，同时适用于Unix和Windows平台。 要注意的是使用 mmap() 函数时会在底层有一些平台的差异性。 另外，还有一些选项可以用来创建匿名的内存映射区域。 如果你对这个感兴趣，确保你仔细研读了Python文档中 这方面的内容 。
+
+## 5.11. 文件路径名的操作
+
+你需要使用路径名来获取文件名，目录名，绝对路径等等。
+
+使用 os.path 模块中的函数来操作路径名。 下面是一个交互式例子来演示一些关键的特性：
+
+```python
+import os
+
+
+if __name__ == '__main__':
+    path = r'D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test\test.txt'
+    # Get the last component of the path
+    print(os.path.basename(path))
+
+    # Get the directory name
+    print(os.path.dirname(path))
+
+    # Join path components together
+    print(os.path.join('abc', 'def', os.path.basename(path)))
+
+    # Expand the user's home directory
+    path = '~/Data/data.csv'
+    print(os.path.expanduser(path))
+
+    # Split the file extension
+    print(os.path.splitext(path))
+输出：
+test.txt
+D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test
+abc\def\test.txt
+C:\Users\Ben/Data/data.csv
+('~/Data/data', '.csv')
+```
+
+对于任何的文件名的操作，你都应该使用 os.path 模块，而不是使用标准字符串操作来构造自己的代码。 特别是为了可移植性考虑的时候更应如此， 因为 os.path 模块知道Unix和Windows系统之间的差异并且能够可靠地处理类似 Data/data.csv 和 Data\data.csv 这样的文件名。 其次，你真的不应该浪费时间去重复造轮子。通常最好是直接使用已经为你准备好的功能。
+
+要注意的是 os.path 还有更多的功能在这里并没有列举出来。 可以查阅官方文档来获取更多与文件测试，符号链接等相关的函数说明。
+
+## 5.12. 测试文件是否存在
+
+你想测试一个文件或目录是否存在。
+
+使用 os.path 模块来测试一个文件或目录是否存在。比如：
+
+```python
+>>> import os
+>>> os.path.exists('/etc/passwd')
+True
+>>> os.path.exists('/tmp/spam')
+False
+```
+
+你还能进一步测试这个文件时什么类型的。 在下面这些测试中，如果测试的文件不存在的时候，结果都会返回False：
+
+```python
+>>> # Is a regular file
+>>> os.path.isfile('/etc/passwd')
+True
+
+>>> # Is a directory
+>>> os.path.isdir('/etc/passwd')
+False
+
+>>> # Is a symbolic link
+>>> os.path.islink('/usr/local/bin/python3')
+True
+
+>>> # Get the file linked to
+>>> os.path.realpath('/usr/local/bin/python3')
+'/usr/local/bin/python3.3'
+```
+
+如果你还想获取元数据(比如文件大小或者是修改日期)，也可以使用 os.path 模块来解决：
+
+```python
+import os
+import time
+
+if __name__ == '__main__':
+    file_path = r'D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test\test.txt'
+    print(os.path.getsize(file_path))
+
+    file_mtime = os.path.getmtime(file_path)
+    print(file_mtime)
+
+    print(time.ctime(file_mtime))
+输出：
+100
+1559489044.3936353
+Sun Jun  2 23:24:04 2019
+```
+
+使用 os.path 来进行文件测试是很简单的。 在写这些脚本时，可能唯一需要注意的就是你需要考虑文件权限的问题，特别是在获取元数据时候。比如：
+
+```python
+>>> os.path.getsize('/Users/guido/Desktop/foo.txt')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "/usr/local/lib/python3.3/genericpath.py", line 49, in getsize
+        return os.stat(filename).st_size
+PermissionError: [Errno 13] Permission denied: '/Users/guido/Desktop/foo.txt'
+```
+
+## 5.13. 获取文件夹中的文件列表
+
+你想获取文件系统中某个目录下的所有文件列表。
+
+使用 os.listdir() 函数来获取某个目录中的文件列表：
+
+```python
+import os
+
+if __name__ == '__main__':
+    names = os.listdir('.')
+    print(names)
+输出：
+['dirA', 'main.py', 'test.txt', '__init__.py', '__pycache__']
+```
+
+结果会返回目录中所有文件列表，包括所有文件，子目录，符号链接等等。 如果你需要通过某种方式过滤数据，可以考虑结合 os.path 库中的一些函数来使用列表推导。比如：
+
+```python
+import os
+
+if __name__ == '__main__':
+    # Get all regular files
+    names = [name for name in os.listdir('.') if os.path.isfile(os.path.join('.', name))]
+    print(names)
+
+    # Get all dirs
+    dirnames = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name))]
+    print(dirnames)
+输出：
+['main.py', 'test.txt', '__init__.py']
+['dirA', '__pycache__']
+```
+
+字符串的 startswith() 和 endswith() 方法对于过滤一个目录的内容也是很有用的。比如：
+
+```python
+import os
+
+if __name__ == '__main__':
+    pyfiles = [name for name in os.listdir('.') if name.endswith('.py')]
+    print(pyfiles)
+输出：
+['main.py', '__init__.py']
+```
+
+对于文件名的匹配，你可能会考虑使用 glob 或 fnmatch 模块。比如：
+
+```python
+import glob
+import os
+from fnmatch import fnmatch
+
+if __name__ == '__main__':
+    pyfiles = glob.glob('./*py')
+    print(pyfiles)
+
+    pyfiles = [name for name in os.listdir('.') if fnmatch(name, '*.py')]
+    print(pyfiles)
+输出：
+['.\\main.py', '.\\__init__.py']
+['main.py', '__init__.py']
+```
+
+获取目录中的列表是很容易的，但是其返回结果只是目录中实体名列表而已。 如果你还想获取其他的元信息，比如文件大小，修改时间等等， 你或许还需要使用到 os.path 模块中的函数或着 os.stat() 函数来收集数据。比如：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import glob
+import os
+import time
+
+if __name__ == '__main__':
+    pyfiles = glob.glob('*.py')
+
+    # Get file sizes and modification dates
+    name_sz_date = [(name, os.path.getsize(name), os.path.getmtime(name)) for name in pyfiles]
+    for name, size, mtime in name_sz_date:
+        print(name, size, time.ctime(mtime))
+
+    # Alternative: Get file metadata
+    file_metadata = [(name, os.stat(name)) for name in pyfiles]
+    for name, meta in file_metadata:
+        print(name, meta.st_size, time.ctime(meta.st_mtime))
+输出：
+main.py 587 Wed Jun  5 23:05:43 2019
+__init__.py 131 Wed Nov 21 19:33:28 2018
+main.py 587 Wed Jun  5 23:05:43 2019
+__init__.py 131 Wed Nov 21 19:33:28 2018
+```
+
+最后还有一点要注意的就是，有时候在处理文件名编码问题时候可能会出现一些问题。 通常来讲，函数 os.listdir() 返回的实体列表会根据系统默认的文件名编码来解码。 但是有时候也会碰到一些不能正常解码的文件名。 关于文件名的处理问题，在5.14和5.15小节有更详细的讲解。
+
+## 5.14. 忽略文件名编码
+
+你想使用原始文件名执行文件的I/O操作，也就是说文件名并没有经过系统默认编码去解码或编码过。
+
+默认情况下，所有的文件名都会根据 sys.getfilesystemencoding() 返回的文本编码来编码或解码。比如：
+
+```python
+>>> sys.getfilesystemencoding()
+'utf-8'
+```
+
+如果因为某种原因你想忽略这种编码，可以使用一个原始字节字符串来指定一个文件名即可。比如：
+
+```python
+import os
+
+if __name__ == '__main__':
+    # Wrte a file using a unicode filename
+    with open('jalape\xf1o.txt', 'w') as f:
+        f.write('Spicy!')
+
+    # Directory listing (decoded)
+    print(os.listdir('.'))
+
+    # Directory listing (raw)
+    print(os.listdir(b'.'))
+
+    # Open file with raw filename
+    with open(b'jalape\xc3\xb1o.txt') as f:
+        print(f.read())
+输出：
+['jalapeño.txt']
+[b'jalape\xc3\xb1o.txt', b'main.py', b'test.txt', b'__init__.py', b'__pycache__']
+Spicy!
+```
+
+正如你所见，在最后两个操作中，当你给文件相关函数如 open() 和 os.listdir() 传递字节字符串时，文件名的处理方式会稍有不同。
+
+通常来讲，你不需要担心文件名的编码和解码，普通的文件名操作应该就没问题了。 但是，有些操作系统允许用户通过偶然或恶意方式去创建名字不符合默认编码的文件。 这些文件名可能会神秘地中断那些需要处理大量文件的Python程序。
+
+读取目录并通过原始未解码方式处理文件名可以有效的避免这样的问题， 尽管这样会带来一定的编程难度。
+
+关于打印不可解码的文件名，请参考5.15小节。
+
+## 5.15. 打印不合法的文件名
+
+你的程序获取了一个目录中的文件名列表，但是当它试着去打印文件名的时候程序崩溃， 出现了 UnicodeEncodeError 异常和一条奇怪的消息—— surrogates not allowed 。
+
+当打印未知的文件名时，使用下面的方法可以避免这样的错误：
+
+```python
+def bad_filename(filename):
+    return repr(filename)[1:-1]
+
+try:
+    print(filename)
+except UnicodeEncodeError:
+    print(bad_filename(filename))
+```
+
+这一小节讨论的是在编写必须处理文件系统的程序时一个不太常见但又很棘手的问题。 默认情况下，Python假定所有文件名都已经根据 sys.getfilesystemencoding() 的值编码过了。 但是，有一些文件系统并没有强制要求这样做，因此允许创建文件名没有正确编码的文件。 这种情况不太常见，但是总会有些用户冒险这样做或者是无意之中这样做了( 可能是在一个有缺陷的代码中给 open() 函数传递了一个不合规范的文件名)。
+
+当执行类似 os.listdir() 这样的函数时，这些不合规范的文件名就会让Python陷入困境。 一方面，它不能仅仅只是丢弃这些不合格的名字。而另一方面，它又不能将这些文件名转换为正确的文本字符串。 Python对这个问题的解决方案是从文件名中获取未解码的字节值比如 \xhh 并将它映射成Unicode字符 \udchh 表示的所谓的”代理编码”。 下面一个例子演示了当一个不合格目录列表中含有一个文件名为bäd.txt(使用Latin-1而不是UTF-8编码)时的样子：
+
+```python
+>>> import os
+>>> files = os.listdir('.')
+>>> files
+['spam.py', 'b\udce4d.txt', 'foo.txt']
+```
+
+如果你有代码需要操作文件名或者将文件名传递给 open() 这样的函数，一切都能正常工作。 只有当你想要输出文件名时才会碰到些麻烦(比如打印输出到屏幕或日志文件等)。 特别的，当你想打印上面的文件名列表时，你的程序就会崩溃：
+
+```python
+with open('b\udce4d.txt', 'w') as f:
+    f.write('Spicy!')
+
+files = os.listdir('.')
+print(files)
+for name in files:
+    print(name)
+输出：
+['b\udce4d.txt', 'jalapeño.txt', 'main.py', 'test.txt', '__init__.py', '__pycache__']
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 12, in <module>
+    print(name)
+UnicodeEncodeError: 'utf-8' codec can't encode character '\udce4' in position 1: surrogates not allowed
+```
+
+程序崩溃的原因就是字符 \udce4 是一个非法的Unicode字符。 它其实是一个被称为代理字符对的双字符组合的后半部分。 由于缺少了前半部分，因此它是个非法的Unicode。 所以，唯一能成功输出的方法就是当遇到不合法文件名时采取相应的补救措施。 比如可以将上述代码修改如下：
+
+```python
+import os
+
+
+def bad_filename(filename):
+    return repr(filename)[1:-1]
+
+
+if __name__ == '__main__':
+    files = os.listdir('.')
+    for name in files:
+        try:
+            print(name)
+        except UnicodeEncodeError:
+            print(bad_filename(name))
+输出：
+b\udce4d.txt
+jalapeño.txt
+main.py
+```
+
+在 bad_filename() 函数中怎样处置取决于你自己。 另外一个选择就是通过某种方式重新编码，示例如下：
+
+```python
+import sys
+
+def bad_filename(filename):
+    temp = filename.encode(sys.getfilesystemencoding(), errors='surrogateescape')
+    return temp.decode('latin-1')
+
+输出：
+bäd.txt
+jalapeño.txt
+main.py
+```
+
+译者注:
+
+> surrogateescape:
+> 这种是Python在绝大部分面向OS的API中所使用的错误处理器，
+> 它能以一种优雅的方式处理由操作系统提供的数据的编码问题。
+> 在解码出错时会将出错字节存储到一个很少被使用到的Unicode编码范围内。
+> 在编码时将那些隐藏值又还原回原先解码失败的字节序列。
+> 它不仅对于OS API非常有用，也能很容易的处理其他情况下的编码错误。
+
+这一小节主题可能会被大部分读者所忽略。但是如果你在编写依赖文件名和文件系统的关键任务程序时， 就必须得考虑到这个。否则你可能会在某个周末被叫到办公室去调试一些令人费解的错误。
+
+## 5.16. 增加或改变已打开文件的编码
