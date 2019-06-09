@@ -6967,3 +6967,828 @@ main.py
 这一小节主题可能会被大部分读者所忽略。但是如果你在编写依赖文件名和文件系统的关键任务程序时， 就必须得考虑到这个。否则你可能会在某个周末被叫到办公室去调试一些令人费解的错误。
 
 ## 5.16. 增加或改变已打开文件的编码
+
+你想在不关闭一个已打开的文件前提下增加或改变它的Unicode编码。
+
+如果你想给一个以二进制模式打开的文件添加Unicode编码/解码方式， 可以使用 io.TextIOWrapper() 对象包装它。比如：
+
+```python
+import urllib.request
+import io
+
+u = urllib.request.urlopen('http://www.python.org')
+f = io.TextIOWrapper(u, encoding='utf-8')
+text = f.read()
+```
+
+如果你想修改一个已经打开的文本模式的文件的编码方式，可以先使用 detach() 方法移除掉已存在的文本编码层， 并使用新的编码方式代替。下面是一个在 sys.stdout 上修改编码方式的例子：
+
+```python
+>>> import sys
+>>> sys.stdout.encoding
+Out[3]: 'UTF-8'
+>>> print('你好')
+你好
+>>> import io
+>>> sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='latin-1')
+>>> sys.stdout.encoding
+Out[7]: 'latin-1'
+>>> print('你好')
+Traceback (most recent call last):
+  File "D:\Anaconda3\lib\site-packages\IPython\core\interactiveshell.py", line 3296, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "<ipython-input-8-5b6bd01b6109>", line 1, in <module>
+    print('你好')
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 0-1: ordinal not in range(256)
+```
+
+I/O系统由一系列的层次构建而成。你可以试着运行下面这个操作一个文本文件的例子来查看这种层次，本地验证如下：
+
+```python
+f = open('test.txt', 'w')
+print(f)
+print(f.buffer)
+print(f.buffer.raw)
+输出：
+<_io.TextIOWrapper name='test.txt' mode='w' encoding='cp936'>
+<_io.BufferedWriter name='test.txt'>
+<_io.FileIO name='test.txt' mode='wb' closefd=True>
+```
+
+在这个例子中，io.TextIOWrapper 是一个编码和解码Unicode的文本处理层， io.BufferedWriter 是一个处理二进制数据的带缓冲的I/O层， io.FileIO 是一个表示操作系统底层文件描述符的原始文件。 增加或改变文本编码会涉及增加或改变最上面的 io.TextIOWrapper 层。
+
+一般来讲，像上面例子这样通过访问属性值来直接操作不同的层是很不安全的。 例如，如果你试着使用下面这样的技术改变编码看看会发生什么：
+
+```python
+import io
+
+if __name__ == '__main__':
+    f = open('test.txt', 'w')
+    print(f)
+    f = io.TextIOWrapper(f.buffer, encoding='UTF-8')
+    print(f)
+    f.write('Hello')
+输出：
+<_io.TextIOWrapper name='test.txt' mode='w' encoding='cp936'>
+<_io.TextIOWrapper name='test.txt' encoding='UTF-8'>
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 11, in <module>
+    f.write('Hello')
+ValueError: I/O operation on closed file.
+```
+
+结果出错了，因为f的原始值已经被破坏了并关闭了底层的文件。
+
+detach() 方法会断开文件的最顶层并返回第二层，之后最顶层就没什么用了。例如：
+
+```python
+f = open('test.txt', 'w')
+print(f)
+b = f.detach()
+print(b)
+f.write('hello')
+输出：
+<_io.TextIOWrapper name='test.txt' mode='w' encoding='cp936'>
+<_io.BufferedWriter name='test.txt'>
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 11, in <module>
+    f.write('hello')
+ValueError: underlying buffer has been detached
+```
+
+一旦断开最顶层后，你就可以给返回结果添加一个新的最顶层。比如：
+
+```python
+import io
+
+if __name__ == '__main__':
+    f = open('test.txt', 'w')
+    print(f)
+    b = f.detach()
+    print(b)
+    f = io.TextIOWrapper(b, encoding='UTF-8')
+    print(f)
+输出：
+<_io.TextIOWrapper name='test.txt' mode='w' encoding='cp936'>
+<_io.BufferedWriter name='test.txt'>
+<_io.TextIOWrapper name='test.txt' encoding='UTF-8'>
+```
+
+尽管已经向你演示了改变编码的方法， 但是你还可以利用这种技术来改变文件行处理、错误机制以及文件处理的其他方面。例如：
+
+```python
+>>> sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='ascii',
+...                             errors='xmlcharrefreplace')
+>>> print('Jalape\u00f1o')
+Jalape&#241;o
+```
+
+注意下最后输出中的非ASCII字符 ñ 是如何被 &#241; 取代的。
+
+## 5.17. 将字节写入
+
+你想在文本模式打开的文件中写入原始的字节数据。
+
+将字节数据直接写入文件的缓冲区即可，例如：
+
+```python
+>>> import sys
+>>> sys.stdout.write(b'Hello\n')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: must be str, not bytes
+>>> sys.stdout.buffer.write(b'Hello\n')
+Hello
+5
+>>>
+```
+
+类似的，能够通过读取文本文件的 buffer 属性来读取二进制数据。
+
+I/O系统以层级结构的形式构建而成。 文本文件是通过在一个拥有缓冲的二进制模式文件上增加一个Unicode编码/解码层来创建。 buffer 属性指向对应的底层文件。如果你直接访问它的话就会绕过文本编码/解码层。
+
+本小节例子展示的 sys.stdout 可能看起来有点特殊。 默认情况下，sys.stdout 总是以文本模式打开的。 但是如果你在写一个需要打印二进制数据到标准输出的脚本的话，你可以使用上面演示的技术来绕过文本编码层。
+
+## 5.18. 将文件描述符包装成文件对象
+
+你有一个对应于操作系统上一个已打开的I/O通道(比如文件、管道、套接字等)的整型文件描述符， 你想将它包装成一个更高层的Python文件对象。
+
+一个文件描述符和一个打开的普通文件是不一样的。 文件描述符仅仅是一个由操作系统指定的整数，用来指代某个系统的I/O通道。 如果你碰巧有这么一个文件描述符，你可以通过使用 open() 函数来将其包装为一个Python的文件对象。 你仅仅只需要使用这个整数值的文件描述符作为第一个参数来代替文件名即可。例如：
+
+```python
+import os
+
+if __name__ == '__main__':
+    # Open a low-level file descriptor
+    fd = os.open('test.txt', os.O_WRONLY | os.O_CREAT)
+
+    # Turn into a proper file
+    f = open(fd, 'wt')
+    f.write('hello world\n')
+    f.close()
+```
+
+当高层的文件对象被关闭或者破坏的时候，底层的文件描述符也会被关闭。 如果这个并不是你想要的结果，你可以给 open() 函数传递一个可选的 colsefd=False 。比如：
+
+```python
+# Create a file object, but don't close underlying fd when done
+f = open(fd, 'wt', closefd=False)
+```
+
+在Unix系统中，这种包装文件描述符的技术可以很方便的将一个类文件接口作用于一个以不同方式打开的I/O通道上， 如管道、套接字等。举例来讲，下面是一个操作管道的例子：
+
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+
+def echo_client(client_sock, addr):
+    print('Got connection from', addr)
+
+    # Make text-mode file wrappers for socket reading/writing
+    client_in = open(client_sock.fileno(), 'rt', encoding='latin-1',
+                closefd=False)
+
+    client_out = open(client_sock.fileno(), 'wt', encoding='latin-1',
+                closefd=False)
+
+    # Echo lines back to the client using file I/O
+    for line in client_in:
+        client_out.write(line)
+        client_out.flush()
+
+    client_sock.close()
+
+def echo_server(address):
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(address)
+    sock.listen(1)
+    while True:
+        client, addr = sock.accept()
+        echo_client(client, addr)
+```
+
+需要重点强调的一点是，上面的例子仅仅是为了演示内置的 open() 函数的一个特性，并且也只适用于基于Unix的系统。 如果你想将一个类文件接口作用在一个套接字并希望你的代码可以跨平台，请使用套接字对象的 makefile() 方法。 但是如果不考虑可移植性的话，那上面的解决方案会比使用 makefile() 性能更好一点。
+
+你也可以使用这种技术来构造一个别名，允许以不同于第一次打开文件的方式使用它。 例如，下面演示如何创建一个文件对象，它允许你输出二进制数据到标准输出(通常以文本模式打开)：
+
+```python
+import sys
+
+if __name__ == '__main__':
+    # Create a binary-mode file for stdout
+    bstdout = open(sys.stdout.fileno(), 'wb', closefd=False)
+    bstdout.write(b'Hello World\n')
+    bstdout.flush()
+输出：
+Hello World
+```
+
+尽管可以将一个已存在的文件描述符包装成一个正常的文件对象， 但是要注意的是并不是所有的文件模式都被支持，并且某些类型的文件描述符可能会有副作用 (特别是涉及到错误处理、文件结尾条件等等的时候)。 在不同的操作系统上这种行为也是不一样，特别的，上面的例子都不能在非Unix系统上运行。 我说了这么多，意思就是让你充分测试自己的实现代码，确保它能按照期望工作。
+
+## 5.19. 创建临时文件和文件夹
+
+你需要在程序执行时创建一个临时文件或目录，并希望使用完之后可以自动销毁掉。
+
+tempfile 模块中有很多的函数可以完成这任务。 为了创建一个匿名的临时文件，可以使用 tempfile.TemporaryFile ：
+
+```python
+from tempfile import TemporaryFile
+
+if __name__ == '__main__':
+    with TemporaryFile('w+t') as f:
+        print('filename is:', f.name)
+        # Read/write to the file
+        f.write('Hello World\n')
+        f.write('Testing\n')
+
+        # Seek back to beginning and read the data
+        f.seek(0)
+        data = f.read()
+
+    # Temporary file is destroyed
+    print(data)
+输出：
+filename is: C:\Users\Ben\AppData\Local\Temp\tmps8hcmnph
+Hello World
+Testing
+```
+
+或者，如果你喜欢，你还可以像这样使用临时文件：
+
+```python
+f = TemporaryFile('w+t')
+# Use the temporary file
+...
+f.close()
+# File is destroyed
+```
+
+TemporaryFile() 的第一个参数是文件模式，通常来讲文本模式使用 w+t ，二进制模式使用 w+b 。 这个模式同时支持读和写操作，在这里是很有用的，因为当你关闭文件去改变模式的时候，文件实际上已经不存在了。 TemporaryFile() 另外还支持跟内置的 open() 函数一样的参数。比如：
+
+```python
+with TemporaryFile('w+t', encoding='utf-8', errors='ignore') as f:
+    ...
+```
+
+在大多数Unix系统上，通过 TemporaryFile() 创建的文件都是匿名的，甚至连目录都没有。 如果你想打破这个限制，可以使用 NamedTemporaryFile() 来代替。比如：
+
+```python
+from tempfile import NamedTemporaryFile
+
+if __name__ == '__main__':
+    with NamedTemporaryFile('w+t') as f:
+        print('filename is:', f.name)
+
+# File automatically destroyed
+输出：
+filename is: C:\Users\Ben\AppData\Local\Temp\tmp2wvojnt6
+```
+
+这里，被打开文件的 f.name 属性包含了该临时文件的文件名。 当你需要将文件名传递给其他代码来打开这个文件的时候，这个就很有用了。 和 TemporaryFile() 一样，结果文件关闭时会被自动删除掉。 如果你不想这么做，可以传递一个关键字参数 delete=False 即可。比如：
+
+```python
+from tempfile import NamedTemporaryFile
+
+if __name__ == '__main__':
+    with NamedTemporaryFile('w+t', delete=False) as f:
+        print('filename is:', f.name)
+        f.write('Hello World')
+输出：
+filename is: C:\Users\Ben\AppData\Local\Temp\tmpzbp1v_nr
+# 程序运行完，打开文件filename is: C:\Users\Ben\AppData\Local\Temp\tmpzbp1v_nr，可以看到内容为Hello World
+```
+
+为了创建一个临时目录，可以使用 tempfile.TemporaryDirectory() 。比如：
+
+```python
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as dirname:
+    print('dirname is:', dirname)
+    # Use the directory
+    ...
+# Directory and all contents destroyed
+```
+
+TemporaryFile() 、NamedTemporaryFile() 和 TemporaryDirectory() 函数 应该是处理临时文件目录的最简单的方式了，因为它们会自动处理所有的创建和清理步骤。 在一个更低的级别，你可以使用 mkstemp() 和 mkdtemp() 来创建临时文件和目录。比如：
+
+```python
+>>> import tempfile
+>>> tempfile.mkstemp()
+(3, '/var/folders/7W/7WZl5sfZEF0pljrEB1UMWE+++TI/-Tmp-/tmp7fefhv')
+>>> tempfile.mkdtemp()
+'/var/folders/7W/7WZl5sfZEF0pljrEB1UMWE+++TI/-Tmp-/tmp5wvcv6'
+```
+
+但是，这些函数并不会做进一步的管理了。 例如，函数 mkstemp() 仅仅就返回一个原始的OS文件描述符，你需要自己将它转换为一个真正的文件对象。 同样你还需要自己清理这些文件。
+
+使用样例：
+
+```python
+import tempfile
+
+if __name__ == '__main__':
+    # The return value is a pair (fd, name) where fd is the file descriptor returned by os.open, and name is the filename.
+    fd = tempfile.mkstemp()
+    print(fd)
+    f = open(fd[0], 'wt')  # 这里使用fd[0]或fd[1]都可以
+    f.write('Hello')
+    f.close()
+# 可以在C:\Users\Ben\AppData\Local\Temp\tmp_bwdd1ip查看文件内容为Hello
+
+fd = tempfile.mkstemp(suffix='.txt', prefix='abc_')
+# 文件路径为：C:\Users\Ben\AppData\Local\Temp\abc_4e99vm6l.txt
+```
+
+通常来讲，临时文件在系统默认的位置被创建，比如 /var/tmp 或类似的地方。 为了获取真实的位置，可以使用 tempfile.gettempdir() 函数。比如：
+
+```python
+print(tempfile.gettempdir())
+输出：
+C:\Users\Ben\AppData\Local\Temp
+```
+
+所有和临时文件相关的函数都允许你通过使用关键字参数 prefix 、suffix 和 dir 来自定义目录以及命名规则。比如：
+
+```python
+from tempfile import NamedTemporaryFile
+
+if __name__ == '__main__':
+    f = NamedTemporaryFile(prefix='mytemp', suffix='.txt', dir='e:', delete=False)
+    print(f.name)
+输出：
+E:\mytempdzp1ohlc.txt
+```
+
+最后还有一点，尽可能以最安全的方式使用 tempfile 模块来创建临时文件。 包括仅给当前用户授权访问以及在文件创建过程中采取措施避免竞态条件。 要注意的是不同的平台可能会不一样。因此你最好阅读 官方文档 来了解更多的细节。
+
+## 5.20. 与串行端口的数据通信
+
+你想通过串行端口读写数据，典型场景就是和一些硬件设备打交道(比如一个机器人或传感器)。
+
+尽管你可以通过使用Python内置的I/O模块来完成这个任务，但对于串行通信最好的选择是使用 pySerial包 。 这个包的使用非常简单，先安装pySerial，使用类似下面这样的代码就能很容易的打开一个串行端口：
+
+```python
+import serial
+ser = serial.Serial('/dev/tty.usbmodem641', # Device name varies
+                    baudrate=9600,
+                    bytesize=8,
+                    parity='N',
+                    stopbits=1)
+```
+
+设备名对于不同的设备和操作系统是不一样的。 比如，在Windows系统上，你可以使用0, 1等表示的一个设备来打开通信端口”COM0”和”COM1”。 一旦端口打开，那就可以使用 read()，readline() 和 write() 函数读写数据了。例如：
+
+```python
+ser.write(b'G1 X50 Y50\r\n')
+resp = ser.readline()
+```
+
+大多数情况下，简单的串口通信从此变得十分简单。
+
+尽管表面上看起来很简单，其实串口通信有时候也是挺麻烦的。 推荐你使用第三方包如 pySerial 的一个原因是它提供了对高级特性的支持 (比如超时，控制流，缓冲区刷新，握手协议等等)。举个例子，如果你想启用 RTS-CTS 握手协议， 你只需要给 Serial() 传递一个 rtscts=True 的参数即可。 其官方文档非常完善，因此我在这里极力推荐这个包。
+
+时刻记住所有涉及到串口的I/O都是二进制模式的。因此，确保你的代码使用的是字节而不是文本 (或有时候执行文本的编码/解码操作)。 另外当你需要创建二进制编码的指令或数据包的时候，struct 模块也是非常有用的。
+
+## 5.21. 序列化Python对象
+
+你需要将一个Python对象序列化为一个字节流，以便将它保存到一个文件、存储到数据库或者通过网络传输它。
+
+对于序列化最普遍的做法就是使用 pickle 模块。为了将一个对象保存到一个文件中，可以这样做：
+
+```python
+import pickle
+
+if __name__ == '__main__':
+    data = 'Hello, world'
+    with open('dump.txt', 'wb') as f:
+        pickle.dump(data, f)
+# 会生成一个dump.txt文件
+```
+
+为了将一个对象转储为一个字符串，可以使用 pickle.dumps() ：
+
+```python
+data = 'Hello, world'
+s = pickle.dumps(data)
+print(s)
+输出：
+b'\x80\x03X\x0c\x00\x00\x00Hello, worldq\x00.'
+# 和dump.txt文件中内容一致。
+```
+
+为了从字节流中恢复一个对象，使用 pickle.load() 或 pickle.loads() 函数。比如：
+
+```python
+import pickle
+
+if __name__ == '__main__':
+    # Restore from a file
+    f = open('dump.txt', 'rb')
+    data = pickle.load(f)
+    print(data)
+
+    # Restore from a string
+    dump_data = pickle.dumps(data)
+    restored_data = pickle.loads(dump_data)
+    print(restored_data)
+输出：
+Hello, world
+Hello, world
+```
+
+对于大多数应用程序来讲，dump() 和 load() 函数的使用就是你有效使用 pickle 模块所需的全部了。 它可适用于绝大部分Python数据类型和用户自定义类的对象实例。 如果你碰到某个库可以让你在数据库中保存/恢复Python对象或者是通过网络传输对象的话， 那么很有可能这个库的底层就使用了 pickle 模块。
+
+pickle 是一种Python特有的自描述的数据编码。 通过自描述，被序列化后的数据包含每个对象开始和结束以及它的类型信息。 因此，你无需担心对象记录的定义，它总是能工作。 举个例子，如果要处理多个对象，你可以这样做：
+
+```python
+import pickle
+
+if __name__ == '__main__':
+    with open('dump.txt', 'wb') as f:
+        pickle.dump([1, 2, 3, 4], f)
+        pickle.dump('hello', f)
+        pickle.dump({'Apple', 'Pear', 'Banana'}, f)
+
+    with open('dump.txt', 'rb') as f:
+        print(pickle.load(f))
+        print(pickle.load(f))
+        print(pickle.load(f))
+输出：
+[1, 2, 3, 4]
+hello
+{'Apple', 'Pear', 'Banana'}
+```
+
+你还能序列化函数，类，还有接口，但是结果数据仅仅将它们的名称编码成对应的代码对象。例如：
+
+```python
+import pickle
+
+import math
+
+if __name__ == '__main__':
+    print(pickle.dumps(math.cos))
+输出：
+b'\x80\x03cmath\ncos\nq\x00.'
+```
+
+当数据反序列化回来的时候，会先假定所有的源数据时可用的。 模块、类和函数会自动按需导入进来。对于Python数据被不同机器上的解析器所共享的应用程序而言， 数据的保存可能会有问题，因为所有的机器都必须访问同一个源代码。
+
+```python
+# 将math.cos序列化到文件中
+import pickle
+
+import math
+
+if __name__ == '__main__':
+    with open('dump.txt', 'wb') as f:
+        pickle.dump(math.cos, f)
+
+# 将math.cos反序列化回来
+import pickle
+
+if __name__ == '__main__':
+    with open('dump.txt', 'rb') as f:
+        data = pickle.load(f)
+
+    print(data(0))
+输出：
+1.0
+```
+
+注
+
+> 千万不要对不信任的数据使用pickle.load()。
+> pickle在加载时有一个副作用就是它会自动加载相应模块并构造实例对象。
+> 但是某个坏人如果知道pickle的工作原理，
+> 他就可以创建一个恶意的数据导致Python执行随意指定的系统命令。
+> 因此，一定要保证pickle只在相互之间可以认证对方的解析器的内部使用。
+
+有些类型的对象是不能被序列化的。这些通常是那些依赖外部系统状态的对象， 比如打开的文件，网络连接，线程，进程，栈帧等等。 用户自定义类可以通过提供__getstate__()和__setstate__()方法来绕过这些限制。 如果定义了这两个方法，pickle.dump() 就会调用__getstate__()获取序列化的对象。 类似的__setstate__()在反序列化时被调用。为了演示这个工作原理， 下面是一个在内部定义了一个线程但仍然可以序列化和反序列化的类：
+
+```python
+# countdown.py
+import time
+import threading
+
+class Countdown:
+    def __init__(self, n):
+        self.n = n
+        self.thr = threading.Thread(target=self.run)
+        self.thr.daemon = True
+        self.thr.start()
+
+    def run(self):
+        while self.n > 0:
+            print('T-minus', self.n)
+            self.n -= 1
+            time.sleep(5)
+
+    def __getstate__(self):
+        return self.n
+
+    def __setstate__(self, n):
+        self.__init__(n)
+```
+
+试着运行下面的序列化试验代码：
+
+```python
+>>> import countdown
+>>> c = countdown.Countdown(30)
+>>> T-minus 30
+T-minus 29
+T-minus 28
+...
+
+>>> # After a few moments
+>>> f = open('cstate.p', 'wb')
+>>> import pickle
+>>> pickle.dump(c, f)
+>>> f.close()
+```
+
+然后退出Python解析器并重启后再试验下（本地没有验证成功，没有继续打印T-minus 19）：
+
+```python
+>>> f = open('cstate.p', 'rb')
+>>> pickle.load(f)
+countdown.Countdown object at 0x10069e2d0>
+T-minus 19
+T-minus 18
+```
+
+你可以看到线程又奇迹般的重生了，从你第一次序列化它的地方又恢复过来。
+
+pickle 对于大型的数据结构比如使用 array 或 numpy 模块创建的二进制数组效率并不是一个高效的编码方式。 如果你需要移动大量的数组数据，你最好是先在一个文件中将其保存为数组数据块或使用更高级的标准编码方式如HDF5 (需要第三方库的支持)。
+
+由于 pickle 是Python特有的并且附着在源码上，所有如果需要长期存储数据的时候不应该选用它。 例如，如果源码变动了，你所有的存储数据可能会被破坏并且变得不可读取。 坦白来讲，对于在数据库和存档文件中存储数据时，你最好使用更加标准的数据编码格式如XML，CSV或JSON。 这些编码格式更标准，可以被不同的语言支持，并且也能很好的适应源码变更。
+
+最后一点要注意的是 pickle 有大量的配置选项和一些棘手的问题。 对于最常见的使用场景，你不需要去担心这个，但是如果你要在一个重要的程序中使用pickle去做序列化的话， 最好去查阅一下 官方文档 。
+
+# 6. 数据编码和处理
+
+## 6.1. 读写CSV数据
+
+你想读写一个CSV格式的文件。
+
+对于大多数的CSV格式的数据读写问题，都可以使用 csv 库。 例如：假设你在一个名叫stocks.csv文件中有一些股票市场数据，就像这样：
+
+> Symbol,Price,Date,Time,Change,Volume
+> "AA",39.48,"6/11/2007","9:36am",-0.18,181800
+> "AIG",71.38,"6/11/2007","9:36am",-0.15,195500
+> "AXP",62.58,"6/11/2007","9:36am",-0.46,935000
+> "BA",98.31,"6/11/2007","9:36am",+0.12,104800
+> "C",53.08,"6/11/2007","9:36am",-0.25,360900
+> "CAT",78.29,"6/11/2007","9:36am",-0.23,225400
+
+下面向你展示如何将这些数据读取为一个元组的序列：
+
+```python
+import csv
+
+if __name__ == '__main__':
+    with open('stocks.csv') as f:
+        f_csv = csv.reader(f)
+        headers = next(f_csv)
+        print(f'Headers: {headers}')
+        for row in f_csv:
+            # Process row
+            print(f'Data: {row}')
+输出：
+Headers: ['Symbol', 'Price', 'Date', 'Time', 'Change', 'Volume']
+Data: ['AA', '39.48', '6/11/2007', '9:36am', '-0.18', '181800']
+Data: ['AIG', '71.38', '6/11/2007', '9:36am', '-0.15', '195500']
+Data: ['AXP', '62.58', '6/11/2007', '9:36am', '-0.46', '935000']
+Data: ['BA', '98.31', '6/11/2007', '9:36am', '+0.12', '104800']
+Data: ['C', '53.08', '6/11/2007', '9:36am', '-0.25', '360900']
+Data: ['CAT', '78.29', '6/11/2007', '9:36am', '-0.23', '225400']
+```
+
+在上面的代码中， row 会是一个列表。因此，为了访问某个字段，你需要使用下标，如 row[0] 访问Symbol， row[4] 访问Change。
+
+```python
+import csv
+
+if __name__ == '__main__':
+    with open('stocks.csv') as f:
+        f_csv = csv.reader(f)
+        headers = next(f_csv)
+        print(headers[0], headers[4], sep=';')
+        for row in f_csv:
+            # Process row
+            print(row[0], row[4], sep=';')
+输出：
+Symbol;Change
+AA;-0.18
+AIG;-0.15
+AXP;-0.46
+BA;+0.12
+C;-0.25
+CAT;-0.23
+```
+
+由于这种下标访问通常会引起混淆，你可以考虑使用命名元组。例如：
+
+```python
+import csv
+from collections import namedtuple
+
+if __name__ == '__main__':
+    with open('stocks.csv') as f:
+        f_csv = csv.reader(f)
+        headers = next(f_csv)
+        Row = namedtuple('Row', headers)
+        for r in f_csv:
+            row = Row(*r)
+            # Process row
+            print(row)  # print(row.Symbol, row.Change, sep=';')
+输出：
+Row(Symbol='AA', Price='39.48', Date='6/11/2007', Time='9:36am', Change='-0.18', Volume='181800')
+Row(Symbol='AIG', Price='71.38', Date='6/11/2007', Time='9:36am', Change='-0.15', Volume='195500')
+Row(Symbol='AXP', Price='62.58', Date='6/11/2007', Time='9:36am', Change='-0.46', Volume='935000')
+Row(Symbol='BA', Price='98.31', Date='6/11/2007', Time='9:36am', Change='+0.12', Volume='104800')
+Row(Symbol='C', Price='53.08', Date='6/11/2007', Time='9:36am', Change='-0.25', Volume='360900')
+Row(Symbol='CAT', Price='78.29', Date='6/11/2007', Time='9:36am', Change='-0.23', Volume='225400')
+```
+
+另外一个选择就是将数据读取到一个字典序列中去。可以这样做：
+
+```python
+import csv
+
+if __name__ == '__main__':
+    with open('stocks.csv') as f:
+        f_csv = csv.DictReader(f)
+        for row in f_csv:
+            # Process row
+            print(row)
+输出：
+OrderedDict([('Symbol', 'AA'), ('Price', '39.48'), ('Date', '6/11/2007'), ('Time', '9:36am'), ('Change', '-0.18'), ('Volume', '181800')])
+OrderedDict([('Symbol', 'AIG'), ('Price', '71.38'), ('Date', '6/11/2007'), ('Time', '9:36am'), ('Change', '-0.15'), ('Volume', '195500')])
+OrderedDict([('Symbol', 'AXP'), ('Price', '62.58'), ('Date', '6/11/2007'), ('Time', '9:36am'), ('Change', '-0.46'), ('Volume', '935000')])
+OrderedDict([('Symbol', 'BA'), ('Price', '98.31'), ('Date', '6/11/2007'), ('Time', '9:36am'), ('Change', '+0.12'), ('Volume', '104800')])
+OrderedDict([('Symbol', 'C'), ('Price', '53.08'), ('Date', '6/11/2007'), ('Time', '9:36am'), ('Change', '-0.25'), ('Volume', '360900')])
+OrderedDict([('Symbol', 'CAT'), ('Price', '78.29'), ('Date', '6/11/2007'), ('Time', '9:36am'), ('Change', '-0.23'), ('Volume', '225400')])
+```
+
+在这个版本中，你可以使用列名去访问每一行的数据了。比如，row['Symbol'] 或者 row['Change']
+
+为了写入CSV数据，你仍然可以使用csv模块，不过这时候先创建一个 writer 对象。例如:
+
+```python
+import csv
+
+if __name__ == '__main__':
+    headers = ['Symbol', 'Price', 'Date', 'Time', 'Change', 'Volume']
+    rows = [('AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800),
+            ('AIG', 71.38, '6/11/2007', '9:36am', -0.15, 195500),
+            ('AXP', 62.58, '6/11/2007', '9:36am', -0.46, 935000),
+            ]
+
+    with open('stocks.csv', 'w') as f:
+        f_csv = csv.writer(f)
+        f_csv.writerow(headers)
+        f_csv.writerows(rows)
+# 生成文件内容：
+Symbol,Price,Date,Time,Change,Volume
+
+AA,39.48,6/11/2007,9:36am,-0.18,181800
+
+AIG,71.38,6/11/2007,9:36am,-0.15,195500
+
+AXP,62.58,6/11/2007,9:36am,-0.46,935000
+
+```
+
+如果你有一个字典序列的数据，可以像这样做：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import csv
+
+if __name__ == '__main__':
+    headers = ['Symbol', 'Price', 'Date', 'Time', 'Change', 'Volume']
+    rows = [{'Symbol': 'AA', 'Price': 39.48, 'Date': '6/11/2007',
+             'Time': '9:36am', 'Change': -0.18, 'Volume': 181800},
+            {'Symbol': 'AIG', 'Price': 71.38, 'Date': '6/11/2007',
+             'Time': '9:36am', 'Change': -0.15, 'Volume': 195500},
+            {'Symbol': 'AXP', 'Price': 62.58, 'Date': '6/11/2007',
+             'Time': '9:36am', 'Change': -0.46, 'Volume': 935000},
+            ]
+
+    with open('stocks.csv', 'w') as f:
+        f_csv = csv.DictWriter(f, headers)
+        f_csv.writeheader()
+        f_csv.writerows(rows)
+```
+
+你应该总是优先选择csv模块分割或解析CSV数据。例如，你可能会像编写类似下面这样的代码：
+
+```python
+with open('stocks.csv') as f:
+for line in f:
+    row = line.split(',')
+    # process row
+```
+
+使用这种方式的一个缺点就是你仍然需要去处理一些棘手的细节问题。 比如，如果某些字段值被引号包围，你不得不去除这些引号。 另外，如果一个被引号包围的字段碰巧含有一个逗号，那么程序就会因为产生一个错误大小的行而出错。
+
+默认情况下，csv 库可识别Microsoft Excel所使用的CSV编码规则。 这或许也是最常见的形式，并且也会给你带来最好的兼容性。 然而，如果你查看csv的文档，就会发现有很多种方法将它应用到其他编码格式上(如修改分割字符等)。 例如，如果你想读取以tab分割的数据，可以这样做：
+
+```python
+# Example of reading tab-separated values
+with open('stock.tsv') as f:
+    f_tsv = csv.reader(f, delimiter='\t')
+    for row in f_tsv:
+        # Process row
+```
+
+如果你正在读取CSV数据并将它们转换为命名元组，需要注意对列名进行合法性认证。 例如，一个CSV格式文件有一个包含非法标识符的列头行，类似下面这样：
+
+> Street Address,Num-Premises,Latitude,Longitude 5412 N CLARK,10,41.980262,-87.668452
+
+这样最终会导致在创建一个命名元组时产生一个 ValueError 异常而失败。 为了解决这问题，你可能不得不先去修正列标题。 例如，可以像下面这样在非法标识符上使用一个正则表达式替换：
+
+```python
+import csv
+import re
+from collections import namedtuple
+
+if __name__ == '__main__':
+    with open('stocks.csv') as f:
+        f_csv = csv.reader(f)
+        headers = [re.sub('[^a-zA-Z_]', '_', h) for h in next(f_csv)]  # 
+        Row = namedtuple('Row', headers)
+        for r in f_csv:
+            row = Row(*r)
+            print(row)
+# 原列头headers被替换后，为：
+<class 'list'>: ['Street_Address', 'Num_Premises', 'Latitude', 'Longitude______N_CLARK', '__', '_________', '__________']
+在构造namedtuple时抛异常：ValueError: Field names cannot start with an underscore: '__'
+
+后修改stocks.csv为如下：
+Street Address,Num-Premises,Latitude,Longitude 5412 N CLARK
+"AA",39.48,"6/11/2007","9:36am"
+"AIG",71.38,"6/11/2007","9:36am"
+"AXP",62.58,"6/11/2007","9:36am"
+"BA",98.31,"6/11/2007","9:36am"
+
+输出如下：
+Row(Street_Address='AA', Num_Premises='39.48', Latitude='6/11/2007', Longitude______N_CLARK='9:36am')
+Row(Street_Address='AIG', Num_Premises='71.38', Latitude='6/11/2007', Longitude______N_CLARK='9:36am')
+Row(Street_Address='AXP', Num_Premises='62.58', Latitude='6/11/2007', Longitude______N_CLARK='9:36am')
+Row(Street_Address='BA', Num_Premises='98.31', Latitude='6/11/2007', Longitude______N_CLARK='9:36am')
+```
+
+还有重要的一点需要强调的是，csv产生的数据都是字符串类型的，它不会做任何其他类型的转换。 如果你需要做这样的类型转换，你必须自己手动去实现。 下面是一个在CSV数据上执行其他类型转换的例子：
+
+```python
+col_types = [str, float, str, str, float, int]
+with open('stocks.csv') as f:
+    f_csv = csv.reader(f)
+    headers = next(f_csv)
+    for row in f_csv:
+        # Apply conversions to the row items
+        row = tuple(convert(value) for convert, value in zip(col_types, row))
+```
+
+另外，下面是一个转换字典中特定字段的例子：
+
+```python
+import csv
+
+if __name__ == '__main__':
+    print('Reading as dicts with type conversion')
+    field_types = [('Price', float),
+                   ('Change', float),
+                   ('Volume', int)]
+
+    with open('stocks.csv') as f:
+        for row in csv.DictReader(f):
+            row.update((key, conversion(row[key])) for key, conversion in field_types)
+            print(row)
+```
+
+通常来讲，你可能并不想过多去考虑这些转换问题。 在实际情况中，CSV文件都或多或少有些缺失的数据，被破坏的数据以及其它一些让转换失败的问题。 因此，除非你的数据确实有保障是准确无误的，否则你必须考虑这些问题(你可能需要增加合适的错误处理机制)。
+
+最后，如果你读取CSV数据的目的是做数据分析和统计的话， 你可能需要看一看 Pandas 包。Pandas 包含了一个非常方便的函数叫 pandas.read_csv() ， 它可以加载CSV数据到一个 DataFrame 对象中去。 然后利用这个对象你就可以生成各种形式的统计、过滤数据以及执行其他高级操作了。 在6.13小节中会有这样一个例子。
+
+注：字典update方法
+
+```python
+d1 = {1: 1, 2: 2, 3: 3}
+d2 = {1: '1', 2: '2', 4: '4'}
+d1.update(d2)
+print(d1)
+输出：
+{1: '1', 2: '2', 3: 3, 4: '4'}
+
+d1 = {1: 1, 2: 2, 3: 3}
+d1.update((i, str(i)) for i in range(1, 5))
+输出：
+{1: '1', 2: '2', 3: '3', 4: '4'}
+```
+
+## 6.2. 读写JSON数据
