@@ -9412,10 +9412,44 @@ if __name__ == '__main__':
     # 关闭数据库连接
     connect.close()
 #-----------------------------------------------------------------------------------------
+# Python不能使用函数重载 https://www.cnblogs.com/erbaodabao0611/p/7490439.html
+def test(a):
+    print(a)
 
 
+def test(a, b):
+    print(a, b)
+    
+test(1)
+test(1, 2)
+运行报错：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 33, in <module>
+    test(1)
+TypeError: test() missing 1 required positional argument: 'b'
 #-----------------------------------------------------------------------------------------
+# 判断字符串里是否有中文
+# main.py
+def has_chinese(word):
+    for ch in word:
+        if '\u4e00' <= ch <= '\u9fff':
+            return True
+    return False
 
+# test_has_chinese.py
+from unittest import TestCase
+
+from src.test.main import has_chinese
+
+
+class TestHas_chinese(TestCase):
+    def test_str_all_chars(self):
+        s = 'abc'
+        self.assertFalse(has_chinese(s))
+
+    def test_str_has_chinese(self):
+        s = '你好，world'
+        self.assertTrue(has_chinese(s))
 
 #-----------------------------------------------------------------------------------------
 
