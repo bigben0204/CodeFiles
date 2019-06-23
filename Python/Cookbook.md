@@ -1206,7 +1206,7 @@ Stock(name='ACME', shares=100, price=123.45, date=None, time=None)
 Stock(name='ACME', shares=100, price=123.45, date='12/17/2012', time=None)
 ```
 
-最后要说的是，如果你的目标是定义一个需要更新很多实例属性的高效数据结构，那么命名元组并不是你的最佳选择。 这时候你应该考虑定义一个包含 __slots__ 方法的类（参考8.4小节）。
+最后要说的是，如果你的目标是定义一个需要更新很多实例属性的高效数据结构，那么命名元组并不是你的最佳选择。 这时候你应该考虑定义一个包含 \_\_slots\_\_ 方法的类（参考8.4小节）。
 
 ## 1.19. 转换并同时计算数据
 
@@ -4626,11 +4626,11 @@ Node(1)
 Node(2)
 ```
 
-在上面代码中， __iter__() 方法只是简单的将迭代请求传递给内部的 _children 属性。
+在上面代码中，\_\_iter\_\_() 方法只是简单的将迭代请求传递给内部的 \_children 属性。
 
-Python的迭代器协议需要 __iter__() 方法返回一个实现了 __next__() 方法的迭代器对象。 如果你只是迭代遍历其他容器的内容，你无须担心底层是怎样实现的。你所要做的只是传递迭代请求既可。
+Python的迭代器协议需要 \_\_iter\_\_() 方法返回一个实现了 \_\_next\_\_() 方法的迭代器对象。 如果你只是迭代遍历其他容器的内容，你无须担心底层是怎样实现的。你所要做的只是传递迭代请求既可。
 
-这里的 iter() 函数的使用简化了代码， iter(s) 只是简单的通过调用 s.__iter__() 方法来返回对应的迭代器对象， 就跟 len(s) 会调用 s.__len__() 原理是一样的。
+这里的 iter() 函数的使用简化了代码， iter(s) 只是简单的通过调用 s.\_\_iter\_\_() 方法来返回对应的迭代器对象， 就跟 len(s) 会调用 s.\_\_len\_\_() 原理是一样的。
 
 注：x!r代表repr(x)，x!s代表str(x)，x!a代表ascii(x)
 
@@ -9184,7 +9184,7 @@ for r in records:
 
 最后提一点，如果你需要从已知的文件格式(如图片格式，图形文件，HDF5等)中读取二进制数据时， 先检查看看Python是不是已经提供了现存的模块。因为不到万不得已没有必要去重复造轮子。
 
-## 6.12. 读取嵌套和可变长二进制数据
+## 6.12. 读取嵌套和可变长二进制数据（TODO）
 
 你需要读取包含嵌套或者可变长记录集合的复杂二进制格式的数据。这些数据可能包含图片、视频、电子地图文件等。
 
@@ -9329,7 +9329,7 @@ if __name__ == '__main__':
 
 在这里，attrs是一个包含所有被传入进来的关键字参数的字典。
 
-如果你还希望某个函数能同时接受任意数量的位置参数和关键字参数，可以同时使用*和**。比如：
+如果你还希望某个函数能同时接受任意数量的位置参数和关键字参数，可以同时使用\*和\*\*。比如：
 
 ```python
 def anyargs(*args, **kwargs):
@@ -9411,7 +9411,7 @@ msg = recv(1024, False)
 msg = recv(1024, block=False)
 ```
 
-另外，使用强制关键字参数也会比使用**kwargs参数更好，因为在使用函数help的时候输出也会更容易理解：
+另外，使用强制关键字参数也会比使用\*\*kwargs参数更好，因为在使用函数help的时候输出也会更容易理解：
 
 ```python
 >>> help(recv)
@@ -9420,7 +9420,7 @@ recv(maxsize, *, block)
     Receives a message
 ```
 
-强制关键字参数在一些更高级场合同样也很有用。 例如，它们可以被用来在使用*args和**kwargs参数作为输入的函数中插入参数，9.11小节有一个这样的例子。
+强制关键字参数在一些更高级场合同样也很有用。 例如，它们可以被用来在使用\*args和\*\*kwargs参数作为输入的函数中插入参数，9.11小节有一个这样的例子。
 
 ## 7.3. 给函数参数增加元信息
 
@@ -9443,7 +9443,7 @@ add(x: int, y: int) -> int
 
 尽管你可以使用任意类型的对象给函数添加注解(例如数字，字符串，对象实例等等)，不过通常来讲使用类或者字符串会比较好点。
 
-函数注解只存储在函数的 __annotations__ 属性中。例如：
+函数注解只存储在函数的 \_\_annotations\_\_ 属性中。例如：
 
 ```python
 def add(x: int, y: int) -> int:
@@ -9467,3 +9467,2011 @@ if __name__ == '__main__':
 参考9.20小节的一个更加高级的例子，演示了如何利用注解来实现多分派(比如重载函数)。
 
 ## 7.4. 返回多个值的函数
+
+你希望构造一个可以返回多个值的函数
+
+为了能返回多个值，函数直接return一个元组就行了。例如：
+
+```python
+>>> def myfun():
+... return 1, 2, 3
+...
+>>> a, b, c = myfun()
+>>> a
+1
+>>> b
+2
+>>> c
+```
+
+尽管myfun()看上去返回了多个值，实际上是先创建了一个元组然后返回的。 这个语法看上去比较奇怪，实际上我们使用的是逗号来生成一个元组，而不是用括号。比如下面的：
+
+```python
+>>> a = (1, 2) # With parentheses
+>>> a
+(1, 2)
+>>> b = 1, 2 # Without parentheses
+>>> b
+(1, 2)
+```
+
+当我们调用返回一个元组的函数的时候 ，通常我们会将结果赋值给多个变量，就像上面的那样。 其实这就是1.1小节中我们所说的元组解包。返回结果也可以赋值给单个变量， 这时候这个变量值就是函数返回的那个元组本身了：
+
+```python
+>>> x = myfun()
+>>> x
+(1, 2, 3)
+```
+
+## 7.5. 定义有默认参数的函数
+
+你想定义一个函数或者方法，它的一个或多个参数是可选的并且有一个默认值。
+
+定义一个有可选参数的函数是非常简单的，直接在函数定义中给参数指定一个默认值，并放到参数列表最后就行了。例如：
+
+```python
+def spam(a, b=42):
+    print(a, b)
+
+spam(1) # Ok. a=1, b=42
+spam(1, 2) # Ok. a=1, b=2
+```
+
+如果默认参数是一个可修改的容器比如一个列表、集合或者字典，可以使用None作为默认值，就像下面这样：
+
+```python
+# Using a list as a default value
+def spam(a, b=None):
+    if b is None:
+        b = []
+        # ...
+```
+
+如果你并不想提供一个默认值，而是想仅仅测试下某个默认参数是不是有传递进来，可以像下面这样写：
+
+```python
+_no_value = object()
+
+
+def spam(a, b=_no_value):
+    if b is _no_value:
+        print('No b value supplied')
+    print(a, b)
+
+
+if __name__ == '__main__':
+    spam(1, object())
+输出：
+1 <object object at 0x000002427F640AD0>
+```
+
+测试object对象：
+
+```python
+a = object()
+b = object()
+print(a)
+print(b)
+print(a is b)
+print(object())
+print(object())
+print(object() is object())
+输出：
+<object object at 0x0000014D572B1AD0>
+<object object at 0x0000014D572B1AE0>
+False
+<object object at 0x0000014D572B1AF0>
+<object object at 0x0000014D572B1AF0>
+False
+```
+
+我们测试下这个函数：
+
+```python
+spam(1)
+spam(1, 2)
+spam(1, None)
+输出：
+No b value supplied
+1 <object object at 0x0000023CE11E0AC0>
+1 2
+1 None
+```
+
+仔细观察可以发现到传递一个None值和不传值两种情况是有差别的。
+
+定义带默认值参数的函数是很简单的，但绝不仅仅只是这个，还有一些东西在这里也深入讨论下。
+
+首先，默认参数的值仅仅在函数定义的时候赋值一次。试着运行下面这个例子：
+
+```python
+>>> x = 42
+>>> def spam(a, b=x):
+...     print(a, b)
+...
+>>> spam(1)
+1 42
+>>> x = 23 # Has no effect
+>>> spam(1)
+```
+
+注意到当我们改变x的值的时候对默认参数值并没有影响，这是因为在函数定义的时候就已经确定了它的默认值了。
+
+其次，默认参数的值应该是不可变的对象，比如None、True、False、数字或字符串。 特别的，千万不要像下面这样写代码：
+
+```python
+def spam(a, b=[]): # NO!
+    # ...
+```
+
+如果你这么做了，当默认值在其他地方被修改后你将会遇到各种麻烦。这些修改会影响到下次调用这个函数时的默认值。比如：
+
+```python
+>>> def spam(a, b=[]):
+...     print(b)
+...     return b
+...
+>>> x = spam(1)
+>>> x
+[]
+>>> x.append(99)
+>>> x.append('Yow!')
+>>> x
+[99, 'Yow!']
+>>> spam(1) # Modified list gets returned!
+[99, 'Yow!']
+```
+
+这种结果应该不是你想要的。为了避免这种情况的发生，最好是将默认值设为None， 然后在函数里面检查它，前面的例子就是这样做的。
+
+在测试None值时使用 is 操作符是很重要的，也是这种方案的关键点。 有时候大家会犯下下面这样的错误：
+
+```python
+def spam(a, b=None):
+    if not b:  # NO! Use 'b is None' instead
+        print('b is None')
+
+if __name__ == '__main__':
+    spam(1, None)
+    spam(1, [])
+    spam(1, 0)
+    spam(1, '')
+输出：
+b is None
+b is None
+b is None
+b is None
+```
+
+这么写的问题在于尽管None值确实是被当成False， 但是还有其他的对象(比如长度为0的字符串、列表、元组、字典等)都会被当做False。 因此，上面的代码会误将一些其他输入也当成是没有输入。如上。
+
+最后一个问题比较微妙，那就是一个函数需要测试某个可选参数是否被使用者传递进来。 这时候需要小心的是你不能用某个默认值比如None、 0或者False值来测试用户提供的值(因为这些值都是合法的值，是可能被用户传递进来的)。 因此，你需要其他的解决方案了。
+
+为了解决这个问题，你可以创建一个独一无二的私有对象实例，就像上面的_no_value变量那样。 在函数里面，你可以通过检查被传递参数值跟这个实例是否一样来判断。 这里的思路是用户不可能去传递这个_no_value实例作为输入。 因此，这里通过检查这个值就能确定某个参数是否被传递进来了。
+
+这里对 object() 的使用看上去有点不太常见。object 是python中所有类的基类。 你可以创建 object 类的实例，但是这些实例没什么实际用处，因为它并没有任何有用的方法， 也没有任何实例数据(因为它没有任何的实例字典，你甚至都不能设置任何属性值)。 你唯一能做的就是测试同一性。这个刚好符合我的要求，因为我在函数中就只是需要一个同一性的测试而已。
+
+## 7.6. 定义匿名或内联函数
+
+你想为 sort() 操作创建一个很短的回调函数，但又不想用 def 去写一个单行函数， 而是希望通过某个快捷方式以内联方式来创建这个函数。
+
+当一些函数很简单，仅仅只是计算一个表达式的值的时候，就可以使用lambda表达式来代替了。比如：
+
+```python
+>>> add = lambda x, y: x + y
+>>> add(2,3)
+5
+>>> add('hello', 'world')
+'helloworld'
+```
+
+这里使用的lambda表达式跟下面的效果是一样的：
+
+```python
+>>> def add(x, y):
+...     return x + y
+...
+>>> add(2,3)
+5
+```
+
+lambda表达式典型的使用场景是排序或数据reduce等：
+
+```python
+names = ['David Beazley', 'Brian Jones', 'Raymond Hettinger', 'Ned Batchelder']
+sorted_names = sorted(names, key=lambda name: name.split()[-1].lower())
+print(sorted_names)
+输出：
+['Ned Batchelder', 'David Beazley', 'Raymond Hettinger', 'Brian Jones']
+```
+
+尽管lambda表达式允许你定义简单函数，但是它的使用是有限制的。 你只能指定单个表达式，它的值就是最后的返回值。也就是说不能包含其他的语言特性了， 包括多个语句、条件表达式、迭代以及异常处理等等。
+
+你可以不使用lambda表达式就能编写大部分python代码。 但是，当有人编写大量计算表达式值的短小函数或者需要用户提供回调函数的程序的时候， 你就会看到lambda表达式的身影了。
+
+## 7.7. 匿名函数捕获变量值
+
+你用lambda定义了一个匿名函数，并想在定义时捕获到某些变量的值。
+
+先看下下面代码的效果：
+
+```python
+>>> x = 10
+>>> a = lambda y: x + y
+>>> x = 20
+>>> b = lambda y: x + y
+```
+
+现在我问你，a(10)和b(10)返回的结果是什么？如果你认为结果是20和30，那么你就错了：
+
+```python
+>>> a(10)
+30
+>>> b(10)
+30
+```
+
+这其中的奥妙在于lambda表达式中的x是一个自由变量， 在运行时绑定值，而不是定义时就绑定，这跟函数的默认值参数定义是不同的。 因此，在调用这个lambda表达式的时候，x的值是执行时的值。例如：
+
+```python
+>>> x = 15
+>>> a(10)
+25
+>>> x = 3
+>>> a(10)
+13
+```
+
+如果你想让某个匿名函数在定义时就捕获到值，可以将那个参数值定义成默认参数即可，就像下面这样：
+
+```python
+>>> x = 10
+>>> a = lambda y, x=x: x + y
+>>> x = 20
+>>> b = lambda y, x=x: x + y
+>>> a(10)
+20
+>>> b(10)
+30
+```
+
+在这里列出来的问题是新手很容易犯的错误，有些新手可能会不恰当的使用lambda表达式。 比如，通过在一个循环或列表推导中创建一个lambda表达式列表，并期望函数能在定义时就记住每次的迭代值。例如：
+
+```python
+funcs = [lambda x: x + n for n in range(5)]
+for f in funcs:
+    print(f(0))
+输出：
+4
+4
+4
+4
+4
+```
+
+但是实际效果是运行是n的值为迭代的最后一个值。现在我们用另一种方式修改一下：
+
+```python
+funcs = [lambda x, n=n: x + n for n in range(5)]
+for f in funcs:
+    print(f(0))
+输出：
+0
+1
+2
+3
+4
+```
+
+通过使用函数默认值参数形式，lambda函数在定义时就能绑定到值。
+
+## 7.8. 减少可调用对象的参数个数
+
+你有一个被其他python代码使用的callable对象，可能是一个回调函数或者是一个处理器， 但是它的参数太多了，导致调用时出错。
+
+如果需要减少某个函数的参数个数，你可以使用 functools.partial() 。 partial() 函数允许你给一个或多个参数设置固定的值，减少接下来被调用时的参数个数。 为了演示清楚，假设你有下面这样的函数：
+
+```python
+def spam(a, b, c, d):
+    print(a, b, c, d)
+```
+
+现在我们使用 partial() 函数来固定某些参数值：
+
+```python
+>>> from functools import partial
+>>> s1 = partial(spam, 1) # a = 1
+>>> s1(2, 3, 4)
+1 2 3 4
+>>> s1(4, 5, 6)
+1 4 5 6
+>>> s2 = partial(spam, d=42) # d = 42
+>>> s2(1, 2, 3)
+1 2 3 42
+>>> s2(4, 5, 5)
+4 5 5 42
+>>> s3 = partial(spam, 1, 2, d=42) # a = 1, b = 2, d = 42
+>>> s3(3)
+1 2 3 42
+>>> s3(4)
+1 2 4 42
+>>> s3(5)
+1 2 5 42
+```
+
+可以看出 partial() 固定某些参数并返回一个新的callable对象。这个新的callable接受未赋值的参数， 然后跟之前已经赋值过的参数合并起来，最后将所有参数传递给原始函数。
+
+本节要解决的问题是让原本不兼容的代码可以一起工作。下面我会列举一系列的例子。
+
+第一个例子是，假设你有一个点的列表来表示(x,y)坐标元组。 你可以使用下面的函数来计算两点之间的距离：
+
+```python
+# points = [(i, i + 1) for i in range(1, 8, 2)]
+points = [ (1, 2), (3, 4), (5, 6), (7, 8) ]
+
+import math
+def distance(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return math.hypot(x2 - x1, y2 - y1)
+```
+
+现在假设你想以某个点为基点，根据点和基点之间的距离来排序所有的这些点。 列表的 sort() 方法接受一个关键字参数来自定义排序逻辑， 但是它只能接受一个单个参数的函数(distance()很明显是不符合条件的)。 现在我们可以通过使用 partial() 来解决这个问题：
+
+```python
+points = [(i, i + 1) for i in range(1, 8, 2)]
+pt = (4, 3)
+points.sort(key=partial(distance, pt))  # 同points = sorted(points, key=partial(distance, pt))
+print(points)
+输出：
+[(3, 4), (1, 2), (5, 6), (7, 8)]
+```
+
+更进一步，partial() 通常被用来微调其他库函数所使用的回调函数的参数。 例如，下面是一段代码，使用 multiprocessing 来异步计算一个结果值， 然后这个值被传递给一个接受一个result值和一个可选logging参数的回调函数：
+
+```python
+import logging
+from functools import partial
+from multiprocessing.pool import Pool
+
+
+def output_result(result, log=None):
+    if log is not None:
+        log.debug('Got: %r', result)  # log.info('Got: %r', result)
+
+
+def output_result_to_console(result):
+    print(f'result is {result}')
+
+
+# A Sample function
+def add(x, y):
+    return x + y
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)  # logging.basicConfig(level=logging.INFO)
+    log = logging.getLogger('test')
+
+    p = Pool()
+    p.apply_async(add, (3, 4), callback=partial(output_result, log=log))
+    p.apply_async(add, (3, 6), callback=output_result_to_console)
+    p.close()
+    p.join()
+输出：
+DEBUG:test:Got: 7
+result is 9
+```
+
+当给 apply_async() 提供回调函数时，通过使用 partial() 传递额外的 logging 参数。 而 multiprocessing 对这些一无所知——它仅仅只是使用单个值来调用回调函数。
+
+作为一个类似的例子，考虑下编写网络服务器的问题，socketserver 模块让它变得很容易。 下面是个简单的echo服务器：
+
+```python
+from socketserver import StreamRequestHandler, TCPServer
+
+class EchoHandler(StreamRequestHandler):
+    def handle(self):
+        for line in self.rfile:
+            self.wfile.write(b'GOT:' + line)
+
+serv = TCPServer(('', 15000), EchoHandler)
+serv.serve_forever()
+```
+
+不过，假设你想给EchoHandler增加一个可以接受其他配置选项的 __init__ 方法。比如：
+
+```python
+class EchoHandler(StreamRequestHandler):
+    # ack is added keyword-only argument. *args, **kwargs are
+    # any normal parameters supplied (which are passed on)
+    def __init__(self, *args, ack, **kwargs):
+        self.ack = ack
+        super().__init__(*args, **kwargs)
+
+    def handle(self):
+        for line in self.rfile:
+            self.wfile.write(self.ack + line)
+```
+
+这么修改后，我们就不需要显式地在TCPServer类中添加前缀了。 但是你再次运行程序后会报类似下面的错误：
+
+```python
+Exception happened during processing of request from ('127.0.0.1', 59834)
+Traceback (most recent call last):
+...
+TypeError: __init__() missing 1 required keyword-only argument: 'ack'
+```
+
+初看起来好像很难修正这个错误，除了修改 socketserver 模块源代码或者使用某些奇怪的方法之外。 但是，如果使用 partial() 就能很轻松的解决——给它传递 ack 参数的值来初始化即可，如下：
+
+```python
+from functools import partial
+serv = TCPServer(('', 15000), partial(EchoHandler, ack=b'RECEIVED:'))
+serv.serve_forever()
+```
+
+在这个例子中，__init__() 方法中的ack参数声明方式看上去很有趣，其实就是声明ack为一个强制关键字参数。 关于强制关键字参数问题我们在7.2小节我们已经讨论过了，读者可以再去回顾一下。
+
+很多时候 partial() 能实现的效果，lambda表达式也能实现。比如，之前的几个例子可以使用下面这样的表达式：
+
+```python
+points.sort(key=lambda p: distance(pt, p))
+p.apply_async(add, (3, 4), callback=lambda result: output_result(result,log))
+serv = TCPServer(('', 15000),
+        lambda *args, **kwargs: EchoHandler(*args, ack=b'RECEIVED:', **kwargs))
+```
+
+这样写也能实现同样的效果，不过相比而已会显得比较臃肿，对于阅读代码的人来讲也更加难懂。 这时候使用 partial() 可以更加直观的表达你的意图(给某些参数预先赋值)。
+
+看下partial绑定参数后，修改绑定参数函数的输出：
+
+```python
+from functools import partial
+
+
+def spam(a, b, c, d):
+    print(a, b, c, d)
+
+
+if __name__ == '__main__':
+    l = ['a']
+    p1 = partial(spam, l)
+    p1(4, 5, 6)
+    l.append('b')  # 修改list对象，会影响绑定函数
+    p1(4, 5, 6)
+
+    x = 3
+    p2 = partial(spam, x)
+    p2(4, 5, 6)
+    x = 10  # 修改基本类型对象值，无法影响到绑定函数
+    p2(4, 5, 6)
+输出：
+['a'] 4 5 6
+['a', 'b'] 4 5 6
+3 4 5 6
+3 4 5 6
+```
+
+## 7.9. 将单方法的类转换为函数
+
+你有一个除 \_\_init\_\_() 方法外只定义了一个方法的类。为了简化代码，你想将它转换成一个函数。
+
+大多数情况下，可以使用闭包来将单个方法的类转换成函数。 举个例子，下面示例中的类允许使用者根据某个模板方案来获取到URL链接地址。
+
+```python
+from urllib.request import urlopen
+
+class UrlTemplate:
+    def __init__(self, template):
+        self.template = template
+
+    def open(self, **kwargs):
+        return urlopen(self.template.format_map(kwargs))
+
+# Example use. Download stock data from yahoo
+yahoo = UrlTemplate('http://finance.yahoo.com/d/quotes.csv?s={names}&f={fields}')
+for line in yahoo.open(names='IBM,AAPL,FB', fields='sl1c1v'):
+    print(line.decode('utf-8'))
+```
+
+这个类可以被一个更简单的函数来代替：
+
+```python
+def urltemplate(template):
+    def opener(**kwargs):
+        return urlopen(template.format_map(kwargs))
+    return opener
+
+# Example use
+yahoo = urltemplate('http://finance.yahoo.com/d/quotes.csv?s={names}&f={fields}')
+for line in yahoo(names='IBM,AAPL,FB', fields='sl1c1v'):
+    print(line.decode('utf-8'))
+```
+
+大部分情况下，你拥有一个单方法类的原因是需要存储某些额外的状态来给方法使用。 比如，定义UrlTemplate类的唯一目的就是先在某个地方存储模板值，以便将来可以在open()方法中使用。
+
+使用一个内部函数或者闭包的方案通常会更优雅一些。简单来讲，一个闭包就是一个函数， 只不过在函数内部带上了一个额外的变量环境。闭包关键特点就是它会记住自己被定义时的环境。 因此，在我们的解决方案中，opener() 函数记住了 template 参数的值，并在接下来的调用中使用它。
+
+任何时候只要你碰到需要给某个函数增加额外的状态信息的问题，都可以考虑使用闭包。 相比将你的函数转换成一个类而言，闭包通常是一种更加简洁和优雅的方案。
+
+## 7.10. 带额外状态信息的回调函数
+
+你的代码中需要依赖到回调函数的使用(比如事件处理器、等待后台任务完成后的回调等)， 并且你还需要让回调函数拥有额外的状态值，以便在它的内部使用到。
+
+这一小节主要讨论的是那些出现在很多函数库和框架中的回调函数的使用——特别是跟异步处理有关的。 为了演示与测试，我们先定义如下一个需要调用回调函数的函数：
+
+```python
+def apply_async(func, args, *, callback):
+    # Compute the result
+    result = func(*args)
+
+    # Invoke the callback with the result
+    callback(result)
+```
+
+实际上，这段代码可以做任何更高级的处理，包括线程、进程和定时器，但是这些都不是我们要关心的。 我们仅仅只需要关注回调函数的调用。下面是一个演示怎样使用上述代码的例子：
+
+```python
+def print_result(result):
+    print('Got:', result)
+
+
+def add(x, y):
+    return x + y
+
+
+if __name__ == '__main__':
+    apply_async(add, (2, 3), callback=print_result)
+    apply_async(add, ('hello', 'world'), callback=print_result)
+输出：
+Got: 5
+Got: helloworld
+```
+
+注意到 print_result() 函数仅仅只接受一个参数 result 。不能再传入其他信息。 而当你想让回调函数访问其他变量或者特定环境的变量值的时候就会遇到麻烦。
+
+为了让回调函数访问外部信息，一种方法是使用一个绑定方法来代替一个简单函数。 比如，下面这个类会保存一个内部序列号，每次接收到一个 result 的时候序列号加1：
+
+```python
+class ResultHandler:
+
+    def __init__(self):
+        self.sequence = 0
+
+    def handler(self, result):
+        self.sequence += 1
+        print('[{}] Got: {}'.format(self.sequence, result))
+```
+
+使用这个类的时候，你先创建一个类的实例，然后用它的 handler() 绑定方法来做为回调函数：
+
+```python
+r = ResultHandler()
+apply_async(add, (2, 3), callback=r.handler)
+apply_async(add, ('hello', 'world'), callback=r.handler)
+输出：
+[1] Got: 5
+[2] Got: helloworld
+```
+
+第二种方式，作为类的替代，可以使用一个闭包捕获状态值，例如：
+
+```python
+def make_handler():
+    sequence = 0
+
+    def handler(result):
+        nonlocal sequence
+        sequence += 1
+        print('[{}] Got: {}'.format(sequence, result))
+
+    return handler
+```
+
+下面是使用闭包方式的一个例子：
+
+```python
+handler = make_handler()
+apply_async(add, (2, 3), callback=handler)
+apply_async(add, ('hello', 'world'), callback=handler)
+输出：
+[1] Got: 5
+[2] Got: helloworld
+```
+
+还有另外一个更高级的方法，可以使用协程来完成同样的事情：
+
+```python
+def make_handler():
+    sequence = 0
+    while True:
+        result = yield
+        sequence += 1
+        print('[{}] Got: {}'.format(sequence, result))
+```
+
+对于协程，你需要使用它的 send() 方法作为回调函数，如下所示：
+
+```python
+handler = make_handler()
+next(handler)  # Advance to the yield
+apply_async(add, (2, 3), callback=handler.send)
+apply_async(add, ('hello', 'world'), callback=handler.send)
+输出：
+[1] Got: 5
+[2] Got: helloworld
+```
+
+基于回调函数的软件通常都有可能变得非常复杂。一部分原因是回调函数通常会跟请求执行代码断开。 因此，请求执行和处理结果之间的执行环境实际上已经丢失了。如果你想让回调函数连续执行多步操作， 那你就必须去解决如何保存和恢复相关的状态信息了。
+
+至少有两种主要方式来捕获和保存状态信息，你可以在一个对象实例(通过一个绑定方法)或者在一个闭包中保存它。 两种方式相比，闭包或许是更加轻量级和自然一点，因为它们可以很简单的通过函数来构造。 它们还能自动捕获所有被使用到的变量。因此，你无需去担心如何去存储额外的状态信息(代码中自动判定)。
+
+如果使用闭包，你需要注意对那些可修改变量的操作。在上面的方案中， nonlocal 声明语句用来指示接下来的变量会在回调函数中被修改。如果没有这个声明，代码会报错。
+
+而使用一个协程来作为一个回调函数就更有趣了，它跟闭包方法密切相关。 某种意义上来讲，它显得更加简洁，因为总共就一个函数而已。 并且，你可以很自由的修改变量而无需去使用 nonlocal 声明。 这种方式唯一缺点就是相对于其他Python技术而言或许比较难以理解。 另外还有一些比较难懂的部分，比如使用之前需要调用 next() ，实际使用时这个步骤很容易被忘记。 尽管如此，协程还有其他用处，比如作为一个内联回调函数的定义(下一节会讲到)。
+
+如果你仅仅只需要给回调函数传递额外的值的话，还有一种使用 partial() 的方式也很有用。 在没有使用 partial() 的时候，你可能经常看到下面这种使用lambda表达式的复杂代码：
+
+```python
+def handler(result, sequence):
+    sequence += 1
+    print('[{}] Got: {}'.format(sequence, result))
+
+
+if __name__ == '__main__':
+    seq = 0
+    apply_async(add, (2, 3), callback=lambda r: handler(r, seq))  # 只能给回调函数传递额外的值，无法保存状态
+    apply_async(add, ('hello', 'world'), callback=lambda r: handler(r, seq))
+输出：
+[1] Got: 5
+[1] Got: helloworld
+```
+
+可以参考7.8小节的几个示例，教你如何使用 partial() 来更改参数签名来简化上述代码。
+
+## 7.11. 内联回调函数
+
+当你编写使用回调函数的代码的时候，担心很多小函数的扩张可能会弄乱程序控制流。 你希望找到某个方法来让代码看上去更像是一个普通的执行序列。
+
+通过使用生成器和协程可以使得回调函数内联在某个函数中。 为了演示说明，假设你有如下所示的一个执行某种计算任务然后调用一个回调函数的函数(参考7.10小节)：
+
+```python
+def apply_async(func, args, *, callback):
+    # Compute the result
+    result = func(*args)
+
+    # Invoke the callback with the result
+    callback(result)
+```
+
+接下来让我们看一下下面的代码，它包含了一个 Async 类和一个 inlined_async 装饰器：
+
+```python
+from queue import Queue
+from functools import wraps
+
+class Async:
+    def __init__(self, func, args):
+        self.func = func
+        self.args = args
+
+def inlined_async(func):
+    @wraps(func)
+    def wrapper(*args):
+        f = func(*args)
+        result_queue = Queue()
+        result_queue.put(None)
+        while True:
+            result = result_queue.get()
+            try:
+                a = f.send(result)
+                apply_async(a.func, a.args, callback=result_queue.put)
+            except StopIteration:
+                break
+    return wrapper
+```
+
+这两个代码片段允许你使用 yield 语句内联回调步骤。比如
+
+```python
+def add(x, y):
+    return x + y
+
+@inlined_async
+def test():  # 这是一个生成器generator，所以在wrapper函数中调用f = func(*args)，并没有真实的调用test函数，只是获取到test函数
+    r = yield Async(add, (2, 3))
+    print(r)
+    r = yield Async(add, ('hello', 'world'))
+    print(r)
+    for n in range(10):
+        r = yield Async(add, (n, n))
+        print(r)
+    print('Goodbye')
+```
+
+如果你调用 test() ，你会得到类似如下的输出：
+
+```python
+5
+helloworld
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+Goodbye
+```
+
+你会发现，除了那个特别的装饰器和 yield 语句外，其他地方并没有出现任何的回调函数(其实是在后台定义的)。
+
+本小节会实实在在的测试你关于回调函数、生成器和控制流的知识。
+
+首先，在需要使用到回调的代码中，关键点在于当前计算工作会挂起并在将来的某个时候重启(比如异步执行)。 当计算重启时，回调函数被调用来继续处理结果。apply_async() 函数演示了执行回调的实际逻辑， 尽管实际情况中它可能会更加复杂(包括线程、进程、事件处理器等等)。
+
+计算的暂停与重启思路跟生成器函数的执行模型不谋而合。 具体来讲，yield 操作会使一个生成器函数产生一个值并暂停。 接下来调用生成器的 __next__() 或 send() 方法又会让它从暂停处继续执行。
+
+根据这个思路，这一小节的核心就在 inline_async() 装饰器函数中了。 关键点就是，装饰器会逐步遍历生成器函数的所有 yield 语句，每一次一个。 为了这样做，刚开始的时候创建了一个 result 队列并向里面放入一个 None 值。 然后开始一个循环操作，从队列中取出结果值并发送给生成器，它会持续到下一个 yield 语句， 在这里一个 Async 的实例被接受到。然后循环开始检查函数和参数，并开始进行异步计算 apply_async() 。 然而，这个计算有个最诡异部分是它并没有使用一个普通的回调函数，而是用队列的 put() 方法来回调。
+
+这时候，是时候详细解释下到底发生了什么了。主循环立即返回顶部并在队列上执行 get() 操作。 如果数据存在，它一定是 put() 回调存放的结果。如果没有数据，那么先暂停操作并等待结果的到来。 这个具体怎样实现是由 apply_async() 函数来决定的。 如果你不相信会有这么神奇的事情，你可以使用 multiprocessing 库来试一下， 在单独的进程中执行异步计算操作，如下所示：
+
+```python
+if __name__ == '__main__':
+    import multiprocessing
+    pool = multiprocessing.Pool()
+    apply_async = pool.apply_async
+
+    # Run the test function
+    test()
+```
+
+实际上你会发现这个真的就是这样的，但是要解释清楚具体的控制流得需要点时间了。
+
+将复杂的控制流隐藏到生成器函数背后的例子在标准库和第三方包中都能看到。 比如，在 contextlib 中的 @contextmanager 装饰器使用了一个令人费解的技巧， 通过一个 yield 语句将进入和离开上下文管理器粘合在一起。 另外非常流行的 Twisted 包中也包含了非常类似的内联回调。
+
+注：wraps函数使用<https://www.cnblogs.com/Neeo/p/8371826.html>：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from functools import wraps
+
+
+def trace(func):
+    """ 装饰器 """
+
+    @wraps(func)
+    def callf(*args, **kwargs):
+        """ A wrapper function """
+        print("Calling function:{}".format(func.__name__))  # Calling function:foo
+        res = func(*args, **kwargs)
+        print("Return value:{}".format(res))  # Return value:9
+        return res
+
+    return callf
+
+
+@trace
+def foo(x):
+    """ 返回给定数字的平方 """
+    return x * x
+
+
+if __name__ == '__main__':
+    print(foo(3))
+    print('==================================')
+    print(foo.__doc__)
+    print('==================================')
+    help(foo)
+    print('==================================')
+    print(foo.__name__)
+    print('==================================')
+    t = trace(foo)
+    print(t)
+    print(t(3))  # callf函数主动调用打印一次，func函数调用再打印一次
+    print('==================================')
+输出：
+Calling function:foo
+Return value:9
+9
+==================================
+ 返回给定数字的平方 
+==================================
+Help on function foo in module __main__:
+
+foo(x)
+    返回给定数字的平方
+
+==================================
+foo
+==================================
+<function foo at 0x00000221A079F8C8>
+Calling function:foo
+Calling function:foo
+Return value:9
+Return value:9
+9
+==================================
+```
+
+上面的装饰器例子等价于：trace(foo)(3),只是在使用装饰器时，我们不用再手动调用装饰器函数，如：
+
+```python
+def foo(x):
+    """ 返回给定数字的平方 """
+    return x * x
+
+print(trace(foo)(3))  # trace(foo(3))只返回一个callf函数，但是不可调用
+输出：
+Calling function:foo
+Return value:9
+9
+```
+
+## 7.12. 访问闭包中定义的变量
+
+你想要扩展函数中的某个闭包，允许它能访问和修改函数的内部变量。
+
+通常来讲，闭包的内部变量对于外界来讲是完全隐藏的。 但是，你可以通过编写访问函数并将其作为函数属性绑定到闭包上来实现这个目的。例如：
+
+```python
+def sample():
+    n = 0
+
+    # Closure function
+    def func():
+        print('n=', n)
+
+    # Accessor methods for n
+    def get_n():
+        return n
+
+    def set_n(value):
+        nonlocal n
+        n = value
+
+    # Attach as function attributes
+    func.get_n = get_n
+    func.set_n = set_n
+    return func
+```
+
+下面是使用的例子:
+
+```python
+>>> f = sample()
+>>> f()
+n= 0
+>>> f.set_n(10)
+>>> f()
+n= 10
+>>> f.get_n()
+10
+```
+
+为了说明清楚它如何工作的，有两点需要解释一下。首先，nonlocal 声明可以让我们编写函数来修改内部变量的值。 其次，函数属性允许我们用一种很简单的方式将访问方法绑定到闭包函数上，这个跟实例方法很像(尽管并没有定义任何类)。
+
+还可以进一步的扩展，让闭包模拟类的实例。你要做的仅仅是复制上面的内部函数到一个字典实例中并返回它即可。例如：
+
+```python
+import sys
+class ClosureInstance:
+    def __init__(self, locals=None):
+        if locals is None:
+            locals = sys._getframe(1).f_locals
+
+        # Update instance dictionary with callables
+        self.__dict__.update((key,value) for key, value in locals.items()
+                            if callable(value) )
+    # Redirect special methods
+    def __len__(self):
+        return self.__dict__['__len__']()
+
+# Example use
+def Stack():
+    items = []
+    def push(item):
+        items.append(item)
+
+    def pop():
+        return items.pop()
+
+    def __len__():
+        return len(items)
+
+    return ClosureInstance()
+```
+
+下面是一个交互式会话来演示它是如何工作的：
+
+```python
+s = Stack()
+print(s)
+
+s.push(10)
+s.push(20)
+s.push('Hello')
+print(len(s))
+print(s.pop())
+print(s.pop())
+print(s.pop())
+输出：
+<__main__.ClosureInstance object at 0x00000209709F66D8>
+3
+Hello
+20
+10
+```
+
+有趣的是，这个代码运行起来会比一个普通的类定义要快很多。你可能会像下面这样测试它跟一个类的性能对比：
+
+```python
+class Stack2:
+    def __init__(self):
+        self.items = []
+
+    def push(self, item):
+        self.items.append(item)
+
+    def pop(self):
+        return self.items.pop()
+
+    def __len__(self):
+        return len(self.items)
+```
+
+如果这样做，你会得到类似如下的结果：
+
+```python
+# Test involving closures
+s = Stack()
+print(timeit('s.push(1);s.pop()', 'from __main__ import s'))  # 0.89690163
+# Test involving a class
+s = Stack2()
+print(timeit('s.push(1);s.pop()', 'from __main__ import s'))  # 0.916409772
+```
+
+结果显示，闭包的方案运行起来要快大概8%，大部分原因是因为对实例变量的简化访问， 闭包更快是因为不会涉及到额外的self变量。
+
+Raymond Hettinger对于这个问题设计出了更加难以理解的改进方案。不过，你得考虑下是否真的需要在你代码中这样做， 而且它只是真实类的一个奇怪的替换而已，例如，类的主要特性如继承、属性、描述器或类方法都是不能用的。 并且你要做一些其他的工作才能让一些特殊方法生效(比如上面 ClosureInstance 中重写过的 __len__() 实现。)
+
+最后，你可能还会让其他阅读你代码的人感到疑惑，为什么它看起来不像一个普通的类定义呢？ (当然，他们也想知道为什么它运行起来会更快)。尽管如此，这对于怎样访问闭包的内部变量也不失为一个有趣的例子。
+
+总体上讲，在配置的时候给闭包添加方法会有更多的实用功能， 比如你需要重置内部状态、刷新缓冲区、清除缓存或其他的反馈机制的时候。
+
+# 8. 类与对象
+
+本章主要关注点的是和类定义有关的常见编程模型。包括让对象支持常见的Python特性、特殊方法的使用、 类封装技术、继承、内存管理以及有用的设计模式。
+
+## 8.1. 改变对象的字符串显示
+
+你想改变对象实例的打印或显示输出，让它们更具可读性。
+
+要改变一个实例的字符串表示，可重新定义它的 \_\_str\_\_() 和 \_\_repr\_\_() 方法。例如：
+
+```python
+class Pair:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return 'Pair({0.x!r}, {0.y!r})'.format(self)
+
+    def __str__(self):
+        return '({0.x!s}, {0.y!s})'.format(self)
+```
+
+\_\_repr\_\_() 方法返回一个实例的代码表示形式，通常用来重新构造这个实例。 内置的 repr() 函数返回这个字符串，跟我们使用交互式解释器显示的值是一样的。 \_\_str\_\_() 方法将实例转换为一个字符串，使用 str() 或 print() 函数会输出这个字符串。比如：
+
+```python
+>>> p = Pair(3, 4)
+>>> p
+Pair(3, 4) # __repr__() output
+>>> print(p)
+(3, 4) # __str__() output
+```
+
+我们在这里还演示了在格式化的时候怎样使用不同的字符串表现形式。 特别来讲，!r 格式化代码指明输出使用 \_\_repr\_\_() 来代替默认的 \_\_str\_\_() 。 你可以用前面的类来试着测试下：
+
+```python
+p = Pair(3, 4)
+print('p is {0!r}'.format(p))
+print('p is {0}'.format(p))
+print(f'p is {p!r}')
+print(f'p is {p}')
+输出：
+p is Pair(3, 4)
+p is (3, 4)
+p is Pair(3, 4)
+p is (3, 4)
+```
+
+自定义 \_\_repr\__() 和 __str__() 通常是很好的习惯，因为它能简化调试和实例输出。 例如，如果仅仅只是打印输出或日志输出某个实例，那么程序员会看到实例更加详细与有用的信息。
+
+\_\_repr\_\_() 生成的文本字符串标准做法是需要让 eval(repr(x)) == x 为真。 如果实在不能这样子做，应该创建一个有用的文本表示，并使用 < 和 > 括起来。比如：
+
+```python
+p = Pair(3, 4)
+print(repr(p))
+p2 = eval(repr(p))
+print(p2)
+print(type(p2))
+print(id(p), id(p2))
+输出：
+Pair(3, 4)
+(3, 4)
+<class '__main__.Pair'>
+2362880936368 2362884006968
+False
+
+>>> f = open('file.dat')
+>>> f
+<_io.TextIOWrapper name='file.dat' mode='r' encoding='UTF-8'>
+```
+
+如果 \_\_str\_\_() 没有被定义，那么就会使用 \_\_repr\_\_() 来代替输出。
+
+上面的 format() 方法的使用看上去很有趣，格式化代码 {0.x} 对应的是第1个参数的x属性。 因此，在下面的函数中，0实际上指的就是 self 本身：
+
+```python
+def __repr__(self):
+    return 'Pair({0.x!r}, {0.y!r})'.format(self)
+```
+
+作为这种实现的一个替代，你也可以使用 % 操作符，就像下面这样：
+
+```python
+def __repr__(self):
+    return 'Pair(%r, %r)' % (self.x, self.y)
+```
+
+## 8.2. 自定义字符串的格式化
+
+你想通过 format() 函数和字符串方法使得一个对象能支持自定义的格式化。
+
+解决方案
+为了自定义字符串的格式化，我们需要在类上面定义 \_\_format\_\_() 方法。例如：
+
+```python
+_formats = {
+    'ymd': '{d.year}-{d.month}-{d.day}',
+    'mdy': '{d.month}/{d.day}/{d.year}',
+    'dmy': '{d.day}/{d.month}/{d.year}'
+}
+
+
+class Date(object):
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    def __format__(self, code):
+        if code == '':
+            code = 'ymd'
+        fmt = _formats[code]
+        return fmt.format(d=self)
+```
+
+现在 Date 类的实例可以支持格式化操作了，如同下面这样：
+
+```python
+d = Date(2012, 12, 21)
+print(format(d))  # 如果不定义__format__则，format(d)输出：<__main__.Date object at 0x000002AE1B3231D0>
+print(format(d, 'mdy'))
+print('The date is {:ymd}'.format(d))
+print('The date is {:mdy}'.format(d))
+输出：
+2012-12-21
+12/21/2012
+The date is 2012-12-21
+The date is 12/21/2012
+```
+
+\_\_format\_\_() 方法给Python的字符串格式化功能提供了一个钩子。 这里需要着重强调的是格式化代码的解析工作完全由类自己决定。因此，格式化代码可以是任何值。 例如，参考下面来自 datetime 模块中的代码：
+
+```python
+>>> from datetime import date
+>>> d = date(2012, 12, 21)
+>>> format(d)
+'2012-12-21'
+>>> format(d,'%A, %B %d, %Y')
+'Friday, December 21, 2012'
+>>> 'The end is {:%d %b %Y}. Goodbye'.format(d)
+'The end is 21 Dec 2012. Goodbye'
+```
+
+对于内置类型的格式化有一些标准的约定。 可以参考 string模块文档 说明。
+
+## 8.3. 让对象支持上下文管理协议
+
+你想让你的对象支持上下文管理协议(with语句)。
+
+为了让一个对象兼容 with 语句，你需要实现 __enter__() 和 __exit__() 方法。 例如，考虑如下的一个类，它能为我们创建一个网络连接：
+
+```python
+from socket import AF_INET, SOCK_STREAM, socket
+
+
+class LazyConnection(object):
+    def __init__(self, address, family=AF_INET, type=SOCK_STREAM):
+        self.address = address
+        self.family = family
+        self.type = type
+        self.sock = None
+
+    def __enter__(self):
+        if self.sock is not None:
+            raise RuntimeError('Already connected')
+        self.sock = socket()
+        self.sock.connect(self.address)
+        return self.sock
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.sock.close()
+        self.sock = None
+```
+
+这个类的关键特点在于它表示了一个网络连接，但是初始化的时候并不会做任何事情(比如它并没有建立一个连接)。 连接的建立和关闭是使用 with 语句自动完成的，例如：
+
+```python
+from functools import partial
+
+conn = LazyConnection(('www.python.org', 80))
+# Connection closed
+with conn as s:
+    # conn.__enter__() executes: connection open
+    s.send(b'GET /index.html HTTP/1.0\r\n')
+    s.send(b'Host: www.python.org\r\n')
+    s.send(b'\r\n')
+    resp = b''.join(iter(partial(s.recv, 8192), b''))
+    # conn.__exit__() executes: connection closed
+```
+
+编写上下文管理器的主要原理是你的代码会放到 with 语句块中执行。 当出现 with 语句的时候，对象的 __enter__() 方法被触发， 它返回的值(如果有的话)会被赋值给 as 声明的变量。然后，with 语句块里面的代码开始执行。 最后，__exit__() 方法被触发进行清理工作。
+
+不管 with 代码块中发生什么，上面的控制流都会执行完，就算代码块中发生了异常也是一样的。 事实上，__exit__() 方法的第三个参数包含了异常类型、异常值和追溯信息(如果有的话)。 __exit__() 方法能自己决定怎样利用这个异常信息，或者忽略它并返回一个None值。 如果 __exit__() 返回 True ，那么异常会被清空，就好像什么都没发生一样， with 语句后面的程序继续在正常执行。
+
+还有一个细节问题就是 LazyConnection 类是否允许多个 with 语句来嵌套使用连接。 很显然，上面的定义中一次只能允许一个socket连接，如果正在使用一个socket的时候又重复使用 with 语句， 就会产生一个异常了。不过你可以像下面这样修改下上面的实现来解决这个问题：
+
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+
+class LazyConnection:
+    def __init__(self, address, family=AF_INET, type=SOCK_STREAM):
+        self.address = address
+        self.family = family
+        self.type = type
+        self.connections = []
+
+    def __enter__(self):
+        sock = socket(self.family, self.type)
+        sock.connect(self.address)
+        self.connections.append(sock)
+        return sock
+
+    def __exit__(self, exc_ty, exc_val, tb):
+        self.connections.pop().close()
+
+# Example use
+from functools import partial
+
+conn = LazyConnection(('www.python.org', 80))
+with conn as s1:
+    pass
+    with conn as s2:
+        pass
+        # s1 and s2 are independent sockets
+```
+
+在第二个版本中，LazyConnection 类可以被看做是某个连接工厂。在内部，一个列表被用来构造一个栈。 每次 __enter__() 方法执行的时候，它复制创建一个新的连接并将其加入到栈里面。 __exit__() 方法简单的从栈中弹出最后一个连接并关闭它。 这里稍微有点难理解，不过它能允许嵌套使用 with 语句创建多个连接，就如上面演示的那样。
+
+在需要管理一些资源比如文件、网络连接和锁的编程环境中，使用上下文管理器是很普遍的。 这些资源的一个主要特征是它们必须被手动的关闭或释放来确保程序的正确运行。 例如，如果你请求了一个锁，那么你必须确保之后释放了它，否则就可能产生死锁。 通过实现 __enter__() 和 __exit__() 方法并使用 with 语句可以很容易的避免这些问题， 因为 __exit__() 方法可以让你无需担心这些了。
+
+在 contextmanager 模块中有一个标准的上下文管理方案模板，可参考9.22小节。 同时在12.6小节中还有一个对本节示例程序的线程安全的修改版。
+
+## 8.4. 创建大量对象时节省内存方法
+
+你的程序要创建大量(可能上百万)的对象，导致占用很大的内存。
+
+对于主要是用来当成简单的数据结构的类而言，你可以通过给类添加 __slots__ 属性来极大的减少实例所占的内存。比如：
+
+```python
+
+# 使用__dict__
+class Date(object):
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+
+if __name__ == '__main__':
+    date = Date(2019, 6, 23)
+    print(date.__dict__)
+输出：
+{'year': 2019, 'month': 6, 'day': 23}
+
+# 使用__slot__
+class Date(object):
+    __slots__ = ['year', 'month', 'day']
+
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+
+if __name__ == '__main__':
+    date = Date(2019, 6, 23)
+    # print(date.__dict__)  # 增加__slot__后，'Date' object has no attribute '__dict__'
+```
+
+当你定义 \_\_slots\_\_ 后，Python就会为实例使用一种更加紧凑的内部表示。 实例通过一个很小的固定大小的数组来构建，而不是为每个实例定义一个字典，这跟元组或列表很类似。 在 \_\_slots\_\_ 中列出的属性名在内部被映射到这个数组的指定小标上。 使用slots一个不好的地方就是我们不能再给实例添加新的属性了，只能使用在 \_\_slots\_\_ 中定义的那些属性名。
+
+使用slots后节省的内存会跟存储属性的数量和类型有关。 不过，一般来讲，使用到的内存总量和将数据存储在一个元组中差不多。 为了给你一个直观认识，假设你不使用slots直接存储一个Date实例， 在64位的Python上面要占用428字节，而如果使用了slots，内存占用下降到156字节。 如果程序中需要同时创建大量的日期实例，那么这个就能极大的减小内存使用量了。
+
+尽管slots看上去是一个很有用的特性，很多时候你还是得减少对它的使用冲动。 Python的很多特性都依赖于普通的基于字典的实现。 另外，定义了slots后的类不再支持一些普通类特性了，比如多继承。 大多数情况下，你应该只在那些经常被使用到的用作数据结构的类上定义slots (比如在程序中需要创建某个类的几百万个实例对象)。
+
+关于 \_\_slots\_\_ 的一个常见误区是它可以作为一个封装工具来防止用户给实例增加新的属性。 尽管使用slots可以达到这样的目的，但是这个并不是它的初衷。 \_\_slots\_\_ 更多的是用来作为一个内存优化工具。
+
+## 8.5. 在类中封装属性名
+
+你想封装类的实例上面的“私有”数据，但是Python语言并没有访问控制。
+
+Python程序员不去依赖语言特性去封装数据，而是通过遵循一定的属性和方法命名规约来达到这个效果。 第一个约定是任何以单下划线_开头的名字都应该是内部实现。比如：
+
+```python
+class A:
+    def __init__(self):
+        self._internal = 0 # An internal attribute
+        self.public = 1 # A public attribute
+
+    def public_method(self):
+        '''
+        A public method
+        '''
+        pass
+
+    def _internal_method(self):
+        pass
+```
+
+Python并不会真的阻止别人访问内部名称。但是如果你这么做肯定是不好的，可能会导致脆弱的代码。 同时还要注意到，使用下划线开头的约定同样适用于模块名和模块级别函数。 例如，如果你看到某个模块名以单下划线开头(比如_socket)，那它就是内部实现。 类似的，模块级别函数比如 sys._getframe() 在使用的时候就得加倍小心了。
+
+你还可能会遇到在类定义中使用两个下划线(__)开头的命名。比如：
+
+```python
+class B:
+    def __init__(self):
+        self.__private = 0
+
+    def __private_method(self):
+        pass
+
+    def public_method(self):
+        pass
+        self.__private_method()
+```
+
+使用双下划线开始会导致访问名称变成其他形式。 比如，在前面的类B中，私有属性会被分别重命名为 _B__private 和 _B__private_method 。 这时候你可能会问这样重命名的目的是什么，答案就是继承——这种属性通过继承是无法被覆盖的。比如：
+
+```python
+class C(B):
+    def __init__(self):
+        super().__init__()
+        self.__private = 1 # Does not override B.__private
+
+    # Does not override B.__private_method()
+    def __private_method(self):
+        pass
+```
+
+这里，私有名称 __private 和 __private_method 被重命名为 _C__private 和 _C__private_method ，这个跟父类B中的名称是完全不同的。
+
+上面提到有两种不同的编码约定(单下划线和双下划线)来命名私有属性，那么问题就来了：到底哪种方式好呢？ **大多数而言，你应该让你的非公共名称以单下划线开头。但是，如果你清楚你的代码会涉及到子类， 并且有些内部属性应该在子类中隐藏起来，那么才考虑使用双下划线方案**。
+
+还有一点要注意的是，有时候你定义的一个变量和某个保留关键字冲突，这时候可以使用单下划线作为后缀，例如：
+
+```python
+lambda_ = 2.0 # Trailing _ to avoid clash with lambda keyword
+```
+
+这里我们并不使用单下划线前缀的原因是它避免误解它的使用初衷 (如使用单下划线前缀的目的是为了防止命名冲突而不是指明这个属性是私有的)。 通过使用单下划线后缀可以解决这个问题。
+
+## 8.6. 创建可管理的属性
+
+你想给某个实例attribute增加除访问与修改之外的其他处理逻辑，比如类型检查或合法性验证。
+
+```python
+class Person:
+    def __init__(self, first_name):
+        self.first_name = first_name  # 调用@first_name.setter方法
+
+    # Getter function
+    @property
+    def first_name(self):
+        return self._first_name
+
+    # Setter function
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+
+    # Deleter function (optional)
+    @first_name.deleter
+    def first_name(self):
+        raise AttributeError("Can't delete attribute")
+
+
+if __name__ == '__main__':
+    person = Person('Zhao')
+    print(person.first_name)  # Zhao
+    person.first_name = 'Qian'
+    print(person.first_name)  # Qian
+```
+
+上述代码中有三个相关联的方法，这三个方法的名字都必须一样。 第一个方法是一个 getter 函数，它使得 first_name 成为一个属性。 其他两个方法给 first_name 属性添加了 setter 和 deleter 函数。 需要强调的是只有在 first_name 属性被创建后， 后面的两个装饰器 @first_name.setter 和 @first_name.deleter 才能被定义。如果把@first_name.setter 和 @first_name.deleter定义在@property之前，则会报错提示：name 'first_name' is not defined。
+
+property的一个关键特征是它看上去跟普通的attribute没什么两样， 但是访问它的时候会自动触发 getter 、setter 和 deleter 方法。例如：
+
+```python
+>>> a = Person('Guido')
+>>> a.first_name # Calls the getter
+'Guido'
+>>> a.first_name = 42 # Calls the setter
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "prop.py", line 14, in first_name
+        raise TypeError('Expected a string')
+TypeError: Expected a string
+>>> del a.first_name
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+AttributeError: can`t delete attribute
+```
+
+在实现一个property的时候，底层数据(如果有的话)仍然需要存储在某个地方。 因此，在get和set方法中，你会看到对 _first_name 属性的操作，这也是实际数据保存的地方。 另外，你可能还会问为什么 __init__() 方法中设置了 self.first_name 而不是 self._first_name 。 在这个例子中，我们创建一个property的目的就是在设置attribute的时候进行检查。 因此，你可能想在初始化的时候也进行这种类型检查。通过设置 self.first_name ，自动调用 setter 方法， 这个方法里面会进行参数的检查，否则就是直接访问 self._first_name 了。
+
+还能在已存在的get和set方法基础上定义property。例如：
+
+```python
+class Person:
+    def __init__(self, first_name):
+        self.set_first_name(first_name)
+
+    # Getter function
+    def get_first_name(self):
+        return self._first_name
+
+    # Setter function
+    def set_first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+
+    # Deleter function (optional)
+    def del_first_name(self):
+        raise AttributeError("Can't delete attribute")
+
+    # Make a property from existing get/set methods
+    name = property(get_first_name, set_first_name, del_first_name)
+
+
+if __name__ == '__main__':
+    person = Person('Zhao')
+    print(person.name)
+    person.name = 'Qian'
+    print(person.name)
+    person.name = 42
+输出：
+Zhao
+Qian
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 32, in <module>
+    person.name = 42
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 16, in set_first_name
+    raise TypeError('Expected a string')
+TypeError: Expected a string
+```
+
+一个property属性其实就是一系列相关绑定方法的集合。如果你去查看拥有property的类， 就会发现property本身的fget、fset和fdel属性就是类里面的普通方法。比如：
+
+```python
+>>> Person.first_name.fget
+<function Person.first_name at 0x1006a60e0>
+>>> Person.first_name.fset
+<function Person.first_name at 0x1006a6170>
+>>> Person.first_name.fdel
+<function Person.first_name at 0x1006a62e0>
+```
+
+只有当你确实需要对attribute执行其他额外的操作的时候才应该使用到property。 有时候一些从其他编程语言(比如Java)过来的程序员总认为所有访问都应该通过getter和setter， 所以他们认为代码应该像下面这样写：
+
+```python
+class Person:
+    def __init__(self, first_name):
+        self.first_name = first_name
+
+    @property
+    def first_name(self):
+        return self._first_name
+
+    @first_name.setter
+    def first_name(self, value):
+        self._first_name = value
+```
+
+**不要写这种没有做任何其他额外操作的property。 首先，它会让你的代码变得很臃肿，并且还会迷惑阅读者。 其次，它还会让你的程序运行起来变慢很多。 最后，这样的设计并没有带来任何的好处。** 特别是当你以后想给普通attribute访问添加额外的处理逻辑的时候， 你可以将它变成一个property而无需改变原来的代码。 因为访问attribute的代码还是保持原样。
+
+Properties还是一种定义动态计算attribute的方法。 这种类型的attributes并不会被实际的存储，而是在需要的时候计算出来。比如：
+
+```python
+import math
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    @property
+    def area(self):
+        return math.pi * self.radius ** 2
+
+    @property
+    def diameter(self):
+        return self.radius * 2
+
+    @property
+    def perimeter(self):
+        return 2 * math.pi * self.radius
+```
+
+在这里，我们通过使用properties，将所有的访问接口形式统一起来， 对半径、直径、周长和面积的访问都是通过属性访问，就跟访问简单的attribute是一样的。 如果不这样做的话，那么就要在代码中混合使用简单属性访问和方法调用。 下面是使用的实例：
+
+```python
+>>> c = Circle(4.0)
+>>> c.radius
+4.0
+>>> c.area  # Notice lack of ()
+50.26548245743669
+>>> c.perimeter  # Notice lack of ()
+25.132741228718345
+```
+
+尽管properties可以实现优雅的编程接口，但有些时候你还是会想直接使用getter和setter函数。例如：
+
+```python
+>>> p = Person('Guido')
+>>> p.get_first_name()
+'Guido'
+>>> p.set_first_name('Larry')
+```
+
+这种情况的出现通常是因为Python代码被集成到一个大型基础平台架构或程序中。 例如，有可能是一个Python类准备加入到一个基于远程过程调用的大型分布式系统中。 这种情况下，直接使用get/set方法(普通方法调用)而不是property或许会更容易兼容。
+
+最后一点，不要像下面这样写有大量重复代码的property定义：
+
+```python
+class Person:
+    def __init__(self, first_name, last_name):
+        self.first_name = first_name
+        self.last_name = last_name
+
+    @property
+    def first_name(self):
+        return self._first_name
+
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+
+    # Repeated property code, but for a different name (bad!)
+    @property
+    def last_name(self):
+        return self._last_name
+
+    @last_name.setter
+    def last_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._last_name = value
+```
+
+重复代码会导致臃肿、易出错和丑陋的程序。好消息是，通过使用装饰器或闭包，有很多种更好的方法来完成同样的事情。 可以参考8.9和9.21小节的内容。
+
+## 调用父类方法
+
+你想在子类中调用父类的某个已经被覆盖的方法。
+
+为了调用父类(超类)的一个方法，可以使用 super() 函数，比如：
+
+```python
+class A:
+    def spam(self):
+        print('A.spam')
+
+
+class B(A):
+    def spam(self):
+        print('B.spam')
+        super().spam()  # Call parent spam()
+
+
+if __name__ == '__main__':
+    b = B()
+    b.spam()
+输出：
+B.spam
+A.spam
+```
+
+super() 函数的一个常见用法是在 __init__() 方法中确保父类被正确的初始化了：
+
+```python
+class A:
+    def __init__(self):
+        self.x = 0
+
+class B(A):
+    def __init__(self):
+        super().__init__()
+        self.y = 1
+
+
+if __name__ == '__main__':
+    b = B()
+    print(b.x, b.y, sep=',')
+输出：
+0,1
+
+# 如果B类不调用super().__init__()
+class A:
+    def __init__(self):
+        self.x = 0
+
+class B(A):
+    def __init__(self):
+        self.y = 1
+
+
+if __name__ == '__main__':
+    b = B()
+    print(b.x, b.y, sep=',')
+输出：
+抛异常：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 16, in <module>
+    print(b.x, b.y, sep=',')
+AttributeError: 'B' object has no attribute 'x'
+```
+
+super() 的另外一个常见用法出现在覆盖Python特殊方法的代码中，比如：
+
+```python
+class A:
+    def __init__(self):
+        self.x = 0
+
+
+class Proxy:
+    def __init__(self, obj):
+        self._obj = obj
+
+    # Delegate attribute lookup to internal obj
+    def __getattr__(self, name):
+        return getattr(self._obj, name)
+
+    # Delegate attribute assignment
+    def __setattr__(self, name, value):
+        if name.startswith('_'):
+            super().__setattr__(name, value)  # Call original __setattr__
+        else:
+            setattr(self._obj, name, value)
+
+
+if __name__ == '__main__':
+    p = Proxy(A())
+    setattr(p, 'a', 1)  # a被设置到_obj上
+    print(getattr(p, 'a'))
+
+    setattr(p, '_b', 2)  # b被设置到p上
+    print(getattr(p, '_b'))
+输出：
+1
+2
+```
+
+在上面代码中，\_\_setattr\_\_() 的实现包含一个名字检查。 如果某个属性名以下划线(_)开头，就通过 super() 调用原始的 \_\_setattr\_\_() ， 否则的话就委派给内部的代理对象 self._obj 去处理。 这看上去有点意思，因为就算没有显式的指明某个类的父类， super() 仍然可以有效的工作。
+
+实际上，大家对于在Python中如何正确使用 super() 函数普遍知之甚少。 你有时候会看到像下面这样直接调用父类的一个方法：
+
+```python
+class Base:
+    def __init__(self):
+        print('Base.__init__')
+
+class A(Base):
+    def __init__(self):
+        Base.__init__(self)
+        print('A.__init__')
+```
+
+尽管对于大部分代码而言这么做没什么问题，但是在更复杂的涉及到多继承的代码中就有可能导致很奇怪的问题发生。 比如，考虑如下的情况：
+
+```python
+class Base:
+    def __init__(self):
+        print('Base.__init__')
+
+
+class A(Base):
+    def __init__(self):
+        Base.__init__(self)
+        print('A.__init__')
+
+
+class B(Base):
+    def __init__(self):
+        Base.__init__(self)
+        print('B.__init__')
+
+
+class C(A, B):
+    def __init__(self):
+        A.__init__(self)
+        B.__init__(self)
+        print('C.__init__')
+```
+
+如果你运行这段代码就会发现 Base.\_\_init\_\_() 被调用两次，如下所示：
+
+```python
+>>> c = C()
+Base.__init__
+A.__init__
+Base.__init__
+B.__init__
+C.__init__
+```
+
+可能两次调用 Base.__init__() 没什么坏处，但有时候却不是。 另一方面，假设你在代码中换成使用 super() ，结果就很完美了：
+
+```python
+class Base:
+    def __init__(self):
+        print('Base.__init__')
+
+class A(Base):
+    def __init__(self):
+        super().__init__()
+        print('A.__init__')
+
+class B(Base):
+    def __init__(self):
+        super().__init__()
+        print('B.__init__')
+
+class C(A,B):
+    def __init__(self):
+        super().__init__()  # Only one call to super() here
+        print('C.__init__')
+```
+
+运行这个新版本后，你会发现每个 __init__() 方法只会被调用一次了：
+
+```python
+>>> c = C()
+Base.__init__
+B.__init__
+A.__init__
+C.__init__
+```
+
+为了弄清它的原理，我们需要花点时间解释下Python是如何实现继承的。 对于你定义的每一个类，Python会计算出一个所谓的方法解析顺序(MRO)列表。 这个MRO列表就是一个简单的所有基类的线性顺序表。例如：
+
+```python
+>>> C.__mro__
+(<class '__main__.C'>, <class '__main__.A'>, <class '__main__.B'>,
+<class '__main__.Base'>, <class 'object'>)
+```
+
+为了实现继承，Python会在MRO列表上从左到右开始查找基类，直到找到第一个匹配这个属性的类为止。
+
+而这个MRO列表的构造是通过一个C3线性化算法来实现的。 我们不去深究这个算法的数学原理，它实际上就是合并所有父类的MRO列表并遵循如下三条准则：
+
+* 子类会先于父类被检查
+* 多个父类会根据它们在列表中的顺序被检查
+* 如果对下一个类存在两个合法的选择，选择第一个父类
+
+老实说，你所要知道的就是MRO列表中的类顺序会让你定义的任意类层级关系变得有意义。
+
+当你使用 super() 函数时，Python会在MRO列表上继续搜索下一个类。 只要每个重定义的方法统一使用 super() 并只调用它一次， 那么控制流最终会遍历完整个MRO列表，每个方法也只会被调用一次。 这也是为什么在第二个例子中你不会调用两次 Base.__init__() 的原因。
+
+super() 有个令人吃惊的地方是它并不一定去查找某个类在MRO中下一个直接父类， 你甚至可以在一个没有直接父类的类中使用它。例如，考虑如下这个类：
+
+```python
+class A:
+    def spam(self):
+        print('A.spam')
+        super().spam()
+```
+
+如果你试着直接使用这个类就会出错：
+
+```python
+>>> a = A()
+>>> a.spam()
+A.spam
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "<stdin>", line 4, in spam
+AttributeError: 'super' object has no attribute 'spam'
+```
+
+但是，如果你使用多继承的话看看会发生什么：
+
+```python
+class B:
+    def spam(self):
+        print('B.spam')
+
+
+class C(A, B):
+    pass
+
+c = C()
+c.spam()
+输出：
+A.spam
+B.spam
+```
+
+你可以看到在类A中使用 super().spam() 实际上调用的是跟类A毫无关系的类B中的 spam() 方法。 这个用类C的MRO列表就可以完全解释清楚了：
+
+```python
+>>> C.__mro__
+(<class '__main__.C'>, <class '__main__.A'>, <class '__main__.B'>,
+<class 'object'>)
+```
+
+然而，由于 super() 可能会调用不是你想要的方法，你应该遵循一些通用原则。 首先，确保在继承体系中所有相同名字的方法拥有可兼容的参数签名(比如相同的参数个数和参数名称)。 这样可以确保 super() 调用一个非直接父类方法时不会出错。 其次，最好确保最顶层的类提供了这个方法的实现，这样的话在MRO上面的查找链肯定可以找到某个确定的方法。
+
+在Python社区中对于 super() 的使用有时候会引来一些争议。 尽管如此，如果一切顺利的话，你应该在你最新代码中使用它。 Raymond Hettinger为此写了一篇非常好的文章 “Python’s super() Considered Super!” ， 通过大量的例子向我们解释了为什么 super() 是极好的。
+
+如果定义了重载函数，则前一个会被覆盖：
+
+```python
+class Base(object):
+    def __init__(self, a):
+        self.a = a
+        self.b = None
+
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+
+if __name__ == '__main__':
+    b1 = Base(1)
+    b2 = Base(1, 2)
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 30, in <module>
+    b1 = Base(1)
+TypeError: __init__() missing 1 required positional argument: 'b'
+```
+
+## 子类中扩展property
+
+在子类中，你想要扩展定义在父类中的property的功能。
+
+考虑如下的代码，它定义了一个property：
+
+```python
+class Person:
+    def __init__(self, name):
+        self.name = name
+
+    # Getter function
+    @property
+    def name(self):
+        return self._name
+
+    # Setter function
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._name = value
+
+    # Deleter function
+    @name.deleter
+    def name(self):
+        raise AttributeError("Can't delete attribute")
+```
+
+下面是一个示例类，它继承自Person并扩展了 name 属性的功能：
+
+```python
+class SubPerson(Person):
+    @property
+    def name(self):
+        print('Getting name')
+        return super().name
+
+    @name.setter
+    def name(self, value):
+        print('Setting name to', value)
+        super(SubPerson, SubPerson).name.__set__(self, value)
+
+    @name.deleter
+    def name(self):
+        print('Deleting name')
+        super(SubPerson, SubPerson).name.__delete__(self)
+```
+
+接下来使用这个新类：
+
+```python
+>>> s = SubPerson('Guido')
+Setting name to Guido
+>>> s.name
+Getting name
+'Guido'
+>>> s.name = 'Larry'
+Setting name to Larry
+>>> s.name = 42
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 16, in name
+        raise TypeError('Expected a string')
+TypeError: Expected a string
+```
+
+如果你仅仅只想扩展property的某一个方法，那么可以像下面这样写：
+
+```python
+class SubPerson(Person):
+    @Person.name.getter
+    def name(self):
+        print('Getting name')
+        return super().name
+```
+
+或者，你只想修改setter方法，就这么写：
+
+```python
+class SubPerson(Person):
+    @Person.name.setter
+    def name(self, value):
+        print('Setting name to', value)
+        super(SubPerson, SubPerson).name.__set__(self, value)
+```
+
+在子类中扩展一个property可能会引起很多不易察觉的问题， 因为一个property其实是 getter、setter 和 deleter 方法的集合，而不是单个方法。 因此，当你扩展一个property的时候，你需要先确定你是否要重新定义所有的方法还是说只修改其中某一个。
+
+在第一个例子中，所有的property方法都被重新定义。 在每一个方法中，使用了 super() 来调用父类的实现。 在 setter 函数中使用 super(SubPerson, SubPerson).name.__set__(self, value) 的语句是没有错的。 为了委托给之前定义的setter方法，需要将控制权传递给之前定义的name属性的 __set__() 方法。 不过，获取这个方法的唯一途径是使用类变量而不是实例变量来访问它。 这也是为什么我们要使用 super(SubPerson, SubPerson) 的原因。
+
+如果你只想重定义其中一个方法，那只使用 @property 本身是不够的。比如，下面的代码就无法工作：
+
+```python
+class SubPerson(Person):
+    @property  # Doesn't work
+    def name(self):
+        print('Getting name')
+        return super().name
+```
+
+如果你试着运行会发现setter函数整个消失了：
+
+```python
+>>> s = SubPerson('Guido')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 5, in __init__
+        self.name = name
+AttributeError: can't set attribute
+```
+
+你应该像之前说过的那样修改代码：
+
+```python
+class SubPerson(Person):
+    @Person.name.getter
+    def name(self):
+        print('Getting name')
+        return super().name
+```
+
+这么写后，property之前已经定义过的方法会被复制过来，而getter函数被替换。然后它就能按照期望的工作了：
+
+```python
+>>> s = SubPerson('Guido')
+>>> s.name
+Getting name
+'Guido'
+>>> s.name = 'Larry'
+>>> s.name
+Getting name
+'Larry'
+>>> s.name = 42
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 16, in name
+        raise TypeError('Expected a string')
+TypeError: Expected a string
+```
+
+在这个特别的解决方案中，我们没办法使用更加通用的方式去替换硬编码的 Person 类名。 如果你不知道到底是哪个基类定义了property， 那你只能通过重新定义所有property并使用 super() 来将控制权传递给前面的实现。
+
+值得注意的是上面演示的第一种技术还可以被用来扩展一个描述器(在8.9小节我们有专门的介绍)。比如：
+
+```python
+# A descriptor
+class String:
+    def __init__(self, name):
+        self.name = name
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        return instance.__dict__[self.name]
+
+    def __set__(self, instance, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        instance.__dict__[self.name] = value
+
+
+# A class with a descriptor
+class Person:
+    name = String('name')
+
+    def __init__(self, name):
+        self.name = name
+
+
+# Extending a descriptor with a property
+class SubPerson(Person):
+    @property
+    def name(self):
+        print('Getting name')
+        return super().name
+
+    @name.setter
+    def name(self, value):
+        print('Setting name to', value)
+        super(SubPerson, SubPerson).name.__set__(self, value)
+
+    @name.deleter
+    def name(self):
+        print('Deleting name')
+        super(SubPerson, SubPerson).name.__delete__(self)
+
+
+if __name__ == '__main__':
+    s = SubPerson('Guido')
+    print(s.name)
+    s.name = 'Larry'
+    print(s.name)
+输出：
+Setting name to Guido
+Getting name
+Guido
+Setting name to Larry
+Getting name
+Larry
+```
+
+最后值得注意的是，读到这里时，你应该会发现子类化 setter 和 deleter 方法其实是很简单的。 这里演示的解决方案同样适用，但是在 Python的issue页面 报告的一个bug，或许会使得将来的Python版本中出现一个更加简洁的方法。
+
+## 创建新的类或实例属性
