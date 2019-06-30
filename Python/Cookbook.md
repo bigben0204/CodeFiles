@@ -10988,7 +10988,7 @@ class Person:
 
 重复代码会导致臃肿、易出错和丑陋的程序。好消息是，通过使用装饰器或闭包，有很多种更好的方法来完成同样的事情。 可以参考8.9和9.21小节的内容。
 
-## 调用父类方法
+## 8.7. 调用父类方法
 
 你想在子类中调用父类的某个已经被覆盖的方法。
 
@@ -11270,7 +11270,7 @@ Traceback (most recent call last):
 TypeError: __init__() missing 1 required positional argument: 'b'
 ```
 
-## 子类中扩展property
+## 8.8. 子类中扩展property
 
 在子类中，你想要扩展定义在父类中的property的功能。
 
@@ -11474,4 +11474,1117 @@ Larry
 
 最后值得注意的是，读到这里时，你应该会发现子类化 setter 和 deleter 方法其实是很简单的。 这里演示的解决方案同样适用，但是在 Python的issue页面 报告的一个bug，或许会使得将来的Python版本中出现一个更加简洁的方法。
 
-## 创建新的类或实例属性
+## 8.9. 创建新的类或实例属性
+
+你想创建一个新的拥有一些额外功能的实例属性类型，比如类型检查。
+
+如果你想创建一个全新的实例属性，可以通过一个描述器类的形式来定义它的功能。下面是一个例子：
+
+```python
+# Descriptor attribute for an integer type-checked attribute
+class Integer:
+    def __init__(self, name):
+        self.name = name
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return instance.__dict__[self.name]
+
+    def __set__(self, instance, value):
+        if not isinstance(value, int):
+            raise TypeError('Expected an int')
+        instance.__dict__[self.name] = value
+
+    def __delete__(self, instance):
+        del instance.__dict__[self.name]
+```
+
+一个描述器就是一个实现了三个核心的属性访问操作(get, set, delete)的类， 分别为 \_\_get\_\_() 、\_\_set\_\_() 和 \_\_delete\_\_() 这三个特殊的方法。 这些方法接受一个实例作为输入，之后相应的操作实例底层的字典。
+
+为了使用一个描述器，需将这个描述器的实例作为类属性放到一个类的定义中。例如：
+
+```python
+class Point:
+    x = Integer('x')
+    y = Integer('y')
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+```
+
+当你这样做后，所有对描述器属性(比如x或y)的访问会被 \_\_get\_\_() 、\_\_set\_\_() 和 \_\_delete\_\_() 方法捕获到。例如：
+
+```python
+>>> p = Point(2, 3)
+>>> p.x # Calls Point.x.__get__(p,Point)
+2
+>>> p.y = 5 # Calls Point.y.__set__(p, 5)
+>>> p.x = 2.3 # Calls Point.x.__set__(p, 2.3)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "descrip.py", line 12, in __set__
+        raise TypeError('Expected an int')
+TypeError: Expected an int
+```
+
+作为输入，描述器的每一个方法会接受一个操作实例。 为了实现请求操作，会相应的操作实例底层的字典(__dict__属性)。 描述器的 self.name 属性存储了在实例字典中被实际使用到的key。
+
+描述器可实现大部分Python类特性中的底层魔法， 包括 @classmethod 、@staticmethod 、@property ，甚至是 \_\_slots\_\_ 特性。
+
+通过定义一个描述器，你可以在底层捕获核心的实例操作(get, set, delete)，并且可完全自定义它们的行为。 这是一个强大的工具，有了它你可以实现很多高级功能，并且它也是很多高级库和框架中的重要工具之一。
+
+描述器的一个比较困惑的地方是它只能在类级别被定义，而不能为每个实例单独定义。因此，下面的代码是无法工作的：
+
+```python
+# Does NOT work
+class Point:
+    def __init__(self, x, y):
+        self.x = Integer('x') # No! Must be a class variable
+        self.y = Integer('y')
+        self.x = x
+        self.y = y
+```
+
+同时，\_\_get\_\_() 方法实现起来比看上去要复杂得多：
+
+```python
+# Descriptor attribute for an integer type-checked attribute
+class Integer:
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return instance.__dict__[self.name]
+```
+
+\_\_get\_\_() 看上去有点复杂的原因归结于实例变量和类变量的不同。 如果一个描述器被当做一个类变量来访问，那么 instance 参数被设置成 None 。 这种情况下，标准做法就是简单的返回这个描述器本身即可(尽管你还可以添加其他的自定义操作)。例如：
+
+```python
+>>> p = Point(2,3)
+>>> p.x # Calls Point.x.__get__(p, Point)
+2
+>>> Point.x # Calls Point.x.__get__(None, Point)
+<__main__.Integer object at 0x100671890>
+```
+
+描述器通常是那些使用到装饰器或元类的大型框架中的一个组件。同时它们的使用也被隐藏在后面。 举个例子，下面是一些更高级的基于描述器的代码，并涉及到一个类装饰器：
+
+```python
+# Descriptor for a type-checked attribute
+class Typed:
+    def __init__(self, name, expected_type):
+        self.name = name
+        self.expected_type = expected_type
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return instance.__dict__[self.name]
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self.expected_type):
+            raise TypeError('Expected ' + str(self.expected_type))
+        instance.__dict__[self.name] = value
+
+    def __delete__(self, instance):
+        del instance.__dict__[self.name]
+
+
+# Class decorator that applies it to selected attributes
+def typeassert(**kwargs):
+    def decorate(cls):
+        for name, expected_type in kwargs.items():
+            # Attach a Typed descriptor to the class
+            setattr(cls, name, Typed(name, expected_type))
+        return cls
+
+    return decorate
+
+
+# Example use
+@typeassert(name=str, shares=int, price=float)
+class Stock:
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+
+
+if __name__ == '__main__':
+    stock = Stock('abc', 100.1, 27.3)
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 48, in <module>
+    stock2 = Stock('abc', 100.1, 27.3)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 42, in __init__
+    self.shares = shares
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 19, in __set__
+    raise TypeError('Expected ' + str(self.expected_type))
+TypeError: Expected <class 'int'>
+```
+
+最后要指出的一点是，如果你只是想简单的自定义某个类的单个属性访问的话就不用去写描述器了。 这种情况下使用8.6小节介绍的property技术会更加容易。 当程序中有很多重复代码的时候描述器就很有用了 (比如你想在你代码的很多地方使用描述器提供的功能或者将它作为一个函数库特性)。
+
+## 8.10. 使用延迟计算属性
+
+你想将一个只读属性定义成一个property，并且只在访问的时候才会计算结果。 但是一旦被访问后，你希望结果值被缓存起来，不用每次都去计算。
+
+定义一个延迟属性的一种高效方法是通过使用一个描述器类，如下所示：
+
+```python
+class lazyproperty(object):
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            value = self.func(instance)
+            setattr(instance, self.func.__name__, value)
+            return value
+```
+
+你需要像下面这样在一个类中使用它：
+
+```python
+class Circle(object):
+    def __init__(self, radius):
+        self.radius = radius
+
+    @lazyproperty  # 定义的描述器类似是类的全局方法，在类加载时初始化好，即在main函数之前进行初始化
+    def area(self):
+        print('Computing area')
+        return math.pi * self.radius ** 2
+
+    @lazyproperty
+    def perimeter(self):
+        print('Computing perimeter')
+        return 2 * math.pi * self.radius
+```
+
+下面在一个交互环境中演示它的使用：
+
+```python
+if __name__ == '__main__':
+    c = Circle(4.0)
+    print(c.radius)
+    print(c.area)
+    print(c.area)
+
+    print(c.perimeter)
+    print(c.perimeter)
+输出：
+4.0
+Computing area
+50.26548245743669
+50.26548245743669
+Computing perimeter
+25.132741228718345
+25.132741228718345
+```
+
+仔细观察你会发现消息 Computing area 和 Computing perimeter 仅仅出现一次。
+
+很多时候，构造一个延迟计算属性的主要目的是为了提升性能。 例如，你可以避免计算这些属性值，除非你真的需要它们。 这里演示的方案就是用来实现这样的效果的， 只不过它是通过以非常高效的方式使用描述器的一个精妙特性来达到这种效果的。
+
+正如在其他小节(如8.9小节)所讲的那样，当一个描述器被放入一个类的定义时， 每次访问属性时它的 \_\_get\_\_() 、\_\_set\_\_() 和 \_\_delete\_\_() 方法就会被触发。 不过，如果一个描述器仅仅只定义了一个 \_\_get\_\_() 方法的话，它比通常的具有更弱的绑定。 特别地，只有当被访问属性不在实例底层的字典中时 \_\_get\_\_() 方法才会被触发。
+
+lazyproperty 类利用这一点，使用 \_\_get\_\_() 方法在实例中存储计算出来的值， 这个实例使用相同的名字作为它的property。 这样一来，结果值被存储在实例字典中并且以后就不需要再去计算这个property了。 你可以尝试更深入的例子来观察结果：
+
+```python
+>>> c = Circle(4.0)
+>>> # Get instance variables
+>>> vars(c)
+{'radius': 4.0}
+
+>>> # Compute area and observe variables afterward
+>>> c.area
+Computing area
+50.26548245743669
+>>> vars(c)
+{'area': 50.26548245743669, 'radius': 4.0}
+
+>>> # Notice access doesn't invoke property anymore
+>>> c.area
+50.26548245743669
+
+>>> # Delete the variable and see property trigger again
+>>> del c.area
+>>> vars(c)
+{'radius': 4.0}
+>>> c.area
+Computing area
+50.26548245743669
+```
+
+这种方案有一个小缺陷就是计算出的值被创建后是可以被修改的。例如：
+
+```python
+>>> c.area
+Computing area
+50.26548245743669
+>>> c.area = 25
+>>> c.area
+25
+```
+
+如果你担心这个问题，那么可以使用一种稍微没那么高效的实现，就像下面这样：
+
+```python
+def lazyproperty(func):
+    name = '_lazy_' + func.__name__
+
+    @property
+    def lazy(self):
+        if hasattr(self, name):
+            return getattr(self, name)
+        else:
+            value = func(self)
+            setattr(self, name, value)
+            return value
+
+    return lazy
+```
+
+如果你使用这个版本，就会发现现在修改操作已经不被允许了：
+
+```python
+>>> c = Circle(4.0)
+>>> c.area
+Computing area
+50.26548245743669
+>>> c.area
+50.26548245743669
+>>> c.area = 25
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+AttributeError: can't set attribute
+```
+
+然而，这种方案有一个缺点就是所有get操作都必须被定向到属性的 getter 函数上去。 这个跟之前简单的在实例字典中查找值的方案相比效率要低一点。 如果想获取更多关于property和可管理属性的信息，可以参考8.6小节。而描述器的相关内容可以在8.9小节找到。
+
+## 8.11. 简化数据结构的初始化
+
+你写了很多仅仅用作数据结构的类，不想写太多烦人的 \_\_init\_\_() 函数。
+
+可以在一个基类中写一个公用的 \_\_init\_\_() 函数：
+
+```python
+import math
+
+class Structure1:
+    # Class variable that specifies expected fields
+    _fields = []
+
+    def __init__(self, *args):
+        if len(args) != len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
+        # Set the arguments
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
+```
+
+然后使你的类继承自这个基类:
+
+```python
+# Example class definitions
+class Stock(Structure1):
+    _fields = ['name', 'shares', 'price']
+
+
+class Point(Structure1):
+    _fields = ['x', 'y']
+
+
+class Circle(Structure1):
+    _fields = ['radius']
+
+    def area(self):
+        return math.pi * self.radius ** 2
+```
+
+使用这些类的示例：
+
+```python
+if __name__ == '__main__':
+        s = Stock('ACME', 50, 91.1)
+    print(s.__dict__)
+    p = Point(2, 3)
+    print(p.__dict__)
+    c = Circle(4.5)
+    print(c.__dict__)
+
+    s2 = Stock('ACME', 50)
+输出：
+{'name': 'ACME', 'shares': 50, 'price': 91.1}
+{'x': 2, 'y': 3}
+{'radius': 4.5}
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 42, in <module>
+    s2 = Stock('ACME', 50)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 12, in __init__
+    raise TypeError('Expected {} arguments'.format(len(self._fields)))
+TypeError: Expected 3 arguments
+```
+
+如果还想支持关键字参数，可以将关键字参数设置为实例属性：
+
+```python
+class Structure2:
+    _fields = []
+
+    def __init__(self, *args, **kwargs):
+        if len(args) > len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._field)))
+
+        # Set all of the positional arguments
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
+
+        # Set the remaining keyword arguments
+        for name in self._fields[len(args):]:
+            setattr(self, name, kwargs.pop(name))
+
+        # Check for any remaining unknown arguments
+        if kwargs:
+            raise TypeError('Invalid argument(s): {}'.format(','.join(kwargs)))
+
+
+# Example use
+class Stock(Structure2):
+    _fields = ['name', 'shares', 'price']
+
+
+if __name__ == '__main__':
+    s1 = Stock('ACME', 50, 91.1)
+    s2 = Stock('ACME', 50, price=91.1)
+    s3 = Stock('ACME', shares=50, price=91.1)
+
+    s4 = Stock('ACME', shares=50, price=91.1, aa=1)
+输出：
+Traceback (most recent call last):
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\pydevd.py", line 1758, in <module>
+    main()
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\pydevd.py", line 1752, in main
+    globals = debugger.run(setup['file'], None, None, is_module)
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\pydevd.py", line 1147, in run
+    pydev_imports.execfile(file, globals, locals)  # execute the script
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\_pydev_imps\_pydev_execfile.py", line 18, in execfile
+    exec(compile(contents+"\n", file, 'exec'), glob, loc)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 35, in <module>
+    s3 = Stock('ACME', shares=50, price=91.1, aa=1)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 22, in __init__
+    raise TypeError('Invalid argument(s): {}'.format(','.join(kwargs)))
+TypeError: Invalid argument(s): aa
+```
+
+你还能将不在 _fields 中的名称加入到属性中去：
+
+```python
+class Structure3:
+    # Class variable that specifies expected fields
+    _fields = []
+
+    def __init__(self, *args, **kwargs):
+        if len(args) != len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
+
+        # Set the arguments
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
+
+        # Set the additional arguments (if any)
+        extra_args = kwargs.keys() - self._fields
+        for name in extra_args:
+            setattr(self, name, kwargs.pop(name))
+
+        if kwargs:
+            raise TypeError('Duplicate values for {}'.format(','.join(kwargs)))
+
+
+# Example use
+class Stock(Structure3):
+    _fields = ['name', 'shares', 'price']
+
+
+if __name__ == '__main__':
+    s1 = Stock('ACME', 50, 91.1)
+    s2 = Stock('ACME', 50, 91.1, date='8/2/2012')
+    s3 = Stock('ACME', 50, 91.1, date='8/2/2012', price=30)
+输出：
+Traceback (most recent call last):
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\pydevd.py", line 1758, in <module>
+    main()
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\pydevd.py", line 1752, in main
+    globals = debugger.run(setup['file'], None, None, is_module)
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\pydevd.py", line 1147, in run
+    pydev_imports.execfile(file, globals, locals)  # execute the script
+  File "D:\Program Files\JetBrains\PyCharm 2019.1.3\helpers\pydev\_pydev_imps\_pydev_execfile.py", line 18, in execfile
+    exec(compile(contents+"\n", file, 'exec'), glob, loc)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 53, in <module>
+    s2 = Stock('ACME', 50, 91.1, date='8/2/2012', price=30)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 43, in __init__
+    raise TypeError('Duplicate values for {}'.format(','.join(kwargs)))
+TypeError: Duplicate values for price
+```
+
+在上面的实现中我们使用了 setattr() 函数类设置属性值， 你可能不想用这种方式，而是想直接更新实例字典，就像下面这样：
+
+```python
+class Structure:
+    # Class variable that specifies expected fields
+    _fields= []
+    def __init__(self, *args):
+        if len(args) != len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
+
+        # Set the arguments (alternate)
+        self.__dict__.update(zip(self._fields,args))
+```
+
+尽管这也可以正常工作，但是当定义子类的时候问题就来了。 当一个子类定义了 __slots__ 或者通过property(或描述器)来包装某个属性， 那么直接访问实例字典就不起作用了。我们上面使用 setattr() 会显得更通用些，因为它也适用于子类情况。
+
+这种方法唯一不好的地方就是对某些IDE而言，在显示帮助函数时可能不太友好。比如：
+
+```python
+>>> help(Stock)
+Help on class Stock in module __main__:
+class Stock(Structure)
+...
+| Methods inherited from Structure:
+|
+| __init__(self, *args, **kwargs)
+|
+...
+>>>
+
+# 本地PyCharm：
+help(Stock)
+显示：
+Help on class Stock in module __main__:
+
+class Stock(Structure3)
+ |  Stock(*args, **kwargs)
+ |  
+ |  # Example use
+ |  
+ |  Method resolution order:
+ |      Stock
+ |      Structure3
+ |      builtins.object
+ |  
+ |  Data and other attributes defined here:
+ |  
+ |  _fields = ['name', 'shares', 'price']
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from Structure3:
+ |  
+ |  __init__(self, *args, **kwargs)
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from Structure3:
+ |  
+ |  __dict__
+ |      dictionary for instance variables (if defined)
+ |  
+ |  __weakref__
+ |      list of weak references to the object (if defined)
+```
+
+可以参考9.16小节来强制在 __init__() 方法中指定参数的类型签名。
+
+## 8.12. 定义接口或者抽象基类
+
+你想定义一个接口或抽象类，并且通过执行类型检查来确保子类实现了某些特定的方法
+
+使用 abc 模块可以很轻松的定义抽象基类：
+
+```python
+from abc import ABCMeta, abstractmethod
+
+
+class IStream(metaclass=ABCMeta):
+    @abstractmethod
+    def read(self, maxbytes=-1):
+        pass
+
+    @abstractmethod
+    def write(self, data):
+        pass
+```
+
+抽象类的一个特点是它不能直接被实例化，比如你想像下面这样做是不行的：
+
+```python
+a = IStream()
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 17, in <module>
+    a = IStream()
+TypeError: Can't instantiate abstract class IStream with abstract methods read, write
+```
+
+抽象类的目的就是让别的类继承它并实现特定的抽象方法：
+
+```python
+class SocketStream(IStream):
+    def read(self, maxbytes=-1):
+        pass
+
+    def write(self, data):
+        pass
+```
+
+抽象基类的一个主要用途是在代码中检查某些类是否为特定类型，实现了特定接口：
+
+```python
+def serialize(obj, stream):
+    if not isinstance(stream, IStream):
+        raise TypeError('Expected an IStream')
+    pass
+
+s = SocketStream()
+serialize(object(), s)
+serialize(object(), 'abc')  # 异常 TypeError: Expected an IStream
+```
+
+除了继承这种方式外，还可以通过注册方式来让某个类实现抽象基类：
+
+```python
+import io
+
+# Register the built-in I/O classes as supporting our interface
+IStream.register(io.IOBase)
+
+# Open a normal file and type check
+f = open('foo.txt')
+isinstance(f, IStream) # Returns True
+```
+
+@abstractmethod 还能注解静态方法、类方法和 properties 。 你只需保证这个注解紧靠在函数定义前即可：
+
+```python
+class A(metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def name(self):
+        pass
+
+    @name.setter
+    @abstractmethod
+    def name(self, value):
+        pass
+
+    @classmethod
+    @abstractmethod
+    def method1(cls):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def method2():
+        pass
+```
+
+标准库中有很多用到抽象基类的地方。collections 模块定义了很多跟容器和迭代器(序列、映射、集合等)有关的抽象基类。 numbers 库定义了跟数字对象(整数、浮点数、有理数等)有关的基类。io 库定义了很多跟I/O操作相关的基类。
+
+你可以使用预定义的抽象类来执行更通用的类型检查，例如：
+
+```python
+import collections
+
+# Check if x is a sequence
+if isinstance(x, collections.Sequence):
+...
+
+# Check if x is iterable
+if isinstance(x, collections.Iterable):
+...
+
+# Check if x has a size
+if isinstance(x, collections.Sized):
+...
+
+# Check if x is a mapping
+if isinstance(x, collections.Mapping):
+```
+
+尽管ABCs可以让我们很方便的做类型检查，但是我们在代码中最好不要过多的使用它。 因为Python的本质是一门动态编程语言，其目的就是给你更多灵活性， 强制类型检查或让你代码变得更复杂，这样做无异于舍本求末。
+
+注：metaclass元类，用于创建类的类 <https://www.cnblogs.com/piperck/p/5840443.html>
+
+```python
+class Test(object):
+    def __init__(self):
+        pass
+
+s = SocketStream()
+print(s.__class__)
+print(s.__class__.__class__)
+print(s.__class__.__class__.__class__)
+
+t = Test()
+print(t.__class__)
+print(t.__class__.__class__)
+print(t.__class__.__class__.__class__)
+输出：
+<class '__main__.SocketStream'>
+<class 'abc.ABCMeta'>
+<class 'type'>
+<class '__main__.Test'>
+<class 'type'>
+<class 'type'>
+
+# 使用type创建类：
+input:
+class FlyToSky(object):
+    pass
+
+pw = type('Trick', (FlyToSky, ), {'laugh_at': 'hahahaha'})
+print pw().laugh_at
+print pw.__dict__
+print pw.__bases__
+print pw().__class__
+print pw().__class__.__class__
+
+
+output:
+hahahaha
+{'__module__': '__main__', 'laugh_at': 'hahahaha', '__doc__': None}
+(<class '__main__.FlyToSky'>,)
+<class '__main__.Trick'>
+<type 'type'>
+```
+
+自定义元类：
+
+```python
+def upper_attr(class_name, class_parents, class_attr):
+    """
+    返回一个对象,将属性都改为大写的形式
+    :param class_name:  类的名称
+    :param class_parents: 类的父类tuple
+    :param class_attr: 类的参数
+    :return: 返回类
+    """
+    # 生成了一个generator
+    attrs = ((name, value) for name, value in class_attr.items() if not name.startswith('__'))
+    uppercase_attrs = dict((name.upper(), value) for name, value in attrs)
+    return type(class_name, class_parents, uppercase_attrs)
+
+
+__metaclass__ = upper_attr
+
+if __name__ == '__main__':
+    pw = upper_attr('Trick', (), {'bar': 0})
+    print(hasattr(pw, 'bar'))
+    print(hasattr(pw, 'BAR'))
+    print(pw.BAR)
+输出：
+False
+True
+0
+```
+
+可以从上面看到，我实现了一个元类(metaclass)， 然后指定了模块使用这个元类来创建类，所以当我下面使用type进行类创建的时候，可以发现小写的bar参数被替换成了大写的BAR参数，并且在最后我调用了这个类属性并，打印了它。
+
+上面我们使用了函数做元类传递给类，下面我们使用一个正式类来作为元类传递给__metaclass__。（这是Py2的写法）
+
+```python
+class UpperAttrMetaClass(type):
+    def __new__(mcs, class_name, class_parents, class_attr):
+        attrs = ((name, value) for name, value in class_attr.items() if not name.startswith('__'))
+        uppercase_attrs = dict((name.upper(), value) for name, value in attrs)
+        return super(UpperAttrMetaClass, mcs).__new__(mcs, class_name, class_parents, uppercase_attrs)
+
+# py2
+# class Trick(object):
+#     __metaclass__ = UpperAttrMetaClass
+#     bar = 12
+#     money = 'unlimited'
+
+# py3
+class Trick(metaclass=UpperAttrMetaClass):
+    bar = 12
+    money = 'unlimited'
+
+if __name__ == '__main__':
+    print(Trick.BAR)
+    print(Trick.MONEY)
+```
+
+## 8.13. 实现数据模型的类型约束
+
+你想定义某些在属性赋值上面有限制的数据结构。
+
+在这个问题中，你需要在对某些实例属性赋值时进行检查。 所以你要自定义属性赋值函数，这种情况下最好使用描述器。
+
+下面的代码使用描述器实现了一个系统类型和赋值验证框架：
+
+```python
+# Base class. Uses a descriptor to set a value
+class Descriptor:
+    def __init__(self, name=None, **opts):
+        self.name = name
+        for key, value in opts.items():
+            setattr(self, key, value)
+
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
+
+    # 这里如果不定义__get__方法，则调用s.name时，直接从s对象上获取属性name，如果定义了__get__方法，则调用__get__方法
+    # def __get__(self, instance, cls):
+    #     if instance is None:
+    #         return self
+    #     else:
+    #         return instance.__dict__[self.name]
+
+# Descriptor for enforcing types
+class Typed(Descriptor):
+    expected_type = type(None)
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self.expected_type):
+            raise TypeError('Expected ' + str(self.expected_type))
+        super().__set__(instance, value)
+
+
+# Descriptor for enforcing types
+class Unsigned(Descriptor):
+    def __set__(self, instance, value):
+        if value < 0:
+            raise ValueError('Expected >= 0')
+        super().__set__(instance, value)
+
+
+class MaxSized(Descriptor):
+    def __init__(self, name=None, **opts):
+        if 'size' not in opts:
+            raise TypeError('Missing size option')
+        super().__init__(name, **opts)
+
+    def __set__(self, instance, value):
+        if len(value) >= self.size:
+            raise ValueError('Size must be < ' + str(self.size))
+        super().__set__(instance, value)
+```
+
+这些类就是你要创建的数据模型或类型系统的基础构建模块。 下面就是我们实际定义的各种不同的数据类型：
+
+```python
+class Integer(Typed):
+    expected_type = int
+
+
+class UnsignedInteger(Integer, Unsigned):
+    pass
+
+
+class Float(Typed):
+    expected_type = float
+
+
+class UnsignedFloat(Float, Unsigned):
+    pass
+
+
+class String(Typed):
+    expected_type = str
+
+
+# self.name = name时，给SizedString对象赋值，先调用Typed.__set__方法（但是super().__set__(instance, value)不调用），再调用MaxSized.__set__方法，在MaxSized.__set__方法调用super().__set__(instance, value)方法，再从MaxSized.__set__方法退出，再从Typed.__set__方法退出。所有父类的__set__校验都会调到。
+class SizedString(String, MaxSized):
+    pass
+```
+
+然后使用这些自定义数据类型，我们定义一个类：
+
+```python
+class Stock:
+    # Specify constraints
+    name = SizedString('name', size=8)
+    shares = UnsignedInteger('shares')
+    price = UnsignedFloat('price')
+
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+```
+
+然后测试这个类的属性赋值约束，可发现对某些属性的赋值违法了约束是不合法的：
+
+```python
+>>> s = Stock('ACME', 70, 40.5)
+>>> s.name
+'ACME'
+>>> s.shares = 75
+>>> s.shares = -10
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 17, in __set__
+        super().__set__(instance, value)
+    File "example.py", line 23, in __set__
+        raise ValueError('Expected >= 0')
+ValueError: Expected >= 0
+>>> s.price = 'a lot'
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 16, in __set__
+        raise TypeError('expected ' + str(self.expected_type))
+TypeError: expected <class 'float'>
+>>> s.name = 'ABRACADABRA'
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 17, in __set__
+        super().__set__(instance, value)
+    File "example.py", line 35, in __set__
+        raise ValueError('size must be < ' + str(self.size))
+ValueError: size must be < 8
+```
+
+还有一些技术可以简化上面的代码，其中一种是使用类装饰器：
+
+```python
+# Class decorator to apply constraints
+def check_attributes(**kwargs):
+    def decorate(cls):
+        for key, value in kwargs.items():
+            if isinstance(value, Descriptor):  # SizedString(size=8)满足这里的判断，是Descriptor的实例
+                value.name = key
+                setattr(cls, key, value)
+            else:  # UnsignedInteger/UnsignedFloat是类名，所以不是Descriptor的实例，类是元类的实例，所以这里isinstance(value, type) == true
+                setattr(cls, key, value(key))
+        return cls
+
+    return decorate
+
+
+# Example
+@check_attributes(name=SizedString(size=8),
+                  shares=UnsignedInteger,
+                  price=UnsignedFloat)
+class Stock:
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+
+
+if __name__ == '__main__':
+    s = Stock('ACME', 70, 40.5)
+    print(s.name)
+    s.shares = 75
+    # s.shares = -10
+    # s.price = 'a lot'
+    s.name = 'ABRACADABRA'
+输出：
+ACME
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 106, in <module>
+    s.name = 'ABRACADABRA'
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 29, in __set__
+    super().__set__(instance, value)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 48, in __set__
+    raise ValueError('Size must be < ' + str(self.size))
+ValueError: Size must be < 8
+```
+
+另外一种方式是使用元类：
+
+```python
+# A metaclass that applies checking
+class checkedmeta(type):
+    def __new__(cls, clsname, bases, methods):
+        # Attach attribute names to the descriptors
+        for key, value in methods.items():
+            if isinstance(value, Descriptor):
+                value.name = key
+        return type.__new__(cls, clsname, bases, methods)
+
+
+# Example
+class Stock2(metaclass=checkedmeta):
+    name = SizedString(size=8)
+    shares = UnsignedInteger()
+    price = UnsignedFloat()
+
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+
+
+if __name__ == '__main__':
+    s = Stock2('ACME', 70, 40.5)
+    print(s.name)
+    s.shares = 75
+    # s.shares = -10
+    # s.price = 'a lot'
+    s.name = 'ABRACADABRA'  # ValueError: Size must be < 8
+```
+
+本节使用了很多高级技术，包括描述器、混入类、super() 的使用、类装饰器和元类。 不可能在这里一一详细展开来讲，但是可以在8.9、8.18、9.19小节找到更多例子。 但是，我在这里还是要提一下几个需要注意的点。
+
+首先，在 Descriptor 基类中你会看到有个 _\_\set_\_\() 方法，却没有相应的 _\_\get_\_\() 方法。 如果一个描述仅仅是从底层实例字典中获取某个属性值的话，那么没必要去定义 _\_\get_\_\() 方法。
+
+所有描述器类都是基于混入类来实现的。比如 Unsigned 和 MaxSized 要跟其他继承自 Typed 类混入。 这里利用多继承来实现相应的功能。
+
+混入类的一个比较难理解的地方是，调用 super() 函数时，你并不知道究竟要调用哪个具体类。 你需要跟其他类结合后才能正确的使用，也就是必须合作才能产生效果。
+
+使用类装饰器和元类通常可以简化代码。上面两个例子中你会发现你只需要输入一次属性名即可了。
+
+```python
+# Normal
+class Point1:
+    x = Integer('x')
+    y = Integer('y')
+
+
+# 类装饰器
+@check_attributes(x=Integer, y=Integer)
+class Point2:
+    pass
+
+
+# 元类Metaclass
+class Point3(metaclass=checkedmeta):
+    x = Integer()
+    y = Integer()
+
+
+if __name__ == '__main__':
+    p = Point3()
+    p.x = 10.5  # TypeError: Expected <class 'int'>
+```
+
+所有方法中，类装饰器方案应该是最灵活和最高明的。 首先，它并不依赖任何其他新的技术，比如元类。其次，装饰器可以很容易的添加或删除。
+
+最后，装饰器还能作为混入类的替代技术来实现同样的效果;
+
+```python
+# Base class. Uses a descriptor to set a value
+class Descriptor:
+    def __init__(self, name=None, **opts):
+        self.name = name
+        for key, value in opts.items():
+            setattr(self, key, value)
+
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
+
+
+# Decorator for applying type checking
+def Typed(expected_type, cls=None):
+    if cls is None:
+        return lambda cls: Typed(expected_type, cls)
+    super_set = cls.__set__
+
+    def __set__(self, instance, value):
+        if not isinstance(value, expected_type):
+            raise TypeError('Expected ' + str(expected_type))
+        super_set(self, instance, value)
+
+    cls.__set__ = __set__
+    return cls
+
+
+# Decorator for unsigned values
+def Unsigned(cls):
+    super_set = cls.__set__
+
+    def __set__(self, instance, value):
+        if value < 0:
+            raise ValueError('Expected >= 0')
+        super_set(self, instance, value)
+
+    cls.__set__ = __set__
+    return cls
+
+
+# Decorator for allowing sized values
+def MaxSized(cls):
+    super_init = cls.__init__
+
+    def __init__(self, name=None, **opts):
+        if 'size' not in opts:
+            raise TypeError('Missing size option')
+        super_init(self, name, **opts)
+
+    cls.__init__ = __init__
+
+    super_set = cls.__set__
+
+    def __set__(self, instance, value):
+        if len(value) >= self.size:
+            raise ValueError('Size must be < ' + str(self.size))
+        super_set(self, instance, value)
+
+    cls.__set__ = __set__
+    return cls
+
+
+# Specialized descriptors
+@Typed(int)
+class Integer(Descriptor):
+    pass
+
+
+@Unsigned
+class UnsignedInteger(Integer):
+    pass
+
+
+@Typed(float)
+class Float(Descriptor):
+    pass
+
+
+@Unsigned
+class UnsignedFloat(Float):
+    pass
+
+
+@Typed(str)
+class String(Descriptor):
+    pass
+
+
+@MaxSized
+class SizedString(String):
+    pass
+
+
+class Stock:
+    # Specify constraints
+    name = SizedString('name', size=8)
+    shares = UnsignedInteger('shares')
+    price = UnsignedFloat('price')
+
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+
+
+if __name__ == '__main__':
+    s = Stock('ACME', 70, 40.5)
+    print(s.name)  # ACME
+    s.shares = 75
+    # s.shares = -10
+    # s.price = 'a lot'
+    s.name = 'ABRACADABRA'  # ValueError: Size must be < 8
+```
+
+这种方式定义的类跟之前的效果一样，而且执行速度会更快。 设置一个简单的类型属性的值，装饰器方式要比之前的混入类的方式几乎快100%。 现在你应该庆幸自己读完了本节全部内容了吧？^_^
+
+## 8.14. 实现自定义容器
+
