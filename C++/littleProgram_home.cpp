@@ -3060,45 +3060,50 @@ using namespace std;
 
 unique_ptr<int> getUp(int i)
 {
-	return make_unique<int>(i);
+    return make_unique<int>(i);
 }
 
 int main()
 {
-	unique_ptr<int> pInt1(new int(3)); //unique_ptr<int> pInt = make_unique<int>(3);
-	
-	//1.无法进行拷贝构造和赋值操作
-	//unique_ptr<int> pInt2(pInt1);//这种不安全的转移控制权方式编译错误
-	//unique_ptr<int> pInt2 = pInt1;//错误
+    unique_ptr<int> pInt1(new int(3)); //unique_ptr<int> pInt = make_unique<int>(3);
 
-	//2.可以进行移动构造和移动赋值操作
-	//如果想转移控制权，必须显示调用move函数
-	unique_ptr<int> pInt2(move(pInt1));
-	
-	//move语意可以用在任何你需要创建一个“右值引用”的地方
-	//也可以在函数返回值中使用
-	unique_ptr<int> pInt3 = getUp(5);//函数中作为返回值却可以用
+    //1.无法进行拷贝构造和赋值操作
+    //unique_ptr<int> pInt2(pInt1);//这种不安全的转移控制权方式编译错误
+    //unique_ptr<int> pInt2 = pInt1;//错误
 
-	//3.可做为容器元素
-	vector<unique_ptr<int> > pIntVec;
-	pIntVec.push_back(move(pInt1));
-	//pIntVec.push_back(pInt1);报错
-	//cout << *pInt1 << endl;但这个也同样出错,说明sp添加到容器中之后,它自身报废了
-	
-	//目前理解是：虽然unique_ptr可以放置在容器中，但是不能做各种拷贝操作，如排序，遍历之类的操作都不支持
-// 	//抛异常了
-// 	for (unique_ptr<int>& pInt : pIntVec)
-// 	{
-// 		cout << *pInt << endl;
-// 	}
-	//同样抛异常了
-// 	for (vector<unique_ptr<int> >::iterator iter = pIntVec.begin(); iter != pIntVec.end(); ++iter)
-// 	{
-// 		cout << **iter << endl;
-// 	}
+    //2.可以进行移动构造和移动赋值操作
+    //如果想转移控制权，必须显示调用move函数
+    unique_ptr<int> pInt2(move(pInt1));
 
-	return 0;
+    //move语意可以用在任何你需要创建一个“右值引用”的地方
+    //也可以在函数返回值中使用
+    unique_ptr<int> pInt3 = getUp(5);//函数中作为返回值却可以用
+
+    //3.可做为容器元素
+    vector<unique_ptr<int> > pIntVec;
+    pIntVec.push_back(move(pInt2));
+    pIntVec.push_back(move(pInt3));
+    //pIntVec.push_back(pInt1);报错
+    //cout << *pInt1 << endl;但这个也同样出错,说明sp添加到容器中之后,它自身报废了
+
+    for (unique_ptr<int>& pInt : pIntVec)
+    {
+        cout << *pInt << endl;
+    }
+    for (vector<unique_ptr<int> >::iterator iter = pIntVec.begin(); iter != pIntVec.end(); ++iter)
+    {
+        cout << **iter << endl;
+    }
+
+    return 0;
 }
+
+输出：
+3
+5
+3
+5
+
 
 //http://www.tuicool.com/articles/6zUBfen
 
