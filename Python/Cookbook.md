@@ -13019,3 +13019,1203 @@ if __name__ == '__main__':
 11.8小节还有一个在远程方法调用环境中使用代理的例子。
 
 ## 8.16. 在类中定义多个构造器
+
+你想实现一个类，除了使用 __init__() 方法外，还有其他方式可以初始化它。
+
+为了实现多个构造器，你需要使用到类方法。例如：
+
+```python
+import time
+
+
+class Date:
+    """方法一：使用类方法"""
+
+    # Primary constructor
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    # Alternate constructor
+    @classmethod
+    def today(cls):
+        t = time.localtime()
+        return cls(t.tm_year, t.tm_mon, t.tm_mday)
+```
+
+直接调用类方法即可，下面是使用示例：
+
+```python
+a = Date(2012, 12, 21) # Primary
+b = Date.today() # Alternate
+```
+
+类方法的一个主要用途就是定义多个构造器。它接受一个 class 作为第一个参数(cls)。 你应该注意到了这个类被用来创建并返回最终的实例。在继承时也能工作的很好：
+
+```python
+class NewDate(Date):
+    pass
+
+c = Date.today() # Creates an instance of Date (cls=Date)
+d = NewDate.today() # Creates an instance of NewDate (cls=NewDate)
+print(c.__class__)
+print(d.__class__)
+输出：
+<class '__main__.Date'>
+<class '__main__.NewDate'>
+```
+
+## 8.17. 创建不调用init方法的实例
+
+你想创建一个实例，但是希望绕过执行 \_\_init\_\_() 方法。
+
+解决方案
+可以通过 \_\_new\_\_() 方法创建一个未初始化的实例。例如考虑如下这个类：
+
+```python
+class Date:
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+```
+
+下面演示如何不调用 \_\_init\_\_() 方法来创建这个Date实例：
+
+```python
+>>> d = Date.__new__(Date)
+>>> d
+<__main__.Date object at 0x1006716d0>
+>>> d.year
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+AttributeError: 'Date' object has no attribute 'year'
+>>>
+```
+
+结果可以看到，这个Date实例的属性year还不存在，所以你需要手动初始化：
+
+```python
+date = {'year': 2012, 'month': 8, 'day': 29}
+for key, value in date.items():
+    setattr(d, key, value)
+print(d.year)
+print(d.month)
+输出：
+2012
+8
+```
+
+当我们在反序列对象或者实现某个类方法构造函数时需要绕过 __init__() 方法来创建对象。 例如，对于上面的Date来讲，有时候你可能会像下面这样定义一个新的构造函数 today() ：
+
+```python
+from time import localtime
+
+class Date:
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+
+    @classmethod
+    def today(cls):
+        d = cls.__new__(cls)
+        t = localtime()
+        d.year = t.tm_year
+        d.month = t.tm_mon
+        d.day = t.tm_mday
+        return d
+```
+
+同样，在你反序列化JSON数据时产生一个如下的字典对象：
+
+```python
+data = { 'year': 2012, 'month': 8, 'day': 29 }
+```
+
+如果你想将它转换成一个Date类型实例，可以使用上面的技术。
+
+当你通过这种非常规方式来创建实例的时候，最好不要直接去访问底层实例字典，除非你真的清楚所有细节。 否则的话，如果这个类使用了 __slots__ 、properties 、descriptors 或其他高级技术的时候代码就会失效。 而这时候使用 setattr() 方法会让你的代码变得更加通用。
+
+## 8.18. 利用Mixins扩展类功能
+
+你有很多有用的方法，想使用它们来扩展其他类的功能。但是这些类并没有任何继承的关系。 因此你不能简单的将这些方法放入一个基类，然后被其他类继承。
+
+通常当你想自定义类的时候会碰上这些问题。可能是某个库提供了一些基础类， 你可以利用它们来构造你自己的类。
+
+假设你想扩展映射对象，给它们添加日志、唯一性设置、类型检查等等功能。下面是一些混入类：
+
+```python
+class LoggedMappingMixin:
+    """
+    Add logging to get/set/delete operations for debugging.
+    """
+    __slots__ = ()  # 混入类都没有实例变量，因为直接实例化混入类没有任何意义
+
+    def __getitem__(self, key):
+        print('Getting ' + str(key))
+        return super().__getitem__(key)
+
+    def __setitem__(self, key, value):
+        print('Setting {} = {!r}'.format(key, value))
+        return super().__setitem__(key, value)
+
+    def __delitem__(self, key):
+        print('Deleting ' + str(key))
+        return super().__delitem__(key)
+
+
+class SetOnceMappingMixin:
+    """
+    Only allow a key to be set once
+    """
+    __slots__ = ()
+
+    def __setitem__(self, key, value):
+        if key in self:
+            raise KeyError(str(key) + ' already set')
+        return super().__setitem__(key, value)
+
+
+class StringKeysMappingMixin:
+    """
+    Restrict keys to strings only
+    """
+    __slots__ = ()
+
+    def __setitem__(self, key, value):
+        if not isinstance(key, str):
+            raise TypeError('keys must be strings')
+        return super().__setitem__(key, value)
+```
+
+这些类单独使用起来没有任何意义，事实上如果你去实例化任何一个类，除了产生异常外没任何作用。 它们是用来通过多继承来和其他映射对象混入使用的。例如：
+
+```python
+class LoggedDict(LoggedMappingMixin, dict):
+    pass
+
+d = LoggedDict()
+d['x'] = 23
+print(d['x'])
+del d['x']
+
+from collections import defaultdict
+
+class SetOnceDefaultDict(SetOnceMappingMixin, defaultdict):
+    pass
+
+
+d = SetOnceDefaultDict(list)
+d['x'].append(2)
+d['x'].append(3)
+# d['x'] = 23  # KeyError: 'x already set'
+```
+
+这个例子中，可以看到混入类跟其他已存在的类(比如dict、defaultdict和OrderedDict)结合起来使用，一个接一个。 结合后就能发挥正常功效了。
+
+混入类在标准库中很多地方都出现过，通常都是用来像上面那样扩展某些类的功能。 它们也是多继承的一个主要用途。比如，当你编写网络代码时候， 你会经常使用 socketserver 模块中的 ThreadingMixIn 来给其他网络相关类增加多线程支持。 例如，下面是一个多线程的XML-RPC服务：
+
+```python
+from xmlrpc.server import SimpleXMLRPCServer
+from socketserver import ThreadingMixIn
+class ThreadedXMLRPCServer(ThreadingMixIn, SimpleXMLRPCServer):
+    pass
+```
+
+同时在一些大型库和框架中也会发现混入类的使用，用途同样是增强已存在的类的功能和一些可选特征。
+
+对于混入类，有几点需要记住。首先是，混入类不能直接被实例化使用。 其次，混入类没有自己的状态信息，也就是说它们并没有定义 \_\_init\_\_() 方法，并且没有实例属性。 这也是为什么我们在上面明确定义了 \_\_slots\_\_ = () 。
+
+还有一种实现混入类的方式就是使用类装饰器，如下所示：
+
+```python
+def LoggedMapping(cls):
+    """第二种方式：使用类装饰器"""
+    cls_getitem = cls.__getitem__
+    cls_setitem = cls.__setitem__
+    cls_delitem = cls.__delitem__
+
+    def __getitem__(self, key):
+        print('Getting ' + str(key))
+        return cls_getitem(self, key)
+
+    def __setitem__(self, key, value):
+        print('Setting {} = {!r}'.format(key, value))
+        return cls_setitem(self, key, value)
+
+    def __delitem__(self, key):
+        print('Deleting ' + str(key))
+        return cls_delitem(self, key)
+
+    cls.__getitem__ = __getitem__
+    cls.__setitem__ = __setitem__
+    cls.__delitem__ = __delitem__
+    return cls
+
+
+@LoggedMapping
+class LoggedDict(dict):
+    pass
+```
+
+这个效果跟之前的是一样的，而且不再需要使用多继承了。参考9.12小节获取更多类装饰器的信息， 参考8.13小节查看更多混入类和类装饰器的例子。
+
+## 8.19. 实现状态对象或者状态机
+
+你想实现一个状态机或者是在不同状态下执行操作的对象，但是又不想在代码中出现太多的条件判断语句。
+
+在很多程序中，有些对象会根据状态的不同来执行不同的操作。比如考虑如下的一个连接对象：
+
+```python
+class Connection:
+    """普通方案，好多个判断语句，效率低下~~"""
+
+    def __init__(self):
+        self.state = 'CLOSED'
+
+    def read(self):
+        if self.state != 'OPEN':
+            raise RuntimeError('Not open')
+        print('reading')
+
+    def write(self, data):
+        if self.state != 'OPEN':
+            raise RuntimeError('Not open')
+        print('writing')
+
+    def open(self):
+        if self.state == 'OPEN':
+            raise RuntimeError('Already open')
+        self.state = 'OPEN'
+
+    def close(self):
+        if self.state == 'CLOSED':
+            raise RuntimeError('Already closed')
+        self.state = 'CLOSED'
+```
+
+这样写有很多缺点，首先是代码太复杂了，好多的条件判断。其次是执行效率变低， 因为一些常见的操作比如read()、write()每次执行前都需要执行检查。
+
+一个更好的办法是为每个状态定义一个对象：
+
+```python
+class Connection:
+    """新方案——对每个状态定义一个类"""
+
+    def __init__(self):
+        self.new_state(ClosedConnectionState)
+
+    def new_state(self, new_state):
+        self._state = new_state
+
+    def read(self):
+        return self._state.read(self)
+
+    def write(self, date):
+        return self._state.write(self, date)
+
+    def open(self):
+        return self._state.open(self)
+
+    def close(self):
+        return self._state.close(self)
+
+
+# Connection state base class
+class ConnectionState:
+    @staticmethod
+    def read(conn):
+        raise NotImplementedError()
+
+    @staticmethod
+    def write(conn, data):
+        raise NotImplementedError()
+
+    @staticmethod
+    def open(conn):
+        raise NotImplementedError()
+
+    @staticmethod
+    def close(conn):
+        raise NotImplementedError()
+
+
+# Implementation of different states
+class ClosedConnectionState(ConnectionState):
+    @staticmethod
+    def read(conn):
+        raise RuntimeError('Not open')
+
+    @staticmethod
+    def write(conn, data):
+        raise RuntimeError('Not open')
+
+    @staticmethod
+    def open(conn):
+        conn.new_state(OpenConnectionState)
+
+    @staticmethod
+    def close(conn):
+        raise RuntimeError('Already closed')
+
+
+class OpenConnectionState(ConnectionState):
+    @staticmethod
+    def read(conn):
+        print('reading')
+
+    @staticmethod
+    def write(conn, data):
+        print('writing')
+
+    @staticmethod
+    def open(conn):
+        raise RuntimeError('Already open')
+
+    @staticmethod
+    def close(conn):
+        conn.new_state(ClosedConnectionState)
+```
+
+下面是使用演示：
+
+```python
+>>> c = Connection()
+>>> c._state
+<class '__main__.ClosedConnectionState'>
+>>> c.read()
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 10, in read
+        return self._state.read(self)
+    File "example.py", line 43, in read
+        raise RuntimeError('Not open')
+RuntimeError: Not open
+>>> c.open()
+>>> c._state
+<class '__main__.OpenConnectionState'>
+>>> c.read()
+reading
+>>> c.write('hello')
+writing
+>>> c.close()
+>>> c._state
+<class '__main__.ClosedConnectionState'>
+```
+
+如果代码中出现太多的条件判断语句的话，代码就会变得难以维护和阅读。 这里的解决方案是将每个状态抽取出来定义成一个类。
+
+这里看上去有点奇怪，每个状态对象都只有静态方法，并没有存储任何的实例属性数据。 实际上，所有状态信息都只存储在 Connection 实例中。 在基类中定义的 NotImplementedError 是为了确保子类实现了相应的方法。 这里你或许还想使用8.12小节讲解的抽象基类方式。
+
+设计模式中有一种模式叫状态模式，这一小节算是一个初步入门！
+
+## 8.20. 通过字符串调用
+
+你有一个字符串形式的方法名称，想通过它调用某个对象的对应方法。
+
+最简单的情况，可以使用 getattr() ：
+
+```python
+import math
+
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return 'Point({!r:},{!r:})'.format(self.x, self.y)
+
+    def distance(self, x, y):
+        return math.hypot(self.x - x, self.y - y)
+
+
+if __name__ == '__main__':
+    p = Point(3, 4)
+    d = p.distance(0, 0)
+    print(d)  # 5.0
+    d = getattr(p, 'distance')(0, 0)  # Call p.distance(0, 0)
+    print(d)  # 5.0
+```
+
+另外一种方法是使用 operator.methodcaller() ，例如：
+
+```python
+import operator
+p = Point(3, 4)
+d = operator.methodcaller('distance', 0, 0)(p)
+```
+
+当你需要通过相同的参数多次调用某个方法时，使用 operator.methodcaller 就很方便了。 比如你需要排序一系列的点，就可以这样做：
+
+```python
+points = [
+    Point(1, 2),
+    Point(3, 0),
+    Point(10, -3),
+    Point(-5, -7),
+    Point(-1, 8),
+    Point(3, 2)
+]
+# Sort by distance from origin (0, 0)
+points.sort(key=operator.methodcaller('distance', 0, 0))  # points.sort(key=lambda p: p.distance(0, 0))
+print(points)
+输出：
+[Point(1,2), Point(3,0), Point(3,2), Point(-1,8), Point(-5,-7), Point(10,-3)]
+```
+
+调用一个方法实际上是两部独立操作，第一步是查找属性，第二步是函数调用。 因此，为了调用某个方法，你可以首先通过 getattr() 来查找到这个属性，然后再去以函数方式调用它即可。
+
+operator.methodcaller() 创建一个可调用对象，并同时提供所有必要参数， 然后调用的时候只需要将实例对象传递给它即可，比如：
+
+```python
+>>> p = Point(3, 4)
+>>> d = operator.methodcaller('distance', 0, 0)
+>>> d(p)
+5.0
+```
+
+通过方法名称字符串来调用方法通常出现在需要模拟 case 语句或实现访问者模式的时候。 参考下一小节获取更多高级例子。
+
+## 8.21. 实现访问者模式
+
+你要处理由大量不同类型的对象组成的复杂数据结构，每一个对象都需要进行不同的处理。 比如，遍历一个树形结构，然后根据每个节点的相应状态执行不同的操作。
+
+这里遇到的问题在编程领域中是很普遍的，有时候会构建一个由大量不同对象组成的数据结构。 假设你要写一个表示数学表达式的程序，那么你可能需要定义如下的类：
+
+```python
+class Node:
+    pass
+
+
+class UnaryOperator(Node):
+    def __init__(self, operand):
+        self.operand = operand
+
+
+class BinaryOperator(Node):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+
+class Add(BinaryOperator):
+    pass
+
+
+class Sub(BinaryOperator):
+    pass
+
+
+class Mul(BinaryOperator):
+    pass
+
+
+class Div(BinaryOperator):
+    pass
+
+
+class Negate(UnaryOperator):
+    pass
+
+
+class Number(Node):
+    def __init__(self, value):
+        self.value = value
+```
+
+然后利用这些类构建嵌套数据结构，如下所示：
+
+```python
+# Representation of 1 + 2 * (3 - 4) / 5
+t1 = Sub(Number(3), Number(4))
+t2 = Mul(Number(2), t1)
+t3 = Div(t2, Number(5))
+t4 = Add(Number(1), t3)
+```
+
+这样做的问题是对于每个表达式，每次都要重新定义一遍，有没有一种更通用的方式让它支持所有的数字和操作符呢。 这里我们使用访问者模式可以达到这样的目的：
+
+```python
+class NodeVisitor:
+    def visit(self, node):
+        method_name = 'visit_' + type(node).__name__
+        method = getattr(self, method_name, None)
+        if method is None:
+            method = self.generic_visit
+        return method(node)
+
+    def generic_visit(self, node):
+        raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
+```
+
+为了使用这个类，可以定义一个类继承它并且实现各种 visit_Name() 方法，其中Name是node类型。 例如，如果你想求表达式的值，可以这样写：
+
+```python
+class Evaluator(NodeVisitor):
+    def visit_Number(self, node):
+        return node.value
+
+    def visit_Add(self, node):
+        return self.visit(node.left) + self.visit(node.right)
+
+    def visit_Sub(self, node):
+        return self.visit(node.left) - self.visit(node.right)
+
+    def visit_Mul(self, node):
+        return self.visit(node.left) * self.visit(node.right)
+
+    def visit_Div(self, node):
+        return self.visit(node.left) / self.visit(node.right)
+
+    def visit_Negate(self, node):
+        return -self.visit(node.operand)  # 原文这里写的是-node.operand，应该是有问题的，-无法对于Number作用
+```
+
+使用示例：
+
+```python
+e = Evaluator()
+print(e.visit(t4))
+输出：
+0.6
+```
+
+作为一个不同的例子，下面定义一个类在一个栈上面将一个表达式转换成多个操作序列：
+
+```python
+class StackCode(NodeVisitor):
+    def generate_code(self, node):
+        self.instructions = []
+        self.visit(node)
+        return self.instructions
+
+    def visit_Number(self, node):
+        self.instructions.append(('PUSH', node.value))
+
+    def binop(self, node, instruction):
+        self.visit(node.left)
+        self.visit(node.right)
+        self.instructions.append((instruction,))
+
+    def visit_Add(self, node):
+        self.binop(node, 'ADD')
+
+    def visit_Sub(self, node):
+        self.binop(node, 'SUB')
+
+    def visit_Mul(self, node):
+        self.binop(node, 'MUL')
+
+    def visit_Div(self, node):
+        self.binop(node, 'DIV')
+
+    def unaryop(self, node, instruction):
+        self.visit(node.operand)
+        self.instructions.append((instruction,))
+
+    def visit_Negate(self, node):
+        self.unaryop(node, 'NEG')
+```
+
+使用示例：
+
+```python
+>>> s = StackCode()
+>>> s.generate_code(t4)
+[('PUSH', 1), ('PUSH', 2), ('PUSH', 3), ('PUSH', 4), ('SUB',),
+('MUL',), ('PUSH', 5), ('DIV',), ('ADD',)]
+# 按顺序列表，推了4个数字后，SUB操作符作用于最后两个数字得到-1，将2和-1进行MUL操作得到-2，再推入数字5，将-2和5进行DIV操作得到-0.4，再将1和-0.4进行ADD操作得到0.6
+```
+
+刚开始的时候你可能会写大量的if/else语句来实现， 这里访问者模式的好处就是通过 getattr() 来获取相应的方法，并利用递归来遍历所有的节点：
+
+```python
+def binop(self, node, instruction):
+    self.visit(node.left)
+    self.visit(node.right)
+    self.instructions.append((instruction,))
+```
+
+增加了StackCode对于值计算的代码：
+
+```python
+class StackCode(NodeVisitor):
+    def generate_code(self, node):
+        self._eval_flag = False
+        self.instructions = []
+        self.visit(node)
+        return self.instructions
+
+    def generate_value(self, node):
+        self._eval_flag = True
+        self.instructions = []
+        self.visit(node)
+        return self.instructions[0][1]
+
+    def visit_Number(self, node):
+        self.instructions.append(('PUSH', node.value))
+
+    def binop(self, node, instruction):
+        self.visit(node.left)
+        self.visit(node.right)
+        self.instructions.append((instruction,))
+        if self._eval_flag:
+            self.eval_binop_value()
+
+    def visit_Add(self, node):
+        self.binop(node, '+')
+
+    def visit_Sub(self, node):
+        self.binop(node, '-')
+
+    def visit_Mul(self, node):
+        self.binop(node, '*')
+
+    def visit_Div(self, node):
+        self.binop(node, '/')
+
+    def unaryop(self, node, instruction):
+        self.visit(node.operand)
+        self.instructions.append((instruction,))
+
+    def visit_Negate(self, node):
+        self.unaryop(node, 'NEG')
+        if self._eval_flag:
+            self.eval_unaryop_value()
+
+    def eval_binop_value(self):
+        op = self.instructions.pop()[0]
+        right = self.instructions.pop()[1]
+        left = self.instructions.pop()[1]
+        self.instructions.append(('PUSH', eval(str(left) + op + str(right))))
+
+    def eval_unaryop_value(self):
+        op = self.instructions.pop()[0]
+        single = self.instructions.pop()[1]
+        self.instructions.append(('PUSH', -single))  # 单操作符默认为取反
+
+
+if __name__ == '__main__':
+    # Representation of 1 + (-2) * (3 - 4) / 5
+    t1 = Sub(Number(3), Number(4))
+    t5 = Negate(Number(2))
+    t2 = Mul(t5, t1)
+    t3 = Div(t2, Number(5))
+    t4 = Add(Number(1), t3)
+
+    e = Evaluator()
+    print(e.visit(t4))
+
+    s = StackCode()
+    print(s.generate_code(t4))
+    print(s.generate_value(t4))
+输出：
+1.4
+[('PUSH', 1), ('PUSH', 2), ('NEG',), ('PUSH', 3), ('PUSH', 4), ('-',), ('*',), ('PUSH', 5), ('/',), ('+',)]
+1.4
+```
+
+还有一点需要指出的是，这种技术也是实现其他语言中switch或case语句的方式。 比如，如果你正在写一个HTTP框架，你可能会写这样一个请求分发的控制器：
+
+```python
+class HTTPHandler:
+    def handle(self, request):
+        methname = 'do_' + request.request_method
+        getattr(self, methname)(request)
+    def do_GET(self, request):
+        pass
+    def do_POST(self, request):
+        pass
+    def do_HEAD(self, request):
+        pass
+```
+
+访问者模式一个缺点就是它严重依赖递归，如果数据结构嵌套层次太深可能会有问题， 有时候会超过Python的递归深度限制(参考 sys.getrecursionlimit() )。
+
+可以参照8.22小节，利用生成器或迭代器来实现非递归遍历算法。
+
+在跟解析和编译相关的编程中使用访问者模式是非常常见的。 Python本身的 ast 模块值得关注下，可以去看看源码。 9.24小节演示了一个利用 ast 模块来处理Python源代码的例子。
+
+## 8.22. 不用递归实现访问者模式
+
+你使用访问者模式遍历一个很深的嵌套树形数据结构，并且因为超过嵌套层级限制而失败。 你想消除递归，并同时保持访问者编程模式。
+
+通过巧妙的使用生成器可以在树遍历或搜索算法中消除递归。 在8.21小节中，我们给出了一个访问者类。 下面我们利用一个栈和生成器重新实现这个类：
+
+```python
+class NodeVisitor:
+    def visit(self, node):
+        stack = [node]
+        last_result = None
+        while stack:
+            try:
+                last = stack[-1]
+                if isinstance(last, types.GeneratorType):
+                    stack.append(last.send(last_result))
+                    last_result = None
+                elif isinstance(last, Node):
+                    stack.append(self._visit(stack.pop()))
+                else:
+                    last_result = stack.pop()
+            except StopIteration:
+                stack.pop()
+
+        return last_result
+
+    def _visit(self, node):
+        method_name = 'visit_' + type(node).__name__
+        method = getattr(self, method_name, None)
+        if method is None:
+            method = self.generic_visit
+        return method(node)
+
+    def generic_visit(self, node):
+        raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
+```
+
+如果你使用这个类，也能达到相同的效果。事实上你完全可以将它作为上一节中的访问者模式的替代实现。 考虑如下代码，遍历一个表达式的树：
+
+```python
+class UnaryOperator(Node):
+    def __init__(self, operand):
+        self.operand = operand
+
+class BinaryOperator(Node):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+class Add(BinaryOperator):
+    pass
+
+class Sub(BinaryOperator):
+    pass
+
+class Mul(BinaryOperator):
+    pass
+
+class Div(BinaryOperator):
+    pass
+
+class Negate(UnaryOperator):
+    pass
+
+class Number(Node):
+    def __init__(self, value):
+        self.value = value
+
+# A sample visitor class that evaluates expressions
+class Evaluator(NodeVisitor):
+    def visit_Number(self, node):
+        return node.value
+
+    def visit_Add(self, node):
+        return self.visit(node.left) + self.visit(node.right)
+
+    def visit_Sub(self, node):
+        return self.visit(node.left) - self.visit(node.right)
+
+    def visit_Mul(self, node):
+        return self.visit(node.left) * self.visit(node.right)
+
+    def visit_Div(self, node):
+        return self.visit(node.left) / self.visit(node.right)
+
+    def visit_Negate(self, node):
+        return -self.visit(node.operand)
+
+if __name__ == '__main__':
+    # 1 + 2*(3-4) / 5
+    t1 = Sub(Number(3), Number(4))
+    t2 = Mul(Number(2), t1)
+    t3 = Div(t2, Number(5))
+    t4 = Add(Number(1), t3)
+    # Evaluate it
+    e = Evaluator()
+    print(e.visit(t4))  # Outputs 0.6
+```
+
+如果嵌套层次太深那么上述的Evaluator就会失效：
+
+```python
+a = Number(0)
+for n in range(1, 101):
+    a = Add(a, Number(n))
+e = Evaluator()
+print(e.visit(a))  # 5050
+
+# 失效
+a = Number(0)
+for n in range(1, 100000):
+    a = Add(a, Number(n))
+e = Evaluator()
+print(e.visit(a))
+输出：
+Traceback (most recent call last):
+...
+    File "visitor.py", line 29, in _visit
+return meth(node)
+    File "visitor.py", line 67, in visit_Add
+return self.visit(node.left) + self.visit(node.right)
+RuntimeError: maximum recursion depth exceeded
+```
+
+现在我们稍微修改下上面的Evaluator：
+
+```python
+class Evaluator(NodeVisitor):
+    def visit_Number(self, node):
+        return node.value
+
+    def visit_Add(self, node):
+        yield (yield node.left) + (yield node.right)
+
+    def visit_Sub(self, node):
+        yield (yield node.left) - (yield node.right)
+
+    def visit_Mul(self, node):
+        yield (yield node.left) * (yield node.right)
+
+    def visit_Div(self, node):
+        yield (yield node.left) / (yield node.right)
+
+    def visit_Negate(self, node):
+        yield - (yield node.operand)
+```
+
+再次运行，就不会报错了：
+
+```python
+>>> a = Number(0)
+>>> for n in range(1,100000):
+...     a = Add(a, Number(n))
+...
+>>> e = Evaluator()
+>>> e.visit(a)
+4999950000
+```
+
+如果你还想添加其他自定义逻辑也没问题：
+
+```python
+class Evaluator(NodeVisitor):
+    ...
+    def visit_Add(self, node):
+        print('Add:', node)
+        lhs = yield node.left
+        print('left=', lhs)
+        rhs = yield node.right
+        print('right=', rhs)
+        yield lhs + rhs
+    ...
+输出：
+Add: <__main__.Add object at 0x0000014EC0E3F9E8>
+Add: <__main__.Add object at 0x0000014EC0E3F978>
+Add: <__main__.Add object at 0x0000014EC0E3F668>
+Add: <__main__.Add object at 0x0000014EC0E3F5F8>
+Add: <__main__.Add object at 0x0000014EC0E3F518>
+Add: <__main__.Add object at 0x0000014EC0E3F748>
+Add: <__main__.Add object at 0x0000014EC0E04BA8>
+Add: <__main__.Add object at 0x0000014EC0E04978>
+Add: <__main__.Add object at 0x0000014EC0E04A90>
+Add: <__main__.Add object at 0x0000014EC0E2B0F0>
+left= 0
+right= 1
+left= 1
+right= 2
+left= 3
+right= 3
+left= 6
+right= 4
+left= 10
+right= 5
+left= 15
+right= 6
+left= 21
+right= 7
+left= 28
+right= 8
+left= 36
+right= 9
+left= 45
+right= 10
+55
+```
+
+下面是简单的测试：
+
+```python
+>>> e = Evaluator()
+>>> e.visit(t4)
+Add: <__main__.Add object at 0x1006a8d90>
+left= 1
+right= -0.4
+0.6
+```
+
+这一小节我们演示了生成器和协程在程序控制流方面的强大功能。 避免递归的一个通常方法是使用一个栈或队列的数据结构。 例如，深度优先的遍历算法，第一次碰到一个节点时将其压入栈中，处理完后弹出栈。visit() 方法的核心思路就是这样。
+
+另外一个需要理解的就是生成器中yield语句。当碰到yield语句时，生成器会返回一个数据并暂时挂起。 上面的例子使用这个技术来代替了递归。例如，之前我们是这样写递归：
+
+```python
+value = self.visit(node.left)
+```
+
+现在换成yield语句：
+
+```python
+value = yield node.left
+```
+
+看完这一小节，你也许想去寻找其它没有yield语句的方案。但是这么做没有必要，你必须处理很多棘手的问题。 例如，为了消除递归，你必须要维护一个栈结构，如果不使用生成器，代码会变得很臃肿，到处都是栈操作语句、回调函数等。 实际上，使用yield语句可以让你写出非常漂亮的代码，它消除了递归但是看上去又很像递归实现，代码很简洁。
+
+(没太看懂？)
+
+## 8.23. 循环引用数据结构的内存管理
+
+你的程序创建了很多循环引用数据结构(比如树、图、观察者模式等)，你碰到了内存管理难题。
+
+一个简单的循环引用数据结构例子就是一个树形结构，双亲节点有指针指向孩子节点，孩子节点又返回来指向双亲节点。 这种情况下，可以考虑使用 weakref 库中的弱引用。例如：
+
+```python
+import weakref
+
+
+class Node:
+
+    def __init__(self, value):
+        self.value = value
+        self._parent = None
+        self.children = []
+
+    def __repr__(self):
+        return 'Node({!r:})'.format(self.value)
+
+    # property that manages the parent as a weak-reference
+    @property
+    def parent(self):
+        return None if self._parent is None else self._parent()  # 注意这里返回的是_parent()，而不是_parent
+
+    @parent.setter
+    def parent(self, node):
+        self._parent = weakref.ref(node)
+
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
+```
+
+这种是想方式允许parent静默终止。例如：
+
+```python
+>>> root = Node('parent')
+>>> c1 = Node('child')
+>>> root.add_child(c1)
+>>> print(c1.parent)
+Node('parent')
+>>> del root
+>>> print(c1.parent)
+None
+```
+
+循环引用的数据结构在Python中是一个很棘手的问题，因为正常的垃圾回收机制不能适用于这种情形。 例如考虑如下代码：
+
+```python
+# Class just to illustrate when deletion occurs
+class Data:
+    def __del__(self):
+        print('Data.__del__')
+
+# Node class involving a cycle
+class Node:
+    def __init__(self):
+        self.data = Data()
+        self.parent = None
+        self.children = []
+
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
+```
+
+下面我们使用这个代码来做一些垃圾回收试验：
+
+```python
+>>> a = Data()
+>>> del a # Immediately deleted
+Data.__del__
+>>> a = Node()
+>>> del a # Immediately deleted
+Data.__del__
+>>> a = Node()
+>>> a.add_child(Node())
+>>> del a # Not deleted (no message)
+```
+
+可以看到，最后一个的删除时打印语句没有出现。原因是Python的垃圾回收机制是基于简单的引用计数。 当一个对象的引用数变成0的时候才会立即删除掉。而对于循环引用这个条件永远不会成立。 因此，在上面例子中最后部分，父节点和孩子节点互相拥有对方的引用，导致每个对象的引用计数都不可能变成0。
+
+Python有另外的垃圾回收器来专门针对循环引用的，但是你永远不知道它什么时候会触发。 另外你还可以手动的触发它，但是代码看上去很挫：
+
+```python
+>>> import gc
+>>> gc.collect() # Force collection
+Data.__del__
+Data.__del__
+```
+
+如果循环引用的对象自己还定义了自己的 \_\_del\_\_() 方法，那么会让情况变得更糟糕。 假设你像下面这样给Node定义自己的 \_\_del\_\_() 方法：
+
+```python
+# Node class involving a cycle
+class Node:
+    def __init__(self):
+        self.data = Data()
+        self.parent = None
+        self.children = []
+
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
+
+    # NEVER DEFINE LIKE THIS.
+    # Only here to illustrate pathological behavior
+    def __del__(self):
+        del self.data
+        del.parent
+        del.children
+```
+
+这种情况下，垃圾回收永远都不会去回收这个对象的，还会导致内存泄露。 如果你试着去运行它会发现，Data.\_\_del\_\_ 消息永远不会出现了,甚至在你强制内存回收时：
+
+```python
+>>> a = Node()
+>>> a.add_child(Node()
+>>> del a # No message (not collected)
+>>> import gc
+>>> gc.collect() # No message (not collected)
+```
+
+弱引用消除了引用循环的这个问题，本质来讲，弱引用就是一个对象指针，它不会增加它的引用计数。 你可以通过 weakref 来创建弱引用。例如：
+
+```python
+>>> import weakref
+>>> a = Node()
+>>> a_ref = weakref.ref(a)
+>>> a_ref
+<weakref at 0x100581f70; to 'Node' at 0x1005c5410>
+>>> print(a_ref())
+<src.test.main.Node object at 0x000001B45C355BA8>
+>>> a
+<src.test.main.Node at 0x1b45c355ba8>
+```
+
+为了访问弱引用所引用的对象，你可以像函数一样去调用它即可。如果那个对象还存在就会返回它，否则就返回一个None。 由于原始对象的引用计数没有增加，那么就可以去删除它了。例如;
+
+```python
+>>> print(a_ref())
+<__main__.Node object at 0x1005c5410>
+>>> del a
+Data.__del__
+>>> print(a_ref())
+None
+```
+
+通过这里演示的弱引用技术，你会发现不再有循环引用问题了，一旦某个节点不被使用了，垃圾回收器立即回收它。 你还能参考8.25小节关于弱引用的另外一个例子。
+
+## 8.24. 让类支持比较操作
+
+你想让某个类的实例支持标准的比较运算(比如>=,!=,<=,<等)，但是又不想去实现那一大丢的特殊方法。
+
+Python类对每个比较操作都需要实现一个特殊方法来支持。 例如为了支持>=操作符，你需要定义一个 \_\_ge\_\_() 方法。 尽管定义一个方法没什么问题，但如果要你实现所有可能的比较方法那就有点烦人了。
+
+装饰器 functools.total\_ordering 就是用来简化这个处理的。 使用它来装饰一个来，你只需定义一个 \_\_eq\_\_() 方法， 外加其他方法(\_\_lt\_\_, \_\_le\_\_, \_\_gt\_\_, or \_\_ge\_\_)中的一个即可。 然后装饰器会自动为你填充其它比较方法。
+
+作为例子，我们构建一些房子，然后给它们增加一些房间，最后通过房子大小来比较它们：
+
+```python
+from functools import total_ordering
+
+
+class Room:
+    def __init__(self, name, length, width):
+        self.name = name
+        self.length = length
+        self.width = width
+        self.square_feet = self.length * self.width
+
+
+@total_ordering
+class House:
+    def __init__(self, name, style):
+        self.name = name
+        self.style = style
+        self.rooms = list()
+
+    @property
+    def living_space_footage(self):
+        return sum(r.square_feet for r in self.rooms)
+
+    def add_room(self, room):
+        self.rooms.append(room)
+
+    def __str__(self):
+        return '{}: {} square foot {}'.format(self.name,
+                                              self.living_space_footage,
+                                              self.style)
+
+    def __eq__(self, other):
+        return self.living_space_footage == other.living_space_footage
+
+    def __lt__(self, other):
+        return self.living_space_footage < other.living_space_footage
+
+```
+
+这里我们只是给House类定义了两个方法：__eq__() 和 __lt__() ，它就能支持所有的比较操作：
+
+```python
+# Build a few houses, and add rooms to them
+h1 = House('h1', 'Cape')
+h1.add_room(Room('Master Bedroom', 14, 21))
+h1.add_room(Room('Living Room', 18, 20))
+h1.add_room(Room('Kitchen', 12, 16))
+h1.add_room(Room('Office', 12, 12))
+h2 = House('h2', 'Ranch')
+h2.add_room(Room('Master Bedroom', 14, 21))
+h2.add_room(Room('Living Room', 18, 20))
+h2.add_room(Room('Kitchen', 12, 16))
+h3 = House('h3', 'Split')
+h3.add_room(Room('Master Bedroom', 14, 21))
+h3.add_room(Room('Living Room', 18, 20))
+h3.add_room(Room('Office', 12, 16))
+h3.add_room(Room('Kitchen', 15, 17))
+houses = [h1, h2, h3]
+print('Is h1 bigger than h2?', h1 > h2) # prints True
+print('Is h2 smaller than h3?', h2 < h3) # prints True
+print('Is h2 greater than or equal to h1?', h2 >= h1) # Prints False
+print('Which one is biggest?', max(houses)) # Prints 'h3: 1101-square-foot Split'
+print('Which is smallest?', min(houses)) # Prints 'h2: 846-square-foot Ranch'
+```
+
+其实 total_ordering 装饰器也没那么神秘。 它就是定义了一个从每个比较支持方法到所有需要定义的其他方法的一个映射而已。 比如你定义了 __le__() 方法，那么它就被用来构建所有其他的需要定义的那些特殊方法。 实际上就是在类里面像下面这样定义了一些特殊方法：
+
+```python
+class House:
+    def __eq__(self, other):
+        pass
+    def __lt__(self, other):
+        pass
+    # Methods created by @total_ordering
+    __le__ = lambda self, other: self < other or self == other
+    __gt__ = lambda self, other: not (self < other or self == other)
+    __ge__ = lambda self, other: not (self < other)
+    __ne__ = lambda self, other: not self == other
+```
+
+当然，你自己去写也很容易，但是使用 @total_ordering 可以简化代码，何乐而不为呢。
+
+## 8.25. 创建缓存实例
