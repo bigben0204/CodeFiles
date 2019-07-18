@@ -1,4 +1,247 @@
 //------------------------------------------------------------------------------------------------
+// 用正则表达式查找字符串中的数字
+// Solution.java
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+class Solution {
+    List<String> countNumStr(String str, int num) {
+        ArrayList<String> strings = new ArrayList<>();
+
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(str);
+        while (matcher.find()) {
+            String numStr = matcher.group(0);
+            int tmpNum = Integer.parseInt(numStr);
+            if (tmpNum > num) {
+                strings.add(numStr);
+            }
+        }
+
+        return strings;
+    }
+}
+
+// SolutionTest.java
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        String str = "333abcd2323defh3456";
+        List<String> numStrs = new Solution().countNumStr(str, 1000);
+        List<String> expectedNumStrs = Arrays.asList("2323", "3456");
+        assertEquals(expectedNumStrs, numStrs);
+    }
+}
+//------------------------------------------------------------------------------------------------
+// 594. Longest Harmonious Subsequence https://leetcode.com/problems/longest-harmonious-subsequence/
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int findLHS(int[] nums) {
+        Map<Integer, Integer> intCountMap = getIntCountMap(nums);
+        
+        int firstNum = 0;
+        int firstNumCount = 0;
+        int secondNum = 0;
+        int secondNumCount = 0;
+        int lhs = 0;
+
+        int index = 0;
+        for (Map.Entry<Integer, Integer> entry : intCountMap.entrySet()) {
+            if (index % 2 == 0) {
+                firstNum = entry.getKey();
+                firstNumCount = entry.getValue();
+            } else {
+                secondNum = entry.getKey();
+                secondNumCount = entry.getValue();
+            }
+
+            if (Math.abs(firstNum - secondNum) == 1 && firstNumCount > 0 && secondNumCount > 0) {
+                lhs = Math.max(lhs, firstNumCount + secondNumCount);
+            }
+
+            ++index;
+        }
+
+        return lhs;
+    }
+
+    private Map<Integer, Integer> getIntCountMap(int[] nums) {
+        Map<Integer, Integer> intCountMap = new HashMap<>();
+        for (int num : nums) {
+            intCountMap.put(num, intCountMap.getOrDefault(num, 0) + 1);
+        }
+        return intCountMap;
+    }
+}
+
+// 改进1
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int findLHS(int[] nums) {
+        Map<Integer, Integer> intCountMap = getIntCountMap(nums);
+
+        int lhs = 0;
+        for (Map.Entry<Integer, Integer> entry : intCountMap.entrySet()) {
+            int tmpNum = entry.getKey();
+            int tmpNumCount = entry.getValue();
+            if (intCountMap.containsKey(tmpNum + 1)) {
+                lhs = Math.max(lhs, tmpNumCount + intCountMap.get(tmpNum + 1));
+            }
+        }
+
+        return lhs;
+    }
+
+    private Map<Integer, Integer> getIntCountMap(int[] nums) {
+        Map<Integer, Integer> intCountMap = new HashMap<>();
+        for (int num : nums) {
+            intCountMap.put(num, intCountMap.getOrDefault(num, 0) + 1);
+        }
+        return intCountMap;
+    }
+}
+
+// 改进2，没有改进1速度快
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int findLHS(int[] nums) {
+        Map<Integer, Integer> intCountMap = new HashMap<>();
+
+        int lhs = 0;
+        for (int num : nums) {
+            int numCount = intCountMap.getOrDefault(num, 0) + 1;
+            intCountMap.put(num, numCount);
+            if (intCountMap.containsKey(num + 1)) {
+                lhs = Math.max(lhs, numCount + intCountMap.get(num + 1));
+            }
+            if (intCountMap.containsKey(num - 1)) {
+                lhs = Math.max(lhs, numCount + intCountMap.get(num - 1));
+            }
+        }
+
+        return lhs;
+    }
+}
+//------------------------------------------------------------------------------------------------
+// 计算蜂窝小区最短距离 参考 https://www.cnblogs.com/onduty/p/5709379.html 有问题：直线距离会小区多次折叠的距离，导致计算不准确，如41和57距离为8，如下代码算出来7
+//Demo.java
+package huawei;
+
+public class Demo {
+
+    private static final int D = 6;
+
+    public int getCellularDistance(int firstValue, int secondValue) {
+        // 小值为value1，大值为value2
+        int value1 = Math.min(firstValue, secondValue);
+        int value2 = Math.max(firstValue, secondValue);
+
+        // 计算数字处于第几圈，1为第1圈，2-7为第2圈，依次类推，对应极座标的r = circleNumber - 1
+        int circleNumber1 = getCircleNumber(value1);
+        int circleNumber2 = getCircleNumber(value2);
+
+        // 计算数字的极座标弧度
+        double radians1 = getRadians(value1, circleNumber1);
+        double radians2 = getRadians(value2, circleNumber2);
+
+        // 计算数字的极座标距离
+        int r1 = circleNumber1 - 1;
+        int r2 = circleNumber2 - 1;
+
+        // 根据极座标计算距离
+        return (int) Math.round(Math.sqrt(r1 * r1 - 2 * r1 * r2 * Math.cos(radians1 - radians2) + r2 * r2));
+    }
+
+    private double getRadians(int value, int circleNumber) {
+        //如果圈数为1，则弧度为0
+        if (circleNumber == 1) {
+            return 0;
+        }
+
+        // 计算该圈最大的数字
+        int circleMaxValue = circleNumber * (circleNumber - 1) * D / 2 + 1;
+        // 计算该圈的容量
+        int circleCapacity = (circleNumber - 1) * D;
+        // 计算当前数字对应的弧度，x轴正方向为1->7->19->37->...
+        return (circleMaxValue - value) * 2 * Math.PI / circleCapacity;
+    }
+
+    private int getCircleNumber(int value) {
+        return (int) Math.ceil((1 + Math.sqrt(1 + (double) 4 * (value - 1) / 3)) / 2);
+    }
+}
+
+//DemoTest.java
+package huawei;
+
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class DemoTest {
+    @Test
+    public void test_firstValue_1() {
+        Demo demo = new Demo();
+        int distance = demo.getCellularDistance(1, 7);
+        assertEquals(1, distance);
+    }
+
+    @Test
+    public void test_SecondValue_1() {
+        Demo demo = new Demo();
+        int distance = demo.getCellularDistance(8, 1);
+        assertEquals(2, distance);
+    }
+
+    @Test
+    public void test3() {
+        Demo demo = new Demo();
+        assertEquals(1, demo.getCellularDistance(2, 7));
+        assertEquals(1, demo.getCellularDistance(6, 7));
+    }
+
+    @Test
+    public void test4() {
+        Demo demo = new Demo();
+        assertEquals(2, demo.getCellularDistance(3, 7));
+        assertEquals(2, demo.getCellularDistance(5, 7));
+        assertEquals(2, demo.getCellularDistance(4, 7));
+    }
+
+    @Test
+    public void test5() {
+        Demo demo = new Demo();
+        assertEquals(4, demo.getCellularDistance(3, 35));
+        assertEquals(4, demo.getCellularDistance(57, 61));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //165. Compare Version Numbers https://leetcode.com/problems/compare-version-numbers/
 通过这个例子，发现使用BigDecimal耗时也多，耗内存也多。
 
