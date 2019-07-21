@@ -1,4 +1,108 @@
 //------------------------------------------------------------------------------------------------
+//技能鉴定1级：n位显示的计算器，计算起始数字k的平方，如果溢出则显示前n位，求最大显示值
+//Solution.java
+package test;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+class Solution {
+    /**
+     * @param n 计算器位数
+     * @param k 起始数字
+     * @return 计算器最大显示数字
+     */
+    int maxSquareResult(int n, int k) {
+        int max = -1;
+        if (!checkInputValid(n, k)) {
+            return max;
+        }
+
+        Set<Integer> squareResults = new LinkedHashSet<>();
+        int tmpSquareResult = k;
+        while (!squareResults.contains(tmpSquareResult)) {
+            squareResults.add(tmpSquareResult);
+            tmpSquareResult = getSquareResult(n, tmpSquareResult);
+            if (tmpSquareResult > max) {
+                max = tmpSquareResult;
+            }
+        }
+        System.out.println(String.format("Process = %s, \nlength = %d\n", squareResults, squareResults.size()));
+        return max;
+    }
+
+    private int getSquareResult(int n, int k) {
+        long squareResult = (long) k * k; // 这里要先把k转成long，否则两个int相乘结果还是int，会溢出为0，也可以用BigDecimal
+        String strSquareResult = String.valueOf(squareResult);
+        return strSquareResult.length() > n ? Integer.parseInt(strSquareResult.substring(0, n)) : (int) squareResult;
+        
+        // import java.math.BigDecimal;
+        // BigDecimal bigDecimalK = new BigDecimal(k);
+        // String strSquareResult = String.valueOf(bigDecimalK.multiply(bigDecimalK));
+        // return Integer.parseInt(strSquareResult.length() > n ? strSquareResult.substring(0, n) : strSquareResult);
+    }
+
+    private boolean checkInputValid(int n, int k) {
+        if (n > 0 && n <= 9) {
+            return true;
+        }
+
+        int maxK = (int) Math.pow(10, n);
+        if (k > 0 && k <= maxK) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+// SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        assertEquals(-1, SOLUTION.maxSquareResult(0, 0));
+    }
+
+    @Test
+    public void test2() {
+        assertEquals(1, SOLUTION.maxSquareResult(1, 1));
+    }
+
+    @Test
+    public void test3() {
+        assertEquals(4, SOLUTION.maxSquareResult(1, 2));
+    }
+
+    @Test
+    public void test4() {
+        assertEquals(62, SOLUTION.maxSquareResult(2, 2));
+    }
+
+    @Test
+    public void test5() {
+        assertEquals(36, SOLUTION.maxSquareResult(2, 12));
+    }
+
+    @Test
+    public void test6() {
+        assertEquals(999937937, SOLUTION.maxSquareResult(9, 12));
+    }
+
+    @Test
+    public void test() {
+        System.out.println(Integer.MAX_VALUE);
+        System.out.println((long) Math.pow(10, 9));
+    }
+}
+//------------------------------------------------------------------------------------------------
 // 用正则表达式查找字符串中的数字
 // Solution.java
 package test;
