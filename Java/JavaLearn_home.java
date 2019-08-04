@@ -1,4 +1,300 @@
 //------------------------------------------------------------------------------------------------
+//技能鉴定1级：求计算机配件整体最大质量因子
+//Solution.java
+package test;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+
+    private static final int INVALID_INPUT = -1;
+    private static final int NOT_ENOUGH_BUDGET = -2;
+
+    private final Map<String, PartsMgr> partsNameMgrMap = new LinkedHashMap<>();
+    private int budget;
+    private int currentBudget;
+    private int currentQualityFactor = Integer.MAX_VALUE;
+    private final List<PartInfo> currentPartInfos = new ArrayList<>();
+
+    /**
+     * @param inputStr 电脑配件输入字符串
+     * @return 最大整机质量因子
+     */
+    public int getMaxQualityFactor(String inputStr) {
+        if (!init(inputStr)) {
+            return INVALID_INPUT;
+        }
+
+        if (!getMinFactor()) {
+            return NOT_ENOUGH_BUDGET;
+        }
+
+        while (currentBudget <= budget) {
+            if (!updateQualityFactor()) {
+                break;
+            }
+        }
+        return currentQualityFactor;
+    }
+
+    private boolean updateQualityFactor() {
+        int tmpCurrentQualityFactor = Integer.MAX_VALUE;
+        for (PartInfo currentPartInfo : currentPartInfos) {
+            int tmpPartInfoQualityFactor = currentPartInfo.getQualityFactor();
+            if (tmpPartInfoQualityFactor != currentQualityFactor) {
+                tmpCurrentQualityFactor = Math.min(tmpPartInfoQualityFactor, tmpCurrentQualityFactor);
+                continue;
+            }
+
+            // 取下一级质量因子配件，如果没有，则整体质量因子无法再提升
+            PartInfo nextQualityFactorPartInfo =
+                partsNameMgrMap.get(currentPartInfo.getName()).getNextQualityFactorPartInfo(currentPartInfo);
+            if (nextQualityFactorPartInfo == null) {
+                return false;
+            }
+
+            tmpCurrentQualityFactor = Math.min(nextQualityFactorPartInfo.getQualityFactor(), tmpCurrentQualityFactor);
+            // 如果其中一种配件的下一个质量因子超预算，则整体质量因子无法再提升
+            currentBudget += nextQualityFactorPartInfo.getPrice() - currentPartInfo.getPrice();
+            if (currentBudget > budget) {
+                return false;
+            }
+
+            currentPartInfo.update(nextQualityFactorPartInfo);
+        }
+        currentQualityFactor = tmpCurrentQualityFactor;
+        return true;
+    }
+
+    private boolean getMinFactor() {
+        partsNameMgrMap.forEach(this::calculatePartMinPrice);
+        return currentBudget <= budget;
+    }
+
+    private void calculatePartMinPrice(String partName, PartsMgr partsMgr) {
+        PartInfo cheapestPartInfo = partsMgr.getCheapestPartInfo();
+        currentBudget += cheapestPartInfo.getPrice();
+        currentQualityFactor = Math.min(currentQualityFactor, cheapestPartInfo.getQualityFactor());
+        currentPartInfos.add(cheapestPartInfo.clone());
+    }
+
+    private boolean init(String inputStr) {
+        try {
+            String[] inputStrs = inputStr.split(":");
+            if (inputStrs.length != 2) {
+                return false;
+            }
+
+            String[] budgetAndPartsNumStrs = inputStrs[0].split(",");
+            if (budgetAndPartsNumStrs.length != 2) {
+                return false;
+            }
+
+            budget = Integer.parseInt(budgetAndPartsNumStrs[0]);
+            int partsNum = Integer.parseInt(budgetAndPartsNumStrs[1]);
+
+            String[] partsStrs = inputStrs[1].split(";");
+            if (partsStrs.length != partsNum) {
+                return false;
+            }
+
+            for (String partStr : partsStrs) {
+                String[] partInfoStrs = partStr.substring(1, partStr.length() - 1).split(",");
+                if (partInfoStrs.length != 3) {
+                    return false;
+                }
+
+                addToPartsMap(partInfoStrs);
+            }
+            partsNameMgrMap.forEach((key, value) -> value.finishAddingPartInfo());
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void addToPartsMap(String[] partInfoStrs) {
+        String partName = partInfoStrs[0];
+        int partPrice = Integer.parseInt(partInfoStrs[1]);
+        int partQualityFactor = Integer.parseInt(partInfoStrs[2]);
+        PartInfo partInfo = new PartInfo(partName, partPrice, partQualityFactor);
+        if (partsNameMgrMap.containsKey(partName)) {
+            partsNameMgrMap.get(partName).addPartInfo(partInfo);
+        } else {
+            PartsMgr partsMgr = new PartsMgr(partName);
+            partsMgr.addPartInfo(partInfo);
+            partsNameMgrMap.put(partName, partsMgr);
+        }
+    }
+}
+
+//PartInfo.java
+package test;
+
+import java.util.Objects;
+
+public class PartInfo {
+    private final String name;
+    private int price;
+    private int qualityFactor;
+
+    public PartInfo(String name, int price, int qualityFactor) {
+        this.name = name;
+        this.price = price;
+        this.qualityFactor = qualityFactor;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public int getQualityFactor() {
+        return qualityFactor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PartInfo partInfo = (PartInfo) o;
+        return price == partInfo.price &&
+            qualityFactor == partInfo.qualityFactor &&
+            Objects.equals(name, partInfo.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, price, qualityFactor);
+    }
+
+    @Override
+    public String toString() {
+        return "PartInfo{" +
+            "name='" + name + '\'' +
+            ", price=" + price +
+            ", qualityFactor=" + qualityFactor +
+            '}';
+    }
+
+    public PartInfo clone() {
+        return new PartInfo(this.name, this.price, this.qualityFactor);
+    }
+
+    public void update(PartInfo partInfo) {
+        price = partInfo.price;
+        qualityFactor = partInfo.qualityFactor;
+    }
+}
+
+//PartsMgr.java
+package test;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class PartsMgr {
+    private final String partName;
+
+    private final Map<Integer, PartInfo> partQualityFactorInfoMap = new TreeMap<>();
+    private final Map<Integer, Integer> qualityFactorIndexMap = new HashMap<>();
+    private final List<PartInfo> partInfos = new ArrayList<>();
+    private int index = 0;
+
+    public PartsMgr(String partName) {
+        this.partName = partName;
+    }
+
+    public void addPartInfo(PartInfo partInfo) {
+        partQualityFactorInfoMap.merge(partInfo.getQualityFactor(), partInfo,
+            (oldPartInfo, newPartInfo) -> newPartInfo.getPrice() < oldPartInfo.getPrice() ? newPartInfo : oldPartInfo);
+    }
+
+    public PartInfo getCheapestPartInfo() {
+        return partInfos.stream()
+            .min(Comparator.comparing(PartInfo::getPrice))
+            .orElseThrow(() -> new RuntimeException("PartsMgr::getCheapestPartInfo no cheapestPartInfo"));
+    }
+
+    public void finishAddingPartInfo() {
+        partQualityFactorInfoMap.forEach(this::initQualityFactorIndexMap);
+    }
+
+    private void initQualityFactorIndexMap(Integer qualityFactor, PartInfo partInfo) {
+        qualityFactorIndexMap.put(qualityFactor, index++);
+        partInfos.add(partInfo);
+    }
+
+    public PartInfo getNextQualityFactorPartInfo(PartInfo partInfo) {
+        int partInfoIndex = qualityFactorIndexMap.get(partInfo.getQualityFactor());
+        if (++partInfoIndex >= this.index) {
+            return null;
+        }
+
+        return partInfos.get(partInfoIndex);
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static Solution SOLUTION;
+
+    @Before
+    public void before() {
+        SOLUTION = new Solution();
+    }
+
+    @Test
+    public void test_quality_factor_1() {
+        String inputStr = "2000,6:(CPU,500,2);(CPU,700,5);(MEM,200,3);(MB,800,7);(POW,400,4);(POW,600,7)";
+        assertEquals(2, SOLUTION.getMaxQualityFactor(inputStr));
+    }
+
+    @Test
+    public void test_quality_factor_2() {
+        String inputStr = "9000,16:" +
+            "(CPU,2000,7);(CPU,3000,8);" +
+            "(MB,1000,8);(MB,800,6);" +
+            "(CASE,600,6);(CASE,400,4);" +
+            "(MEM,600,5);(MEM,900,7);" +
+            "(DC,2000,6);(DC,3000,7);" +
+            "(SPK,200,4);(SPK,500,6);" +
+            "(KM,500,7);(KM,200,4);" +
+            "(MON,1000,5);(MON,1300,7)";
+        assertEquals(6, SOLUTION.getMaxQualityFactor(inputStr));
+    }
+
+    @Test
+    public void test_expect_not_enough_budget() {
+        String inputStr = "100,6:(CPU,500,2);(CPU,700,5);(MEM,200,3);(MB,800,7);(POW,400,4);(POW,600,7)";
+        assertEquals(-2, SOLUTION.getMaxQualityFactor(inputStr));
+    }
+
+    @Test
+    public void test_expect_invalid_input() {
+        String inputStr = "100,6:(CPU,500,);(CPU,700,5);(MEM,200,3);(MB,800,7);(POW,400,4);(POW,600,7)";
+        assertEquals(-1, SOLUTION.getMaxQualityFactor(inputStr));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //技能鉴定1级：n位显示的计算器，计算起始数字k的平方，如果溢出则显示前n位，求最大显示值
 //Solution.java
 package test;

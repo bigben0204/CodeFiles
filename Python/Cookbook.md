@@ -14219,3 +14219,556 @@ class House:
 当然，你自己去写也很容易，但是使用 @total_ordering 可以简化代码，何乐而不为呢。
 
 ## 8.25. 创建缓存实例
+
+在创建一个类的对象时，如果之前使用同样参数创建过这个对象， 你想返回它的缓存引用。
+
+这种通常是因为你希望相同参数创建的对象时单例的。 在很多库中都有实际的例子，比如 logging 模块，使用相同的名称创建的 logger 实例永远只有一个。例如：
+
+```python
+import logging
+
+if __name__ == '__main__':
+    a = logging.getLogger('foo')
+    b = logging.getLogger('bar')
+    print(a is b)
+    c = logging.getLogger('foo')
+    print(a is c)
+输出：
+False
+True
+```
+
+为了达到这样的效果，你需要使用一个和类本身分开的工厂函数，例如：
+
+然后做一个测试，你会发现跟之前那个日志对象的创建行为是一致的：
+
+```python
+# The class in question
+class Spam:
+    def __init__(self, name):
+        self.name = name
+
+
+# Caching support
+import weakref
+
+_spam_cache = weakref.WeakValueDictionary()  # dict()也是同样输出
+
+
+def get_spam(name):
+    if name not in _spam_cache:
+        s = Spam(name)
+        _spam_cache[name] = s
+    else:
+        s = _spam_cache[name]
+    return s
+
+
+if __name__ == '__main__':
+    a = get_spam('foo')
+    b = get_spam('bar')
+    print(a is b)
+    c = get_spam('foo')
+    print(a is c)
+输出：
+False
+True
+```
+
+编写一个工厂函数来修改普通的实例创建行为通常是一个比较简单的方法。 但是我们还能否找到更优雅的解决方案呢？
+
+例如，你可能会考虑重新定义类的 __new__() 方法，就像下面这样：
+
+```python
+# The class in question
+import weakref
+
+
+class Spam:
+    _spam_cache = weakref.WeakValueDictionary()
+
+    def __new__(cls, name):
+        if name in cls._spam_cache:
+            return cls._spam_cache[name]
+        else:
+            self = super().__new__(cls)
+            cls._spam_cache[name] = self
+            return self
+
+    def __init__(self, name):
+        print('Initializing Spam')
+        self.name = name
+```
+
+初看起来好像可以达到预期效果，但是问题是 __init__() 每次都会被调用，不管这个实例是否被缓存了。例如：
+
+```python
+if __name__ == '__main__':
+    s = Spam('Dave')
+    t = Spam('Dave')
+    print(s is t)
+输出：
+Initializing Spam
+Initializing Spam
+True
+```
+
+这个或许不是你想要的效果，因此这种方法并不可取。
+
+上面我们使用到了弱引用计数，对于垃圾回收来讲是很有帮助的，关于这个我们在8.23小节已经讲过了。 当我们保持实例缓存时，你可能只想在程序中使用到它们时才保存。 一个 WeakValueDictionary 实例只会保存那些在其它地方还在被使用的实例。 否则的话，只要实例不再被使用了，它就从字典中被移除了。观察下下面的测试结果：
+
+```python
+>>> a = get_spam('foo')
+>>> b = get_spam('bar')
+>>> c = get_spam('foo')
+>>> list(_spam_cache)
+['foo', 'bar']
+>>> del a
+>>> del c
+>>> list(_spam_cache)
+['bar']
+>>> del b
+>>> list(_spam_cache)
+[]
+>>>
+```
+
+对于大部分程序而已，这里代码已经够用了。不过还是有一些更高级的实现值得了解下。
+
+首先是这里使用到了一个全局变量，并且工厂函数跟类放在一块。我们可以通过将缓存代码放到一个单独的缓存管理器中：
+
+```python
+import weakref
+
+
+class CachedSpamManager:
+    def __init__(self):
+        self._cache = weakref.WeakValueDictionary()
+
+    def get_spam(self, name):
+        if name not in self._cache:
+            s = Spam(name)
+            self._cache[name] = s
+        else:
+            s = self._cache[name]
+        return s
+
+    def clear(self):
+        self._cache.clear()
+
+
+class Spam:
+    manager = CachedSpamManager()
+
+    def __init__(self, name):
+        self.name = name
+
+    @staticmethod
+    def get_spam(name):
+        return Spam.manager.get_spam(name)
+
+
+if __name__ == '__main__':
+    a = Spam.get_spam('foo')
+    b = Spam.get_spam('foo')
+    print(a is b)
+输出：
+True
+```
+
+这样的话代码更清晰，并且也更灵活，我们可以增加更多的缓存管理机制，只需要替代manager即可。
+
+还有一点就是，我们暴露了类的实例化给用户，用户很容易去直接实例化这个类，而不是使用工厂方法，如：
+
+```python
+>>> a = Spam('foo')
+>>> b = Spam('foo')
+>>> a is b
+False
+```
+
+有几种方式可以防止用户这样做，第一个是将类的名字修改为以下划线(_)开头，提示用户别直接调用它。 第二种就是让这个类的 \_\_init\_\_() 方法抛出一个异常，让它不能被初始化：
+
+```python
+class Spam:
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError("Can't instantiate directly")
+
+    # Alternate constructor
+    @classmethod
+    def _new(cls, name):
+        self = cls.__new__(cls)
+        self.name = name
+
+
+if __name__ == '__main__':
+    a =  Spam('foo')
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 16, in <module>
+    a =  Spam('foo')
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 6, in __init__
+    raise RuntimeError("Can't instantiate directly")
+RuntimeError: Can't instantiate directly
+```
+
+然后修改缓存管理器代码，使用 Spam._new() 来创建实例，而不是直接调用 Spam() 构造函数：
+
+```python
+# ------------------------最后的修正方案------------------------
+import weakref
+
+
+class CachedSpamManager2:
+    def __init__(self):
+        self._cache = weakref.WeakValueDictionary()
+
+    def get_spam(self, name):
+        if name not in self._cache:
+            temp = Spam3._new(name)  # Modified creation
+            self._cache[name] = temp
+        else:
+            temp = self._cache[name]
+        return temp
+
+    def clear(self):
+        self._cache.clear()
+
+
+class Spam3:
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError("Can't instantiate directly")
+
+    # Alternate constructor
+    @classmethod
+    def _new(cls, name):
+        self = cls.__new__(cls)
+        self.name = name
+        return self
+
+
+if __name__ == '__main__':
+    spamManager2 = CachedSpamManager2()
+    a = spamManager2.get_spam('foo')
+    b = spamManager2.get_spam('foo')
+    print(a is b)  # True
+```
+
+最后这样的方案就已经足够好了。 缓存和其他构造模式还可以使用9.13小节中的元类实现的更优雅一点(使用了更高级的技术)。
+
+# 9. 元编程
+
+软件开发领域中最经典的口头禅就是“don’t repeat yourself”。 也就是说，任何时候当你的程序中存在高度重复(或者是通过剪切复制)的代码时，都应该想想是否有更好的解决方案。 在Python当中，通常都可以通过元编程来解决这类问题。 简而言之，元编程就是关于创建操作源代码(比如修改、生成或包装原来的代码)的函数和类。 主要技术是使用装饰器、类装饰器和元类。不过还有一些其他技术， 包括签名对象、使用 exec() 执行代码以及对内部函数和类的反射技术等。 本章的主要目的是向大家介绍这些元编程技术，并且给出实例来演示它们是怎样定制化你的源代码行为的。
+
+## 9.1. 在函数上添加包装器
+
+你想在函数上添加一个包装器，增加额外的操作处理(比如日志、计时等)。
+
+如果你想使用额外的代码包装一个函数，可以定义一个装饰器函数，例如：
+
+```python
+import time
+from functools import wraps
+
+
+def timethis(func):
+    """
+    Decorator that reports the execution time.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__, end - start)
+        return result
+
+    return wrapper
+```
+
+下面是使用装饰器的例子：
+
+```python
+@timethis
+def countdown(n):
+    """
+    Counts down
+    """
+    while n > 0:
+        n -= 1
+
+
+if __name__ == '__main__':
+    countdown(100000)
+    countdown(10000000)
+输出：
+countdown 0.010106325149536133
+countdown 0.44972777366638184
+```
+
+一个装饰器就是一个函数，它接受一个函数作为参数并返回一个新的函数。 当你像下面这样写：
+
+```python
+@timethis
+def countdown(n):
+    pass
+```
+
+跟像下面这样写其实效果是一样的：
+
+```python
+def countdown(n):
+    pass
+countdown = timethis(countdown)
+```
+
+顺便说一下，内置的装饰器比如 @staticmethod, @classmethod,@property 原理也是一样的。 例如，下面这两个代码片段是等价的：
+
+```python
+class A:
+    @classmethod
+    def method(cls):
+        pass
+
+class B:
+    # Equivalent definition of a class method
+    def method(cls):
+        pass
+    method = classmethod(method)
+```
+
+在上面的 wrapper() 函数中， 装饰器内部定义了一个使用 *args 和 **kwargs 来接受任意参数的函数。 在这个函数里面调用了原始函数并将其结果返回，不过你还可以添加其他额外的代码(比如计时)。 然后这个新的函数包装器被作为结果返回来代替原始函数。
+
+需要强调的是装饰器并不会修改原始函数的参数签名以及返回值。 使用 *args 和 **kwargs 目的就是确保任何参数都能适用。 而返回结果值基本都是调用原始函数 func(*args, **kwargs) 的返回结果，其中func就是原始函数。
+
+刚开始学习装饰器的时候，会使用一些简单的例子来说明，比如上面演示的这个。 不过实际场景使用时，还是有一些细节问题要注意的。 比如上面使用 @wraps(func) 注解是很重要的， 它能保留原始函数的元数据(下一小节会讲到)，新手经常会忽略这个细节。 接下来的几个小节我们会更加深入的讲解装饰器函数的细节问题，如果你想构造你自己的装饰器函数，需要认真看一下。
+
+## 9.2. 创建装饰器时保留函数元信息
+
+你写了一个装饰器作用在某个函数上，但是这个函数的重要的元信息比如名字、文档字符串、注解和参数签名都丢失了。
+
+任何时候你定义装饰器的时候，都应该使用 functools 库中的 @wraps 装饰器来注解底层包装函数。例如：
+
+```python
+import time
+from functools import wraps
+def timethis(func):
+    '''
+    Decorator that reports the execution time.
+    '''
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__, end-start)
+        return result
+    return wrapper
+```
+
+下面我们使用这个被包装后的函数并检查它的元信息：
+
+```python
+@timethis
+def countdown(n: int):
+    """
+    Counts down
+    """
+    while n > 0:
+        n -= 1
+
+if __name__ == '__main__':
+    countdown(100000)
+    print(countdown.__name__)
+    print(countdown.__doc__)
+    print(countdown.__annotations__)
+输出：
+countdown 0.009953022003173828
+countdown
+
+    Counts down
+    
+{'n': <class 'int'>}
+```
+
+在编写装饰器的时候复制元信息是一个非常重要的部分。如果你忘记了使用 @wraps ， 那么你会发现被装饰函数丢失了所有有用的信息。比如如果忽略 @wraps 后的效果是下面这样的：
+
+```python
+>>> countdown.__name__
+'wrapper'
+>>> countdown.__doc__
+>>> countdown.__annotations__
+{}
+```
+
+@wraps 有一个重要特征是它能让你通过属性 \_\_wrapped\_\_ 直接访问被包装函数。例如:
+
+```python
+print(countdown.__wrapped__(100000))  # 直接访问原countdown函数
+输出：
+None
+```
+
+\_\_wrapped\_\_ 属性还能让被装饰函数正确暴露底层的参数签名信息。例如：
+
+```python
+>>> from inspect import signature
+>>> print(signature(countdown))
+(n: int)
+```
+
+一个很普遍的问题是怎样让装饰器去直接复制原始函数的参数签名信息， 如果想自己手动实现的话需要做大量的工作，最好就简单的使用 @wraps 装饰器。 通过底层的 \_\_wrapped\_\_ 属性访问到函数签名信息。更多关于签名的内容可以参考9.16小节。
+
+## 9.3. 解除一个装饰器
+
+一个装饰器已经作用在一个函数上，你想撤销它，直接访问原始的未包装的那个函数。
+
+假设装饰器是通过 @wraps (参考9.2小节)来实现的，那么你可以通过访问 __wrapped__ 属性来访问原始函数：
+
+```python
+>>> @somedecorator
+>>> def add(x, y):
+...     return x + y
+...
+>>> orig_add = add.__wrapped__
+>>> orig_add(3, 4)
+7
+```
+
+直接访问未包装的原始函数在调试、内省和其他函数操作时是很有用的。 但是我们这里的方案仅仅适用于在包装器中正确使用了 @wraps 或者直接设置了 \_\_wrapped\_\_ 属性的情况。
+
+如果有多个包装器，那么访问 \_\_wrapped\_\_ 属性的行为是不可预知的，应该避免这样做。 在Python3.3中，它会略过所有的包装层，比如，假如你有如下的代码：
+
+```python
+from functools import wraps
+
+def decorator1(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print('Decorator 1')
+        return func(*args, **kwargs)
+    return wrapper
+
+def decorator2(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print('Decorator 2')
+        return func(*args, **kwargs)
+    return wrapper
+
+@decorator1
+@decorator2
+def add(x, y):
+    return x + y
+```
+
+下面我们在Python3.3下测试：
+
+```python
+>>> add(2, 3)
+Decorator 1
+Decorator 2
+5
+>>> add.__wrapped__(2, 3)
+5
+```
+
+下面我们在Python3.4(Python3.7)下测试：
+
+```python
+>>> add(2, 3)
+Decorator 1
+Decorator 2
+5
+>>> add.__wrapped__(2, 3)
+Decorator 2
+5
+```
+
+最后要说的是，并不是所有的装饰器都使用了 @wraps ，因此这里的方案并不全部适用。 特别的，内置的装饰器 @staticmethod 和 @classmethod 就没有遵循这个约定 (它们把原始函数存储在属性 __func__ 中)。
+
+## 9.4. 定义一个带参数的装饰器
+
+你想定义一个可以接受参数的装饰器
+
+我们用一个例子详细阐述下接受参数的处理过程。 假设你想写一个装饰器，给函数添加日志功能，同时允许用户指定日志的级别和其他的选项。 下面是这个装饰器的定义和使用示例：
+
+```python
+import logging
+from functools import wraps
+
+
+def logged(level, name=None, message=None):
+    """
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    """
+
+    def decorate(func):
+        log_name = name if name else func.__module__
+        log = logging.getLogger(log_name)
+        log_msg = message if message else func.__name__
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            log.log(level, log_msg)
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorate
+
+
+# Example use
+@logged(logging.WARNING)
+def add(x, y):
+    return x + y
+
+
+@logged(logging.CRITICAL, 'example')
+def spam():
+    print('Spam!')
+
+
+if __name__ == '__main__':
+    print(add(1, 2))
+    spam()
+输出：
+3
+add
+Spam!
+spam
+```
+
+初看起来，这种实现看上去很复杂，但是核心思想很简单。 最外层的函数 logged() 接受参数并将它们作用在内部的装饰器函数上面。 内层的函数 decorate() 接受一个函数作为参数，然后在函数上面放置一个包装器。 这里的关键点是包装器是可以使用传递给 logged() 的参数的。
+
+定义一个接受参数的包装器看上去比较复杂主要是因为底层的调用序列。特别的，如果你有下面这个代码：
+
+```python
+@decorator(x, y, z)
+def func(a, b):
+    pass
+```
+
+装饰器处理过程跟下面的调用是等效的;
+
+```python
+def func(a, b):
+    pass
+func = decorator(x, y, z)(func)
+```
+
+decorator(x, y, z) 的**返回结果必须是一个可调用对象**，它接受一个函数作为参数并包装它， 可以参考9.7小节中另外一个可接受参数的包装器例子。
+
+## 9.5. 可自定义属性的装饰器
+
+你想写一个装饰器来包装一个函数，并且允许用户提供参数在运行时控制装饰器行为。
+
+引入一个访问函数，使用 nonlocal 来修改内部变量。 然后这个访问函数被作为一个属性赋值给包装函数。
+
+```python
+
+```
