@@ -14770,5 +14770,680 @@ decorator(x, y, z) 的**返回结果必须是一个可调用对象**，它接受
 引入一个访问函数，使用 nonlocal 来修改内部变量。 然后这个访问函数被作为一个属性赋值给包装函数。
 
 ```python
+import logging
+from functools import wraps, partial
 
+
+# Utility decorator to attach a function as an attribute of obj
+def attach_wrapper(obj, func=None):
+    if func is None:
+        return partial(attach_wrapper, obj)
+    setattr(obj, func.__name__, func)
+    return func
+
+
+def logged(level, name=None, message=None):
+    """
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    """
+
+    def decorate(func):
+        log_name = name if name else func.__module__
+        log = logging.getLogger(log_name)
+        log_msg = message if message else func.__name__
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            log.log(level, log_msg)
+            return func(*args, **kwargs)
+
+        # Attach setter functions
+        @attach_wrapper(wrapper)
+        def set_level(new_level):
+            nonlocal level
+            level = new_level
+
+        @attach_wrapper(wrapper)
+        def set_message(new_msg):
+            nonlocal log_msg
+            log_msg = new_msg
+
+        return wrapper
+
+    return decorate
+
+
+# Example use
+@logged(logging.DEBUG)
+def add(x, y):
+    return x + y
+
+
+@logged(logging.CRITICAL, 'example')
+def spam():
+    print('Spam!')
 ```
+
+下面是交互环境下的使用例子：
+
+```python
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    print(add(1, 2))
+    # Change the log message
+    add.set_message('Add called')
+    print(add(1, 2))
+    # Change the log level
+    add.set_level(logging.WARNING)
+    print(add(1, 2))
+输出：
+DEBUG:__main__:add
+3
+DEBUG:__main__:Add called
+3
+WARNING:__main__:Add called
+3
+```
+
+这一小节的关键点在于访问函数(如 set_message() 和 set_level() )，它们被作为属性赋给包装器。 每个访问函数允许使用 nonlocal 来修改函数内部的变量。
+
+还有一个令人吃惊的地方是访问函数会在多层装饰器间传播(如果你的装饰器都使用了 @functools.wraps 注解)。 例如，假设你引入另外一个装饰器，比如9.2小节中的 @timethis ，像下面这样：
+
+```python
+def timethis(func):
+    """
+    Decorator that reports the execution time.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__, end - start)
+        return result
+
+    return wrapper
+
+@timethis
+@logged(logging.DEBUG)
+def countdown(n):  # 按装饰器先后顺序调用，这里先调用timethis，调用func时，再调用logged
+    while n > 0:
+        n -= 1
+```
+
+你会发现访问函数依旧有效：
+
+```python
+>>> countdown(10000000)
+DEBUG:__main__:countdown
+countdown 0.8198461532592773
+>>> countdown.set_level(logging.WARNING)
+>>> countdown.set_message("Counting down to zero")
+>>> countdown(10000000)
+WARNING:__main__:Counting down to zero
+countdown 0.8225970268249512
+```
+
+你还会发现即使装饰器像下面这样以相反的方向排放，效果也是一样的：
+
+```python
+@logged(logging.DEBUG)
+@timethis
+def countdown(n):  # 按装饰器先后顺序调用，这里先调用logged，调用func时，再调用timethis
+    while n > 0:
+        n -= 1
+输出：
+DEBUG:__main__:countdown
+countdown 22.000741004943848
+WARNING:__main__:Counting down to zero
+countdown 2.449922561645508
+```
+
+还能通过使用lambda表达式代码来让访问函数的返回不同的设定值：
+
+```python
+ed(level, name=None, message=None):
+    """
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    """
+
+    def decorate(func):
+        log_name = name if name else func.__module__
+        log = logging.getLogger(log_name)
+        log_msg = message if message else func.__name__
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            log.log(level, log_msg)
+            return func(*args, **kwargs)
+
+        # Attach setter functions
+        @attach_wrapper(wrapper)
+        def set_level(new_level):
+            nonlocal level
+            level = new_level
+
+        @attach_wrapper(wrapper)
+        def set_message(new_msg):
+            nonlocal log_msg
+            log_msg = new_msg
+
+        @attach_wrapper(wrapper)
+        def get_level():
+            return level
+
+        # Alternative 同上get_level()
+        # wrapper.get_level = lambda: level
+
+        return wrapper
+
+    return decorate
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    countdown(10000000)
+    print(countdown.get_level())
+
+    countdown.set_level(logging.WARNING)
+    print(countdown.get_level())
+    countdown.set_message("Counting down to zero")
+    countdown(10000000)
+输出：
+DEBUG:__main__:countdown
+WARNING:__main__:Counting down to zero
+countdown 0.46024060249328613
+10
+30
+countdown 0.44997620582580566
+```
+
+一个比较难理解的地方就是对于访问函数的首次使用。例如，你可能会考虑另外一个方法直接访问函数的属性，如下：
+
+```python
+def logged(level, name=None, message=None):
+    """
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    """
+
+    def decorate(func):
+        log_name = name if name else func.__module__
+        log = logging.getLogger(log_name)
+        log_msg = message if message else func.__name__
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            wrapper.log.log(wrapper.level, wrapper.log_msg)
+            return func(*args, **kwargs)
+
+        # Attach adjustable attributes
+        wrapper.level = level
+        wrapper.log_msg = log_msg
+        wrapper.log = log
+
+        return wrapper
+
+    return decorate
+```
+
+这个方法也可能正常工作，但前提是它必须是最外层的装饰器才行。 如果它的上面还有另外的装饰器(比如上面提到的 @timethis 例子)，那么它会隐藏底层属性，使得修改它们没有任何作用。 而通过使用访问函数就能避免这样的局限性。
+
+如下验证，两个装饰器@timethis和@logged(logging.DEBUG)，设置的countdown.level和countdown.log_msg无效：
+
+```python
+@timethis
+@logged(logging.DEBUG)
+def countdown(n):
+    while n > 0:
+        n -= 1
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    countdown(10000000)
+
+    countdown.level = logging.WARNING
+    countdown.log_msg = "Counting down to zero"
+    countdown(10000000)
+输出：
+DEBUG:__main__:countdown
+DEBUG:__main__:countdown
+countdown 0.46451663970947266
+countdown 0.5054244995117188
+```
+
+再修改装饰器先后顺序为@logged(logging.DEBUG)和@timethis，设置的countdown.level和countdown.log_msg生效：
+
+```python
+@logged(logging.DEBUG)
+@timethis
+def countdown(n):
+    while n > 0:
+        n -= 1
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    countdown(10000000)
+
+    countdown.level = logging.WARNING
+    countdown.log_msg = "Counting down to zero"
+    countdown(10000000)
+输出：
+DEBUG:__main__:countdown
+WARNING:__main__:Counting down to zero
+countdown 0.45221900939941406
+countdown 0.5152807235717773
+```
+
+最后提一点，这一小节的方案也可以作为9.9小节中装饰器类的另一种实现方法。
+
+使用装饰器实现函数日志记录功能：
+
+```python
+import time
+
+
+def func_log(func):
+    """
+    Decorator that reports the execution time.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            print(func.__name__, 'Begin')
+            start = time.time()
+            result = func(*args, **kwargs)
+            return result
+        except Exception as e:
+            raise e
+        finally:
+            end = time.time()
+            print(func.__name__, 'Time consuming: {}'.format(end - start))
+            print(func.__name__, 'End')
+
+    return wrapper
+
+
+@func_log
+def countdown(n):
+    while n > 0:
+        n -= 1
+    raise RuntimeError('Exception')
+
+
+if __name__ == '__main__':
+    countdown(10000000)
+输出：
+countdown Begin
+countdown Time consuming: 0.6098487377166748
+countdown End
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 85, in <module>
+    countdown(10000000)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 68, in wrapper
+    raise e
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 65, in wrapper
+    result = func(*args, **kwargs)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 81, in countdown
+    raise RuntimeError('Exception')
+RuntimeError: Exception
+```
+
+## 9.6. 带可选参数的装饰器
+
+你想写一个装饰器，既可以不传参数给它，比如 @decorator ， 也可以传递可选参数给它，比如 @decorator(x,y,z) 。
+
+下面是9.5小节中日志装饰器的一个修改版本：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import logging
+from functools import wraps, partial
+
+
+def logged(func=None, *, level=logging.DEBUG, name=None, message=None):
+    if func is None:
+        return partial(logged, level=level, name=name, message=message)
+
+    log_name = name if name else func.__module__
+    log = logging.getLogger(log_name)
+    log_msg = message if message else func.__name__
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        log.log(level, log_msg)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+# 相当于直接调用logged(add)
+# Example use
+@logged
+def add(x, y):
+    return x + y
+
+
+# 相当于先调用logged(level=logging.CRITICAL, name='example')，此时返回partial函数，再调用logged(spam, level=level, name=name, message=message)函数
+@logged(level=logging.CRITICAL, name='example')
+def spam():
+    print('Spam!')
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    print(add(1, 2))
+输出：
+DEBUG:__main__:add
+3
+```
+
+可以看到，@logged 装饰器可以同时不带参数或带参数。
+
+这里提到的这个问题就是通常所说的编程一致性问题。 当我们使用装饰器的时候，大部分程序员习惯了要么不给它们传递任何参数，要么给它们传递确切参数。 其实从技术上来讲，我们可以定义一个所有参数都是可选的装饰器，就像下面这样：
+
+```python
+@logged()
+def add(x, y):
+    return x+y
+```
+
+但是，这种写法并不符合我们的习惯，有时候程序员忘记加上后面的括号会导致错误。 这里我们向你展示了如何以一致的编程风格来同时满足没有括号和有括号两种情况。
+
+为了理解代码是如何工作的，你需要非常熟悉装饰器是如何作用到函数上以及它们的调用规则。 对于一个像下面这样的简单装饰器：
+
+```python
+# Example use
+@logged
+def add(x, y):
+    return x + y
+```
+
+这个调用序列跟下面等价：
+
+```python
+def add(x, y):
+    return x + y
+
+add = logged(add)
+```
+
+这时候，被装饰函数会被当做第一个参数直接传递给 logged 装饰器。 因此，logged() 中的第一个参数就是被包装函数本身。所有其他参数都必须有默认值。
+
+而对于一个下面这样有参数的装饰器：
+
+```python
+@logged(level=logging.CRITICAL, name='example')
+def spam():
+    print('Spam!')
+```
+
+调用序列跟下面等价：
+
+```python
+def spam():
+    print('Spam!')
+spam = logged(level=logging.CRITICAL, name='example')(spam)
+```
+
+初始调用 logged() 函数时，被包装函数并没有传递进来。 因此在装饰器内，它必须是可选的。这个反过来会迫使其他参数必须使用关键字来指定。 并且，但这些参数被传递进来后，装饰器要返回一个接受一个函数参数并包装它的函数(参考9.5小节)。 为了这样做，我们使用了一个技巧，就是利用 functools.partial 。 它会返回一个未完全初始化的自身，除了被包装函数外其他参数都已经确定下来了。 可以参考7.8小节获取更多 partial() 方法的知识。
+
+## 9.7. 利用装饰器强制函数上的类型检查
+
+作为某种编程规约，你想在对函数参数进行强制类型检查。
+
+在演示实际代码前，先说明我们的目标：能对函数参数类型进行断言，类似下面这样：
+
+```python
+>>> @typeassert(int, int)
+... def add(x, y):
+...     return x + y
+...
+>>>
+>>> add(2, 3)
+5
+>>> add(2, 'hello')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "contract.py", line 33, in wrapper
+TypeError: Argument y must be <class 'int'>
+```
+
+下面是使用装饰器技术来实现 @typeassert ：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from functools import wraps
+from inspect import signature
+
+
+def typeassert(*ty_args, **ty_kwargs):
+    def decorate(func):
+        # If in optimized mode, disable type checking, __debug__ is False
+        if not __debug__:
+            return func
+
+        # Map function argument names to supplied types
+        sig = signature(func)
+        bound_types = sig.bind_partial(*ty_args, **ty_kwargs).arguments  # 把x, y, z和[int], {'z':int}绑定，结果是OrderedDict{x:int, z:int}
+        # bound_types = sig.bind(*ty_args, **ty_kwargs).arguments  # 如果使用bind来绑定x, y, z和[int], {'z':int}，则抛异常：missing a required argument: 'y'
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            bound_values = sig.bind(*args, **kwargs)
+            # Enforce type assertions across supplied arguments
+            for name, value in bound_values.arguments.items():
+                if name in bound_types:
+                    if not isinstance(value, bound_types[name]):
+                        raise TypeError('Argument {} must be {}'.format(name, bound_types[name]))
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorate
+
+
+@typeassert(int, int)
+def add(x, y):  # def add(x: int, y: str):
+    return x + y
+
+
+if __name__ == '__main__':
+    print(add(1, 'hello'))
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 38, in <module>
+    print(add(1, 'hello'))
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 24, in wrapper
+    raise TypeError('Argument {} must be {}'.format(name, bound_types[name]))
+TypeError: Argument y must be <class 'int'>
+```
+
+可以看出这个装饰器非常灵活，既可以指定所有参数类型，也可以只指定部分。 并且可以通过位置或关键字来指定参数类型。下面是使用示例：
+
+```python
+@typeassert(int, z=int)
+def spam(x, y, z=42):
+    print(x, y, z)
+
+
+if __name__ == '__main__':
+    spam(1, 2, 3)
+    spam(1, 'hello', 3)
+    spam(1, 'hello', 'world')
+输出：
+1 2 3
+1 hello 3
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 46, in <module>
+    spam(1, 'hello', 'world')
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 25, in wrapper
+    raise TypeError('Argument {} must be {}'.format(name, bound_types[name]))
+TypeError: Argument z must be <class 'int'>
+```
+
+这节是高级装饰器示例，引入了很多重要的概念。
+
+首先，装饰器只会在函数定义时被调用一次。 有时候你去掉装饰器的功能，那么你只需要简单的返回被装饰函数即可。 下面的代码中，如果全局变量　\_\_debug\_\_ 被设置成了False(当你使用-O或-OO参数的优化模式执行程序时)， 那么就直接返回未修改过的函数本身：
+
+python断言(assert) 与 \_\_debug\_\_: <https://blog.csdn.net/you_are_my_dream/article/details/53328293>
+
+```python
+def decorate(func):
+    # If in optimized mode, disable type checking
+    if not __debug__:
+        return func
+
+# cmd验证：
+D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test>python main.py
+1 2 3
+1 hello 3
+Traceback (most recent call last):
+  File "main.py", line 46, in <module>
+    spam(1, 'hello', 'world')
+  File "main.py", line 25, in wrapper
+    raise TypeError('Argument {} must be {}'.format(name, bound_types[name]))
+TypeError: Argument z must be <class 'int'>
+
+D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test>python -O main.py
+1 2 3
+1 hello 3
+1 hello world
+
+D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test>python -OO main.py
+1 2 3
+1 hello 3
+1 hello world
+```
+
+其次，这里还对被包装函数的参数签名进行了检查，我们使用了 inspect.signature() 函数。 简单来讲，它运行你提取一个可调用对象的参数签名信息。例如：
+
+```python
+from inspect import signature
+
+def spam(x, y, z=42):
+    print(x, y, z)
+
+
+if __name__ == '__main__':
+    sig = signature(spam)
+    print(sig)
+    print(sig.parameters)
+    print(sig.parameters['x'].name)
+    print(sig.parameters['x'].default)
+    print(sig.parameters['x'].kind)
+    print(sig.parameters['z'].name)
+    print(sig.parameters['z'].default)
+    print(sig.parameters['z'].kind)
+输出：
+(x, y, z=42)
+OrderedDict([('x', <Parameter "x">), ('y', <Parameter "y">), ('z', <Parameter "z=42">)])
+x
+<class 'inspect._empty'>
+POSITIONAL_OR_KEYWORD
+z
+42
+POSITIONAL_OR_KEYWORD
+```
+
+装饰器的开始部分，我们使用了 bind_partial() 方法来执行从指定类型到名称的部分绑定。 下面是例子演示：
+
+```python
+if __name__ == '__main__':
+    sig = signature(spam)
+    bound_types = sig.bind_partial(int, z=int)
+    print(bound_types)
+    print(bound_types.arguments)
+输出：
+<BoundArguments (x=<class 'int'>, z=<class 'int'>)>
+OrderedDict([('x', <class 'int'>), ('z', <class 'int'>)])
+```
+
+在这个部分绑定中，你可以注意到缺失的参数被忽略了(比如并没有对y进行绑定)。 不过最重要的是创建了一个有序字典 bound_types.arguments 。 这个字典会将参数名以函数签名中相同顺序映射到指定的类型值上面去。 在我们的装饰器例子中，这个映射包含了我们要强制指定的类型断言。
+
+在装饰器创建的实际包装函数中使用到了 sig.bind() 方法。 bind() 跟 bind_partial() 类似，但是它不允许忽略任何参数。因此有了下面的结果：
+
+```python
+>>> bound_values = sig.bind(1, 2, 3)
+>>> bound_values.arguments
+OrderedDict([('x', 1), ('y', 2), ('z', 3)])
+```
+
+使用这个映射我们可以很轻松的实现我们的强制类型检查：
+
+```python
+>>> for name, value in bound_values.arguments.items():
+...     if name in bound_types.arguments:
+...         if not isinstance(value, bound_types.arguments[name]):
+...             raise TypeError()
+...
+```
+
+不过这个方案还有点小瑕疵，它对于有默认值的参数并不适用。 比如下面的代码可以正常工作，尽管items的类型是错误的：
+
+```python
+>>> @typeassert(int, list)
+... def bar(x, items=None):
+...     if items is None:
+...         items = []
+...     items.append(x)
+...     return items
+>>> bar(2)
+[2]
+>>> bar(2,3)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "contract.py", line 33, in wrapper
+TypeError: Argument items must be <class 'list'>
+>>> bar(4, [1, 2, 3])
+[1, 2, 3, 4]
+```
+
+经调试，有默认值的参数，在wraper函数中，sig.bind(2)时，不会生成items的Dict，所以无法校验：
+
+```python
+@typeassert(int, list)
+def bar(x, items=None):
+    if items is None:
+        items = []
+    items.append(x)
+    return items
+
+
+if __name__ == '__main__':
+    sig = signature(bar)
+    print(sig.parameters)
+    print(sig.bind(2))
+    print(sig.bind(2, 'hello'))
+输出：
+OrderedDict([('x', <Parameter "x">), ('items', <Parameter "items=None">)])
+<BoundArguments (x=2)>
+<BoundArguments (x=2, items='hello')>
+```
+
+最后一点是关于适用装饰器参数和函数注解之间的争论。 例如，为什么不像下面这样写一个装饰器来查找函数中的注解呢？
+
+```python
+@typeassert
+def spam(x:int, y, z:int = 42):
+    print(x,y,z)
+```
+
+一个可能的原因是如果使用了函数参数注解，那么就被限制了。 如果注解被用来做类型检查就不能做其他事情了。而且 @typeassert 不能再用于使用注解做其他事情的函数了。 而使用上面的装饰器参数灵活性大多了，也更加通用。
+
+可以在PEP 362以及 inspect 模块中找到更多关于函数参数对象的信息。在9.16小节还有另外一个例子。
+
+## 9.8. 将装饰器定义为类的一部分
