@@ -10839,7 +10839,7 @@ Traceback (most recent call last):
 AttributeError: can`t delete attribute
 ```
 
-在实现一个property的时候，底层数据(如果有的话)仍然需要存储在某个地方。 因此，在get和set方法中，你会看到对 _first_name 属性的操作，这也是实际数据保存的地方。 另外，你可能还会问为什么 __init__() 方法中设置了 self.first_name 而不是 self._first_name 。 在这个例子中，我们创建一个property的目的就是在设置attribute的时候进行检查。 因此，你可能想在初始化的时候也进行这种类型检查。通过设置 self.first_name ，自动调用 setter 方法， 这个方法里面会进行参数的检查，否则就是直接访问 self._first_name 了。
+在实现一个property的时候，底层数据(如果有的话)仍然需要存储在某个地方。 因此，在get和set方法中，你会看到对 _first_name 属性的操作，这也是实际数据保存的地方。 另外，你可能还会问为什么 \_\_init\_\_() 方法中设置了 self.first_name 而不是 self._first_name 。 在这个例子中，我们创建一个property的目的就是在设置attribute的时候进行检查。 因此，你可能想在初始化的时候也进行这种类型检查。通过设置 self.first_name ，自动调用 setter 方法， 这个方法里面会进行参数的检查，否则就是直接访问 self._first_name 了。
 
 还能在已存在的get和set方法基础上定义property。例如：
 
@@ -14277,7 +14277,7 @@ True
 
 编写一个工厂函数来修改普通的实例创建行为通常是一个比较简单的方法。 但是我们还能否找到更优雅的解决方案呢？
 
-例如，你可能会考虑重新定义类的 __new__() 方法，就像下面这样：
+例如，你可能会考虑重新定义类的 \_\_new\_\_() 方法，就像下面这样：
 
 ```python
 # The class in question
@@ -14300,7 +14300,7 @@ class Spam:
         self.name = name
 ```
 
-初看起来好像可以达到预期效果，但是问题是 __init__() 每次都会被调用，不管这个实例是否被缓存了。例如：
+初看起来好像可以达到预期效果，但是问题是 \_\_init\_\_() 每次都会被调用，不管这个实例是否被缓存了。例如：
 
 ```python
 if __name__ == '__main__':
@@ -15334,8 +15334,8 @@ D:\Program Files\JetBrains\PythonProject\Py3TestProject\src\test>python -OO main
 ```python
 from inspect import signature
 
-def spam(x, y, z=42):
-    print(x, y, z)
+def spam(x, y, z=42, *, d):
+    print(x, y, z, d)
 
 
 if __name__ == '__main__':
@@ -15348,6 +15348,7 @@ if __name__ == '__main__':
     print(sig.parameters['z'].name)
     print(sig.parameters['z'].default)
     print(sig.parameters['z'].kind)
+    print(sig.parameters['d'].kind)
 输出：
 (x, y, z=42)
 OrderedDict([('x', <Parameter "x">), ('y', <Parameter "y">), ('z', <Parameter "z=42">)])
@@ -15357,6 +15358,7 @@ POSITIONAL_OR_KEYWORD
 z
 42
 POSITIONAL_OR_KEYWORD
+KEYWORD_ONLY
 ```
 
 装饰器的开始部分，我们使用了 bind_partial() 方法来执行从指定类型到名称的部分绑定。 下面是例子演示：
@@ -15447,3 +15449,972 @@ def spam(x:int, y, z:int = 42):
 可以在PEP 362以及 inspect 模块中找到更多关于函数参数对象的信息。在9.16小节还有另外一个例子。
 
 ## 9.8. 将装饰器定义为类的一部分
+
+你想在类中定义装饰器，并将其作用在其他函数或方法上。
+
+在类里面定义装饰器很简单，但是你首先要确认它的使用方式。比如到底是作为一个实例方法还是类方法。 下面我们用例子来阐述它们的不同：
+
+```python
+from functools import wraps
+
+
+class A:
+    # Decorator as an instance method
+    def decorator1(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print('Decorator 1')
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    # Decorator as a class method
+    @classmethod
+    def decorator2(cls, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print('Decorator 2')
+            return func(*args, **kwargs)
+
+        return wrapper
+```
+
+下面是一使用例子：
+
+```python
+# As an instance method
+a = A()
+
+
+@a.decorator1
+def spam():
+    pass
+
+
+# As a class method
+@A.decorator2
+def grok():
+    pass
+
+
+if __name__ == '__main__':
+    spam()
+    grok()
+输出：
+Decorator 1
+Decorator 2
+```
+
+在类中定义装饰器初看上去好像很奇怪，但是在标准库中有很多这样的例子。 特别的，@property 装饰器实际上是一个类，它里面定义了三个方法 getter(), setter(), deleter() , 每一个方法都是一个装饰器。例如：
+
+```python
+class Person:
+
+    def __init__(self):
+        self._first_name = ''
+
+    # Create a property instance
+    first_name = property()
+
+    # Apply decorator methods
+    @first_name.getter
+    def first_name(self):
+        return self._first_name
+
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+
+
+if __name__ == '__main__':
+    p = Person()
+    p.first_name = 'hello'
+    print(p.first_name)
+输出：
+hello
+```
+
+它为什么要这么定义的主要原因是各种不同的装饰器方法会在关联的 property 实例上操作它的状态。 因此，任何时候只要你碰到需要在装饰器中记录或绑定信息，那么这不失为一种可行方法。
+
+在类中定义装饰器有个难理解的地方就是对于额外参数 self 或 cls 的正确使用。 尽管最外层的装饰器函数比如 decorator1() 或 decorator2() 需要提供一个 self 或 cls 参数， 但是在两个装饰器内部被创建的 wrapper() 函数并不需要包含这个 self 参数。 你唯一需要这个参数是在你确实要访问包装器中这个实例的某些部分的时候。其他情况下都不用去管它。
+
+对于类里面定义的包装器还有一点比较难理解，就是在涉及到继承的时候。 例如，假设你想让在A中定义的装饰器作用在子类B中。你需要像下面这样写：
+
+```python
+class B(A):
+    @A.decorator2
+    def bar(self):
+        pass
+```
+
+也就是说，装饰器要被定义成类方法并且你必须显式的使用父类名去调用它。 你不能使用 @B.decorator2 ，因为在方法定义时，这个类B还没有被创建。
+
+## 9.9. 将装饰器定义为类
+
+你想使用一个装饰器去包装函数，但是希望返回一个可调用的实例。 你需要让你的装饰器可以同时工作在类定义的内部和外部。
+
+为了将装饰器定义成一个实例，你需要确保它实现了 \_\_call\_\_() 和 \_\_get\_\_() 方法。 例如，下面的代码定义了一个类，它在其他函数上放置一个简单的记录层：
+
+```python
+import types
+from functools import wraps
+
+
+class Profiled:
+    def __init__(self, func):
+        wraps(func)(self)
+        self.ncalls = 0
+
+    def __call__(self, *args, **kwargs):
+        self.ncalls += 1
+        return self.__wrapped__(*args, **kwargs)
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return types.MethodType(self, instance)
+
+
+@Profiled
+def add(x, y):
+    return x + y
+
+
+class Spam:
+    @Profiled  # Spam()时会调用Profiled类的__get__方法
+    def bar(self, x):
+        print('bar', self, x)
+
+    @classmethod
+    @Profiled  # @Profiled要放在@classmethod后
+    def foo(cls, y):
+        print('foo', y)
+
+
+if __name__ == '__main__':
+    print(add(1, 2))
+    Spam().bar(10)
+    Spam.foo(20)
+输出：
+3
+bar <__main__.Spam object at 0x000001DD6CE6EC18> 10
+foo 20
+```
+
+在交互环境中的使用示例：
+
+```python
+if __name__ == '__main__':
+    print(add(1, 2))
+    print(add(3, 4))
+    print(add.ncalls)
+
+    s = Spam()
+    s.bar(1)
+    s.bar(2)
+    s.bar(3)
+    print(s.bar.ncalls)
+    print(Spam.bar.ncalls)
+
+    Spam.foo(10)
+    Spam.foo(20)
+    print(Spam.foo.ncalls)
+输出：
+3
+7
+2
+bar <__main__.Spam object at 0x00000140CC146080> 1
+bar <__main__.Spam object at 0x00000140CC146080> 2
+bar <__main__.Spam object at 0x00000140CC146080> 3
+3
+3
+foo 10
+foo 20
+2
+```
+
+将装饰器定义成类通常是很简单的。但是这里还是有一些细节需要解释下，特别是当你想将它作用在实例方法上的时候。
+
+首先，使用 functools.wraps() 函数的作用跟之前还是一样，将被包装函数的元信息复制到可调用实例中去。
+
+其次，通常很容易会忽视上面的 \_\_get\_\_() 方法。如果你忽略它，保持其他代码不变再次运行， 你会发现当你去调用被装饰实例方法时出现很奇怪的问题。例如：
+
+```python
+>>> s = Spam()
+>>> s.bar(3)
+Traceback (most recent call last):
+...
+TypeError: bar() missing 1 required positional argument: 'x'
+```
+
+出错原因是当方法函数在一个类中被查找时，它们的 __get__() 方法依据描述器协议被调用， 在8.9小节已经讲述过描述器协议了。在这里，__get__() 的目的是创建一个绑定方法对象 (最终会给这个方法传递self参数)。下面是一个例子来演示底层原理：
+
+```python
+s = Spam()
+def grok(self, x):
+    pass
+print(grok.__get__(s, Spam))
+输出：
+<bound method grok of <__main__.Spam object at 0x000001597F36C0F0>>
+```
+
+\_\_get\_\_() 方法是为了确保绑定方法对象能被正确的创建。 type.MethodType() 手动创建一个绑定方法来使用。只有当实例被使用的时候绑定方法才会被创建。 如果这个方法是在类上面来访问， 那么 \_\_get\_\_() 中的instance参数会被设置成None并直接返回 Profiled 实例本身。 这样的话我们就可以提取它的 ncalls 属性了。
+
+如果你想避免一些混乱，也可以考虑另外一个使用闭包和 nonlocal 变量实现的装饰器，这个在9.5小节有讲到。例如：
+
+```python
+from functools import wraps
+
+
+def profiled(func):
+    ncalls = 0
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        nonlocal ncalls
+        ncalls += 1
+        return func(*args, **kwargs)
+
+    wrapper.ncalls = lambda: ncalls  # 这里如果改成wrapper.ncalls = ncalls，则是一个静态对象0
+    return wrapper
+
+
+# Example
+@profiled
+def add(x, y):
+    return x + y
+```
+
+这个方式跟之前的效果几乎一样，除了对于 ncalls 的访问现在是通过一个被绑定为属性的函数来实现，例如：
+
+```python
+if __name__ == '__main__':
+    print(add(2, 3))
+    print(add(4, 5))
+    print(add.ncalls())
+输出：
+5
+9
+2
+```
+
+## 9.10. 为类和静态方法提供装饰器
+
+你想给类或静态方法提供装饰器。
+
+给类或静态方法提供装饰器是很简单的，不过要确保装饰器在 @classmethod 或 @staticmethod 之后。例如：
+
+```python
+import time
+from functools import wraps
+
+# A simple decorator
+def timethis(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        r = func(*args, **kwargs)
+        end = time.time()
+        print(end-start)
+        return r
+    return wrapper
+
+# Class illustrating application of the decorator to different kinds of methods
+class Spam:
+    @timethis
+    def instance_method(self, n):
+        print(self, n)
+        while n > 0:
+            n -= 1
+
+    @classmethod
+    @timethis
+    def class_method(cls, n):
+        print(cls, n)
+        while n > 0:
+            n -= 1
+
+    @staticmethod
+    @timethis
+    def static_method(n):
+        print(n)
+        while n > 0:
+            n -= 1
+```
+
+装饰后的类和静态方法可正常工作，只不过增加了额外的计时功能：
+
+```python
+>>> s = Spam()
+>>> s.instance_method(1000000)
+<__main__.Spam object at 0x1006a6050> 1000000
+0.11817407608032227
+>>> Spam.class_method(1000000)
+<class '__main__.Spam'> 1000000
+0.11334395408630371
+>>> Spam.static_method(1000000)
+1000000
+0.11740279197692871
+```
+
+如果你把装饰器的顺序写错了就会出错。例如，假设你像下面这样写：
+
+```python
+class Spam:
+    @timethis
+    @staticmethod
+    def static_method(n):
+        print(n)
+        while n > 0:
+            n -= 1
+```
+
+那么你调用这个静态方法时就会报错：
+
+```python
+>>> Spam.static_method(1000000)
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+File "timethis.py", line 6, in wrapper
+start = time.time()
+TypeError: 'staticmethod' object is not callable
+```
+
+问题在于 @classmethod 和 @staticmethod 实际上并不会创建可直接调用的对象， 而是创建特殊的描述器对象(参考8.9小节)。因此当你试着在其他装饰器中将它们当做函数来使用时就会出错。 确保这种装饰器出现在装饰器链中的第一个位置可以修复这个问题。
+
+当我们在抽象基类中定义类方法和静态方法(参考8.12小节)时，这里讲到的知识就很有用了。 例如，如果你想定义一个抽象类方法，可以使用类似下面的代码：
+
+```python
+from abc import ABCMeta, abstractmethod
+class A(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def method(cls):
+        pass
+```
+
+在这段代码中，@classmethod 跟 @abstractmethod 两者的顺序是有讲究的，如果你调换它们的顺序就会出错。
+
+## 9.11. 装饰器为被包装函数增加参数
+
+你想在装饰器中给被包装函数增加额外的参数，但是不能影响这个函数现有的调用规则。
+
+可以使用关键字参数来给被包装函数增加额外参数。考虑下面的装饰器：
+
+```python
+from functools import wraps
+
+
+def optional_debug(func):
+    @wraps(func)
+    def wrapper(*args, debug=False, **kwargs):
+        if debug:
+            print('Calling', func.__name__)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@optional_debug
+def spam(a, b, c):
+    print(a, b, c)
+
+
+if __name__ == '__main__':
+    spam(1, 2, 3)
+    spam(1, 2, 3, debug=True)
+输出：
+1 2 3
+Calling spam
+1 2 3
+```
+
+通过装饰器来给被包装函数增加参数的做法并不常见。 尽管如此，有时候它可以避免一些重复代码。例如，如果你有下面这样的代码：
+
+```python
+def a(x, debug=False):
+    if debug:
+        print('Calling a')
+    print('a: ', x)
+
+
+def b(x, y, z, debug=False):
+    if debug:
+        print('Calling b')
+    print('a: ', x, y, z)
+
+
+def c(x, y, debug=False):
+    if debug:
+        print('Calling c')
+    print('a: ', x, y)
+```
+
+那么你可以将其重构成这样：
+
+```python
+import inspect
+from functools import wraps
+
+
+def optional_debug(func):
+    if 'debug' in inspect.getfullargspec(func).args:  # 或用inspect.signature(func).parameters.keys()
+        raise TypeError('debug argument already defined in func {}'.format(func.__name__))
+
+    @wraps(func)
+    def wrapper(*args, debug=False, **kwargs):
+        if debug:
+            print('Calling', func.__name__)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+@optional_debug
+def a(x):
+    print('a: ', x)
+
+
+@optional_debug
+def b(x, y, z):
+    print('b: ', x, y, z)
+
+
+@optional_debug
+def c(x, y):
+    print('c: ', x, y)
+
+
+# @optional_debug  # 异常TypeError: debug argument already defined in func d
+def d(debug, x, y):
+    print('d: ', debug, x, y)
+
+
+if __name__ == '__main__':
+    a(10, debug=True)
+    b(1, 2, 3, debug=True)
+    c(100, 200, debug=True)
+```
+
+这种实现方案之所以行得通，在于强制关键字参数很容易被添加到接受 *args 和 **kwargs 参数的函数中。 通过使用强制关键字参数，它被作为一个特殊情况被挑选出来， 并且接下来仅仅使用剩余的位置和关键字参数去调用这个函数时，这个特殊参数会被排除在外。 也就是说，它并不会被纳入到 **kwargs 中去。
+
+还有一个难点就是如何去处理被添加的参数与被包装函数参数直接的名字冲突。 例如，如果装饰器 @optional_debug 作用在一个已经拥有一个 debug 参数的函数上时会有问题。 这里我们增加了一步名字检查。
+
+上面的方案还可以更完美一点，因为精明的程序员应该发现了被包装函数的函数签名其实是错误的（即只能看到原始函数签名，看不到包装过的完整签名）。例如：
+
+```python
+>>> @optional_debug
+... def add(x,y):
+...     return x+y
+...
+>>> import inspect
+>>> print(inspect.signature(add))
+(x, y)
+```
+
+通过如下的修改，可以解决这个问题：
+
+```python
+import inspect
+from functools import wraps
+
+
+def optional_debug(func):
+    if 'debug' in inspect.getfullargspec(func).args:
+        raise TypeError('debug argument already defined in func {}'.format(func.__name__))
+
+    @wraps(func)
+    def wrapper(*args, debug=False, **kwargs):
+        if debug:
+            print('Calling', func.__name__)
+        return func(*args, **kwargs)
+
+    sig = inspect.signature(func)
+    parms = list(sig.parameters.values())
+    parms.append(inspect.Parameter('debug', inspect.Parameter.KEYWORD_ONLY, default=False))  # KEYWORD_ONLY表示这个参数只能通过关键字引用，所以会给签名上增加*这个参数
+    wrapper.__signature__ = sig.replace(parameters=parms)
+
+    return wrapper
+```
+
+通过这样的修改，包装后的函数签名就能正确的显示 debug 参数的存在了。例如：
+
+```python
+>>> @optional_debug
+... def add(x,y):
+...     return x+y
+...
+>>> print(inspect.signature(add))
+(x, y, *, debug=False)
+>>> add(2,3)
+5
+```
+
+参考9.16小节获取更多关于函数签名的信息。
+
+## 9.12. 使用装饰器扩充类的功能
+
+你想通过反省或者重写类定义的某部分来修改它的行为，但是你又不希望使用继承或元类的方式。
+
+这种情况可能是类装饰器最好的使用场景了。例如，下面是一个重写了特殊方法 __getattribute__ 的类装饰器， 可以打印日志：
+
+```python
+def log_getattribute(cls):
+    # Get the original implementation
+    orig_getattribute = cls.__getattribute__
+
+    # Make a new definition
+    def new_getattribute(self, name):
+        print('getting: ', name)
+        return orig_getattribute(self, name)
+
+    cls.__getattribute__ = new_getattribute
+    return cls
+
+
+# Example use
+@log_getattribute
+class A:
+    def __init__(self, x):
+        self.x = x
+
+    def spam(self):
+        pass
+```
+
+下面是使用效果：
+
+```python
+>>> a = A(42)
+>>> a.x
+getting: x
+42
+>>> a.spam()
+getting: spam
+```
+
+类装饰器通常可以作为其他高级技术比如混入或元类的一种非常简洁的替代方案。 比如，上面示例中的另外一种实现使用到继承：
+
+```python
+class LoggedGetattribute:
+    def __getattribute__(self, name):
+        print('getting:', name)
+        return super().__getattribute__(name)
+
+# Example:
+class A(LoggedGetattribute):
+    def __init__(self,x):
+        self.x = x
+    def spam(self):
+        pass
+```
+
+这种方案也行得通，但是为了去理解它，你就必须知道方法调用顺序、super() 以及其它8.7小节介绍的继承知识。 某种程度上来讲，类装饰器方案就显得更加直观，并且它不会引入新的继承体系。它的运行速度也更快一些， 因为他并不依赖 super() 函数。
+
+如果你系想在一个类上面使用多个类装饰器，那么就需要注意下顺序问题。 例如，一个装饰器A会将其装饰的方法完整替换成另一种实现， 而另一个装饰器B只是简单的在其装饰的方法中添加点额外逻辑。 那么这时候装饰器A就需要放在装饰器B的前面。
+
+你还可以回顾一下8.13小节另外一个关于类装饰器的有用的例子。
+
+## 9.13. 使用元类控制实例的创建
+
+你想通过改变实例创建方式来实现单例、缓存或其他类似的特性。
+
+Python程序员都知道，如果你定义了一个类，就能像函数一样的调用它来创建实例，例如：
+
+```python
+class Spam:
+    def __init__(self, name):
+        self.name = name
+
+a = Spam('Guido')
+b = Spam('Diana')
+```
+
+如果你想自定义这个步骤，你可以定义一个元类并自己实现 __call__() 方法。
+
+为了演示，假设你不想任何人创建这个类的实例：
+
+```python
+class NoInstance(type):
+    def __call__(self, *args, **kwargs):
+        raise TypeError("Can't instantiate directly")
+
+
+# Example
+class Spam(metaclass=NoInstance):
+    @staticmethod
+    def grok(x):
+        print('Spam.grok')
+
+    @classmethod
+    def foo(cls, y):
+        print('Spam.foo')
+
+
+if __name__ == '__main__':
+    Spam.grok(1)
+    Spam.foo(1)
+输出：
+Spam.grok
+Spam.foo
+```
+
+这样的话，用户只能调用这个类的静态方法，而不能使用通常的方法来创建它的实例。例如：
+
+```python
+>>> Spam.grok(42)
+Spam.grok
+>>> s = Spam()
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "example1.py", line 7, in __call__
+        raise TypeError("Can't instantiate directly")
+TypeError: Can't instantiate directly
+```
+
+现在，假如你想实现单例模式（只能创建唯一实例的类），实现起来也很简单：
+
+```python
+class Singleton(type):
+    def __init__(self, *args, **kwargs):
+        self.__instance = None
+        super().__init__(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self.__instance is None:
+            self.__instance = super().__call__(*args, **kwargs)
+            return self.__instance
+        else:
+            return self.__instance
+
+
+# Example
+class Spam(metaclass=Singleton):
+    def __init__(self):
+        print('Creating Spam')
+```
+
+那么Spam类就只能创建唯一的实例了，演示如下：
+
+```python
+>>> a = Spam()
+Creating Spam
+>>> b = Spam()
+>>> a is b
+True
+>>> c = Spam()
+>>> a is c
+True
+```
+
+最后，假设你想创建8.25小节中那样的缓存实例。下面我们可以通过元类来实现：
+
+```python
+import weakref
+
+
+class Cached(type):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__cache = weakref.WeakValueDictionary()
+
+    def __call__(self, *args, **kwargs):
+        if args in self.__cache:
+            return self.__cache[args]
+        else:
+            obj = super().__call__(*args)
+            self.__cache[args] = obj
+            return obj
+
+
+class Spam(metaclass=Cached):
+    def __init__(self, name):
+        print('Creating Spam({!r})'.format(name))
+        self.name = name
+```
+
+然后我也来测试一下：
+
+```python
+if __name__ == '__main__':
+    a = Spam('Guido')
+    b = Spam('Diana')
+    c = Spam('Guido')  # Cached
+    print(a is b)
+    print(a is c)  # Cached value returned
+输出：
+Creating Spam('Guido')
+Creating Spam('Diana')
+False
+True
+```
+
+利用元类实现多种实例创建模式通常要比不使用元类的方式优雅得多。
+
+假设你不使用元类，你可能需要将类隐藏在某些工厂函数后面。 比如为了实现一个单例，你你可能会像下面这样写：
+
+```python
+class _Spam:
+    def __init__(self):
+        print('Creating Spam')
+
+_spam_instance = None
+
+def Spam():
+    global _spam_instance
+
+    if _spam_instance is not None:
+        return _spam_instance
+    else:
+        _spam_instance = _Spam()
+        return _spam_instance
+```
+
+尽管使用元类可能会涉及到比较高级点的技术，但是它的代码看起来会更加简洁舒服，而且也更加直观。
+
+更多关于创建缓存实例、弱引用等内容，请参考8.25小节。
+
+## 9.14. 捕获类的属性定义顺序
+
+你想自动记录一个类中属性和方法定义的顺序， 然后可以利用它来做很多操作（比如序列化、映射到数据库等等）。
+
+利用元类可以很容易的捕获类的定义信息。下面是一个例子，使用了一个OrderedDict来记录描述器的定义顺序：
+
+```python
+# A set of descriptors for various types
+from collections import OrderedDict
+
+
+class Typed:
+    _expected_type = type(None)
+
+    def __init__(self, name=None):
+        self._name = name
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self._expected_type):
+            raise TypeError('{} expected {}'.format(self._name, str(self._expected_type)))
+
+
+        instance.__dict__[self._name] = value
+
+
+class Integer(Typed):
+    _expected_type = int
+
+
+class Float(Typed):
+    _expected_type = float
+
+
+class String(Typed):
+    _expected_type = str
+
+
+# Metaclass that uses an OrderedDict for class body
+class OrderedMeta(type):
+    def __new__(cls, clsname, bases, clsdict):
+        d = dict(clsdict)
+        order = []  # 这里就是类中定义的顺序列表
+        for name, value in clsdict.items():
+            if isinstance(value, Typed):
+                value._name = name
+                order.append(name)
+        d['_order'] = order
+        return type.__new__(cls, clsname, bases, d)
+
+    @classmethod
+    def __prepare__(cls, clsname, bases):
+        return OrderedDict()
+```
+
+在这个元类中，执行类主体时描述器的定义顺序会被一个 OrderedDict捕获到， 生成的有序名称从字典中提取出来并放入类属性 \_order 中。这样的话类中的方法可以通过多种方式来使用它。 例如，下面是一个简单的类，使用这个排序字典来实现将一个类实例的数据序列化为一行CSV数据：
+
+```python
+class Structure(metaclass=OrderedMeta):
+    def as_csv(self):
+        return ','.join(str(getattr(self, name)) for name in self._order)
+
+
+# Example use
+class Stock(Structure):
+    name = String()
+    shares = Integer()
+    price = Float()
+
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
+```
+
+我们在交互式环境中测试一下这个Stock类：
+
+```python
+if __name__ == '__main__':
+    s = Stock('GOOD', 100, 490.1)
+    print(s.name)
+    print(s.as_csv())
+
+    t = Stock('AAPL','a lot', 610.23)
+输出：
+GOOD
+GOOD,100,490.1
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 72, in <module>
+    t = Stock('AAPL','a lot', 610.23)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 63, in __init__
+    self.shares = shares
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 16, in __set__
+    raise TypeError('{} expected {}'.format(self._name, str(self._expected_type)))
+TypeError: shares expected <class 'int'>
+```
+
+本节一个关键点就是OrderedMeta元类中定义的 \_\_prepare\_\_() 方法。 这个方法会在开始定义类和它的父类的时候被执行。它必须返回一个映射对象以便在类定义体中被使用到。 我们这里通过返回了一个OrderedDict而不是一个普通的字典，可以很容易的捕获定义的顺序。
+
+如果你想构造自己的类字典对象，可以很容易的扩展这个功能。比如，下面的这个修改方案可以防止重复的定义：
+
+```python
+from collections import OrderedDict
+
+
+class NoDupOrderedDict(OrderedDict):
+    def __init__(self, clsname):
+        self.clsname = clsname
+        super().__init__()
+
+    def __setitem__(self, name, value):
+        if name in self:
+            raise TypeError('{} already defined in {}'.format(name, self.clsname))
+        super().__setitem__(name, value)
+
+
+class OrderedMeta(type):
+    def __new__(cls, clsname, bases, clsdict):  # 这里的clsdict就是__prepare__返回的已经setitem之后的NoDupOrderedDict
+        d = dict(clsdict)
+        d['_order'] = [name for name in clsdict if name[0] != '_']
+        return type.__new__(cls, clsname, bases, d)
+
+    @classmethod
+    def __prepare__(cls, clsname, bases):
+        return NoDupOrderedDict(clsname)
+```
+
+下面我们测试重复的定义会出现什么情况：
+
+```python
+class A(metaclass=OrderedMeta):
+    def spam(self):
+        pass
+
+    def spam(self):
+        pass
+
+
+if __name__ == '__main__':
+    pass  # A()才会访问到OrderedMeta的__new__方法
+输出：
+  File "D:\Program Files\JetBrains\PyCharm 2019.2\helpers\pydev\pydevd.py", line 2060, in <module>
+    main()
+  File "D:\Program Files\JetBrains\PyCharm 2019.2\helpers\pydev\pydevd.py", line 2054, in main
+    globals = debugger.run(setup['file'], None, None, is_module)
+  File "D:\Program Files\JetBrains\PyCharm 2019.2\helpers\pydev\pydevd.py", line 1405, in run
+    return self._exec(is_module, entry_point_fn, module_name, file, globals, locals)
+  File "D:\Program Files\JetBrains\PyCharm 2019.2\helpers\pydev\pydevd.py", line 1412, in _exec
+    pydev_imports.execfile(file, globals, locals)  # execute the script
+  File "D:\Program Files\JetBrains\PyCharm 2019.2\helpers\pydev\_pydev_imps\_pydev_execfile.py", line 18, in execfile
+    exec(compile(contents+"\n", file, 'exec'), glob, loc)
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 28, in <module>
+    class A(metaclass=OrderedMeta):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 32, in A
+    def spam(self):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 13, in __setitem__
+    raise TypeError('{} already defined in {}'.format(name, self.clsname))
+TypeError: spam already defined in A
+```
+
+最后还有一点很重要，就是在 __new__() 方法中对于元类中被修改字典的处理。 尽管类使用了另外一个字典来定义，在构造最终的 class 对象的时候， 我们仍然需要将这个字典转换为一个正确的 dict 实例。 通过语句 d = dict(clsdict) 来完成这个效果。
+
+对于很多应用程序而已，能够捕获类定义的顺序是一个看似不起眼却又非常重要的特性。 例如，在对象关系映射中，我们通常会看到下面这种方式定义的类：
+
+```python
+class Stock(Model):
+    name = String()
+    shares = Integer()
+    price = Float()
+```
+
+在框架底层，我们必须捕获定义的顺序来将对象映射到元组或数据库表中的行（就类似于上面例子中的 as_csv() 的功能）。 这节演示的技术非常简单，并且通常会比其他类似方法（通常都要在描述器类中维护一个隐藏的计数器）要简单的多。
+
+## 9.15. 定义有可选参数的元类
+
+你想定义一个元类，允许类定义时提供可选参数，这样可以控制或配置类型的创建过程。
+
+在定义类的时候，Python允许我们使用 metaclass 关键字参数来指定特定的元类。 例如使用抽象基类：
+
+```python
+from abc import ABCMeta, abstractmethod
+
+
+class IStream(metaclass=ABCMeta):
+    @abstractmethod
+    def read(self, maxsize=None):
+        pass
+
+    @abstractmethod
+    def write(self, data):
+        pass
+```
+
+然而，在自定义元类中我们还可以提供其他的关键字参数，如下所示：
+
+```python
+class Spam(metaclass=MyMeta, debug=True, synchronize=True):
+    pass
+```
+
+为了使元类支持这些关键字参数，你必须确保在 __prepare__() , __new__() 和 __init__() 方法中 都使用强制关键字参数。就像下面这样：
+
+```python
+class MyMeta(type):
+    # Optional
+    @classmethod
+    def __prepare__(cls, name, bases, *, debug=False, synchronize=False):
+        # Custom processing
+        pass
+        return super().__prepare__(name, bases)
+
+    # Required
+    def __new__(cls, name, bases, ns, *, debug=False, synchronize=False):
+        # Custom processing
+        pass
+        return super().__new__(cls, name, bases, ns)
+
+    # Required
+    def __init__(self, name, bases, ns, *, debug=False, synchronize=False):
+        # Custom processing
+        pass
+        super().__init__(name, bases, ns)
+```
+
+给一个元类添加可选关键字参数需要你完全弄懂类创建的所有步骤， 因为这些参数会被传递给每一个相关的方法。 \_\_prepare\_\_() 方法在所有类定义开始执行前首先被调用，用来创建类命名空间。 通常来讲，这个方法只是简单的返回一个字典或其他映射对象。 \_\_new\_\_() 方法被用来实例化最终的类对象。它在类的主体被执行完后开始执行。 \_\_init\_\_() 方法最后被调用，用来执行其他的一些初始化工作。
+
+当我们构造元类的时候，通常只需要定义一个 \_\_new\_\_() 或 \_\_init\_\_() 方法，但不是两个都定义。 但是，如果需要接受其他的关键字参数的话，这两个方法就要同时提供，并且都要提供对应的参数签名。 默认的 \_\_prepare\_\_() 方法接受任意的关键字参数，但是会忽略它们， 所以只有当这些额外的参数可能会影响到类命名空间的创建时你才需要去定义 \_\_prepare\_\_() 方法。
+
+通过使用强制关键字参数，在类的创建过程中我们必须通过关键字来指定这些参数。
+
+使用关键字参数配置一个元类还可以视作对类变量的一种替代方式。例如：
+
+```python
+class Spam(metaclass=MyMeta):
+    debug = True
+    synchronize = True
+    pass
+```
+
+将这些属性定义为参数的好处在于它们不会污染类的名称空间， 这些属性仅仅只从属于类的创建阶段，而不是类中的语句执行阶段。 另外，它们在 \_\_prepare\_\_() 方法中是可以被访问的，因为这个方法会在所有类主体执行前被执行。 但是类变量只能在元类的 \_\_new\_\_() 和 \_\_init\_\_() 方法中可见。
+
+## 9.16. *args和**kwargs的强制参数签名
