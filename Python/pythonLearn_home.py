@@ -9494,8 +9494,28 @@ class TestHas_chinese(TestCase):
         self.assertTrue(has_chinese(s))
 
 #-----------------------------------------------------------------------------------------
+# 299. Bulls and Cows https://leetcode.com/problems/bulls-and-cows/
+#
+import collections
 
 
+class Solution:
+    def getHint(self, secret: str, guess: str) -> str:
+        # ¼«¼òËã·¨
+        A = sum(s == g for s, g in zip(secret, guess))
+        B = sum((collections.Counter(secret) & collections.Counter(guess)).values()) - A
+        return "{A}A{B}B".format(A=A, B=B)
+
+#
+from unittest import TestCase
+
+from src.test.main import Solution
+
+
+class TestSolution(TestCase):
+    def test_getHint(self):
+        output = Solution().getHint("1807", "7810")
+        self.assertEqual(output, '1A3B')
 #-----------------------------------------------------------------------------------------
 
 

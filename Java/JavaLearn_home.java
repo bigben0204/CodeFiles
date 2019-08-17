@@ -1,4 +1,303 @@
 //------------------------------------------------------------------------------------------------
+//299. Bulls and Cows https://leetcode.com/problems/bulls-and-cows/
+package test;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+
+class Solution {
+    public String getHint(String secret, String guess) {
+        int a = 0;
+        for (int i = 0; i < secret.length(); i++) {
+            if (secret.charAt(i) == guess.charAt(i)) {
+                ++a;
+            }
+        }
+
+        int b = 0;
+        Map<Character, Long> characterCountMapSecret =
+            secret.chars().mapToObj(c -> (char) c).collect(Collectors.groupingBy(c -> c, Collectors.counting()));
+        Map<Character, Long> characterCountMapGuess =
+            guess.chars().mapToObj(c -> (char) c).collect(Collectors.groupingBy(c -> c, Collectors.counting()));
+
+        for (Map.Entry<Character, Long> entry : characterCountMapSecret.entrySet()) {
+            Character numberSecret = entry.getKey();
+            Long numberSecretCount = entry.getValue();
+            Long numberGuessCount = characterCountMapGuess.getOrDefault(numberSecret, 0L);
+            b += Math.min(numberSecretCount, numberGuessCount);
+        }
+
+        return String.format("%dA%dB", a, b - a);
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+// 955. Delete Columns to Make Sorted II https://leetcode.com/problems/delete-columns-to-make-sorted-ii/
+// Solution.java
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+enum ColumnOrderType {
+    ASCEND, DESCEND, EQUAL_OR_ASCEND
+}
+
+class Solution { // 58ms
+    private static final char INVALID_CHAR = '-';
+
+    public int minDeletionSize(String[] A) {
+        int deleteColumnNum = 0;
+        List<Integer> lastOrders = Stream.generate(() -> 0).limit(A.length).collect(Collectors.toList());
+
+        for (int columnIndex = 0; columnIndex < A[0].length(); columnIndex++) {
+            ColumnOrderType columnOrderType = getColumnOrderType(A, columnIndex, lastOrders);
+            if (columnOrderType == ColumnOrderType.ASCEND) {
+                return deleteColumnNum;
+            } else if (columnOrderType == ColumnOrderType.DESCEND) {
+                ++deleteColumnNum;
+            }
+        }
+
+        return deleteColumnNum;
+    }
+
+    private ColumnOrderType getColumnOrderType(String[] strings, int columnIndex, List<Integer> lastOrders) {
+        char lastChar = INVALID_CHAR;
+        ColumnOrderType columnOrderType = ColumnOrderType.ASCEND;
+        List<Integer> currentOrders = new ArrayList<>();
+        int orderLevel = 1;
+
+        for (int i = 0; i < strings.length; i++) {
+            char currentChar = strings[i].charAt(columnIndex);
+            if (lastChar == INVALID_CHAR) {
+                lastChar = currentChar;
+                currentOrders.add(orderLevel);
+                continue;
+            }
+
+            if (lastChar > currentChar) {
+                // 如果之前的序列是相等的字典序，则该列是升序，需要删除
+                if (lastOrders.get(i - 1) == lastOrders.get(i)) {
+                    return ColumnOrderType.DESCEND;
+                } else {
+                    // 如果之前的序列满足字典序，则当前列字符无影响
+                    ++orderLevel;
+                }
+            } else if (lastChar == currentChar) {
+                // 如果之前的序列是相等的字典序，则orderLevel仍不变
+                if (lastOrders.get(i - 1) == lastOrders.get(i)) {
+                    columnOrderType = ColumnOrderType.EQUAL_OR_ASCEND;
+                } else {
+                    // 如果之前的序列满足字典序
+                    ++orderLevel;
+                }
+            } else { // lastChar < currentChar
+                // 无论之前序列什么字典序，当前都满足了字典序
+                ++orderLevel;
+            }
+
+            lastChar = currentChar;
+            currentOrders.add(orderLevel);
+        }
+
+        lastOrders.clear();
+        lastOrders.addAll(currentOrders);
+        return columnOrderType;
+    }
+}
+
+// SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        String[] strings = {"ca", "bb", "ac"};
+        assertEquals(SOLUTION.minDeletionSize(strings), 1);
+    }
+
+    @Test
+    public void test2() {
+        String[] strings = {"xc", "yb", "za"};
+        assertEquals(SOLUTION.minDeletionSize(strings), 0);
+    }
+
+    @Test
+    public void test3() {
+        String[] strings = {"zyx", "wvu", "tsr"};
+        assertEquals(SOLUTION.minDeletionSize(strings), 3);
+    }
+
+    @Test
+    public void test4() {
+        String[] strings = {"abx", "agz", "bgc", "bfc"};
+        assertEquals(1, SOLUTION.minDeletionSize(strings));
+    }
+
+    @Test
+    public void test5() {
+        String[] strings = {"xga","xfb","yfa"};
+        assertEquals(1, SOLUTION.minDeletionSize(strings));
+    }
+}
+
+//用字符串比较
+package test;
+
+import java.util.Arrays;
+
+
+enum ColumnOrderType {
+    ASCEND, DESCEND, EQUAL_OR_ASCEND
+}
+
+class Solution { // 5ms
+    public int minDeletionSize(String[] A) {
+        int N = A.length;
+        int W = A[0].length();
+        int ans = 0;
+
+        // cur : all rows we have written
+        // For example, with A = ["abc","def","ghi"] we might have
+        // cur = ["ab", "de", "gh"].
+        String[] cur = new String[N];
+        for (int j = 0; j < W; ++j) {
+            // cur2 : What we potentially can write, including the
+            //        newest column col = [A[i][j] for i]
+            // Eg. if cur = ["ab","de","gh"] and col = ("c","f","i"),
+            // then cur2 = ["abc","def","ghi"].
+            String[] cur2 = Arrays.copyOf(cur, N);
+            for (int i = 0; i < N; ++i)
+                cur2[i] += A[i].charAt(j);
+
+            ColumnOrderType columnOrderType = isSorted(cur2);
+            if (columnOrderType == ColumnOrderType.ASCEND) {
+                return ans;
+            } else if (columnOrderType == ColumnOrderType.EQUAL_OR_ASCEND) {
+                cur = cur2;
+            } else {
+                ans++;
+            }
+        }
+
+        return ans;
+    }
+
+    public ColumnOrderType isSorted(String[] A) {
+        ColumnOrderType columnOrderType = ColumnOrderType.ASCEND;
+        for (int i = 0; i < A.length - 1; ++i) {
+            int ret = A[i].compareTo(A[i + 1]);
+            if (ret > 0) {
+                return ColumnOrderType.DESCEND;
+            } else if (ret == 0) {
+                columnOrderType = ColumnOrderType.EQUAL_OR_ASCEND;
+            }
+        }
+        return columnOrderType;
+    }
+}
+
+//使用StringBuilder慢了
+package test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+
+enum ColumnOrderType {
+    ASCEND, DESCEND, EQUAL_OR_ASCEND
+}
+
+class Solution { //48ms
+    public int minDeletionSize(String[] A) {
+        int N = A.length;
+        int W = A[0].length();
+        int ans = 0;
+
+        // cur : all rows we have written
+        // For example, with A = ["abc","def","ghi"] we might have
+        // cur = ["ab", "de", "gh"].
+
+        List<StringBuilder> cur = Stream.generate(() -> new StringBuilder()).limit(N).collect(Collectors.toList());
+
+        for (int j = 0; j < W; ++j) {
+            // cur2 : What we potentially can write, including the
+            //        newest column col = [A[i][j] for i]
+            // Eg. if cur = ["ab","de","gh"] and col = ("c","f","i"),
+            // then cur2 = ["abc","def","ghi"].
+            List<StringBuilder> cur2 = cur.stream().map(e -> new StringBuilder(e.toString())).collect(Collectors.toList());
+            for (int i = 0; i < N; ++i)
+                cur2.get(i).append(A[i].charAt(j));
+
+            ColumnOrderType columnOrderType = isSorted(cur2);
+            if (columnOrderType == ColumnOrderType.ASCEND) {
+                return ans;
+            } else if (columnOrderType == ColumnOrderType.EQUAL_OR_ASCEND) {
+                cur = cur2;
+            } else {
+                ans++;
+            }
+        }
+
+        return ans;
+    }
+
+    public ColumnOrderType isSorted(List<StringBuilder> A) {
+        ColumnOrderType columnOrderType = ColumnOrderType.ASCEND;
+        for (int i = 0; i < A.size() - 1; ++i) {
+            int ret = A.get(i).toString().compareTo(A.get(i + 1).toString());
+            if (ret > 0) {
+                return ColumnOrderType.DESCEND;
+            } else if (ret == 0) {
+                columnOrderType = ColumnOrderType.EQUAL_OR_ASCEND;
+            }
+        }
+        return columnOrderType;
+    }
+}
+
+//cuts表示之前列是否已经区分出字典序了，如果已经区分出来，则当前列字母就不需要再比较了
+package test;
+
+class Solution { //1ms
+    public int minDeletionSize(String[] A) {
+        int N = A.length;
+        int W = A[0].length();
+        // cuts[j] is true : we don't need to check any new A[i][j] <= A[i][j+1]
+        boolean[] cuts = new boolean[N - 1];
+
+        int ans = 0;
+        search:
+        for (int j = 0; j < W; ++j) {
+            // Evaluate whether we can keep this column
+            for (int i = 0; i < N - 1; ++i)
+                if (!cuts[i] && A[i].charAt(j) > A[i + 1].charAt(j)) {
+                    // Can't keep the column - delete and continue
+                    ans++;
+                    continue search;
+                }
+
+            // Update 'cuts' information
+            for (int i = 0; i < N - 1; ++i)
+                if (A[i].charAt(j) < A[i + 1].charAt(j))
+                    cuts[i] = true;
+        }
+
+        return ans;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
 //技能鉴定1级：求计算机配件整体最大质量因子
 //Solution.java
 package test;
@@ -7099,6 +7398,14 @@ String[] strArray1 = stream.toArray(String[]::new);
 // for (String s : strings) { //查看数组内容需要手工遍历，如果用System.out.println(strings)无法打出数组元素
     // System.out.println(s);
 // }
+
+// List转换为Array可以这样处理：
+// ArrayList<String> list=new ArrayList<String>();
+// String[] strings = new String[list.size()];
+// list.toArray(strings);
+// 反过来，如果要将数组转成List怎么办呢？如下：
+// String[] s = {"a","b","c"};
+// List list = java.util.Arrays.asList(s);
 
 // 2. Collection
 List<String> list1 = stream.collect(Collectors.toList()); //实现是ArrayList::new
