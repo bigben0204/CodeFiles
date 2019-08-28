@@ -1,4 +1,1114 @@
 //------------------------------------------------------------------------------------------------
+//406. Queue Reconstruction by Height https://leetcode.com/problems/queue-reconstruction-by-height/
+输入：二维数组，其中每个对象是一个小朋友信息，由{k, v}表示，k表示小朋友体重，v表示体重比这个小朋友轻的有几位排在这个小朋友前。
+输出：小朋友排序好的二维数组队列。
+例：
+输入：{{6, 1}, {8, 0}, {9, 0}, {5, 0}, {4, 3}};
+输出：{{5, 0}, {8, 0}, {6, 1}, {4, 3}, {9, 0}};
+
+算法：先将输入小朋友按体重由小到大排序，然后依次插入到队列中，当前面有几个空位时，就把这个小朋友放在对应的位置。
+分析：之所以可以这样排序，是因为每个小朋友在找位置时，已经没有比他轻的小朋友了，所以在这个小朋友前不用预留比他轻的小朋友位置，只需要预留比他重的小朋友位置，所以v为几，在前面留几个空位即可。
+
+//Solution.java
+package test;
+
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+class Solution { //48ms
+    private static final int INVALID_STUDENT_FLAG = -1;
+
+    public int[][] reconstructQueue(int[][] students) {
+        List<int[]> sortedStudents =
+            Arrays.stream(students).sorted((e1, e2) -> {
+                if (e1[0] != e2[0]) {
+                    return Integer.compare(e1[0], e2[0]);
+                } else {
+                    return Integer.compare(e2[1], e1[1]);
+                }
+            }).map(e -> new int[]{e[0], e[1]}).collect(Collectors.toList());
+        emptyStudents(students);
+
+        for (int[] sortedStudent : sortedStudents) {
+            int studentIndex = getStudentIndex(sortedStudent, students);
+            students[studentIndex] = sortedStudent;
+        }
+
+        return students;
+    }
+
+    private int getStudentIndex(int[] sortedStudent, int[][] students) {
+        int emptySeatsInFront = sortedStudent[1];
+        int tmp = 0;
+        for (int i = 0; i < students.length; i++) {
+            if (students[i][1] == INVALID_STUDENT_FLAG) {
+                if (tmp++ == emptySeatsInFront) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private void emptyStudents(int[][] students) {
+        for (int[] student : students) {
+            student[0] = INVALID_STUDENT_FLAG;
+            student[1] = INVALID_STUDENT_FLAG;
+        }
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        int[][] students = {{6, 1}, {8, 0}, {9, 0}, {5, 0}, {4, 3}};
+        int[][] expectedStudents = {{5, 0}, {8, 0}, {6, 1}, {4, 3}, {9, 0}};
+        assertArrayEquals(expectedStudents, new Solution().reconstructQueue(students));
+    }
+
+    @Test
+    public void test2() {
+        int[][] students = {{7, 0}, {4, 4}, {7, 1}, {5, 0}, {6, 1}, {5, 2}};
+        int[][] expectedStudents = {{5, 0}, {7, 0}, {5, 2}, {6, 1}, {4, 4}, {7, 1}};
+        assertArrayEquals(expectedStudents, new Solution().reconstructQueue(students));
+
+    }
+}
+
+//别人的优化算法，每个人在放入队列时，在他之后放的不会有比他大的了，所以可以直接按index放入，后面即使有人放在他前面，这些人也都比他矮，不会影响v参数：
+step 1: sort
+[7,0], [7,1], [6,1], [5,0], [5,2], [4,4]
+
+step 2: insert by height
+[7,0]
+[7,0], [7,1]
+[7,0], [6,1], [7,1]
+[5,0], [7,0], [6,1], [7,1]
+[5,0], [7,0], [5,2], [6,1], [7,1]
+[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]
+
+def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+    people.sort(key=lambda p: (p[0], -p[1]), reverse=True)
+    res = []
+    [res.insert(p[1], p) for p in people]
+    return res
+
+//Solution.java
+package test;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+class Solution { //36ms
+    public int[][] reconstructQueue(int[][] students) {
+        Arrays.sort(students, (e1, e2) -> {
+            if (e1[0] != e2[0]) {
+                return -Integer.compare(e1[0], e2[0]);
+            } else {
+                return Integer.compare(e1[1], e2[1]);
+            }
+        });
+
+        List<int[]> sortedStudents = new LinkedList<>();
+
+        for (int[] student : students) {
+            sortedStudents.add(student[1], student);
+        }
+
+        return sortedStudents.toArray(new int[0][]); //sortedStudents.stream().toArray(int[][]::new)
+    }
+}
+//------------------------------------------------------------------------------------------------
+//324. Wiggle Sort II https://leetcode.com/problems/wiggle-sort-ii/
+//思路：把数组排序，然后对半分，轮流从小的和大的里交插插入。另外要注意从大往小开始插入，以区分出差异值。
+//Solution.java
+package test;
+
+import java.util.Arrays;
+
+class Solution { //40ms
+    public void wiggleSort(int[] nums) {
+        int[] sortedNums = Arrays.stream(nums).sorted().toArray();
+
+        int index = 0;
+        int length = nums.length;
+        int middleIndex = (nums.length + 1) / 2;
+        for (int firstIndex = middleIndex - 1, secondIndex = length - 1; firstIndex >= 0; --firstIndex, --secondIndex) {
+            nums[index++] = sortedNums[firstIndex];
+            if (index < length) {
+                nums[index++] = sortedNums[secondIndex];
+            }
+        }
+    }
+}
+
+//使用流比较耗时，优化后的，改为纯数组操作：
+package test;
+
+import java.util.Arrays;
+
+class Solution { //3ms
+    public void wiggleSort(int[] nums) {
+        Arrays.sort(nums);
+        int length = nums.length;
+        int[] tmp = new int[length];
+
+        int index = 0;
+        int middleIndex = (nums.length + 1) / 2;
+        for (int firstIndex = middleIndex - 1, secondIndex = length - 1; firstIndex >= 0; --firstIndex, --secondIndex) {
+            tmp[index++] = nums[firstIndex];
+            if (index < length) {
+                tmp[index++] = nums[secondIndex];
+            }
+        }
+
+        for (int i = 0; i < length; i++) {
+            nums[i] = tmp[i];
+        }
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        int[] nums = {1, 5, 1, 1, 6, 4};
+        int[] expectedStudents = {1, 6, 1, 5, 1, 4};
+        new Solution().wiggleSort(nums);
+        assertArrayEquals(expectedStudents, nums);
+    }
+
+    @Test
+    public void test2() {
+        int[] nums = {1, 5, 1, 1, 6, 4, 7};
+        int[] expectedStudents = {4, 7, 1, 6, 1, 5, 1};
+        new Solution().wiggleSort(nums);
+        assertArrayEquals(expectedStudents, nums);
+    }
+
+    @Test
+    public void test3() {
+        int[] nums = {4, 5, 5, 6};
+        int[] expectedStudents = {5, 6, 4, 5};
+        new Solution().wiggleSort(nums);
+        assertArrayEquals(expectedStudents, nums);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//面试官考试：调整数字为波峰波谷形式。
+输入一个数组序列，调整每一位上的数字，使得奇偶位索引的对应数字满足波峰波谷的变化趋势，如下两种情况都是符合的：
+1. 偶数位为波峰、奇数位为波谷：A[0] > A[1] < A[2] > A[3] < A[4] ...
+2. 偶数位为波谷、奇数位为波峰：A[0] < A[1] > A[2] < A[3] > A[4] ...
+求返回调整数字的最小总和。
+
+例1：
+输入：[1, 2, 3]
+输出：2
+分析：
+把index=1的2，增加2，则[1, 4, 3]满足。
+或把index=2的3，减少2，则[1, 2, 1]满足。
+两种情况变化数字总和都是2。
+
+例2：
+输入：[9, 6, 1, 6, 2]
+输出：4
+分析：
+把index=0的9，减少4，则[5, 6, 1, 6, 2]满足。
+
+例3：
+输入：[10, 6, 5, 6, 5]
+输出：4
+分析：
+把index=2的5加2，index=4的5加2，则[10, 6, 7, 6, 7]满足。2+2=4
+另一种调整情况：把index=0的10减5，则[5, 6, 5, 6, 5]满足，但是变化值为5。
+两种情况相比5比4大，所以输出为4。
+
+//1144. Decrease Elements To Make Array Zigzag https://leetcode.com/problems/decrease-elements-to-make-array-zigzag/
+//LeetCode上有强调只通过减少数字来调整，不能增加数字，所以要么只减少奇数位，要么只减少偶数位即可，没有同时需要调整奇数位和调整偶数位的场景，因为同时减少奇数和偶数位肯定不是最优解。
+package test;
+
+class Solution {
+    public int movesToMakeZigzag(int[] nums) {
+        int decreaseOddValue = 0, decreaseEvenValue = 0, length = nums.length;
+        for (int i = 0; i < length; i++) {
+            if (i % 2 == 0) { //如果i是偶数，只减少偶数位的场景
+                int valueToLowerThanLeft = i > 0 && nums[i] >= nums[i - 1] ? nums[i] - nums[i - 1] + 1 : 0;
+                int valueToLowerThanRight = i < length - 1 && nums[i] >= nums[i + 1] ? nums[i] - nums[i + 1] + 1 : 0;
+                decreaseEvenValue += Math.max(valueToLowerThanLeft, valueToLowerThanRight);
+            } else { //如果i是奇数，只减少奇数位的场景
+                int valueToLowerThanLeft = nums[i] >= nums[i - 1] ? nums[i] - nums[i - 1] + 1 : 0;
+                int valueToLowerThanRight = i < length - 1 && nums[i] >= nums[i + 1] ? nums[i] - nums[i + 1] + 1 : 0;
+                decreaseOddValue += Math.max(valueToLowerThanLeft, valueToLowerThanRight);
+            }
+        }
+
+        return Math.min(decreaseOddValue, decreaseEvenValue);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//997. Find the Town Judge https://leetcode.com/problems/find-the-town-judge/
+//Solution.java
+package test;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+class Solution { //66ms
+    public int findJudge(int N, int[][] trust) {
+        if (N == 1) {
+            return 1;
+        }
+
+        List<int[]> personHaveTrustList = IntStream.rangeClosed(1, N).mapToObj(i -> new int[]{i, 0}).collect(Collectors.toList());
+        Map<Integer, Set<Integer>> personTrustedIndexMap = new HashMap<>();
+
+        init(personHaveTrustList, personTrustedIndexMap, trust);
+
+        List<int[]> personHaveNoTrustList = personHaveTrustList.stream().filter(e -> e[1] == 0).collect(Collectors.toList());
+        if (personHaveNoTrustList.size() != 1) {
+            return -1;
+        }
+
+        int tmpSecretIndex = personHaveNoTrustList.get(0)[0];
+        Set<Integer> trustPersonSet = personTrustedIndexMap.get(tmpSecretIndex);
+        if (trustPersonSet != null && trustPersonSet.size() == N - 1) {
+            return tmpSecretIndex;
+        }
+
+        return -1;
+    }
+
+    private void init(List<int[]> personHaveTrustList, Map<Integer, Set<Integer>> personTrustedIndexMap, int[][] trust) {
+        for (int[] trustPair : trust) {
+            int trustPersonIndex = trustPair[0];
+            int trustedPersonIndex = trustPair[1];
+            personHaveTrustList.get(trustPersonIndex - 1)[1] = 1;
+
+            Set<Integer> allTrustSet = personTrustedIndexMap.get(trustedPersonIndex);
+            if (allTrustSet == null) {
+                allTrustSet = new HashSet<>();
+                personTrustedIndexMap.put(trustedPersonIndex, allTrustSet);
+            }
+            allTrustSet.add(trustPersonIndex);
+        }
+    }
+}
+
+//别人的优化算法
+package test;
+
+class Solution { //2ms
+    public int findJudge(int N, int[][] trust) {
+        if (trust == null || N <= 0) {
+            return -1;
+        }
+
+        if (trust.length == 0 && N == 1) {
+            return 1;
+        }
+
+        int[] candidateCounts = new int[N + 1];
+
+        for (int i = 0; i < trust.length; i++) {
+            if (candidateCounts[trust[i][1]] != -1) { //只有从来没有信任过别人，才能加1个被信任计数
+                candidateCounts[trust[i][1]]++;
+            }
+
+            candidateCounts[trust[i][0]] = -1; //只要信任别人，该位置值就是-1
+        }
+
+        for (int i = 0; i <= N; i++) {
+            if (candidateCounts[i] == N - 1) { //看哪个编号的值是N - 1，说明被其他所有人信任
+                return i;
+            }
+        }
+
+        return -1;
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        int[][] trust = {{1, 2}};
+        assertEquals(2, new Solution().findJudge(2, trust));
+    }
+
+    @Test
+    public void test2() {
+        int[][] trust = {{1, 3}, {2, 3}};
+        assertEquals(3, new Solution().findJudge(3, trust));
+    }
+
+    @Test
+    public void test3() {
+        int[][] trust = {{1, 3}, {2, 3}, {3, 1}};
+        assertEquals(-1, new Solution().findJudge(3, trust));
+    }
+
+    @Test
+    public void test4() {
+        int[][] trust = {{1, 2}, {2, 3}};
+        assertEquals(-1, new Solution().findJudge(3, trust));
+    }
+
+    @Test
+    public void test5() {
+        int[][] trust = {{1, 3}, {1, 4}, {2, 3}, {2, 4}, {4, 3}};
+        assertEquals(3, new Solution().findJudge(4, trust));
+    }
+
+    @Test
+    public void test6() {
+        int[][] trust = {};
+        assertEquals(-1, new Solution().findJudge(1, trust)); //这个用例感觉有问题
+    }
+}
+//------------------------------------------------------------------------------------------------
+//11. 盛最多水的容器 https://leetcode-cn.com/problems/container-with-most-water/
+//
+package test;
+
+class Solution {
+    public int maxArea(int[] height) {
+        int l = 0;
+        int r = height.length - 1;
+        int maxArea = 0;
+        while (l < r) {
+            maxArea = Math.max(maxArea, Math.min(height[l], height[r]) * (r - l));
+            if (height[l] < height[r]) {
+                ++l;
+            } else {
+                --r;
+            }
+        }
+        return maxArea;
+    }
+}
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        int[] heights = {1, 8, 6, 2, 5, 4, 8, 3, 7};
+        assertEquals(49, new Solution().maxArea(heights));
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//面试官D考试Demo3：
+给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
+此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。
+
+注意:
+不能使用代码库中的排序函数来解决这道题。
+
+示例:
+输入: [2,0,2,1,1,0]
+输出: [0,0,1,1,2,2]
+
+进阶：
+一个直观的解决方案是使用计数排序的两趟扫描算法。
+首先，迭代计算出0、1 和 2 元素的个数，然后按照0、1、2的排序，重写当前数组。
+你能想出一个仅使用常数空间的一趟扫描算法吗？
+//Solution.java
+package test;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+class Solution { //85ms
+
+    private int wholeIndex;
+
+    public void sortColors(int[] nums) {
+//        Arrays.sort(nums);
+        
+        Map<Integer, Long> numCountMap = Arrays.stream(nums).boxed().collect(Collectors.groupingBy(i -> i,
+            TreeMap::new, Collectors.counting()));
+
+        wholeIndex = 0;
+        numCountMap.forEach((k, v) -> {
+            for (int index = wholeIndex; index < wholeIndex + v; ++index) {
+                nums[index] = k;
+            }
+            wholeIndex += v;
+        });
+    }
+}
+
+//https://blog.csdn.net/xdzhangzhenhao/article/details/81349891
+// 类似三路排序的优化方案：维护好三个指针
+// arr[0,zero_index]==0,arr[zero_index+1,i-1]==1,arr[two_index,n-1]==2
+// 终止条件：i>=two
+//Solution.java
+package test;
+
+class Solution { //1ms
+    public void sortColors(int[] nums) {
+        int zero_index = -1;
+        int n = nums.length;
+        int two_index = n;
+        for (int i = 0; i < n; ) {
+            if (i >= two_index) {
+                return;
+            }
+
+            if (nums[i] == 1) {
+                i++;
+            } else if (nums[i] == 0) {
+                swap(nums, ++zero_index, i);
+                i++;
+            } else if (nums[i] == 2) {
+                swap(nums, i, --two_index);
+            }
+        }
+    }
+
+    private void swap(int[] nums, int l, int r) {
+        if (l == r) {
+            return;
+        }
+        int tmp = nums[l];
+        nums[l] = nums[r];
+        nums[r] = tmp;
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        int[] ints = {2, 0, 2, 1, 1, 0};
+        int[] expectInts = {0, 0, 1, 1, 2, 2};
+        new Solution().sortColors(ints);
+        assertArrayEquals(expectInts, ints);
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//面试官D考试Demo1：给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
+//Solution.java
+package test;
+
+class Solution {
+    public void moveZeroes(int[] nums) {
+        int l = 0;
+        for (int r = 0; r < nums.length; ++r) {
+            if (nums[r] != 0) {
+                swap(nums, l, r);
+                ++l;
+            }
+        }
+    }
+
+    private void swap(int[] nums, int l, int r) {
+        int tmp = nums[l];
+        nums[l] = nums[r];
+        nums[r] = tmp;
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+
+public class SolutionTest {
+    @Test
+    public void test() {
+        int[] ints = {0, 1, 0, 3, 12};
+        int[] expectInts = {1, 3, 12, 0, 0};
+        new Solution().moveZeroes(ints);
+        assertArrayEquals(expectInts, ints);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//441. Arranging Coins https://leetcode.com/problems/arranging-coins/submissions/
+class Solution {
+    public int arrangeCoins(int n) {
+        return (int) Math.floor((-1 + Math.sqrt(1 + 8 * (long) n)) / 2);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//632. 最小区间 https://leetcode-cn.com/problems/smallest-range/submissions/
+你有?k?个升序排列的整数数组。找到一个最小区间，使得?k?个列表中的每个列表至少有一个数包含在其中。
+我们定义如果?b-a < d-c?或者在?b-a == d-c?时?a < c，则区间 [a,b] 比 [c,d] 小。
+//Solution.java
+package test;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class Solution {
+    public int[] smallestRange(List<List<Integer>> nums) {
+        List<int[]> arr = sort(nums);
+
+        int k = nums.size();
+        int[] cnt = new int[k];
+        int len = Integer.MAX_VALUE;
+        int[] ans = new int[2];
+        int count = 0;
+
+        for (int r = 0, l = 0; r < arr.size(); r++) {
+            if (cnt[arr.get(r)[1]]++ == 0) {
+                ++count;
+            }
+
+            while (cnt[arr.get(l)[1]] > 1) {
+                --cnt[arr.get(l)[1]];
+                ++l;
+            }
+
+            if (count == k) {
+                int tmpLen = arr.get(r)[0] - arr.get(l)[0];
+                if (tmpLen < len) {
+                    len = tmpLen;
+                    ans[0] = arr.get(l)[0];
+                    ans[1] = arr.get(r)[0];
+                }
+            }
+        }
+        return ans;
+    }
+
+    private List<int[]> sort(List<List<Integer>> nums) {
+        List<int[]> arrIndexList = new ArrayList<>();
+        for (int i = 0; i < nums.size(); i++) {
+            final int index = i;
+            nums.get(i).stream().forEach(e -> arrIndexList.add(new int[]{e, index}));
+        }
+        arrIndexList.sort(Comparator.comparingInt(o -> o[0]));
+        return arrIndexList;
+    }
+}
+
+//SolutionTest.java
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+
+public class SolutionTest {
+    @Test
+    public void test() {
+        List<Integer> integers1 = Arrays.asList(4, 10, 15, 24, 26);
+        List<Integer> integers2 = Arrays.asList(0, 9, 12, 20);
+        List<Integer> integers3 = Arrays.asList(5, 18, 22, 30);
+        List<List<Integer>> nums = Arrays.asList(integers1, integers2, integers3);
+
+        int[] expectInts = {20, 24};
+        assertArrayEquals(expectInts, new Solution().smallestRange(nums));
+    }
+
+    @Test
+    public void test1() {
+        List<Integer> integers1 = Arrays.asList(1, 2, 3);
+        List<List<Integer>> nums = Arrays.asList(integers1, integers1, integers1);
+
+        int[] expectInts = {1, 1};
+        assertArrayEquals(expectInts, new Solution().smallestRange(nums));
+    }
+}
+
+//解析：先将所有数字排序，并记录所在列表编号0、1、2，之后通过l和r两个滑窗索引，判断是否在滑窗范围内包括所有列表编号，每次当r右移后，如果l所在的位置有两个同列表的数字，则将l开始右移，直到l所在位置只有一个该列表元素，再判断len，直到遍历完r。
+arr = {ArrayList@1023}  size = 13
+ 0 = {int[2]@1026} 
+  0 = 0
+  1 = 1
+ 1 = {int[2]@1029} 
+  0 = 4
+  1 = 0
+ 2 = {int[2]@1027} 
+  0 = 5
+  1 = 2
+ 3 = {int[2]@1030} 
+  0 = 9
+  1 = 1
+ 4 = {int[2]@1031} 
+  0 = 10
+  1 = 0
+ 5 = {int[2]@1032} 
+  0 = 12
+  1 = 1
+ 6 = {int[2]@1033} 
+  0 = 15
+  1 = 0
+ 7 = {int[2]@1034} 
+  0 = 18
+  1 = 2
+ 8 = {int[2]@1035} 
+  0 = 20
+  1 = 1
+ 9 = {int[2]@1036} 
+  0 = 22
+  1 = 2
+ 10 = {int[2]@1037} 
+  0 = 24
+  1 = 0
+ 11 = {int[2]@1038} 
+  0 = 26
+  1 = 0
+ 12 = {int[2]@1039} 
+  0 = 30
+  1 = 2
+
+//------------------------------------------------------------------------------------------------
+//831. 隐藏个人信息 https://leetcode-cn.com/problems/masking-personal-information/
+//Solution.java
+class Solution {
+    public String maskPII(String S) {
+        if(S.contains(".")){
+            return maskEmail(S);
+        }else{
+            return maskPhone(S);
+        }
+    }
+    public String maskEmail(String str){   
+        str = str.toLowerCase();
+        StringBuilder sb = new StringBuilder();
+        String[] sp = str.split("@");
+        sb.append(sp[0].charAt(0)+"*****"+sp[0].charAt(sp[0].length() - 1));
+        sb.append("@"+sp[1]);
+        return sb.toString();
+    }
+    public String maskPhone(String str){   
+        StringBuilder sb = new StringBuilder();
+        for(char ch : str.toCharArray()){
+            if(Character.isDigit(ch))
+                 sb.append(ch);
+        }
+        StringBuilder ans = new StringBuilder();
+        if(sb.length() == 10){
+            ans.append("***-***-");
+        }else if(sb.length() == 11){
+            ans.append("+*-***-***-"); 
+        }else if(sb.length() == 12){
+            ans.append("+**-***-***-"); 
+        }else if(sb.length() == 13){
+            ans.append("+***-***-***-");
+        }
+         ans.append(sb.substring(sb.length() - 4));
+        return ans.toString();
+    }
+}
+//------------------------------------------------------------------------------------------------
+//516. 最长回文子序列 https://leetcode-cn.com/problems/longest-palindromic-subsequence/
+状态：
+f[i][j] 表示 s 的第 i 个字符到第 j 个字符组成的子串中，最长的回文序列长度是多少。
+
+转移方程：
+如果 s 的第 i 个字符和第 j 个字符相同的话
+f[i][j] = f[i + 1][j - 1] + 2
+
+如果 s 的第 i 个字符和第 j 个字符不同的话
+f[i][j] = max(f[i + 1][j], f[i][j - 1])
+
+然后注意遍历顺序，i 从最后一个字符开始往前遍历，j 从 i + 1 开始往后遍历，这样可以保证每个子问题都已经算好了。
+
+初始化：
+f[i][i] = 1 单个字符的最长回文序列是 1
+
+结果：
+f[0][n - 1]
+
+                b    b    b    a    b
+        下标j   0    1    2    3    4
+ 下标i
+    0           1    2    3    3    4
+    1           0    1    2    2    3
+    2           0    0    1    1    3
+    3           0    0    0    1    1
+    4           0    0    0    0    1
+
+//DynamicSolution.java
+package test;
+
+public class DynamicSolution {
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] f = new int[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            f[i][i] = 1;
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    f[i][j] = f[i + 1][j - 1] + 2;
+                } else {
+                    f[i][j] = Math.max(f[i + 1][j], f[i][j - 1]);
+                }
+            }
+        }
+        return f[0][n - 1];
+    }
+}
+
+//DynamicSolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class DynamicSolutionTest {
+    @Test
+    public void test() {
+        assertEquals(4, new DynamicSolution().longestPalindromeSubseq("bbbab"));
+    }
+}
+
+//另一个解法：
+原题相当于，原字符串s与倒置后所得字符串_s，计算两个字符串的最长公共子序列。
+Tip:必须用dp[1...n1][1...n2]来存储公共子序列长度，边界默认为0，否则的话在i-1和j-1关于0的边界处处理起来略复杂。
+同 5、两个字符串最大公共子序列
+//------------------------------------------------------------------------------------------------
+//动态规划学习 https://blog.csdn.net/zw6161080123/article/details/80639932
+3、数组最大连续子序列和
+如arr[] = {6,-1,3,-4,-6,9,2,-2,5}的最大连续子序列和为14。即为：9,2,-2,5
+创建一个数组a，长度为原数组长度，不同位置数字a[i]代表0...i上最大连续子序列和，a[0]=arr[0]设置一个最大值max，初始值为数组中的第一个数字。当进来一个新的数字arr[i+1]时，判断到他前面数字子序列和a[i]+arr[i+1]跟arr[i+1]哪个大，前者大就保留前者，后者大就说明前面连续数字加起来都不如后者一个新进来的数字大，前面数字就可以舍弃，从arr[i+1]开始，每次比较完都跟max比较一下，最后的max就是最大值。
+//DynamicSolution.java
+package test;
+
+public class DynamicSolution {
+    public static int MaxContinueArraySum(int a[]) {
+        int n = a.length;
+        int max = a[0];
+        int sum = a[0];
+        for (int i = 1; i < n; i++) {
+            sum = Math.max(sum + a[i], a[i]);
+            if (sum >= max) {
+                max = sum;
+            }
+        }
+        return max;
+    }
+}
+
+//DynamicSolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class DynamicSolutionTest {
+    @Test
+    public void test() {
+        int[] arr = {6, -1, 3, -4, -6, 9, 2, -2, 5};
+        assertEquals(14, DynamicSolution.MaxContinueArraySum(arr));
+    }
+}
+
+
+4、数字塔从上到下所有路径中和最大的路径
+数字塔是第i行有i个数字组成，从上往下每个数字只能走到他正下方数字或者正右方数字，求数字塔从上到下所有路径中和最大的路径，如有下数字塔
+3
+1    5
+8    4    3
+2    6    7    9
+6    2    3    5    1
+最大路径是3-5-3-9-5，和为25。我们可以分别从从上往下看跟从下往上看两种动态规划的方式去解这个题
+从上往下看：当从上往下看时，每进来新的一行，新的一行每个元素只能选择他正上方或者左左方的元素，也就是说，第一个元素只能连他上方的元素，最后一个元素只能连他左上方的元素，其他元素可以有两种选择，所以需要选择加起来更大的那一个数字，并把这个位置上的数字改成相应的路径值，具体过程如下图所示
+3                            3                            3                            3
+1    5                      4    8                      4    8                      4    8
+8    4    3                8    4    3                12   12  11             12   12   11  
+2    6    7    9          2    6    7    9           2    6    7    9         14   18   19   20
+6    2    3    5    1    6    2    3    5    1     6    2    3    5    1    20   20   22   25   21
+所以最大值就是最底层的最大值也就是25。
+具体运算过程就是，建立一个n*n的二维数组dp[][]，n是数字塔最后一行的数字个数，二维数组每一行数字跟数字塔每一行数字个数一样，保存的值是从上方到这一个位置最大路径的值，填入边界值dp[0][0]=3，每一行除了第一个值跟最后一个值，其他的值选择上方或者左上方更大的值与这个位置上的值相加得来的值，即dp[i][j]=Math.max(dp[i-1][j-1], dp[i-1][j]) + n[i][j]
+
+//DynamicSolution.java
+package test;
+
+public class DynamicSolution {
+    public static int minNumberInRotateArray(int n[][]) {
+        int max = 0;
+        int dp[][] = new int[n.length][n.length];
+        dp[0][0] = n[0][0];
+        for (int i = 1; i < n.length; i++) {
+            for (int j = 0; j <= i; j++) {
+                if (j == 0) {
+                    //如果是第一列，直接跟他上面数字相加
+                    dp[i][j] = dp[i - 1][j] + n[i][j];
+                } else {
+                    //如果不是第一列，比较他上面跟上面左面数字谁大，谁大就跟谁相加，放到这个位置
+                    dp[i][j] = Math.max(dp[i - 1][j - 1], dp[i - 1][j]) + n[i][j];
+                }
+                max = Math.max(dp[i][j], max);
+            }
+        }
+        return max;
+    }
+}
+
+//DynamicSolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class DynamicSolutionTest {
+    @Test
+    public void test() {
+        int[][] arr = {
+            {3},
+            {1, 5},
+            {8, 4, 3},
+            {2, 6, 7, 9},
+            {6, 2, 3, 5, 1}
+        };
+        assertEquals(25, DynamicSolution.minNumberInRotateArray(arr));
+    }
+}
+
+优化：动态规划中每一个需要创建一个二维数组的解法，都可以换成只创建一个一维数组的滚动数组解法，依据的规则是一般二维数组中存放的是所有的结果，但是一般我们需要的结果实在二维数组的最后一行的某个值，前面几行的值都是为了得到最后一行的值而需要的，所以可以开始就创建跟二维数组最后一行一样大的一维数组，每次存放某一行的值，下一次根据这一行的值算出下一行的值，在存入这个数组，也就是把这个数组滚动了，最后数组存储的结果就是原二维数组中最后一行的值。
+
+拿到本题来说，开始创建一个一维数组dp[n]，初始值只有dp[0]=3，新进来一行时，仍然遵循dp[i][j]=Math.max(dp[i-1][j-1], dp[i-1][j]) + n[i][j]，现在为求dp[j]，所以现在dp[i-1][j]其实就是数组中这个位置本来的元素即dp[j]，而dp[i-1][j-1]其实就是数组中上一个元素dp[j-1]，也就是说dp[j]=Math.max(dp[j], dp[j-1])+n[i][j]
+//DynamicSolution.java
+package test;
+
+public class DynamicSolution {
+
+    public static int minNumberInRotateArray2(int n[][]) {
+        int[] temp = new int[n.length];
+        temp[0] = n[0][0];
+        for (int i = 1; i < n.length; i++) {
+            for (int j = i; j >= 0; j--) {
+                if (j == i) {
+                    temp[i] = temp[i - 1] + n[i][j];
+                } else if (j == 0) {
+                    temp[0] += n[i][0];
+                } else {
+                    temp[j] = Math.max(temp[j], temp[j - 1]) + n[i][j];
+                }
+            }
+        }
+        int max = temp[0];
+        //从temp数组里取出最大的值
+        for (int i = 1; i < temp.length; i++) {
+            if (temp[i] > max) {
+                max = temp[i];
+            }
+        }
+        return max;
+    }
+}
+
+5、两个字符串最大公共子序列
+比如字符串1：BDCABA；字符串2：ABCBDAB，则这两个字符串的最长公共子序列长度为4，最长公共子序列是：BCBA
+具体思想：设 X=(x1,x2,.....xn)和 Y={y1,y2,.....ym} 是两个序列，将 X 和 Y 的最长公共子序列记为LCS(X,Y)，如果 xn=ym，即X的最后一个元素与Y的最后一个元素相同，这说明该元素一定位于公共子序列中。因此，现在只需要找：LCS(Xn-1，Ym-1)就好，LCS(X,Y)=LCS(Xn-1，Ym-1)+1；如果xn != ym，这下要麻烦一点，因为它产生了两个子问题：LCS(Xn-1，Ym) 和 LCS(Xn，Ym-1)。
+
+动态规划解法：先创建一个解空间即数组，因为给定的是两个字符串即两个一维数组存储的数据，所以要创建一个二维数组，设字符串X有n个值，字符串Y有m个值，需要创建一个m+1*n+1的二维数组，二维数组每个位置（i，j）代表当长度为i的X子串与长度为j的Y的子串他们的最长公共子串，之所以要多创建一个是为了将边界值填入进去，边界值就是第一行跟第一列，指X长度为0或者Y长度为0时，自然需要填0，其他位置填数字时，当这两个位置数字相同，dp[i][j] = dp[i-1][j-1]+1；当这两个位置数字不相同时，dp[i][j] = Math.max(dp[i][j-1], dp[i-1][j])。最后二维数组最右下角的值就是最大子串。
+
+        下标j  0    1    2    3    4    5    6    7
+下标i      
+   0           0    0    0    0    0    0    0    0
+   1           0    0    1    1    1    1    1    1
+   2           0    0    1    1    1    2    2    2
+   3           0    0    1    2    2    2    2    2
+   4           0    1    1    2    2    2    3    3
+   5           0    1    2    2    3    3    3    4
+   6           0    1    2    2    3    3    4    4
+
+//DynamicSolution.java
+package test;
+
+public class DynamicSolution {
+    public static int maxTwoArraySameOrderMethod(String str1, String str2) {
+        int m = str1.length();
+        int n = str2.length();
+        /*
+         * 定义一个二维数组保存公共子序列长度
+         * dp[i][j]表示字符串1从头开始长度是i，字符串2从头开始长度是j，这两个字符串的最长公共子序列的长度
+         * 设置数组行列比他们长度大一往二维数组中填写数字时，每个位置的数字跟他上方或者左方或者左上方数字有关系，这样处理边界数字时不用处理这种情况，方便接下来的循环
+         */
+        int dp[][] = new int[m + 1][n + 1];
+        /*
+         * 初始化第一行第一列
+         * dp[0,j]表示啥？表示字符串1的长度是0，字符串2的长度是j，这两个字符串的最长公共子序列的长度是0，因为，字符串1 根本就没有嘛
+         */
+        for (int i = 0; i <= m; i++) {
+            dp[i][0] = 0;
+        }
+        for (int i = 0; i <= n; i++) {
+            dp[0][i] = 0;
+        }
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                /*
+                 * 如果当c[i][j]时，字符串1从头开始长度是i，字符串2从头开始长度是j时他们最后一个字符相同
+                 * 就同时把他们向前移动一位，找c[i-1][j-1]时长度最大的再加一
+                 * 表现在二维数组中就是c[i][j]左上方的点
+                 */
+                if (str1.charAt(i - 1) == str2.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                    /*
+                     * 如果当c[i][j]时，他们最后一个字符不相同
+                     * 要将str1往前移动一位的c[i-1][j]的lcs长度，或者将str2往前移动一位的c[i][j-1]的lcs长度
+                     * 哪个长，将它赋给c[i][j]
+                     * 表现在二维数组中就是c[i][j]上方的点或者左方的点
+                     */
+                } else {
+                    dp[i][j] = Math.max(dp[i][j - 1], dp[i - 1][j]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+
+//DynamicSolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class DynamicSolutionTest {
+    @Test
+    public void test() {
+        assertEquals(4, DynamicSolution.maxTwoArraySameOrderMethod("BDCABA", "ABCBDAB"));
+    }
+}
+
+6、背包问题
+在N件物品取出若干件放在容量为W的背包里，每件物品的体积为W1，W2……Wn（Wi为整数），与之相对应的价值为P1,P2……Pn（Pi为整数），求背包能够容纳的最大价值。
+
+像这种固定数值的组合问题，比如这个问题的W总容量，跟下个实例零钱问题的总钱数，都是适合用动态规划来解决的问题，对于这样的问题，动态规划的解法就是：创建一个二维数组，横坐标是从1开始到W，纵坐标是组成W的各种元素，本题中就是指W1，W2……Wn，数组中每个位置（i，j）的数字就是当组成元素只有W1，W2……Wi，背包可放容量为j时的结果，本题中就是容纳的最大价值。所以很容易分析出，当（i，j）时，如果Wi能放的下，空间减小，但是会增加Pi的价值，如果Wi不能放的下，空间不变，是（i-1，j）的价值，取其中最大值就好了，即状态转化方程为能放的下，dp[i][j] = Math.max(dp[i-1][j], dp[i-1][j-w[i]]+p[i])；放不下，dp[i][j] = dp[i-1][j]；
+
+dp表：
+      容量j 0    1    2    3    4     5     6     7     8     9     10
+物品i           
+    0       0    0    0    0    0     0     0     0     0     0     0
+    1       0    0    3    3    3     3     3     3     3     3     3
+    2       0    0    3    3    3     3     3     5     5     5     5
+    3       0    0    3    7    7     10    10    10    10    10    12
+    4       0    0    3    7    7     10    10    10    10    10    12
+    5       0    4    4    7    11    11    14    14    14    14    14
+
+//Solution.java
+package test;
+
+class Solution {
+    public static int PackageHelper(int n, int[] weights, int[] prices, int volume) {
+        //设置一个二维数组，横坐标代表从第一个物品开始放到第几个物品，纵坐标代表背包总容量，dp代表最大价值
+        int[][] dp = new int[n + 1][volume + 1];
+        for (int i = 1; i < n + 1; i++) {
+            for (int j = 1; j <= volume; j++) {
+                if (j >= weights[i - 1]) {
+                    /*
+                     * 当能放得下这个物品时，放下这个物品，价值增加，但是空间减小，最大价值是dp[i-1][j-weights[i]]+prices[i]。其中dp[i-1][j-weights[i]]：表示为了腾出容量放第i个物品，之前的i-1个物品在占用空间j-weights[i]时的最大价值。
+                     * 当不放这个物品时，空间大，物品还是到i-1，最大价值是dp[i-1][j]
+                     * 比较这两个大小，取最大的，就是dp[i][j]
+                     */
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i - 1][j - weights[i - 1]] + prices[i - 1]); //这里每一步计算出来的包括当前物品在内的所有物品在总容量为j时的最大价值
+                } else {
+                    //如果放不下，就是放上一个物品时的dp
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[n][volume];
+    }
+}
+
+优化：滚动数组，只创建一个一维数组，长度为从1到W，初始值都是0，能装得下i时，dp[j] = Math.max(dp[j], dp[j-w[i]]+p[i])；装不下时，dp[j] = dp[j];
+//Solution.java
+package test;
+
+class Solution {
+    public static int PackageHelper(int n, int[] weights, int[] prices, int volume) {
+        //设置一个二维数组，横坐标代表从第一个物品开始放到第几个物品，纵坐标代表背包还有多少容量，dp代表最大价值
+        int[] dp = new int[volume + 1];
+        for (int i = 1; i < n + 1; i++) {
+            for (int j = volume; j > 0; j--) {
+                if (j >= weights[i - 1]) {
+                    dp[j] = Math.max(dp[j], dp[j - weights[i - 1]] + prices[i - 1]);
+                } else {
+                    dp[j] = dp[j];
+                }
+            }
+        }
+        return dp[volume];
+    }
+}
+//SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    @Test
+    public void test1() {
+        int n = 5;
+        int[] weights = {2, 5, 3, 6, 1};
+        int[] prices = {3, 2, 7, 1, 4};
+        int volume = 10;
+        assertEquals(14, Solution.PackageHelper(n, weights, prices, volume));
+    }
+}
+
+动态规划和分治区别：
+
+动态规划算法：它通常用于求解具有某种最优性质的问题。在这类问题中，可能会有许多可行解。每一个解都对应于一个值，我们希望找到具有最优值的解。动态规划算法与分治法类似，其基本思想也是将待求解问题分解成若干个子问题，先求解子问题，然后从这些子问题的解得到原问题的解。与分治法不同的是，适合于用动态规划求解的问题，经分解得到子问题往往不是互相独立的。
+
+分治法：若用分治法来解这类问题，则分解得到的子问题数目太多，有些子问题被重复计算了很多次。如果我们能够保存已解决的子问题的答案，而在需要时再找出已求得的答案，这样就可以避免大量的重复计算，节省时间。我们可以用一个表来记录所有已解的子问题的答案。
+
+总结：
+
+不管该子问题以后是否被用到，只要它被计算过，就将其结果填入表中。这就是动态规划法的基本思路。
+//------------------------------------------------------------------------------------------------
 //299. Bulls and Cows https://leetcode.com/problems/bulls-and-cows/
 package test;
 
@@ -2647,6 +3757,49 @@ public class TwoSum {
         }
 
         return res;
+    }
+}
+
+//自己写的方法，只是把index存成了Map的List值
+package test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, List<Integer>> numIndexMap = getNumIndexMap(nums);
+
+        for (int i = 0; i < nums.length; i++) {
+            int otherInt = target - nums[i];
+
+            List<Integer> otherIntIndexList = numIndexMap.get(otherInt);
+            if (otherIntIndexList != null) {
+                if (otherInt != nums[i]) {
+                    return new int[]{i, otherIntIndexList.get(0)};
+                } else if (otherIntIndexList.size() > 1) {
+                    return new int[]{i, otherIntIndexList.get(1)};
+                }
+            }
+        }
+
+        return new int[]{};
+    }
+
+    private Map<Integer, List<Integer>> getNumIndexMap(int[] nums) {
+        Map<Integer, List<Integer>> numIndexMap = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            List<Integer> indexList = numIndexMap.get(nums[i]);
+            if (indexList == null) {
+                indexList = new ArrayList<>();
+                numIndexMap.put(nums[i], indexList);
+            }
+            indexList.add(i);
+        }
+
+        return numIndexMap;
     }
 }
 
