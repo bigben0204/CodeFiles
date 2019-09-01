@@ -796,7 +796,7 @@ Brian
 
 在上面例子中， rows 被传递给接受一个关键字参数的 sorted() 内置函数。 这个参数是 callable 类型，并且从 rows 中接受一个单一元素，然后返回被用来排序的值。 itemgetter() 函数就是负责创建这个 callable 对象的。
 
-operator.itemgetter() 函数有一个被 rows 中的记录用来查找值的索引参数。可以是一个字典键名称， 一个整形值或者任何能够传入一个对象的 __getitem__() 方法的值。 如果你传入多个索引参数给 itemgetter() ，它生成的 callable 对象会返回一个包含所有元素值的元组， 并且 sorted() 函数会根据这个元组中元素顺序去排序。 但你想要同时在几个字段上面进行排序（比如通过姓和名来排序，也就是例子中的那样）的时候这种方法是很有用的。
+operator.itemgetter() 函数有一个被 rows 中的记录用来查找值的索引参数。可以是一个字典键名称， 一个整形值或者任何能够传入一个对象的 \_\_getitem\_\_() 方法的值。 如果你传入多个索引参数给 itemgetter() ，它生成的 callable 对象会返回一个包含所有元素值的元组， 并且 sorted() 函数会根据这个元组中元素顺序去排序。 但你想要同时在几个字段上面进行排序（比如通过姓和名来排序，也就是例子中的那样）的时候这种方法是很有用的。
 
 itemgetter() 有时候也可以用 lambda 表达式代替，比如：
 
@@ -16376,7 +16376,7 @@ class Spam(metaclass=MyMeta, debug=True, synchronize=True):
     pass
 ```
 
-为了使元类支持这些关键字参数，你必须确保在 __prepare__() , __new__() 和 __init__() 方法中 都使用强制关键字参数。就像下面这样：
+为了使元类支持这些关键字参数，你必须确保在 \_\_prepare\_\_() , \_\_new\_\_() 和 \_\_init\_\_() 方法中 都使用强制关键字参数。就像下面这样：
 
 ```python
 class MyMeta(type):
@@ -16587,4 +16587,313 @@ class Point(Structure):
 (x, y)
 ```
 
-## 在类上强制使用编程规约
+## 9.17. 在类上强制使用编程规约
+
+你的程序包含一个很大的类继承体系，你希望强制执行某些编程规约（或者代码诊断）来帮助程序员保持清醒。
+
+如果你想监控类的定义，通常可以通过定义一个元类。一个基本元类通常是继承自 type 并重定义它的 \_\_new\_\_() 方法 或者是 \_\_init\_\_() 方法。比如：
+
+```python
+class MyMeta(type):
+    def __new__(cls, clsname, bases, clsdict):
+        # clsname is name of class being defined
+        # bases is tuple of base classes
+        # clsdict is class dictionary
+        return super().__new__(cls, clsname, bases, clsdict)
+```
+
+另一种是，定义 \_\_init\_\_() 方法：
+
+```python
+class MyMeta(type):
+    def __init__(self, clsname, bases, clsdict):
+        # clsname is name of class being defined
+        # bases is tuple of base classes
+        # clsdict is class dictionary
+        super().__init__(clsname, bases, clsdict)
+```
+
+为了使用这个元类，你通常要将它放到到一个顶级父类定义中，然后其他的类继承这个顶级父类。例如：
+
+```python
+class Root(metaclass=MyMeta):
+    pass
+
+
+class A(Root):
+    pass
+
+
+class B(Root):
+    pass
+```
+
+元类的一个关键特点是它允许你在定义的时候检查类的内容。在重新定义 \_\_init\_\_() 方法中， 你可以很轻松的检查类字典、父类等等。并且，一旦某个元类被指定给了某个类，那么就会被继承到所有子类中去。 因此，一个框架的构建者就能在大型的继承体系中通过给一个顶级父类指定一个元类去捕获所有下面子类的定义。
+
+作为一个具体的应用例子，下面定义了一个元类，它会拒绝任何有混合大小写名字作为方法的类定义（可能是想气死Java程序员^_^）：
+
+```python
+class NoMixedCaseMeta(type):
+    def __new__(cls, clsname, bases, clsdict):
+        for name in clsdict:
+            if name.lower() != name:
+                raise TypeError('Bad attribute name: ' + name)
+        return super().__new__(cls, clsname, bases, clsdict)
+
+
+class Root(metaclass=NoMixedCaseMeta):
+    pass
+
+
+class A(Root):
+    def foo_bar(self):  # Ok
+        pass
+
+
+class B(Root):
+    def fooBar(self):  # TypeError
+        pass
+
+
+if __name__ == '__main__':
+    pass
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 21, in <module>
+    class B(Root):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 8, in __new__
+    raise TypeError('Bad attribute name: ' + name)
+TypeError: Bad attribute name: fooBar
+```
+
+作为更高级和实用的例子，下面有一个元类，它用来检测重载方法，确保它的调用参数跟父类中原始方法有着相同的参数签名。
+
+```python
+import logging
+from inspect import signature
+
+
+class MatchSignatureMeta(type):
+    def __init__(self, clsname, bases, clsdict):
+        super().__init__(clsname, bases, clsdict)
+        sup = super(self, self)
+        for name, value in clsdict.items():
+            if name.startswith('_') or not callable(value):
+                continue
+
+            # Get the previous definition (if any) and compare the signatures
+            prev_dfn = getattr(sup, name, None)  # 获取到直接父类的函数定义
+            if prev_dfn:
+                prev_sig = signature(prev_dfn)
+                val_sig = signature(value)
+                if prev_sig != val_sig:
+                    logging.warning('Signature mismatch in %s. %s != %s', value.__qualname__, prev_sig, val_sig)
+
+
+# Example
+class Root(metaclass=MatchSignatureMeta):
+    pass
+
+
+class A(Root):
+    def foo(self, x, y):
+        pass
+
+    def spam(self, x, *, z):
+        pass
+
+
+# Class with redefined methods, but slightly different signatures
+class B(A):
+    def foo(self, a, b):
+        pass
+
+    def spam(self, x, z):
+        pass
+
+
+# Class with redefined methods, but slightly different signatures
+class C(B):
+    def foo(self, p, q):
+        pass
+
+    def spam(self, x, z, w):
+        pass
+
+
+if __name__ == '__main__':
+    pass
+输出：
+WARNING:root:Signature mismatch in B.foo. (self, x, y) != (self, a, b)
+WARNING:root:Signature mismatch in B.spam. (self, x, *, z) != (self, x, z)
+WARNING:root:Signature mismatch in C.foo. (self, a, b) != (self, p, q)
+WARNING:root:Signature mismatch in C.spam. (self, x, z) != (self, x, z, w)
+```
+
+这种警告信息对于捕获一些微妙的程序bug是很有用的。例如，如果某个代码依赖于传递给方法的关键字参数， 那么当子类改变参数名字的时候就会调用出错。
+
+在大型面向对象的程序中，通常将类的定义放在元类中控制是很有用的。 元类可以监控类的定义，警告编程人员某些没有注意到的可能出现的问题。
+
+有人可能会说，像这样的错误可以通过程序分析工具或IDE去做会更好些。诚然，这些工具是很有用。 但是，如果你在构建一个框架或函数库供其他人使用，那么你没办法去控制使用者要使用什么工具。 因此，对于这种类型的程序，如果可以在元类中做检测或许可以带来更好的用户体验。
+
+在元类中选择重新定义 \_\_new\_\_() 方法还是 \_\_init\_\_() 方法取决于你想怎样使用结果类。 \_\_new\_\_() 方法在类创建之前被调用，通常用于通过某种方式（比如通过改变类字典的内容）修改类的定义。 而 \_\_init\_\_() 方法是在类被创建之后被调用，当你需要完整构建类对象的时候会很有用。 在最后一个例子中，这是必要的，因为它使用了 super() 函数来搜索之前的定义。 它只能在类的实例被创建之后，并且相应的方法解析顺序也已经被设置好了。
+
+最后一个例子还演示了Python的函数签名对象的使用。 实际上，元类将每个可调用定义放在一个类中，搜索前一个定义（如果有的话）， 然后通过使用 inspect.signature() 来简单的比较它们的调用签名。
+
+最后一点，代码中有一行使用了 super(self, self) 并不是排版错误。 当使用元类的时候，我们要时刻记住一点就是 self 实际上是一个类对象。 因此，这条语句其实就是用来寻找位于继承体系中构建 self 父类的定义。
+
+## 9.18. 以编程方式定义类
+
+你在写一段代码，最终需要创建一个新的类对象。你考虑将类的定义源代码以字符串的形式发布出去。 并且使用函数比如 exec() 来执行它，但是你想寻找一个更加优雅的解决方案。
+
+你可以使用函数 types.new_class() 来初始化新的类对象。 你需要做的只是提供类的名字、父类元组、关键字参数，以及一个用成员变量填充类字典的回调函数。例如：
+
+```python
+import types
+
+
+# Methods
+def __init__(self, name, shares, price):
+    self.name = name
+    self.shares = shares
+    self.price = price
+
+
+def cost(self):
+    return self.shares * self.price
+
+
+cls_dict = {
+    '__init__': __init__,
+    'cost': cost,
+}
+
+# Make a class
+Stock = types.new_class('Stock', (), {}, lambda ns: ns.update(cls_dict))
+Stock.__module__ = __name__
+```
+
+这种方式会构建一个普通的类对象，并且按照你的期望工作：
+
+```python
+s = Stock('ACME', 50, 91.1)
+print(s)
+print(s.cost())
+输出：
+<__main__.Stock object at 0x0000012809CE12C8>
+4555.0
+```
+
+这种方法中，一个比较难理解的地方是在调用完 types.new_class() 对 Stock.\_\_module\_\_ 的赋值。 每次当一个类被定义后，它的 \_\_module\_\_ 属性包含定义它的模块名。 这个名字用于生成 \_\_repr\_\_() 方法的输出。它同样也被用于很多库，比如 pickle 。 因此，为了让你创建的类是“正确”的，你需要确保这个属性也设置正确了。
+
+如果你想创建的类需要一个不同的元类，可以通过 types.new_class() 第三个参数传递给它。例如：
+
+```python
+import abc
+
+Stock = types.new_class('Stock', (), {'metaclass': abc.ABCMeta}, lambda ns: ns.update(cls_dict))
+Stock.__module__ = __name__
+
+print(Stock)
+print(type(Stock))
+输出：
+<class '__main__.Stock'>
+<class 'abc.ABCMeta'>
+```
+
+第三个参数还可以包含其他的关键字参数。比如，一个类的定义如下：
+
+```python
+class Spam(Base, debug=True, typecheck=False):
+    pass
+```
+
+那么可以将其翻译成如下的 new_class() 调用形式：
+
+```python
+Spam = types.new_class('Spam', (Base,),
+                        {'debug': True, 'typecheck': False},
+                        lambda ns: ns.update(cls_dict))
+```
+
+new_class() 第四个参数最神秘，它是一个用来接受类命名空间的映射对象的函数。 通常这是一个普通的字典，但是它实际上是 \_\_prepare\_\_() 方法返回的任意对象，这个在9.14小节已经介绍过了。 这个函数需要使用上面演示的 update() 方法给命名空间增加内容。
+
+很多时候如果能构造新的类对象是很有用的。 有个很熟悉的例子是调用 collections.namedtuple() 函数，例如：
+
+```python
+>>> Stock = collections.namedtuple('Stock', ['name', 'shares', 'price'])
+>>> Stock
+<class '__main__.Stock'>
+```
+
+namedtuple() 使用 exec() 而不是上面介绍的技术。但是，下面通过一个简单的变化， 我们直接创建一个类：
+
+```python
+import operator
+import sys
+import types
+
+
+def named_tuple(classname, fieldnames):
+    # Populate a dictionary of field property accessors
+    cls_dict = {name: property(operator.itemgetter(n)) for n, name in enumerate(fieldnames)}
+
+    # Make a __new__ function and add to the class dict
+    def __new__(cls, *args):
+        if len(args) != len(fieldnames):
+            raise TypeError('Expectd {} arguments'.format(len(fieldnames)))
+        return tuple.__new__(cls, args)
+
+    cls_dict['__new__'] = __new__
+
+    # Make the class
+    cls = types.new_class(classname, (tuple,), {}, lambda ns: ns.update(cls_dict))
+
+    # Set the module to that of the caller
+    cls.__module__ = sys._getframe(1).f_globals['__name__']
+    return cls
+```
+
+这段代码的最后部分使用了一个所谓的”框架魔法”，通过调用 sys._getframe() 来获取调用者的模块名。 另外一个框架魔法例子在2.15小节中有介绍过。
+
+下面的例子演示了前面的代码是如何工作的：
+
+```python
+>>> Point = named_tuple('Point', ['x', 'y'])
+>>> Point
+<class '__main__.Point'>
+>>> p = Point(4, 5)
+>>> len(p)
+2
+>>> p.x
+4
+>>> p.y
+5
+>>> p.x = 2
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+AttributeError: can't set attribute
+>>> print('%s %s' % p)
+4 5
+```
+
+这项技术一个很重要的方面是它对于元类的正确使用。 你可能像通过直接实例化一个元类来直接创建一个类：
+
+```python
+Stock = type('Stock', (), cls_dict)
+```
+
+这种方法的问题在于它忽略了一些关键步骤，比如对于元类中 __prepare__() 方法的调用。 通过使用 types.new_class() ，你可以保证所有的必要初始化步骤都能得到执行。 比如，types.new_class() 第四个参数的回调函数接受 \_\_prepare\_\_() 方法返回的映射对象。
+
+如果你仅仅只是想执行准备步骤，可以使用 types.prepare_class() 。例如：
+
+```python
+import types
+metaclass, kwargs, ns = types.prepare_class('Stock', (), {'metaclass': type})
+```
+
+它会查找合适的元类并调用它的 __prepare__() 方法。 然后这个元类保存它的关键字参数，准备命名空间后被返回。
+
+更多信息, 请参考 PEP 3115 , 以及 Python documentation .
+
+## 9.19. 在定义的时候初始化类的成员
