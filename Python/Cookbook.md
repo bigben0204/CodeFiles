@@ -17387,4 +17387,703 @@ Traceback (most recent call last):
 TypeError: No matching method for test
 ```
 
-## 避免重复的属性方法
+## 9.21. 避免重复的属性方法
+
+你在类中需要重复的定义一些执行相同逻辑的属性方法，比如进行类型检查，怎样去简化这些重复代码呢？
+
+考虑下一个简单的类，它的属性由属性方法包装：
+
+```python
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('name must be a string')
+        self._name = value
+
+    @property
+    def age(self):
+        return self._age
+
+    @age.setter
+    def age(self, value):
+        if not isinstance(value, int):
+            raise TypeError('age must be an int')
+        self._age = value
+
+
+if __name__ == '__main__':
+    p = Person('Lily', 20)
+    print(p.name)
+    print(p.age)
+    pass
+```
+
+可以看到，为了实现属性值的类型检查我们写了很多的重复代码。 只要你以后看到类似这样的代码，你都应该想办法去简化它。 一个可行的方法是创建一个函数用来定义属性并返回它。例如：
+
+```python
+def typed_property(name, expected_type):
+    storage_name = '_' + name
+
+    @property
+    def prop(self):
+        return getattr(self, storage_name)
+
+    @prop.setter
+    def prop(self, value):
+        if not isinstance(value, expected_type):
+            raise TypeError('{} must be a {}'.format(name, expected_type))
+        setattr(self, storage_name, value)
+
+    return prop
+
+
+# Example use
+class Person:
+    name = typed_property('name', str)
+    age = typed_property('age', int)
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+```
+
+本节我们演示内部函数或者闭包的一个重要特性，它们很像一个宏。例子中的函数 typed_property() 看上去有点难理解，其实它所做的仅仅就是为你生成属性并返回这个属性对象。 因此，当在一个类中使用它的时候，效果跟将它里面的代码放到类定义中去是一样的。 尽管属性的 getter 和 setter 方法访问了本地变量如 name , expected_type 以及 storate_name ，这个很正常，这些变量的值会保存在闭包当中。
+
+我们还可以使用 functools.partial() 来稍稍改变下这个例子，很有趣。例如，你可以像下面这样：
+
+```python
+from functools import partial
+
+String = partial(typed_property, expected_type=str)
+Integer = partial(typed_property, expected_type=int)
+
+
+# Example use
+class Person:
+    name = String('name')
+    age = Integer('age')
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+```
+
+其实你可以发现，这里的代码跟8.13小节中的类型系统描述器代码有些相似。
+
+## 9.22. 定义上下文管理器的简单方法
+
+你想自己去实现一个新的上下文管理器，以便使用with语句。
+
+实现一个新的上下文管理器的最简单的方法就是使用 contexlib 模块中的 @contextmanager 装饰器。 下面是一个实现了代码块计时功能的上下文管理器例子：
+
+```python
+import time
+from contextlib import contextmanager
+
+
+@contextmanager
+def timethis(label):
+    start = time.time()
+    try:
+        yield
+    finally:
+        end = time.time()
+        print('{}: {}'.format(label, end - start))
+
+
+if __name__ == '__main__':
+    with timethis('counting'):
+        n = 10000000
+        while n > 0:
+            n -= 1
+输出：
+counting: 0.7202937602996826
+```
+
+在函数 timethis() 中，yield 之前的代码会在上下文管理器中作为 __enter__() 方法执行， 所有在 yield 之后的代码会作为 __exit__() 方法执行。 如果出现了异常，异常会在yield语句那里抛出。
+
+下面是一个更加高级一点的上下文管理器，实现了列表对象上的某种事务：
+
+```python
+@contextmanager
+def list_transaction(orig_list):
+    working = list(orig_list)
+    yield working
+    orig_list[:] = working
+```
+
+这段代码的作用是任何对列表的修改只有当所有代码运行完成并且不出现异常的情况下才会生效。 下面我们来演示一下：
+
+```python
+>>> items = [1, 2, 3]
+>>> with list_transaction(items) as working:
+...     working.append(4)
+...     working.append(5)
+...
+>>> items
+[1, 2, 3, 4, 5]
+>>> with list_transaction(items) as working:
+...     working.append(6)
+...     working.append(7)
+...     raise RuntimeError('oops')
+...
+Traceback (most recent call last):
+    File "<stdin>", line 4, in <module>
+RuntimeError: oops
+>>> items
+[1, 2, 3, 4, 5]
+```
+
+通常情况下，如果要写一个上下文管理器，你需要定义一个类，里面包含一个 __enter__() 和一个 __exit__() 方法，如下所示：
+
+```python
+import time
+
+class timethis:  # 使用方法同用@contextmanager装饰的timethis方法
+    def __init__(self, label):
+        self.label = label
+
+    def __enter__(self):
+        self.start = time.time()
+
+    def __exit__(self, exc_ty, exc_val, exc_tb):
+        end = time.time()
+        print('{}: {}'.format(self.label, end - self.start))
+```
+
+尽管这个也不难写，但是相比较写一个简单的使用 @contextmanager 注解的函数而言还是稍显乏味。
+
+@contextmanager 应该仅仅用来写自包含的上下文管理函数。 如果你有一些对象(比如一个文件、网络连接或锁)，需要支持 with 语句，那么你就需要单独实现 \_\_enter\_\_() 方法和 \_\_exit\_\_() 方法。
+
+## 9.23. 在局部变量域中执行代码
+
+你想在使用范围内执行某个代码片段，并且希望在执行后所有的结果都不可见。
+
+为了理解这个问题，先试试一个简单场景。首先，在全局命名空间内执行一个代码片段：
+
+```python
+>>> a = 13
+>>> exec('b = a + 1')
+>>> print(b)
+14
+```
+
+然后，再在一个函数中执行同样的代码：
+
+```python
+def test():
+    a = 13
+    exec('b = a + 1')
+    print(b)
+
+
+if __name__ == '__main__':
+    test()
+输出：
+Traceback (most recent call last):
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 11, in <module>
+    test()
+  File "D:/Program Files/JetBrains/PythonProject/Py3TestProject/src/test/main.py", line 7, in test
+    print(b)
+NameError: name 'b' is not defined
+```
+
+可以看出，最后抛出了一个NameError异常，就跟在 exec() 语句从没执行过一样。 要是你想在后面的计算中使用到 exec() 执行结果的话就会有问题了。
+
+为了修正这样的错误，你需要在调用 exec() 之前使用 locals() 函数来得到一个局部变量字典。 之后你就能从局部字典中获取修改过后的变量值了。例如：
+
+```python
+def test():
+    a = 13
+    loc = locals()
+    exec('b = a + 1')
+    b = loc['b']
+    print(b)
+
+
+if __name__ == '__main__':
+    test()
+输出：
+14
+```
+
+实际上对于 exec() 的正确使用是比较难的。大多数情况下当你要考虑使用 exec() 的时候， 还有另外更好的解决方案（比如装饰器、闭包、元类等等）。
+
+然而，如果你仍然要使用 exec() ，本节列出了一些如何正确使用它的方法。 默认情况下，exec() 会在调用者局部和全局范围内执行代码。然而，在函数里面， 传递给 exec() 的局部范围是拷贝实际局部变量组成的一个字典。 因此，如果 exec() 如果执行了修改操作，这种修改后的结果对实际局部变量值是没有影响的。 下面是另外一个演示它的例子：
+
+```python
+>>> def test1():
+...     x = 0
+...     exec('x += 1')
+...     print(x)
+...
+>>> test1()
+0
+```
+
+上面代码里，当你调用 locals() 获取局部变量时，你获得的是传递给 exec() 的局部变量的一个拷贝。 通过在代码执行后审查这个字典的值，那就能获取修改后的值了。下面是一个演示例子：
+
+```python
+def test2():
+    x = 0
+    loc = locals()
+    print('before:', loc)
+    exec('x += 1')
+    print('after', loc)
+    print(x)
+
+
+if __name__ == '__main__':
+    test2()
+输出：
+before: {'x': 0}
+after {'x': 1, 'loc': {...}}
+0
+```
+
+仔细观察最后一步的输出，除非你将 loc 中被修改后的值手动赋值给x，否则x变量值是不会变的。
+
+在使用 locals() 的时候，你需要注意操作顺序。每次它被调用的时候， locals() 会获取局部变量值中的值并覆盖字典中相应的变量。 请注意观察下下面这个试验的输出结果：
+
+```python
+def test3():
+    x = 0
+    loc = locals()
+    print(loc)
+    exec('x += 1')
+    print(loc)
+    locals()
+    print(loc)
+
+
+if __name__ == '__main__':
+    test3()
+输出：
+{'x': 0}
+{'x': 1, 'loc': {...}}
+{'x': 0, 'loc': {...}}
+```
+
+注意最后一次调用 locals() 的时候x的值是如何被覆盖掉的。
+
+作为 locals() 的一个替代方案，你可以使用你自己的字典，并将它传递给 exec() 。例如：
+
+```python
+def test4():
+    a = 13
+    loc = {'a': a}
+    glb = {}
+    exec('b = a + 1', glb, loc)
+    b = loc['b']
+    print(b)
+
+
+if __name__ == '__main__':
+    test4()
+输出：
+14
+```
+
+大部分情况下，这种方式是使用 exec() 的最佳实践。 你只需要保证全局和局部字典在后面代码访问时已经被初始化。
+
+还有一点，在使用 exec() 之前，你可能需要问下自己是否有其他更好的替代方案。 大多数情况下当你要考虑使用 exec() 的时候， 还有另外更好的解决方案，比如装饰器、闭包、元类，或其他一些元编程特性。
+
+## 9.24. 解析与分析Python源码
+
+你想写解析并分析Python源代码的程序。
+
+大部分程序员知道Python能够计算或执行字符串形式的源代码。例如：
+
+```python
+>>> x = 42
+>>> eval('2 + 3*4 + x')
+56
+>>> exec('for i in range(10): print(i)')
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+尽管如此，ast 模块能被用来将Python源码编译成一个可被分析的抽象语法树（AST）。例如：
+
+```python
+>>> import ast
+>>> ex = ast.parse('2 + 3*4 + x', mode='eval')
+>>> ex
+<_ast.Expression object at 0x1007473d0>
+>>> ast.dump(ex)
+"Expression(body=BinOp(left=BinOp(left=Num(n=2), op=Add(),
+right=BinOp(left=Num(n=3), op=Mult(), right=Num(n=4))), op=Add(),
+right=Name(id='x', ctx=Load())))"
+
+>>> top = ast.parse('for i in range(10): print(i)', mode='exec')
+>>> top
+<_ast.Module object at 0x100747390>
+>>> ast.dump(top)
+"Module(body=[For(target=Name(id='i', ctx=Store()),
+iter=Call(func=Name(id='range', ctx=Load()), args=[Num(n=10)],
+keywords=[], starargs=None, kwargs=None),
+body=[Expr(value=Call(func=Name(id='print', ctx=Load()),
+args=[Name(id='i', ctx=Load())], keywords=[], starargs=None,
+kwargs=None))], orelse=[])])"
+```
+
+分析源码树需要你自己更多的学习，它是由一系列AST节点组成的。 分析这些节点最简单的方法就是定义一个访问者类，实现很多 visit_NodeName() 方法， NodeName() 匹配那些你感兴趣的节点。下面是这样一个类，记录了哪些名字被加载、存储和删除的信息。
+
+```python
+import ast
+
+class CodeAnalyzer(ast.NodeVisitor):
+    def __init__(self):
+        self.loaded = set()
+        self.stored = set()
+        self.deleted = set()
+
+    def visit_Name(self, node):
+        if isinstance(node.ctx, ast.Load):
+            self.loaded.add(node.id)
+        elif isinstance(node.ctx, ast.Store):
+            self.stored.add(node.id)
+        elif isinstance(node.ctx, ast.Del):
+            self.deleted.add(node.id)
+
+# Sample usage
+if __name__ == '__main__':
+    # Some Python code
+    code = '''
+for i in range(10):
+    print(i)
+del i
+    '''
+
+    # Parse into an AST
+    top = ast.parse(code, mode='exec')
+    print(ast.dump(top))
+
+    # Feed the AST to analyze name usage
+    c = CodeAnalyzer()
+    c.visit(top)
+    print('Loaded:', c.loaded)
+    print('Stored:', c.stored)
+    print('Deleted:', c.deleted)
+```
+
+如果你运行这个程序，你会得到下面这样的输出：
+
+```python
+Module(body=[For(target=Name(id='i', ctx=Store()), iter=Call(func=Name(id='range', ctx=Load()), args=[Num(n=10)], keywords=[]), body=[Expr(value=Call(func=Name(id='print', ctx=Load()), args=[Name(id='i', ctx=Load())], keywords=[]))], orelse=[]), Delete(targets=[Name(id='i', ctx=Del())])])
+Loaded: {'range', 'print', 'i'}
+Stored: {'i'}
+Deleted: {'i'}
+```
+
+最后，AST可以通过 compile() 函数来编译并执行。例如：
+
+```python
+>>> exec(compile(top,'<stdin>', 'exec'))
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+当你能够分析源代码并从中获取信息的时候，你就能写很多代码分析、优化或验证工具了。 例如，相比盲目的传递一些代码片段到类似 exec() 函数中，你可以先将它转换成一个AST， 然后观察它的细节看它到底是怎样做的。 你还可以写一些工具来查看某个模块的全部源码，并且在此基础上执行某些静态分析。
+
+需要注意的是，如果你知道自己在干啥，你还能够重写AST来表示新的代码。 下面是一个装饰器例子，可以通过重新解析函数体源码、 重写AST并重新创建函数代码对象来将全局访问变量降为函数体作用范围，
+
+```python
+# namelower.py
+import ast
+import inspect
+
+# Node visitor that lowers globally accessed names into
+# the function body as local variables.
+class NameLower(ast.NodeVisitor):
+    def __init__(self, lowered_names):
+        self.lowered_names = lowered_names
+
+    def visit_FunctionDef(self, node):
+        # Compile some assignments to lower the constants
+        code = '__globals = globals()\n'
+        code += '\n'.join("{0} = __globals['{0}']".format(name)
+                            for name in self.lowered_names)
+        code_ast = ast.parse(code, mode='exec')
+
+        # Inject new statements into the function body
+        node.body[:0] = code_ast.body
+
+        # Save the function object
+        self.func = node
+
+# Decorator that turns global names into locals
+def lower_names(*namelist):
+    def lower(func):
+        srclines = inspect.getsource(func).splitlines()
+        # Skip source lines prior to the @lower_names decorator
+        for n, line in enumerate(srclines):
+            if '@lower_names' in line:
+                break
+
+        src = '\n'.join(srclines[n+1:])
+        # Hack to deal with indented code
+        if src.startswith((' ','\t')):
+            src = 'if 1:\n' + src
+        top = ast.parse(src, mode='exec')
+
+        # Transform the AST
+        cl = NameLower(namelist)
+        cl.visit(top)
+
+        # Execute the modified AST
+        temp = {}
+        exec(compile(top,'','exec'), temp, temp)
+
+        # Pull out the modified code object
+        func.__code__ = temp[func.__name__].__code__
+        return func
+    return lower
+```
+
+为了使用这个代码，你可以像下面这样写：
+
+```python
+INCR = 1
+
+
+@lower_names('INCR')
+def countdown(n):
+    while n > 0:
+        n -= INCR
+
+
+# Sample usage
+if __name__ == '__main__':
+    start = time.time()
+    countdown(10000000)
+    end = time.time()
+    print(end - start)
+输出：
+0.46865057945251465
+```
+
+装饰器会将 countdown() 函数重写为类似下面这样子：
+
+```python
+def countdown(n):
+    __globals = globals()
+    INCR = __globals['INCR']
+    while n > 0:
+        n -= INCR
+```
+
+验证如果使用全局变量：
+
+```python
+import time
+
+INCR = 1
+
+
+def countdown(n):
+    while n > 0:
+        n -= INCR
+
+
+# Sample usage
+if __name__ == '__main__':
+    start = time.time()
+    countdown(10000000)
+    end = time.time()
+    print(end - start)
+输出：
+0.6717183589935303
+```
+
+在性能测试中，它会让函数运行快20%
+
+现在，你是不是想为你所有的函数都加上这个装饰器呢？或许不会。 但是，这却是对于一些高级技术比如AST操作、源码操作等等的一个很好的演示说明
+
+本节受另外一个在 ActiveState 中处理Python字节码的章节的启示。 使用AST是一个更加高级点的技术，并且也更简单些。参考下面一节获得字节码的更多信息。
+
+## 9.25. 拆解Python字节码
+
+你想通过将你的代码反编译成低级的字节码来查看它底层的工作机制。
+
+dis 模块可以被用来输出任何Python函数的反编译结果。例如：
+
+```python
+import dis
+
+
+def countdown(n):
+    while n > 0:
+        print('T-minus', n)
+        n -= 1
+    print('Blastoff!')
+
+
+# Sample usage
+if __name__ == '__main__':
+    print(dis.dis(countdown))
+输出：
+  5           0 SETUP_LOOP              30 (to 32)
+        >>    2 LOAD_FAST                0 (n)
+              4 LOAD_CONST               1 (0)
+              6 COMPARE_OP               4 (>)
+              8 POP_JUMP_IF_FALSE       30
+
+  6          10 LOAD_GLOBAL              0 (print)
+             12 LOAD_CONST               2 ('T-minus')
+             14 LOAD_FAST                0 (n)
+             16 CALL_FUNCTION            2
+             18 POP_TOP
+
+  7          20 LOAD_FAST                0 (n)
+             22 LOAD_CONST               3 (1)
+             24 INPLACE_SUBTRACT
+             26 STORE_FAST               0 (n)
+             28 JUMP_ABSOLUTE            2
+        >>   30 POP_BLOCK
+
+  8     >>   32 LOAD_GLOBAL              0 (print)
+             34 LOAD_CONST               4 ('Blastoff!')
+             36 CALL_FUNCTION            1
+             38 POP_TOP
+             40 LOAD_CONST               0 (None)
+             42 RETURN_VALUE
+None
+```
+
+当你想要知道你的程序底层的运行机制的时候，dis 模块是很有用的。比如如果你想试着理解性能特征。 被 dis() 函数解析的原始字节码如下所示：
+
+```python
+print(countdown.__code__.co_code)
+b'x\x1e|\x00d\x01k\x04r\x1et\x00d\x02|\x00\x83\x02\x01\x00|\x00d\x038\x00}\x00q\x02W\x00t\x00d\x04\x83\x01\x01\x00d\x00S\x00'
+```
+
+如果你想自己解释这段代码，你需要使用一些在 opcode 模块中定义的常量。例如：
+
+```python
+code = countdown.__code__.co_code
+print(opcode.opname[code[0]])
+print(opcode.opname[code[1]])
+print(opcode.opname[code[2]])
+print(opcode.opname[code[3]])
+输出：
+SETUP_LOOP
+<30>
+LOAD_FAST
+<0>
+```
+
+奇怪的是，在 dis 模块中并没有函数让你以编程方式很容易的来处理字节码。 不过，下面的生成器函数可以将原始字节码序列转换成 opcodes 和参数。
+
+```python
+import opcode
+
+def generate_opcodes(codebytes):
+    extended_arg = 0
+    i = 0
+    n = len(codebytes)
+    while i < n:
+        op = codebytes[i]
+        i += 1
+        if op >= opcode.HAVE_ARGUMENT:
+            oparg = codebytes[i] + codebytes[i+1]*256 + extended_arg
+            extended_arg = 0
+            i += 2
+            if op == opcode.EXTENDED_ARG:
+                extended_arg = oparg * 65536
+                continue
+        else:
+            oparg = None
+        yield (op, oparg)
+```
+
+使用方法如下：
+
+```python
+for op, oparg in generate_opcodes(countdown.__code__.co_code):
+    print(op, opcode.opname[op], oparg)
+输出：
+120 SETUP_LOOP 31774
+0 <0> None
+100 LOAD_CONST 27393
+4 DUP_TOP None
+114 POP_JUMP_IF_FALSE 29726
+0 <0> None
+100 LOAD_CONST 31746
+0 <0> None
+131 CALL_FUNCTION 258
+0 <0> None
+124 LOAD_FAST 25600
+3 ROT_THREE None
+56 INPLACE_SUBTRACT None
+0 <0> None
+125 STORE_FAST 28928
+2 ROT_TWO None
+87 POP_BLOCK None
+0 <0> None
+116 LOAD_GLOBAL 25600
+4 DUP_TOP None
+131 CALL_FUNCTION 257
+0 <0> None
+100 LOAD_CONST 21248
+0 <0> None
+```
+
+这种方式很少有人知道，你可以利用它替换任何你想要替换的函数的原始字节码。 下面我们用一个示例来演示整个过程：
+
+```python
+>>> def add(x, y):
+...     return x + y
+...
+>>> c = add.__code__
+>>> c
+<code object add at 0x1007beed0, file "<stdin>", line 1>
+>>> c.co_code
+b'|\x00\x00|\x01\x00\x17S'
+>>>
+>>> # Make a completely new code object with bogus byte code
+>>> import types
+>>> newbytecode = b'xxxxxxx'
+>>> nc = types.CodeType(c.co_argcount, c.co_kwonlyargcount,
+...     c.co_nlocals, c.co_stacksize, c.co_flags, newbytecode, c.co_consts,
+...     c.co_names, c.co_varnames, c.co_filename, c.co_name,
+...     c.co_firstlineno, c.co_lnotab)
+>>> nc
+<code object add at 0x10069fe40, file "<stdin>", line 1>
+>>> add.__code__ = nc
+>>> add(2,3)
+Segmentation fault
+```
+
+你可以像这样耍大招让解释器奔溃。但是，对于编写更高级优化和元编程工具的程序员来讲， 他们可能真的需要重写字节码。本节最后的部分演示了这个是怎样做到的。你还可以参考另外一个类似的例子： this code on ActiveState
+
+# 10. 模块与包
+
+模块与包是任何大型程序的核心，就连Python安装程序本身也是一个包。本章重点涉及有关模块和包的常用编程技术，例如如何组织包、把大型模块分割成多个文件、创建命名空间包。同时，也给出了让你自定义导入语句的秘籍。
+
+## 10.1. 构建一个模块的层级包
