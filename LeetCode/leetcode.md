@@ -519,7 +519,7 @@ public class SolutionTest {
 }
 ```
 
-## 75 Sort Colors
+## 1.7. 75 Sort Colors
 
 <https://leetcode.com/problems/sort-colors/>
 
@@ -613,7 +613,7 @@ public class SolutionTest {
 }
 ```
 
-## 面试官D考试Demo1：
+## 1.8. 面试官D考试Demo1：
 
 给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
 
@@ -657,7 +657,7 @@ public class SolutionTest {
 }
 ```
 
-## 441 Arranging Coins
+## 1.9. 441 Arranging Coins
 
 <https://leetcode.com/problems/arranging-coins/submissions/>
 
@@ -669,7 +669,7 @@ class Solution {
 }
 ```
 
-## 632 最小区间
+## 1.10. 632 最小区间
 
 <https://leetcode-cn.com/problems/smallest-range/submissions/>
 
@@ -805,7 +805,7 @@ arr = {ArrayList@1023}  size = 13
   1 = 2
 ```
 
-## 831 隐藏个人信息 
+## 1.11. 831 隐藏个人信息
 
 <https://leetcode-cn.com/problems/masking-personal-information/>
 
@@ -849,7 +849,7 @@ class Solution {
 }
 ```
 
-## 516 最长回文子序列
+## 1.12. 516 最长回文子序列
 
 <https://leetcode-cn.com/problems/longest-palindromic-subsequence/>
 
@@ -924,7 +924,7 @@ public class DynamicSolutionTest {
 Tip:必须用dp[1...n1][1...n2]来存储公共子序列长度，边界默认为0，否则的话在i-1和j-1关于0的边界处处理起来略复杂。
 同 5、两个字符串最大公共子序列
 
-## 299 Bulls and Cows
+## 1.13. 299 Bulls and Cows
 
 <https://leetcode.com/problems/bulls-and-cows/>
 
@@ -984,7 +984,7 @@ class TestSolution(TestCase):
         self.assertEqual(output, '1A3B')
 ```
 
-## 955 Delete Columns to Make Sorted II 
+## 1.14. 955 Delete Columns to Make Sorted II
 
 <https://leetcode.com/problems/delete-columns-to-make-sorted-ii/>
 
@@ -1263,7 +1263,7 @@ class Solution { //1ms
 }
 ```
 
-## 594 Longest Harmonious Subsequence
+## 1.15. 594 Longest Harmonious Subsequence
 
 <https://leetcode.com/problems/longest-harmonious-subsequence/>
 
@@ -1376,7 +1376,7 @@ class Solution {
 }
 ```
 
-## 165 Compare Version Numbers
+## 1.16. 165 Compare Version Numbers
 
 <https://leetcode.com/problems/compare-version-numbers/>
 
@@ -1474,7 +1474,7 @@ class Solution {
 }
 ```
 
-## 493 Reverse Pairs
+## 1.17. 493 Reverse Pairs
 
 <https://leetcode.com/problems/reverse-pairs/>
 
@@ -1593,7 +1593,7 @@ public class SolutionTest {
 }
 ```
 
-## 1 Two Sum
+## 1.18. 1 Two Sum
 
 <https://leetcode.com/problems/two-sum/>
 
@@ -1721,7 +1721,7 @@ public class TwoSumTest {
 }
 ```
 
-## 3 Longest Substring Without Repeating Characters
+## 1.19. 3 Longest Substring Without Repeating Characters
 
 <https://leetcode.com/problems/longest-substring-without-repeating-characters/>
 
@@ -1812,5 +1812,348 @@ public class LongestSubstringTest {
         int length = 3;
         assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
     }
+}
+```
+
+## 1.20. 621 Task Scheduler
+
+<https://leetcode.com/problems/task-scheduler/>
+
+```c++
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {  //算法不对
+    typedef std::pair<char, int> CharCountPair;
+public:
+    int leastInterval(std::vector<char>& tasks, int n) {
+        std::unordered_map<char, int> charCountMap;
+        for_each(tasks.begin(), tasks.end(), [&] (char task) {++charCountMap[task]; });
+
+        std::vector<CharCountPair> charCounts;
+        for_each(charCountMap.begin(), charCountMap.end(), [&] (const CharCountPair& p) {charCounts.push_back(p); });
+        sort(charCounts.begin(), charCounts.end(), [&] (const CharCountPair& lhs, const CharCountPair& rhs) {return lhs.second > rhs.second; });
+
+        int interval = 0;
+        int maxCharCount = (*charCounts.begin()).second;
+        for (int index = 1; index <= maxCharCount; index++) {
+            int tmpInterval = count_if(charCounts.begin(), charCounts.end(), [&] (const CharCountPair& p) {return p.second >= index; });
+            interval += tmpInterval > n || index == maxCharCount ? tmpInterval : n + 1;  // 如果已经数到最后一轮，则无需再与n比较
+        }
+
+        return interval;
+    }
+};
+
+//改后仍然不对
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+    typedef std::pair<char, int> CharCountPair;
+public:
+    int leastInterval(std::vector<char>& tasks, int n) {
+        if (n == 0) {
+            return tasks.size();
+        }
+
+        std::unordered_map<char, int> charCountMap;
+        for_each(tasks.begin(), tasks.end(), [&] (char task) {++charCountMap[task]; });
+
+        std::vector<CharCountPair> charCounts;
+        for_each(charCountMap.begin(), charCountMap.end(), [&] (const CharCountPair& p) {charCounts.push_back(p); });
+        sortCharCounts(charCounts);
+
+
+        int interval = 0;
+        int maxCharCount = (*charCounts.begin()).second;
+        for (int index = 1; index <= maxCharCount; index++) {
+            bool needReSort = false;
+            int tmpInterval = getTmpInterval(charCounts, needReSort, n);
+            if (tmpInterval == 0) {
+                break;
+            }
+
+            if (needReSort) {
+                sortCharCounts(charCounts);
+            }
+
+            interval += tmpInterval;
+        }
+
+        return interval;
+    }
+private:
+    void sortCharCounts(std::vector<CharCountPair>& charCounts)
+    {
+        sort(charCounts.begin(), charCounts.end(), [&] (const CharCountPair& lhs, const CharCountPair& rhs) {return lhs.second > rhs.second; });
+    }
+
+    int getTmpInterval(std::vector<CharCountPair>& charCounts, bool& needReSort, const int& fixedInterval)
+    {
+        needReSort = false;
+        if (charCounts.size() - 1 <= fixedInterval) {
+            needReSort = false;
+        }
+        else if (charCounts.at(fixedInterval - 1).second - 1 >= charCounts.at(fixedInterval).second) {
+            needReSort = false;
+        }
+        else {
+            needReSort = true;
+        }
+
+        int tmpInterval = 0;
+        for (std::vector<CharCountPair>::iterator iter = charCounts.begin(); iter != charCounts.end();) {
+            --(*iter).second;
+            ++tmpInterval;
+
+            if ((*iter).second == 0) {
+                iter = charCounts.erase(iter);
+            }
+            else {
+                ++iter;
+            }
+
+            if (tmpInterval > fixedInterval) {
+                break;
+            }
+        }
+        return tmpInterval != 0 && tmpInterval <= fixedInterval && !charCounts.empty() ? fixedInterval + 1 : tmpInterval;
+    }
+};
+```
+
+参考别人答案优化后的：
+
+<https://leetcode-cn.com/problems/task-scheduler/solution/python-xiang-jie-by-jalan/>
+
+思路
+完成所有任务的最短时间取决于出现次数最多的任务数量。
+
+看下题目给出的例子
+
+输入: tasks = ["A","A","A","B","B","B"], n = 2
+输出: 8
+执行顺序: A -> B -> (待命) -> A -> B -> (待命) -> A -> B.
+因为相同任务必须要有时间片为 n 的间隔，所以我们先把出现次数最多的任务 A 安排上（当然你也可以选择任务 B）。例子中 n = 2，那么任意两个任务 A 之间都必须间隔 2 个单位的时间：
+
+A -> (单位时间) -> (单位时间) -> A -> (单位时间) -> (单位时间) -> A
+中间间隔的单位时间可以用来安排别的任务，也可以处于“待命”状态。当然，为了使总任务时间最短，我们要尽可能地把单位时间分配给其他任务。现在把任务 B 安排上：
+
+A -> B -> (单位时间) -> A -> B -> (单位时间) -> A -> B
+很容易观察到，前面两个 A 任务一定会固定跟着 2 个单位时间的间隔。最后一个 A 之后是否还有任务跟随取决于是否存在与任务 A 出现次数相同的任务。
+
+该例子的计算过程为：
+
+(任务 A 出现的次数 - 1) * (n + 1) + (出现次数为 3 的任务个数)，即：
+
+(3 - 1) * (2 + 1) + 2 = 8
+所以整体的解题步骤如下：
+
+计算每个任务出现的次数
+找出出现次数最多的任务，假设出现次数为 x
+计算至少需要的时间 (x - 1) * (n + 1)，记为 min_time
+计算出现次数为 x 的任务总数 count，计算最终结果为 min_time + count
+特殊情况
+然而存在一种特殊情况，例如：
+
+输入: tasks = ["A","A","A","B","B","B","C","C","D","D"], n = 2
+输出: 10
+执行顺序: A -> B -> C -> A -> B -> D -> A -> B -> C -> D
+此时如果按照上述方法计算将得到结果为 8，比数组总长度 10 要小，应返回数组长度。
+
+```c++
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+    typedef std::pair<char, int> CharCountPair;
+public:
+    int leastInterval(std::vector<char>& tasks, int n) {
+        std::unordered_map<char, int> charCountMap;
+        for_each(tasks.begin(), tasks.end(), [&] (char task) {++charCountMap[task]; });
+
+        std::vector<CharCountPair> charCounts;
+        for_each(charCountMap.begin(), charCountMap.end(), [&] (const CharCountPair& p) {charCounts.push_back(p); });
+        sort(charCounts.begin(), charCounts.end(), [&] (const CharCountPair& lhs, const CharCountPair& rhs) {return lhs.second > rhs.second; });
+
+        int maxCharCount = charCounts.at(0).second;
+        int minInterval = (maxCharCount - 1) * (n + 1);
+        int charCountWithMaxCount = count_if(charCounts.begin(), charCounts.end(), [&] (const CharCountPair& p) {return p.second == maxCharCount; });
+        int interval = minInterval + charCountWithMaxCount;
+
+        return std::max<int>(interval, tasks.size());
+    }
+};
+
+// gtest_Solution.cpp
+#include "gtest/gtest.h"
+#include "Solution.h"
+
+TEST(SolutionTest, Test1)
+{
+    std::vector<char> chars = {'A', 'A', 'A', 'B', 'B', 'B'};
+    int interval = 2;
+
+    Solution solution;
+    EXPECT_EQ(8, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test2)
+{
+    std::vector<char> chars = {'A', 'A', 'A', 'B', 'B'};
+    int interval = 2;
+
+    Solution solution;
+    EXPECT_EQ(7, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test3)
+{
+    std::vector<char> chars = {'A', 'A', 'A', 'B', 'B'};
+    int interval = 1;
+
+    Solution solution;
+    EXPECT_EQ(5, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test4)
+{
+    std::vector<char> chars = {'A', 'A', 'A', 'B', 'B'};
+    int interval = 3;
+
+    Solution solution;
+    EXPECT_EQ(9, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test5)
+{
+    std::vector<char> chars = {'A', 'A', 'A', 'B', 'B', 'C'};
+    int interval = 3;
+
+    Solution solution;
+    EXPECT_EQ(9, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test6)
+{
+    std::vector<char> chars = {'A', 'A', 'A', 'B', 'B', 'C'};
+    int interval = 2;
+
+    Solution solution;
+    EXPECT_EQ(7, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test7)
+{
+    std::vector<char> chars = {'A','A','A','A','A','A','B','C','D','E','F','G'};
+    int interval = 2;
+
+    Solution solution;
+    EXPECT_EQ(16, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test8)
+{
+    std::vector<char> chars = {'A','A','A','B','B','B'};
+    int interval = 0;
+
+    Solution solution;
+    EXPECT_EQ(6, solution.leastInterval(chars, interval));
+}
+
+TEST(SolutionTest, Test9)
+{
+    std::vector<char> chars = {'A','A','A','B'};
+    int interval = 1;
+
+    Solution solution;
+    EXPECT_EQ(5, solution.leastInterval(chars, interval));
+}
+```
+
+## 1.21. 554 Brick Wall
+
+<https://leetcode.com/problems/brick-wall/>
+
+思路：找到每行各个砖组成的数字和，数出各行砖出现的最多的数字，其个数就是竖线要穿过时经过的缝，用砖高度减去该数字即竖线穿过的砖个数。
+
+```python
+// Solution.h
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+    typedef std::vector<int> Ints;
+    typedef std::vector<Ints> IntsVector;
+    typedef std::unordered_map<int, int> IntCountMap;
+    typedef std::pair<int, int> IntCountPair;
+public:
+    int leastBricks(IntsVector& wall) {
+        IntCountMap intCountMap;
+        initIntCountMap(wall, intCountMap);
+
+        IntCountMap::const_iterator maxCountIter = std::max_element(intCountMap.begin(), intCountMap.end(),
+            [] (const IntCountPair& lhs, const IntCountPair& rhs) {return lhs.second < rhs.second; });
+        return maxCountIter != intCountMap.end() ? wall.size() - (*maxCountIter).second : wall.size();
+    }
+
+private:
+    void initIntCountMap(const IntsVector& wall, IntCountMap& intCountMap)
+    {
+        for (const Ints& ints : wall) {
+            if (ints.size() == 1) {
+                continue;
+            }
+
+            int sum = 0;
+            for_each(ints.begin(), ints.end() - 1, [&] (int brick) {
+                sum += brick;
+                ++intCountMap[sum];
+                });
+        }
+    }
+};
+
+// gtest_Solution.cpp
+#include "gtest/gtest.h"
+#include "Solution.h"
+
+TEST(SolutionTest, Test1)
+{
+    std::vector<std::vector<int>> wall = 
+    {{1,2,2,1},
+    {3,1,2},
+    {1,3,2},
+    {2,4},
+    {3,1,2},
+    {1,3,1,1}};
+
+    Solution solution;
+    EXPECT_EQ(2, solution.leastBricks(wall));
+}
+
+TEST(SolutionTest, Test2)
+{
+    std::vector<std::vector<int>> wall =
+    {{1,2,2,1}};
+
+    Solution solution;
+    EXPECT_EQ(0, solution.leastBricks(wall));
+}
+
+TEST(SolutionTest, Test3)
+{
+    std::vector<std::vector<int>> wall =
+    {{1},
+    {1},
+    {1}};
+
+    Solution solution;
+    EXPECT_EQ(3, solution.leastBricks(wall));
 }
 ```
