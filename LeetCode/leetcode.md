@@ -2157,3 +2157,153 @@ TEST(SolutionTest, Test3)
     EXPECT_EQ(3, solution.leastBricks(wall));
 }
 ```
+
+## 1.22. 1016 Binary String With Substrings Representing 1 To N
+
+<https://leetcode.com/problems/binary-string-with-substrings-representing-1-to-n/submissions/>
+
+```c++
+#include <string>
+
+class Solution {
+public:
+    bool queryString(std::string S, int N) {
+        for (int index = 1; index <= N; index++) {
+            std::string binStr = decToBinString(index);
+            if (S.find(binStr) == std::string::npos) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+private:
+    std::string decToBinString(int num)
+    {
+        if (num > 0) {
+            std::string s;
+            std::stringstream ss;
+            s = decToBinString(num / 2);
+            ss << num % 2;
+            return s + ss.str();
+        }
+        else {
+            return "";
+        }
+    }
+
+    //std::string decToBinString(int num)
+    //{
+    //    int result = 0, temp = num, j = 1;
+    //    while (temp) {
+    //        result = result + j * (temp % 2);
+    //        temp = temp / 2;
+    //        j *= 10;
+    //    }
+//
+    //    std::stringstream ss;
+    //    ss << result;
+    //    return ss.str();
+    //}
+
+    // 利用位与将10进制转成2进制字符串
+    //std::string decToBinString(int x) {
+    //    std::string ans;
+    //    while (x) {
+    //        ans = (x & 1) ? '1' + ans : '0' + ans;
+    //        x >>= 1;
+    //    }
+    //    return ans;
+    //}
+};
+```
+
+## 1.23. 326 Power of Three
+
+<https://leetcode.com/problems/power-of-three/>
+
+```c++
+class Solution {
+public:
+    bool isPowerOfThree(int n) { // 20ms
+        if (n == 1) {
+            return true;
+        }
+
+        int remainder = 0;
+        int divisor = n;
+        while (divisor > 3) {
+            remainder = divisor % 3;
+            if (remainder != 0) {
+                return false;
+            }
+
+            divisor = divisor / 3;
+        }
+        return divisor == 3;
+    }
+};
+
+class Solution { // 优化12ms
+public:
+    bool isPowerOfThree(int n) {
+        while (n % 3 == 0 && n != 0) {
+            n /= 3;
+        }
+        return n == 1;
+    }
+};
+```
+
+## 234 Palindrome Linked List
+
+<https://leetcode.com/problems/palindrome-linked-list/>
+
+```c++
+//Definition for singly-linked list.
+struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x): val(x), next(NULL) {}
+};
+
+class Solution {
+public:
+    bool isPalindrome(ListNode* head) {
+        if (!head || !head->next) {  // 判断指针是否为空，使用!比和NULL相比快
+            return true;
+        }
+
+        ListNode* slow = head;
+        ListNode* fast = head;
+        ListNode* slowPrevious = NULL;
+        ListNode* tempSlowPrevious = NULL;
+
+        // 通过定义两个快慢指针，在走到Tail时，也一并找到中间元素，同时也将从Head到中间元素的单链指向反转
+        while (fast != NULL && fast->next != NULL) {
+            slowPrevious = slow;
+            slow = slow->next;
+            fast = fast->next->next;
+            slowPrevious->next = tempSlowPrevious;
+            tempSlowPrevious = slowPrevious;
+        }
+
+
+        ListNode* mid2LeftStartNode = slowPrevious; //无论Node总个数是奇还是偶，左侧中间开始查找元素都是slow的前一个元素
+        ListNode* mid2RightStartNode = fast == NULL ? slow : slow->next; //右侧中间开始查找元素要看总个数是奇还是偶，来判断起始查找元素
+
+        while (mid2RightStartNode != NULL) {
+            if (mid2LeftStartNode->val != mid2RightStartNode->val) {
+                return false;
+            }
+            else {
+                mid2LeftStartNode = mid2LeftStartNode->next;
+                mid2RightStartNode = mid2RightStartNode->next;
+            }
+        }
+
+        return true;
+    }
+};
+```
