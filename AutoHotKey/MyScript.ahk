@@ -7,6 +7,8 @@
 ;&: 连接两个按钮合并成一个自定义热键
 ;~: 激发热键时, 不会屏蔽(被操作系统隐藏) 热键中按键原有的功能
 
+#Hotstring EndChars `t
+
 ;重新加载此文件
 #+r::
 {
@@ -50,18 +52,8 @@
     fileContent := ""
     return
 }
-#IfWinActive ahk_class Chrome_WidgetWin_1
-^;::
-{
-    SendInput {End}
-    return
-}
-^+;::
-{
-    SendInput {Home}
-    return
-}
 
+#IfWinActive ahk_exe Code.exe
 generateVscCode(ByRef language)
 {
     SendInput, ``````%language%
@@ -85,6 +77,43 @@ generateVscCode(ByRef language)
 :o:``c::
 {
     generateVscCode("c{+}{+}") ;+要用{+}转义
+    return
+}
+
+#IfWinActive ahk_exe Typora.exe
+generateTyporaCode(ByRef language)
+{
+    SendInput, ``````%language%
+    SendInput, {Enter}
+}
+
+:o:``p::
+{
+    generateTyporaCode("python")
+    return
+}
+
+:o:``j::
+{
+    generateTyporaCode("java")
+    return
+}
+
+:o:``c::
+{
+    generateTyporaCode("c{+}{+}") ;+要用{+}转义
+    return
+}
+
+#IfWinActive ahk_class Chrome_WidgetWin_1
+^;::
+{
+    SendInput {End}
+    return
+}
+^+;::
+{
+    SendInput {Home}
     return
 }
 
