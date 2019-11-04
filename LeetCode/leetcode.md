@@ -2307,3 +2307,251 @@ public:
     }
 };
 ```
+
+## 870 Advantage Shuffle
+
+<https://leetcode.com/problems/advantage-shuffle/>
+
+```c++
+#include "gtest/gtest.h"
+#include <vector>
+
+using namespace std;
+
+class Solution {
+    typedef vector<int> Ints;
+    typedef multimap<int, int, greater<int>> ValueIndexMap;
+public:
+    vector<int> advantageCount(Ints& a, Ints& b) {
+        sort(a.begin(), a.end());
+        ValueIndexMap valueIndexMapOfB;
+        getValueIndexMap(b, valueIndexMapOfB);
+
+        Ints retA(a.size(), 0);
+        int indexHeadOfA = 0, indexTailOfA = a.size() - 1;
+        for (const auto& valueIndexPair : valueIndexMapOfB) {
+            const int& valueOfB = valueIndexPair.first;
+            const int& indexOfB = valueIndexPair.second;
+            if (a.at(indexTailOfA) > valueOfB) {
+                retA[indexOfB] = a.at(indexTailOfA--);
+            } else {
+                retA[indexOfB] = a.at(indexHeadOfA++);
+            }
+        }
+        return retA;
+    }
+
+private:
+    void getValueIndexMap(const Ints& b, ValueIndexMap& valueIndexMap) {
+        int index = 0;
+        for_each(b.begin(), b.end(), [&](int value) { valueIndexMap.insert(make_pair(value, index++)); });
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<int> A = {2, 7, 11, 15};
+    vector<int> B = {1, 10, 4, 11};
+    vector<int> expectA = {2, 11, 7, 15};
+    EXPECT_EQ(expectA, Solution().advantageCount(A, B));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<int> A = {12, 24, 8, 32};
+    vector<int> B = {13, 25, 32, 11};
+    vector<int> expectA = {24, 32, 8, 12};
+    EXPECT_EQ(expectA, Solution().advantageCount(A, B));
+}
+
+TEST(SolutionTest, Test3) {
+    vector<int> A = {9, 10, 11, 12};
+    vector<int> B = {10, 10, 10, 10};
+    vector<int> expectA = {12, 11, 9, 10};
+    EXPECT_EQ(expectA, Solution().advantageCount(A, B));
+}
+```
+
+如果不使用greater函数，也可以自定义比较器：
+
+```c++
+struct IntReverseComp {
+    bool operator()(const int& lhs, const int& rhs) const {
+        return lhs > rhs;
+    }
+};
+
+typedef multimap<int, int, greater<int>> ValueIndexMap;
+```
+
+## 658 Find K Closest Elements
+
+<https://leetcode.com/problems/find-k-closest-elements/>
+
+```c++
+#include "gtest/gtest.h"
+#include <vector>
+#include <deque>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> findClosestElements(vector<int>& arr, int k, int x) {
+        if (x <= *arr.begin()) {
+            return vector<int>(arr.begin(), arr.begin() + k);
+        } else if (x >= *arr.rbegin()) {
+            return vector<int>(arr.end() - k, arr.end());
+        }
+
+        int leftIndex = findClosestIndex(arr, x);  // 找到恰好小于等于x的index
+        int rightIndex = leftIndex + 1;
+        deque<int> retInts;
+        while (retInts.size() < k) {  // 依次从index往走和往右遍历，查看哪个离x的值更小，就将这个值加入
+            if (rightIndex >= arr.size()) {
+                retInts.push_front(arr.at(leftIndex--));
+            } else if (leftIndex < 0) {
+                retInts.push_back(arr.at(rightIndex++));
+            } else if (x - arr.at(leftIndex) <= arr.at(rightIndex) - x) {
+                retInts.push_front(arr.at(leftIndex--));
+            } else {
+                retInts.push_back(arr.at(rightIndex++));
+            }
+        }
+
+        return vector<int>(retInts.begin(), retInts.end());
+    }
+
+private:
+    int findClosestIndex(vector<int>& arr, int x) {
+        auto it = partition_point(arr.begin(), arr.end(), [=](int i) { return x >= i; });
+        return distance(arr.begin(), it - 1);
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<int> arr = {1, 2, 3, 4, 5};
+    int k = 4, x = 3;
+    vector<int> expected = {1, 2, 3, 4};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<int> arr = {1, 2, 3, 4, 5};
+    int k = 4, x = -1;
+    vector<int> expected = {1, 2, 3, 4};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test3) {
+    vector<int> arr = {1, 2, 3, 4, 5};
+    int k = 4, x = 6;
+    vector<int> expected = {2, 3, 4, 5};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test4) {
+    vector<int> arr = {1, 2, 3, 7, 8};
+    int k = 4, x = 3;
+    vector<int> expected = {1, 2, 3, 7};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test5) {
+    vector<int> arr = {1, 2, 3, 7, 8};
+    int k = 4, x = 6;
+    vector<int> expected = {2, 3, 7, 8};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test6) {
+    vector<int> arr = {1, 2, 3, 7, 8};
+    int k = 4, x = 2;
+    vector<int> expected = {1, 2, 3, 7};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test7) {
+    vector<int> arr = {1, 2, 3, 7, 8, 9};
+    int k = 5, x = 5;
+    vector<int> expected = {1, 2, 3, 7, 8};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test8) {
+    vector<int> arr = {1, 2, 3, 7, 8, 9};
+    int k = 0, x = 5;
+    vector<int> expected;
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+
+TEST(SolutionTest, Test9) {
+    vector<int> arr = {0, 0, 1, 2, 3, 3, 4, 7, 7, 8};
+    int k = 3, x = 5;
+    vector<int> expected = {3, 3, 4};
+    EXPECT_EQ(expected, Solution().findClosestElements(arr, k, x));
+}
+```
+
+## 820  Short Encoding of Words 
+
+ https://leetcode.com/problems/short-encoding-of-words/ 
+
+```c++
+// 每次的新单词，都遍历是不是能在前面所有单词中找到以其为结尾，最差的情况为O(n*n)
+class Solution {  // 1228ms
+public:
+    int minimumLengthEncoding(vector<string>& words)
+    {
+        sort(words.begin(), words.end(), [](const string& lhs, const string& rhs) { return lhs.size() > rhs.size(); });
+        vector<string> uniqueWords;
+        int length = 0;
+
+        for (const auto& word : words) {
+            if (!isWordInUniqueWords(word, uniqueWords)) {
+                uniqueWords.push_back(word);
+                length += word.size() + 1;
+            }
+        }
+
+        return length;
+    }
+
+private:
+    bool isWordInUniqueWords(const string& word, const vector<string>& uniqueWords)
+    {
+        for (const auto& uniqueWord : uniqueWords) {
+            if (uniqueWord.substr(uniqueWord.size() - word.size()) == word) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+// 别人的优化的代码：也是先按单词长度排序，同时构造一个单词全集HashSet，然后每加入一个单词，就把这个单词的所有可组合形式从单词全集Set中删除，后续的单词只需要判断是不是在HashSet，如果在，则说明这个单词要加进来，如果不在，则说明被之前更长的单词包括了。耗时最差情况：O(n * 7)，7为单词长度
+class Solution {  // 64ms
+public:
+    int minimumLengthEncoding(vector<string>& words)
+    {
+        unordered_set<string> m(words.begin(), words.end());
+        sort(words.begin(), words.end(), [](const string& a, const string& b) {
+            return a.size() > b.size(); // we need to iterate in decreasing order of length
+        });
+
+        int res = 0;
+        for (string word: words) {
+            if (m.find(word) != m.end()) { // add to our string only if no other word had this as suffix
+                res += word.size() + 1;
+                for (int i = 0;
+                     i < word.size(); i++) { // all words which can be formed from this word will be covered here
+                    string temp = word.substr(i);
+                    if (m.find(temp) != m.end()) {
+                        m.erase(temp);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+};
+```
+
