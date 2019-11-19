@@ -2491,9 +2491,7 @@ TEST(SolutionTest, Test9) {
 }
 ```
 
-## 820  Short Encoding of Words 
-
- https://leetcode.com/problems/short-encoding-of-words/ 
+## [820  Short Encoding of Words](https://leetcode.com/problems/short-encoding-of-words/)
 
 ```c++
 // 每次的新单词，都遍历是不是能在前面所有单词中找到以其为结尾，最差的情况为O(n*n)
@@ -2553,5 +2551,88 @@ public:
         return res;
     }
 };
+```
+
+## [957. N 天后的牢房](https://leetcode-cn.com/problems/prison-cells-after-n-days/)
+
+```c++
+#include "gtest/gtest.h"
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+// https://leetcode.com/problems/prison-cells-after-n-days/discuss/411445/C%2B%2B-easyclean-code-4ms
+class Solution {
+public:
+    vector<int> prisonAfterNDays(vector<int>& cells, int N) {
+        int key = 0;
+        unordered_map<int, int> mymap;
+        while (N-- > 0) {  // 只要N大于0，就需要计算一次cells，所以在while最后会update一次cells
+            key = get_key(cells);
+            if (mymap.find(key) != mymap.end()) {
+                N %= (mymap[key] - N);
+            } else {
+                mymap[key] = N;
+            }
+            update_cells(cells);
+        }
+        return cells;
+    }
+
+private:
+    int get_key(vector<int>& cells) {
+        int tmp = 0;
+        // 把cells作为二进制转为十进制数字
+        for (int i = 0; i < cells.size(); i++) {
+            tmp = (tmp << 1 | cells[i]);
+        }
+        return tmp;
+    }
+
+    void update_cells(vector<int>& cells) {
+        vector<int> tmp(8, 0);
+        for (int i = 1; i < cells.size() - 1; i++) {
+            tmp[i] = (cells[i - 1] == cells[i + 1]);
+        }
+        cells = tmp;
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<int> cells = {0, 1, 0, 1, 1, 0, 0, 1};
+    int N = 7;
+    vector<int> expectedCells = {0, 0, 1, 1, 0, 0, 0, 0};
+    EXPECT_EQ(expectedCells, Solution().prisonAfterNDays(cells, N));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<int> cells = {0, 0, 1, 0, 0, 1, 0, 0};
+    int N = 7;
+    vector<int> expectedCells = {0, 0, 1, 0, 0, 1, 0, 0};
+    EXPECT_EQ(expectedCells, Solution().prisonAfterNDays(cells, N));
+}
+
+TEST(SolutionTest, Test3) {
+    vector<int> cells = {0, 1, 0, 1, 1, 0, 0, 1};
+    int dec = 0;
+    for (int i = 0; i < cells.size(); i++) {
+        dec = (dec << 1 | cells[i]);
+    }
+    // 另一种将二进制转为十进制数字的方法
+//    for (int i = 0; i < cells.size(); ++i) {
+//        if (cells[i] > 0) {
+//            tmp ^= 1 << i;  // 这里使用异或，相同位就是0，不同就是1，由于每次1左移i都不同，所以如果某位有值，则异或就是1，和|是一样的效果
+//        }
+//    }
+    
+    // 十进制转为二进制：https://leetcode-cn.com/problems/prison-cells-after-n-days/solution/n-tian-hou-de-lao-fang-by-leetcode/
+    vector<int> originCells(8, 0);
+    for (int i = 0; i < cells.size(); ++i) {
+        if (((dec >> i) & 1) > 0) {  // 每次右移，如果最后一位为1，则说明该位为二进制1
+            originCells[i] = 1;  // 这里与cells相比，是倒序的
+        }
+    }
+}
 ```
 
