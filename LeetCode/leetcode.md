@@ -2,7 +2,7 @@
 
 <https://leetcode.com/problemset/all/>
 
-## 1.1. 747 Largest Number At Least Twice of Others
+## 747. Largest Number At Least Twice of Others
 
 <https://leetcode.com/problems/largest-number-at-least-twice-of-others/submissions/>
 
@@ -90,7 +90,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.2. 406 Queue Reconstruction by Height
+## 406. Queue Reconstruction by Height
 
 <https://leetcode.com/problems/queue-reconstruction-by-height/>
 
@@ -225,7 +225,7 @@ class Solution { //36ms
 }
 ```
 
-## 1.3. 324 Wiggle Sort II
+## 324. Wiggle Sort II
 
 <https://leetcode.com/problems/wiggle-sort-ii/>
 
@@ -313,7 +313,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.4. 1144 Decrease Elements To Make Array Zigzag
+## 1144. Decrease Elements To Make Array Zigzag
 
 <https://leetcode.com/problems/decrease-elements-to-make-array-zigzag/>
 
@@ -342,7 +342,7 @@ class Solution {
 }
 ```
 
-## 1.5. 997 Find the Town Judge
+## 997. Find the Town Judge
 
 <https://leetcode.com/problems/find-the-town-judge/>
 
@@ -478,7 +478,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.6. 11 盛最多水的容器
+## 11. 盛最多水的容器
 
 <https://leetcode-cn.com/problems/container-with-most-water/>
 
@@ -519,7 +519,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.7. 75 Sort Colors
+## 75. Sort Colors
 
 <https://leetcode.com/problems/sort-colors/>
 
@@ -613,7 +613,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.8. 面试官D考试Demo1：
+## 面试官D考试Demo1：
 
 给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
 
@@ -657,7 +657,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.9. 441 Arranging Coins
+## 441. Arranging Coins
 
 <https://leetcode.com/problems/arranging-coins/submissions/>
 
@@ -669,7 +669,7 @@ class Solution {
 }
 ```
 
-## 1.10. 632 最小区间
+## 632. 最小区间
 
 <https://leetcode-cn.com/problems/smallest-range/submissions/>
 
@@ -805,7 +805,7 @@ arr = {ArrayList@1023}  size = 13
   1 = 2
 ```
 
-## 1.11. 831 隐藏个人信息
+## 831. 隐藏个人信息
 
 <https://leetcode-cn.com/problems/masking-personal-information/>
 
@@ -849,7 +849,7 @@ class Solution {
 }
 ```
 
-## 1.12. 516 最长回文子序列
+## 516. 最长回文子序列
 
 <https://leetcode-cn.com/problems/longest-palindromic-subsequence/>
 
@@ -924,7 +924,7 @@ public class DynamicSolutionTest {
 Tip:必须用dp[1...n1][1...n2]来存储公共子序列长度，边界默认为0，否则的话在i-1和j-1关于0的边界处处理起来略复杂。
 同 5、两个字符串最大公共子序列
 
-## 1.13. 299 Bulls and Cows
+## 299. Bulls and Cows
 
 <https://leetcode.com/problems/bulls-and-cows/>
 
@@ -984,7 +984,7 @@ class TestSolution(TestCase):
         self.assertEqual(output, '1A3B')
 ```
 
-## 1.14. 955 Delete Columns to Make Sorted II
+## 955. Delete Columns to Make Sorted II
 
 <https://leetcode.com/problems/delete-columns-to-make-sorted-ii/>
 
@@ -1263,7 +1263,7 @@ class Solution { //1ms
 }
 ```
 
-## 1.15. 594 Longest Harmonious Subsequence
+## 594. Longest Harmonious Subsequence
 
 <https://leetcode.com/problems/longest-harmonious-subsequence/>
 
@@ -1376,7 +1376,7 @@ class Solution {
 }
 ```
 
-## 1.16. 165 Compare Version Numbers
+## 165. Compare Version Numbers
 
 <https://leetcode.com/problems/compare-version-numbers/>
 
@@ -1474,7 +1474,7 @@ class Solution {
 }
 ```
 
-## 1.17. 493 Reverse Pairs
+## 493. Reverse Pairs
 
 <https://leetcode.com/problems/reverse-pairs/>
 
@@ -1593,7 +1593,7 @@ public class SolutionTest {
 }
 ```
 
-## 1.18. 1 Two Sum
+## 1. Two Sum
 
 <https://leetcode.com/problems/two-sum/>
 
@@ -1721,9 +1721,7 @@ public class TwoSumTest {
 }
 ```
 
-## 1.19. 3 Longest Substring Without Repeating Characters
-
-<https://leetcode.com/problems/longest-substring-without-repeating-characters/>
+## [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)(华为题库)
 
 ```java
 package leetcode;
@@ -1813,9 +1811,30 @@ public class LongestSubstringTest {
         assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
     }
 }
+
+// C++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        unordered_set<char> uniqueChars;
+        int longestLength = 0, right = 0, left = 0;
+        int strLength = s.length();
+        while (right < strLength) {
+            char c = s.at(right);
+            if (uniqueChars.find(c) == uniqueChars.end()) {
+                uniqueChars.insert(c);
+                ++right;
+                longestLength = max<int>(longestLength, uniqueChars.size());
+            } else {
+                uniqueChars.erase(s.at(left++));
+            }
+        }
+        return longestLength;
+    }
+};
 ```
 
-## 1.20. 621 Task Scheduler
+## 621. Task Scheduler
 
 <https://leetcode.com/problems/task-scheduler/>
 
@@ -2075,7 +2094,7 @@ TEST(SolutionTest, Test9)
 }
 ```
 
-## 1.21. 554 Brick Wall
+## 554. Brick Wall
 
 <https://leetcode.com/problems/brick-wall/>
 
@@ -2158,7 +2177,7 @@ TEST(SolutionTest, Test3)
 }
 ```
 
-## 1.22. 1016 Binary String With Substrings Representing 1 To N
+## 1016. Binary String With Substrings Representing 1 To N
 
 <https://leetcode.com/problems/binary-string-with-substrings-representing-1-to-n/submissions/>
 
@@ -2219,7 +2238,7 @@ private:
 };
 ```
 
-## 1.23. 326 Power of Three
+## 326. Power of Three
 
 <https://leetcode.com/problems/power-of-three/>
 
@@ -2633,6 +2652,199 @@ TEST(SolutionTest, Test3) {
             originCells[i] = 1;  // 这里与cells相比，是倒序的
         }
     }
+}
+```
+
+## [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)(华为题库)
+
+动态规划：
+
+![](pictures\5.最长回访子串（方法三：动态规划）.png)
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 使用lambda表达式耗时1408ms，使用private
+public:
+    string longestPalindrome(string s) {
+        string maxPalindrome;
+        vector<bool> matrix(s.size(), false);
+        vector<vector<bool>> intsIJ(s.size(), matrix);
+
+        auto calculateMaxPalindrome = [&](int i, int j, string& maxPalindrome) {
+            if (j - i + 1 > maxPalindrome.size()) {
+                maxPalindrome = s.substr(i, j - i + 1);
+            }
+        };
+
+        for (int i = s.size() - 1; i >= 0; --i) {
+            for (int j = i; j < s.size(); ++j) {
+                if (i == j) {
+                    intsIJ.at(i).at(j) = true;
+                    calculateMaxPalindrome(i, j, maxPalindrome);
+                } else if (i + 1 == j) {
+                    if (s.at(i) == s.at(j)) {
+                        intsIJ.at(i).at(j) = true;
+                        calculateMaxPalindrome(i, j, maxPalindrome);
+                    }
+                } else {
+                    intsIJ.at(i).at(j) = intsIJ.at(i + 1).at(j - 1) && s.at(i) == s.at(j);
+                    if (intsIJ.at(i).at(j)) {
+                        calculateMaxPalindrome(i, j, maxPalindrome);
+                    }
+                }
+            }
+        }
+
+        return maxPalindrome;
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    string inputStr = "babad";
+    string expectedPalindrome = "aba";
+    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
+}
+
+TEST(SolutionTest, Test2) {
+    string inputStr = "cbbd";
+    string expectedPalindrome = "bb";
+    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
+}
+
+TEST(SolutionTest, Test3) {
+    string inputStr = "aaaa";
+    string expectedPalindrome = "aaaa";
+    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
+}
+```
+
+[方法四：中心扩展算法](https://leetcode-cn.com/problems/longest-palindromic-substring/solution/zui-chang-hui-wen-zi-chuan-by-leetcode/)：
+
+每次以一个字符或两个相邻字符向左右扩展，查找以这一个字符或两个字符为中心的最长回访字符：
+
+```c++
+class Solution {  // 64ms
+public:
+    string longestPalindrome(string s) {
+        if (s.empty()) {
+            return "";
+        }
+
+        int start = 0, end = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int len1 = expandAroundCenter(s, i, i);
+            int len2 = expandAroundCenter(s, i, i + 1);
+            int len = max(len1, len2);
+            if (len > end - start + 1) {
+                start = i - (len - 1) / 2;
+                end = i + len / 2;
+            }
+        }
+        return s.substr(start, end - start + 1);
+    }
+
+private:
+    int expandAroundCenter(string s, int left, int right) {
+        int L = left, R = right;
+        while (L >= 0 && R < s.length() && s.at(L) == s.at(R)) {
+            L--;
+            R++;
+        }
+        return R - L - 1;
+    }
+};
+```
+
+[Manacher算法的详细讲解](https://www.jianshu.com/p/116aa58b7d81)
+
+## [2. 两数相加](https://leetcode-cn.com/problems/add-two-numbers/)(华为题库)
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct ListNode {
+    int val;
+    ListNode* next;
+
+    ListNode(int x) : val(x), next(NULL) {}
+};
+
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* ret = new ListNode(0);
+        ListNode* cur = ret;
+        int carry = 0;
+        while (l1 != NULL || l2 != NULL) {
+            int val1 = l1 != NULL ? l1->val : 0;
+            int val2 = l2 != NULL ? l2->val : 0;
+            int sum = carry + val1 + val2;
+            carry = sum / 10;
+            cur->next = new ListNode(sum % 10);
+            cur = cur->next;
+            l1 = l1 != NULL ? l1->next : NULL;
+            l2 = l2 != NULL ? l2->next : NULL;
+        }
+        if (carry > 0) {
+            cur->next = new ListNode(carry);
+        }
+
+        cur = ret->next;
+        delete ret;
+        return cur;
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    unique_ptr<ListNode> l1(make_unique<ListNode>(ListNode(2)));
+    unique_ptr<ListNode> l11(make_unique<ListNode>(ListNode(4)));
+    unique_ptr<ListNode> l111(make_unique<ListNode>(ListNode(3)));
+    l1->next = l11.get();
+    l11->next = l111.get();
+
+    unique_ptr<ListNode> l2(make_unique<ListNode>(ListNode(5)));
+    unique_ptr<ListNode> l22(make_unique<ListNode>(ListNode(6)));
+    unique_ptr<ListNode> l222(make_unique<ListNode>(ListNode(4)));
+    l2->next = l22.get();
+    l22->next = l222.get();
+
+    ListNode* l3 = Solution().addTwoNumbers(l1.get(), l2.get());
+    EXPECT_EQ(7, l3->val);
+    EXPECT_EQ(0, l3->next->val);
+    EXPECT_EQ(8, l3->next->next->val);
+}
+
+TEST(SolutionTest, Test2) {
+    unique_ptr<ListNode> l1(make_unique<ListNode>(ListNode(2)));
+    unique_ptr<ListNode> l11(make_unique<ListNode>(ListNode(4)));
+    unique_ptr<ListNode> l111(make_unique<ListNode>(ListNode(3)));
+    l1->next = l11.get();
+    l11->next = l111.get();
+
+    unique_ptr<ListNode> l2(make_unique<ListNode>(ListNode(9)));
+
+    ListNode* l3 = Solution().addTwoNumbers(l1.get(), l2.get());
+    EXPECT_EQ(1, l3->val);
+    EXPECT_EQ(5, l3->next->val);
+    EXPECT_EQ(3, l3->next->next->val);
+}
+
+TEST(SolutionTest, Test3) {
+    unique_ptr<ListNode> l1(make_unique<ListNode>(ListNode(2)));
+    unique_ptr<ListNode> l11(make_unique<ListNode>(ListNode(9)));
+    l1->next = l11.get();
+
+    unique_ptr<ListNode> l2(make_unique<ListNode>(ListNode(9)));
+
+    ListNode* l3 = Solution().addTwoNumbers(l1.get(), l2.get());
+    EXPECT_EQ(1, l3->val);
+    EXPECT_EQ(0, l3->next->val);
+    EXPECT_EQ(1, l3->next->next->val);
 }
 ```
 
