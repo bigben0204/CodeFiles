@@ -2659,14 +2659,14 @@ TEST(SolutionTest, Test3) {
 
 动态规划：
 
-![](pictures\5.最长回访子串（方法三：动态规划）.png)
+![](pictures\5. 最长回访子串（方法三：动态规划）.png)
 
 ```c++
 #include "gtest/gtest.h"
 
 using namespace std;
 
-class Solution {  // 使用lambda表达式耗时1408ms，使用private
+class Solution {  // 使用lambda表达式耗时1408ms，把lambda表达式换成private方法运行超时
 public:
     string longestPalindrome(string s) {
         string maxPalindrome;
@@ -2846,5 +2846,573 @@ TEST(SolutionTest, Test3) {
     EXPECT_EQ(0, l3->next->val);
     EXPECT_EQ(1, l3->next->next->val);
 }
+```
+
+## [43. 字符串相乘](https://leetcode-cn.com/problems/multiply-strings/)(华为题库)
+
+<https://leetcode-cn.com/problems/multiply-strings/solution/you-hua-ban-shu-shi-da-bai-994-by-breezean/>
+
+![](\pictures\43. 字符串相乘（方法一：普通竖式）.png)
+
+```c++
+class Solution {
+    /**
+    * 计算形式
+    *    num1
+    *  x num2
+    *  ------
+    *  result
+    */
+public:
+    string multiply(string num1, string num2) {  // 56ms
+        if (num1 == "0" || num2 == "0") {
+            return "0";
+        }
+        // 保存计算结果
+        string res = "0";
+
+        // num2 逐位与 num1 相乘
+        for (int i = num2.length() - 1; i >= 0; i--) {
+            // 保存 num2 第i位数字与 num1 相乘的结果
+            ostringstream temp;
+            // 补 0
+            for (int j = 0; j < num2.length() - 1 - i; j++) {
+                temp << 0;
+            }
+            int n2 = num2.at(i) - '0';
+
+            int carry = 0;
+            // num2 的第 i 位数字 n2 与 num1 相乘
+            for (int j = num1.length() - 1; j >= 0 || carry != 0; j--) {
+                int n1 = j < 0 ? 0 : num1.at(j) - '0';
+                int product = (n1 * n2 + carry) % 10;
+                temp << product;
+                carry = (n1 * n2 + carry) / 10;
+            }
+
+            // 将当前结果与新计算的结果求和作为新的结果
+            string&& tempStr = temp.str();
+            reverse(tempStr.begin(), tempStr.end());
+            res = addStrings(res, tempStr);
+        }
+        return res;
+    }
+
+private:
+    /**
+     * 对两个字符串数字进行相加，返回字符串形式的和
+     */
+    string addStrings(const string& num1, const string& num2) {
+        ostringstream builder;
+        int carry = 0;
+        for (int i = num1.length() - 1, j = num2.length() - 1;
+             i >= 0 || j >= 0 || carry != 0;
+             i--, j--) {
+            int x = i < 0 ? 0 : num1.at(i) - '0';
+            int y = j < 0 ? 0 : num2.at(j) - '0';
+            int sum = (x + y + carry) % 10;
+            builder << sum;
+            carry = (x + y + carry) / 10;
+        }
+        string&& tempStr = builder.str();
+        reverse(tempStr.begin(), tempStr.end());
+        return tempStr;
+    }
+};
+
+// 略微优化过的
+class Solution {
+    /**
+    * 计算形式
+    *    num1
+    *  x num2
+    *  ------
+    *  result
+    */
+public:
+    string multiply(string num1, string num2) {
+        if (num1 == "0" || num2 == "0") {
+            return "0";
+        }
+        // 保存计算结果
+        string res = "0";
+
+        // num2 逐位与 num1 相乘
+        for (int i = num2.length() - 1; i >= 0; i--) {
+            // 保存 num2 第i位数字与 num1 相乘的结果
+            ostringstream temp;
+            // 补 0
+            for (int j = 0; j < num2.length() - 1 - i; j++) {
+                temp << 0;
+            }
+            int n2 = num2.at(i) - '0';
+
+            int carry = 0;
+            // num2 的第 i 位数字 n2 与 num1 相乘
+            for (int j = num1.length() - 1; j >= 0 || carry != 0; j--) {
+                int n1 = j < 0 ? 0 : num1.at(j) - '0';
+                int product = (n1 * n2 + carry) % 10;
+                temp << product;
+                carry = (n1 * n2 + carry) / 10;
+            }
+
+            // 将当前结果与新计算的结果求和作为新的结果
+            res = move(addStrings(res, temp.str()));
+        }
+
+        // 之前的所有字符串相加都是逆序的，最后返回时要转换成正序
+        reverse(res.begin(), res.end());
+        return move(res);
+    }
+
+private:
+    /**
+     * 对两个字符串数字进行相加，返回字符串形式的和，这里直接是逆序的字符串相加
+     */
+    string addStrings(const string& num1, const string& num2) {
+        ostringstream builder;
+        int carry = 0;
+        for (int i = 0, j = 0;
+             i < num1.length() || j < num2.length() || carry != 0;
+             ++i, ++j) {
+            int x = i >= num1.length() ? 0 : num1.at(i) - '0';
+            int y = j >= num2.length() ? 0 : num2.at(j) - '0';
+            int sum = (x + y + carry) % 10;
+            builder << sum;
+            carry = (x + y + carry) / 10;
+        }
+        return move(builder.str());
+    }
+};
+```
+
+![](\pictures\43. 字符串相乘（方法二：优化竖式）.png)
+
+```c++
+class Solution {  // 优化竖式
+public:
+    string multiply(string num1, string num2) {
+        if (num1 == "0" || num2 == "0") {
+            return "0";
+        }
+
+        vector<int> retInts(num1.size() + num2.size(), 0);
+        for (int i = num1.size() - 1; i >= 0; --i) {
+            int n1 = num1.at(i) - '0';
+            for (int j = num2.size() - 1; j >= 0; --j) {
+                int n2 = num2.at(j) - '0';
+                int sum = retInts[i + j + 1] + n1 * n2;
+                retInts[i + j + 1] = sum % 10;
+                retInts[i + j] += sum / 10;
+            }
+        }
+
+        ostringstream oss;
+        int index = 0;
+        for_each(retInts.begin(), retInts.end(), [&](int i) {
+            if (index++ == 0 && i == 0) {  // 如果首位为0，则不需要拼接
+                return;
+            }
+            oss << i;
+        });
+        return oss.str();
+    }
+};
+```
+
+## [394. 字符串解码](https://leetcode-cn.com/problems/decode-string/)(华为题库)
+
+```c++
+#include <stack>
+#include <cmath>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+// 把每个char单独推送入stack
+class Solution {  // 4ms
+public:
+    string decodeString(string s) {
+        ostringstream outputOss;
+        stack<char> charStack;
+        for (int i = 0; i < s.size(); ++i) {
+            char c = s.at(i);
+            if (c != ']') {  // 如果不是]，就直接进栈
+                charStack.push(c);
+            } else {  // 如果是[，是出栈展开
+                getTempEncodedStr(charStack);
+            }
+        }
+
+        while (!charStack.empty()) {
+            outputOss << charStack.top();
+            charStack.pop();
+        }
+        string&& outputStr = outputOss.str();
+        reverse(outputStr.begin(), outputStr.end());
+        return move(outputStr);
+    }
+
+private:
+    void getTempEncodedStr(stack<char>& charStack) {
+        ostringstream tempOss;
+        while (charStack.top() != '[') {
+            tempOss << charStack.top();
+            charStack.pop();
+        }
+        charStack.pop();  // 把[弹出
+
+        string&& tempStr = tempOss.str();
+        reverse(tempStr.begin(), tempStr.end());
+
+        int num = 0;
+        int index = 0;
+        while (!charStack.empty() && charStack.top() >= '0' && charStack.top() <= '9') {
+            num += pow(10, index++) * (charStack.top() - '0');
+            charStack.pop();
+        }
+
+        tempOss.str("");
+        for (int i = 0; i < num; ++i) {
+            tempOss << tempStr;
+        }
+
+        tempStr = tempOss.str();
+        for_each(tempStr.begin(), tempStr.end(), [&](char c) { charStack.push(c); });
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    EXPECT_EQ("aaabcbc", Solution().decodeString("3[a]2[bc]"));
+}
+
+TEST(SolutionTest, Test2) {
+    EXPECT_EQ("accaccacc", Solution().decodeString("3[a2[c]]"));
+}
+
+TEST(SolutionTest, Test3) {
+    EXPECT_EQ("abcabccdcdcdef", Solution().decodeString("2[abc]3[cd]ef"));
+}
+
+TEST(SolutionTest, Test4) {
+    EXPECT_EQ("abcabcabcabcabcabcabcabcabcabc",Solution().decodeString("10[abc]"));
+}
+
+TEST(SolutionTest, Test5) {
+    EXPECT_EQ("zzzyypqjkjkefjkjkefjkjkefjkjkefyypqjkjkefjkjkefjkjkefjkjkefef",
+        Solution().decodeString("3[z]2[2[y]pq4[2[jk]e1[f]]]ef"));
+}
+
+// 这里把组合后的string入deque
+class Solution {  // 也是4ms
+public:
+    string decodeString(string s) {
+        ostringstream outputOss;
+        deque<string> stringDeque;
+        for (int i = 0; i < s.size(); ++i) {
+            char c = s.at(i);
+            if (c != ']') {  // 如果不是]，就直接进栈
+                stringDeque.push_back(string(1, c));
+            } else {  // 如果是[，是出栈展开
+                getTempEncodedStr(stringDeque);
+            }
+        }
+
+        while (!stringDeque.empty()) {
+            outputOss << stringDeque.front();
+            stringDeque.pop_front();
+        }
+        return move(outputOss.str());
+    }
+
+private:
+    void getTempEncodedStr(deque<string>& stringDeque) {
+        stack<string> tempStack;
+        while (stringDeque.back() != "[") {
+            tempStack.push(stringDeque.back());
+            stringDeque.pop_back();
+        }
+        stringDeque.pop_back();  // 把[弹出
+
+        ostringstream tempOss;
+        while (!tempStack.empty()) {
+            tempOss << tempStack.top();
+            tempStack.pop();
+        }
+
+        int num = 0;
+        int index = 0;
+        while (!stringDeque.empty() && stringDeque.back() >= "0" && stringDeque.back() <= "9") {
+            num += pow(10, index++) * (stringDeque.back().at(0) - '0');
+            stringDeque.pop_back();
+        }
+
+        string&& tempStr = tempOss.str();
+        tempOss.str("");
+        for (int i = 0; i < num; ++i) {
+            tempOss << tempStr;
+        }
+
+        stringDeque.push_back(tempOss.str());
+    }
+};
+
+// 别人算法，同样是4ms，但是逻辑较简单
+class Solution {
+public:
+    string decodeString(string s) {
+        stack<int> numStack;
+        stack<string> resStack;
+        int num = 0;
+        string res;
+        for (int i = 0; i < s.size(); i++) {
+            if (isalpha(s[i])) {
+                res.push_back(s[i]);
+            } else if (isdigit(s[i])) {
+                num = num * 10 + s[i] - '0';
+            } else if (s[i] == '[') {
+                resStack.push(res);
+                res = "";
+                numStack.push(num);
+                num = 0;
+            } else {
+                for (int j = 0; j < numStack.top(); j++) {
+                    resStack.top() += res;
+                }
+                numStack.pop();
+                res = resStack.top();
+                resStack.pop();
+            }
+        }
+        return res;
+    }
+};
+```
+
+## [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)(华为题库)
+
+<https://leetcode-cn.com/problems/number-of-islands/solution/dao-yu-shu-liang-by-leetcode/>
+
+深度搜索：
+
+遍历全部二维网格，如果任意一个单元格为1，则使用深度搜索把与该单元格相连的全部单元格设置为1：
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 8ms
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) {
+            return 0;
+        }
+        int nc = grid[0].size();
+
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    ++num_islands;
+                    dfs(grid, r, c);
+                }
+            }
+        }
+
+        return num_islands;
+    }
+
+private:
+    void dfs(vector<vector<char>>& grid, int r, int c) {
+        int nr = grid.size();
+        int nc = grid[0].size();
+
+        grid[r][c] = '0';
+        if (r - 1 >= 0 && grid[r - 1][c] == '1') {
+            dfs(grid, r - 1, c);
+        }
+        if (r + 1 < nr && grid[r + 1][c] == '1') {
+            dfs(grid, r + 1, c);
+        }
+        if (c - 1 >= 0 && grid[r][c - 1] == '1') {
+            dfs(grid, r, c - 1);
+        }
+        if (c + 1 < nc && grid[r][c + 1] == '1') {
+            dfs(grid, r, c + 1);
+        }
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<vector<char>> grid = {
+        {'1', '1', '1', '1', '0'},
+        {'1', '1', '0', '1', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '0', '0', '0'},
+    };
+    EXPECT_EQ(1, Solution().numIslands(grid));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<vector<char>> grid = {
+        {'1', '1', '0', '0', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '1', '0', '0'},
+        {'0', '0', '0', '1', '1'},
+    };
+    EXPECT_EQ(3, Solution().numIslands(grid));
+}
+```
+
+广度搜索：
+
+同样遍历二维表格，任意一个单元格值为1，则使用队列进行广度搜索，把相邻的1都标为0，再去遍历下一个单元格。
+
+```c++
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) {
+            return 0;
+        }
+        int nc = grid[0].size();
+
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    ++num_islands;
+                    grid[r][c] = '0'; // mark as visited
+                    queue<pair<int, int>> neighbors;
+                    neighbors.push({r, c});
+                    while (!neighbors.empty()) {
+                        auto rc = neighbors.front();
+                        neighbors.pop();
+                        int row = rc.first, col = rc.second;
+                        if (row - 1 >= 0 && grid[row - 1][col] == '1') {
+                            neighbors.push({row - 1, col});
+                            grid[row - 1][col] = '0';
+                        }
+                        if (row + 1 < nr && grid[row + 1][col] == '1') {
+                            neighbors.push({row + 1, col});
+                            grid[row + 1][col] = '0';
+                        }
+                        if (col - 1 >= 0 && grid[row][col - 1] == '1') {
+                            neighbors.push({row, col - 1});
+                            grid[row][col - 1] = '0';
+                        }
+                        if (col + 1 < nc && grid[row][col + 1] == '1') {
+                            neighbors.push({row, col + 1});
+                            grid[row][col + 1] = '0';
+                        }
+                    }
+                }
+            }
+        }
+
+        return num_islands;
+    }
+};
+```
+
+并查集 
+
+遍历二维网格，将竖直或水平相邻的陆地联结。最终，返回并查集数据结构中相连部分的数量。
+
+下面的动画展示了整个算法。
+
+```c++
+class UnionFind {
+public:
+    UnionFind(vector<vector<char>>& grid) {
+        count = 0;
+        int m = grid.size();
+        int n = grid[0].size();
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (grid[i][j] == '1') {
+                    parent.push_back(i * n + j);
+                    ++count;
+                }
+                else {
+                    parent.push_back(-1);
+                }
+                rank.push_back(0);
+            }
+        }
+    }
+
+    int find(int i) { // path compression
+        if (parent[i] != i) {
+            parent[i] = find(parent[i]);
+        }
+        return parent[i];
+    }
+
+    void Union(int x, int y) { // union with rank
+        int rootx = find(x);
+        int rooty = find(y);
+        if (rootx != rooty) {
+            if (rank[rootx] > rank[rooty]) {
+                parent[rooty] = rootx;
+            }
+            else if (rank[rootx] < rank[rooty]) {
+                parent[rootx] = rooty;
+            }
+            else {
+                parent[rooty] = rootx;
+                rank[rootx] += 1;
+            }
+            --count;
+        }
+    }
+
+    int getCount() const {
+        return count;
+    }
+
+private:
+    vector<int> parent;
+    vector<int> rank;
+    int count; // # of connected components
+};
+
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) {
+            return 0;
+        }
+        int nc = grid[0].size();
+
+        UnionFind uf(grid);
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    grid[r][c] = '0';
+                    if (r - 1 >= 0 && grid[r - 1][c] == '1') {
+                        uf.Union(r * nc + c, (r - 1) * nc + c);
+                    }
+                    if (r + 1 < nr && grid[r + 1][c] == '1') {
+                        uf.Union(r * nc + c, (r + 1) * nc + c);
+                    }
+                    if (c - 1 >= 0 && grid[r][c - 1] == '1') {
+                        uf.Union(r * nc + c, r * nc + c - 1);
+                    }
+                    if (c + 1 < nc && grid[r][c + 1] == '1') {
+                        uf.Union(r * nc + c, r * nc + c + 1);
+                    }
+                }
+            }
+        }
+
+        return uf.getCount();
+    }
+};
 ```
 
