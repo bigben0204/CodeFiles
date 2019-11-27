@@ -3416,3 +3416,199 @@ public:
 };
 ```
 
+## [93. 复原IP地址](https://leetcode-cn.com/problems/restore-ip-addresses/)(华为题库)
+
+回溯算法，深度搜索递归遍历全部字符串，查看是否符合IP要求：
+
+```c++
+#include <queue>
+#include <numeric>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+    typedef vector<string> Ips;
+    typedef deque<string> IpSegment;
+public:
+    vector<string> restoreIpAddresses(string s) {
+        Ips ips;
+        IpSegment tmpIpSegment;
+        splitIps(0, 1, s, tmpIpSegment, ips);
+        return ips;
+    }
+
+private:
+    void splitIps(int startIndex, int segmentNumber, const string& inputStr, IpSegment& tmpIpSegment, Ips& ips) {
+        if (segmentNumber == 4) {
+            string fourthSegment = inputStr.substr(startIndex);
+            if (isValidIpSegment(fourthSegment)) {
+                tmpIpSegment.push_back(fourthSegment);
+                addOneIp(tmpIpSegment, ips);
+                tmpIpSegment.pop_back();
+            }
+            return;
+        }
+
+        int indexIncrement = 0;
+        while ((++indexIncrement + startIndex) < inputStr.size()) {
+            string nextSegment = inputStr.substr(startIndex, indexIncrement);
+            if (isValidIpSegment(nextSegment)) {
+                tmpIpSegment.push_back(nextSegment);
+                splitIps(startIndex + indexIncrement, segmentNumber + 1, inputStr, tmpIpSegment, ips);
+                tmpIpSegment.pop_back();
+            } else {
+                break;
+            }
+        }
+    }
+
+    void addOneIp(const IpSegment& tmpIpSegment, Ips& ips) {
+        string ip = accumulate(tmpIpSegment.begin() + 1, tmpIpSegment.end(), *tmpIpSegment.begin(),
+                               [](const string& allIpSegment, const string& tmp) {
+                                   return allIpSegment + "." + tmp;
+                               });
+        ips.push_back(ip);
+    }
+
+    bool isValidIpSegment(const string& segmentStr) {
+        if (segmentStr.size() <= 3) {
+            int segment = stringToInt(segmentStr);
+            string convertedSegmentStr = intToString(segment);
+            return segment >= 0 && segment <= 255 && segmentStr == convertedSegmentStr;
+        }
+        return false;
+    }
+
+    int stringToInt(const string& s) {
+        char* offset;
+        return strtol(s.c_str(), &offset, 10);
+    }
+
+    string intToString(int num) {
+        stringstream ss;
+        ss << num;
+        return string(ss.str());
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    string input = "25525511135";
+    vector<string> ips = {"255.255.11.135", "255.255.111.35"};
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+
+TEST(SolutionTest, Test2) {
+    string input = "";
+    vector<string> ips;
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+
+TEST(SolutionTest, Test3) {
+    string input = "255255255255";
+    vector<string> ips = {"255.255.255.255"};
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+
+TEST(SolutionTest, Test4) {
+    string input = "2552552552552";
+    vector<string> ips;
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+
+TEST(SolutionTest, Test5) {
+    string input = "0000";
+    vector<string> ips = {"0.0.0.0"};
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+
+TEST(SolutionTest, Test6) {
+    string input = "1111";
+    vector<string> ips = {"1.1.1.1"};
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+
+TEST(SolutionTest, Test7) {
+    string input = "111";
+    vector<string> ips;
+    EXPECT_EQ(ips, Solution().restoreIpAddresses(input));
+}
+```
+
+## [55. 跳跃游戏](https://leetcode-cn.com/problems/jump-game/)(华为题库)
+
+从后往前遍历，找到能跳到这个位置的最前一个index，再从这个位置继续往前遍历，直到找到index为0的位置：
+
+```c++
+class Solution {  // 736ms
+public:
+    bool canJump(vector<int>& nums) {
+        int index = findTheMinimalIndexToDstIndex(nums, nums.size() - 1);
+        return index == 0;
+    }
+
+private:
+    int findTheMinimalIndexToDstIndex(vector<int>& nums, int dstIndex) {
+        int availableIndex = dstIndex;
+        for (int index = dstIndex - 1; index >= 0; --index) {
+            if (nums.at(index) >= dstIndex - index) {
+                availableIndex = index;
+            }
+        }
+        if (availableIndex == 0) {
+            return availableIndex;
+        } else if (availableIndex != dstIndex) {
+            return findTheMinimalIndexToDstIndex(nums, availableIndex);;
+        } else {
+            return -1;
+        }
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<int> nums = {2, 3, 1, 1, 4};
+    EXPECT_EQ(true, Solution().canJump(nums));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<int> nums = {3, 2, 1, 0, 4};
+    EXPECT_EQ(false, Solution().canJump(nums));
+}
+
+TEST(SolutionTest, Test3) {
+    vector<int> nums = {0};
+    EXPECT_EQ(true, Solution().canJump(nums));
+}
+```
+
+参考别人的优化代码：
+
+<https://leetcode-cn.com/problems/jump-game/solution/55-by-ikaruga/>
+
+ 解题思路：
+
+1. 如果某一个作为 **起跳点** 的格子可以跳跃的距离是 3，那么表示后面 3 个格子都可以作为 **起跳点**。
+2. 可以对每一个能作为 **起跳点** 的格子都尝试跳一次，把 **能跳到最远的距离** 不断更新。
+3. 如果可以一直跳到最后，就成功了。
+
+```c++
+
+class Solution {  // 12ms
+public:
+    bool canJump(vector<int>& nums) {
+        int k = 0;
+        int maxIndex = nums.size() - 1;
+        for (int i = 0; i < nums.size(); i++) {
+            if (k >= maxIndex) {
+                return true;
+            }
+            if (i > k) {
+                return false;
+            }
+            k = max(k, i + nums[i]);
+        }
+        return true;
+    }
+};
+```
+
