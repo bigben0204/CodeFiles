@@ -3612,3 +3612,96 @@ public:
 };
 ```
 
+另一个优化代码：
+
+<https://leetcode-cn.com/problems/jump-game/solution/hui-dao-zui-chu-de-qi-dian-by-martinyue/>
+
+从最后一个点依次往前，看当前点是不是可以可到达终点，如果可达到就以当前点为观察点，再看它是不是可由更左边的点可到达，直到第1个点。
+
+```c++
+class Solution {  // 12ms
+public:
+    bool canJump(vector<int>& nums) {
+        int leftPoint = nums.size() - 1;
+        for (int index = nums.size() - 2; index >= 0; index--) {
+            if (nums[index] >= leftPoint - index) {
+                leftPoint = index;
+            }
+        }
+        return leftPoint == 0 ? 1 : 0;
+    }
+};
+```
+
+## [739. 每日温度](https://leetcode-cn.com/problems/daily-temperatures/)(华为题库)
+
+用双循环遍历，比较慢：
+
+```c++
+class Solution {  // 2312ms
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        vector<int> days;
+        for (auto tempIter = T.begin(); tempIter != T.end(); ++tempIter) {
+            auto iterGreater = find_if(tempIter + 1, T.end(), [=](int temperature) { return temperature > *tempIter; });
+            days.push_back(iterGreater == T.end() ? 0 : distance(tempIter, iterGreater));
+        }
+        return move(days);
+    }
+};
+```
+
+优化代码：
+
+<https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
+
+温度总共就30到100，把每个温度值都记录在next向量中，每来一个温度，就查找比它高的全部温度，看哪个温度的位置离它最近：
+
+```c++
+class Solution {  // 256ms
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        vector<int> ans(T.size(), 0);
+        vector<int> next(101, numeric_limits<int>::max());
+        for (int i = T.size() - 1; i >= 0; --i) {
+            int warmer_index = numeric_limits<int>::max();
+            for (int t = T[i] + 1; t <= 100; ++t) {
+                if (next[t] < warmer_index) {
+                    warmer_index = next[t];
+                }
+            }
+            if (warmer_index < numeric_limits<int>::max()) {
+                ans[i] = warmer_index - i;
+            }
+            next[T[i]] = i;
+        }
+        return move(ans);
+    }
+};
+```
+
+使用栈的方法：
+
+<https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
+
+stack里存的自顶向下递增的元素的索引，倒序每新来一个元素，就把栈里比它小的元素全部弹出（因为当前元素索引又小，值又比早入栈的元素大，所以早入栈的那些元素在之后的比较中不会起任何作用），此时栈顶的元素即是值刚刚比它大，索引又最小的元素，再把该新元素入栈：
+
+```c++
+class Solution {
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        vector<int> ans(T.size(), 0);
+        stack<int> stack;
+        for (int i = T.size() - 1; i >= 0; --i) {
+            while (!stack.empty() && T[i] >= T[stack.top()]) {
+                stack.pop();
+            }
+            ans[i] = stack.empty() ? 0 : stack.top() - i;
+            stack.push(i);
+        }
+
+        return move(ans);
+    }
+};
+```
+
