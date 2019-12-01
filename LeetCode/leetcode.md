@@ -2094,9 +2094,7 @@ TEST(SolutionTest, Test9)
 }
 ```
 
-## 554. Brick Wall
-
-<https://leetcode.com/problems/brick-wall/>
+## [554. 砖墙](https://leetcode-cn.com/problems/brick-wall/)(华为题库)
 
 思路：找到每行各个砖组成的数字和，数出各行砖出现的最多的数字，其个数就是竖线要穿过时经过的缝，用砖高度减去该数字即竖线穿过的砖个数。
 
@@ -2510,7 +2508,7 @@ TEST(SolutionTest, Test9) {
 }
 ```
 
-## [820  Short Encoding of Words](https://leetcode.com/problems/short-encoding-of-words/)
+## [820  Short Encoding of Words](https://leetcode.com/problems/short-encoding-of-words/)(华为题库)
 
 ```c++
 // 每次的新单词，都遍历是不是能在前面所有单词中找到以其为结尾，最差的情况为O(n*n)
@@ -2848,7 +2846,7 @@ TEST(SolutionTest, Test3) {
 }
 ```
 
-## [43. 字符串相乘](https://leetcode-cn.com/problems/multiply-strings/)(华为题库)
+## [43. 字符串相乘](https://leetcode-cn.com/problems/multiply-strings/)(华为题库)（只看没做）
 
 <https://leetcode-cn.com/problems/multiply-strings/solution/you-hua-ban-shu-shi-da-bai-994-by-breezean/>
 
@@ -3189,7 +3187,7 @@ public:
 };
 ```
 
-## [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)(华为题库)
+## [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)(华为题库)（只看没做）
 
 <https://leetcode-cn.com/problems/number-of-islands/solution/dao-yu-shu-liang-by-leetcode/>
 
@@ -3680,7 +3678,7 @@ public:
 };
 ```
 
-使用栈的方法：
+使用栈的方法（如果某些数据在使用后就没用了，可以考虑用栈）：
 
 <https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
 
@@ -3704,4 +3702,221 @@ public:
     }
 };
 ```
+
+## [8. 字符串转换整数 (atoi)](https://leetcode-cn.com/problems/string-to-integer-atoi/)(华为题库)（只看没做）
+
+别人的解法： 
+
+<https://leetcode-cn.com/problems/string-to-integer-atoi/solution/zi-fu-chuan-zhuan-huan-zheng-shu-atoi-cshi-xian-li/>
+
+使用正则表达式：
+
+```c++
+#include <regex>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 436 ms
+public:
+    int myAtoi(string str) {
+        int result;
+        string resultStr;
+        smatch tmpMatch;
+        //c++中要用\\进行转义
+        regex tmpRegex("^[\\+\\-\\d]\\d*");
+        //先将左边的空格去除
+        trimStart(str);
+        regex_search(str, tmpMatch, tmpRegex);
+
+        stringstream ss;
+        if (int(tmpMatch.size()) == 0) {
+            return 0;
+        }
+        string tmpStr = tmpMatch[0];
+        //转换成int
+        ss << tmpStr;
+        long longResult;
+        ss >> longResult;
+        result = max(min(longResult, long(INT_MAX)), long(INT_MIN));
+
+        return result;
+    }
+
+    void trimStart(string& s) {
+        if (!s.empty()) {
+            s.erase(0, s.find_first_not_of(" "));
+            //s.erase(s.find_last_not_of(" ") + 1);
+        }
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    EXPECT_EQ(42, Solution().myAtoi("42"));
+}
+
+TEST(SolutionTest, Test2) {
+    EXPECT_EQ(-42, Solution().myAtoi("         -42"));
+}
+
+TEST(SolutionTest, Test3) {
+    EXPECT_EQ(0, Solution().myAtoi("words and 987"));
+}
+
+TEST(SolutionTest, Test4) {
+    EXPECT_EQ(-2147483648, Solution().myAtoi("-91283472332"));
+}
+```
+
+使用stringstream：
+
+```c++
+class Solution {  // 8 ms
+public:
+    int myAtoi(string str) {
+        int result = 0;
+        stringstream ss;
+        ss << str;
+        ss >> result;
+        return result;
+    }
+};
+```
+
+## [322. 零钱兑换](https://leetcode-cn.com/problems/coin-change/)(华为题库)（只看没做）
+
+<https://leetcode-cn.com/problems/coin-change/solution/ling-qian-dui-huan-by-leetcode/>
+
+方法一：暴力法[超出时间限制]
+
+全遍历所有硬币组合，第1个硬币从取0个，再继续遍历第2个硬币从取0个，再到第3个硬币从取0个到最大个，再到第2个硬币取1个，再到第3个硬币从取0个到最大个，。。。，再到第1个硬币取1个，依次遍历所有组合：
+
+```c++
+// Solution.java
+package test;
+
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        return coinChange(0, coins, amount);
+    }
+
+    private int coinChange(int idxCoin, int[] coins, int amount) {
+        if (amount == 0) {
+            return 0;
+        }
+        if (idxCoin < coins.length && amount > 0) {
+            int maxVal = amount / coins[idxCoin];
+            int minCost = Integer.MAX_VALUE;
+            for (int x = 0; x <= maxVal; x++) {
+                if (amount >= x * coins[idxCoin]) {
+                    int res = coinChange(idxCoin + 1, coins, amount - x * coins[idxCoin]);
+                    if (res != -1) {
+                        minCost = Math.min(minCost, res + x);
+                    }
+                }
+            }
+            return (minCost == Integer.MAX_VALUE) ? -1 : minCost;
+        }
+        return -1;
+    }
+}
+
+// SolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        int[] coins = {1, 2, 5};
+        int amount = 11;
+        assertEquals(3, SOLUTION.coinChange(coins, amount));
+    }
+
+    @Test
+    public void test2() {
+        int[] coins = {2};
+        int amount = 3;
+        assertEquals(-1, SOLUTION.coinChange(coins, amount));
+    }
+
+    @Test
+    public void test3() {
+        int[] coins = {2, 3, 7};
+        int amount = 15;
+        assertEquals(4, SOLUTION.coinChange(coins, amount));
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
