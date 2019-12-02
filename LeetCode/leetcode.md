@@ -3711,7 +3711,7 @@ public:
 
 使用正则表达式：
 
-```c++
+```java
 #include <regex>
 #include "gtest/gtest.h"
 
@@ -3770,7 +3770,7 @@ TEST(SolutionTest, Test4) {
 
 使用stringstream：
 
-```c++
+```java
 class Solution {  // 8 ms
 public:
     int myAtoi(string str) {
@@ -3791,7 +3791,7 @@ public:
 
 全遍历所有硬币组合，第1个硬币从取0个，再继续遍历第2个硬币从取0个，再到第3个硬币从取0个到最大个，再到第2个硬币取1个，再到第3个硬币从取0个到最大个，。。。，再到第1个硬币取1个，依次遍历所有组合：
 
-```c++
+```java
 // Solution.java
 package test;
 
@@ -3854,9 +3854,116 @@ public class SolutionTest {
 }
 ```
 
+方法二：动态规划-自上而下[通过]
 
+用count数组保存S金额时最小数量硬币，用res表示在rem金额时，依次遍历各种硬币种类，所需最小硬币个数，与临时变量min相比，判断当前rem金额所需的最小硬币个数，并保存在count数组中。
 
+将全部情况遍历后，即得到最小总硬币个数。
 
+```java
+package test;
+
+class Solution {  // 34 ms
+    public int coinChange(int[] coins, int amount) {
+        if (amount < 1) {
+            return 0;
+        }
+        return coinChange(coins, amount, new int[amount]);
+    }
+
+    private int coinChange(int[] coins, int rem, int[] count) {
+        if (rem < 0) {
+            return -1;
+        }
+        if (rem == 0) {
+            return 0;
+        }
+        if (count[rem - 1] != 0) {
+            return count[rem - 1];
+        }
+        int min = Integer.MAX_VALUE;
+        for (int coin : coins) {  // 在总金额为rem时，取一个硬币面值为coin时
+            int res = coinChange(coins, rem - coin, count);  // 计算此情况时，剩余金额所需的最小硬币个数
+            if (res >= 0 && res < min) {
+                min = 1 + res;  // 递推公式也就是F(S) = F(S - coin) + 1
+            }
+        }
+        count[rem - 1] = (min == Integer.MAX_VALUE) ? -1 : min;
+        return count[rem - 1];
+    }
+}
+```
+
+方法三：动态规划-自下而上[通过]
+
+![](pictures\322. 零钱兑换（方法三：动态规划-自下而上）.png)
+
+```java
+package test;
+
+import java.util.Arrays;
+
+class Solution {
+    public int coinChange(int[] coins, int amount) {
+        int max = amount + 1;
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, max);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            for (int j = 0; j < coins.length; j++) {
+                if (coins[j] <= i) {
+                    dp[i] = Math.min(dp[i], dp[i - coins[j]] + 1);  // 
+                }
+            }
+        }
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}
+```
+
+上述代码自己用C++重新写一遍：
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        int invalidValue = amount + 1;
+        vector<int> dp(amount + 1, invalidValue);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; ++i) {
+            for (int coin : coins) {
+                if (coin <= i) {
+                    dp[i] = min(dp[i], dp[i - coin] + 1);
+                }
+            }
+        }
+        return dp[amount] == invalidValue ? -1 : dp[amount];
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<int> coins = {1, 2, 5};
+    int amount = 11;
+    EXPECT_EQ(3, Solution().coinChange(coins, amount));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<int> coins = {2};
+    int amount = 3;
+    EXPECT_EQ(-1, Solution().coinChange(coins, amount));
+}
+
+TEST(SolutionTest, Test3) {
+    vector<int> coins = {2, 3, 7};
+    int amount = 15;
+    EXPECT_EQ(4, Solution().coinChange(coins, amount));
+}
+
+```
 
 
 
