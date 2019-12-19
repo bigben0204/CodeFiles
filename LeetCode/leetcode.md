@@ -9066,7 +9066,10 @@ public class Solution {  // 超时
 }
 ```
 
+方法 2：二维动态规划
 
+我们新建一个额外的 dpdp 数组，与原矩阵大小相同。在这个矩阵中，dp(i, j)dp(i,j) 表示从坐标 (i, j)(i,j) 到右下角的最小路径权值。我们初始化右下角的 dpdp 值为对应的原矩阵值，然后去填整个矩阵，对于每个元素考虑移动到右边或者下面，因此获得最小路径和我们有如下递推公式：
+`dp(i,j)=grid(i,j)+min(dp(i+1,j),dp(i,j+1))`
 
 ```java
 public class Solution {
@@ -9090,9 +9093,140 @@ public class Solution {
 }
 ```
 
+自己用C++写了一遍：
 
+```c++
+class Solution {  // 12ms
+public:
+    int minPathSum(vector<vector<int>>& grid)
+    {
+        if (grid.empty()) {
+            return 0;
+        }
 
+        int m = grid.size();
+        int n = grid.at(0).size();
+        vector<vector<int>> dp(m, vector<int>(n, 0));
+        for (int i = m - 1; i >= 0; --i) {
+            for (int j = n - 1; j >= 0; --j) {
+                if (i == m - 1 && j == n - 1) {
+                    dp[i][j] = grid[i][j];
+                } else if (i == m - 1 && j != n - 1) {
+                    dp[i][j] = grid[i][j] + dp[i][j + 1];
+                } else if (i != m - 1 && j == n - 1) {
+                    dp[i][j] = grid[i][j] + dp[i + 1][j];
+                } else {
+                    dp[i][j] = grid[i][j] + min(dp[i + 1][j], dp[i][j + 1]);
+                }
+            }
+        }
+        return dp[0][0];
+    }
+};
+```
 
+## 使用队列实现栈（华为可信认证2019-12-20 Demo1）
+
+```c++
+#include "gtest/gtest.h"
+#include <queue>
+
+using namespace std;
+
+class MyStack {
+public:
+    MyStack() {}
+
+    void push(int x) {
+        pushQueue_->push(x);
+    }
+
+    int pop() {
+        checkAndSwapPushQueue();
+        transPushQueueToOneValue();
+
+        int top = pushQueue_->front();
+        pushQueue_->pop();
+        return top;
+    }
+
+    int top() {
+        checkAndSwapPushQueue();
+        transPushQueueToOneValue();
+        return pushQueue_->front();
+    }
+
+    bool empty() {
+        return pushQueue_->empty() && transQueue_->empty();
+    }
+
+private:
+    void checkAndSwapPushQueue() {
+        if (pushQueue_->empty()) {
+            queue<int>* tmpQueue_ = pushQueue_;
+            pushQueue_ = transQueue_;
+            transQueue_ = tmpQueue_;
+        }
+    }
+
+    void transPushQueueToOneValue() const {
+        while (pushQueue_->size() != 1) {
+            int front = pushQueue_->front();
+            pushQueue_->pop();
+            transQueue_->push(front);
+        }
+    }
+
+private:
+    queue<int> queue1_;
+    queue<int> queue2_;
+    queue<int>* pushQueue_ = &queue1_;
+    queue<int>* transQueue_ = &queue2_;
+};
+
+class MyStackTest : public testing::Test {
+protected:
+    void SetUp() {
+//        myStack = MyStack();  // 这种写法的问题在于指针浅拷贝，myStack的成员指针指向了临时变量MyStack()里的指针，所以运行时踩内存了
+        myStack = make_unique<MyStack>();
+    }
+
+protected:
+    unique_ptr<MyStack> myStack;
+};
+
+TEST_F(MyStackTest, Test1) {
+    myStack->push(10);
+    myStack->push(20);
+
+    EXPECT_FALSE(myStack->empty());
+    EXPECT_EQ(20, myStack->top());
+    EXPECT_EQ(20, myStack->pop());
+    EXPECT_EQ(10, myStack->top());
+    EXPECT_EQ(10, myStack->pop());
+    EXPECT_TRUE(myStack->empty());
+}
+
+TEST_F(MyStackTest, Test2) {
+    myStack->push(10);
+    myStack->push(20);
+
+    EXPECT_FALSE(myStack->empty());
+    EXPECT_EQ(20, myStack->top());
+    EXPECT_EQ(20, myStack->pop());
+    myStack->push(30);
+    myStack->push(40);
+
+    EXPECT_EQ(40, myStack->pop());
+    EXPECT_EQ(30, myStack->pop());
+    EXPECT_EQ(10, myStack->pop());
+    EXPECT_TRUE(myStack->empty());
+}
+```
+
+## 消除重复字符（华为可信认证2019-12-20 Demo3）
+
+一个输入字符串只有小写字母，请消除重复字符，使得每个字符都唯一，并返回字符串为自然序最小。
 
 
 
