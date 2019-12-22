@@ -9125,7 +9125,7 @@ public:
 };
 ```
 
-## 使用队列实现栈（华为可信认证2019-12-20 Demo1）
+## [225. 用队列实现栈](https://leetcode-cn.com/problems/implement-stack-using-queues/)(华为可信认证2019-12-20 Demo1)
 
 ```c++
 #include "gtest/gtest.h"
@@ -9224,11 +9224,110 @@ TEST_F(MyStackTest, Test2) {
 }
 ```
 
-## 消除重复字符（华为可信认证2019-12-20 Demo3）
+## [316. 去除重复字母](https://leetcode-cn.com/problems/remove-duplicate-letters/)(华为可信认证2019-12-20 Demo3)
 
 一个输入字符串只有小写字母，请消除重复字符，使得每个字符都唯一，并返回字符串为自然序最小。
 
+参考别人代码：
 
+<https://leetcode-cn.com/problems/remove-duplicate-letters/solution/qu-chu-zhong-fu-zi-mu-by-watson-22/>
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 8ms
+public:
+    string removeDuplicateLetters(string s) {
+        map<char, int> charCountMap;
+        map<char, bool> charAppendFlagMap;
+        for_each(s.begin(), s.end(), [&](char c) {
+            ++charCountMap[c];
+            charAppendFlagMap[c] = false;
+        });
+
+        string ret("0");  // 初始化方便处理 否则操作result.back()需要讨论result为空的情形
+        for (char c : s) {
+            --charCountMap[c];  // 更新剩余子串字符ch出现次数
+            if (charAppendFlagMap[c]) {
+                continue;
+            }
+
+            // 当字符串中字符比当前字符大，并且后面还有该字符时，就可以弹出该字符，后面再添加进来
+            while (ret.back() > c && charCountMap[ret.back()] > 0) {
+                charAppendFlagMap[ret.back()] = false;
+                ret.pop_back();
+            }
+            ret.push_back(c);  // 贪心算法的体现——尽可能多吃下字符
+            charAppendFlagMap[c] = true;
+        }
+        return ret.substr(1);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ("abc", solution.removeDuplicateLetters("bcabc"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ("acdb", solution.removeDuplicateLetters("cbacdcbc"));
+}
+```
+
+## [714. 买卖股票的最佳时机含手续费](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/)
+
+别人的解答：
+
+<https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/mai-mai-gu-piao-de-zui-jia-shi-ji-han-shou-xu-fei-/>
+
+方法：动态规划
+我们维护两个变量cash 和 hold，前者表示当我们不持有股票时的最大利润，后者表示当我们持有股票时的最大利润。
+
+在第 i 天时，我们需要根据第 i - 1天的状态来更新 cash 和hold 的值。对于cash，我们可以保持不变，或者将手上的股票卖出，状态转移方程为
+
+`cash = max(cash, hold + prices[i] - fee)`
+对于 hold，我们可以保持不变，或者买入这一天的股票，状态转移方程为
+
+`hold = max(hold, cash - prices[i])`
+在计算这两个状态转移方程时，我们可以不使用临时变量来存储第i−1 天cash 和 hold 的值，而是可以先计算 cash 再计算 hold，原因是在同一天卖出再买入（亏了一笔手续费）一定不会比不进行任何操作好。
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 120ms
+public:
+    int maxProfit(vector<int>& prices, int fee) {
+        int cash = 0, hold = -prices[0];
+        for (int i = 1; i < prices.size(); i++) {
+            cash = max(cash, hold + prices[i] - fee);
+            hold = max(hold, cash - prices[i]);
+        }
+        return cash;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> prices = {1, 3, 2, 8, 4, 9};
+    int fee = 2;
+    EXPECT_EQ(8, solution.maxProfit(prices, fee));
+}
+
+```
+
+[一个方法团灭 6 道股票问题](https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/yi-ge-fang-fa-tuan-mie-6-dao-gu-piao-wen-ti-by-l-2/)
 
 
 
