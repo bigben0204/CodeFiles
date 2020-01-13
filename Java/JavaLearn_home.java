@@ -1,4 +1,177 @@
 //------------------------------------------------------------------------------------------------
+//打印任务：某个打印机根据打印队列执行打印任务。打印任务分为九个优先级，分别采用数字1~9表示，数字越大优先级越高。打印机每次从队列头部取出第一个任务A，然后检查队列余下任务中有没有比A优先级更高的任务，如果有比A优先级高的任务，则将任务A放到队列尾部，否则执行任务A的打印。请编写一个程序，根据输入的打印队列，输出实际打印顺序。
+// 输入：9,3,5 -> 输出：0,2,1
+// 输入：1,3,1 -> 输出：2,0,1
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+    static private class TaskInfo {
+        public TaskInfo(int priority, int index, int flag) {
+            this.priority = priority;
+            this.index = index;
+            this.flag = flag;
+        }
+
+        int priority;
+        int index;
+        int flag;
+    }
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        while (in.hasNextLine()) {
+            String order = getOrder(in.nextLine());
+            System.out.println(order);
+        }
+    }
+
+    private static String getOrder(String priorityStr) {
+        List<TaskInfo> taskInfos = getTasks(priorityStr);
+        TaskInfo tmpMaxTaskInfo = taskInfos.get(0);
+        StringBuilder result = new StringBuilder();
+        while (true) {
+            int index = tmpMaxTaskInfo.index;
+            for (int i = tmpMaxTaskInfo.index + 1; i < taskInfos.size(); i++) {
+                TaskInfo taskInfo = taskInfos.get(i);
+                if (taskInfo.priority > tmpMaxTaskInfo.priority && taskInfo.flag == 0) {
+                    tmpMaxTaskInfo = taskInfo;
+                }
+            }
+
+            for (int i = 0; i < index; i++) {
+                TaskInfo taskInfo = taskInfos.get(i);
+                if (taskInfo.priority > tmpMaxTaskInfo.priority && taskInfo.flag == 0) {
+                    tmpMaxTaskInfo = taskInfo;
+                }
+            }
+            result.append(tmpMaxTaskInfo.index + ",");
+            tmpMaxTaskInfo.flag = 1;
+            tmpMaxTaskInfo = getNextMax(tmpMaxTaskInfo, taskInfos);
+            if (tmpMaxTaskInfo == null) {
+                break;
+            }
+        }
+        return result.substring(0, result.length() - 1);
+    }
+
+    private static List<TaskInfo> getTasks(String priorityStr) {
+        List<TaskInfo> taskInfos = new ArrayList<>();
+        String[] priorityTasks = priorityStr.split(",");
+        for (int index = 0; index < priorityTasks.length; index++) {
+            int priority = Integer.parseInt(priorityTasks[index].trim());
+            TaskInfo t = new TaskInfo(priority, index, 0);
+            taskInfos.add(t);
+        }
+        return taskInfos;
+    }
+
+    private static TaskInfo getNextMax(TaskInfo taskInfo, List<TaskInfo> taskInfos) {
+        for (int i = taskInfo.index + 1; i < taskInfos.size(); i++) {
+            TaskInfo t = taskInfos.get(i);
+            if (t.flag == 0) {
+                return t;
+            }
+        }
+
+        for (int i = 0; i < taskInfo.index; i++) {
+            TaskInfo t = taskInfos.get(i);
+            if (t.flag == 0) {
+                return t;
+            }
+        }
+        return null;
+    }
+}
+
+//------------------------------------------------------------------------------------------------
+//747. Largest Number At Least Twice of Others https://leetcode.com/problems/largest-number-at-least-twice-of-others/submissions/
+
+//把数字和其下标一起排序后获取最大值和第二大值元素，如果满足2倍关系，则直接返回最大值下标索引。
+package test;
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+class Solution {
+    public int dominantIndex(int[] nums) {
+        if (nums.length == 1) {
+            return 0;
+        }
+
+        int[][] sortedInts = new int[nums.length][2];
+        for (int i = 0; i < nums.length; i++) {
+            sortedInts[i][0] = nums[i];
+            sortedInts[i][1] = i;
+        }
+
+        Arrays.sort(sortedInts, Comparator.comparing(e -> -e[0]));
+        int[] max = sortedInts[0];
+        int[] secondMax = sortedInts[1];
+
+        return max[0] >= 2 * secondMax[0] ? max[1] : -1;
+    }
+}
+
+//优化过的，只遍历一遍，找到最大值和第二大的值
+package test;
+
+class Solution { //0ms
+    public int dominantIndex(int[] nums) {
+        if (nums.length == 1) {
+            return 0;
+        }
+
+        int max = nums[0];
+        int maxIndex = 0;
+        int secondMax = Integer.MIN_VALUE;
+
+        for (int i = 1; i < nums.length; ++i) {
+            if (nums[i] > max) { //如果找到了最大值，则原最大值变成第二大值
+                secondMax = max;
+                max = nums[i];
+                maxIndex = i;
+            } else if (secondMax == Integer.MIN_VALUE || nums[i] > secondMax) { //如果当前值不是最大值，则判断当前值是不是比原来的第二大值大，如果大于则将其赋给第二大值
+                secondMax = nums[i];
+            }
+        }
+        return max >= 2 * secondMax ? maxIndex : -1;
+    }
+}
+
+
+//
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        int[] nums = {3, 6, 1, 0};
+        assertEquals(1, SOLUTION.dominantIndex(nums));
+    }
+
+    @Test
+    public void test2() {
+        int[] nums = {1, 2, 3, 4};
+        assertEquals(-1, SOLUTION.dominantIndex(nums));
+    }
+
+    @Test
+    public void test3() {
+        int[] nums = {1, 0, 0, 0};
+        assertEquals(0, SOLUTION.dominantIndex(nums));
+    }
+}
+//------------------------------------------------------------------------------------------------
 //406. Queue Reconstruction by Height https://leetcode.com/problems/queue-reconstruction-by-height/
 输入：二维数组，其中每个对象是一个小朋友信息，由{k, v}表示，k表示小朋友体重，v表示体重比这个小朋友轻的有几位排在这个小朋友前。
 输出：小朋友排序好的二维数组队列。
@@ -431,6 +604,8 @@ public class SolutionTest {
 
 //------------------------------------------------------------------------------------------------
 //面试官D考试Demo3：
+//75. Sort Colors https://leetcode.com/problems/sort-colors/
+
 给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
 此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。
 
@@ -2143,7 +2318,7 @@ class Solution {
 //    }
 }
 //------------------------------------------------------------------------------------------------
-//493. Reverse Pairs
+//493. Reverse Pairs https://leetcode.com/problems/reverse-pairs/
 Given an array nums, we call (i, j) an important reverse pair if i < j and nums[i] > 2*nums[j].
 
 You need to return the number of important reverse pairs in the given array.
@@ -3710,7 +3885,7 @@ str: https://blog.csdn.net/wohaqiyi/article/details/79179600 , count: 4
 str: https://blog.csdn.net/woliuyunyicai/article/details/48489525 , count: 3
 MaxCountStr: https://blog.csdn.net/wohaqiyi/article/details/79179600
 //------------------------------------------------------------------------------------------------
-//leetcode 1
+//1. Two Sum https://leetcode.com/problems/two-sum/
 package leetcode;
 
 import java.util.HashMap;
@@ -3833,7 +4008,7 @@ public class TwoSumTest {
     }
 }
 //------------------------------------------------------------------------------------------------
-//letcode 3
+//3. Longest Substring Without Repeating Characters https://leetcode.com/problems/longest-substring-without-repeating-characters/
 package leetcode;
 
 import java.util.Arrays;
