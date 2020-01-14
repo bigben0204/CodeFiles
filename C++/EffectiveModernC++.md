@@ -648,13 +648,13 @@ auto x4{ 27 };                      // 同上
 这和`auto`的一种特殊类型推导有关系。当使用一对花括号来初始化一个`auto`类型的变量的时候，推导的类型是`std::intializer_list`。如果这种类型无法被推导（比如在花括号中的变量拥有不同的类型），代码会编译错误。
 
 ```c++
-auto x5 = { 1, 2, 3.0 };            // 错误！ 不能讲T推导成
+auto x5 = { 1, 2, 3.0 };            // 错误！ 不能将T推导成
                                     // std::intializer_list<T>
 ```
 
 正如注释中所说的，在这种情况，类型推导会失败，但是认识到这里实际上是有两种类型推导是非常重要的。一种是`auto: x5`的类型被推导。因为`x5`的初始化是在花括号里面，`x5`必须被推导成`std::intializer_list`。但是`std::intializer_list`是一个模板。实例是对一些`T`实例化成`std::intializer_list`，这就意味着`T`的类型必须被推导出来。类型推导就在第二种的推导的范围上失败了。在这个例子中，类型推导失败是因为在花括号里面的数值并不是单一类型的。
 
-对待花括号初始化的行为是`auto`唯一和模板类型推导不一样的地方。当`auto`声明变量被使用一对花括号初始化，推导的类型是`std::intializer_list`的一个实例。但是如果相同的初始化递给相同的模板，类型推导会失败，代码不能编译。
+**对待花括号初始化的行为是`auto`唯一和模板类型推导不一样的地方**。当`auto`声明变量被使用一对花括号初始化，推导的类型是`std::intializer_list`的一个实例。但是如果相同的初始化递给相同的模板，类型推导会失败，代码不能编译。
 
 ```c++
 auto x = { 11, 23, 9 };             // x的类型是
@@ -703,6 +703,214 @@ resetV({ 1, 2, 3 });                // 编译错误，不能推导出{ 1, 2, 3 }
 | `auto`在函数返回值或者lambda参数里面执行模板的类型推导，而不是通常意义的`auto`类型推导 |
 
 ## 条款三：理解`decltype`
+
+`decltype`是一个怪异的发明。给定一个变量名或者表达式，`decltype`会告诉你这个变量名或表达式的类型。`decltype`的返回的类型往往也是你期望的。然而有时候，它提供的结果会使开发者极度抓狂而不得参考其他文献或者在线的Q&A网站。
+
+我们从在典型的情况开始讨论，这种情况下`decltype`不会有令人惊讶的行为。与`templates`和`auto`在类型推导中行为相比（请见条款一和条款二），`decltype`一般只是复述一遍你所给他的变量名或者表达式的类型，如下：
+
+```c++
+   const int i = 0;            // decltype(i) is const int
+
+   bool f(const Widget& w);    // decltype(w) is const Widget&
+                               // decltype(f) is bool(const Widget&)
+   struct Point{
+     int x, y;                 // decltype(Point::x) is int，没见过这种用法：decltype(Point::x) i = 10;
+   };
+
+   Widget w;                   // decltype(w) is Widget
+
+   if (f(w)) ...               // decltype(f(w)) is bool
+
+   template<typename T>        // simplified version of std::vector
+   class vector {
+   public:
+     ...
+     T& operator[](std::size_t index);
+     ...
+   };
+
+   vector<int> v;              // decltype(v) is vector<int>
+   ...
+   if(v[0] == 0)               // decltype(v[0]) is int&
+```
+
+毫无令人惊讶的地方。
+
+在C++11中，`decltype`最主要的用处可能就是用来声明一个函数模板，在这个函数模板中返回值的类型取决于参数的类型。举个例子，假设我们想写一个函数，这个函数中接受一个支持方括号索引（也就是"[]"）的容器作为参数，验证用户的合法性后返回索引结果。这个函数的返回值类型应该和索引操作的返回值类型是一样的。
+
+操作子`[]`作用在一个对象类型为`T`的容器上得到的返回值类型为`T&`。对`std::deque`一般是成立的，例如，对`std::vector`，这个几乎是处处成立的。然而，**对`std::vector`，`[]`操作子不是返回`bool&`，而是返回一个全新的对象**。发生这种情况的原理将在条款六中讨论，对于**此处重要的是容器的`[]`操作返回的类型是取决于容器的**。
+
+`decltype`使得这种情况很容易来表达。下面是一个模板程序的部分，展示了如何使用`decltype`来求返回值类型。这个模板需要改进一下，但是我们先推迟一下：
+
+```c++
+#include <iostream>
+#include <vector>
+#include <cassert>
+
+using namespace std;
+
+// works, but requires refinements（改进）
+template<typename Container, typename Index>
+auto authAndAccess(Container& c, Index i) -> decltype(c[i]) {
+    assert(i < c.size());
+    return c[i];
+}
+
+int main() {
+    vector<int> ints = {1, 2, 3};
+    // 这里返回的类型是int&，如果定义int&&，则编译报错：error: cannot bind rvalue reference of type 'int&&' to lvalue of type '__gnu_cxx::__alloc_traits<std::allocator<int>, int>::value_type' {aka 'int'}
+    int& i = authAndAccess(ints, 2);  // 3
+    cout << i << endl;
+
+    vector<bool> bools = {true, false, true};
+    // 这里返回类型是bool，可以定义类型为bool或bool&&或const bool&，如果定义bool&，则编译报错：error: cannot bind non-const lvalue reference of type 'bool&' to an rvalue of type 'bool'
+    bool b = authAndAccess(bools, 2);
+    cout << boolalpha << b << endl;  // true
+    return 0;
+}
+
+```
+
+将`auto`用在函数名之前和类型推导是没有关系的。更精确地讲，此处使用了`C++11`的尾随返回类型技术，即函数的返回值类型在函数参数之后声明(“->”后边)。尾随返回类型的一个优势是在定义返回值类型的时候使用函数参数。例如在函数`authAndAccess`中，我们使用了`c`和`i`定义返回值类型。在传统的方式下，我们在函数名前面声明返回值类型，`c`和`i`是得不到的，因为此时`c`和`i`还没被声明。
+
+使用这种类型的声明，`authAndAccess`的返回值就是`[]`操作子的返回值，这正是我们所期望的。
+
+`C++11`允许单语句的`lambda`表达式的返回类型被推导，在`C++14`中之中行为被拓展到包括多语句的所有的`lambda`表达式和函数。在上面`authAndAccess`中，意味着在`C++14`中我们可以忽略尾随返回类型，仅仅保留开头的`auto`。使用这种形式的声明，
+意味着将会使用类型推导。特别注意的是，编译器将从函数的实现来推导这个函数的返回类型：
+
+```c++
+template<typename Container, typename Index>         // C++14;
+auto authAndAccess(Container &c, Index i)            // not quite
+{                                                    // correct
+    authenticateUser();
+    return c[i];
+}                                 // return type deduced from c[i]
+
+int& i = authAndAccess(ints, 2);  // 上例编译失败：error: cannot bind non-const lvalue reference of type 'int&' to an rvalue of type 'int'。相当于把int&类型对象赋给template<typename T> void f(T param);的模板函数，则T推导出的类型为int。
+```
+
+条款二解释说，对使用`auto`来表明函数返回类型的情况，编译器使用模板类型推导。但是这样是回产生问题的。正如我们所讨论的，对绝大部分对象类型为`T`的容器，`[]`操作子返回的类型是`T&`, 然而条款一提到，在模板类型推导的过程中,初始表达式的引用会被忽略。思考这对下面代码意味着什么：
+
+```c++
+std::deque<int> d;
+...
+authAndAccess(d, 5) = 10;       // authenticate user, return d[5],
+                                // then assign 10 to it;
+                                // this won't compile! error: lvalue required as left operand of assignment
+```
+
+此处，`d[5]`返回的是`int&`，但是`authAndAccess`的`auto`返回类型声明将会剥离这个引用，从而得到的返回类型是`int`。`int`作为一个右值成为真正的函数返回类型。上面的代码尝试给一个右值`int`赋值为10。这种行为是在`C++`中被禁止的，所以代码无法编译通过。
+
+为了让`authAndAccess`按照我们的预期工作，我们需要为它的返回值使用`decltype`类型推导，即指定`authAndAccess`要返回的类型正是表达式`c[i]`的返回类型。`C++`的拥护者们预期到在某种情况下有使用`decltype`类型推导规则的需求，并将这个功能在`C++14`中通过`decltype(auto)`实现。这使这对原本的冤家（`decltype`和`auto`）在一起完美地发挥作用：`auto`指定需要推导的类型，`decltype`表明在推导的过程中使用`decltype`推导规则。因此，我们可以重写`authAndAccess`如下：
+
+```c++
+template<typename Container, typename Index>  // C++14; works,
+decltype(auto)                                // but still
+authAndAccess(Container &c, Index i)          // requires
+{                                             // refinement
+	authenticateUser();
+	return c[i];
+}
+```
+
+现在`authAndAccess`的返回类型就是`c[i]`的返回类型。在一般情况下，`c[i]`返回`T&`，`authAndAccess`就返回`T&`，在不常见的情况下，`c[i]`返回一个对象，`authAndAccess`也返回一个对象。
+
+`decltype(auto)`并不仅限使用在函数返回值类型上。当时想对一个表达式使用`decltype`的推导规则时，它也可以很方便的来声明一个变量：
+
+**注**：**我这里的理解decltype(auto)就是对表达式的原始类型做推导**，如上述函数返回值使用decltype(auto)表示decltype(c[i])，下例对赋值对象myWidget2使用decltype(auto)表示decltype(cw)。
+
+```c++
+class Widget {};
+
+int main() {
+    Widget w;
+    const Widget& cw = w;
+    auto myWidget1 = cw;  // auto type deduction, myWidget1's type is Widget
+    decltype(auto) myWidget2 = cw;  // decltype type deduction: myWidget2's type is const Widget&
+    decltype(myWidget1) myWidget3 = cw;  // 这里是对myWidget1类型做推导，还是Widget
+    return 0;
+}
+```
+
+我知道，到目前为止会有两个问题困扰着你。一个是我们前面提到的，对`authAndAccess`的改进。我们在这里讨论。
+
+再次看一下`C++14`版本的`authAndAccess`的声明：
+
+```c++
+template<typename Container, typename Index>
+decltype(auto) anthAndAccess(Container &c, Index i);
+```
+
+这个容器是通过非`const`左值引用传入的，因为通过返回一个容器元素的引用是来修改容器是被允许的。但是这也意味着不可能将右值（如临时变量）传入这个函数。右值不能和一个左值引用绑定（除非是`const`的左值引用，这不是这里的情况）。
+
+诚然，传递一个右值容器给`authAndAccess`是一种极端情况。一个右值容器作为一个临时对象，在 `anthAndAccess` 所在语句的最后被销毁，意味着对容器中一个元素的引用（这个引用通常是`authAndAccess`返回的）在创建它的语句结束的地方将被悬空。然而，这对于传给`authAndAccess`一个临时对象是有意义的。一个用户可能仅仅想拷贝一个临时容器中的一个元素，例如：
+
+```c++
+std::deque<std::string> makeStringDeque(); // factory function
+// make copy of 5th element of deque returned
+// from makeStringDeque
+auto s = authAndAccess(makeStringDeque(), 5);  // 通过工厂函数获得一个临时deque，获取其第5个元素值返回
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
