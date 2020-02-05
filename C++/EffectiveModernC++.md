@@ -1877,7 +1877,369 @@ int, double
 
 这就会让编译器检查大括号内的初始值然后选择重载函数，不过这里有一个有趣的边缘情况。一个大括号内无参的构造函数，不仅可以表示默认构造，还可以表示带**std::initializer_list**的构造函数。你的空括号是表示哪一种情况呢？如果它表示不带参数，那么就是默认构造；如果它表示一个空的**std::initializer_list**，那么就是从一个不带元素的**std::initializer_list**进行构造。
 
-正确答案是你将使用默认构造，一个空的大括号表示的是没有参数，而不是一个空的**std::initializer_list**：
+正确答案是你将使用默认构造，**一个空的大括号表示的是没有参数**，而不是一个空的**std::initializer_list**：
+
+```c++
+class Widget {
+public:
+    Widget() {
+        cout << "Widget()" << endl;
+    }
+
+    Widget(std::initializer_list<int> il) {
+        cout << "Widget(std::initializer_list<int> il)" << endl;
+    }
+};
+
+Widget w1;   // 调用默认构造函数
+
+Widget w2{};   // 调用默认构造函数
+
+Widget w3();   // 出现most vexing parse，声明了一个函数
+
+// 输出：
+Widget()
+Widget()
+```
+
+如果你想要用一个空的**std::initializer_list**参数来调用带**std::initializer_list**构造函数，那么你需要把大括号作为参数，即把空的大括号放在圆括号内或者大括号内：
+
+```c++
+Widget w4({});   // 用了一个空的list来调用带std::initializer_list构造函数
+
+Widget w5{{}};   // 同上
+
+// 输出：
+Widget(std::initializer_list<int> il)
+Widget(std::initializer_list<int> il)
+```
+
+此时此刻，大括号初始化，**std::initializer_list**，构造函数重载之间的复杂关系在你的大脑中冒泡，你可能想要知道这些信息会在多大程度上关系到你的日常编程。可能比你想象中要多，因为**std::vector**就是一个被它们直接影响的类。**std::vector**中有一个可以指定容器的大小和容器内元素的初始值的不带**std::initializer_list**构造函数，但它也有一个可以指定容器中元素值的带**std::initializer_list**函数。如果你想要创建一个数值类型的**std::vector**(例如**std::vector**)，然后你要传递两个值作为构造函数的参数，那么使用大括号与圆括号的行为是不同的：
+
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    std::vector<int> v1(10, 20);   // 使用不带std::initializer_list的构造函数
+    // 创建10个元素的vector，每个元素的值为20
+    auto p = [](const auto& i) { cout << i << " "; };
+    for_each(v1.begin(), v1.end(), p);
+
+    cout << "\n";
+    std::vector<int> v2{10, 20};   // 使用带std::initializer_list的构造函数
+    // 创建2个元素的vector，元素值为10和20
+    for_each(v2.begin(), v2.end(), p);
+
+    return 0;
+}
+// 输出：
+20 20 20 20 20 20 20 20 20 20 
+10 20 
+```
+
+我们先忽视**std::vector**和圆括号，大括号，构造函数重载规则。这次讨论不涉及两个要素。首先，作为一个类的作者，你需要知道如果你的构造函数集中包含一个带**std::initializer**构造函数，客户代码中使用了大括号初始化的话看起来好像只有带**std::initializer**构造函数。因此，你最好把构造函数设计得重载调用不受大括号和圆括号影响。换句话说，**把上面std::vector出现的情况中当作错误，自己写代码时应该避免这样**。
+
+一种纠纷，比如说，你的类一开始不含有带**std::initializer_list**构造函数，后来你加了一个，那么用户会发现，原先使用大括号初始化时选择的是不带**std::initializer_list**构造函数，而现在全部都选择带**std::initializer_list**构造函数。当然，这种事情在你为重载函数再添加一个实现时也有可能发生：本来是调用旧的重载函数可能会选择新加入的函数。不过**std::initializer_list**构造函数的不同之处是，带**std::initializer_list**构造函数不用与其它构造函数竞争，它直接遮蔽了其它的构造函数。所以加入带**std::initializer_list**需要深思熟虑。
+
+第二个要讲的是作为类的使用者(用户)，你创建对象时必须在使用大括号还是圆括号上仔细考虑。大多数开发者最后会选择一种符号作为默认使用，而使用另一种符号当它无可避免的时候。使用大括号作为默认符号的人喜欢大括号的广泛适用性，禁止窄化转换，避免C++的**most vexing parse**。这些人知道在某种情况下(例如，上面的vector)，圆括号是必须的。另一方便，使用圆括号作为默认符合的人们，沿袭着C++98的语法传统，又可以避免**auto-deduced-a-std::initializer_list**问题，还知道重载构造函数的选择不受**std::initializer_list**构造函数的拦截，他们也会让步当只有大括号才能实现时(例如用特殊的值来初始化容器)。这里没有哪个更好的说法，所以我的建议是选择一种符号并且大部分情况下使用它。
+
+上面说的**auto-deduced-a-std::initializer_list**问题是如条款2所说的auto类型推导的特别之处，本意是想使用auto替换使用初始化列表构造的vector类型声明，但是auto将类型推导成initializer_list了，而非vector：
+
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+template<typename T>
+class TD;
+
+int main() {
+    auto t1 = {1, 2, 3};
+    TD<decltype(t1)> t1Type;  // error: aggregate 'TD<std::initializer_list<int> > t1Type' has incomplete type and cannot be defined
+
+    vector<int> t2 = {1, 2, 3};
+    TD<decltype(t2)> t2Type;  // error: aggregate 'TD<std::vector<int> > t2Type' has incomplete type and cannot be defined
+    return 0;
+}
+```
+
+如果你是模板的作者，那么大括号和圆括号的关系会变得很难搞，因为你不可能知道模板函数调用时使用哪一种。例如，你想通过随意的数值参数来创建一个数值类型对象。一个可变参数模板在概念上可以很直接的实现：
+
+```cpp
+template <typename T, typename... Ts>
+void doSomeWork(Ts&&... params)
+{
+  create local T object from params...  //伪代码
+  ...
+}
+```
+
+在伪代码中有两种选择：
+
+```cpp
+T localObject(std::forward<Ts>(params)...);    // 使用圆括号
+
+T localObject{std::forward<Ts>(params)...};    // 使用大括号
+```
+
+然后考虑以下代码：
+
+```cpp
+std::vector<int> v;
+...
+doSomeWork<std::vector<int>>(10,20);
+```
+
+如果`doSomeWork`使用的是圆括号的方式创建对象，那么局部对象**std::vector**有10个元素。如果`doSomeWork`使用的是大括号的方式创建对象，那么局部对象**std::vector**只有2个元素。是要使用哪一种方式呢，模板的作者是不知道的，只有用户知道他想使用哪一种方式。
+
+这正是标准库函数`std::make_unique`和`std::make_shared`所面临的一个问题(条款21)。这些函数的解决办法是强制要求把参数写在圆括号内，然后在接口中说明这个决策。
+
+本地试验模板中分别圆括号和大括号，可以看到括号使用方式不同，对于同样的可变参数调用，得到的vector元素也不同：
+
+```c++
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+template<typename T, typename... Ts>
+decltype(auto) getVar1(Ts&& ... params) {
+    return T(forward<Ts>(params)...);
+}
+
+template<typename T, typename... Ts>
+decltype(auto) getVar2(Ts&& ... params) {
+    return T{forward<Ts>(params)...};
+}
+
+int main() {
+    auto p = [](const auto& i) { cout << i << " "; };
+
+    auto&& v1 = getVar1<vector<int>>(10, 20);  // 20 20 20 20 20 20 20 20 20 20 
+    for_each(v1.begin(), v1.end(), p);
+
+    cout << "\n";
+    auto&& v2 = getVar2<vector<int>>(10, 20);  // 10 20 
+    for_each(v2.begin(), v2.end(), p);
+
+    return 0;
+}
+```
+
+**总结**
+
+需要记住的3点：
+
+- 大括号初始化是适用范围最广泛的初始化语法，它可以防止范围窄化转换和免疫C++的**most vexing parse**问题。
+- 在选择重载构造函数期间，大括号初始化会尽可能的匹配带**std::initializer_list**构造函数，尽管看起来匹配其它的构造函数刚好。
+- 使用大括号和圆括号初始化导致巨大差异的一个例子是用两个参数创建`std::vector`对象。
+- 在模板中选择用大括号还是圆括号创建对象是具有挑战性的。
+
+## 条款8：优先使用`nullptr`而不是`0`或者`NULL`
+
+`0`字面上是一个`int`类型，而不是指针，这是显而易见的。`C++`扫描到一个`0`，但是发现在上下文中仅有一个指针用到了它，编译器将勉强将`0`解释为空指针，但是这仅仅是一个应变之策。`C++`最初始的原则是`0`是`int`而非指针。
+
+经验上讲，同样的情况对`NULL`也是存在的。对`NULL`而言，仍有一些细节上的不确定性，因为赋予`NULL`一个除了`int`（即`long`）以外的整数类型是被允许的。这不常见，但是这真的是没有问题的，因为此处的焦点不是`NULL`的确切类型，而是`0`和`NULL`都不属于指针类型。
+
+在`C++98`中，这意味着重载指针和整数类型的函数的行为会令人吃惊。传递`0`或者`NULL`作为参数给重载函数永远不会调用指针重载的那个函数：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+void f(int);       // 函数f的三个重载
+void f(bool);
+void f(void*);
+
+int main() {
+    f(0);          // 调用 f(int)，而非f(void*)
+    f(NULL);       // 可能无法编译，但是调用f(int)，不可能调用 f(void*)。如果只有void f(void*)，则可以调用编译。
+    return 0;
+}
+// 当前编译错误为：
+/cygdrive/d/Program Files/JetBrains/CppProject/TestProject/main.cpp:14:11: error: call of overloaded 'f(NULL)' is ambiguous
+     f(NULL);                                             // 可能无法编译，但是调用f(int)
+           ^
+/cygdrive/d/Program Files/JetBrains/CppProject/TestProject/main.cpp:7:6: note: candidate: 'void f(int)'
+ void f(int);                                          // 函数f的三个重载
+      ^
+/cygdrive/d/Program Files/JetBrains/CppProject/TestProject/main.cpp:8:6: note: candidate: 'void f(bool)'
+ void f(bool);
+      ^
+/cygdrive/d/Program Files/JetBrains/CppProject/TestProject/main.cpp:9:6: note: candidate: 'void f(void*)'
+ void f(void*);
+      ^
+```
+
+`f(NULL)`行为的不确定性的确反映了在实现`NULL`的类型上存在的自由发挥空间。如果`NULL`被定为`0L`（即`0`作为一个`long`整形），函数的调用是有歧义的，因为`long`转化为`int`，`long`转化为`bool`，`0L`转换为`void*`都被认为是同样可行的。关于这个函数调用有意思的事情是在源代码的字面意思（使用`NULL`调用`f`，`NULL`应该是个空指针）和它的真实意义（一个整数在调用`f`，`NULL`不是空指针）存在着冲突。这种违背直觉的行为正是`C++98`程序员不被允许重载指针和整数类型的原因。这个原则对于`C++11`依然有效，因为尽管有本条款的力荐，仍然还有一些开发者继续使用`0`和`NULL`，虽然`nullptr`是一个更好的选择。
+
+`nullptr`的优势是它不再是一个整数类型。诚实的讲，它也不是一个指针类型，但是你可以把它想象成一个可以指向任意类型的指针。`nullptr`的类型实际上是`std::nullptr_t`，`std::nullptr_t`定义为`nullptr`的类型，这是一个完美的循环定义。`std::nullptr_t`可以隐式的转换为所有的原始的指针类型，这使得`nullptr`表现的像可以指向任意类型的指针。
+
+使用`nullptr`作为参数去调用重载函数`f`将会调用`f(void*)`重载体，因为`nullptr`不能被视为整数类型的：
+
+```c++
+	f(nullptr);                                          //调用f(void*)重载体
+```
+
+使用`nullptr`而不是`0`或者`NULL`，可以避免重载解析上的令人吃惊行为，但是它的优势不仅限于此。它可以提高代码的清晰度，尤其是牵扯到`auto`类型变量的时候。例如，你在一个代码库中遇到下面代码：
+
+```c++
+	auto result = findRecord( /* arguments */);
+
+	if(result == 0){
+		...
+	}
+```
+
+如果你不能轻松地的看出`findRecord`返回的是什么，要知道`result`是一个指针还是整数类型并不是很简单的。毕竟，`0`（被用来测试`result`的）即可以当做指针也可以当做整数类型。另一方面，你如果看到下面的代码：
+
+```c++
+	auto result = findRecord( /* arguments */);
+
+	if(reuslt == nullptr){
+		...
+	}
+```
+
+明显就没有歧义了：`result`一定是个指针类型。
+
+当模板进入我们考虑的范围，`nullptr`的光芒则显得更加耀眼了。假想你有一些函数，只有当对应的互斥量被锁定的时候，这些函数才可以被调用。每个函数的参数是不同类型的指针：
+
+```c++
+	int    f1(std::shared_ptr<Widget> spw);             // 只有对应的
+	double f2(std::unique_ptr<Widget> upw);             // 互斥量被锁定
+	bool   f3(Widget* pw);                              // 才会调用这些函数
+```
+
+想传递空指针给这些函数的调用看上去像这样：
+
+```c++
+	std::mutex f1m, f2m, f3m;                           // 对应于f1, f2和f3的互斥量 
+
+	using MuxGuard =                                    // C++11 版typedef；参加条款9
+      std::lock_guard<std::mutex>;
+    ...
+    {
+      MuxGuard g(f1m);                                 // 为f1锁定互斥量
+      auto result = f1(0);                             // 将0当做空指针作为参数传给f1
+    }                                                  // 解锁互斥量
+
+    ...
+
+    {
+      MuxGuard g(f2m);                                // 为f2锁定互斥量
+      auto result = f2(NULL);                         // 将NULL当做空指针作为参数传给f2
+    }                                                 // 解锁互斥量
+
+    ...
+
+    {
+      MuxGuard g(f3m);                               // 为f3锁定互斥量
+      auto result = f3(nullptr);                     // 将nullptr当做空指针作为参数传给f3
+    }                                                // 解锁互斥量
+```
+
+在前两个函数调用中没有使用`nullptr`是令人沮丧的，但是上面的代码是可以工作的，这才是最重要的。然而，代码中的重复模式——锁定互斥量，调用函数，解锁互斥量——才是更令人沮丧和反感的。避免这种重复风格的代码正是模板的设计初衷，因此，让我们使用模板化上面的模式：
+
+```c++
+	template<typename FuncType,
+	         typename MuxType,
+	         typename PtrType>
+	auto lockAndCall(FuncType func,
+	                 MuxType& mutex,
+	                 PtrType ptr) -> decltype(func(ptr))
+	{
+      MuxGuard g(mutex);
+      return func(ptr);
+    }
+```
+
+如果这个函数的返回值类型（`auto ...->decltype(func(ptr))`）让你挠头不已，你应该到条款3寻求一下帮助，在那里我们已经做过详细的介绍。在`C++14`中，你可以看到，返回值可以通过简单的`decltype(auto)`推导得出：
+
+```c++
+	template<typename FuncType,
+	         typename MuxType,
+	         typename PtrType>
+	decltype(auto) lockAndCall(FuncType func,                       // C++14
+	                 MuxType& mutex,
+	                 PtrType ptr) 
+	{
+      MuxGuard g(mutex);
+      return func(ptr);
+    }
+```
+
+给定`lockAndCall`模板（上边的任意版本），调用者可以写像下面的代码：
+
+```c++
+#include <iostream>
+#include <mutex>
+#include <memory>
+
+using namespace std;
+
+using MuxGuard = std::lock_guard<std::mutex>;
+
+template<typename FuncType, typename MuxType, typename PtrType>
+decltype(auto) lockAndCall(FuncType func, MuxType& mutex, PtrType ptr) {
+    MuxGuard g(mutex);
+    return func(ptr);
+}
+
+class Widget {};
+
+int f1(std::shared_ptr<Widget> spw) {
+    return 0;
+}
+
+double f2(std::unique_ptr<Widget> upw) {
+    return 0;
+}
+
+bool f3(Widget* pw) {
+    return true;
+}
+
+int main() {
+    std::mutex f1m, f2m, f3m;
+    auto result1 = lockAndCall(f1, f1m,0);  // 错误，error: could not convert 'ptr' from 'int' to 'std::shared_ptr<Widget>'
+    auto result2 = lockAndCall(f2, f2m, NULL);  // 错误，本地编译，NULL被推导为long int类型，error: could not convert 'ptr' from 'long int' to 'std::unique_ptr<Widget>'
+    auto result3 = lockAndCall(f3, f2m, nullptr);  // 正确
+    return 0;
+}
+```
+
+他们可以这样写，但是就如注释中指明的，三种情况里面的两种是无法编译通过。在第一个调用中，当把`0`作为参数传给`lockAndCall`,模板通过类型推导得知它的类型。`0`的类型总是`int`，这就是对`lockAndCall`的调用实例化的时候的类型。不幸的是，这意味着在`lockAndCall`中调用`func`，被传入的是`int`，这个`f1`期望接受的参数`std::share_ptr`是不不兼容的。传入到`lockAndCall`的`0`尝试来表示一个空指针，但是正真不传入的是一个普通的`int`类型。尝试将`int`作为`std::share_ptr`传给`f1`会导致一个类型冲突错误。使用`0`调用`lockAndCall`会失败，因为在模板中，一个`int`类型传给一个要求参数是`std::share_ptr`的函数。
+
+对调用`NULL`的情况的分析基本上是一样的。当`NULL`传递给`lockAndCall`时，从参数`ptr`推导出的类型是整数类型，当`ptr`——一个`int`或者类`int`的类型——传给`f2`，一个类型错误将会发生，因为这个函数期待的是得到一个`std::unique_ptr`类型的参数。
+
+相反，使用`nullptr`是没有问题的。当`nullptr`传递给`lockAndCall`，`ptr`的类型被推导为`std::nullptr_t`。当`ptr`被传递给`f3`，有一个由`std::nullptr_t`到`Widget*`的隐形转换，因为`std::nullptr_t`可以隐式转换为任何类型的指针。
+
+真正的原因是，对于`0`和`NULL`，模板类型推导出了错误的类型（他们的真正类型，而不是它们作为空指针而体现出的退化的内涵），这是在需要用到空指针时使用`nullptr`而非`0`或者`NULL`最引人注目的原因。使用`nullptr`，模板不会造成额外的困扰。另外结合`nullptr`在重载中不会导致像`0`和`NULL`那样的诡异行为的事实，胜负已定。当你需要用到空指针时，使用`nullptr`而不是`0`或者`NULL`。
+
+| 要记住的东西                         |
+| :----------------------------------- |
+| 相较于`0`和`NULL`，优先使用`nullptr` |
+| 避免整数类型和指针类型之间的重载     |
+
+## 条款9：优先使用声明别名而不是`typedef`
+
+
+
+
+
+
+
+
+
+
 
 
 
