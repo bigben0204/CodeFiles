@@ -2231,15 +2231,509 @@ int main() {
 
 ## 条款9：优先使用声明别名而不是`typedef`
 
+我有信心说，大家都同意使用`STL`容器是个好的想法，并且我希望，条款18可以说服你使用`std::unique_ptr`也是个好想法，但是我想绝对我们中间没有人喜欢写像这样`std::unique_ptr>`的代码多于一次。这仅仅是考虑到这样的代码会增加得上“键盘手”的风险。
+
+为了避免这样的医疗悲剧，推荐使用一个`typedef`:
+
+```c++
+	typedef
+	  std::unique_ptr<std::unordered_map<std::string, std::string>>
+	  UPtrMapSS;
+```
+
+但是`typedef`家族是有如此浓厚的`C++98`气息。他们的确可以在`C++11`下工作，但是`C++11`也提供了声明别名（`alias declarations`）：
+
+```c++
+	using UptrMapSS = 
+	  std::unique_ptr<std::unordered_map<std::string, std::string>>;
+```
+
+考虑到`typedef`和声明别名具有完全一样的意义，推荐其中一个而排斥另外一个的坚实技术原因是容易令人质疑的。这样的质疑是合理的。
+
+技术原因当然存在，但是在我提到之前。我想说的是，很多人发现使用声明别名可以使涉及到函数指针的类型的声明变得容易理解：
+
+```c++
+	// FP等价于一个函数指针，这个函数的参数是一个int类型和
+	// std::string常量类型，没有返回值
+	typedef void (*FP)(int, const std::string&);      // typedef
+
+	// 同上
+	using FP = void (*)(int, const std::string&);     // 声明别名
+```
+
+当然，上面任何形式都不是特别让人容易下咽，并且很少有人会花费大量的时间在一个函数指针类型的标识符上，所以这很难当做选择声明别名而不是`typedef`的不可抗拒的原因。
+
+但是，一个不可抗拒的原因是真实存在的：模板。尤其是声明别名有可能是模板化的（这种情况下，它们被称为模板别名（`alias template`）），然而`typedef`这时只能说句“臣妾做不到”。模板别名给`C++11`程序员提供了一个明确的机制来表达在`C++98`中需要黑客式的将`typedef`嵌入在模板化的`struct`中才能完成的东西。举个栗子，给一个使用个性化的分配器`MyAlloc`的链接表定义一个标识符。使用别名模板，这就是小菜一碟：
+
+```c++
+	template<typname T>                             // MyAllocList<T>
+	using MyAllocList = std::list<T, MyAlloc<T>>;   // 等同于
+                                                    // std::list<T,
+                                                    //   MyAlloc<T>>
+
+	MyAllocList<Widget> lw;                         // 终端代码 
+```
+
+本地试验：
+
+```c++
+#include <list>
+using namespace std;
+
+class Widget {};
+
+// 使用using
+template<typename T>
+using MyAlloc = std::allocator<T>;
+
+template<typename T>
+using MyAllocList = std::list<T, MyAlloc<T>>;
+
+MyAllocList<Widget> lw;
+
+// 使用typedef 
+template<typename T>
+using MyAlloc = std::allocator<T>;
+
+template<typename T>
+struct MyAllocList {
+    typedef std::list<T, MyAlloc<T>> type;
+};
+
+MyAllocList<Widget>::type lw;
+```
+
+如果你想在一个模板中使用`typedef`来完成创建一个节点类型可以被模板参数指定的链接表的任务，你必须在`typedef`名称之前使用`typename`：
+
+```c++
+	template<typename T>                            // Widget<T> 包含
+	class Widget{                                   // 一个 MyAloocList<T>
+	private:                                        // 作为一个数据成员
+	  typename MyAllocList<T>::type list;
+	  // ...
+    };
+```
+
+此处，`MyAllocList::type`表示一个依赖于模板类型参数`T`的类型，因此`MyAllocList::type`是一个依赖类型（`dependent type`），`C++`中许多令人喜爱的原则中的一个就是在依赖类型的名称之前必须冠以`typename`。
+
+如果`MyAllocList`被定义为一个声明别名，就不需要使用`typename`（就像笨重的`::type`后缀）：
+
+```c++
+template<typename T>
+using MyAlloc = std::allocator<T>;
+
+template<typename T>
+using MyAllocList = std::list<T, MyAlloc<T>>;   // 和以前一样
+
+template<typename T>
+class Widget {
+private:
+    MyAllocList<T> list;                         // 没有typename
+    // ...                                          // 没有::type
+};
+```
+
+对你来说，`MyAllocList`（使用模板别名）看上去依赖于模板参数`T`，正如`MyAllocList::type`（使用内嵌的`typdef`）一样，但是你不是编译器。当编译器处理`Widget`遇到`MyAllocList`（使用模板别名），编译器知道`MyAllocList`是一个类型名称，因为`MyAllocList`是一个模板别名：它必须是一个类型。`MyAllocList`因此是一个非依赖类型（`non-dependent type`），指定符`typename`是不需要和不允许的。
+
+另一方面，当编译器在`Widget`模板中遇到`MyAllocList`（使用内嵌的`typename`）时，编译器并不知道它是一个类型名，因为有可能存在一个特殊化的`MyAllocList`，只是编译器还没有扫描到，在这个特殊化的`MyAllocList`中`MyAllocList::type`表示的并不是一个类型。这听上去挺疯狂的，但是不要因为这种可能性而怪罪于编译器。是人类有可能会写出这样的代码。
+
+例如，一些被误导的鬼魂可能会杂糅出像这样代码：
+
+```c++
+	class Wine {...};
+
+	template<>                                 // 当T时Wine时
+	class MyAllocList<Wine>{                   // MyAllocList 是特殊化的
+	private:
+	  enum class WineType                      // 关于枚举类参考条款10
+	  { White, Red, Rose };
+
+	  WineType type;                           // 在这个类中，type是个数据成员
+	  ...
+	};
+```
+
+正如你看到的，`MyAllocList::type`并不是指一个类型。如果`Widget`被使用`Wine`初始化，`Widget`模板中的`MyAllocList::type`指的是一个数据成员，而不是一个类型。在`Widget`模板中，`MyAllocList::type`是否指的是一个类型忠实地依赖于传入的`T`是什么，这也是编译器坚持要求你在类型前面冠以`typename`的原因。
+
+如果你曾经做过模板元编程（`TMP`），你会强烈地额反对使用模板类型参数并在此基础上修改为其他类型的必要性。例如，给定一个类型`T`，你有可能想剥夺`T`所包含的所有的`const`或引用的修饰符，即你想将`const std::string&`变成`std::string`。你也有可能想给一个类型加上`const`或者将它变成一个左值引用，也就是将`Widget`变成`const Widget`或者`Widget&`。（如果你没有做过`TMP`,这太糟糕了，因为如果你想成为一个真正牛叉的`C++`程序员，你至少需要对`C++`这方面的基本概念足够熟悉。你可以同时看一些TMP的例子，包括我上面提到的类型转换，还有条款23和条款27。）
+
+`C++11`给你提供了工具来完成这类转换的工作，表现的形式是`type traits`,它是``中的一个模板的分类工具。在这个头文件中有数十个类型特征，但是并不是都可以提供类型转换，不提供转换的也提供了意料之中的接口。给定一个你想竞选类型转换的类型`T`，得到的类型是`std::transformation::type`。例如：
+
+```c++
+    std::remove_const<T>::type                 // 从 const T 得到 T
+    std::remove_reference<T>::type             // 从 T& 或 T&& 得到 T
+    std::add_lvalue_reference<T>::type         // 从 T 得到 T&
+```
+
+注释仅仅总结了这些转换干了什么，因此不需要太咬文嚼字。在一个项目中使用它们之前，我知道你会参考准确的技术规范。
+
+无论如何，我在这里不是只想给你大致介绍一下类型特征。反而是因为注意到，类型转换总是以`::type`作为每次使用的结尾。当你对一个模板中的类型参数（你在实际代码中会经常用到）使用它们时，你必须在每次使用前冠以`typename`。这其中的原因是`C++11`的类型特征是通过内嵌`typedef`到一个模板化的`struct`来实现的。就是这样的，他们就是通过使用类型同义技术来实现的，就是我一直在说服你远不如模板别名的那个技术。
+
+这是一个历史遗留问题，但是我们略过不表（我打赌，这个原因真的很枯燥）。因为标准委员会姗姗来迟地意识到模板别名是一个更好的方式，对于`C++11`的类型转换，委员会使这些模板也成为`C++14`的一部分。别名有一个统一的形式：对于`C++11`中的每个类型转换`std::transformation::type`，有一个对应的`C++14`的模板别名`std::transformation_t`。用例子来说明我的意思：
+
+```c++
+	std::remove_const<T>::type                  // C++11: const T -> T
+	std::remove_const_t<T>                      // 等价的C++14
+
+	std::remove_reference<T>::type              // C++11: T&/T&& -> T
+	std::remove_reference_t<T>                  // 等价的C++14
+
+	std::add_lvalue_reference<T>::type          // C++11: T -> T&
+	std::add_lvalue_reference_t<T>              // 等价的C++14
+```
+
+`C++11`的结构在`C++14`中依然有效，但是我不知道你还有什么理由再用他们。即便你不熟悉`C++14`，自己写一个模板别名也是小儿科。仅仅`C++11`的语言特性被要求，孩子们甚至都可以模拟一个模式，对吗？如果你碰巧有一份`C++14`标准的电子拷贝，这依然很简单，因为需要做的即使一些复制和粘贴操作。在这里，我给你开个头：
+
+```c++
+	template<class T>
+	using remove_const_t = typename remove_const<T>::type;
+
+	template<class T>
+	using remove_reference_t = typename remove_reference<T>::type;
+
+	template<class T>
+	using add_lvalue_reference_t = 
+	  typename add_lvalue_reference<T>::type;
+```
+
+本地试验：
+
+```c++
+const Widget<int> cw;
+remove_const<decltype(cw)>::type w1;  // Widget<int>类型
+remove_const_t<const Widget<int>> w2;  // Widget<int>类型，type_traits.h标准库中已定义
+```
+
+| 要记住的东西                                                 |
+| :----------------------------------------------------------- |
+| `typedef`不支持模板化，但是别名声明支持                      |
+| 模板别名避免了`::type`后缀，在模板中，`typedef`还经常要求使用`typename`前缀 |
+| `C++14`为`C++11`中的类型特征转换提供了模板别名               |
+
+## 条款10：优先使用作用域限制的`enums`而不是无作用域的`enum`
+
+一般而言，在花括号里面声明的变量名会限制在括号外的可见性。但是这对于`C++98`风格的`enums`中的枚举元素并不成立。枚举元素和包含它的枚举类型同属一个作用域空间，这意味着在这个作用域中不能再有同样名字的定义：
+
+```c++
+	enum Color { black, white, red};                 // black, white, red 和
+	                                                 // Color  同属一个定义域
 
 
+	auto white = false;                              // 错误！因为 white
+	                                                 // 在这个定义域已经被声明过
+```
 
+事实就是枚举元素泄露到包含它的枚举类型所在的作用域中，对于这种类型的`enum`官方称作无作用域的（`unscoped`）。在`C++11`中对应的使用作用域的enums（`scoped enums`）不会造成这种泄露：
 
+```c++
+	enum class Color { black, white, red};            // black, white, red
+	                                                  // 作用域为 Color
 
+	auto white = false;                               // fine, 在这个作用域内
+	                                                  // 没有其他的 "white"
 
+	Color c = white;                                  // 错误！在这个定义域中
+	                                                  // 没有叫"white"的枚举元素
 
+	Color c = Color::white;                           // fine
 
+	auto c = Color::white;                            // 同样没有问题（和条款5
+	                                                  // 的建议项吻合）
+```
 
+因为限制作用域的`enum`是通过"enum class"来声明的，它们有时被称作枚举类（`enum class`）。
+
+限制作用域的`enum`可以减少命名空间的污染，这足以是我们更偏爱它们而不是不带限制作用域的表亲们。除此之外，限制作用域的`enums`还有一个令人不可抗拒的优势：它们的枚举元素可以是更丰富的类型。无作用域的`enum`会将枚举元素隐式的转换为整数类型（从整数出发，还可以转换为浮点类型）。因此像下面这种语义上荒诞的情况是完全合法的：
+
+```c++
+	enum Color { black, white, red };                  // 无限制作用域的enum
+
+	std::vector<std::size_t>                           // 返回x的质因子的函数
+	  primeFactors(std::size_t x);
+
+	Color c = red;
+	...
+
+	if (c < 14.5 ){                                   // 将Color和double类型比较！
+
+		auto  factors =                               // 计算一个Color变量的质因子
+		  primeFactors(c); 
+	}
+```
+
+在`enum`后增加一个`class`，就可以将一个无作用域的`enum`转换为一个有作用域的`enum`，变成一个有作用域的`enum`之后，事情就变得不一样了。在有作用域的`enum`中不存在从枚举元素到其他类型的隐式转换：
+
+```c++
+	enum class Color { black, white, red };           // 有作用域的enum
+
+	Color c = Color::red;                             // 和前面一样，但是
+	...                                               // 加上一个作用域限定符
+
+	if (c < 14.5){                                    // 出错！不能将Color类型
+                                                      // 和double类型比较
+      auto factors =                                  // 出错！不能将Color类型传递给
+        primeFactors(c);                              // 参数类型为std::size_t的函数
+    ...
+ 	}
+```
+
+如果你就是想将`Color`类型转换为一个其他类型，使用类型强制转换（`cast`）可以满足你这种变态的需求:
+
+```c++
+	if(static_cast<double>(c) < 14.5) {              // 怪异但是有效的代码
+
+	auto factors =                                   // 感觉不可靠
+	  primeFactors(static_cast<std::size_t(c));      // 但是可以编译
+	...
+}
+```
+
+相较于无定义域的`enum`，有定义域的`enum`也许还有第三个优势，因为有定义域的`enum`可以被提前声明的，即可以不指定枚举元素而进行声明:
+
+```c++
+	enum Color;                                      // 出错！c++，可以使用enum Color : std::uint8_t;方式来指定枚举类型大小，后面会讲
+
+	enum class Color;                                // 没有问题
+```
+
+这是一个误导。在`C++11`之前，没有定义域的`enum`也有可能被提前声明，但是需要一点额外的工作。这个工作时基于这样的事实：`C++`中的枚举类型都有一个被编译器决定的潜在的类型。对于一个无定义域的枚举类型像`Color`,
+
+```c++
+    enum Color {black, white, red };
+```
+
+编译器有可能选择`char`作为潜在的类型，因为仅仅有三个值需要表达。
+
+然而一些枚举类型有很大的取值的跨度，如下：
+
+```c++
+	enum Status { good = 0,
+                  failed = 1,
+                  incomplete = 100,
+                  corrupt = 200,
+                  indeterminate = 0xFFFFFFFF
+                };
+```
+
+这里需要表达的值范围从`0`到`0xFFFFFFFF`。除非是在一个不寻常的机器上（在这台机器上，`char`类型至少有`32`个`bit`），编译器一定会选择一个取值范围比`char`大的整数类型来表示`Status`的类型。
+
+为了更高效的利用内存，编译器通常想为枚举类型选择可以充分表示枚举元素的取值范围但又占用内存最小的潜在类型。在某些情况下，为了代码速度的优化，可以回牺牲内存大小，在那种情况下，编译器可能不会选择占用内存最小的可允许的潜在类型，但是编译器依然希望能过优化内存存储的大小。为了使这种功能可以实现，`C++98`仅仅支持枚举类型的定义（所有枚举元素被列出来），而枚举类型的声明是不被允许的。这样可以保证在枚举类型被用到之前，编译器已经给每个枚举类型选择了潜在类型。
+
+不能事先声明枚举类型有几个不足。最引人注意的就是会增加编译依赖性。再次看看`Status`这个枚举类型：
+
+```c++
+	enum Status { good = 0,
+                  failed = 1,
+                  incomplete = 100,
+                  corrupt = 200,
+                  indeterminate = 0xFFFFFFFF
+                };
+```
+
+这个枚举体可能会在整个系统中都会被使用到，因此被包含在系统每部分都依赖的一个头文件当中。如果一个新的状态需要被引入：
+
+```c++
+	enum Status { good = 0,
+                  failed = 1,
+                  incomplete = 100,
+                  corrupt = 200,
+                  audited = 500,
+                  indeterminate = 0xFFFFFFFF
+                };
+```
+
+就算一个子系统——甚至只有一个函数！——用到这个新的枚举元素，有可能导致整个系统的代码需要被重新编译。这种事情是人们憎恨的。在`C++11`中，这种情况被消除了。例如，这里有一个完美的有效的有作用域的`enum`的声明，还有一个函数将它作为参数：
+
+```c++
+	enum class Status;                  // 前置声明
+
+	void continueProcessing(Status s);  // 使用前置声明的枚举体
+```
+
+如果`Status`的定义被修改，包含这个声明的头文件不需要重新编译。更进一步，如果`Status`被修改（即，增加`audited`枚举元素），但是`continueProcessing`的行为不受影响（因为`continueProcessing`没有使用`audited`），`continueProcessing`的实现也不需要重新编译。
+
+但是如果编译器需要在枚举体之前知道它的大小，`C++11`的枚举体怎么做到可以前置声明，而`C++98`的枚举体无法实现？原因是简单的，对于有作用域的枚举体的潜在类型是已知的，对于没有作用域的枚举体，你可以指定它。
+
+对有作用域的枚举体，默认的潜在的类型是`int`:
+
+```c++
+	enum class Status;                  // 潜在类型是int
+```
+
+如果默认的类型不适用于你，你可重载它：
+
+```c++
+	enum class Status: std::uint32_t;   // Status潜在类型是
+	                                    // std::uint32_t
+	                                    // （来自<cstdint>）
+```
+
+无论哪种形式，编译器都知道有作用域的枚举体中的枚举元素的大小。
+
+为了给没有作用域的枚举体指定潜在类型，你需要做相同的事情，结果可能是前置声明：
+
+```c++
+	enum Color: std::uint8_t;          // 没有定义域的枚举体
+	                                   // 的前置声明，潜在类型是
+	                                   // std::uint8_t
+```
+
+潜在类型的指定也可以放在枚举体的定义处：
+
+```c++
+	enum class Status: std::uint32_t{ good = 0,
+	                                  failed = 1,
+	                                  incomplete = 100,
+	                                  corrupt = 200,
+	                                  audited = 500,
+	                                  indeterminate = 0xFFFFFFFF
+	                                };
+```
+
+从有定义域的枚举体可以避免命名空间污染和不易受无意义的隐式类型转换影响的角度看，你听到至少在一种情形下没有定义域的枚举体是有用的可能会感到惊讶。这种情况发生在引用`C++11`的`std::tuples`中的某个域时。例如，假设我们有一个元组，元组中保存着姓名，电子邮件地址，和用户在社交网站的影响力数值：
+
+```c++
+	using UserInfo =                 // 别名，参见条款9
+	  std::tuple<std::string,        // 姓名
+	  	         std::string,        // 电子邮件
+	  	         std::size_t> ;      // 影响力
+```
+
+尽管注释已经说明元组的每部分代表什么意思，但是当你遇到像下面这样的源代码时，可能注释没有什么用：
+
+```c++
+    UserInfo uInfo("Ben", "ben@163.com", 100);  // 元组类型的一个对象
+    auto val = std::get<1>(uInfo);  // 得到第一个域的值：ben@163.com
+```
+
+作为一个程序员，你有很多事要做。你真的想去记住元组的第一个域对应的是用户的电子邮件地址？我不这么认为。使用一个没有定义域的枚举体来把名字和域的编号联系在一起来避免去死记这些东西：
+
+```c++
+	enum UserInfoFields {uiName, uiEmail, uiReputation };
+    UserInfo uInfo("Ben", "ben@163.com", 100);  // 和前面一样
+	auto val = std::get<uiEmail>(uInfo);    // 得到电子邮件域的值，将枚举值隐式转换为数字以获取对应位置对象值
+```
+
+上面代码正常工作的原因是`UserInfoFields`到`std::get()`要求的`std::size_t`的隐式类型转换。
+
+如果使用有作用域的枚举体的代码就显得十分冗余：
+
+```c++
+	enum class UserInfoFields { uiName, uiEmail, uiReputaion };
+
+	UserInfo uInfo;                        // 和前面一样
+	...
+
+	auto val = std::get<static_cast<std::size_t>(UserInfoFields::uiEmail)>(uInfo); 
+```
+
+写一个以枚举元素为参数返回对应的`std::size_t`的类型的值可以减少这种冗余性。`std::get`是一个模板，你提供的值是一个模板参数（注意用的是尖括号，不是圆括号），因此负责将枚举元素转化为`std::size_t`的这个函数必须在编译阶段就确定它的结果。就像条款15解释的，这意味着它必须是一个`constexpr`函数。
+
+实际上，它必须是一个`constexpr`函数模板，因为它应该对任何类型的枚举体有效。如果我们打算实现这种一般化，我们需要一般化返回值类型。不是返回`std::size_t`，我们需要返回枚举体的潜在类型。通过`std::underlying_type`类型转换来实现（关于类型转换的信息，参见条款9）。最后需要将这个函数声明为`noexcept`（参见条款14），因为我们知道它永远不会触发异常。结果就是这个函数模板可以接受任何的枚举元素，返回这个元素的在编译阶段的常数值：
+
+```c++
+	template<typename E>
+	constexpr typename std::underlying_type<E>::type
+	  toUType(E enumerator) noexcept
+	{
+	  return
+	    static_cast<typename 
+	                std::underlying_type<E>::type>(enumerator);
+    }
+```
+
+在`C++14`中，`toUType`可以通过将`std::underlying_type::type`替代为`std::underlying_type_t`（参见条款9）:
+
+```c++
+	template<typename E>                           // C++14
+	constexpr std::underlying_type_t<E>
+	  toUType(E enumerator) noexcept
+	{
+	  return static_cast<std::underlying_type_t<E>>(enumerator);
+    }
+```
+
+更加优雅的`auto`返回值类型（参见条款3）在`C++14`中也是有效的：
+
+```c++
+	template<typename E>
+	constexpr auto
+	  toUType(E enumerator) noexcept
+	{
+	  return static_cast<std::underlying_type_t<E>>(enumerator);
+	}
+```
+
+无论写哪种形式，`toUType`允许我们想下面一样访问一个元组的某个域：
+
+```c++
+	auto val = std::get<toUType(UserInfoFields::uiEmail)>(uInfo);
+```
+
+这样依然比使用没有定义域的枚举体要复杂，但是它**可以避免命名空间污染和不易引起注意的枚举元素的的类型转换**。很多时候，你可能会决定多敲击一些额外的键盘来避免陷入一个上古时代的枚举体的技术陷阱中。
+
+本地试验：
+
+```c++
+#include <iostream>
+#include <tuple>
+
+using namespace std;
+
+using UserInfo = std::tuple<std::string, std::string, std::size_t>;
+enum class UserInfoFields { uiName, uiEmail, uiReputation };
+
+template<typename E>
+constexpr auto toUType(E enumerator) noexcept {
+    return static_cast<std::underlying_type_t<E>>(enumerator);
+}
+
+int main() {
+    UserInfo uInfo("Ben", "ben@163.com", 100);
+    // auto val = std::get<static_cast<std::size_t>(UserInfoFields::uiEmail)>(uInfo);  // ben@163.com 写起来过于麻烦
+    auto val = std::get<toUType(UserInfoFields::uiEmail)>(uInfo);  // 如果要给get指定类型：std::get<toUType<UserInfoFields>(UserInfoFields::uiEmail)>(uInfo)
+    cout << val << endl;  // ben@163.com
+    return 0;
+}
+```
+
+| 要记住的东西                                                 |
+| :----------------------------------------------------------- |
+| `C++98`风格的`enum`是没有作用域的`enum`                      |
+| 有作用域的枚举体的枚举元素仅仅对枚举体内部可见。只能通过类型转换（`cast`）转换为其他类型 |
+| 有作用域和没有作用域的`enum`都支持指定潜在类型。有作用域的`enum`的默认潜在类型是`int`。没有作用域的`enum`没有默认的潜在类型。 |
+| 有作用域的`enum`总是可以前置声明的。没有作用域的`enum`只有当指定潜在类型时才可以前置声明。 |
+
+[underlying_type的type类型返回枚举值的潜在类型](https://bobjin.com/blog/c_cpp_docs/reference/en/cpp/types/underlying_type.html)：
+
+```c++
+#include <iostream>
+#include <type_traits>
+ 
+enum e1 {};
+enum class e2: int {};
+ 
+int main() {
+    bool e1_type = std::is_same<
+        unsigned
+       ,typename std::underlying_type<e1>::type
+    >::value; 
+ 
+    bool e2_type = std::is_same<
+        int
+       ,typename std::underlying_type<e2>::type
+    >::value;
+ 
+    std::cout
+    << "underlying type for 'e1' is " << (e1_type?"unsigned":"non-unsigned") << '\n'
+    << "underlying type for 'e2' is " << (e2_type?"int":"non-int") << '\n';
+}
+// 输出：
+underlying type for 'e1' is unsigned
+underlying type for 'e2' is int
+```
+
+## 条款11：优先使用delete关键字删除函数而不是private却又不实现的函数
 
 
 
