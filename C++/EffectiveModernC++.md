@@ -2735,11 +2735,567 @@ underlying type for 'e2' is int
 
 ## 条款11：优先使用delete关键字删除函数而不是private却又不实现的函数
 
+果你要给其他开发者提供代码，并且还不想让他们调用特定的函数，你只需要不声明这个函数就可以了。没有函数声明，没有就没有函数可以调用。这是没有问题的。但是有时候`C++`为你声明了一些函数，如果你想阻止客户调用这些函数，就不是那么容易的事了。
 
+这种情况只有对“特殊的成员函数”才会出现，即这个成员函数是需要的时候`C++`自动生成的。条款17详细地讨论了这种函数，但是在这里，我们仅仅考虑复制构造函数和复制赋值操作子。这一节致力于`C++98`中的一般情况，这些情况可能在`C++11`中已经不复存在。在`C++98`中，如果你想压制一个成员函数的使用，这个成员函数通常是复制构造函数，赋值操作子，或者它们两者都包括。
 
+在`C++98`中阻止这类函数被使用的方法是将这些函数声明为`private`，并且不定义它们。例如，在`C++`标准库中，`IO`流的基础是类模板`basic_ios`。所有的输入流和输出流都继承（有可能间接地）与这个类。拷贝输入和输出流是不被期望的，因为不知道应该采取何种行为。比如，一个`istream`对象，表示一系列输入数值的流，一些已经被读入内存，有些可能后续被读入。如果一个输入流被复制，是不是应该将已经读入的数据和将来要读入的数据都复制一下呢？处理这类问题最简单的方法是定义这类问题不存在，`IO`流的复制就是这么做的。
 
+为了使`istream`和`ostream`类不能被复制，`basic_ios`在`C++98`中是如下定义的（包括注释）：
 
+```c++
+	template <class charT, class traits = char_traits<charT> >
+	class basic_ios :public ios_base {
+	public:
+	  ...
 
+	  private:
+	    basic_ios(const basic_ios& );                  // 没有定义
+	    basic_ios& operator(const basic_ios&);         // 没有定义
+    };
+```
+
+将这些函数声明为私有来阻止客户调用他们。故意不定义它们是因为，如果有函数访问这些函数（通过成员函数或者友好类）在链接的时候会导致没有定义而触发的错误。
+
+在`C++11`中，有一个更好的方法可以基本上实现同样的功能：用`= delete`标识拷贝复制函数和拷贝赋值函数为删除的函数`deleted functions`。在`C++11`中`basic_ios`被定义为：
+
+```c++
+	template <class charT, class traits = char_traits<charT> >
+	class basic_ios : public ios_base {
+	public:
+	  ...
+	  basic_ios(const basic_ios& ) = delete;
+	  basic_ios& operator=(const basic_ios&) = delete;
+	  ...
+    };
+```
+
+删除的函数和声明为私有函数的区别看上去只是时尚一些，但是区别比你想象的要多。删除的函数不能通过任何方式被使用，即便是其他成员函数或者友好函数试图复制`basic_ios`对象的时候也会导致编译失败。这是对`C++98`中的行为的升级，因为在`C++98`中直到链接的时候才会诊断出这个错误。
+
+方便起见，删除函数被声明为公有的，而不是私有的。这样设计的原因是，当客户端程序尝试使用一个成员函数的时候，`C++`会在检查删除状态之前检查可访问权限。当客户端代码尝试访问一个删除的私有函数时，一些编译器仅仅会警报该函数为私有，尽管这里函数的可访问性并不本质上影响它是否可以被使用。当把私有未定义的函数改为对应的删除函数时，牢记这一点是很有意义的，因为使这个函数为公有的可以产生更易读的错误信息。
+
+本地试验，无论公有还是私有，删除函数在编译时都提示使用了删除的函数：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+class Test {
+public:
+    void show() = delete;
+
+private:
+    void print() = delete;
+};
+
+int main() {
+    Test test;
+    test.show();  // error: use of deleted function 'void Test::show()'
+    test.print();  // error: use of deleted function 'void Test::print()'
+    return 0;
+}
+```
+
+删除函数一个重要的优势是任何函数都可以是删除的，然而仅有成员函数才可以是私有的。举个例子，假如我们有个非成员函数，以一个整数为参数，然后返回这个参数是不是幸运数字：
+
+```
+	bool isLucky(int number);
+```
+
+`C++`继承于`C`意味着，很多其他类型被隐式的转换为`int`类型，但是有些调用可以编译但是没有任何意义，以下都可以编译通过：
+
+```c++
+	if(isLucky('a')) ...                  // a 是否是幸运数字？
+
+	if(isLucky(ture)) ...                 // 返回true?
+
+	if(isLucky(3.5)) ...                  // 我们是否应该在检查它是否幸运之前裁剪为3？
+```
+
+如果幸运数字一定要是一个整数，我们希望能到阻止上面那种形式的调用。
+
+完成这个任务的一个方法是为想被排除出去的类型的重载函数声明为删除的：
+
+```c++
+	bool isLucky(int number);           // 原本的函数
+
+	bool isLucky(char) = delete;        // 拒绝char类型
+
+	bool isLucky(bool) = delete;        // 拒绝bool类型
+
+	bool isLucky(double) = delete;      // 拒绝double和float类型
+```
+
+（对`double`的重载的注释写到：`double`和`float`类型都讲被拒绝可能会令你感到吃惊，当时当你回想起来，如果给`float`一个转换为`int`或者`double`的可能性，`C++`总是倾向于转化为`double`的，就不会感到奇怪了。以`float`类型调用`isLucky`总是调用对应的`double`重载，而不是`int`类型的那个重载。结果就是将`double`类型的重载删除将会阻止`float`类型的调用编译。）
+
+尽管删除函数不能被使用，但是它们仍然是你程序的一部分。因此，在重载解析的时候仍会将它们考虑进去。这也就是为什么有了上面的那些声明，对`isLucky`不被期望的调用会被拒绝：
+
+```c++
+	if (isLucky('a')) ...               // 错误！调用删除函数
+
+	if (isLucky(true)) ...              // 错误！
+
+	if (isLucky(3.5f)) ...              // 错误！
+```
+
+还有一个删除函数可以完成技巧（而私有成员函数无法完成）是可以阻止那些应该被禁用的模板实现。举个例子，假设你需要使用一个内嵌指针的模板（虽然第4章建议使用智能指针而不是原始的指针）：
+
+```c++
+	template<typename T>
+	void processPointer(T* ptr);
+```
+
+在指针的家族中，有两个特殊的指针。一个是`void*`指针，因为没有办法对它们解引用，递增或者递减它们等操作。另一个是`char*`指针，因为它们往往表示指向`C`类型的字符串，而不是指向独立字符的指针。这些特殊情况经常需要特殊处理，在`processPointer`模板中，假设对这些特殊的指针合适的处理方式拒绝调用。也就是说，不可能以`void*`或者`char*`为参数调用`processPointer`。
+
+这是很容易强迫实现的。仅仅需要删除这些实现：
+
+```c++
+	template<>
+	void processPointer<void>(void*) = delete;
+
+	template<>
+	void processPointer<char>(char*) = delete;
+```
+
+现在，使用`void*`或者`char*`调用`processPointer`是无效的，使用`const void*`或者`const char*`调用也需要是无效的，因此这些实现也需要被删除：
+
+```c++
+	template<>
+	void processPointer<const void>(const void*) = delete;
+
+	template<>
+	void processPointer<const char>(const char*) = delete;
+```
+
+如果你想更彻底一点，你还要删除对`const volatile void*`和`const volatile char*`的重载，你就可以在其他标准的字符类型的指针`std::wchar_t, std::char16_t`和`std::char32_t`上愉快的工作了。
+
+有趣的是，如果你在一个类内部有一个函数模板，你想通过声明它们为私有来禁止某些实现，但是你通过这种方式做不到，因为赋予一个成员函数模板的某种特殊情况下拥有不同于模板主体的访问权限是不可能。举个例子，如果`processPointer`是`Widget`内部的一个成员函数模板，你想禁止使用`void*`指针的调用，下面是一个`C++98`风格的方法，下面代码依然无法通过编译：
+
+```c++
+	class Widget{
+	public:
+	  ...
+	  template<typename T>
+	  void processPointer(T* ptr)
+	  { ... }
+
+	private:
+	  template<>                                       // 错误！error: explicit specialization in non-namespace scope 'class Widget'
+	  void processPointer<void>(void*);                //  error: template-id 'processPointer<void>' in declaration of primary template
+
+    };
+```
+
+这里的问题是，模板的特殊情况必须要写在命名空间的作用域内，而不是类的作用域内。这个问题对于删除函数是不存在的，因为它们不再需要一个不同的访问权限。它们可以再类的外面被声明为是被删除的（也就是在命名空间的作用域内）：
+
+```c++
+	class Widget{
+	public:
+	  ...
+	  template<typename T>
+	  void processPointer(T* ptr)
+	  { ... }
+	  ...
+
+    };
+
+    template<>                                              // 仍然是公用的，但是已被删除
+    void Widget::processPointer<void>(void*) = delete;
+```
+
+真相是，`C++98`中声明私有函数是不定义而想达到`C++11`中删除函数同样效果的尝试。作为一个模仿品，`C++98`的方式并不如它要模仿的东西那么好。它在类的外边和内部都是是无法工作的，当它工作时，知道链接的时候可能又不工作了。所以还是坚持使用删除函数吧。
+
+| 要记住的东西                                         |
+| :--------------------------------------------------- |
+| 优先使用删除函数而不是私有而不定义的函数             |
+| 任何函数都可以被声明为删除，包括非成员函数和模板实现 |
+
+## 条款12：使用override关键字声明覆盖的函数
+
+`C++`中的面向对象的变成都是围绕类，继承和虚函数进行的。其中最基础的一部分就是，派生类中的虚函数会覆盖掉基类中对应的虚函数。但是令人心痛的意识到虚函数重载是如此容易搞错。这部分的语言特性甚至看上去是按照墨菲准则设计的，它不需要被遵从，但是要被膜拜。
+
+因为覆盖“`overriding`”听上去像重载“`overloading`”，但是它们完全没有关系，我们要有一个清晰地认识，虚函数（覆盖的函数）可以通过基类的接口来调用一个派生类的函数：
+
+```c++
+	class Base{
+	public:
+	  virtual void doWork();                          // 基类的虚函数
+	  ...
+	};
+
+	class Derived: public Base{
+	public:
+	  virtual void doWork();                         // 覆盖 Base::doWork
+	                                                 // ("virtual" 是可选的)
+	  ...
+	};
+
+	std::unique_ptr<Base> upb =                      // 产生一个指向派生类的基类指针
+	                                                 // 关于 std::make_unique 的信息参考条款21
+	  std::make_unique<Derived>();
+
+	...
+
+	upb->doWork();                                   // 通过基类指针调用 doWork()，
+	                                                 // 派生类的对应函数别调用
+```
+
+如果要使用覆盖的函数，几个条件必须满足：
+
+- 基类中的函数被声明为虚的。
+- 基类中和派生出的函数必须是完全一样的（出了虚析构函数）。
+- 基类中和派生出的函数的参数类型必须完全一样。
+- 基类中和派生出的函数的常量特性必须完全一样。
+- 基类中和派生出的函数的返回值类型和异常声明必须使兼容的。
+
+以上的约束仅仅是`C++98`中要求的部分，`C++11`有增加了一条：
+
+- 函数的引用修饰符必须完全一样。成员函数的引用修饰符是很少被提及的`C++11`的特性，所以你之前没有听说过也不要惊奇。这些修饰符使得将这些函数只能被左值或者右值使用成为可能。成员函数不需要声明为虚就可以使用它们：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+class Widget {
+public:
+    // 只有当 *this 为左值时
+    // 这个版本的 doWorkd()
+    // 函数被调用
+    void doWork()& {
+        cout << "doWork()&" << endl;
+    }
+    
+	// 只有当 *this 为右值
+    // 这个版本的 doWork()
+    // 函数被调用
+    void doWork()&& {
+        cout << "doWork()&&" << endl;
+    }
+};
+
+Widget makeWidget() {  // 工厂函数，返回右值
+    return Widget();
+}                             
+
+int main() {
+	Widget w;                                        // 正常的对象（左值）
+
+	w.doWork();                                      // 为左值调用 Widget::doWork() 
+	                                                 //（即 Widget::doWork &）
+	makeWidget().doWork();                           // 为右值调用 Widget::doWork() 
+	                                                 //（即 Widget::doWork &&）
+    return 0;
+}
+// 输出：
+doWork()&
+doWork()&&
+```
+
+稍后我们会更多介绍带有引用修饰符的成员函数的情况，但是现在，我们只是简单的提到：如果一个虚函数在基类中有一个引用修饰符，派生类中对应的那个也必须要有完全一样的引用修饰符。如果不完全一样，派生类中的声明的那个函数也会存在，但是它不会覆盖基类中的任何东西。
+
+对覆盖函数的这些要求意味着，一个小的错误会产生一个很大不同的结果。在覆盖函数中出现的错误通常还是合法的，但是它导致的结果并不是你想要的。所以当你犯了某些错误的时候，你并不能依赖于编译器对你的通知。例如，下面的代码是完全合法的，乍一看，看上去也是合理的，但是它不包含任何虚覆盖函数——没有一个派生类的函数绑定到基类的对应函数上。你能找到每种情况里面的问题所在吗？即为什么派生类中的函数没有覆盖基类中同名的函数。
+
+```c++
+	class Base {
+	public:
+	  virtual void mf1() const;
+	  virtual void mf2(int x);
+	  virtual void mf3() &;
+	  void mf4() const;
+	};
+
+	class Derived: public Base {
+	 public:
+	   virtual void mf1();
+	   virtual void mf2(unsigned int x);
+	   virtual void mf3() &&;
+	   void mf4() const;
+	};
+```
+
+需要什么帮助吗？
+
+- `mf1`在`Base`中声明常成员函数，但是在`Derived`中没有
+- `mf2`在`Base`中以`int`为参数，但是在`Derived`中以`unsigned int`为参数
+- `mf3`在`Base`中有左值修饰符，但是在`Derived`中是右值修饰符
+- `mf4`没有继承`Base`中的虚函数
+
+你可能会想，“在实际中，这些代码都会触发编译警告，因此我不需要过度忧虑。”也许的确是这样，但是也有可能不是这样。经过我的检查，发现在两个编译器上，上边的代码被全然接受而没有发出任何警告，在这两个编译器上所有警告是都会被输出的。（其他的编译器输出了这些问题的警告信息，但是输出的信息也不全。）
+
+因为声明派生类的覆盖函数是如此重要，有如此容易出错，所以`C++11`给你提供了一种可以显式的声明一个派生类的函数是要覆盖对应的基类的函数的：声明它为`override`。把这个规则应用到上面的代码得到下面样子的派生类：
+
+```c++
+	class Derived: public Base {
+	public:
+	  virtual void mf1() override;
+	  virtual void mf2(unsigned int x) override;
+	  virtual void mf3() && override;
+	  virtual void mf4() const override;
+	};
+```
+
+这当然是无法通过编译的，因为当你用这种方式写代码的时候，编译器会把覆盖函数所有的问题揭露出来。这正是你想要的，所以你应该把所有覆盖函数声明为`override`。
+
+使用`override`，同时又能通过编译的代码如下（假设目的就是`Derived`类中的所有函数都要覆盖`Base`对应的虚函数）：
+
+```c++
+	class Base {
+	public:
+	  virtual void mf1() const;
+	  virtual void mf2(int x);
+	  virtual void mf3() &;
+	  virtual void mf4() const;
+	};
+
+	class Derived: public Base {
+	public:
+	  virtual void mf1() const override;
+	  virtual void mf2(int x) override;
+	  virtual void mf3() & override;
+	  void mf4() const override;                 // 加上"virtual"也可以
+	                                             // 但是不是必须的
+	};
+```
+
+注意在这个例子中，代码能正常工作的一个基础就是声明`mf4`为`Base`类中的虚函数。绝大部分关于覆盖函数的错误发生在派生类中，但是也有可能在基类中有不正确的代码。
+
+对于派生类中覆盖体都声明为`override`不仅仅可以让编译器在应该要去覆盖基类中函数而没有去覆盖的时候可以警告你。它还可以帮助你预估一下更改基类里的虚函数的标识符可能会引起的后果。如果在派生类中到处使用了`override`，你可以改一下基类中的虚函数的名字，看看这个举动会造成多少损害（即，有多少派生类无法通过编译），然后决定是否可以为了这个改动而承受它带来的问题。如果没有`override`，你会希望此处有一个无所不包的测试单元，因为，正如我们看到的，派生类中那些原本被认为要覆盖基类函数的部分，不会也不需要引发编译器的诊断信息。
+
+## 条款13：优先使用const_iterator而不是iterator
+
+`const_iterator`在STL中等价于指向`const`的指针。被指向的数值是不能被修改的。标准的做法是应该使用`const`的迭代器的地方，也就是尽可能的在没有必要修改指针所指向的内容的地方使用`const_iterator`。
+
+这对于C++98和C++11是正确，但是在C++98中，`const_iterator`只有部分的支持。一旦有一个这样的迭代器，创建它们并非易事，使用也会受限。举一个例子，假如你希望从`vector`搜索第一次出现的1983(这一年"C++"替换"C + 类"而作为一个语言的名字)，然iterator后在搜到的位置插入数值1998(这一年第一个ISO C++标准被接受)。如果在vector中并不存在1983，插入操作的位置应该是vector的末尾。在C++98中使用`iterator`，这会非常容易：
+
+```c++
+std::vector<int> values;
+…
+std::vector<int>::iterator it =
+std::find(values.begin(),values.end(), 1983);
+values.insert(it, 1998);
+```
+
+在这里`iterator`并不是合适的选择，因为这段代码永远都不会修改`iterator`指向的内容。重新修改代码，改成`const_iterator`是不重要的，但是在C++98中，有一个改动看起来是合理的，但是仍然是不正确的：
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    typedef std::vector<int>::iterator IterT;    // typetypedef
+    typedef std::vector<int>::const_iterator ConstIterT; // defs
+    std::vector<int> values;
+    ConstIterT ci =
+        std::find(static_cast<ConstIterT>(values.begin()), // cast
+                  static_cast<ConstIterT>(values.end()), 1983);      // cast
+    values.insert(static_cast<IterT>(ci), 1998);       // 可能无法编译
+                                                        // 参考后续解释，error: no matching function for call to '__gnu_cxx::__normal_iterator<int*, std::vector<int> >::__normal_iterator(ConstIterT&)'
+    return 0;
+}
+```
+
+`typedef`并不是必须的，当然，这会使得代码更加容易编写。（如果你想知道为什么使用`typedef`而不是使用规则9中建议使用的别名声明，这是因为这个例子是C++98的代码，别名声明的特性是C++11的。）
+
+在`std::find`中的强制类型转换是因为`values`是在C++98中是非`const`的容器，但是并没有比较好的办法可以从一个非`const`容器中得到一个`const_iterator`。强制类型转换并非必要的，因为可以从其他的办法中得到`const_iterator`（比如，可以绑定`values`到一个`const`的引用变量，然后使用这个变量代替代码中的`values`），但是不管使用哪种方式，从一个非`const`容器中得到一个`const_iterator`牵涉到太多。
+
+一旦使用了`const_iterator`，麻烦的事情会更多，因为在C++98中，插入或者删除元素的定位只能使用`iterator`，`const_iterator`是不行的。这就是为什么在上面的代码中，我把`const_iterator`（从`std::find`中小心翼翼的拿到的）有转换成了`iterator`：`insert`给一个`const_iterator`会编译不过。
+
+老实说，我上面展示的代码可能就编译不过，这是因为并没有合适的从`const_iterator`到`interator`的转换，甚至是使用`static_cast`也不行。甚至最暴力的`reinterpret_cast`也不成。（这不是C++98的限制，同时C++11也同样如此。`const_iterator`转换不成`iterator`，不管看似有多么合理。）还有一些方法可以生成类似`const_iterator`行为的`iterator`，但是它们都不是很明显，也不通用，本书中就不讨论了。除此之外，我希望我所表达的观点已经明确：`const_iterator`在C++98中非常麻烦事，是万恶之源。那时候，开发者在必要的地方并不使用`const_iterator`，在C++98中`const_iterator`是非常不实用的。
+
+所有的一切在C++11中发生了变化。现在`const_iterator`既容易获得也容易使用。容器中成员函数`cbegin`和`cend`可以产生`const_iterator`，甚至非`const`的容器也可以这样做，STL成员函数通常使用`const_iterator`来进行定位（也就是说，插入和删除insert and erase）。修订原来的C++98的代码使用C++11的`const_iterator`替换原来的`iterator`是非常的简单的事情：
+
+```c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+template<typename T>
+class Type;
+
+int main() {
+    std::vector<int> values; // 和之前一样
+    auto it = // use cbegin
+        std::find(values.cbegin(), values.cend(), 1983); // and cend
+    values.insert(it, 1998);
+    // Type<decltype(it)> type;  // Type<__gnu_cxx::__normal_iterator<const int*, std::vector<int> > >
+    // 如果上面使用begin(),end()，则type为Type<__gnu_cxx::__normal_iterator<int*, std::vector<int> > >
+    return 0;
+}
+```
+
+在代码使用`const_iterator`非常的实用！
+
+在C++11中只有一种使用`const_iterator`的短处就是在编写最大化泛型库的代码的时候。代码需要考虑一些容器或者类似于容器的数据结构提供`begin`和`end`（加上cbegin, cend, rbegin等等）作为非成员函数而不是成员函数。例如这种情况针对于内建的数组，和一些第三方库中提供一些接口给自由无约束的函数来使用。最大化泛型代码使用非成员函数而不是使用成员函数的版本。
+
+## [条款14: 如果函数不会抛出异常就把它们声明为noexcept](https://www.cnblogs.com/boydfd/p/5035940.html)
+
+在C++98中，异常规范（exception specifications）是一个不稳定因素。你必须总结出一个函数可能会抛出的异常类型，所以如果函数的实现被修改了，异常规范可能也需要被修正。改变异常规范则又可能影响到客户代码，因为调用者可能依赖于原先的异常规范。编译器通常不会提供帮助来维护“函数实现，异常规范以及客户代码”之间的一致性。最终，大多数程序员觉得C++98的异常规范不值得去使用。
+
+C++11中，对于函数的异常抛出行为来说，出现了一种真正有意义的信息，它能说明函数是否有可能抛出异常。是或不是，一个函数可能抛出一个异常或它保证它不会抛出异常。这种“可能或绝不”二分的情况是C++11异常规范的基础，这种异常规范从本质上替换了C++98的异常规范。（C++98风格的异常规范仍然是有效的，但是它们是被弃用了的。）在C++11中，无条件的noexcept就说明这个函数保证不会抛出异常。
+
+在设计接口的时候，一个函数是不是应该这么声明（noexcept）是一个需要考虑的问题。函数的异常抛出行为是客户最感兴趣的部分。调用者能询问一个函数的noexcept状态，并且这个询问的结果能影响异常安全（exception safety）或着调用代码的性能。因此，一个函数是否是noexcept和一个成员函数是否是cosnt，这两个信息使同样重要。当你知道一个函数不会抛出异常的时候却不声明它为noexcept，就属于一个不好的接口设计。
+
+但是，这里还有一个额外的动机让我们把noexcept应用到不会产生异常的函数上：它允许编译器产生更好的目标代码。为了理解为什么会这样，让我们检查一下C++98和C++11中，对于一个函数不会抛出异常的不同解释。考虑一个函数f，它保证调用者永远不会收到异常。两种不同的表示方法：
+
+```c++
+int f(int x) throw();           //C++98风格
+
+int f(int x) noexcept;          //C++11风格
+```
+
+如果，运行时期，一个异常逃离了f，这违反了f的异常规范。在C++98的异常规范下，f的调用者的调用栈被解开了，然后经过一些不相关的动作，程序终止执行。在C++11的异常规范下，运行期行为稍微有些不同：调用栈只有在程序终止前才有可能被解开。
+
+解开调用栈的时机，以及解开的可能性的不同，对于代码的产生有很大的影响。在一个noexcept函数中，如果一个异常能传到函数外面去，优化器不需要保持运行期栈为解开的状态，也不需要确保noexcept函数中的对象销毁的顺序和构造的顺序相反（译注：因为noexcept已经假设了不会抛出异常，所以就算异常被抛出，大不了就是程序终止，而不可能处理异常）。使用“throw()”异常规范的函数，以及没有异常规范的函数，没有这样的优化灵活性。三种情况能这样总结：
+
+```c++
+RetType function(params) noexcept;          //优化最好
+
+RetType function(params) throw();           //没有优化
+
+RetType function(params);                   //没有优化
+```
+
+这种情况就能作为一个充足的理由，让你在知道函数不会抛出异常的时候，把它声明为noexcept。
+
+对于一些函数，情况变得更加强烈（更多的优化）。move操作就是一个很好的例子。假设你有一份C++98代码，它使用了std::vector。Widget通过一次次push_back来加到std::vector中:
+
+```c++
+std::vector<Widget> vw;
+
+...
+
+Widget w;
+
+...                     //使用w
+
+vw.push_back(w);        //把w加到vw中
+
+...
+```
+
+假设这个代码工作得很好，然后你也没有兴趣把它改成C++11的版本。但是，基于C++11的move语法能提升原来代码的性能（当涉及move-enabled类型时）的事实，你想做一些优化，因此你要保证Widget有一个move operation，你要么自己写一个，要么用函数生成器来实现（看Item 17）。
+
+当一个新的元素被添加到std::vector时，可能std::vector剩下的空间不足了，也就是std::vector的size等于它的capacity(容量)。当发生这种事时，std::vector申请一个新的，更大的内存块来保存它的元素，然后把原来的内存块中的元素，转移到新块中去。在C++98中，转移是通过拷贝来完成的，它先把旧内存块中的所有元素拷贝到新内存块中，再销毁旧内存块中的对象（译注：再delete旧内存）。这种方法确保push_back能提供强异常安全的保证：如果一个异常在拷贝元素的时候被抛出，std::vector的状态没有改变，因为在所有的元素都成功地被拷贝到新内存块前，旧内存块中的元素都不会被销毁。
+
+在C++11中，会进行一个很自然的优化：用move来替换std::vector元素的拷贝。不幸的是，这样做会违反push_back的强异常安全保证。如果n个元素已经从旧内存块中move出去了，在move第n+1个元素时，有一个异常抛出，push_back操作不能执行完。但是原来的std::vector已经被修改了：n个元素已经被move出去了。想要恢复到原来的状态是不太可能的，因为尝试”把新内存块中的元素move回旧内存块中“的操作也可能产生异常。
+
+这是一个严重的问题，因为一些历史遗留代码的行为可能依赖于push_back的强异常安全的保证。因此，除非知道它不会抛出异常，否则C++11中的push_back的实现不能默默地用move操作替换拷贝操作。在这种情况（不会抛出异常）下，用move替换拷贝操作是安全的，并且唯一的效果就是能提升代码的性能。
+
+std::vector::push_back采取”如果可以就move，不能就copy“的策略，并且在标准库中，不只是这个函数这么做。在C++98中，其他提供强异常安全的函数（比如，std::vector::reserve，std::deque::insert等等）也采取这样的策略。如果知道move操作不会产生异常，所有这些函数都在C++11中使用move操作来替换原先C++98中的拷贝操作。但是一个函数怎么才能知道move操作会不会产生异常呢？回答很明显：它会检查这个操作是否被声明为noexcept。
+
+swap函数特别需要noexcept，swap是实现很多STL算法的关键部分，并且它也常常被拷贝赋值操作调用。它的广泛使用使得noexcept提供的优化特别有价值。有趣的是，标准库的swap是否是noexcept常常取决于用户自定义的swap是否是noexcept。举个例子，标准库中，array和std::pair的swap这么声明：
+
+```c++
+template<class T, size_t N>
+void swap(T (&a)[N],
+          T (&b)[N])    noexcept(noexcept(swap(*a, *b)));
+
+template<class T1, class T2>
+sturct pair{
+    ...
+    void swap(pair& p) noexcept(noexcept(swap(first, p.first)) && 
+                                noexcept(swap(second, p.second)));
+    ...
+};
+
+// 本地试验
+#include <iostream>
+#include <array>
+
+using namespace std;
+
+class Widget {
+public:
+    Widget() {}
+
+    Widget(int i) : i_(i) {}
+
+private:
+    int i_;
+};
+
+// 如果去掉这个特化的swap<Widget>版本，则main函数输出为true
+namespace std {
+    template<>
+    void swap<Widget>(Widget& lhs, Widget& rhs) noexcept(false) {
+    }
+}
+
+int main() {
+    array<Widget, 10> widgets1;
+    widgets1.fill(Widget(10));
+
+    array<Widget, 10> widgets2;
+    widgets2.fill(Widget(20));
+
+    swap(widgets1, widgets2);
+
+    cout << boolalpha << noexcept(swap(widgets1, widgets2)) << endl;  // false
+    return 0;
+}
+```
+
+这些函数是条件noexcept（conditionally noexcept）：它们是否是noexcept取决于noexcept中的表达式是否是noexcept。举个例子，给出两个Widget的数组，只有用数组中的元素来调用的swap是noexcept时（也就是用Widget来调用的swap是noexcept时），用数组调用的swap才是noexcept。反过来，这也决定了Widget的二维数组是否是noexcept。相似地，std::pair<Widget, Widget>对象的swap成员函数是否是noexcept取决于用Widget调用的swap是否是noexcept。事实上，只有低层次数据结构的swap调用是noexcept，才能使得高层次数据结构的swap调用是noexcept。这鼓励你尽量提供noexcept swap函数。
+
+现在我希望你已经对noexcept提供的优化机会感到兴奋了。哎，可是我必须浇灭你的热情。优化很重要，但是正确性更重要。我记得在这个Item的开始说过，noexcept是函数接口的一部分，所以只有当你愿意长期致力于noexcept的实现时，你才应该声明函数为noexcept。如果你声明一个函数为noexcept，并且之后对于这个决定后悔了，你的选择是将是绝望的。1：你能把noexcept从函数声明中移除（也就是改变函数接口），则客户代码会遭受运行期风险。2：你也能改变函数的实现，让异常能够逃离函数，但是保持着原来的异常规范（现在，原来的规范声明是错误的）。如果你这么做，当一个异常尝试逃离函数时，你的程序将会终止。3：或者你可以抛弃一开始想要改变实现的想法，回归到你现存的实现中去。这些选择没有一个是好的选择。
+
+事实上，很多函数都是异常中立的（exception-neutral）。这些函数自己不抛出异常，但是他们调用的函数可能抛出异常。当发生这样的事时，异常中立的函数允许异常通过调用链传给处理程序。异常中立的函数永远不是noexcept，因为他们可能抛出“我只经过一下”（异常产生的地方在别的函数中，但是需要经过我们来传递出去）的异常。因此，很大部分函数都不适合设计为noexcept。
+
+然而，一些函数天生就不抛出异常，并且对于一些函数（特别是move操作和swap函数）成为noexcept能有很大的回报，只要有任何可能，它们都值得实现为noexcept。当你能很明确地说一个函数永远不应该抛出异常的时候，你应该明确地把这个函数声明为noexcept。
+
+请记住，我说过一些函数天生就适合实现为noexcept。但是如果扭曲一个函数的实现来允许noexcept声明，这样是本末倒置的。假设一个简单的函数实现可能会产生异常（比如，它调用的函数可能抛出异常），如果你想隐藏这样的调用（比如，在函数内部捕捉所有的异常并且把它们替换成相应的状态值或者特殊的返回值）不仅将使你的函数实现更加复杂，它还将使你的函数调用变得更加复杂。举个例子，调用者必须要检查状态值或特殊的返回值。同时增加的运行期的费用（比如，额外的分支，以及更大的函数在指令缓存上会增加更大的压力。等等）会超过你希望通过noexcept来实现的加速，同时，你还要承担源代码更加难以理解和维护的负担。这真是一个糟糕的软件工程。
+
+对于一些函数来说，声明为noexcept不是如此重要，它们在默认情况下就是noexcept了。在C++98中，允许内存释放函数（比如operator delete和operator delete[]）和析构函数抛出异常是很糟糕的设计风格，在C++11中，这种设计风格已经在语言规则的层次上得到了改进。默认情况下，所有的内存释放函数和所有的析构函数（包括用户自定义的和编译器自动生成的）都隐式成为noexcept。因此我们不需要把它们声明成noexcept的（这么做不会造成任何问题，但是不寻常。）只有一种情况析构函数不是隐式noexcept，就是当类中的一个成员变量（包括继承来和被包含在成员变量中的成员变量）的析构函数声明表示了它可能会抛出异常（比如，声明这个析构函数为“noexcept(false)”）。这样的声明是不寻常的，标准库中就没有。如果把一个带有能抛出异常的析构函数的对象用在标准库中（比如，这个对象在一个容器中或者这个对象被传给一个算法），那么程序的行为是未定义的。
+
+我们值得去注意一些库的接口设计区分了宽接口（wide contract）和窄接口（narrow contract）。一个带宽接口的函数没有前提条件。这样的函数被调用时不需要注意程序的状态，它在传入的参数方面没有限制。带宽接口的函数永远不会展现未定义行为。
+
+不带宽接口条件的函数就是窄接口函数。对这些函数来说，如果传入的参数违反了前提条件，结果将是未定义的。
+
+如果你在写一个宽接口的函数，并且你知道你不会抛出一个异常，那就遵循本Item的建议，把它声明为noexcept。对于那些窄接口的函数，情况将变得很棘手。举个例子，假设你正在写一个函数f，这个函数接受一个std::string参数，并且它假设f的实现永远不会产生一个异常。这个假设建议我们把f声明为noexcept。
+
+现在假设f有一个前提条件：std::string参数的数据长度不会超过32个字节。如果用一个超过32字节的std::string来调用f，f的行为将是未定义的，因为一个不符合前提条件的参数会导致未定义行为。f没有义务去检查前提条件，因为函数假设它们的前提条件是被满足的（调用者有责任确保这些假设是有效的）。由于前提条件的存在，把f声明为noexcept看起来是合理的。
+
+```c++
+void f(const std::string& s) noexcept;      //前提条件：s.length() <= 32
+```
+
+但是假设f的实现选择检查前提条件是否被违反了。检查本不是必须的，但是它也不是被禁止的，并且检查一下前提条件是有用的（比如，在进行系统测试的时候）。调试时，捕捉一个抛出的异常总是比尝试找出未定义行为的原因要简单很多。但是要怎么报道出前提条件被违反了呢？只有报道了才能让测试工具或客户端的错误处理机制来捕捉到它。一个直接的方法就是抛出一个“前提条件被违反”的异常，但是如果f被声明为noexcept，那么这个方法就不可行了，抛出一个异常就会导致程序终止。因此，区分宽接口和窄接口的库设计者通常只为宽接口函数提供noexcept声明。
+
+最后还有一点，让我完善一下我之前的观点（编译器常常无法对“找出函数实现和它们的异常规范之间的矛盾”提供帮助）。考虑一下下面的代码，这段代码是完全合法的：
+
+```c++
+void setup();           //在别处定义的函数
+void cleanup();         
+
+void doWork() noexcept
+{
+    setup();            //做设置工作
+
+    ...                 //做实际的工作
+
+    cleanup();          //做清理工作
+}
+```
+
+在这里，尽管doWork调用了non-noexcept函数（setup和cleanup），doWork还是被声明为noexcept。这看起来很矛盾，但是有可能setup和cleanup在说明文档中说了它们永远不会抛出异常。就算它们没有在说明文档中说明，我们 还是有多理由来解释他们的声明式为什么是non-noexcept。举个例子，它们可能是用C写的。（也可能是从C标准库移动到std命名空间但缺少异常规范的函数，比如，std::strlen没有声明为noexcept）或者它们可能是C++98标准库的一部分，没有使用C++98的异常规范，并且到目前为止还没有被修改成C++11的版本。
+
+因为这里有很多合适的理由来解释为什么noexcept函数可以调用缺乏noexcept保证的函数，所以C++允许这样的代码，并且编译器通常不会对此发出警告。
+
+**你要记住的事**
+
+- noexcept是函数接口的一部分，并且调用者可能会依赖这个接口。
+- 比起non-noexcept函数，noexcept函数可以更好地被优化。
+- noexcept对于move操作，swap，内存释放函数和析构函数是特别有价值的，
+- 大部分函数是异常中立的而不是noexcept。
+
+## [条款15: 只要有可能，就使用constexpr](https://www.cnblogs.com/boydfd/p/5041316.html)
 
 
 
