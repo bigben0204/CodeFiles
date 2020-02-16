@@ -3297,19 +3297,1360 @@ void doWork() noexcept
 
 ## [条款15: 只要有可能，就使用constexpr](https://www.cnblogs.com/boydfd/p/5041316.html)
 
+如果说C++11中有什么新东西能拿“最佳困惑奖”的话，那肯定是constexpr了。当把它用在对象上时，它本质上是const的加强版，但是把它用在函数上时，它将拥有不同的意义。切开“迷雾”（解开困惑）是值得的，因为当constexpr符合你想表达的情况时，你肯定会想要使用它的。
+
+从概念上来说，constexpr表明的一个值不只是不变的，它还能在编译期被知道。但是这个概念只是故事的一部分，因为当constexpr应用在函数上时，事情变得比看上去还要微妙。为了避免毁掉后面的惊喜，现在，我只能说你不能假设constexpr函数的返回值是const的，同时你也不能假设这些值能在编译期被知道。也许最有趣的是，这些东西都是特性（是有用的）。对于constexpr函数来说，不需要产生const或能在编译期知道的返回结果是一件好事。
+
+但是，让我们从constexpr对象开始。这些对象确实是常量，也确实能在编译期被知道。（技术上来讲，它们的值是在翻译阶段被决定的，翻译阶段包含了编译期和链接期。除非你要写一个C++的编译器或连接器，不然这都影响不到你，所以你能在编程的时候，开心地假设为constexpr对象的值是在编译期被决定的）
+
+值能在编译器知道是很有用的。它们能代替只读内存，举个例子，尤其是对一些嵌入式系统来说，这是一个相当重要的特性。更广泛的应用就是，当C++要求一个不变的，并且在编译期能知道的整形常量表达式的时候，我们可以使用它（constexpr对象或函数）来替代。这样的场景包括了数组大小的说明，整形模板参数（包括std::array对象的长度），枚举成员的值，alignment说明符，等等。如果你想使用变量来做这些事，你肯定想要把它声明为constexpr，因为编译器会确保它是一个编译期的值：
+
+```c++
+int sz;                             //non-constexpr变量
+
+...
+
+constexpr auto arraySize1 = sz;     //错误！sz的值不是在编译期被知道的
+
+std::array<int, sz> data1;          //错误！同样的问题
+
+constexpr auto arraySize2 = 10;     //对的，10是一个编译期的常量
+
+std::array<int, arraySize2> data2;  //对的，arraySize2是一个constexpr
+```
+
+记住，const不能提供和constexpr一样的保证，因为const对象不需要用“在编译期就知道的”值初始化：
+
+```c++
+int sz;
+
+...
+
+const auto arraySize = sz;          //对的，arraySize是拷贝自sz的const变量
+
+std::array<int, arraySize> data;    //错误！arraySize的值不能在编译期知道
+```
+
+简单来说，所有的constexpr对象都是const对象，但是不是所有的const对象都是constexpr对象。如果你想让编译器保证变量拥有的值能被用在那些，需要编译期常量的上下文中，那么你就应该使用constexpr而不是const。
+
+当涉及constexpr函数时，constexpr对象的使用范围变得更加有趣。当使用编译期常量来调用这样的函数时，它们产生编译期常量。当用来调用函数的值不能在运行期前得知时，它们产生运行期的值。这听起来好像你知道它们会做什么，但是这么想是错误的。正确的观点是这样的：
+
+- constexpr函数能被用在要求编译期常量的上下文中，如果所有传入constexpr函数的参数都能在编译期知道，那么结果将在编译期计算出来。如果有任何一个参数的值不能在编译期知道，你的代码就被拒绝（不能在编译期执行）了。
+- 当使用一个或多个不能在编译期知道的值来调用一个constexpr函数时，它表现得就像一个正常的函数，在运行期计算它的值。这意味着你不需要两个函数来表示相同的操作，一个为编译期常量服务，一个为所有的值服务。constexpr函数把这些事都做了。
+
+假设你需要一个数据结构来存放一个运算方式不会改变的实验结果。举个例子，在实验过程中，灯的亮度等级（有高，低，关三种状态），风扇的速度，以及温度也是这样，等等。如果这里有n种环境条件和实验有关，每种条件有三种状态，那么结果的组合数量就是3^n。因此对于实验结果的所有的组合进行保存，就需要一个起码有3^n的空间的数据结构。假设每个结果都是一个int，那么n就是在编译期已知的（或者说可以计算出来），std::array是一个合理的选择。但是我们需要一个方法来在编译期计算3^n。C++标准库提供了std::pow，这个函数是我们需要的数学函数，但是对于我们的目的来说，它有两点问题。第一，std::pow在浮点类型下工作，但是我们需要一个整形的结果。第二，std::pow不是constexpr（也就是，用编译期的值调用它时，它不能返回一个编译期的结果），所以我们不能用它来明确std::array的大小。
+
+幸运的是，我们能自己写一个我们所需要的pow，我马上就会告诉你怎么实现，但是现在先让我们看一下它是怎么声明以及怎么使用的：
+
+```c++
+constexpr                                   //pow是一个constexpr函数
+int pow(int base, int exp) noexcept         //永远不会抛出异常
+{
+    ...                                     //实现在下面
+}
+
+constexpr auto numConds = 5;                //条件的数量
+
+std::array<int, pow(3, numConds)> results;  //结果有3^numConds个函数
+```
+
+回忆一下，pow前面的constexpr不是说pow返回一个const值，它意味着如果base和exp是编译期常量，pow的返回结果能被视为编译期常量。如果base和/或exp不是编译期常量，pow的结果将在运行期计算。这意味着pow不只能在编译阶段计算std::array的大小，它也可以在运行期的时候这么调用:
+
+```c++
+auto base = readFromDB("base");     //运行期得到这些值
+auto exp = readFromDB("exponent");  
+
+auto baseToExp = pow(base, exp);    //在运行期调用pow
+```
+
+因为当用编译期的值调用constexpr函数时，必须能返回一个编译期的结果，所以有些限制被强加在constexpr函数的实现上。C++11和C++14有不同的限制。
+
+在c++11中，constexpr函数只能包含一条简单的语句：一个return语句。实际上，限制没听起来这么大，因为两个技巧可以用来扩张constexpr函数的表达式，并且这将超过你的想象。第一，条件表达式 “?:”能用来替换if-else语句，然后第二，递归能用来替换循环。因此pow被实现成这样：
+
+```c++
+constexpr int pow(int base, int exp) noexcept
+{
+    return (exp == 0 ? 1 : base * pow(base, exp - 1));
+}
+```
+
+这确实可以工作，但是很难想象，除了写函数的人，还有谁会觉得这个函数写得很优雅。在C++14中，constexpr函数的限制大幅度变小了，所以这让下面的实现成为了可能：
+
+```c++
+constexpr int pow(int base, int exp) noexcept           //C++14
+{
+    auto result = 1;
+    for(int i = 0; i < exp; ++i) result *= base;
+
+    return result;
+}
+```
+
+本地试验：
+
+```c++
+#include <iostream>
+#include <array>
+
+using namespace std;
+
+constexpr int pow(int base, int exp) noexcept {
+    // C++14可以在constexpr函数中写多条语句，C++11会编译报错： error: body of 'constexpr' function 'constexpr int pow(int, int)' not a return-statement
+    auto result = 1;
+    for (int i = 0; i < exp; ++i) {
+        result *= base;
+    }
+    return result;
+//    return (exp == 0 ? 1 : base * pow(base, exp - 1));  // C++11只能写一句return语句
+}
+
+int main() {
+    constexpr auto numConds = 5;
+    std::array<int, pow(3, numConds)> results;
+    return 0;
+}
+```
+
+constexpr函数由于限制，只能接受和返回literal类型（本质上来说就是，这个类型的值能在编译期决定）。在C++11中，除了void的所有built-in类型都是literal类型，user-defined类型也可能是literal类型。因为构造函数和其他函数也可能是constexpr：
+
+```c++
+class Point{
+public:
+    constexpr Point(double xVal = 0, double yVal = 0) noexcept
+        : x(xVal), y(yVal)
+    {}
+
+    constexpr double xValue() const noexcept { return x;}
+    constexpr double yValue() const noexcept { return y;}
+
+    void setX(double newX) noexcept { x = newX; }
+    void setY(double newY) noexcept { y = newY; }
+
+private:
+    double x, y;
+};
+```
+
+这里，Point的构造函数被声明为constexpr，因为如果传入的参数能在编译期知道，则被构造的Point的成员变量的值也能在编译期知道。因此，Point也能被初始化为constexpr：
+
+```c++
+constexpr Point p1(9.4, 27.7);          //对的，在编译期“执行”constexpr构造函数
+constexpr Point p2(28.8, 5.3);          //也是对的
+constexpr Point p3;
+constexpr double x = 10.0;  // 如果double为non-constexpr，则下一句p4构造编译报错
+constexpr Point p4(x);
+
+constexpr Point p(28.8, 5.3);
+p.setX(10.0);  // 所有的constexpr对象都是const对象，所以编译错误： error: passing 'const Point' as 'this' argument discards qualifiers [-fpermissive]
+constexpr double x = p.xValue();
+```
+
+同样地，getter（xValue和yValue）也能是constexpr，因为如果用一个在编译期就知道的Point对象调用它们（比如，一个constexpr Point对象），则成员变量x和y的值都能在编译期知道。这使得一个constexpr函数能调用Point的getter，然后用这个函数的返回值来初始化一个constexpr对象。
+
+```c++
+constexpr
+Point midpoint(const Point& p1, const Point& p2) noexcept
+{
+    return { (p1.xValue() + p2.xValue()) / 2,   //调用constexpr成员函数
+             (p1.yValue() + p2.yValue()) / 2};  //并通过初始化列表产生一个
+                                                //新的临时Point对象
+}
+
+constexpr auto mid = midpoint(p1, p2);          //用constexpr函数的返回值
+                                                //来初始化一个constexpr对象
+```
+
+这是很激动人心的，它意味着，虽然mid对象的初始化需要调用构造函数，getter函数和一个non-member(指midpoint)函数，但是它还是能在read-only内存中创建！这意味着，你能使用一个表达式（比如mid.xValue() * 10）来明确模板的参数，或者明确enum成员的值。它意味着以前运行期能做的工作和编译期能做的工作之间的界限变得模糊了，一些以前只能在运行期执行的运算现在可以移到编译期来执行了。移动的代码越多，软件跑得越快。（当然编译时间也会增加。）
+
+在C++11中，有两个限制阻止Point的成员函数setX和setY被声明为constexpr。第一，它们改动了它们操作的对象，但是在C++11中，constexpr成员函数被隐式声明为const。第二，它们的返回值类型是void，void类型在C++11中不是literal类型。在C++14中，两个限制都被移除了，所以C++14的Point，能把它的setter也声明为constexpr：
+
+```c++
+class Point{
+public:
+    ...
+
+    constexpr void setX(double newX) noexcept       //C++14
+    { x = newX; }
+
+    constexpr void setY(double newY) noexcept       
+    { y = newY;} 
+
+    ...
+};
+```
+
+这使得我们能写出这样的函数：
+
+```c++
+constexpr Point reflection(const Point& p) noexcept {
+    Point result;  //创建一个non-constPoint。这里不能写成constexpr，还是之前说的constexpr对象都是const，则无法调用setX和setY
+    
+    result.setX(-p.xValue());  // 如果setX函数不设置为constexpr，则编译报错：In function 'constexpr Point reflection(const Point&)': error: call to non-'constexpr' function 'void Point::setX(double)'
+    result.setY(-p.yValue());
+    
+    return result;  // 返回一个result的拷贝
+}
+```
+
+客户代码看起来像这样：
+
+```c++
+constexpr Point p1(9.4, 27.7);      
+constexpr Point p2(28.8, 5.3);
+constexpr auto mid = midpoint(p1, p2);
+
+constexpr auto reflectedMid =           //reflectedMid的值是（-19.1 -16.5）
+    reflection(mid);                    //并且是在编译期知道的
+```
+
+本Item的建议是，只要有可能就使用constexpr，并且现在我希望你能知道这是为什么：比起non-constexpr对象和non-constexpr函数，constexpr对象和constexpr函数都能被用在更广泛的上下文中（一些只能使用常量表达式的地方）。通过“只要有可能就使用constexpr”，你能让你的对象和函数的使用范围最大化。
+
+记住，constexpr是对象接口或函数接口的一部分，constexpr宣称“我能被用在任何需要常量表达式的地方”。如果你声明一个对象或函数为constexpr，客户就有可能使用在这些上下文中（要求常量表达式的地方）。如果你之后觉得对于constexpr的使用是错误的，然后移除了constexpr，这会造成很大范围的客户代码无法编译。（由于调试的原因，增加一个I/O操作到我们的constexpr函数中也会导致同样的问题，因为I/O语句一般不允许在constexpr中使用）“只要有可能就使用constexpr”中的“只要有可能”是说：需要你保证你愿意长时间保持这些对象和函数是constexpr。
+
+**你要记住的事**
+
+- constexpr对象是const，对它进行初始化的值需要在编译期知道。
+- 如果使用在编译期就知道的参数来调用constexpr函数，它就能产生编译期的结果。
+- 比起non-constexpr对象和函数，constexpr对象很函数能被用在更广泛的上下文中。
+- constexpr是对象接口或函数接口的一部分。
+
+## [条款16: 让const成员函数做到线程安全](https://www.cnblogs.com/boydfd/p/5042876.html)
+
+如果我们在数学领域里工作，我们可能会发现用一个类来表示多项式会很方便。在这个类中，如果有一个函数能计算多选式的根（也就是，多项式等于0时，各个未知量的值）将变得很方便。这个函数不会改变多项式，所以很自然就想到把它声明为const：
+
+```c++
+class Polynomial{
+public:
+    using RootsType =               //一个存放多项式的根的数据结构
+        std::vector<double>;        //（using的信息请看Item 9）
+    ...
+
+    RootsType roots() const;
+
+    ...
+
+};
+```
+
+计算多项式的根代价可能很高，所以如果不必计算的话，我们就不想计算。如果我们必须要计算，那么我们肯定不想多次计算。因此，当我们必须要计算的时候，我们将计算后的多项式的根缓存起来，并且让roots函数返回缓存的根。这里给出最基本的方法：
+
+```c++
+class Polynomial{
+public:
+    using RootsType = std::vector<double>;
+
+    RottsType roots() const
+    {
+        if(!rootsAreValid){         //如果缓存不可用
+
+            ...                     //计算根，把它们存在rootVals中
+
+            rootsAreValid = true;
+        }
+
+        return rootVals;
+    }
+
+private:
+    mutable bool rootsAreValid{ false };    //初始化的信息看Item 7
+    mutable RootsType rootVals{};
+};
+```
+
+概念上来说，roots的操作不会改变Polynomial对象，但是，对于它的缓存行为来说，它可能需要修改rootVals和rootsAreValid。这就是mutable很经典的使用情景，这也就是为什么这些成员变量的声明带有mutable。
+
+现在想象一下有两个线程同时调用同一个Polynomial对象的roots：
+
+```c++
+Polynomuial p;
+
+...
 
 
+/*-------- 线程1 -------- */      /*-------- 线程2 -------- */
 
+auto rootsOfP = p.roots();          auto valsGivingZero = p.roots();
+```
 
+客户代码是完全合理的，roots是const成员函数，这就意味着，它表示一个读操作。在多线程中非同步地执行一个读操作是安全的。至少客户是这么假设的。但是在这种情况下，却不是这样，因为在roots中，这两个线程中的一个或两个都可能尝试去修改成员变量rootsAreValid和rootVals。这意味着这段代码在没有同步的情况下，两个不同的线程读写同一段内存，这其实就是data race的定义。所以这段代码会有未定义的行为。
 
+现在的问题是roots被声明为const，但是它却不是线程安全的。这样的const声明在C++11和C++98中都是正确的（取多项式的根不会改变多项式的值），所以我们需要更正的地方是线程安全的缺失。
 
+解决这个问题最简单的方式就是最常用的办法：使用一个mutex：
 
+```c++
+class Polynomial{
+public:
+    using RootsType = std::vector<double>;
 
+    RottsType roots() const
+    {
+        std::lock_guard<std::mutex> g(m);       //锁上互斥锁，如果std::mutex m未定义mutable标识符，则编译错误：error: binding reference of type 'std::lock_guard<std::mutex>::mutex_type&' {aka 'std::mutex&'} to 'const std::mutex' discards qualifiers
 
+        if(!rootsAreValid){                     //如果缓存不可用
 
+            ...                                 
 
+            rootsAreValid = true;
+        }
 
+        return rootVals;
+    }                                           //解开互斥锁
 
+private:
+    mutable std::mutex m;
+    mutable bool rootsAreValid{ false };    
+    mutable RootsType rootVals{};
+};
+```
+
+std::mutex m被声明为mutable，因为对它加锁和解锁调用的都不是const成员函数，在roots（一个const成员函数）中，如果不这么声明，m将被视为const对象。
+
+值得注意的是，因为std::mutex是一个move-only类型（也就是，这个类型的对象只能move不能copy），所以把m添加到Polynomial中，会让Polynomial失去copy的能力，但是它还是能被move的。
+
+在一些情况下，一个mutex是负担过重的。举个例子，如果你想做的事情只是计算一个成员函数被调用了多少次，一个std::atomic计数器（也就是，其它的线程保证看着它的（counter的）操作不中断地做完，看Item 40）常常是达到这个目的的更廉价的方式。（事实上是不是更廉价，依赖于你跑代码的硬件和标准库中mutex的实现）这里给出怎么使用std::atomic来计算调用次数的例子：
+
+```c++
+class Point {
+public:
+    ...
+
+    double distanceFromOrigin() const noexcept      //noexcept的信息请看Item 14
+    {
+        ++callCount;                                //原子操作的自增
+
+        return std::sqrt((x * x) + (y * y));
+    }
+
+private:
+    mutable std::atomic<unsigned> callCount{ 0 };
+};
+```
+
+和std::mutex相似，std::atomic也是move-only类型，所以由于callCount的存在，Point也是move-only的。
+
+因为比起mutex的加锁和解锁，对std::atomic变量的操作常常更廉价，所以你可能会过度倾向于std::atomic。举个例子，在一个类中，缓存一个“计算昂贵”的int，你可能会尝试使用一对std::atomic变量来代替一个mutex：
+
+```c++
+class Widget {
+public:
+    ...
+
+    int magicValue() const
+    {
+        if (cacheValid) return cachedValue;
+        else{
+            auto val1 = expensiveComputation1();
+            auto val2 = expensiveComputation2();
+            cachedValue = val1 + val2;              //恩，第一部分
+            cacheValid = true;                      //恩，第二部分
+            return cachedValue;
+        }
+    }
+
+private:
+    mutable std::atomic<bool> cacheValid { false };
+    mutable std::atomic<int> cachedValue;
+};
+```
+
+这能工作，但是有时候它会工作得很辛苦，考虑一下：
+
+- 一个线程调用Widget::magicValue,看到cacheValid是false的，执行了两个昂贵的计算，并且把它们的和赋给cachedValue。
+- 在这个时间点，第二个线程调用Widget::magicValue，也看到cacheValid是false的，因此同样进行了昂贵的计算（这个计算第一个线程已经完成了）。（这个“第二个线程”事实上可能是一系列线程，也就会不断地进行这昂贵的计算）
+
+这样的行为和我们使用缓存的目的是相违背的。换一下cachedValue和CacheValid赋值的顺序可以消除这个问题（不断进行重复计算），但是错的更加离谱了：
+
+```c++
+class Widget {
+public:
+    ...
+
+    int magicValue() const
+    {
+        if (cacheValid) return cachedValue;
+        else{
+            auto val1 = expensiveComputation1();
+            auto val2 = expensiveComputation2();
+            cacheValid = true;                      //恩，第一部分                
+            return cachedValue = val1 + val2;       //恩，第二部分    
+        }
+    }
+    ...
+};
+```
+
+想象一下cacheValid是false的情况：
+
+- 一个线程调用Widget::magicValue，并且刚执行完：把cacheValid设置为true。
+- 同时，第二个线程调用Widget::magicValue，然后检查cacheValid，发现它是true，然后，即使第一个线程还没有把计算结果缓存下来，它还是直接返回cachedValue。因此，返回的值是不正确的。
+
+让我们吸取教训。对于单一的变量或者内存单元，它们需要同步时，使用std::atomic就足够了，但是一旦你需要处理两个或更多的变量或内存单元，并把它们视为一个整体，那么你就应该使用mutex。对于Widget::magicValue，看起来应该是这样的：
+
+```c++
+class Widget {
+public:
+    ...
+
+    int magicValue() const
+    {
+        std::lock_guard<std::mutex> guard(m);       //锁住m
+        if (cacheValid) return cachedValue;
+        else{
+            auto val1 = expensiveComputation1();
+            auto val2 = expensiveComputation2();
+            cachedValue = val1 + val2;              
+            cacheValid = true;                      
+            return cachedValue;
+        }
+    }                                               //解锁m
+    ...
+
+private:
+    mutable std::mutex m;
+    mutable int cachedValue;                    //不再是atomic了
+    mutable bool cacheValid { false };
+    
+};
+```
+
+现在，这个Item是基于“多线程可能同时执行一个对象的const成员函数”的假设。如果你要写一个const成员函数，并且你能保证这里没有多于一个的线程会执行这个对象的cosnt成员函数，那么函数的线程安全就不重要了。举个例子，如果一个类的成员函数只是设计给单线程使用的，那么这个成员函数是不是线程安全就不重要了。在这种情况下，你能避免mutex和std::atomic造成的负担。以及免受“包含它们的容器将变成move-only”的影响。然而，这样的自由线程（threading-free）变得越来越不常见了，它们还将变得更加稀有。以后，const成员函数的多线程执行一定会成为主题，这就是为什么你需要确保你的const成员函数是线程安全的。
+
+**你要记住的事**
+
+- 让const成员函数做到线程安全，除非你确保它们永远不会用在多线程的环境下。
+- 比起mutex，使用std::atomic变量能提供更好的性能，但是它只适合处理单一的变量或内存单元
+
+## [条款17: 理解特殊成员函数的生成规则](https://www.cnblogs.com/boydfd/p/5050742.html)
+
+C++的官方说法中，特殊成员函数是C++愿意去主动生成的。C++98有4个这样的函数：默认构造函数，析构函数，拷贝构造函数，拷贝operator=。当然，这里有些细则。这些函数只在需要的时候产生，也就是，在类中如果一些代码没有清楚地声明它们就使用了它们。一个默认构造函数只有在类中没有声明任何构造函数的情况下才会被生成出来（当你的目的是要求这个类的构造函数必须提供参数时，这防止编译器为你的类生成一个默认构造函数。）。特殊成员函数被隐式生成为public和inline，并且它们是nonvirtual，除非是在派生类中的析构函数，并且这个派生类继承自带virtual析构函数的基类。在这种情况下，派生类中，编译器生成的析构函数也是virtual。
+
+本地试验，Base默认生成的析构函数为非虚的，导致多态调用时未调用Derived的析构函数，所以对于基类，必须显式声明析构函数为vritual：
+
+```c++
+class Base {
+public:
+//    virtual ~Base() {
+//        cout << "~Base()" << endl;
+//    }
+};
+
+class Derived : public Base {
+public:
+    virtual ~Derived() {
+        cout << "~Derived()" << endl;
+    }
+};
+
+int main() {
+    Base* b = new Derived();
+    delete b;  // 无任何输出
+    return 0;
+}
+```
+
+但是你已经知道这些事情了。是的，是的，这些都是古老的历史了：两河流域，商朝，FORTRAN，C++98。但是时间变了，同时C++中特殊成员函数的生成规则也改变了。意识到新规则的产生是很重要的，因为没有什么事和“知道什么时候编译器会悄悄地把成员函数插入到你的类中”一样能作为高效C++编程的核心了。
+
+在C++11中，特殊成员函数“俱乐部”有两个新成员：move构造函数和move operator=。这里给出它们的函数签名：
+
+```c++
+class Widget{
+public:
+    ...
+    Widget(Widget&& rhs);               //move构造函数
+
+    Widget& operator=(Widget&& rhs);    //move assignment operator
+    ...
+};
+```
+
+控制它们的生成和行为的规则和它们的“copying兄弟”很像。move操作只有在被需要的时候生成，并且如果它们被生成出来，它们对类中的non-static成员变量执行“memberwise move”（“以成员为单位逐个move”）。这意味着：move构造函数，用参数rhs中的相应成员“移动构造”（move-construct）每个non-static成员变量；move operator=，用参数rhs中的相应成员“移动赋值”（move-assign）每个non-static成员变量。move构造函数同样“移动构造”基类的部分（如果存在的话），并且move operator=也“移动赋值”它的基类部分。
+
+现在，当我提及move操作（移动构造或移动赋值）一个成员变量或基类时，不能保证move会真正发生。“memberwise move”事实上更像一个请求，因为那些不是move-enabled（能移动的）类型（也就是，不提供move操作的类型，比如，大多数C++98遗留下来的类）将通过copy操作来“move”。每个memberwise “move”的关键都是std::move的应用，首先move来自一个对象（std::move的参数），然后通过函数重载解析来决定执行move或copy，最后产生一个结果（move来的或copy来的）。（The heart of each memberwise “move” is application of std::move to the object to be moved from, and the result is used during function overload resolution to determine whether a move or a copy should be performed. ）Item 23包含了这个过程的细节。在这个Item中，只需要简单地记住“memberwise move”是这么运作的：当成员函数和基类支持move操作时，就使用move，如果不支持move操作，就使用copy。
+
+与copy操作一样，如果你自己声明了move操作，编译器就不会帮你生成了。但是，它们被生成的具体条件和copy操作有一点不一样。
+
+两个copy操作是独立的：声明一个不会阻止编译器生成另外一个。所以如果你声明了一个拷贝构造函数，但是没有声明拷贝operator=，然后你写的代码中要用到拷贝赋值，编译器将帮你生成一个拷贝operator=。相似的，如果你声明了一个拷贝operator=，但是没有声明拷贝构造函数，然后你的代码需要copy构造，编译器将帮你生成一个拷贝构造函数。这在C++98中是正确的，在C++11还是正确的。
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+class Widget {
+public:
+    Widget() {}
+
+    Widget(const Widget& rhs) : s_(rhs.s_) {  // 声明了拷贝构造函数会阻止默认构造函数自动生成
+        cout << "Widget(const Widget& rhs)" << endl;
+    }
+
+public:
+    std::string s_{"hello"};
+};
+
+int main() {
+    Widget w1;
+    Widget w2(w1);
+    w2 = w1;  // 会自动生成拷贝operator=
+
+    Widget w3(move(w1));  // 也会调用拷贝构造函数，最后w1.s_为"hello"，w3.s_也为"hello"。声明了一个copy操作，move操作就不会被自动生成
+    return 0;
+}
+
+// 再看下例：
+class Widget {
+public:
+    std::string s_{"hello"};
+};
+
+int main() {
+    Widget w1;
+    Widget w3(move(w1));  // 调用默认生成的移动构造函数，最后w1.s_为""，w3.s_为"hello"
+    return 0;
+}
+```
+
+两个move操作不是独立的：如果你声明了任何一个，那就阻止了编译器生成另外一个。也就是说，基本原理就是，如果你为你的类声明了一个move构造函数，那么你就表明你的move构造函数和编译器生成的不同，它不是通过默认的memberwise move来实现的。并且如果memberwise move构造函数不对的话，那么memberwise move赋值函数也应该不对。所以声明一个move构造函数会阻止一个move operator=被自动生成，声明一个move operator=函数会阻止一个move构造函数被自动生成。
+
+```c++
+class Widget {
+public:
+    Widget() {}
+
+    Widget(Widget&& rhs) : s_(move(rhs.s_)) {  // 声明了移动构造函数也会阻止默认构造函数自动生成
+        cout << "Widget(Widget&& rhs)" << endl;
+    }
+
+public:
+    std::string s_{"hello"};
+};
+
+int main() {
+    Widget w1;
+    Widget w2(w1);  // 编译错误：error: use of deleted function 'Widget::Widget(const Widget&)'
+    Widget w3(move(w1));
+    w3 = move(w1);  // 编译错误：error: use of deleted function 'Widget& Widget::operator=(const Widget&)'
+    return 0;
+}
+```
+
+另外，如果任何类显式地声明了一个copy操作，move操作就不会被自动生成。理由是，声明一个copy操作（构造函数或assignment函数）表明了用正常的方法（memberwise copy）来拷贝对象对于这个类来说是不合适的，然后编译器认为，如果对于copy操作来说memberwise copy不合适，那么对于move操作来说memberwise move很有可能也是不合适的。
+
+反过来也是这样。声明一个move操作会使得编译器让copy操作不可用（通过delete（看Item 11）可以使得copy操作不可用。）总之，如果memberwise move不是move一个对象最合适的方法，就没有理由期望memberwise copy是copy这个对象的合适方法。这听起来可能会破坏C++98的代码，因为比起C++98，在C++11中让copy操作有效的限制条件要更多，但是情况不是这样的。C++98的代码没有move操作，因为在C++98中没有和“moving”一个对象一样的事情。遗留的类唯一能拥有一个user-declared（用户自己声明的）move操作的方式是它们被添加到C++11中，并且利用move语义来修改这个类，这样这个类才必须按照C++11的规则来生成特殊成员函数（也就是抑制copy操作的生成）。
+
+也许你已经听过被称为“三法则”（“the Rule of Three”）的准则了。**三法则说明了如果你声明了任何一个拷贝构造函数，拷贝operator=或析构函数，那么你应该声明所有的这三个函数**。它产生于一个观察（自定义copy操作的需求几乎都来自一种类，这种类需要对一些资源进行管理），并且大部分暗示着：（1）在一个copy操作中做的任何资源管理，在另一个copy操作中很可能也需要做同样的管理。（2）类的析构函数也需要参与资源管理（通常是释放资源）。需要被管理的经典资源就是内存了，并且这也是为什么所有管理内存的标准库类（比如，执行动态内存管理的STL容器）都被称作“the big three”：两个copy操作和一个析构函数。
+
+三法则的一个结论是：类中出现一个user-declared析构函数表示简单的memberwise copy可能不太适合copy操作。这反过来就建议：如果一个类声明了一个析构函数，copy操作可能不应该被自动生成，因为它们可能将作出一些不正确的事。在C++98被采用的时候，这个原因的重要性没有被发现，所以在C++98中，user-declared析构函数的存在不会影响编译器生成copy操作的意愿。这种情况在C++11中还是存在的，但是这只是因为条件的限制（如果阻止copy操作的生成会破坏太多的遗留代码）。
+
+但是，三法则背后的原因还是有效的，并且，结合之前的观察（copy操作的声明阻止隐式move操作的生成），这促使**C++11在一个类中有一个user-declared的析构函数时，不去生成move操作**。
+
+本地试验，声明了析构函数后，则不会自动生成移动构造函数，所以使用移动构造时会调用自动生成的拷贝构造函数：
+
+同时还注意到，**声明构造函数，并不会影响编译器生成拷贝构造函数，同样的，声明构造函数，也不会影响编译器生成移动构造函数**：
+
+```c++
+class Widget {
+public:
+    Widget() {}
+    
+    ~Widget() {}
+
+public:
+    std::string s_{"hello"};
+};
+
+int main() {
+    Widget w1;
+    Widget w2(w1);
+    Widget w3(move(w1));  // 单步调试，可以看到w1.s_为"hello"，w3.s_也为"hello"
+    return 0;
+}
+```
+
+所以只在下面这三个事情为真的时候才为类生成move操作（当需要的时候）：
+
+- 没有copy操作在类中被声明。
+- 没有move操作在类中被声明。
+- 没有析构函数在类中被声明。
+
+在某些情况下，相似的规则可能延伸到copy操作中去，因为当一个类中声明了copy操作或者一个析构函数时，C++11不赞成自动生成copy操作。这意味着如果你的类中，已经声明了析构函数或者其中一个copy操作，但是你依赖于编译器帮你生成另外的copy操作，那么你应该“升级”一下这些类来消除依赖。如果编译器生成的函数提供的行为是正确的（也就是，如果memberwise copy就是你想要的），你的工作就很简单了，因为C++11的“=default”让你能明确地声明：
+
+```c++
+class Widget {
+public:
+    ...
+    ~Widget();                  //user-declared析构函数
+
+    ...
+    Widget(const Widget&) = default;    //默认的拷贝构造函数的行为OK的话
+
+    Widget&
+        operator=(const Widegt&) = default; //默认的行为OK的话
+    ...
+};
+```
+
+这种方法在多态基类（也就是，定义“派生类对象需要被调用的”接口的类）中常常是有用的。多态基类通常拥有virtual析构函数，因为如果它们没有，一些操作（比如，通过指向派生类对象的基类指针进行delete操作或基类引用进行typeid操作（译注：typeid操作只要基类有虚函数就不会错，最主要的原因还是析构函数的delete））会产生未定义或错误的结果。除非这个类继承了一个已经是virtual的析构函数，而唯一让析构函数成为virtual的办法就是显示声明它。常常，默认实现是对的，“=default”就是很好的方法来表达它。但是，一个user-declared析构函数抑制了move操作的产生，所以如果move的能力是被支持的，“=default”就找到第二个应用的地方了。声明一个move操作会让copy操作失效，所以如果copy的能力也是需要的，新一轮的“=deafult”能做这样的工作:
+
+```c++
+class Base{
+public:
+    virtual ~Base() = default;              //让析构函数成为virtual
+
+    Base(Base&&) = default;                 //支持move
+    Base& operator=(Base&) = default;   
+
+    Base(const Base&) = default;            //支持copy
+    Base& operator=(const Base*) = default;
+    
+    ...
+};
+```
+
+事实上，即使你有一个类，编译器愿意为这个类生成copy和move操作，并且生成的函数的行为是你想要的，你可能还是要接受上面的策略（自己声明它们并且使用“= default”作为定义）。这样需要做更多的工作，但是它使得你的意图看起来更清晰，并且它能帮你
+避开一些很微妙的错误。举个例子，假设你有一个类代表一个string表格，也就是一个数据结构，它允许用一个整形ID来快速查阅string：
+
+```c++
+class StringTable{
+public:
+    StringTable() {}
+    ...                     //插入，删除，查找函数等等，但是没有
+                            //copy/move/析构函数
+
+private:
+    std::map<int, std::string> values;
+};
+```
+
+假设这个类没有声明copy操作，move操作，以及析构函数，这样编译器就会自动生成这些函数如果它们被使用了。这样非常方便。
+
+但是假设过了一段时间后，我们觉得记录默认构造函数以及析构函数会很有用，并且添加这样的功能也很简单：
+
+```c++
+class StringTable{
+public:
+    StringTable() 
+    { makeLogEntry("Creating StringTable object");}     //后加的
+
+    ~StringTable()
+    { makeLogEntry("Destroying StringTable object");}   //也是后加的
+
+    ...                                                 //其他的函数
+
+private:
+    std::map<int, std::string> values;
+};
+```
+
+这看起来很合理，但是**声明一个析构函数有一个重大的潜在副作用：它阻止move操作被生成**。但是copy操作的生成不受影响。因此代码很可能会编译通过，并且通过功能测试。这包括了move功能的测试，因为即使这个类中不再有move的能力，但是请求move它是能通过编译并且执行的。这样的请求在本Item的前面已经说明过了，它会导致copy的调用。这意味着代码中“move” StringTable对象实际上是copy它们，也就是，copy std::map<int, std::string>对象。然后呢，copy一个std::map<int, std::string>对象很可能比move它会慢好几个数量级。因此，**简单地为类增加一个析构函数就会引进一个重大的性能问题**！**如果之前把copy和move操作用“=default”显式地定义**了，那么问题就不会出现了。
+
+现在，已经忍受了我无止境的啰嗦（在C++11中copy操作和move操作生成的控制规则）之后，你可能会想知道什么时候我才会把注意力放在另外两个特殊成员函数上（默认构造函数和析构函数）。现在就是时候了，但是只有一句话，因为这些成员函数几乎没有改变：C++11中的规则几乎和C++98中的规则一样。
+
+因此C++11对特殊成员函数的控制规则是这样的：
+
+- **默认构造函数**：
+  1. 和C++98中的规则一样，只在类中没有user-declared的构造函数时生成。
+- **析构函数**：
+  1. 本质上和C++98的规则一样;
+  2. 唯一的不同就是析构函数默认声明为noexcept（看Item 14）。
+  3. 和C++98一样，只有基类的析构函数是virtual时，析构函数才会是virtual。
+- **拷贝构造函数**：
+  1. 和C++98一样的运行期行为：memberwise拷贝构造non-static成员变量。
+  2. 只在类中没有user-declared拷贝构造函数时被生成。
+  3. 如果类中声明了一个move操作，它就会被删除（声明为delete）。
+  4. 在有user-declared拷贝operator=或析构函数时，这个函数能被生成，但是这种生成方法是被弃用的。
+- **拷贝operator=**：
+  1. 和C++98一样的运行期行为：memberwise拷贝赋值non-static成员变量。
+  2. 只在类中没有user-declared拷贝operator=时被生成。
+  3. 如果类中声明了一个move操作，它就会被删除（声明为delete）。
+  4. 在有user-declared拷贝构造函数或析构函数时，这个函数能被生成，但是这种生成方法是被弃用的。
+- **move构造函数和move operator=**：
+  1. 每个都对non-static成员变量执行memberwise move。
+  2. 只有类中没有user-declared拷贝操作、move操作或析构函数时被生成。
+
+注意关于成员函数模板的存在，这里没有规则规定它会阻止编译器生成特殊成员函数。这意味着如果Widget看起来像这样：
+
+```c++
+class Widget{
+public:
+    ...
+    template<typename T>
+    Widget(const T& rhs);               //构造自任何类型
+
+    template<typename T>
+    Widget& operator=(const T& rhs);    //赋值自任何类型
+
+    ...
+};
+```
+
+即使这些template能实例化出拷贝构造函数和拷贝operator=的函数签名（就是T是Widget的情况），编译器仍然会为Widget生成copy和move操作（假设以前抑制它们生成的条件满足了）。在所有的可能性中，这将作为一个勉强值得承认的边缘情况让你感到困惑，但是这是有原因的，我之后会提及它的。Item 26说明了这是有很重要的原因的。
+
+**你要记住的事**
+
+- 特殊成员函数是那些编译器可能自己帮我们生成的函数：默认构造函数，析构函数，copy操作，move操作。
+- 只有在类中没有显式声明的move操作，copy操作和析构函数时，move操作才被自动生成。
+- 只有在类中没有显式声明的拷贝构造函数的时候，拷贝构造函数才被自动生成。只要存在move操作的声明，拷贝构造函数就会被删除（delete）。拷贝operator=和拷贝构造函数的情况类似。在有显式声明的copy操作或析构函数时，另一个copy操作能被生成，但是这种生成方法是被弃用的
+- 成员函数模板永远不会抑制特殊成员函数的生成。
+
+# 第四章 智能指针
+
+## 条款18：使用std::unique_ptr管理独占资源
+
+当你要使用一个智能指针时，首先要想到的应该是`std::unique_ptr`.下面是一个很合理的假设:默认情况下，`std::unique_ptr`和原生指针同等大小，对于大多数操作(包括反引用)，它们执行的底层指令也一样。这就意味着，尽管在内存回收直来直往的情况下，`std::unique_ptr`也足以胜任原生指针轻巧快速的使用要求。
+
+`std::unique_ptr`具现了独占(exclusive ownership)语义,一个非空的`std::unique_ptr`永远拥有它指向的对象，move一个`std::unique_ptr`会将所有权从源指针转向目的指针(源指针指向为null)。拷贝一个`std::unique_ptr`是不允许的，假如说真的可以允许拷贝`std::unique_ptr`,那么将会有两个`std::unique_ptr`指向同一块资源区域，每一个都认为它自己拥有且可以摧毁那块资源。因此，`std::unique_ptr`是一个move-only类型。当它面临析构时，一个非空的`std::unique_ptr`会摧毁它所拥有的资源。默认情况下，`std::unique_ptr`会使用delete来释放它所包裹的原生指针指向的空间。
+
+`std::unique_ptr`的一个常见用法是作为一个工厂函数返回一个继承层级中的一个特定类型的对象。假设我们有一个投资类型的继承链。
+
+```c++
+class Investment { ... };    
+class Stock:public Investment { ... };
+class Bond:public Investment { ... };
+class RealEstate:public Investment { ... };
+```
+
+生产这种层级对象的工厂函数通常在堆上面分配一个对象并且返回一个指向它的指针。当不再需要使用时，调用者来决定是否删除这个对象。这是一个绝佳的`std::unique_ptr`的使用场景。因为调用者获得了由工厂函数分配的对象的所有权(并且是独占性的)，而且`std::unique_ptr`在自己即将被销毁时，自动销毁它所指向的空间。一个为Investment层级对象设计的工厂函数可以声明如下：
+
+```c++
+template<typename... Ts> 
+std::unique_ptr<Investment> makeInvestment(Ts&&... params);// return std::unique_ptr
+    // to an object created
+    // from the given args
+```
+
+调用者可以在一处代码块中使用返回的`std::unique_ptr`:
+
+```c++
+{
+	...
+	auto pInvestment = makeInvestment( arguments ); 
+	//pInvestment is of type std::unique_ptr<Investment>
+	...
+}//destroy *pInvestment
+```
+
+他们也可以使用在拥有权转移的场景中，例如当工厂函数返回的`std::unique_ptr`可以移动到一个容器中，这个容器随即被移动到一个对象的数据成员上，该对象随后即被销毁。当该对象被销毁后，该对象的`std::unique_ptr`数据成员也随即被销毁，它的析构会引发工厂返回的资源被销毁。如果拥有链因为异常或者其他的异常控制流(如，函数过早返回或者for循环中的break语句)中断，最终拥有资源的`std::unique_ptr`仍会调用它的析构函数(注解：这条规则仍有例外：大多数源自于程序的非正常中断。一个从一个线程主函数(如程序的初始线程的main函数)传递出来的异常，或者一个违背了noexpect规范(请看Item 14)的异常,本地对象不会得到析构，如果`std::abort`或者其他的exit函数(如`std::_Exit`, `std::exit`,或者`std::quick_exit`)被调用，那么它们肯定不会被析构)，`std::unique_ptr`管理的资源也因此得到释放。
+
+默认情况下，析构函数会使用delete。但是，我们也可以在它的构造过程中指定特定的析构方法(custom deleters):当资源被回收时，传入的特定的析构方法(函数对象，或者是特定的lambda表达式)会被调用。对于我们的例子来说，如果被makeInvestment创建的对象不应该直接被deleted，而是首先要有一条log记录下来，我们就可以这样实现makeInvestment（当你看到意图不是很明显的代码时，请注意看注释）
+
+```c++
+auto delInvmt = [](Investment* pInvestment){
+	makeLogEntry(pInvestment);
+	delete pInvestment;
+};//custom deleter(a lambda expression)
+template<typename... Ts>
+std::unique_ptr<Investment, decltype(delInvmt)>//revised return type
+makeInvestment(Ts&&... params)
+{
+	std::unique_ptr<Investment, decltype(delInvmt)> pInv(nullptr, delInvmt);//ptr to be returned
+	if ( /* a Stock object should be created */ )
+	{
+       pInv.reset(new Stock(std::forward<Ts>(params)...));
+    }
+    else if ( /* a Bond object should be created */ )
+    {
+       pInv.reset(new Bond(std::forward<Ts>(params)...));
+    }
+    else if ( /* a RealEstate object should be created */ )
+    {
+       pInv.reset(new RealEstate(std::forward<Ts>(params)...));
+    }
+    return pInv;
+}
+```
+
+本地试验，这里有几个：
+
+* 如果Bond构造函数定义两个参数，则makeInvestment函数传入1个参数时，会导致new Bond编译不过，不太知道这里如何使用可变模板参数？；
+
+* makeInvestment的return行，可以不用move，是因为标准允许编译器：
+
+  1.如果支持move构造，那么调用move构造。
+
+  2.如果不支持move，那就调用copy构造。
+
+  3.如果不支持copy，那就报错吧。
+
+* auto stock = makeInvestment; 不用move是因为函数返回的是个右值对象，会调用移动构造函数
+
+```c++
+#include <iostream>
+#include <memory>
+
+using namespace std;
+
+class Investment {
+public:
+    virtual string name() = 0;
+};
+
+class Stock : public Investment {
+public:
+    Stock(int param1) {}
+
+    virtual string name() override {
+        return "Stock";
+    }
+};
+
+class Bond : public Investment {
+public:
+    Bond(int param1) {}
+
+    virtual string name() override {
+        return "Bond";
+    }
+};
+
+class RealEstate : public Investment {
+public:
+    RealEstate(int param1) {}
+
+    virtual string name() override {
+        return "RealState";
+    }
+};
+
+auto delInvmt = [](Investment* pInvestment) {
+    cout << "Destroy investment. Name: " << pInvestment->name() << endl;
+    delete pInvestment;
+};
+
+template<typename... Ts>
+std::unique_ptr<Investment, decltype(delInvmt)> makeInvestment(const string& name, Ts&& ... params) {
+    std::unique_ptr<Investment, decltype(delInvmt)> pInv(nullptr, delInvmt);
+    if (name == "Stock") {
+        pInv.reset(new Stock(std::forward<Ts>(params)...));
+    } else if (name == "Bond") {
+        pInv.reset(new Bond(std::forward<Ts>(params)...));
+    } else if (name == "RealState") {
+        pInv.reset(new RealEstate(std::forward<Ts>(params)...));
+    }
+    return pInv;
+}
+
+int main() {
+    auto stock = makeInvestment("Stock", 1);  // 函数返回的是个右值对象，所以可以调用移动构造函数
+    auto bond = makeInvestment("Bond", 1);
+    auto realEstate = makeInvestment("RealState", 1);
+    return 0;
+}
+// 输出：
+Destroy investment. Name: Stock
+Destroy investment. Name: RealState
+Destroy investment. Name: Bond
+    
+// 另外试验
+unique_ptr<int> pInt = make_unique<int>(10);
+unique_ptr<int> pInt2 = move(pInt);  // pInt是个左值，unique_ptr没有拷贝构造函数，所以这里不用move则会编译报错：使用deleted的拷贝构造函数
+```
+
+为上解决上面工厂函数变长模板无法创建构造函数参数个数不一样的问题，可以用下面的修改方案来支持：<https://oomake.com/question/2320243>
+
+```c++
+#include <iostream>
+#include <memory>
+
+using namespace std;
+
+class Investment {
+public:
+    virtual string name() = 0;
+};
+
+class Stock : public Investment {
+public:
+    Stock(int param1) {}
+
+    virtual string name() override {
+        return "Stock";
+    }
+};
+
+class Bond : public Investment {
+public:
+    Bond(int param1, int param2) {}
+
+    virtual string name() override {
+        return "Bond";
+    }
+};
+
+class RealEstate : public Investment {
+public:
+    RealEstate(int param1, int param2, int param3) {}
+
+    virtual string name() override {
+        return "RealState";
+    }
+};
+
+auto delInvmt = [](Investment* pInvestment) {
+    cout << "Destroy investment. Name: " << pInvestment->name() << endl;
+    delete pInvestment;
+};
+
+template<typename T, typename... Ts>
+decltype(auto) makeInvestment(Ts&& ... params) {
+    return unique_ptr<Investment, decltype(delInvmt)>(new T(std::forward<Ts>(params)...), delInvmt);
+}
+
+int main() {
+    auto stock = makeInvestment<Stock>(1);
+    auto bond = makeInvestment<Bond>(1, 2);
+    auto realEstate = makeInvestment<RealEstate>(1, 2, 3);
+    return 0;
+}
+```
+
+函数返回值优先优先使用移动构造函数，再使用拷贝构造函数，见下例试验：<https://blog.csdn.net/yongqingjiao/article/details/78764963>
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+class Widget {
+public:
+    Widget() {
+        cout << "Widget()" << endl;
+    }
+
+    Widget(const Widget& widget) = delete;
+
+    Widget(Widget&& widget) {
+        cout << "Widget(Widget&& widget)" << endl;
+    }
+
+    void show() {
+        cout << "hello" << endl;
+    }
+};
+
+Widget getWidget() {
+    Widget widget;
+    return widget;
+}
+
+int main() {
+    auto widget = getWidget();
+    widget.show();
+    // auto widget1(widget); 编译报错，只有返回值有优化，可以优先调用移动构造函数
+    return 0;
+}
+
+```
+
+上例可以看到，Widget的拷贝构造函数显式定义为delete，在函数getWidget中返回widget对象时，仍没有编译报错，这是因为函数返回值可以优先调用移动构造函数。如果把移动构造函数也删除掉，则编译报错： error: use of deleted function 'Widget::Widget(const Widget&)'
+
+------
+
+我之前说过，当使用默认的析构方法时(即，delete)，你可以假设`std::unique_ptr`对象的大小和原生指针一样。当`std::unique_ptr`用到了自定义的deleter时，情况可就不一样了。函数指针类型的deleter会使得`std::unique_ptr`的大小增长到一个字节到两个字节。对于deleters是函数对象的`std::unique_ptr`,大小的改变依赖于函数对象内部要存储多少状态。无状态的函数对象(如，没有captures的lambda expressions) 不会导致额外的大小开销。这就意味着当一个自定义的deleter既可以实现为一个函数对象或者一个无捕获状态的lambda表达式时，lambda是第一优先选择:
+
+```c++
+auto delInvmt1 = [](Investment* pInvestment)
+				{	
+					makeLogEntry(pInvestment);
+					delete pInvestment;
+				}
+
+//custom deleter as stateless lambda
+template<typename... Ts>
+std::unique_ptr<Investment, decltype(delInvmt1)>
+makeInvestment(Ts&&.. args);//return type has size of Investment*
+
+void delInvmt2(Investment* pInvestment)
+{
+	makeLogEntry(pInvestment);
+	delete pInvestment;
+}
+
+//custom deleter as function pointer
+template<typename... Ts>
+std::unique_ptr<Investment,(void *)(Investment*)>
+makeInvestment(Ts&&... params);//return type has size of Investment* plus at least size of function pointer!
+```
+
+带有过多状态的函数对象的deleters是使得`std::unique_ptr`的大小得到显著的增加。如果你发现一个自定义的deleter使得你的`std::unique_ptr`大到无法接受，请考虑重新改变你的设计。
+
+`std::unique_ptr`会产生两种格式，一种是独立的对象(std::unique_ptr)，另外一种是数组(`std::unique_ptr`).因此，std::unique_ptr指向的内容从来不会产生任何歧义性。它的API是专门为了你使用的格式来设计的.例如，单对象格式中没有过索引操作符(操作符[]),数组格式则没有解引用操作符(操作符*和操作符->)
+
+`std::unique_ptr`的数组格式对你来说可能是华而不实的东东，因为和原生的array相比，`std::array`,`std::vector`以及`std::string`几乎是更好的数据结构选择。我所想到的唯一的std::unique_ptr<T[]>有意义的使用场景是，你使用了C-like API来返回一个指向堆内分配的数组的原生指针，而且你像对之接管拥有权。
+
+本地试验，使用unique_ptr来管理数组版本：<https://blog.csdn.net/DumpDoctorWang/article/details/88600780>
+
+```c++
+#include <iostream>
+#include <memory>
+
+using namespace std;
+
+int main() {
+    // 第1种方式
+    unique_ptr<int[]> ints(new int[10]{1, 2});
+//    unique_ptr<int[]> ints = make_unique<int[]>(10);
+    ints[2] = 3;
+    cout << ints[0] << endl;  // 1
+    cout << ints[1] << endl;  // 2
+    cout << ints[2] << endl;  // 3
+    cout << ints[3] << endl;  // 0
+    
+    // 第2种方式，自定义删除器来删除数组
+    auto deleter = [](int* pInt) { delete[] pInt; };
+    int* pInt = new int[10]{1, 2};
+    unique_ptr<int, decltype(deleter)> up(pInt, deleter);
+    cout << *up << endl;  // 1，不能用up[0]的方式
+    cout << *(up.get() + 1) << endl;  // 2
+    return 0;
+}
+```
+
+C++11使用`std::unique_ptr`来表述独占所有权。但是它的一项最引人注目的特性就是它可以轻易且有效的转化为`std::shared_ptr`:
+
+```
+std::shared_ptr<Investment> sp = makeInvestment(arguments);//converts std::unique_ptr to std::shared_ptr
+```
+
+这就是`std::unique_ptr`很适合作为工厂函数返回值类型的原因。工厂函数不知道调用者想使用独占性的拥有语义还是共享式的拥有语义(即`std::share_ptr`).通过返回`std::unique_ptr`,工厂函数将选择权移交给了调用者,调用者在需要的时候可以将`std::unique_ptr`转化为它最富有灵活性的兄弟(如果想了解更多关于`std::shared_ptr`,请移步Item 19)
+
+本地试验：
+
+```c++
+#include <memory>
+
+using namespace std;
+
+unique_ptr<int> getUp(int num) {
+    return make_unique<int>(num);
+}
+
+int main() {
+    shared_ptr<int> sp(make_unique<int>(10));  // shared_ptr有个使用unique_ptr&&为入参的移动构造函数
+    shared_ptr<int> sp1 = getUp(10);
+    return 0;
+}
+```
+
+| 要记住的东西                                                 |
+| :----------------------------------------------------------- |
+| `std::unique_ptr`是一个具有开销小，速度快，`move-only`特定的智能指针，使用独占拥有方式来管理资源。 |
+| 默认情况下，释放资源由delete来完成，也可以指定自定义的析构函数来替代。但是具有丰富状态的deleters和以函数指针作为deleters增大了`std::unique_ptr`的存储开销 |
+| 很容易将一个`std::unique_ptr`转化为`std::shared_ptr`         |
+
+## 条款19：使用std::shared_ptr管理共享资源
+
+使用垃圾回收机制的程序员指责并且嘲笑C++程序员阻止内存泄露的做法。“你们tmd是原始人!”他们嘲笑道。“你们有没有看过1960年Lisp语言的备忘录？应该用机器来管理资源的生命周期，而不是人类。”C++程序员开始翻白眼了:"你们懂个屁，如果备忘录的内容意味着唯一的资源是内存而且回收资源的时机是不确定性的，那么我们宁可喜欢具有普适性和可预测性的析构函数."但是我们的回应部分是虚张声势。垃圾回收确实非常方便，手动来控制内存管理周期听起来像是用原始工具来做一个记忆性的内存回路。为什么我们不两者兼得呢？做出一个既可以想垃圾回收那样自动，且可以运用到所有资源，具有可预测的回收时机(像析构函数那样)的系统。
+
+`std::shared_ptr`就是C++11为了达到上述目标推出的方式。一个通过`std::shared_ptr`访问的对象被指向它的指针通过共享所有权(shared ownership)方式来管理.没有一个特定的`std::shared_ptr`拥有这个对象。相反，这些指向同一个对象的`std::shared_ptr`相互协作来确保该对象在不需要的时候被析构。当最后一个`std::shared_ptr`不再指向该对象时(例如，因为`std::shared_ptr`被销毁或者指向了其他对象)，`std::shared_ptr`会在此之前摧毁这个对象。就像GC一样，使用者不用担心他们如何管理指向对象的生命周期，而且因为有了析构函数，对象析构的时机是可确定的。
+
+一个`std::shared_ptr`可以通过查询资源的引用计数(reference count)来确定它是不是最后一个指向该资源的指针，引用计数是一个伴随在资源旁的一个值，它记录着有多少个`std::shared_ptr`指向了该资源。`std::shared_ptr`的构造函数会自动递增这个计数，析构函数会自动递减这个计数，而拷贝构造函数可能两者都做(比如，赋值操作`sp1=sp2`,sp1和sp2都是`std::shared_ptr`类型，它们指向了不同的对象，赋值操作使得sp1指向了原来sp2指向的对象。赋值带来的连锁效应使得原来sp1指向的对象的引用计数减1，原来sp2指向的对象的引用计数加1.)如果`std::shared_ptr`在执行减1操作后发现引用计数变成了0，这就说明了已经没有其他的`std::shared_ptr`在指向这个资源了，所以`std::shared_ptr`直接析构了它指向的空间。
+
+引用计数的存在对性能会产生部分影响：
+
+- `std::shared_ptrs`是原生指针的两倍大小，因为它们内部除了包含了一个指向资源的原生指针之外，同时还包含了指向资源的引用计数
+- 引用计数的内存必须被动态分配.概念上来说，引用计数会伴随着被指向的对象，但是被指向的对象对此一无所知。因此，他们没有为引用计数准备存储空间。(一个好消息是任何对象，即使是内置类型，都可以被`std::shared_ptr`管理。)Item21解释了用`std::make_shared`来创建`std::shared_ptr`的时候可以避免动态分配的开销，但是有些情况下`std::make_shared`也是不能被使用的。不管如何，引用计数都是存储为动态分配的数据
+- 引用计数的递增或者递减必须是原子的，因为在多线程环境下，会同时存在多个写者和读者。例如，在一个线程中，一个`std::shared_ptr`指向的资源即将被析构(因此递减它所指向资源的引用计数)，同时，在另外一个线程中，一个`std::shared_ptr`指向了同一个对象，它此时正进行拷贝操作(因此要递增同一个引用计数)。原子操作通常要比非原子操作执行的慢，所以尽管引用计数通常只有一个word大小，但是你可假设对它的读写相对来说比较耗时。
+
+当我写到:`std::shared_ptr`构造函数在构造时"通常"会增加它指向的对象的引用计数时，你是不是很好奇？创建一个新的指向某对象的`std::sharedptr`会使得指向该对象的`std::sharedptr`多出一个，为什么我们不说构造一个`std::sharedptr`总是会增加引用计数？
+
+Move构造函数是我为什么那么说的原因。从另外一个`std::shared_ptr` move构造(Move-constructing)一个`std::shared_ptr`会使得源`std::shared_ptr`指向为null,这就意味着新的`std::shared_ptr`取代了老的`std::shared_ptr`来指向原来的资源，所以就不需要再修改引用计数了。Move构造`std::shared_ptr`要比拷贝构造`std::shared_ptr`快：copy拷贝需要修改引用计数，然而move拷贝却不需要。对于赋值构造也是一样的。最后得出结论，move构造要比拷贝构造快，move赋值要比copy赋值快。
+
+像`std::unique_ptr`(Item 18)那样,`std::shared_ptr`也把delete作为它默认的资源析构机制。但是它也支持自定义的deleter.然后，它支持这种机制的方式不同于`std::unique_ptr`.对于`std::unique_ptr`,自定义的deleter是智能指针类型的一部分，对于`std::shared_ptr`,情况可就不一样了:
+
+```c++
+auto loggingDel = [](widget *pw)
+					{	
+						makeLogEntry(pw);
+						delete pw;
+					}//自定义的deleter(如Item 18所说)
+std::unique_ptr<Widget, decltype(loggingDel)>upw(new Widget, loggingDel);//deleter类型是智能指针类型的一部分
+
+std::shared_ptr<Widget> spw(new Widget, loggingDel);//deleter类型不是智能指针类型的一部分
+```
+
+std::shared_prt的设计更加的弹性一些，考虑到两个std::shared_ptr,每一个都支持不同类型的自定义deleter(例如，两个不同的lambda表达式):
+
+```c++
+auto customDeleter1 = [](Widget *pw) {...};
+auto customDeleter2 = [](Widget *pw) {...};//自定义的deleter,属于不同的类型
+
+std::shared_prt<Widget> pw1(new Widget, customDeleter1);
+std::shared_prt<Widget> pw2(new Widget, customDeleter2);
+```
+
+因为pw1和pw2属于相同类型，所以它们可以放置到属于同一个类型的容器中去:
+
+```c++
+std::vector<std::shared_ptr<Widget>> vpw{ pw1, pw2 };
+```
+
+它们之间可以相互赋值，也都可以作为一个参数类型为`std::shared_ptr`类型的函数的参数。所有的这些特性，具有不同类型的自定义deleter的`std::unique_ptr`全都办不到，因为自定义的deleter类型会影响到`std::unique_ptr`的类型。
+
+与`std::unique_ptr`不同的其他的一点是，为`std::shared_ptr`指定自定义的deleter不会改变`std::shared_ptr`的大小。不管deleter如何，一个`std::shared_ptr`始终是两个pointer的大小。这可是个好消息，但是会让我们一头雾水。自定义的deleter可以是函数对象，函数对象可以包含任意数量的data.这就意味着它可以是任意大小。涉及到任意大小的自定义deleter的`std::shared_ptr`如何保证它不使用额外的内存呢？
+
+它肯定是办不到的，它必须使用额外的空间来完成上述目标。然而，这些额外的空间不属于`std::shared_ptr`的一部分。额外的空间被分配在堆上，或者在`std::shared_ptr`的创建者使用了自定义的allocator之后，位于该allocator管理的内存中。我之前说过，一个`std::shared_ptr`对象包含了一个指针，指向了它所指对象的引用计数。此话不假，但是却有一些误导性，因为引用计数是一个叫做控制块(control block)的很大的数据结构。每一个由`std::shared_ptr`管理的对象都对应了一个控制块。改控制块不仅包含了引用计数，还包含了一份自定义deleter的拷贝(在指定好的情况下).如果指定了一个自定义的allocator,也会被包含在其中。控制块也可能包含其他的额外数据，比如Item 21条所说，一个次级(secondary)的被称作是weak count的引用计数，在本Item中我们先略过它。我们可以想象出`std::shared_ptr`的内存布局如下所示:
+
+![](pictures\shared_ptr内存布局.png)
+
+一个对象的控制块被第一个创建指向它的`std::shared_ptr`的函数来设立.至少这也是理所当然的。一般情况下，函数在创建一个`std::shared_ptr`时，它不可能知道这时是否有其他的`std::shared_ptr`已经指向了这个对象，所以在创建控制块时，它会遵循以下规则：
+
+- `std::make_shared`(请看Item 21)总是会创建一个控制块。它制造了一个新的可以指向的对象，所以可以确定这个新的对象在`std::make_shared`被调用时肯定没有相关的控制块。
+- 当一个`std::shared_ptr`被一个独占性的指针(例如，一个`std::unique_ptr`或者`std::auto_ptr`)构建时，控制块被相应的被创建。独占性的指针并不使用控制块，所以被指向的对象此时还没有控制块相关联。(构造的一个过程是，由`std::shared_ptr`来接管了被指向对象的所有权，所以原来的独占性指针被设置为null).
+- 当一个`std::shared_ptr`被一个原生指针构造时，它也会创建一个控制块。如果你想要基于一个已经有控制块的对象来创建一个`std::shared_ptr`，你可能传递了一个`std::shared_ptr`或者`std::weak_ptr`作为`std::shared_ptr`的构造参数，而不是传递了一个原生指针。`std::shared_ptr`构造函数接受`std::shared_ptr`或者`std::weak_ptr`时，不会创建新的控制块，因为它们(指构造函数)会依赖传递给它们的智能指针是否已经指向了带有控制块的对象的情况。
+
+当使用了一个原生的指针构造多个`std::shared_ptr`时，这些规则的存在会使得被指向的对象包含多个控制块，带来许多负面的未定义行为。多个控制块意味着多个引用计数，多个引用计数意味着对象会被摧毁多次(每次引用计数一次)。这就意味着下面的代码着实糟糕透顶：
+
+```c++
+auto pw = new Widget;			//pw是一个原生指针
+...
+std::shared_ptr<Widget> spw1(pw, loggingDel);//为*pw创建了一个控制块
+...
+std::shared_ptr<Widget> spw2(pw, loggingDel);//为pw创建了第二个控制块!
+```
+
+创建原生指针pw的行为确实不太好，这样违背了我们一整章背后的建议(请看开章那几段话来复习)。但是先不管这么多，创建pw的那行代码确实不太建议，但是至少它没有产生程序的未定义行为.
+
+现在的情况是，因为spw1的构造函数的参数是一个原生指针，所以它为指向的对象(就是pw指向的对象:`*pw`)创造了一个控制块(伴随着一个引用计数)。到目前为止，代码还没有啥问题。但是随后，spw2也被同一个原生指针作为参数构造,它也为`*pw`创造了一个控制块(还有引用计数).`*pw`因此拥有了两个引用计数。每一个最终都会变成0，最终会引起两次对`*pw`的析构行为。第二次析构就要对未定义的行为负责了。
+
+对于`std::shared_ptr`在这里总结两点.首先，避免给std::shared_ptr构造函数传递原生指针。通常的取代做法是使用std::make_shared(请看Item 21).但是在上面的例子中，我们**使用了自定义的deleter,这对于std::make_shared是不可能的**。第二，如果你必须要给std::shared_ptr构造函数传递一个原生指针，那么请直接传递new语句，上面代码的第一部分如果被写成下面这样：
+
+```c++
+std::shared_ptr<Widget> spw1(new Widget,loggingDel);//direct use of new
+```
+
+这样就不大可能从同一个原生指针来构造第二个`std::shared_ptr`了。而且，创建spw2的代码作者会用spw1作为初始化(spw2)的参数(即，这样会调用std::shared_ptr的拷贝构造函数)。这样无论如何都不有问题:
+
+```c++
+std::shared_ptr<Widget> spw2(spw1);//spw2 uses same control block as spw1
+```
+
+使用this指针时，有时也会产生因为使用原生指针作为`std::shared_ptr`构造参数而导致的产生多个控制块的问题。假设我们的程序使用`std::shared_ptr`来管理Widget对象，并且我们使用了一个数据结构来管理跟踪已经处理过的Widget对象：
+
+```c++
+std::vector<std::shared_ptr<Widget>> processedWidgets;
+```
+
+进一步假设Widget有一个成员函数来处理:
+
+```c++
+class Widget{
+public:
+	...
+	void process();
+	...
+};
+```
+
+这有一个看起来很合理的Widget::process实现
+
+```c++
+void Widget::process()
+{
+	...						//process the Widget
+	processedWidgets.emplace_back(this);//add it to list
+										//processed Widgets;
+										//this is wrong!	   
+}
+```
+
+注释里面说这样做错了，指的是传递this指针，并不是因为使用了`emplace_back`(如果你对`emplace_back`不熟悉，请看Item 42.)这样的代码会通过编译，但是给一个`std::shared_ptr`传递this就相当于传递了一个原生指针。所以`std::shared_ptr`会给指向的Widget(*this)创建了一个新的控制块。当你意识到成员函数之外也有`std::shared_ptr`早已指向了Widget，这就粗大事了，同样的道理，会导致发生未定义的行为。
+
+本地试验，单步调试，可以看到在最后一行时，processedWidgets中第0和第3个对象的内存地址一样，并且name都是"widget1"，但widget1的引用计数只有2（一个是widget1对象计数，另一个是processedWidgets[0]的计数），最后会有第3个shared_ptr\<Widget\>对象（即processedWidgets[3]）来释放指针，会导致未定义行为：
+
+```c++
+#include <iostream>
+#include <memory>
+#include <vector>
+
+using namespace std;
+
+class Widget;
+
+vector<shared_ptr<Widget>> processedWidgets;
+
+class Widget {
+public:
+    Widget(const std::string& name) : name_(move(name)) {}
+
+    void process() {
+        processedWidgets.emplace_back(this);
+    }
+
+private:
+    string name_;
+};
+
+int main() {
+    shared_ptr<Widget> widget1 = make_shared<Widget>("widget1");
+    shared_ptr<Widget> widget2 = make_shared<Widget>("widget2");
+    shared_ptr<Widget> widget3 = make_shared<Widget>("widget3");
+    processedWidgets.push_back(widget1);
+    processedWidgets.push_back(widget2);
+    processedWidgets.push_back(widget3);
+    cout << "widget1 count: " << widget1.use_count() << endl;  // 2
+    widget1->process();
+    cout << "widget1 count: " << widget1.use_count() << endl;  // 2
+    return 0;
+}
+```
+
+`std::shared_ptr`的API包含了修复这一问题的机制。这可能是C++标准库里面最诡异的方法名字了：`std::enabled_from_this`.它是一个基类的模板，如果你想要使得被std::shared_ptr管理的类安全的以this指针为参数创建一个`std::shared_ptr`,就必须要继承它。在我们的例子中，Widget会以如下方式继承`std::enable_shared_from_this`：
+
+```c++
+class Widget: public std::enable_shared_from_this<Widget>{
+	public:
+		...
+		void process();
+		...
+};
+```
+
+正如我之前所说的，`std::enable_shared_from_this`是一个基类模板。它的类型参数永远是它要派生的子类类型，所以widget继承自`std::enable_shared_from_this`。如果这个子类继承自以子类类型为模板参数的基类的想法让你觉得不可思议，先放一边吧，不要纠结。以上代码是合法的，并且还有相关的设计模式，它有一个非常名字，虽然像`std::enable_shared_from_this`一样古怪,名字叫**The Curiously Recurring Template Pattern(CRTP)**。欲知详情请使用你的搜索引擎。我们下面继续讲`std::enable_shared_from_this`.
+
+`std::enable_shared_from_this`定义了一个成员函数来创建指向当前对象的`std::shared_ptr`,但是它并不重复创建控制块。这个成员函数的名字是`shared_from_this`,当你实现一个成员函数，用来创建一个`std::shared_ptr`来指向this指针指向的对象,可以在其中使用`shared_from_this`。下面是Widget::process的一个安全实现:
+
+```c++
+void Widget::process()
+{
+	//as before, process the Widget
+	...
+	//add std::shared_ptr to current object to processedWidgets
+	processedWidgets.emplace_back(shared_from_this());
+}
+```
+
+`shared_from_this`内部实现是，它首先寻找当前对象的控制块，然后创建一个新的`std::shared_ptr`来引用那个控制块。**这样的设计依赖一个前提，就是当前的对象必须有一个与之相关的控制块**。为了让这种情况成真，**事先必须有一个`std::shared_ptr`指向了当前的对象**(比如说，在这个调用`shared_from_this`的成员函数的外面)，如果这样的`std::shared_ptr`不存在(即，当前的对象没有相关的控制块)，虽然shared_from_this通常会抛出异常，产生的行为仍是未定义的。
+
+为了阻止用户在没有一个`std::shared_ptr`指向该对象之前，使用一个里面调用`shared_from_this`的成员函数，继承自`std::enable_shared_from_this`的子类通常会把它们的构造函数声明为private,并且让它们的使用者利用返回`std::shared_ptr`的工厂函数来创建对象。举个栗子，对于Widget来说，可以像下面这样写：
+
+```c++
+class Widget: public std::enable_shared_from_this<Widget>{
+public:
+	//工厂函数转发参数到一个私有的构造函数
+	template<typename... Ts>
+	static std::shared_ptr<Widget> create(Ts&&... params);
+	...
+	void process();			//as before
+	...
+private:
+	...							//构造函数
+}
+```
+
+参考上述讲解，本地试验，可以看到widget1->process();调用之后，widget1的引用计数变为3，一个是widget1，另两个是processedWidgets[0]和processedWidgets[3]：
+
+```c++
+#include <iostream>
+#include <memory>
+#include <vector>
+
+using namespace std;
+
+class Widget;
+
+vector<shared_ptr<Widget>> processedWidgets;
+
+class Widget : public std::enable_shared_from_this<Widget> {
+public:
+    template<typename... Ts>
+    static shared_ptr<Widget> create(Ts&& ... params) {
+        return shared_ptr<Widget>(new Widget(std::forward<Ts>(params)...));
+        // return make_shared<Widget>(std::forward<Ts>(params)...);  // 这里无法使用make_shared方法，因为在make_shared方法里会new Widget，但Widget构造函数被定义为private，导致无法访问
+    }
+
+    void process() {
+        processedWidgets.emplace_back(shared_from_this());
+    }
+
+private:
+    Widget(const std::string& name) : name_(move(name)) {}
+
+private:
+    string name_;
+};
+
+int main() {
+    shared_ptr<Widget> widget1 = Widget::create("widget1");
+    shared_ptr<Widget> widget2 = Widget::create("widget2");
+    shared_ptr<Widget> widget3 = Widget::create("widget3");
+    processedWidgets.push_back(widget1);
+    processedWidgets.push_back(widget2);
+    processedWidgets.push_back(widget3);
+    cout << "widget1 count: " << widget1.use_count() << endl;  // 2
+    widget1->process();
+    cout << "widget1 count: " << widget1.use_count() << endl;  // 3
+    return 0;
+}
+```
+
+直到现在，你可能只能模糊的记得我们关于控制块的讨论源自于想要理解`std::shared_ptr`性能开销的欲望。既然我们已经理解如何避免创造多余的控制块，下面我们回归正题吧。
+
+一个控制块可能只有几个字节大小，尽管自定义的deleters和allocators可能会使得它更大。通常控制块的实现会比你想象中的更复杂。它利用了继承，甚至还用到虚函数(确保指向的对象能正确销毁。)这就意味着使用`std::shared_ptr`会因为控制块使用虚函数而导致一定的机器开销。
+
+当我们读到了动态分配的控制块，任意大小的deleters和allocators,虚函数机制，以及引用计数的原子操纵，你对`std::shared_ptr`的热情可能被泼了一盆冷水，没关系.它做不到对每一种资源管理的问题都是最好的方案。但是相对于它提供的功能，`std::shared_ptr`性能的耗费还是很合理。通常情况下，`std::shared_ptr`被`std::make_shared`所创建，使用默认的deleter和默认的allocator,控制块也只有大概三个字节大小。它的分配基本上是不耗费空间的(它并入了所指向对象的内存分配，欲知详情，请看Item 21.)解引用一个`std::shared_ptr`花费的代价不会比解引用一个原生指针更多。执行一个需要操纵引用计数的过程(例如拷贝构造和拷贝赋值，或者析构)需要一至两个原子操作，但是这些操作通常只会映射到个别的机器指令，尽管相对于普通的非原子指令他们可能更耗时，但它们终究仍是单个的指令。控制块中虚函数的机制在被`std::shared_ptr`管理的对象的生命周期中一般只会被调用一次：当该对象被销毁时。
+
+花费了相对很少的代价，你就获得了对动态分配资源生命周期的自动管理。大多数时间，想要以共享式的方式来管理对象，使用`std::shared_ptr`是一个大多数情况下都比较好的选择。如果你发现自己开始怀疑是否承受得起使用`std::shared_ptr`的代价时，首先请重新考虑是否真的需要使用共享式的管理方法。如果独占式的管理方式可以或者可能实用，`std::unique_ptr`或者是更好的选择。它的性能开销与原生指针大致相同，并且从`std::unique_ptr`“升级”到s`td::shared_ptr`是很简单的，因为`std::shared_ptr`可以从一个`std::unique_ptr`里创建。
+
+反过来可就不一定好用了。如果你把一个资源的生命周期管理交给了`std::shared_ptr`，后面没有办法在变化了。即使引用计数的值是1，为了让`std::unique_ptr`来管理它，你也不能重新声明资源的所有权。资源和指向它的`std::shared_ptr`之间的契约至死方休。不许离婚，取消或者变卦。
+
+另外std::shared_ptr不能和数组一起工作。到目前为止这是另外一个和std::unique_ptr不同的地方，std::shared_ptr的API被设计为只能作为单一对象的指针。这里没有std::shared_ptr<T[]>。有时候，“聪明的”程序员会这么想：使用一个std::shared_ptr来指向一个数组，确定一个自定义deleter来执行数组的销毁（也就是delete[]）。这能编译通过，但是它是一个可怕的想法。首先，std::shared_ptr没有提供operator[]，所以数组的索引操作就要求基于指针运算来实现，这很尴尬。另外，对于单个对象来说，std::shared_ptr支持从“派生类到基类的”转换，但是当应用到数组中时，这将开启一扇未知的大门（就是这个原因，std::unique_ptr<T[]>API禁止这样的转换）。最重要的是，既然C++11已经给出了多种built-in数组的替代品（比如，std::array,std::vector,std::string），声明一个指向原始数组的智能指针总是标识着，这是一个糟糕的设计。<https://www.cnblogs.com/boydfd/p/5127309.html>
+
+| 要记住的东西                                                 |
+| :----------------------------------------------------------- |
+| `std::shared_ptr`为了管理任意资源的共享式内存管理提供了自动垃圾回收的便利 |
+| `std::shared_ptr`是`std::unique_ptr`的两倍大，除了控制块，还有需要原子引用计数操作引起的开销 |
+| 资源的默认析构一般通过delete来进行，但是自定义的deleter也是支持的。deleter的类型对于`std::shared_ptr`的类型不会产生影响 |
+| 避免从原生指针类型变量创建`std::shared_ptr`                  |
+
+本地试验，std::shared_ptr从“派生类到基类的”转换：<https://blog.csdn.net/adream307/article/details/81607414>
+
+```c++
+#include <iostream>
+#include <memory>
+
+using namespace std;
+
+class Base {
+public:
+    Base() { std::cout << "Base" << std::endl; }
+
+    virtual ~Base() { std::cout << "~Base" << std::endl; }
+
+    virtual void print() { std::cout << "Base::print" << std::endl; }
+};
+
+class Derived : public Base {
+public:
+    Derived() { std::cout << "Derived" << std::endl; }
+
+    virtual ~Derived() { std::cout << "~Derived" << std::endl; }
+
+    virtual void print() { std::cout << "Derived::print" << std::endl; }
+
+    void printDerived() {
+        cout << "Derived::printDerived" << endl;
+    }
+};
+
+int main() {
+    shared_ptr<Base> basePtr = make_shared<Derived>();
+    basePtr->print();  // Base无printDerived函数，无法调用basePtr->printDerived()
+    shared_ptr<Derived> derivedPtr = dynamic_pointer_cast<Derived>(basePtr);  // Base类至少有一个虚函数，否则这里的动态转换失败
+    derivedPtr->printDerived();
+    return 0;
+}
+// 输出：
+Base
+Derived
+Derived::print
+Derived::printDerived
+~Derived
+~Base
+```
+
+## [条款20: 使用std::weak_ptr替换会造成指针悬挂的类std::shared_ptr指针](https://www.cnblogs.com/boydfd/p/5130548.html)
 
 
 
