@@ -5851,6 +5851,569 @@ template<typename _Tp>
 
 ## [条款24: 区分右值引用和universal引用](https://www.cnblogs.com/boydfd/p/5251797.html)
 
+古人曾说事情的真相会让你觉得很自在，但是在适当的情况下，一个良好的谎言同样能解放你。这个Item就是这样一个谎言。但是，因为我们在和软件打交道，所以让我们避开“谎言”这个词，换句话来说：本Item是由“抽象”组成的。
+
+为了声明一个指向T类型的右值引用，你会写T&&。因此我们可以“合理”地假设：如果你在源代码中看到“T&&”，你就看到了一个右值引用。可惜地是，它没有这么简单：
+
+```c++
+void f(Widget&& param);         // 右值引用
+
+Widget&& var1 = Widget();       // 右值引用
+
+auto&& var2 = var1;             // 不是右值引用
+
+template<typename T>
+void f(std::vector<T>&& param); // 右值引用
+
+template<typename T>
+void f(T&& param);              // 不是右值引用
+```
+
+事实上，“T&&”有两个不同的意思。当然，其中一个是右值引用。这样引用行为就是你所期望的：它们只绑定到右值上去，并且它们的主要职责就是去明确一个对象是可以被move的。
+
+“T&&”的另外一个意思不是左值引用也不是右值引用。这样的引用看起来像是在源文件中的右值引用（也就是，“T&&”），但是它能表现得像是一个左值引用（也就是“T&”）一样。它这样的两重意义让它能绑定到左值（就像左值引用）上去，也能绑定到右值（就像右值引用）上去。另外，它能绑定到const或非const对象上去，也能绑定到volatile或非volatile对象上去，甚至能绑定到const加volatile的对象上去。它能绑定到几乎任何东西上去。这样空前灵活的引用理应拥有它们自己的名字，我叫它们universal引用（万能引用）。
+
+universal引用出现在两种上下文中。最通用的情况是在函数模板参数中，就像来自于上面示例代码的这个例子一样：
+
+```c++
+template<typename T>
+void f(T&& param);              // param是一个universal引用
+```
+
+第二个情况是auto声明，包括上面示例代码中的这一行代码，这里的auto推导和上一个模板一样，见Item 2：
+
+```c++
+auto&& var2 = var1;             // var2是一个universal引用
+```
+
+这两个情况的共同点就是它们都存在类型推导。在模板f中，param的类型正在被推导，并且在var2的声明式中，var2的类型正在被推导。把它们和下面的例子（它们不存在类型推导，同样来自上面的示例代码）比较一下，可以发现，如果你看到不存在类型推导的“T&&”时，你能把它视为右值引用：
+
+```c++
+void f(Widget&& param);         // 没有类型推导
+                                // param是右值引用
+
+Widget&& var1 = Widget();       // 没有类型推导
+                                // param是右值引用
+```
+
+因为universal引用是引用，它们必须被初始化。universal引用的初始化决定了它代表一个右值还是一个左值。如果初始化为一个右值，universal引用对应右值引用。如果初始化为一个左值，universal引用对应一个左值引用。对于那些属于函数参数的universal引用，它在调用的地方被初始化：
+
+```c++
+template<typename T>
+void f(T&& param);              // param是一个universal引用
+
+Widget w;
+f(w);                           // 左值被传给f，param的类型是
+                                // Widget&（也就是一个左值引用）
+
+f(std::move(w));                // 右值被传给f，param的类型是
+                                // Widget&&（也就是一个右值引用）
+```
+
+要让一个引用成为universal引用，类型推导是其必要不补充条件。引用声明的格式必须同时正确才行，而且格式很严格。它必须正好是“T&&”。再看一次这个我们之前在示例代码中看过的例子：
+
+```c++
+template<typename T>
+void f(std::vector<T>&& param); // param是一个右值引用
+```
+
+当f被调用时，类型T将被推导（除非调用者显式地指定它，这种边缘情况我们不关心）。但是param类型推导的格式不是“T&&”，而是“std::vector&&”。按照上面的规则，排除了param成为一个universal引用的可能性。因此param是一个右值引用，有时候你的编译器会很高兴地为你确认你是否传入了一个左值给f：
+
+```c++
+std::vector<int> v;
+f(v);                           // 错误！不能绑定一个左值到右值
+                                // 引用上去
+```
+
+甚至一个简单的const属性的出场就足以取消引用成为universal的资格：
+
+```c++
+template<typename T>
+void f(const T&& param);        // param是一个右值引用
+```
+
+如果你在一个模板中，并且你看到一个“T&&”类型的函数参数，你可能觉得你能假设它是一个universal引用。但是你不能，因为在模板中不能保证类型推导的存在。考虑一下std::vector中的这个push_back成员函数：
+
+```c++
+template<class T, class Allocator = allocator<T>>       //来自c++标准库
+class vector {
+public:
+    void push_back(T&& x);
+    ...
+};
+```
+
+push_back的参数完全符合universal引用的格式，但是在这个情况中没有类型推导发生。因为push_back不能存在于vector的特定实例之外，并且实例的类型就完全能决定push_back的声明类型了。也就是说
+
+```c++
+    std::vector<Widget> v;
+```
+
+使得std::vector模板被实例化为下面这样：
+
+```c++
+class vector<Widget, allocator<Widget>> {
+public:
+    void push_back(Widget&& x);     //右值引用
+    ...
+};
+```
+
+现在你能清楚地发现push_back没有用到类型推导。vector的这个push_back（vector中有两个push_back函数）总是声明一个类型是rvalue-reference-to-T（指向T的右值引用）的参数。
+
+不同的是，std::vector中和push_back概念上相似的emplace_back成员函数用到了类型推导：
+
+```c++
+template<class T, class Allocator = allocator<T>>
+class vector {
+public:
+    template <class... Args>
+    void emplace_back(Args&&... args);
+    ...
+};
+```
+
+在这里，类型参数Args独立于vector的类型参数T，所以每次emplace_back被调用的时候，Args必须被推导。（好吧，Args事实上是一个参数包，不是一个类型参数，但是为了讨论的目的，我们能把它视为一个类型参数。）
+
+事实上emplace_back的类型参数被命名为Args（不是T），但是它仍然是一个universal引用，之前我说universal引用的格式必须是“T&&”。在这里重申一下，我没要求你必须使用名字T。举个例子。下面的模板使用一个universal引用，因为格式（“type&&”）是正确的，并且param的类型将被推导（再说一次，除了调用者显式指定类型的边缘情况）：
+
+```c++
+    template<typename MyTemplateType>       // param是一个
+    void someFunc(MyTemplateType&& param);  // universal引用
+```
+
+本地试验，如果显式指定类型，则无法进行universal引用类型推导：
+
+```c++
+template<typename T>
+void f(T&& param) {
+}
+
+int main() {
+    vector<int> ints;
+    f<vector<int>>(ints);  // 编译错误：error: no matching function for call to 'f<std::vector<int, std::allocator<int> > >(std::vector<int>&)'
+    return 0;
+}
+```
+
+我之前说过auto变量也能是universal引用。更加精确一些，用auto&&的格式被推导的变量是universal引用，因为类型推导有发生，并且它有正确的格式（“T&&”）。auto universal引用不像用于函数模板参数的universal引用那么常见，但是他们有时候会在C++11中突然出现。他们在C++14中出现的频率更高，因为C++14的lambda表达式可以声明auto&&参数。举个例子，如果你想要写一个C++14的lambda来记录任意函数调用花费的时间，你能这么做：
+
+```c++
+auto timeFuncInvocation =
+    [](auto&& func, auto&&... param)
+    {
+        start timer;
+        std::forward<decltype(func)>(func){             // 用params
+            std::forward<decltype(params)>(params)...   // 调用func
+        };
+        停止timer并记录逝去的时间。
+    };
+```
+
+本地试验：
+
+```c++
+#include <iostream>
+#include <chrono>
+#include <thread>
+
+using namespace std;
+
+class Timer {
+public:
+    ~Timer() {
+        chrono::steady_clock::time_point end = chrono::steady_clock::now();
+        chrono::duration<double> timeUsed = chrono::duration_cast<chrono::duration<double>>(end - start_);
+        cout << "Elapse time : " << timeUsed.count() << "s" << endl;
+    }
+
+private:
+    chrono::steady_clock::time_point start_ = chrono::steady_clock::now();;
+};
+
+void funcTest(double seconds) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(1000 * seconds)));
+}
+
+int main() {
+    // func可绑定任何可调用对象，如函数或lambda表达式
+    auto timeFuncInvocation = [](auto&& func, auto&& ... param) {
+        Timer timer;
+        forward<decltype(func)>(func)(forward<decltype(param)>(param)...);
+    };
+
+    timeFuncInvocation(funcTest, 1.5);
+
+    auto funcTest2 = [](double seconds) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(1000 * seconds)));
+    };
+    timeFuncInvocation(funcTest2, 1.5);
+
+    return 0;
+}
+// 输出：
+Elapse time : 1.50041s
+Elapse time : 1.50033s
+```
+
+如果你对lambda中“std::forward<decltype(blah blah blah)>”（译注：blah blah blah发音为：布拉布拉布拉）的代码感到困惑，这可能只是意味着你还没读过Item 33.不要担心这件事。在本Item中，重要的事情是lambda表达式中声明的auto&&参数。func是一个universal引用，它能被绑定到任何调用的对象上去，不管是左值还是右值。params（译注：原文为args，应该是笔误）是0个或多个universal引用（也就是一个universal引用包），它能被绑定到任何数量的任意类型的对象上去。结果就是，由于auto universal引用的存在，timeFuncInvocation能给绝大多数函数的执行进行计时。（对于为什么是绝大多数而不是任意，请看Item 30。）
+
+把这件事记在心里：我们这整个Item(universal引用的基础)都是一个谎言...额，一个“抽象”！潜在的事实被称为引用折叠，这个话题会在Item 28中专门讨论。但是事实并不会让抽象失效。区分右值引用和universal引用将帮助你更精确地阅读源代码（“我看到的T&&只能绑定到右值上，还是能绑定到所有东西上呢？”），并且在你和同事讨论的时候，它能让你避免歧义。（“我在这里使用一个universal引用，不是一个右值引用...”）。它也能让你搞懂Item 25和Item 26的意思，这两个Item都依赖于这两个引用的区别。所以，拥抱抽象并陶醉于此吧。就像牛顿的运动定律（学术上来说是错误的）一样，比起爱因斯坦的相对论（“事实”）来说它通常一样好用并且更简单，universal引用的概念也是这样，比起工作在引用折叠的细节来说，它是更好的选择。
+
+**你要记住的事**
+
+- 如果一个函数模板参数有T&&的格式，并且会被推导，或者一个对象使用auto&&来声明，那么参数或对象就是一个universal引用。
+- 如果类型推导的格式不是准确的type&&，或者如果类型推导没有发生，type&&就是一个右值引用。
+- 如果用右值来初始化，universal引用相当于右值引用。如果用左值来初始化，则相当于左值引用。
+
+## [条款25 对右值引用使用std::move，对通用引用使用std::forward](https://blog.csdn.net/big_yellow_duck/article/details/52388820)
+
+右值引用只能绑定有移动机会的对象。如果你有个右值引用参数，那么你要知道它绑定的对象可能要被移动：
+
+```cpp
+class Widget {
+    Widget(Widget&& rhs);  // rhs要绑定一个有移动机会的对象
+    ...
+};
+```
+
+情况既然是这样，你将想要把这样的对象，传递给那些以对象右值性质为优势的其它函数。因此，我们需要把绑定到右值对象的参数转化为右值。就如条款23所说，**std::move**不仅是这样做的，它就是以这个为目的创建出来的：
+
+```cpp
+class Widget {
+public:
+    Widget(Widget&& rhs)    // rhs是个右值引用
+    : name(std::move(rhs.name)),
+      p(std::move(p))
+      { ... }
+    ...
+
+private:
+    std::string name;
+    std::shared_ptr<SomeDataStructure> p;
+};
+```
+
+另一方便（条款24），通用引用有可能绑定一个有移动机会的对象，当初始值为右值时，通用引用应该被转换为右值。条款23说明这完全是**std::forward**做的事情：
+
+```cpp
+class Widget {
+public:
+    template<typename T>
+    void setName(T&& newName)    // newName是个通用引用
+    { name = std::forward<T>(newName); }
+
+    ...
+};
+```
+
+简而言之，当把右值引用转发给其他函数时，右值引用应该无条件转换为右值（借助**std::move**），因为右值引用总是绑定右值。而当把通用引用转发给其他函数时，通用引用应该有条件地转换为右值（借助**std::forward**)，因为通用引用只是有时候会绑定右值。
+
+本地试验：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+class Test {
+public:
+    Test() {}
+
+    Test& operator=(const Test& test) {
+        cout << "Test& operator=(const Test& test)" << endl;
+        return *this;
+    }
+
+    Test& operator=(Test&& test) {
+        cout << "Test& operator=(Test&& test)" << endl;
+        return *this;
+    }
+};
+
+class Widget {
+public:
+    template<typename T>
+    void setTest(T&& newTest) {
+        test_ = forward<T>(newTest);
+    }
+
+private:
+    Test test_;
+};
+
+int main() {
+    Widget widget;
+    Test test;
+    widget.setTest(test);  // 传入左值，调用拷贝赋值函数：Test& operator=(const Test& test)
+    widget.setTest(Test());  // 传入右值，调用移动赋值函数：Test& operator=(Test&& test)
+    return 0;
+}
+```
+
+条款23说明对右值引用使用**std::forward**会表现出正确的行为，但是源代码会是冗长的、易错的、不符合语言习惯的，因此你应该避免对右值引用使用**std::forward**。更糟的想法是对通用引用使用**std::move**，因为它可以对不希望被改变的左值使用（例如，局部变量）：
+
+```c++
+class Widget {
+public:
+    template<typename T>
+    void setName(T&& newName)  // newName是个通用引用
+    { name = std::move(newName); }  // 可以编译，不过太糟了！太糟了！
+    ...
+
+private:
+    std::string name;
+    std::shared_ptr<SomeDataStructure> p;
+};
+
+std::string getWidgetName();    // 工厂函数
+
+Widget w;
+
+auto n = getWidgetName();   // n 是个局部变量
+
+w.setName(n);    // 把n移动到w
+
+...             // 到了这里n的值是未知的
+```
+
+在这里，局部变量n被传递给setName，调用者的行为是可以被原谅的，毕竟这里是个只读操作。但是因为在setName里面使用了**std::move**，它无条件地把引用参数转换为右值，那么**n的值将会被移动到w.name，当n从setName返回时，它的值是未知的**。这种行为会让调用者绝望——很可能暴怒。
+
+你可能觉得setName的参数不应该声明为通用引用，这样的引用不能是**const**的（看条款24），而setName是肯定不会修改参数的。你可能会指出如果setName简单地对**const**左值和右值重载，所有的问题都可以避免。就像这样：
+
+```cpp
+class Widget {
+public:
+    void setName(const std::string& newName)  // 由const左值设置
+    { name = newName; }
+
+    void setName(std::string&& newName)  // 由右值设置
+    { name = std::move(newName); } 
+
+    ...
+};
+```
+
+这是可以工作的，不过它有缺点。第一，它有更多的源代码要写和维护（用了两个函数代替一个模板函数），第二，它效率更低。例如，这样使用setName：
+
+```cpp
+w.setName("Adela Novak");
+```
+
+在接受通用引用的setName版本中，字符串“Adela Novak”将会传递给setName，然后在w里面表达为**std::string**的赋值操作。因此w里的name成员变量直接被字符串赋值，没有产生**std::string**临时对象（即此时T&&的类型为右值常量数组const char[n]&&，并没有构造成临时入参 string对象，而是直接由常量数组在setName函数内部拷贝构造name）。
+
+本地试验：
+
+```c++
+template<typename T>
+class Type;
+
+int main() {
+    auto&& s = "abcdef";  // error: aggregate 'Type<const char (&)[7]> type' has incomplete type and cannot be defined
+    Type<decltype(s)> type;
+    return 0;
+}
+```
+
+而在重载的setName版本中，会创建一个临时对象（用const char*创建string），然后setName的参数绑定到这个临时对象，再把这个临时对象移动到w的成员变量中。因此，调用一次setName需要执行一次**std::string**的构造函数（为了创建临时对象），和一次**std::string**的移到赋值操作符（为了把newName移到到w.name），还有一次**std::string**的析构函数（为了销毁临时string对象）。这种执行顺序几乎肯定会比单独使用接受const char*指针的**std::string**移动构造函数昂贵。额外的开销可能会根据实现的不同而不同，而这笔开销是否值得又要根据应用和库的不同而不同，但事实是，使用一个接受通用引用的模板代替这两个重载函数可能会在某些情况下减少运行时开销。如果我们的例子中的Widget的成员变量可以任意类型（而不是被人熟知的**std::string**），那么性能的差距可能会进一步拉大，因为**不是所有类型的移动操作都像std::string那么便宜**（看条款29）。
+
+但是，使用两个重载函数的最严重的问题，不是冗长易错的源代码，也不是代码的运行时效率，而是这种设计的可扩展性差。Widget::setName只接受一个参数，所以只需重载两个函数，但如果函数有更多的参数，每个参数都可以是左值或右值，那么重载函数的数量会成几何增加：n个参数需要2^n个重载。然而这根本不值得，一些函数——实际上是模板函数——可以接受无限个参数，每个都可以是左值和右值。典型的代表是**std::make_shared**，还有在C++14中的**std::make_unique**。它们的声明如下：
+
+```cpp
+template<class T, class... Args>
+shared_ptr<T> make_shared(Args&&... args);   // C++11标准库
+
+template<class T, class... Args>
+unique_ptr<T> make_unique(Args&&... args);  // C++14标准库
+```
+
+对于这种函数，用左值和右值重载根本不可能：只有通用引用才是正确的方式。而在这些函数里面，我向你保证，当把通用引用转发给其他函数时，都使用了**std::forward**，这也是你应该做的。
+
+最后呢，在某些情况中，你想要在单独的函数中多次使用被通用引用或者右值引用绑定的对象，那么你应该确保这个对象不会被移动，除非你完成了工作。在那种情况，你只应在最后一次使用那个引用时，才用**std::move**（对右值引用）或**std::forward**（对通用引用）。例如：
+
+```cpp
+template<typename T>
+void setSignText(T&& text)   // text是个通用引用
+{ 
+    sign.setText(text);      // 使用text，但不修改它，因为右值引用类型是个左值类型，所以这里setText只会调用const T&版本
+
+    auto now = std::chrono::system_clock::now();  // 获取当前时间
+
+    signHistory.add(now, std::forward<T>(text));  // 有条件地把text转换为右值
+}
+```
+
+在这里，我们要确保text的值不会被`sign.setText`改变，因为我们在调用`signHistory.add`时还想要用这个值。因此，在最后一次使用这个通用引用时才对它使用**std::forward**。
+
+对于**std::move**，想法是一样的（即最后一次使用右值引用时才对它使用**std::move**），但在你要注意再极少数情况下，你需要用**std::move_if_noexcept**来代替**std::move**。想知道什么时候和为什么的话，去看条款14。
+
+如果你有个函数是通过值返回，然后你函数内返回的是被右值引用或通用引用绑定的对象，那么你应该对你返回的对象使用**std::move**或**std::forward**。想知道为什么，考虑一个把两个矩阵相加的**operator+**函数，而左边的矩阵参数被指定为右值（因此可以用这个参数来存储相加的结果）：
+
+```cpp
+Matrix     // 通过值返回
+operator+(Matrix&& lhs, const Matrix& rhs)
+{
+    lhs += rhs;
+    return std::move(lhs);      // 把lhs移动到返回值
+}
+```
+
+在返回语句中，通过把lhs转换为一个右值（借助**std::move**），lhs会被移动到函数的返回区。如果省略了**std::move**的调用，
+
+```cpp
+Matrix
+operator+(Matrix&& lhs, const Matrix& rhs)
+{
+    lhs += rhs;
+    return lhs;            // 把lhs拷贝到返回值
+}
+```
+
+事实上，lhs是个左值 ，它会强迫编译器把它的值拷贝到返回区。假如Matrix类型支持移动构造，它比拷贝构造效率更高，那么在返回语句中使用**std::move**会产生更高效的代码。
+
+如果Matrix类型不支持移动构造，把它转换为右值也是无伤害的，因为此时右值会简单地作为参数来调用拷贝构造函数（看条款23）。如果Matrix后来被修改为支持移动，那么在下次编译**operator+**会自动地提高效率。这种情况下，返回值为右值引用，对该右值引用使用**std::move**不会损失任何东西（而且可能得到一些好处）。
+
+这种情况，对于通用引用和**std::forward**是相似的。考虑一个模板函数reduceAndCopy，它的参数是一个可能没减少过的Fraction对象，然后函数的行为是把它减少，然后返回减少后的Fraction对象。如果最开始的对象是个右值，它的值应该被移到到返回值中（因此避免进行拷贝的开销），但如果最开始的对象是个左值，那么应该进行拷贝。因此：
+
+```cpp
+template<typename T>
+Fraction       // 通过值返回
+reduceAndCopy(T&& frac)     // 通用引用参数
+{
+    frac.reduce();
+    return std::forward<T>(frac);  // 把右值移动到返回值，而拷贝左值
+}1234567
+```
+
+如果省略了**std::forward**的调用，那么frac会无条件地被拷贝到reduceAndCopy的返回值中。
+
+一些开发者得知了上面的信息后，尝试在一些原本不该使用的场合进行拓展使用。“如果对放回值为右值引用的参数使用**std::move**，执行的拷贝构造会变成移动构造”，他们振振有词，“我也可以对返回的局部变量做通用的优化。”换句话说，他们认为假如一个函数通过值语义返回一个局部变量，就像这样，
+
+```cpp
+Widget makeWidget()          // “拷贝”版本的makeWidget
+{
+    Widget w;      // 局部变量
+
+    ...           // 配置w
+
+    return w;     //  把w“拷贝”到返回值
+}12345678
+```
+
+开发者可以“优化”这份代码，把“拷贝”变成移动：
+
+```cpp
+Widget makeWidget()     // 移动版本的makeWidget
+{
+    Widget w;
+    ...
+    return std::move(w);  // 把w移动到返回值中（实际上没有这样做）
+}
+```
+
+我的注释已经提示你这样的想法是错误的，但为什么是错误的呢？
+
+这想法是错误的，因为标准委员会早就想到想到这种优化了。长期被公认的是：在“拷贝”版本的makeWidget中，通过在分配给函数返回值的内存中直接构造w，从而避免拷贝局部变量w（意思是**直接在返回区创建w，这样返回时就不用把局部变量w拷贝到返回区**了）。这称为**return value optimization（RVO）**，这被标准库明文规定了。
+
+制定这样的规定是件很麻烦的事情，因为你只有在不影响程序行为的情况下才想要允许这样的拷贝省略（copy elision）。把标准库那墨守成规（可以说是有毒的）的规则进行意译，这个特殊的规则讲的是在通过值返回的函数中，如果**（1）一个局部变量的类型和返回值的类型相同**，而且**（2）这个局部变量是被返回的对象**，那么编译器可能会省略局部变量的拷贝（或移动）。记住这点，再看一次“拷贝”版本的makeWidget：
+
+```cpp
+Widget makeWidget()      // “拷贝”版本的makeWidget
+{
+    Widget w;
+    ...
+    return w;      // 把w“拷贝”到返回值
+}
+```
+
+两个条件都满足，你要相信我，这份代码在每个正规的C++编译器面前，都会进行RVO优化来避免拷贝w。这意味着“拷贝”版本的makeWidget实际上没有拷贝任何东西。
+
+移动版本的makeWidget只是做了它名字意义上的事情（假定Widget提供移动构造）：把w的内容移动到makeWidget的返回区。但为什么编译器不使用RVO来消除移动，直接在分配给函数返回值的内存中构造w呢？答案很简单：它们不行。条件（2）明确规定返回的是个局部对象，但移动版本的makeWidget的行为与此不同。再看一次返回语句：
+
+```cpp
+return std::move(w);1
+```
+
+这里返回的不是局部变量w，而是个对w的引用——`std::move(w)`的结果。返回一个对局部变量的引用不满足RVO的条件，所以编译器必须把w移动到函数的返回区。**开发者想要对返回的局部变量使用std::move来帮助编译器优化，实际上却是限制了编译器可选的优化选项**！
+
+不过RVO只是一种优化方式，编译器有时候不会省略拷贝和移动操作，尽管优化被允许。你可能会过分猜疑，然后你担心你的编译器会严厉对待拷贝操作，因为它们可以这样。或者你有足够的洞察力来辨认那些情况RVO难以实现，例如，当一个函数中有不同的控制流返回不同的局部变量时。（编译器会在分配给返回值的内存中构建合适的局部变量，但是编译器怎么知道返回哪个局部变量合适呢？）如果是这样的话，比起拷贝的开销，你可能更乐意使用移动。那样的话，你依然觉得对返回的局部变量使用**std::move**是合情理的，因为你知道这样绝对不用拷贝。
+
+遗憾的是，在那种情况下，对局部变量使用**std::move**依然是个糟糕的想法。一部分标准RVO的规则讲述：**如果RVO条件满足，但编译器没有省略拷贝操作，那么返回的对象一定会被视为右值**。实际上，**标准库要求当RVO被许可时，要么发生拷贝省略，要么对返回的局部变量隐式使用std::move**。因此“拷贝”版本的makeWidget：
+
+```cpp
+Widget makeWidget()   // 如前
+{
+    Widget w;
+    ...
+    return w;
+}
+```
+
+编译器必须是要么把拷贝省略，要么把这个函数看作是这样写的：
+
+```cpp
+Widget makeWidget()
+{
+    Widget w;
+    ...
+    return std::move(w);    // 把w视为右值，因为没有省略拷贝.
+}
+```
+
+这种情况和**以值传递的函数参数**很像，关于**函数返回值，它们没有资格省略拷贝，但是当它们返回时，编译器一定会把它看作右值**。结果是，如果你的源代码是这样的，
+
+```cpp
+Widget makeWidget(Widget w)  // 以值传递的参数，类型和返回值一样
+{
+    ...
+    return w;
+}
+```
+
+而编译器会把代码视为这样写的：
+
+```cpp
+Widget makeWidget(Widget w) 
+{
+    ...
+    return std::move(w);      // 把w视为右值
+}
+```
+
+这意味着，如果你对返回的局部变量（局部变量的类型和返回值类型相同，函数是通过值返回）使用**std::move**，你并不能帮助你的编译器（如果编译器不能省略拷贝，就会把局部变量视为右值），不过你可以阻碍它们（通过阻碍RVO）。
+
+存在对局部变量使用**std::move**的合适的场合（即当你把变量传递给一个函数，而且你知道不会再使用这个局部变量了，也没有返回该变量）。
+
+但在有资格进行RVO的return语句，或者返回以值传递的参数时，**std::move**不适用。
+
+**总结**
+
+需要记住的3点：
+
+- 在最后一次使用右值引用或者通用引用时，对右值引用使用**std::move**，对通用引用使用**std::forward**。
+- 在一个通过值返回的函数中，如果返回的是右值引用或通用引用，那么对它们做同样的事情（对右值引用使用**std::move**，对通用引用使用**std::forward**）。
+- 如果局部变量有资格进行返回值优化（RVO），不要对它们使用**std::move**或**std::forward**。
+
+## [条款26 避免对通用引用进行重载](https://blog.csdn.net/big_yellow_duck/article/details/52413057)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
