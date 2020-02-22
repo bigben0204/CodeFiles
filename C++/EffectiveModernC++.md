@@ -2337,7 +2337,7 @@ private:
 
 另一方面，当编译器在`Widget`模板中遇到`MyAllocList`（使用内嵌的`typename`）时，编译器并不知道它是一个类型名，因为有可能存在一个特殊化的`MyAllocList`，只是编译器还没有扫描到，在这个特殊化的`MyAllocList`中`MyAllocList::type`表示的并不是一个类型。这听上去挺疯狂的，但是不要因为这种可能性而怪罪于编译器。是人类有可能会写出这样的代码。
 
-例如，一些被误导的鬼魂可能会杂糅出像这样代码：
+例如，一些误入歧途的灵魂可能在图谋着一些这样的事情：
 
 ```c++
 	class Wine {...};
@@ -2357,7 +2357,7 @@ private:
 
 如果你曾经做过模板元编程（`TMP`），你会强烈地额反对使用模板类型参数并在此基础上修改为其他类型的必要性。例如，给定一个类型`T`，你有可能想剥夺`T`所包含的所有的`const`或引用的修饰符，即你想将`const std::string&`变成`std::string`。你也有可能想给一个类型加上`const`或者将它变成一个左值引用，也就是将`Widget`变成`const Widget`或者`Widget&`。（如果你没有做过`TMP`,这太糟糕了，因为如果你想成为一个真正牛叉的`C++`程序员，你至少需要对`C++`这方面的基本概念足够熟悉。你可以同时看一些TMP的例子，包括我上面提到的类型转换，还有条款23和条款27。）
 
-`C++11`给你提供了工具来完成这类转换的工作，表现的形式是`type traits`,它是``中的一个模板的分类工具。在这个头文件中有数十个类型特征，但是并不是都可以提供类型转换，不提供转换的也提供了意料之中的接口。给定一个你想竞选类型转换的类型`T`，得到的类型是`std::transformation::type`。例如：
+C++11提供了实行这样转换的工具，他们叫做**type traits**，是一种变形的模板类，包含在头文件`<type_traits>`中。这个头文件中有一系列这样的**type traits**，但并不是所有的都与处理类型转换相关，其中的一些提供了望文而知意的接口。假设你要转换的源类型为`T`，你需要的转换结果就是`std::transformation::type`。例如：
 
 ```c++
     std::remove_const<T>::type                 // 从 const T 得到 T
@@ -6282,7 +6282,7 @@ reduceAndCopy(T&& frac)     // 通用引用参数
 {
     frac.reduce();
     return std::forward<T>(frac);  // 把右值移动到返回值，而拷贝左值
-}1234567
+}
 ```
 
 如果省略了**std::forward**的调用，那么frac会无条件地被拷贝到reduceAndCopy的返回值中。
@@ -6297,7 +6297,7 @@ Widget makeWidget()          // “拷贝”版本的makeWidget
     ...           // 配置w
 
     return w;     //  把w“拷贝”到返回值
-}12345678
+}
 ```
 
 开发者可以“优化”这份代码，把“拷贝”变成移动：
@@ -6331,7 +6331,7 @@ Widget makeWidget()      // “拷贝”版本的makeWidget
 移动版本的makeWidget只是做了它名字意义上的事情（假定Widget提供移动构造）：把w的内容移动到makeWidget的返回区。但为什么编译器不使用RVO来消除移动，直接在分配给函数返回值的内存中构造w呢？答案很简单：它们不行。条件（2）明确规定返回的是个局部对象，但移动版本的makeWidget的行为与此不同。再看一次返回语句：
 
 ```cpp
-return std::move(w);1
+return std::move(w);
 ```
 
 这里返回的不是局部变量w，而是个对w的引用——`std::move(w)`的结果。返回一个对局部变量的引用不满足RVO的条件，所以编译器必须把w移动到函数的返回区。**开发者想要对返回的局部变量使用std::move来帮助编译器优化，实际上却是限制了编译器可选的优化选项**！
@@ -6396,59 +6396,702 @@ Widget makeWidget(Widget w)
 
 ## [条款26 避免对通用引用进行重载](https://blog.csdn.net/big_yellow_duck/article/details/52413057)
 
+假如你要写一个函数，参数是name，它先记录当前日期和时间，然后把name添加到全局数据结构中。你可能会想出这样的一个函数：
 
+```cpp
+std::multiset<std::string> names;    // 全局数据结构
 
+void logAndAdd(const string& name)
+{
+    auto now = std::chrono::system_clock::now();  // 获取当前时间
 
+    log(now, "logAndAdd");    // 记录日记
 
+    names.emplace(name);      // 把name添加到全局数据结构中
+}
+```
 
+这代码不是不合理，不过它不够效率。思考这三个可能的调用：
 
+```cpp
+std::string petName("Darla");
 
+logAndAdd(petName);    // 传递左值std::string
 
+logAndAdd(std::string("Persephone"));   // 传递右值std::string
 
+logAndAdd("Patty Dog");    // 传递字符串
+```
 
+在第一个调用中，`logAndAdd`的参数`name`绑定到变量`petName`上，而在`logAndAdd`内，`name`最终被传递给`names.emplace`。因为`name`是个左值，所以它被拷贝到`names`中。这个拷贝是无法避免的，因为传给`logAndAdd`的就是个左值（`petName`）。
 
+在第二个调用中，参数`name`绑定的是一个右值（由字符串Persephone显示创建的临时**std::string**对象）。不过`name`本身是个左值，所以它还是会被拷贝到`names`，但是我们注意到，原则上，它的值可以被移到到`names`。在这个调用中，我们用的是拷贝，不过我们应该能够得到一次移动。
 
+在第三个调用中，参数`name`又再一次绑定右值，不过这个临时**std::string**对象是由字符串隐式创建而来。和第二个调用一样，`name`是被拷贝到`names`，但在这个例子中，一开始传递给`logAndAdd`的参数是字符串。如果将字符串直接传递给`emplace`，是不需要创建临时的**std::string**对象的。取而代之的是，`emplace`会直接在**std::multiset**中用字符串构建**std::string**对象。在第三个调用中，我们还是要拷贝一个**std::string**对象的，不过我们真的没必要承担移动的开销，更何况移动。
 
+通过重新写`logAndAdd`，让其接受一个通用引用，然后服从条款25对通用引用使用**std::forward**，我们可以消除第二个调用和第三个调用的低效率。代码是这样的：
 
+```cpp
+template<typename T>
+void logAndAdd(T&& name)
+{
+    auto now = std::chrono::system_clock::now();
+    log(now, "logAndAdd");
+    names.emplace(std::forward<T>(name));
+}
 
+std::string petName("Darla");    // 如前
 
+logAndAdd(petName);      // 如前，将左值拷贝到multiset
 
+logAndAdd(std::string("Persephone"));   // 移动右值来代替拷贝它
 
+logAndAdd("Patty Dog");  // 在multisest内创建std::string，来代替创建临时std::string对象
+```
 
+yoooohu！最佳工作效率！
 
+这就是故事的结尾了吗，我们可以功成身退了，不过，我没有告诉你，用户并不总是直接持有`logAndAdd`需要的`name`。一些用户只有名字表的索引，为了支持这些用户，我们重载了`logAndAdd`：
 
+```cpp
+std::string nameFromIdx(int idx);    // 根据idx返回name
 
+void logAndAdd(int idx)      // 新的重载
+{
+    auto now = std::chrono::system_clock::now();
+    log(now, "logAndAdd");
+    names.emplace(nameFromIdx(idx));
+}
+```
 
+这两个函数的重载决策的工作满足我们期望：
 
+```cpp
+std::string petName("Darla");   // 如前
 
+logAndAdd(petName);                // 如前，这三个都是使用T&&的重载
+logAndAdd(std::string("Persephone"));
+logAndAdd("PattyDog");
 
+logAndAdd(22);    // 使用int重载
+```
 
+实际上，决策工作正常是因为你想的太少了。假如用户有个**short**类型持有索引，然后把它传递给`logAndAdd`：
 
+```cpp
+short nameIdx;
+...               // 给nameIdx赋值
+logAndAdd(nameIdx);   // 错误
+```
 
+最后一行的注释讲得不清楚，让我来解释这里发生了什么。
 
+`logAndAdd`有两个重载，其中的接受通用引用的重载可以将T推断为**short**，因此产生了精确匹配。而接受**int**的重载需要提升才能匹配**short**参数。任何一个正常的重载决策规则，精确匹配都会打败需要提升的匹配，所以会调用接受通用引用的重载。
 
+在那个重载中，参数`name`被绑定到传进来的**short**，然后`name`被完美转发到`names`（std::multiset<std::string>）的成员函数`emplace`中，在那里，相应地，`emplace`尽职地把**short**转发到**std::string**的构造函数。**std::string**不存在接收**short**的构造函数，因此`multiset.emplace`内的**std::string**构造调用会失败。这所有的所有都是因为对于**short**类型，通用引用的重载比**int**的重载更好。
 
+本地试验：
 
+```c++
+#include <set>
+#include <map>
 
+using namespace std;
+multiset<string> names;
 
+template<typename T>
+void logAndAdd(T&& name) {
+    names.emplace(forward<T>(name));
+}
 
+string nameFromIdx(int idx) {
+    return "hello";
+}
 
+void logAndAdd(int idx) {
+    names.emplace(nameFromIdx(idx));
+}
 
+int main() {
+    logAndAdd(10);
+    short idx = 10;
+    logAndAdd(idx);  // 编译错误：error: no matching function for call to 'std::basic_string<char>::basic_string(short int&)'
 
+    return 0;
+}
+```
 
+接受通用引用作为参数的函数是C++最贪婪的函数，它们可以为几乎所有类型的参数实例化，从而创建的精确匹配。这就是为什么结合重载和通用引用几乎总是个糟糕的想法：通用引用重载吸收的参数类型远多于开发者的期望。
 
+一种容易掉进这个坑的方法是写完美转发的构造函数。对`logAndAdd`这个例子进行小小的改动就可以展示这个问题，相比于写一个接受**std::string**或索引的函数，试着想象一个类Person，它的构造函数就是做那个函数的事情：
 
+```c++
+#include <iostream>
 
+using namespace std;
 
+class Person {
+public:
+    template<typename T>
+    explicit Person(T&& name): name(forward<T>(name)) {
+    }
 
+    Person(int idx) : name(nameFromIdx(idx)) {}
 
+private:
+    string nameFromIdx(int idx) {
+        return string();
+    }
 
+private:
+    string name;
+};
 
+int main() {
+    Person person("hello");
+    Person person1(10);
+    Person person2(static_cast<short>(10));  // 编译错误：error: no matching function for call to 'std::basic_string<char>::basic_string(short int)'
 
+    Person p("Nancy");
+    auto cloneOfP(p);  // 编译错误：error: no matching function for call to 'std::basic_string<char>::basic_string(Person&)'
+    return 0;
+}
+```
 
+和`logAndAdd`的情况一样，传递一个不是**int**的整型数会调用通用引用构造函数，然后那会导致编译失败。但是，这里问题更糟，因为比起看见的，Person会出现更多重载。条款17解释过在合适的条件下，C++会生成拷贝和移动构造，就算这个类有模板化的构造函数，它在实例化时也会生成拷贝和移动构造的签名。如果Person类生成移动和拷贝构造，Person看起来是这样的：
 
+```cpp
+class Person {
+public:
+    template<typename T>
+    explicit Person(T&& n)
+    : name(std::forward<T>(n)) {}
 
+    explicit Person(int idx);
 
+    Person(const Person & rhs);   // 编译器生成的拷贝构造
+
+    Person(Person&& rhs);   // 编译器生成的移动构造
+
+    ...
+};
+```
+
+当你花大量时间在编译器和写编译器的人上时，才能忘记常人的想法，知道这会导致个直观的问题：：
+
+```cpp
+Person p("Nancy");
+
+auto cloneOfP(p);   // 从p创建一个新Person，这不能通过编译
+```
+
+在这里我们尝试用一个Person创建一个Person，看起来明显是用拷贝构造的情况。（p是个左值，所以我们消除将“拷贝”换成移动的想法。）但这个代码不会调用拷贝构造函数，它会调用完美转发的构造函数，这个函数尝试用一个Person对象（p）来初始化另一个Person对象的**std::string**，而**std::string**没有接受Person为参数的构造函数，你的编译器很生气，后果很严重，发出一长串错误信息。
+
+“为什么啊？”你可能很奇怪，“完美转发构造函数还能代替拷贝构造函数被调用?我是用一个Person对象初始化另一个Person对象啊！”事实上我们是这样做的，但是编译器是宣誓效忠于C++的规则的，而在这里使用的规则是重载决策规则。
+
+编译器的理由是这样的：`cloneOfP`被一个非**const**左值（p）初始化，那意味着模板构造函数可以被实例化来接受一个非**const**左值Person，这样实例化之后，Person的代码变成这样：
+
+```cpp
+class Person {
+public:
+    explicit Person(Person& n)      // 从完美转发模板构造实例化而来
+    : name(std::forward<Person&>(n)) {} 
+
+    explicit Person(int idx);
+
+    Person(const Person& rhs); 
+
+    ...
+};
+```
+
+在这条语句中，
+
+```cpp
+auto cloneOfP(p);
+```
+
+p既可以传递给拷贝构造，又可以传递给实例化模板。调用拷贝构造的话需要对p添加**const**才能匹配拷贝构造的参数类型，但是调用实例化模板不用添加什么。因此生成的模板是更加匹配的函数，所以编译器做了它们应该做的事情：调用更加匹配的函数。因此，“拷贝”一个非**const**的左值Person，会被完美转发构造函数处理，而不是拷贝构造函数。
+
+如果我们稍稍改一下代码，让对象拷贝**const**对象，我们就会得到完全不一样结果：
+
+```cpp
+const Person cp("Nancy");  // 对象是**const**的
+
+auto cloneOfP(cp);      // 调用拷贝构造！
+```
+
+因为对象拷贝的对象是**const**的，它会精确匹配拷贝构造函数。模板化构造函数可以实例化出一样的签名，
+
+```cpp
+class Person {
+public:
+    explicit Person(const Person& n);    // 实例化的模板构造
+
+    Person(const Person& rhs);   // 编译器生成的拷贝构造
+
+    ...
+};
+```
+
+不过这没关系，因为C++重载决策的一个规则是：当一个模板实例化函数和一个非模板函数（即，一个普通函数）匹配度一样时，优先使用普通函数。因此，在相同的签名下，拷贝构造（普通函数）胜过实例化模板函数。
+
+（如果你想知道为什么在实例化模板构造函数可以得到拷贝构造的签名的情况下，编译器还能生成拷贝构造函数，请去复习条例17。）
+
+完美转发构造函数与编译器生成的拷贝和移动构造函数之间的纠纷在继承介入后变得更加杂乱。特别是，派生类的拷贝和移动构造的常规实现的行为让你大出所料。看这里：
+
+```cpp
+class SpecialPerson :  public Person {
+public:
+    SpecialPerson(const SpecialPerson& rhs)  // 拷贝构造函数
+    : Person(rhs)              // 调用基类的完美转发构造
+    { ... }
+
+    SpecialPerson(SpecialPerson&& rhs)    // 移动构造函数
+    ： Person(std::move(rhs))   // 调用基类的完美构造函数
+    { ... }
+};
+```
+
+就像注释表明那样，派生类的拷贝和移动构造并没有调用基类的拷贝和移动构造，而是调用了基类的完美转发构造！要理解为什么，你要注意到派生类的函数把类型SpecialPerson传递给基类，然后实例化模板，重载决策，对Person使用完美构造函数。最终，代码不能通过编译，因为**std::string**没有以SpecialPerson为参数的构造函数。
+
+我希望我现在可以说服你应该尽可能地避免以通用引用重载函数。不过，如果对通用引用进行重载是个糟糕的想法，而你需要转发参数，或者特殊处理一些参数，该怎么做呢？方法有很多种，因为太多了，所以我决定把它放进一个条款中，它就是条款27，也就是下一条款，继续看吧，你会和它撞个满怀的。
+
+**总结**
+
+需要记住的2点：
+
+- 对通用引用进行重载几乎总是会导致这个重载函数频繁被调用，超出预期。
+- 完美转发构造函数是特别有问题的，因为在接受非**const**左值作为参数时，它们通常比拷贝构造匹配度高，然后它们还能劫持派生类调用的基类的拷贝和移动构造。
+
+## [条款27 熟悉替代重载通用引用的方法](https://blog.csdn.net/big_yellow_duck/article/details/52421038?depth_1-utm_source=distribute.pc_relevant.none-task&utm_source=distribute.pc_relevant.none-task)
+
+条款26解释了对通用引用进行重载会导致很多问题，包括是独立函数和成员函数（尤其是构造函数）。不过条款26也展示了这种重载有用的地方，如果它的行为能像我们想象那样的话！本条款是探索如何获得我们期望的行为，既包括通过设计避免对通用引用进行重载，又包括使用通用引用重载时，约束它们能匹配的参数类型。
+
+接下来的讨论是以条款26提出的例子开展的，如果你最近没有读条款26，你最好先去复习一下。
+
+### **放弃重载**
+
+条款26的第一个例子，`logAndAdd`，完全可以避免重载通用引用的缺点——只需把本来重载的函数改个不同的名字。例如，`logAndAdd`两个重载，可以改成`logAndAddName`和`logAndAddNameIdx`。额，这种方法不适用于第二个例子，即Person构造函数，因为构造函数的名字是固定的。另外，谁希望放弃重载了?
+
+### 通过const T&传递参数
+
+一种替代方法是回归C++98，用pass-by-lvalue-to-const（即const T&）代替pass-by-universal-reference（即通用引用，T&&），这种方法的劣势是没有通用引用高效。不过我们知道通用引用和重载带来的纠纷，放弃一些效率来保持代码的简单性也是很吸引人的。
+
+### 通过值语义传递参数
+
+一种经常让你走向高性能却不用增加复杂性的方法是，用值参数把引用参数替换掉。这种设计遵顼条款41的建议，当你知道要拷贝参数的时候，考虑直接以值传递对象，这里不讨论细节了。在这里，我会向你展示该技术如何在Person的例子中使用：
+
+```cpp
+class Person {
+public:
+    explicit Person(std::string n)  // 替换 T&& 构造函数
+    : name(std::move(n)) {}    // 使用std::move
+
+    explicit Person(int idx)        // 和以前一样
+    : name(nameFromIdx(idx)) {}
+
+    ...
+
+private:
+    std::string name;
+};
+```
+
+因为**std::string**没有只接受一个整型数的构造函数，所以所有的**int**或者类似**int**的参数（例如，std::size_t，short，long）都会调用**int**重载的构造函数。同样地，所有的**std::string**类型参数（包含std::string可以构造的参数，例如字符串“Ruth”）都会调用接受**std::string**的构造函数。因此不会让调用者出乎意料，我在想，你可能会说一些人会传递NULL和0来表示空指针，然后就出问题了（调用了int重载构造）。我想说这些人应该去参考条款8，然后反复研读，直到他们意识到使用NULL和0表示空指针会让他们遭到报应。
+
+### 使用Tag dispatch
+
+以lvalue-reference-to-const传递和值传递都不支持完美转发，如果我们使用通用引用的动机就是为了完美转发，那么我们一定要用通用引用，这没有其他办法，然后我们又不想放弃重载。那么，如果不想放弃重载，又不想放弃通用引用，那我们该如何避免重载通用引用呢？
+
+实际上不是很难啦，重载函数的调用是对比重载函数的形参和调用端使用的实参，然后选择最佳匹配函数——考虑所有的形参和实参的结合情况。一个通用引用形参通常会精确匹配所有传进来的参数，不过，如果参数列表中除了通用引用还有其它的参数（该参数不是通用引用）。不是通用引用的参数不能匹配的话，就会在决策是淘汰带有通用引用参数的函数。这想法基于**tag dispatch**，然后用之前的例子来讲解比较容易理解。
+
+对于这个函数来说，它工作得很好，但是当我们提出一个接受**int**的构造函数时，就会引出条款26的一堆问题。本条款的目的就是为了避免那些问题，比起添加重载函数，我们打算重新实现`logAndAdd`，让它代表两个函数，一个接受整型数，一个接受另外的参数，`logAndAdd`接受所有类型的参数，包括整型数和非整型数。
+
+这两个函数真正所做的工作在命名为`logAndAddImpl`函数中，即，我们重载`logAndAddImpl`。其中一个函数接受通用引用，所以我们既有重载，又用通用引用，不过每一个函数都会有第二个形参，用来表示该参数是否为整型数，这就是条款26所讲的防止我们掉进坑的方法，因为我们安排第二个形参来决定选择哪个重载函数。
+
+我知道，“Show me the code!”你会这样讲。没问题啊，这是一个几乎正确的版本：
+
+```cpp
+template<typename T>
+void logAndAdd(T&& name)
+{
+    logAndAddImpl(std::forward<T>(name),
+                               std::is_integral<T>());     // 不是完全正确
+}
+```
+
+这个函数把它的参数转发给`logAndAddImpl`，但它还传递了个参数用来表示参数类型T是否为整型数。至少，我们假定它是这样的。就算传给该函数的是右值整型数，也能工作。但是，就如条款28所说，如果传给通用引用`name`的是左值参数，那么T会被推断为左值引用，所以如果一个左值**int**传递给`logAndAdd`，T会被推断为**int&**。这不是整型数类型，因为引用不是整型数类型。这意味着`std::is_intergral`在函数接受左值参数时会是false，尽管那参数真的是表示一个整型值。
+
+意识到这个问题就相当于解决掉它了，因为C++标准库有个**type trait**，**std::remove_reference**，它所做的事情跟名字一样，也跟我们需要的那样：删除类型的引用语义。因此，`logAndAdd`这样写比较合适：
+
+```cpp
+template<typename T>
+void logAndAdd(T&& name)
+{
+    logAndAddImpl(
+      std::forward<T>(name),
+      std::is_integral<typename std::remove_reference<T>::type>()
+    );
+}
+```
+
+这有瑕疵。（在C++14，`typename std::remove_reference::type`可以用`std::remove_reference_t`代替。）
+
+搞定了那里之后，我们可以把注意力放到被调用的函数上了（`logAndAddImpl`）。它有两个重载函数，第一个是只应用于非整型数上的（即`std::is_integral::type`的类型是false）：
+
+```c++
+template<typename T>    // 把非整型的参数添加到全局数据结构
+void logAndAddImpl(T&& name, std::false_type)
+{
+    auto now = std::chrono::system_clock::now();
+    log(now, "logAndAdd");
+    names.emplace(std::forward<T>(name));
+}
+```
+
+只要你理解了第二个参数使用的技术，这代码就很直截了当了。概念上，`logAndAdd`传递一个布尔值给`logAndAddImpl`，它表示传递到`logAndAdd`的实参是否为整形数类型。不过**true**或者**false**都是运行时的值，我们需要进行重载决策——编译期间的现象——来选择正确的`logAndAddImpl`。那意味着我们需要一个相当于**true**的类型，和另一个相当于**false**的类型。这对于C++标准库提供的**std::true_type**和**std::false_type**来说再平常不过了。如果T是整型数，那么`logAndAdd`传递给`logAndAddImpl`的参数是一个继承了**std::true_type**的对象，如果不是整型数就是继承**std::false_type**的对象。所以当`logAndAdd`传递过来的T不是整型数类型时，上面的重载函数是`logAndImpl`调用的可行的候选函数。
+
+第二个重载覆盖相反的情况：T为整型类型。在那种情况下，`logAndAddImpl`只是简单地通过索引找到名字，然后把找到的名字还给`logAndAdd`：
+
+```cpp
+std::string nameFromIndx(int idx);     // 和条款26一样
+
+// 整型参数，找到name，并以它调用logAndAdd
+void logAndAddImpl(int idx, std::true_type)
+{
+    logAndAdd(nameFromIdx(idx);
+}
+```
+
+通过让`logAndAddImpl`用索引查找名字从而传递给`logAndAdd`（在那里名字会被转发到另一个重载的`logAndAddImpl`），我们可以避免在两个重载函数都加上记录日志的代码。
+
+在这个设计中，类型**std::false_type**和**std::true_type**是“tags”（标签），使用它们的目的是为了强迫重载决策往我们想要的方向发展。注意一下，我们没有为这些类型参数命名，因为它们在运行期间没有任何作用，实际上，我们希望编译器可以辨别出标签参数是不同寻常的，然后优化它们在运行期间的开销。（一些编译器可以这样做，至少在某些时候。）在`logAndAdd`里调用重载实现函数，是通过创建合适的标签对象把工作“dispatch”（调度）到正确重载函数，因此这种设计的名字是：**tag dispatch**。它是模板元编程的基本构件，现代C++库你看得越多，你遇到它就越多。
+
+对于我们的目的，**tag dispatch**重要的不是它如何工作，而是它让我们结合通用引用和重载，却不会引起条款26描述的问题。dispatching函数——`logAndAdd`——接受一个不受限制的通用引用参数，但这个函数并没有进行重载。实现的函数——`logAndAddImpl`——被重载，一个接受通用引用参数，但决策调用哪个函数并不只是取决于通用引用参数，还要取决于标签，而标签的值被设计来保证不超过一个函数能切实可行的匹配。这样的结果是，标签的值决定了调用哪个重载函数，那么通用引用形参总能精确匹配它的实得变得无关紧要。
+
+本地试验：
+
+```c++
+#include <iostream>
+#include <set>
+#include <chrono>
+#include <ctime>
+
+using namespace std;
+
+multiset<string> names;
+
+template<typename T>
+void logAndAddImpl(T&& name, false_type);
+
+void logAndAddImpl(int idx, true_type);
+
+template<typename T>
+void logAndAdd(T&& name) {
+    logAndAddImpl(forward<T>(name), is_integral<remove_reference_t<T>>());
+}
+
+void log(const string& msg, const chrono::system_clock::time_point& time) {
+    auto nowTime = chrono::system_clock::to_time_t(time);
+    cout << msg << ": " << ctime(&nowTime) << endl;
+}
+
+template<typename T>
+void logAndAddImpl(T&& name, false_type) {
+    auto now = chrono::system_clock::now();
+    log("logAndAdd", now);
+    names.emplace(forward<T>(name));
+}
+
+string nameFromIdx(int idx) {
+    return "hello";
+}
+
+void logAndAddImpl(int idx, true_type) {
+    logAndAdd(nameFromIdx(idx));
+}
+
+int main() {
+    short idx = 10;
+    logAndAdd(idx);
+    return 0;
+}
+// 输出：
+logAndAdd: Sat Feb 22 17:43:14 2020   
+```
+
+### 约束接受通用引用的模板
+
+**tag dispatch**的重点是存在一个（不被重载的）函数作为用户的API，这个函数把工作调度到实现的函数。创建一个不被重载的调度函数很容易，但思考条款26的第二个问题，Person类中的完美转发构造函数，是个例外。编译器可能会生成拷贝和移动构造函数，所以如果你只写一个构造函数然后在函数体中使用**tag dispatch**，一些构造调用绕过了**tag dispatch**系统，被编译器生成的构造函数处理了。
+
+事实上，真正的问题是：编译器生成的函数不是有时候绕过**tag dispatch**设计，而是从来没绕过（即从来不会调用编译器生成的函数，因为tag dispatch也是通用引用参数，回顾条款26）。当你用一个左值对象去初始化同类型的对象时，你总是想要进行拷贝构造的，不过，就像条款26展示那样，提供一个接受通用引用的构造函数后，会导致拷贝非**const**左值时一直调用通用引用构造。那条款也解释了当基类声明了完美转发构造后，派生类以传统方式实现它们拷贝和移动构造时，总会调用完美构造函数，尽管正确的行为是调用基类拷贝和移动构造。
+
+对于这种情况，对通用引用重载的函数比你想象中要贪婪，**tag dispatch**不贪婪，但是却不是你想要的技术。你需要另外一种技术，这种技术可以让你控制调用通用引用重载函数的条件。你需要的东西，是我朋友，叫**std::enable_if**。
+
+**std::enable_if**可以让你强迫编译器当作模板不存在。这样的目标被称为是**disable**的。默认地，所有模板都是**enable**（使能）的，不过模板使用**std::enable_if**后，只会在满足**std::enable_if**指定的条件才会被使能。在我们的例子中，我们想要在传递给构造函数的参数类型不是Person时才使能完美转发构造函数，如果传递的参数类型是Person，我们打算**disable**完美转发构造函数（即让编译器忽略它），因为这样，当我们想要用一个Person来初始化另一个Person时，就会由类的拷贝或移动构造来处理这次调用了。
+
+表示这种想法的方式不是很难，不过语法比较恶心，尤其是你以前没见过它，所以我们慢慢来。除了条件部分，**std::enable_if**有公式可以代，所以我们从那里开始。这里是Person类的完美转发构造的声明，只是展示了使用**std::enable_if**的最简单的方式。我只是展示了声明，因为**std::enable_if**不会影响到定义，所以这个函数的实现和条款26的实现相同。
+
+```cpp
+class Person {
+public:
+    template<typename T,
+             typename = typename std::enable_if<condition>::type>
+    explicit Person(T&& n);
+
+    ...
+};
+```
+
+想要知道第4行的代码做了什么，我只能抱歉地表明你去看源码吧，因为很复杂。在这里，我想着重讲一下condition（条件）表达式，它会控制该构造函数是否被使能。
+
+我们想指定的条件是，T不可以是Person类型，即当T的类型和Person不同时，该模板构造才能使能。幸好有一个**type trait**可以决定两个类型是否相同（**std::is_same**），看来我们的想要的条件是`!std::is_same::value`。（注意有个“！”）。这已经很接近我们想要的了，但并不是完全正确，因为，就像条款28解释那样，当用左值初始化通用引用时，类型推断总会把T推断为左值引用。这意味着当代码是这样时，
+
+```cpp
+Person p("Nancy");
+
+auto cloneOfP(p);           // 以左值进行初始化123
+```
+
+通用引用构造会把T推断为`Person&`。类型`Person`和`Person&`是不相同的，这样的结果是`std::is_same::value`为**false**。
+
+如果我们仔细想想——我们所说的只有当T不是Person类型时才使能模板构造意味着什么，我们会意识到在审视T时，我们应该忽略：
+
+- 它是否是个引用。为了决定通用引用构造函数是否应该被使能，类型`Person&`、`Person&&`都应该像`Person`那样处理。
+- 它是否是**const**和**volatile**。对我们来说，`const Person`和`volatile const Person`和`volatile Person`都应该像`Person`那样处理。
+
+这意味着我们在检查T的类型和Person是否相同之前，需要一种方式来去除T类型的引用，**const&&**、**volatile**。再一次，标准库以**type trait**的形式给予我们需要的东西，它就是**std::decay**。`std::decay::type`和T相同，除了删掉了引用和cv描述符（即const和volatile）。（我在这里捏造了事实，因为**std::decay**就像它的名字表示那样，也可以把数组和函数类型转换成指针类型（看条款1），不过对于这里的讨论，**std::decay**的行为和我描述的一样。）那么。我们想要的控制使能构造函数的条件是这样的：
+
+```cpp
+!std::is_same<Person, typename std::decay<T>::type>::value1
+```
+
+即，Person类型和T类型不一样，其中忽略了T的引用、cv描述符。（就如条款9解释那样，**std::decay**之前的“typename”是必须的，因为`std::decay::type`取决于模板参数T。）
+
+把这个条件插入到上面的公式中，再把代码格式化，使人更容易看出是怎样组合起来的，从而产生了下面这个Person完美转发构造的声明：
+
+```cpp
+class Person {
+public:
+    template<
+        typename T,
+        typename = typename std::enable_if<
+            !std::is_same<Person,
+                typename std::decay<T>::type
+            >::value
+        >::type
+    >
+    explicit Person(T&& n);
+
+    ...
+};
+```
+
+如果之前你没看过这样的东西，知足吧！我把这个设计放到最后是有原因的。当你可以使用其他技术来避免混合通用引用和重载（你几乎总是可以避免），你应该使用它。然后，当你习惯了这种函数语法，这种方法也不算差。而且，它的行为是通过你的努力而来的。给定上面的构造函数，当我们用一个Person（左值或右值，const或非const，volatile或非volatile）构造另一个Person时，将永远不会调用接受通用引用的构造函数。
+
+是不是很成功？我们做到啦！
+
+额，等等。为了确保最终的庆典，我们还要搞定来自条款26的某个问题。
+
+假如一个继承Person的类用传统的方式实现拷贝和移动构造：
+
+```cpp
+class SpecialPerson : public Person {
+public: 
+    SpecialPerson(const SpecialPerson& rhs)    // 拷贝构造函数
+    : Person(rhs)       // 调用了基类的完美转发构造
+    { ... }
+
+    SpecialPerson(SpecialPerson&& rhs)    // 移动构造函数
+    : Person(std::move(rhs))    // 调用了基类的完美转发构造
+    { ... }
+
+    ...
+};
+```
+
+这代码和我在条款26展示的一样，包括注释，在这里呢，依然是正确的。当我们拷贝或者移动一个SpecialPerson对象时，我们期望通过基类的拷贝或移动构造函数来拷贝或移动该对象的基类部分，不过在这些函数中，我们传递给基类构造函数的是SpecialPerson对象，然后因为SpecialPerson和Person不同（就算经过std::decay处理也是不同的），所以类型的通用引用构造函数被使能，然后它为了精确匹配Special对象很开心地实例化。这个精确匹配比起拷贝和移动构造所需的派生类到基类转换（即SpecialPerson对象转换为Person对象）要好，所以我们现在的代码，拷贝和移动SpecialPerson对象会使用完美转发构造函数来拷贝和移动它们的基类部分。这似曾相似，在条款26。
+
+派生类只是遵循实现拷贝和移动构造正常规则，所以我们把问题定位在基类中，而且，定位在控制Person通用引用构造函数是否被使能的条件中。我们现在意识到，我们不是想要在参数类型与Person不同时使能模板构造，而是想在参数类型与Person以及由Person派生的类型不同时使能模板构造。坑爹的继承！
+
+当你听到标准库**type trait**中有一个是判断一个类型是否由另一个类型派生而来时，你应该不会感到惊讶，它是**std::is_base_of**。当T2是由T1派生而来时，`std::is_base_of::value`是**true**。因为类型被认为是从它自身派生而来，所以`std::is_base_of::value`是**true**。这个很方便，因为我们想要修改我们的控制使能Personw完美转发构造的条件，而条件是：类型T，去除引用和cv描述符后，既不是Person类型，也不是Person派生的类型。使用**std::is_base_of**代替**std::is_same**可以给予我们想要的东西：
+
+```c++
+class Person {
+public:
+    template<
+      typename T,
+      typename = typename std::enable_if<
+                      !std::is_base_of<Person,
+                                       typename std::decay<T>::type
+                                       >::value
+                  >::type
+    >
+    explicit Person(T&& n);
+
+    ...
+};
+```
+
+现在我们终于完成了。那是我们用C++11写的代码，如果我们用的是C++14，这份代码仍然可以工作，不过我们可以为**std::enable_if**和**std::decay**使用别名模板来消除讨厌的“typename”和“::type”。因此产生了这份更易接受的代码：
+
+```cpp
+class Person {
+public:
+    template<
+      typename T,
+      typename std::enable_if_t<
+                    !std::is_base_of<Person,
+                                     std::decay_t<T>
+                                    >::value
+               >
+    >
+    explicit Person(T&& n);
+
+    ...
+};1234567891011121314
+```
+
+好吧，我承认我说谎了，我们仍然没有完全解决问题，但我们接近了，接近到令人着急的程度，讲真！
+
+我们已经看到当我们想要用类型拷贝和移动构造时，如何使用**std::enable_if**来让接受通用引用的构造函数有选择性地失去资格，但我们还没看到如何应用它来区分整型数和非整型数实参。总的来说，这是我们最原始的目的，构造函数含糊不清的问题是我们在前进的道路上一直牵扯的东西。
+
+我们所要做的所有事情是（1）添加一个处理整型参数的Person构造重载，然后（2）进一步约束模板构造，即**disable**掉整型参数。把这些原料加到我们之前讨论的东西的锅中，用慢火炖 ，然后欣赏成功的味道：
+
+```cpp
+class Person {
+public:
+    template<
+      typename T,
+      typename = std::enable_if_t<
+        !std::is_base_of<Person, std::decay_t<T>>::value
+        &&
+        !std::is_integral<std::remove_reference_t<T>>::value
+      >
+    >
+    explicit Person(T&& n)       // 接受std::string类型
+    : name(std::forward<T>(n))   // 和 可以转换为string的参数的构造函数
+    { ... }
+
+    explicit Person(int idx)     // 接受整型参数的构造函数
+    : name(nameFromIdx(idx))
+    { ... }
+
+    ...    // 拷贝和移动构造， 等等
+
+private:
+    std::string name;
+};
+```
+
+瞧！多么美丽的东西！好吧，好吧，这声美丽可能是从那些迷恋模板元编程的人口中发出的，不过事实上，这方法不仅能完成工作，它还能以独特的沉着来完成工作。因为它使用完美转发，提供了最高的效率，又因为它控制了通用引用和重载的结合，而不是禁用它。这项技术可以用于无法避免重载的场合（例如构造函数）。
+
+本地试验：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+class Person {
+public:
+    template<
+        typename T,
+        typename = enable_if_t<
+            !is_base_of<Person, decay_t<T>>::value
+            && !is_integral<remove_reference_t<T>>::value
+        >
+    >
+    explicit Person(T&& name) : name(forward<T>(name)) {
+    }
+
+    Person(int idx) : name(nameFromIdx(idx)) {}
+
+private:
+    string nameFromIdx(int idx) {
+        return string();
+    }
+
+private:
+    string name;
+};
+
+class SpecialPerson : public Person {
+public:
+    SpecialPerson(const SpecialPerson& rhs) : Person(rhs) {}
+
+    SpecialPerson(SpecialPerson&& rhs) : Person(move(rhs)) {}
+};
+
+int main() {
+    Person p("Nancy");
+    auto cloneOfP(p);
+
+    Person p2(static_cast<short>(10));
+    return 0;
+}
+```
+
+### 权衡
+
+本条款讲解的前三种技术——放弃重载、通过**const T&**传递参数、通过值语义传递参数——指定了函数的参数类型，而后两种技术——**tag dispatch**和限制模板资格——使用了完美转发，因此不用指定参数的类型。这个基本的决定——是否指定类型——有不一样的结果。
+
+一般来说，完美转发更具效率，因为它为了保持声明参数时的类型，它避免创建临时对象。在Person构造的例子中，完美转发允许一个把类似“Nancy”的字符串转发到接受**std::string**的构造函数中，但是没有使用完美转发的技术一定要先从字符串中创建一个临时**std::string**对象，来满足Person构造函数指定的参数类型。
+
+但是完美转发有缺点，一个是某些类型不能被完美转发，尽管它们可以被传递到函数，条款30会探索这些完美转发失败的例子。
+
+第二个问题是是当用户传递无效参数时，错误信息的可理解性。例如，假设在创建Person对象的时候传递了个**char16_t**（C++11引进的一种以16位表示一个字符的类型）字符组成的字符串，而不是**char**：
+
+```cpp
+Person p(u"Konrad Zusz");    // "Konrad Zusz"是由char16_t类型字符组成1
+```
+
+当使用本条款的前三种技术时，编译器看到可执行的构造函数只接受**int**和**std::string**，然后编译器或多或少会产生一些直观的错误信息表明：无法将**const char16_t[12]**转换到**int**或**std::string**。
+
+而使用基于完美转发的技术时，构造函数的通用引用绑定**char16_t**类型的数组不会发出任何抱怨。构造函数再把数组转发到Person的**std::string**成员变量的构造中，而只有在那个时刻，调用者传递的参数（一个const char16_t数组）和需要的参数（**std::string**构造函数可接受的参数类型）的不匹配才被发现。这样的结果是，错误信息很可能，额，令人十分深刻。在我使用的某个编译器中，错误信息有160行。
+
+在这个例子中，通用引用只需完美转发一次（从Person构造函数到std::string构造函数），但在更复杂的系统中，很有可能一个通用引用要通过函数进行几层转发才能到达决定实参类型是否能接受的地方。通用引用转发的时间越长，出错时的错误信息就越迷惑。许多开发者发现，在性能是首先关心的场合中，接口也不会使用通用引用参数，就是因为这个原因。
+
+在Person的那个例子中，我们知道完美转发构造函数的通用引用参数应该是**std::string**类型第一个初始值，所以我们的可以使用**static_assert**来证明通用引用参数就是扮演这个角色。**std::is_constructible**这个**type trait**可以在编译期间测试一个类型的对象是否能被另一个不同类型（或一些不同类型）的对象（或者另一些对象）构造，所以这个断言很容易写：
+
+```cpp
+class Person {
+public:
+    template<
+      typename T,
+      typename = std::enable_if_t<
+        !std::is_base_of<Person, std::decay_t<T>>::value
+        &&
+        !std::is_integral<std::remove_reference_t<T>>::value
+      >
+    >
+    explicit Person(T&& n)
+    : name(std::forward<T>(n))
+    {
+        // 断言可以从T对象构造一个std::string
+        static_assert(
+          std::is_constructible<std::string, T>::value,
+          "Parameter n can't be used to construct a std::string"
+        );
+        ...        // 构造函数的常规工作
+    };
+
+    ...
+};
+```
+
+这样之后，如果用户代码尝试使用一个不能构造**std::string**的类型创建Person对象时，就会产生上面指定的错误信息。不幸的是，在这个例子中，**static_assert**是在构造函数体内，但完美转发的代码是成员初始化列表的一部分，在**static_assert**之前。在我使用的编译器，来自**static_assert**的漂亮、易读的错误信息会跟在常规错误信息（即，那160行错误信息）之后出现。
+
+**总结**
+
+需要记住的3点：
+
+- 替代结合通用引用和重载的方法包括使用有区别的函数名、以**lvalue-reference-to-const**形式传递参数、以值语义传递参数和使用**tag dispatch**。
+- 借助**std::enable_if**限制模板容许一起使用通用引用和重载，不过它控制着编译器可以使用通用引用重载的条件。
+- 通用引用参数一般具有性能优势，但它们通常有适用性劣势。
+
+## [条款28 理解引用折叠](https://blog.csdn.net/big_yellow_duck/article/details/52433305)
 
 
 
