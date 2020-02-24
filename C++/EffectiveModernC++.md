@@ -7440,52 +7440,401 @@ SSO存在的动机是：有大量证据表明在大多数应用中普遍使用�
 
 ## [条款30 熟悉完美转发失败的情况](https://blog.csdn.net/big_yellow_duck/article/details/52448421)
 
+完美转发是C++11箱子里最令人注目的特性之一，完美转发，它是完美的！额，打开箱子后，然后你会发现理想中的“完美”和现实中的“完美”有点出入。C++11的完美转发非常棒，但当且仅当你愿意忽略一两个特殊情况，才能真正得到完美。该条款就是为了让你熟悉那些特殊情况。
 
+在着手探索我们的特殊情况之前，值得回顾一下“完美转发”的意思。“转发”的意思是一个函数传递——转发——它的参数到另一个函数，目的是为了让第二个函数（被转发参数的函数）收到第一个函数（进行转发的函数）接受到的对象。这个规则排除值语义的形参，因为它们只是拷贝原始调用者传递的参数，我们想要的是，接受转发参数的函数能够处理最开始传递进来的对象。指针形参也排除在外，因为我们不想强迫调用者传递指针。通常，当发生有目的的转发时，我们都是处理形参为引用的参数。
 
+完美转发意思是：我们不单单转发对象，我们还转发它们重要的特性：它们的类型，它们是右值还是左值，它们是否是**const**或者**volation**修饰的。配合我们观察到的我们一般处理引用参数，这暗示着我们会把完美转发用到通用引用（看条款24）上，因为只有通用引用形参才会把传递给它们的实参的左值或右值信息进行编码。
 
+假设我们有一些函数f，然后我们写了个函数（事实上是模板函数），这个函数把参数转发到函数f。我们需要的关键代码是这样的：
 
+```c++
+template<typename T>
+void fwd(T&& param)          // 接受参数
+{
+    f(std::forward<T>(param));      // 转发到f
+}
+```
 
+按照本性，进行转发的函数是通用的。例如，fwd模板，应该可以接受一些类型不同的参数，然后转发它所得到的。对于这种通用性的一种有逻辑的扩展是，fwd不应该只是个模板，而是个可变参数模板，因此可以接受任意数目的参数，可变参数模板fwd看起来应该是这样的：
 
+```cpp
+template<typename ... T>
+void fwd(T&& ... params)   //  接受一些参数
+{
+    f(std::forward<T>(params)...);    // 把它们转发到f
+}
+```
 
+这种形式的模板你能在其它地方见到，例如标准库容器的**emplace**函数（看条款42），和智能指针工厂函数——**std::make_shared**和**std::make_unique**（看条款21）。
 
+给定我们的目标函数f和进行转发的函数fwd，如果用某个实参调用f会做某件事，然后用同样的实参调用fwd，但fwd里的f行为和前面那种情况不一样，那么完美转发是失败的：
 
+```
+f( expression );       // 如果f做某件事
+fwd(expression);       // 而fwd里的f做的是不同的事，那么fwd完美转发expression失败12
+```
 
+几种类型的实参会导致这种失败，知道它们是什么和如何工作是很重要的，让我们来观察这几种不能完美转发的类型吧。
 
+### 大括号初始值
 
+假如f的声明是这样的：
 
+```cpp
+void f(const std::vector<int>& v);
+```
 
+这种情况，用大括号初始值调用f是可以通过编译的：
 
+```cpp
+f({1, 2, 3});   // 正确，“{1，2，3}”被隐式转换为std::vector<int>
+```
 
+但如果把大括号初始值传递给fwd就不能通过编译：
 
+```
+fwd({1,2,3})；   // 错误，不能编译
+```
 
+那是因为使用大括号初始值会让完美转发失败。
 
+这种失败的原因都是相同的。在直接调用f时（例如`f({1,2,3})`），编译器观察调用端的实参，又观察f函数声明的参数类型，然后编译器对比这两个类型，如果是相互兼容的，然后，如果是必要的话，编译器会把类型进行隐式转发，使得调用成功。在上面的例子中，编译器从`{1,2,3}`生成一个临时的`std::vector`对象，因此f的参数v可绑定到一个`std::vector`对象。
 
+这种失败的原因都是相同的。在直接调用f时（例如`f({1,2,3})`），编译器观察调用端的实参，又观察f函数声明的参数类型，然后编译器对比这两个类型，如果是相互兼容的，然后，如果是必要的话，编译器会把类型进行隐式转发，使得调用成功。在上面的例子中，编译器从`{1,2,3}`生成一个临时的`std::vector`对象，因此f的参数v可绑定到一个`std::vector`对象。
 
+当使用转发模板fwd间接调用f时，编译器不会比较调用端传递给fwd的实参和f声明的形参，取而代之的是，编译器推断传递给fwd实参的类型，然后比较推断的类型和f声明的形参类型。当下面某种情况发生时，完美转发会失败：
 
+- 编译器不能推断出传递给fwd参数的类型，在这种情况下，代码编译失败。
+- 编译器为传递给fwd参数推断出“错误的”类型。这里的“错误的”，可以表示实例化的fwd不能编译推断出来的类型，还可以表示使用fwd推断的类型调用f的行为与直接使用传递给fwd的参数调用f的行为不一致。这种不一致行为的一种源头是f是个重载函数的名字，然后，根据“不正确的”推断类型，fwd里的f重载调用与直接调用f的行为不一样。
 
+在上面“`fwd({1,2,3})`”的例子中，问题在于，给没有声明为**std::initialist_list**类型的模板参数传递大括号初始值，正如标准库所说，这是“non-deduced context”。通俗易懂的说，那意味着在fwd的调用中，编译器禁止从表达式`{1,2,3}`推断出一个类型，因为fwd的形参不是声明为**std::initializer_list**。因为那是被禁止推断，所以编译器拒绝这样调用。
 
+有趣的是，条款2解释过**auto**变量在用大括号初始值初始化时会进行类型推断。这些变量被视为是**std::initializer_list**对象，然后对于进行转发的函数的形参应该被推断为**std::initializer_list**的场合，提供了一个简单的应对办法——用**auto**声明一个局部变量，然后把局部变量传递给进行转发的函数：
 
+```cpp
+auto il = {1, 2, 3};               // il的类型被推断为std::initializer_list<int>
 
+fwd(il);           // 正确，把il转发给f
+```
 
+### 0和NULL作为空指针
 
+条款8解释过，当你尝试把0和NULL作为空指针传递给一个模板，类型推断就会出错，编译器会把你传入的参数推断为整型数类型（通常是**int**），而不是指针类型。这就导致了0和NULL都不可以作为空指针被完美转发，不过，解决办法也很容易：用**nullptr**代替0或NULL。关于细节，请看条款8。
 
+### 只声明的static const成员变量
 
+作为一个通用的规则：不需要在类中定义**static const**成员变量；声明它就行了。那是因为编译器会为这些成员变量的值进行**const propagation**（常数传播），因此不需要为这些变量提供内存。例如，思考这份代码：
 
+```cpp
+class Widget {
+public:
+    static const std::size_t MinVals = 28;         // MinVals的声明
+    ...
+};
+...                 // 没有定义MinVals
+
+std::vector<int> weightData;
+widgetData.reserve(Widget::MinVals);    // 使用MinVals
+```
+
+在这里，我们使用`Widget::MinVals`（下面简称为Minvals）来指定widgetData的初始容量，尽管MinVals缺乏定义。编译器忽视MinVals没有定义（就像它们被要求这样）然后把28放到出现MinVals的地方。事实上没有为MinVals的值留出存储空间是不成问题的，如果取MinVals的地址（例如，某人创建一个指向MinVals的指针），然后MinVals才会去请求存储空间的值（因此指针就有东西可指），然后对于上面的代码，虽然它可以编译，但它会链接失败，除非为MinVals提供定义。
+
+本地试验，编译链接运行都没有报错：
+
+```c++
+class Widget {
+public:
+    static const std::size_t MinVals = 28;         // MinVals的声明
+};
+
+int main() {
+    std::vector<int> weightData;
+    weightData.reserve(Widget::MinVals);    // 使用MinVals
+    weightData.emplace_back(10);
+    return 0;
+}
+```
+
+把那些记住心里，然后想象f（fwd把参数转发的目的函数）是这样声明的：
+
+```cpp
+void f(std::size_t val);1
+```
+
+用MinVals直接调用f是没问题的，因为编译器会用28代替MinVals：
+
+```cpp
+f(Widget::MinVals);      // 正确，被视为"f(28)"1
+```
+
+但是，当我们通过fwd调用f时，事情就没有那么一帆风顺了：
+
+```cpp
+fwd(Widget::MinVals);           // 错误！不应该链接1
+```
+
+代码可以编译，但是它不能链接。如果你能想起我们取MinVals地址会发生什么，你就很聪明啦，那是因为表面下的问题是相同的。
+
+本地试验，链接失败：
+
+```c++
+#include <vector>
+
+using namespace std;
+
+void f(std::size_t val) {}
+
+template<typename ... T>
+void fwd(T&& ... params)   //  接受一些参数
+{
+    f(std::forward<T>(params)...);    // 把它们转发到f
+}
+
+class Widget {
+public:
+    static const std::size_t MinVals = 28;         // MinVals的声明
+};
+
+// const std::size_t Widget::MinVals;  // 加上这行就可以链接通过
+
+int main() {
+    f(Widget::MinVals);
+    fwd(Widget::MinVals);
+    return 0;
+}
+
+// 链接报错：
+/usr/lib/gcc/x86_64-pc-cygwin/8.3.0/../../../../x86_64-pc-cygwin/bin/ld: CMakeFiles/TestProject.dir/main.cpp.o:main.cpp:(.rdata$.refptr._ZN6Widget7MinValsE[.refptr._ZN6Widget7MinValsE]+0x0): undefined reference to `Widget::MinVals'
+```
+
+尽管源代码没有取MinVals的地址，但fwd的参数是个通用引用，然后引用呢，在编译器生成的代码中，通常被视为指针。对于程序的二进制代码中（或对于硬件），指针和引用在本质上是同一个东西。在这个层次上，有一句反应事实的格言：引用只是会自动解引用的指针。情况既然是这样了，MinVals被引用传递和被指针传递是相同的，而这样的话，必须要有指针可以指向的内存。以引用传递**static const**成员变量通常要求它们被定义过，而这个要求可以导致代码完美转发失败。
+
+在之前的讨论中，你可能会注意到我的一些含糊用词。代码“不应该”链接，引用“通常”被视为指针，以引用传递**static const**成员变量“通常”要求它们被定义过。这就好像是我知道一些东西，但是没有告诉你。
+
+那是因为，我现在告诉你。根据标准库，以引用传递MinVals要求MinVals被定义，但不是所有实现都强迫服从这个要求。因此，取决于你的编译器和链接器，你可能会发现你可以完美转发没有定义过的**static const**成员变量。如果真的可以，恭喜你，不过没有理由期望这样的代码能够移植。为了让代码可移植，就像我们谈及那样，简简单单地为**static const**成员变量提供一份定义。对于MinVals，代码是这样的：
+
+```cpp
+const std::size_t Widget::MinVals;              // 在存放Widget的 ".cpp"文件中1
+```
+
+留意到定义没有重复初始值（对于MinVals这个例子，是28），不过，不用在意这个细节。如果你在声明和定义两个地方都忘记提供初始值，你的编译器会发出抱怨，然后就能让你记起你需要在其中一个地方指定初始值。
+
+### 重载函数名字和模板名字
+
+假如我们的函数f（我们想要借助fwd转发参数到该函数）想通过接受一个函数作为参数来定制它的行为，假定该函数接受和返回**int**，那么f应该被声明为这样：
+
+```cpp
+void f(int (*pf)(int));        // pf = "进行处理的函数"
+```
+
+值得注意的是f也可以被声明为使用简单的非指针函数。这样的声明看起来是下面这样的，尽管它和上面的声明具有相同的意思：
+
+```cpp
+void f(int pf(int));    // 声明和上面一样
+```
+
+无所谓，现在假如我们有个重载函数，processVal：
+
+```cpp
+int processVal(int value);
+int processVal(int value, int priority);
+```
+
+我们可以把processVal传给f，
+
+```cpp
+f(processVal);         // 正确
+```
+
+不过有一些让我们惊讶的东西。f需要的是一个指向函数的指针作为它的参数，但是processVal既不是个函数指针，也不是一个函数，它是两个不同函数的名字。不过，编译器知道它们需要哪个processVal：匹配f形参类型的那一个。因此，编译器会选择接受一个**int**的processVal，然后把那个函数地址传给f。
+
+使得代码可以工作的原因是f的声明让编译器知道需求那个版本的processVal。但是，fwd，是个模板函数，没有任何关于需求类型的信息，这让编译器不能决定——应该传递哪个重载函数：
+
+```cpp
+fwd(processVal);      //  错误！哪个processVal。 error: too many arguments to function 'void fwd(T&& ...) [with T = {}]'
+```
+
+单独的processVal没有类型。 没有类型，就不能进行类型推断；没有类型推断，就留给我们另一种完美转发失败的情况。
+
+当我们尝试用一个模板函数名字来代替重载函数名字，会出现相同的问题。一个模板函数不是代表成函数，它代表很多函数：
+
+```cpp
+template<typename T>
+T workOnVal(T param)        // 一个处理值的模板
+{
+    return param;
+}
+
+fwd(workOnVal);        // 错误！哪个workOnVal实例化？error: too many arguments to function 'void fwd(T&& ...) [with T = {}]'
+```
+
+像fwd这种进行完美转发的函数，想要接受一个重载函数名字或者模板名字的方法是：手动指定你想要转发的那个重载或者实例化。例如，你可以创建一个函数指针，它的类型与f的形参类型相同，然后用processVal和workOnVal初始化那个指针（所以能够选择合适的processVal版本或生成合适的workOnValue实例化），然后把指针传递给fwd：
+
+```cpp
+using ProcessFuncType = int (*)(int);
+
+ProcessFuncType processValPtr = processVal;    // 指定了processVal的签名
+
+fwd(processValue);          // 正确
+
+fwd(static_cast<ProcessFuncType>(workOnVal));   // 也是正确的
+```
+
+当然，这需要你知道fwd转发的目的函数需要的函数指针类型，我们可以合理假设完美转发函数的文档或注释会说明转发的目的函数需要的函数指针类型。最后，进行完美转发的函数被设计来能够接受任何东西，所以如果没有文档告诉你要传递的类型，那你怎么知道呢？
+
+### 位域（Bitfields）
+
+最后一种完美转发失败的情况是，当位域被用作函数实参。为了在实际中知道这是什么意思，观察一个模型化的IPV4头部：
+
+```cpp
+struct IPv4Header {
+    std::uint32_t version : 4,
+                         IHL : 4,
+                         DSCP : 6,
+                         ECN : 2,
+                         totalLength : 16;
+    ...
+};
+```
+
+如果我们可怜的函数f（我们的转发函数fwd永恒的目标）被声明为接受一个**std::size_t**参数，然后用IPv4Header对象的totalLength域来调用f，编译器不会发出怨言：
+
+```cpp
+void f(std::size_t sz);   // 被调用的函数
+
+IPv4Header h;
+...
+f(h.totalLength);         // 正确
+```
+
+但是，想要借助fwd把h.totalLength转发f，就是另外的结果了：
+
+```cpp
+fwd(h.totalLength);      // 错误。error: cannot bind bitfield 'h.IPv4Header::totalLength' to 'unsigned int&'
+```
+
+问题在于，fwd的形参是个引用，而h.totalLength是个非**const**的位域。这听起来可能不是很糟糕，但是C++标准对于这种结合，平淡无趣地讲：“A non-const reference shall not be bound to a bit-field.”（不是常量引用不能绑定位域。）对于这个禁令，原因很充分：位域可能是包括机器字（world）的任意部分（例如，32位**int**的3-5个位。），但是没有方法直接获取它们的地址。我之前提起过在硬件层面上引用和指针是相同的东西，然后，就像没有办法创建指向任意位的指针（C++表明可指向的最小的东西是一个**char**），也没有办法对任意位进行绑定引用。
+
+绕过不能完美转发转发位域很简单，只要你意识到接受位域作为参数的函数只是接收它的值的拷贝。毕竟，没有函数可以对位域绑定引用，也没有函数可以接受一个指向位域的指针，因为指向位域的指针不可能存在。可以传递位域的参数种类只有传值参数，和，有趣的常量引用（reference-to-const），在传值参数的情况里，被调用的函数明显接收位域的值的拷贝，而在常量引用参数的情况里，标准规定引用实际上绑定的是位域的值的拷贝（这份拷贝存储在某些标准整型类型中，例如int）。常量引用不会绑定位域，它们绑定的是“正常的”对象，这个对象拷贝了位域的值。
+
+那么，把位域传递给进行完美转发函数的关键是，利用转发目的函数总是接收位域的值拷贝这个优势。所以你可以自己进行拷贝，然后用这个拷贝调用转发函数。例如，在IPv4Header这个例子，可以用这个把戏：
+
+```cpp
+//  拷贝位域的值，初始化形式看条款6
+auto length = static_cast<std::uint16_t>(h.totalLength);
+
+fwd(length);   // 转发拷贝
+```
+
+本地试验：
+
+```c++
+#include <iostream>
+
+using namespace std;
+
+void f(std::size_t sz) {
+}
+
+template<typename ... T>
+void fwd(T&& ... params)   //  接受一些参数
+{
+    f(std::forward<T>(params)...);    // 把它们转发到f
+}
+
+struct IPv4Header {
+    std::uint32_t version : 4,
+        IHL : 4,
+        DSCP : 6,
+        ECN : 2,
+        totalLength : 16;
+};
+
+int main() {
+    IPv4Header h;
+    f(h.totalLength);
+    auto length = static_cast<uint16_t>(h.totalLength);  // 本地试验这样也可以：auto length = h.totalLength;
+    fwd(length);
+    return 0;
+}
+```
+
+**总结**
+
+在大多数情况下，完美转发工作得像它宣称那样，你很少需要仔细考虑它。但有时它不能工作——当一些看起来合理的代码编译失败，或者可以编译，行为却和你预料的不一样——知道完美转发有瑕疵是重要的，同样重要的是知道如何绕过它们。在大多数情况下，完美转发是直截了当的。
+
+需要记住的2点：
+
+- 当模板类型推断失败或推断出错误的类型时，完美转发会失败。
+- 导致完美转发失败的几种实参有：大括号初始值，0和NULL代表的空指针，只声明的**static const**成员变量，模板函数名字和重载函数名字，位域。
 
 # 第6章 lambda表达式
 
-条款31：避免默认捕获模式
+## [条款31 对于lambda表达式，避免使用默认捕获模式](https://blog.csdn.net/big_yellow_duck/article/details/52468051)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 条款32：使用初始化捕获将对象移入闭包
+
 条款33：对auto&&型别的形参使用decltype，以std::forward之
+
 条款34：优先选用lambda式，而非std::bind
+
+
 
 # 第7章 并发API
 
 条款35：优先选用基于任务而非基于线程的程序设计
+
 条款36：如果异步是必要的，则指定std::launch::async
+
 条款37：使std::thread型别对象在所有路径皆不可联结
+
 条款38：对变化多端的线程句柄析构函数行为保持关注
+
 条款39：考虑针对一次性事件通信使用以void为模板型别实参的期值
+
 条款40：对并发使用std::atomic，对特种内存使用volatile
 
 # 第8章 微调
