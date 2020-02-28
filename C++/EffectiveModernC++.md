@@ -7773,6 +7773,506 @@ int main() {
 
 ## [条款31 对于lambda表达式，避免使用默认捕获模式](https://blog.csdn.net/big_yellow_duck/article/details/52468051)
 
+C++11中有两种默认捕获模式：引用捕获或值捕获。默认的引用捕获模式可能会导致悬挂引用，默认的值捕获模式诱骗你——让你认为你可以免疫刚说的问题（事实上没有免疫），然后它又骗你——让你认为你的闭包是独立的（事实上它们可能不是独立的）。
+
+那就是本条款的总纲。如果你是工程师，你会想要更具体的内容，所以让我们从默认捕获模式的危害开始说起吧。
+
+引用捕获会导致闭包包含一个局部变量的引用或者一个形参的引用（在定义lamda的作用域）。如果一个由lambda创建的闭包的生命期超过了局部变量或者形参的生命期，那么闭包的引用将会空悬。例如，我们有一个容器，它的元素是过滤函数，这种过滤函数接受一个**int**，返回**bool**表示传入的值是否可以满足过滤条件：
+
+```cpp
+using FilterContainer =                       // 关于using，看条款9
+    std::vector<std::function<bool(int)>>;    // 关于std::function，看条款2
+
+FilterContainer filters;               // 含有过滤函数的容器 
+```
+
+我们可以通过添加一个过滤器，过滤掉5的倍数，像这样：
+
+```cpp
+filters.emplace_back(         // 关于emplace_back, 看条款42
+  [](int value) { return value % 5 == 0; }
+);
+```
+
+但是，我们可能需要在运行期间计算被除数，而不是直接把硬编码5写到lambda中，所以添加过滤器的代码可能是这样的：
+
+```cpp
+void addDivisorFilter()
+{
+    auto calc1 = computeSomeValue1();
+    auto calc2 = computeSomeValue2();
+
+    auto divisor = computeDivisor(calc1, calc2);
+
+    filters.emplace_back(
+      [&](int value) { return value % divisor == 0; }   // 危险！对divisor的引用会空悬
+    );
+}
+```
+
+这代码有个定时炸弹。lambda引用了局部变量`divisor`， 但是局部变量的生命期在`addDivisorFilter`返回时终止，也就是在`filters.emplace_back`返回之后，所有添加到容器的函数本质上就像是一到达容器就死亡了。使用那个过滤器会产生未定义行为，这实际上是在创建过滤器的时候就决定好的了。
+
+现在呢，如果显式引用捕获`divisor`，会存在着同样的问题：
+
+```cpp
+filters.emplace(
+  [&divisor](int value)          // 危险！对divisor的引用依然会空悬
+  { return value % divisor == 0; }
+);
+```
+
+不过使用显示捕获，很容易就可以看出lambda的活性依赖于`divisor`的生命期。而且，写出名字“divisor”会提醒我们，要确保`divisor`的生命期至少和lambda闭包一样长。比起用“[&]”表达“确保不会空悬”，显式捕获更容易让你想起这个告诫。
+
+如果你知道一个闭包创建后马上被使用（例如，传递给STL算法）而且不会被拷贝，那么引用的局部变量或参数就没有风险。在这种情况下，你可能会争论，没有空悬引用的风险，因此没有理由避免使用默认的引用捕获模式，例如，我们的过滤lambda只是作为C++11的**std::all_of**的参数（**std::all_of**返回范围内元素是否都满足某个条件）：
+
+```cpp
+template<typename C>
+void workWithContainer(const C& container)
+{
+    auto calc1 = computeSomeValue1();   // 如前
+    auto calc2 = computeSomeValue2();   // 如前
+
+    auto divisor = computeDivisor(calc1, calc2);    // 如前
+
+    using ContElemT = typename C::value_type;   // 容器的类型
+
+    using std::begin;    // 关于通用性，看条款13
+    using std::end;      // 条款13
+
+    if (std::all_of(                    // 如果容器中的元素都是divisor的倍数...
+         begin(container), end(container),
+         [&](const ContElemT& value)
+         { return value % divisor == 0; }
+        )  {
+        ...         
+    } else {
+        ...
+    }
+} 
+```
+
+当然，这是安全的，但是它的安全有点不稳定，如果发现lambda在其他上下文很有用（例如，作为函数加入到过滤器容器），然后拷贝及粘贴到其他上下文，在那里`divisor`已经死亡，而闭包还健全，你又回到了空悬的境地，同时，在捕获语句中，也没有特别提醒你对`divisor`进行生命期分析（即没有显式捕获）。
+
+从长期来看，显式列出lambda依赖的局部变量或形参是更好的软件工程。
+
+顺便说下，C++14的lambda形参可以使用**auto**声明，意味着上面的代码可以用C++14简化，`ContElemT`的那个typedef可以删去，然后把if语句的条件改成这样：
+
+```cpp
+if (std::all_of(begin(container), end(container),
+                [&](const auto& value)         // C++14
+                { return value % divisor == 0; })
+```
+
+解决这个问题的一种办法是对`divisor`使用默认的值捕获模式。即，我们这样向容器添加lambda：
+
+```cpp
+filters.emplace_back(            // 现在divisor就不会空悬
+  [=](int value)  { return value % divisor == 0; }
+```
+
+这满足这个例子的需要，但是，总的来说，默认以值捕获不是对抗空悬的长生不老药。问题在于，如果你用值捕获了个指针，你在lambda创建的闭包中持有这个指针的拷贝，但你不能阻止lambda外面的代码删除指针指向的内容，从而导致你拷贝的指针空悬。
+
+“这不可能发生”你在抗议，“自从看了第四章，我十分热爱智能指针。只有智障的C++98程序员才会使用原生指针和**delete**。”你说的可能是正确的，但这是不相关的，因为实际上你真的会使用原生指针，而它们实际上也会在你眼皮底下被删除，只不过在你的现代C++编程风格中，它们（原生指针）在源代码中不露迹象。。
+
+假如Widget类可以做的其中一件事是，向过滤器容器添加条目：
+
+```cpp
+class Widget {
+public:
+    ...          // 构造函数等
+    void addFilter() const;  // 添加一个条目
+
+private:
+    int divisor;         // 用于Widget的过滤器中
+};
+```
+
+`Widget::addFilter`可能定义成这样：
+
+```cpp
+void Widget::addFilter() const
+{
+    filters.emplace_back(
+      [=](int value) { return value % divisor == 0; }  // [=],[&],[this]皆可
+    );
+}
+```
+
+对于外行人，这看起来像是安全的代码。lambda依赖`divisor`，但默认的以值捕获模式确保了`divisor`被拷贝到lambda创建的闭包里，对吗？
+
+错了，完全错了。
+
+捕获只能用于可见（在创建lambda的作用域可见）的非**static**局部变量（包含形参）。在`Widget::addFilter`内部，`divisor`不是局部变量，它是Widget类的成员变量，它是不能被捕获的，如果默认捕获模式被删除，代码就不能编译了：
+
+```cpp
+void Widget::addFilter() const
+{
+    filters.emplace_back(              
+      [](int value) { return value % divisor == 0; }   // 错误，不能得到divisor
+    );
+}
+```
+
+而且，如果试图显式捕获`divisor`（无论是值捕获还是引用捕获，这都没有关系），捕获不会通过编译，因为`divisor`不是局部变量或形参：
+
+```cpp
+void Widget::addFilter() const
+{
+    filters.emplace_back(
+      [divisor](int value)   // 错误！
+      { return value % divisor == 0; }
+    );
+}
+```
+
+所以如果在默认值捕获语句中（即“[=]”），捕获的不是`divisor`，而不是默认值捕获语句就不能编译，那么前者发生了什么？
+
+问题解释取决于原生指针的隐式使用：**this**。每一个非**static**成员函数都有一个**this**指针，然后每当你使用类的成员变量时都用到这个指针。例如，在Widget的一些成员函数中，编译器内部会把`divisor`替换成`this->divisor`。在`Widget::addFiliter`的默认值捕获版本中，
+
+```cpp
+void Widget::addFilter() const
+{
+    filters.emplace_back(
+      [=](int value) { return value % divisor == 0; }
+    );
+}
+```
+
+被捕获的是Widget的**this**指针，而不是`divisor`，编译器把上面的代码视为这样写的：
+
+```cpp
+void Widget::addFilter() const 
+{
+    auto currentObjectPtr = this;
+
+    filters.emplace_back(
+      [currentObjectPtr](int value)
+      { return value % currentObject->divisor == 0; }
+    );
+}
+```
+
+理解了这个就相当于理解了lambda闭包的活性与Widget对象的生命期有紧密关系，闭包内含有Widget的**this**指针的拷贝。特别是，思考下面的代码，它根据第4章，只是用智能指针：
+
+```cpp
+using FilterContainer = std::vector<std::function<bool(int)>>;   // 如前
+
+FilterContainer filters;         // 如前
+
+void doSomeWork()
+{
+    auto pw = std::make_unique<Widget>();  // 创建Widge
+                                           // 关于std::make_unique，看条款21
+    pw->addFilter();     // 添加使用Widget::divisor的过滤函数
+
+    ...
+}             // 销毁Widget，filters现在持有空悬指针！
+```
+
+当调用`doSomeWork`时，创建了一个过滤函数，它依赖**std::make_unique**创建的Widget对象，即，那个过滤函数内含有指向Widget指针——即，Widget的**this**指针——的拷贝。这个函数被添加到`filters`中，不过当`doSomeWork`执行结束之后，Widget对象被销毁，因为它的生命期由**std::unique_ptr**管理（看条款18）。从那一刻起，`filters`中含有一个带空悬指针的条目。
+
+通过将你想捕获的成员变量拷贝到局部变量中，然后捕获这个局部拷贝，就可以解决这个特殊的问题了：
+
+```cpp
+void Widget::addFilter() const 
+{
+    auto divisorCopy = divisor;          // 拷贝成员变量
+    
+    filters.emplace_back(
+      [divisorCopy](int value)            // 捕获拷贝
+      { return value % divisorCopy == 0; }   // 使用拷贝
+    );
+}
+```
+
+实话说，如果你用这种方法，那么默认值捕获也是可以工作的：
+
+```cpp
+void Widget::addFilter() const
+{
+    auto divisorCopy = divisor;          // 拷贝成员变量
+
+    filters.emplace_back(
+      [=](int value)                // 捕获拷贝
+      { return value % divisorCopy == 0; } //使用拷贝
+    );
+};
+```
+
+但是，我们为什么要冒险呢？在一开始的代码，默认值捕获就意外地捕获了**this**指针，而不是你以为的`divisor`。
+
+在C++14中，捕获成员变量一种更好的方法是使用广义lambda捕获（generalized lambda capture，即，捕获语句可以是表达式，看条款32）：
+
+```cpp
+void Widget::addFilter() const 
+{
+    filters.emplace_back(               // C++14
+      [divisor = divisor](int value)    // 在闭包中拷贝divisor
+      { return value % divisor == 0; }  // 使用拷贝
+    );
+}
+```
+
+广义lambda捕获没有默认捕获模式，但是，就算在C++14，本条款的建议——避免使用默认捕获模式——依然成立。
+
+使用默认值捕获模式的一个另外的缺点是：它们表明闭包是独立的，不受闭包外数据变化的影响。总的来说，这是不对的，因为lambda可能不会依赖于局部变量和形参，但它们**会依赖于静态存储周期的对象**（static storage duration）。这样的对象定义在全局作用域或者命名空间作用域，又或者在类中、函数中、文件中声明为**static**。这样的对象可以在lambda内使用，但是它们不能被捕获。如果你使用了默认值捕获模式，这些对象会给你错觉，让你认为它们可以捕获。思考下面这个修改版本的`addDivisorFilter`函数：
+
+```cpp
+void addDivisorFilter()
+{
+    static auto calc1 = computeSomeValue1(); // static
+    static auto calc2 = computeSomeValue2(); // static
+
+    static auto divisor = computeDivisor(calc1, calc2);   // static
+
+    filters.emplace_back(
+      [=](int value)                    // 没有捕获任何东西
+      { return value % divisor == 0; }  // 引用了上面的divisor
+    );  // 如果这里写[divisor]会编译告警：warning: capture of variable 'divisor' with non-automatic storage duration
+
+    ++divisor;          // 修改divisor
+};
+```
+
+这份代码，对于随便的读者，他们看到“[=]”然后想，“很好，lambda拷贝了它内部使用的对象，因此lambda是独立的。”，这可以被谅解。但这lambda不是独立的，它没有使用任何的非**static**局部变量和形参，所以它没有捕获任何东西。更糟的是，lambda的代码引用了**static**变量`divisor`。在每次调用`addDivisorFilter`的最后，`divisor`都会被递增，通过这个函数，会把好多个lambda添加到`filiters`，每一个lambda的行为都是新的（对应新的`divisor`值）。从实践上讲，这个lambda是通过引用捕获`divisor`，和默认值捕获语句表示的含义有直接的矛盾。如果你一开始就远离默认的值捕获模式，你就能消除理解错代码的风险。
+
+**总结**
+
+需要记住的2点：
+
+- 默认引用捕获会导致空悬引用。
+- 默认值捕获对空悬指针（尤其是**this**）很敏感，而且它会误导地表明lambda是独立的。
+
+## [条款32 使用初始化捕获将对象移入闭包](https://blog.csdn.net/big_yellow_duck/article/details/52473055)
+
+有时候，你想要的既不是值捕获，也不是引用捕获。如果你想要把一个只可移动对象（例如，**std::unique_ptr**或**std::future**类型对象）放入闭包中，C++11没有办法做这事。如果你有个对象的拷贝操作昂贵，但移动操作廉价（例如，大部分的标准容器），然后你需要把这个对象放入闭包中，那么比起拷贝这个对象你更愿意移动它。但是，C++11还是没有办法完成这事。
+
+本地试验，对于unique_ptr对象只能使用&值捕获，无法使用=值捕获：
+
+```c++
+#include <iostream>
+#include <memory>
+
+using namespace std;
+
+int main() {
+    auto pInt = make_unique<int>(10);
+    auto pFunction = [&]{ cout << *pInt; };  // 如果使用=捕获，编译错误：error: use of deleted function 'std::unique_ptr<_Tp, _Dp>::unique_ptr(const std::unique_ptr<_Tp, _Dp>&) [with _Tp = int; _Dp = std::default_delete<int>]'
+    pFunction();  // 10
+    return 0;
+}    
+```
+
+但那是C++11，C++14就不一样啦，它直接支持将对象移动到闭包。如果你的编译器支持C++14，欢呼吧，然后继续读下去。如果你依然使用C++11的编译器，你还是应该欢呼和继续读下去，因为C++11有接近移动捕获行为的办法。
+
+缺少移动捕获被认为是C++11的一个缺陷，最直接的补救方法是在C++14中加上它，但标准委员会采用了另外一种方法。它们提出了一种新的、十分灵活的捕获技术，引用捕获只是属于这种技术的其中一种把戏。这种新能力被称为初始化捕获（init capture），实际上，它可以做C++11捕获格式能做的所有事情，而且更多。初始化捕获不能表示的是默认捕获模式，不过条款31解释过无论如何你都应该远离默认捕获模式。（对于将C++11捕获转换为初始化捕获的情况，初始化捕获的语法会比较啰嗦，所以如果C++11捕获能解决问题的情况下，最好使用C++11捕获。）
+
+使用初始化捕获让你有可能指定
+
+1. 成员变量的名字（留意，这是闭包类的成员变量，这个闭包类由lambda生成）和
+2. （初始化那成员变量的）表达式 。
+
+这里是如何使用初始化捕获来把**std::unique_ptr**移动到闭包内：
+
+```cpp
+class Widget {
+public:
+    ...
+    bool isValidated() const;
+    bool isProcessed() const;
+    bool isArchived() const;
+private:
+    ...
+};
+
+auto pw = std::make_unique<Widget>();  //创建Widget
+
+...              // 配置*pw
+
+auto func = [pw = std::move(pw)]  // 以std::move(pw)来初始化闭包中成员变量pw，C++14支持
+            { return pw->isValidated() && pw->isArchived(); }  
+```
+
+初始化捕获的代码部分是`pw = std::move(pw)`，“=”左边的是你指定的闭包类的成员变量名，右边的是进行初始化表达式。有趣的是，“=”左边的作用域和右边的作用域不同，左边的作用域是在闭包类内，而右边的作用域和lambda被定义的地方的作用域相同。在上面的例子中，“=”左边的名字`pw`指的是闭包类的成员变量，而右边的名字`pw`指的是在lambda之前声明的对象，即由**make_unique**创建的对象。所以`pw = std::move(pw)`的意思是：在闭包中创建一个成员变量pw，然后用——对局部变量pw使用**std::move**的——结果初始化那个成员变量。
+
+通常，lambda体内代码的作用域在闭包类内，所以代码中的`pw`指的是闭包类的成员变量。
+
+在上面例子中，注释“配置*pw”表明了在**std::make_unique**创建Widget之后，在lambda捕获指向Widget的**std::unique_ptr**之前，Widget在某些方面会被修改。如果这个配置不是必需的，即，如果**std::make_unique**创建的Widget对象的状态已经适合被lambda捕获，那么局部变量`pw`是不必要的，因为闭包类的成员变量可以直接被**std::make_unique**初始化：
+
+```cpp
+auto func = [pw = std::make_unique<Widget>()]        // 以调用make_unique的结果
+            { return pw->isValidated() && pw->isArchived(); }; // 来初始化闭包的局部变量pw
+```
+
+这应该清楚地表明在C++14中，C++11的“捕获”概念得到显著推广，因为在C++11，不可能捕获一个表达式的结果。因此，初始化捕获的另一个名字是**generalized lambda capture**（广义lambda捕获）。
+
+但如果你使用的编译器不支持C++14的初始化捕获，那该怎么办呢？在不支持引用捕获的语言中，你该怎样完成引用捕获呢？
+
+你要记得，一个lambda表达式会生成一个类，而且会创建那个类的对象。lambda做不了的事情，你自己手写的类可以做。例如，就像上面展示的C++14的lambda代码，在C++11中可被写成这样：
+
+```cpp
+class IsValAndArch {           // "is validated and archived
+public:
+    using DataType = std::unique_ptr<Widget>;
+
+    explicit IsValAndArch(DataType&& ptr)
+    : pw(std::move(ptr)) {}
+
+    bool operator()() const
+    { return pw->isValidated() && pw->isArchived; }
+private:
+    DataType pw;
+};
+
+auto func = IsValAndArch(std::make_unique<Widget>());
+```
+
+这比起写lambda多做了很多工作，事实上没有改变：在C++11中，如果你想要一个支持成员变量移动初始化的类，那么你和你的需求之间相隔的唯一东西，就是花费一点时间在你的键盘上。
+
+如果你想要坚持使用lambda，C++11可以模仿移动捕获，通过
+
+1. 把需要捕获的对象移动到**std::bind**产生的函数中，
+2. 给lambda一个要“捕获”对象的引用（作为参数）。
+
+如果你熟悉**std::bind**，代码是很直截了当的；如果你不熟悉**std::bind**，代码会有一些需要习惯的、但值得的问题。
+
+假如你创建了一个局部的**std::vector**，把一系列合适的值放进去，然后想要把它移动到闭包中。在C++14，这很容易：
+
+```cpp
+std::vector<double> data;     // 要移动到闭包的对象
+
+...       // 添加数据
+
+auto func = [data = std::move(data)]    // C++14初始化捕获
+            {  /* uses of data */ };
+```
+
+本地试验：
+
+```c++
+#include <iostream>
+#include <vector>
+#include <functional>
+
+using namespace std;
+
+int main() {
+    vector<double> data = {1, 3, 5};
+    function<void()> func = [data = move(data)] { cout << data.size() << endl; };
+    cout << data.size() << endl;  // 0，因为data数据被移走，即使上面的func从未调用过；如果上面改成[data = data]，则拷贝构造，这里仍为3
+    return 0;
+}
+
+// 默认地，lambda生成的闭包类里的operator()成员函数是const的，所以初始化捕获的闭包变量默认为const的，所以如果想在闭包内修改该变量，必须增加mutable
+#include <iostream>
+#include <memory>
+#include <vector>
+#include <functional>
+
+using namespace std;
+
+int main() {
+    vector<double> data = {1, 3, 5};
+    function<void()> func = [data = move(data)]() mutable {
+        cout << data.size() << endl;  // 3
+        data.emplace_back(10);
+        cout << data.size() << endl;  // 4
+    };
+    func();
+    return 0;
+}
+```
+
+这代码的关键部分是：你想要移动的对象的类型（`std::vector`）和名字（`data`），还有初始化捕获中的初始化表达式（`std::move(data)`）。C++11的对等物也是一样：
+
+```cpp
+std::vector<double> data;        // 如前
+
+...           // 添加数据
+
+auto func =               // 引用捕获的C++11模仿物
+    std::bind(
+      [](const std::vector<double>& data)     // 代码关键部分！上面说C++14的初始化捕获的变量为const，所以这里对等C++11的写成const&
+      { /* uses of data */ },
+      std::move(data);              // 代码关键部分！
+   );
+```
+
+类似于lambda表达式，**std::bind**产生一个函数对象。我把**std::bind**返回的函数对象称为**bind object**（绑定对象）。**std::bind**的第一个参数是一个可执行对象，后面的参数代表传给可执行对象的值。
+
+一个绑定对象含有传递给**std::bind**的所有实参的拷贝。对于每一个左值实参，在绑定对象内的对应的对象被拷贝构造，对于每一个右值实参，对应的对象被移动构造。在这个例子中，第二个实参是右值（**std::move**的结果——看条款23），所以`data`在绑定对象中被移动构造（**注意，此时该构造对象（无论是拷贝构造还是拷贝构造）还未传递给待绑定的函数**）。这个移动构造是移动捕获模仿物的关键，因为把一个右值移动到绑定对象，我们就绕过C++11的无能——无法移动一个右值到C++11闭包。
+
+当一个**绑定对象被“调用”**（即，它的函数调用操作符被调用），**它存储的参数会传递给最开始的可执行对象**（**std::bind**的第一个参数）。在这个例子中，那意味着当`func`（绑定对象）被调用时，`func`里的移动构造出的`data`拷贝作为参数传递给lambda（即，一开始传递给**std::bind**的lambda）。
+
+这个lambda和C++14版本的lambda一样，除了形参，`data`，它相当于我们的虚假移动捕获对象。这个参数是一个——对绑定对象内的`data`拷贝的——左值引用。（它不是一个右值引用，因为，即使初始化`data`拷贝的表达式是`std::move(data)`，但`data`拷贝本身是一个左值。）因此，在lambda里使用的`data`，是在操作绑定对象内移动构造出的`data`的拷贝。
+
+默认地，lambda生成的闭包类里的**operator()**成员函数是**const**的，这会导致闭包里的所有成员变量在lambda体内都是**const**。但是，绑定对象里移动构造出来的`data`拷贝不是**const**的，所以为了防止`data`拷贝在lambda内被修改，lambda的形参声明为常量引用。如果lambda被声明为**mutable**，闭包里的**operator()**函数就不会被声明为**const**，所以此时在lambda声明中省略**const**比较合适：
+
+```cpp
+auto func = 
+    std::bind(                             // 可变lambda，初始化捕获的C++11模仿物
+      [](std::vector<double>& data) mutable
+      { /* uses of data */ },
+      std::move(data);
+  );
+```
+
+因为一个绑定对象会存储传给**std::bind**的所有实参的拷贝，在我们的例子中，绑定对象持有一份由lambda产生的闭包的拷贝，它是**std::bind**的第一个实参。因此闭包的生命期和绑定对象的生命期相同，那是很重要的，因为这意味着只要闭包存在，绑定对象内的虚假移动捕获对象也存在。
+
+本地试验，查看绑定对象是如何存储参数的：
+
+```c++
+#include <iostream>
+#include <memory>
+#include <functional>
+
+using namespace std;
+
+int main() {
+    auto pInt = make_shared<int>(10);
+    auto func1 = bind([](const auto& pInt) {  // 但这里尝试使用[](shared_ptr<int> pInt)，运行结果和const&一样，我理解应该为3？
+        cout << *pInt << endl;
+    }, pInt);
+    cout << pInt.use_count() << endl;  // 2，一个是首次声明的pInt，另一个是绑定对象里存储的拷贝构造临时对象pInt
+    func1();  // 这里绑定对象的第1个参数是const&，所以这里没有再次构造pInt
+    cout << pInt.use_count() << endl;  // 2
+    return 0;
+}
+```
+
+如果这是你第一次接触**std::bind**，那么在深陷之前讨论的细节之前，你可能需要咨询你最喜欢的C++11参考书了。即使是这种情况，这些关键点你应该要清楚：
+
+- 在一个C++11闭包中移动构造一个对象是不可能的，但在绑定对象中移动构造一个对象是有可能的。
+- 在C++11中模仿移动捕获需要在一个绑定对象内移动构造出一个对象，然后把该移动构造对象以引用传递给lambda。
+- 因为绑定对象的生命期和闭包的生命期相同，可以把绑定对象中的对象（即除可执行对象外的实参的拷贝）看作是闭包里的对象。
+
+作为使用**std::bind**模仿移动捕获的第二个例子，这里是我们之前看到的在C++14，闭包内创建**std::unique_ptr**的代码：
+
+```cpp
+auto func = [pw = std::make_unique<Widget>()]   // 如前，在闭包内创建pw
+            { return pw->isValidated() && pw->isArchived(); };12
+```
+
+这是C++11的模仿物：
+
+```cpp
+auto func = std::bind(
+              [](const std::unique_ptr<Widget>& pw)
+              { return pw->isValidated() && pw->isArchived(); },
+              std::make_unique<Widget>()
+           );
+```
+
+我展示了如何使用**std::bind**来绕开C++11的lambda的限制，这是很讽刺的，因为在条款34中，我提倡尽量使用lambda来代替**std::bind**。但是，那条款解释了，在C++11的某些情况**std::bind**是有用的，这里就是其中一个例子。（在C++14，初始化捕获和**auto**形参这两个特性可以消除那些情况。）
+
+**总结**
+
+需要记住的2点：
+
+- 使用C++14的初始化捕获来把对象移到到闭包。
+- 在C++11，借助手写类或**std::bind**模仿初始化捕获。
+
+## [条款33 对需要std::forward的auto&&参数使用decltype](https://blog.csdn.net/big_yellow_duck/article/details/52461662)
 
 
 
@@ -7794,30 +8294,7 @@ int main() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-条款32：使用初始化捕获将对象移入闭包
-
-条款33：对auto&&型别的形参使用decltype，以std::forward之
+## 
 
 条款34：优先选用lambda式，而非std::bind
 
@@ -7842,3 +8319,4 @@ int main() {
 条款41：针对可复制的形参，在移动成本低并且一定会被复制的前提下，考虑将其按值传递
 
 条款42：考虑置入而非插入
+
