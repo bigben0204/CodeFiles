@@ -8274,11 +8274,626 @@ auto func = std::bind(
 
 ## [条款33 对需要std::forward的auto&&参数使用decltype](https://blog.csdn.net/big_yellow_duck/article/details/52461662)
 
+泛型lambda(generic lambda)是C++14最令人兴奋的特性之一——lambda可以在参数说明中使用**auto**。这个特性的实现很直截了当：闭包类中的**operator()**函数是一个模板。例如，给定这个lambda，
 
+```cpp
+auto f = [](auto x) { return func(normalize(x)); };1
+```
 
+闭包类的函数调用操作符看起来是这样的：
 
+```cpp
+class SomeCompilerGeneratedClassName {
+public:
+    template<typename T>         
+    auto operator()(T x) const          // 关于auto返回类型看条款3
+    { return func(normalize(x)); }
 
+    ...              // 闭包类的其他功能
+};12345678
+```
 
+在这个例子中，lambda对`x`做的唯一的一件事就是把它转发给`normalized`。如果`normalized`区别对待左值和右值，这个lambda这样写是不合适的，因为即使传递给lambda的实参是个右值，lambda总是传一个左值（形参`x`）给`normalized`。
+
+写这个lambda的正确方式是把`x`完美转发给`normalized`，这样做需要在代码中修改两个地方。第一，x要改成通用引用（看条款24），第二，借助**std::forward**（看条款25）把`x`转发到`normalized`。在概念上，修改成这样：
+
+```cpp
+auto f = [](auto&& x)
+         { return func(normalized(std::forward<???>(x))); };12
+```
+
+但是，在概念和实现之间，有一个问题，就是你传递给**std::forward**的参数是什么类型，这决定了我上面写的???的地方会变成怎样。
+
+一般来说，当你使用完美转发时，你是在一个接受类型形参T的模板函数中，所以你只是写`std::forward`。而在泛型模板中，没有你可以拿到的类型参数T。在lambda生成的闭包内，模板化**operator()**函数有一个T，但是在lambda中无法指定它，所以它对你没有任何帮助。
+
+条款28解释过如果把一个左值传递给通用引用，通用引用的类型会变为左值引用；如果把一个右值传递给通用引用，通用引用会变为一个右值引用。那意味着在我们的lambda中，我们可以通过检查`x`的类型来判断传递进来的实参是左值还是右值，**decltype**就可以让我们这样做。如果传递给lambda的是个左值，`decltype(x)`将会产生一个左值引用；如果传递给lambda的是个右值，`decltype(x)`将会产生一个右值引用。
+
+条款28也解释了当使用**std::forward**时，**有一个规则：传给它的类型参数是个左值引用时，表明返回的是个左值，传递给它的类型参数是个非引用类型时，表明返回的是个右值**。在我们的lambda中，如果`x`绑定的是一个左值引用，`decltype(x)`将产生一个左值引用，这符合规则。不过，如果`x`绑定的是个右值，`decltype(x)`将会产生一个右值引用，而不是常规的非引用。（要注意的是，条款28中传递给std::forward的类型参数是T，而在lambda中无法使用T，也无法使用auto，所以只能将decltype(x)作为std::forward的类型参数。）
+
+但看回在条款28中，**std::forward**的C++14实现：
+
+```cpp
+template<typename T>     // 在命名空间std
+T&& forward(remove_reference_t<T>& param)
+{
+    return static_cast<T&&>(param);
+}
+```
+
+如果一个用户想要完美转发一个Widegt类型的右值，它正常地用Widget类型（即非引用类型）实例化**std::forward**，然后**std::forward**产生这个函数：
+
+```cpp
+Widget&& forward(Widget& param)   // 当T为Widegt时，std::forward的实例化
+{
+    return static_cast<Widget&&>(param);
+}
+```
+
+不过，请思考如果用户代码想要完美转发一个Widget类型的右值，但是这次它没有服从规则将T指定为非引用类型，而是将T指定为右值引用，这会发生什么？那是，思考把T替换成Widget&&将会发生什么。在**std::forward**实例化、应用了**std::remove_reference_t**之后，引用折叠（再次看条款28，看懂！）之前，**std::forward**看起来是这样的：
+
+```cpp
+Widget&& && forward(Widget& param)   // 当T为Widget&&，std::forward的实例化
+{                                    // 还没发生引用折叠
+    return static_cast<Widget&& &&>(param);
+}
+```
+
+如果你用这个实例化和把T设置为Widget的**std::forward**那个实例化进行比较，你会发现它们是相同的。那意味着用一个右值引用实例化**std::forward**，和用一个非引用类型实例化**std::forward**产生的结果相同。
+
+那是个很棒的消息，因为当一个右值实参传递给lambda形参x时，`decltype(x)`会产生一个右值引用。我们在上面已经确认了把一个左值传给lambda时，`decltype(x)`会产生一个可以传给**std::forward**的常规类型，而现在我们认识到对于右值，把`decltype(x)`产生的类型传递给**std::forward**的类型参数是不传统的，不过，它产生的结果与传统类型产生的结果相同。所以无论是左值还是右值，把`decltype(x)`传递给**std::forward**都能得到我们想要的结果，因此我们的完美转发lambda可以这样写：
+
+```c++
+auto f = 
+    [](auto&& param)
+    {
+        return 
+          func(normalize(std::forward<decltype(pram)>(param)));
+    };
+```
+
+在这份代码加上6个点，就可以让我们的完美转发lambda接受多个参数了，因为C++14的lambda的参数是可变的：
+
+```cpp
+auto f = 
+    [](auto&&... params)
+    {
+        return 
+          func(normalized(std::forward<decltype(params)>(params)...));
+    };
+```
+
+**总结**
+
+需要记住的1点：
+
+- 对需要**std::forward**的**auto&&**参数使用**decltype**（Use decltype on auto&& parameters to std::forward them.）。
+
+## [条款34 优先选用lambda式，而非std::bind](https://blog.csdn.net/big_yellow_duck/article/details/52493888)
+
+C++11的**std::bind**是C++98的**std::bind1st**和**std::bind2nd**的继承人，但是，通俗的说，**std::bind**在2005年的时候已经是标准库的一部分了，那个时候标准委员会采用了名为TR1的文档，里面就包含**std::bind**的说明。（在TR1中，bind在不同的命名空间，所以它是std::tr1::bind，而不是std::bind，接口和现在有点不同。）这个历史意味着一些开发者对**std::bind**已经有了十年的或者更多的开发经验了，如果你是他们中的一员，你可能不愿意放弃这个工作得好好的工具。这是可以理解的，但是在如今的情况下，作出改变是好的，因为在C++11，比起使用**std::bind**，lambda几乎总是更好的选择。到了C++14，lambda在这种情况中不只是变强了，它还披上了装甲。
+
+该条款假设你熟悉**std::bind**，如果你不熟悉，那么在继续看下去之前，你要对它有基本的认识。这种的认识在某些情况下是值得的，因为你不会知道，在哪一个时间点，看代码或者维护代码时遇到**std::bind**。
+
+就像条款32所说，我**std::bind**返回的函数对象称为绑定对象（bind object）。
+
+比起**std::bind**更偏爱lambda的最主要原因是lambda的具有更好的可读性。举个例子，假设我们有个函数用来设置警报：
+
+```c++
+#include <chrono>
+
+// 声明一个时间点的类型别名
+using Time = std::chrono::steady_clock::time_point;
+
+// 关于"enum class"看条款10
+enum class Sound { Beep, Siren, Whistle };
+
+// 声明一个时间长度的类型别名
+using Duration = std::chrono::steady_clock::duration;
+
+// 在时间点t，发出警报声s，持续时间为d
+void setAlarm(Time t, Sound s, Duration d) {}
+```
+
+进一步假设，在程序的某些地方，我们想要设置在一个小时之后发出警报，持续30秒。但是呢，警报的类型，依然是未决定的。我们可以写一个修改了`setAlarm`接口的lambda，从而只需要指定警报类型：
+
+```c++
+// setSoundL("L"指lambda)是一个允许指定警报类型的函数对象
+// 警报在一个小时后触发，持续30秒
+auto setSoundL = 
+    [](Sound s)
+    {
+        using namespace std::chrono;
+
+        setAlarm(steady_clock::now() + hours(1),
+                 s,
+                 seconds(30));
+    };
+```
+
+注意看lambda里的`setAlarm`，这是一个正常的函数调用，就算只有一点lambda经验的读者都可以看出传递给lambda的参数会作为`setAlarm`的一个实参。
+
+我们可以使用C++14对于秒(s)，毫秒(ms)，时(h)等标准后缀来简化代码，那是基于C++11的支持而照字面意思定义的。这些后缀在**std::literals**命名空间里实现，所以上面的代码可以写成这样：
+
+```c++
+auto setSoundL =
+    [](Sound s) {
+    using namespace std::chrono;
+    using namespace std::literals;     // 为了得到C++14的后缀
+
+    setAlarm(steady_clock::now() + 1h,   // C++14, 不过意思和上面相同
+             s,
+             30s);
+};
+```
+
+我们第一次尝试写出对应的**std::bind**调用，代码在下面。我们在注释中说明它有个错误，但是正确的代码复杂得多，而这个简化的版本可以让我们看到重要的问题：
+
+```cpp
+#include <functional>
+
+using namespace std::chrono;
+using namespace std::literals;
+
+using namespace std::placeholders;   // "_1"需要这个命名空间
+
+auto setSoundB =                  // "B"对应"bind"
+    std::bind(setAlarm,
+              steady_clock::now() + 1h,    // 错误！看下面
+              _1,
+              30s);
+```
+
+这份代码的读者简单地知道在`setSoundB`里，**std::bind**会用指定时间点和持续时间来调用`setAlarm`。对于缺少经验的读者，占位符“_1”简直是个魔术，为了理解`setSoundB`的第一个实参会传递给`setAlarm`的第二个参数，读者需要聪明地把**std::bind**参数列表上占位符的数字和它的位置进行映射。这个实参的类型在**std::bind**没有说明，所以读者还需要去咨询`setAlarm`的声明，来决定传递给`setSoundB`的参数类型。
+
+但是，如我所说，这代码不完全正确。在lambda中，很明显表达式“steady_clock::now() + 1h”是`setAlarm`的一个实参，当`setAlarm`调用时，表达式会被求值。那是行得通的：我们想要在调用了`setAlarm`后的一个小时触发警报。但在**std::bind**的调用中，“steady_clock::now() + 1h”作为实参传递给**std::bind**，而不是`setAlarm`，那意味着表达式在调用**std::bind**的时候已经被求值，那么表达式的结果时间会被存储在产生的绑定对象中。最终，警报会在调用了**std::bind**后的一个小时触发，而不是调用`setAlarm`后的一个小时！
+
+解决这个问题需要告知**std::bind**推迟表达式的求值，直到`setAlarm`被调用，而这种办法需要在原来的**std::bind**内嵌入一个新的**std::bind**：
+
+```cpp
+auto setSoundB = 
+    std::bind(setAlarm,
+              std::bind(std::plus<>(), steady_clock::now(), 1h),
+              _1,
+              30s);
+```
+
+如果你熟悉来自C++98的**std::plus**，你可能会对这份代码感到惊奇，因为在两个方括号之间没有指定类型，即代码含有`std::plus<>`，而不是`std::plus`。在C++14，标准操作符模板的模板类型参数可以被省略，所以这里未提供类型给它。C++11没有提供这种特性，所以在C++11中对于lambda的**std::bind**等同物是这样的：
+
+```c++
+using namespace std::chrono;
+using namespace std::placeholders;
+
+auto setSoundB = 
+    set::bind(setAlarm,
+              std::bind(std::plus<steady_clock::time_point>(),  // 本地试验，这里编译错误：time_point与duration不是同一种类型
+                        steady_clock::now(),
+                        hours(1)),
+              _1,
+              seconds(30));
+```
+
+如果，在现在这个时刻，lambda的实现看起来没有吸引力的话，你可能需要去检查一下视力了。
+
+当`setAlarm`被重载，会出现一个新的问题。假如有个重载接受第四个参数来指定警报的音量：
+
+```cpp
+enum class Volume { Normal, Loud, LoudPlusPlus };
+
+void setAlarm(Time t, Sound s, Duration d, Volume v) {}
+```
+
+之前那个lambda还会工作得很好，因为重载决策会选择带有三个参数的`setAlarm`版本：
+
+```c++
+auto setSoundL =                  // 和以前
+    [](Sound s) {
+    using namespace std::chrono;
+    using namespace std::literals;
+
+    setAlarm(steady_clock::now() + 1h,    // 正确，调用
+             s,                         // 3参数版本的
+             30s);                      // setAlarm
+};
+```
+
+另一方面，**std::bind**的调用，现在会编译失败：
+
+```cpp
+auto setSoundB = 
+    std::bind(setAlarm,
+              std::bind(std::plus<>(), 
+                        steady_clock::now(), 
+                        1h),
+              _1,
+              30s);
+```
+
+问题在于编译器没有办法决定哪个`setAlarm`应该被传递给**std::bind**，它拥有的只是一个函数名，而这单独的函数名是有歧义的。
+
+为了让**std::bind**可以通过编译，`setAlarm`必须转换为合适的函数指针类型：
+
+```cpp
+using SetAlarm3ParamType = void (*)(Time t, Sound s, Duration d);
+
+auto setSoundB =   // 现在就ok了
+    std::bind(static_cast<SetAlarm3ParamType>(setAlarm),
+              std::bind(std::plus<>(), steady_clock::now(), 1h),
+              _1,
+              30s);
+```
+
+但这又引出了lambda和**std::bind**的另一个不同之处。在`setSoundL`的函数调用操作符内（即，lambda的闭包类的函数调用操作符），是以普通函数调用的方式调用`setAlarm`，这可以被编译器以通用的方式内联：
+
+```cpp
+setSoundL(Sound::Siren);   // setAlarm的函数体可能在这里内联
+```
+
+不过，在**std::bind**的调用中，传递了一个指向`setAlarm`的函数指针，而那意味着在`setSoundB`的函数调用操作符内（即，绑定对象的函数调用操作符），是以函数指针的方式调用`setAlarm`，而那意味着通过`setSoundB`调用的`setAlarm`，比通过`setSoundL`调用的`setAlarm`进行内联的可能性更低：
+
+```cpp
+setSoundB(Sound::Siren);   // setAlarm的函数体在这里内联的可能性较低
+```
+
+因此，使用lambda生成的代码可能会比使用**std::bind**的快。
+
+`setAlarm`那个例子只是简单地调用了一个函数，如果你想做一些更复杂的事情，使用lambda的好处会更加明显。例如，思考这个C++14的lambda，返回它的实参是否在最小值（lowVal）和最大值（highVal）之间，`lowVal`和`highVal`都是局部变量：
+
+```cpp
+auto betweenL = 
+    [lowVal, highVal]
+    (const auto& val)         // C++14
+    { return lowVal <= val && val <= highVal; };
+```
+
+**std::bind**也可以表达同样的东西，不过它为了保证工作正常运行而让代码变得晦涩：
+
+```cpp
+using namespace std::placeholders;
+
+auto betweenB = 
+    std::bind(std::logical_and<>(),           // C++14
+              std::bind(std::less_equal<>(), lowVal, _1),
+              std::bind(std::less_equal<>(), _1, highVal));
+```
+
+在C++11，你还必须指定要比较的类型，所以**std::bind**的调用看起来是这样的：
+
+```cpp
+auto betweenB =               // c++11版本
+    std::bind(std::logical_and<bool>(),
+              std::bind(std::less_equal<int>(), lowVal, _1),
+              std::bind(std::less_equal<int>(), _1, highVal));
+```
+
+当然，在C++11中，lambda不能使用**auto**形参，所以它也必须指定类型：
+
+```cpp
+auto betweenL =           C++11版本
+    [lowVal, highVal]
+    (int val)
+    { return lowVal <= val && val <= highVal; };
+```
+
+不管怎样，我希望我们能认同lambda的版本不仅代码更短，还具有更好的可读性和可维护性。
+
+------
+
+在早些时候，我提起过对于那些对**std::bind**没有经验的程序员，占位符（例如，_1，_2等）跟是魔术一样。不过，占位符的行为不是完全密封的。假设我们有一个用来精简拷贝Widget的函数，
+
+```cpp
+enum class CompLevel { low, Normal, High };  // 精简等级
+
+Widget compress(const Widget& w, CompLevel lev); // 对w进行精简拷贝
+```
+
+然后我们想要创建一个函数对象，它允许我们指定`Widget w`的精简级别，这是用**std::bind**创建的函数对象：
+
+```cpp
+Widget w;
+
+using namespace std::placeholders;
+
+auto compressRateB = std::bind(compress, w, _1);
+```
+
+当我们把`w`传递给**std::bind**时，为了以后的`compress`调用，`w`会被存储起来，它存储在对象`compressRateB`中，但它是如何存储的呢——通过值还是引用呢？这是会导致不一样的结果，因为如果`w`在调用**std::bind**和调用`compressRateB`之间被修改，通过引用存储的`w`也会随之改变，而通过值存储就不会改变。
+
+答案是**通过值存储**，你想知道答案的唯一办法就是知道**std::bind**是如何工作的；但在**std::bind**中没有任何迹象。对比使用lambda方法，`w`通过值捕获或通过引用捕获都是显式的：
+
+```c++
+auto compressRateL =            
+    [w](CompLevel lev)     // w以值捕获,lev以值传递
+    { return compress(w, lev); };
+```
+
+参数以何种方式传递也是显示的。在这里，很清楚地知道参数`lev`是以值传递的。因此：
+
+```cpp
+CompressRateL(CompLevel::High);   // 参数以值传递
+```
+
+但在绑定对象里，参数是以什么方式传递的呢？
+
+```cpp
+compressRateB(ConpLevel::High);    // 参数传递方式？
+```
+
+再次说明，想知答案的唯一办法是记住**std::bind**是怎样工作的。（答案是**传递给绑定对象的所有参数都是通过引用的方式**，因为绑定对象的函数调用操作符使用了完美转发。）
+
+那么，对比lambda，使用**std::bind**的代码可读性不足、表达能力不足，还可能效率低。在C++14，没有理由使用**std::bind**。而在C++11，**std::bind**可以使用在受限的两个场合：
+
+- **移动捕获**。C++11的lambda没有提供移动捕获，但可以结合**std::bind**和**lambda**来效仿移动捕获。具体细节看条款32，那里也解释了C++11效仿C++14的lambda提供的初始化捕获的情况。
+- **多态函数对象**。因为绑定对象的函数调用操作符会使用完美转发，它可以接受任何类型的实参（条款30讲述了完美转发的限制）。这在你想要绑定一个函数调用操作符模板时有用。例如，给定这个类：
+
+```cpp
+class PolyWidget {
+public:
+    template<typename T>
+    void operator()(const T& param) const {
+        cout << typeid(param).name() << endl;
+    }
+};
+```
+
+**std::bind**可以绑定`polyWidget`对象：
+
+```cpp
+PolyWidget pw;
+
+auto boundPW = std::bind(pw, _1);
+```
+
+然后`boundPW`可以绑定任何类型的实参：
+
+```cpp
+boundPW(1930);      // 传递int到PolyWidget::operator()
+
+boundPW(nullptr);   // 传递nullptr到PolyWidget::operator()
+
+boundPW("Rosebud");   // 传递字符串到PolyWidget::operator()
+```
+
+这在C++11的lambda里无法做到，但是在C++14，使用**auto**形参就很容易做到了：
+
+```cpp
+// [pw]这里调用拷贝构造函数，如果声明PolyWidget(const PolyWidget&) = delete;，则构造失败
+auto boundPW = [pw](const auto& param)
+               { pw(param); }
+```
+
+当然，这些都是边缘情况，而且这种边缘情况会转瞬即逝，因为支持C++14的编译器已经越来越普遍。
+
+2005年，**bind**非官方地加入了C++，比起它的前身有了很多的进步。而在C++11，lambda几乎要淘汰**std::bind**，而在C++14，**std::bind**已经没有需要使用的场合了。
+
+**总结**
+
+需要记住的2点：
+
+- 比起使用**std::bind**，lambda有更好的可读性，更强的表达能力，可能还有更高的效率。
+- 在C++11，只有在实现**移动捕获**或者**绑定函数调用操作符模板**时，**std::bind**可能是有用的。
+
+# 第7章 并发API
+
+## [条款35：优先选用基于任务而非基于线程的程序设计](https://blog.csdn.net/big_yellow_duck/article/details/52502869)
+
+如果你想异步地运行函数`doAsyncWork`，你有两个基本的选择。你可以创建一个**std::thread**，用它来运行`doAsyncWork`，因此这是基于线程（thread-based）的方法：
+
+```cpp
+int doAsyncWork();
+
+std::thread t(doAsyncWork);
+```
+
+或者你把`doAsynWork`传递给**std::async**，一个叫做基于任务（task-based）的策略：
+
+```
+auto fut = std::async(doAsyncWork);    // "fut"的意思是"future"1
+```
+
+在这种调用中，传递给**std::async**的函数对象被认为是一个任务（task）。
+
+基于任务的方法通常比基于线程实现的相对要好，我们看到基于任务的方法代码量更少，这已经是展示了一些原因了。在这里，`doAsyncWork`会返回一个值，我们有理由假定调用`doAsyncWork`的代码对这个返回值有兴趣。在基于线程的调用中，没有直接的办法获取到它；而在基于任务的调用中，这很容易，因为**std::asyn**返回的`future`提供了一个函数**get**来获取返回值。如果`doAsyncWork`函数发出了一个异常，**get**函数是很重要的，它能取到这个异常。在基于线程的方法中，如果`doAsyncWork`抛出了异常，程序就死亡了（借助**std::terminate**）。
+
+基于线程编程和基于任务编程的一个更基础的区别是，基于任务编程表现出更高级别的抽象。它让你免受线程管理的细节，这让我想起了我需要总结“线程”在C++并发软件里的三个意思：
+
+- **硬件线程**是一种负责计算的线程。现代机器体系结构为每个CPU核心提供一个或多个硬件线程。
+- **软件线程**（又称为操作系统线程或系统线程）是由操作系统管理和为硬件线程进行调度的线程。软件线程创建的数量通常会比硬件线程多，因为当一个软件线程阻塞了（例如，I/O操作，等待锁或者条件变量），运行另一个非阻塞的线程能提供吞吐率。
+- **std::thread**是C++进程里的对象，它在自身内部操作软件线程。一些**std::thread**对象表示为“null”句柄，相当于不持有软件线程，因为它们处于默认构造状态（因此没有需要执行的函数），它要么被移动过了（那么，移动操作的目的**std::thread**对象会操作软件线程），要么被**join**了（**std::thread**对象要执行的函数运行结束），要么被**detach**了（**std::thread**对象和它内部软件线程的连接被切断了，即thread对象和软件线程分离了）。
+
+软件线程是一种受限的资源，如果你想创建的线程数量多于系统提供的数量，会抛出**std::system_error**异常。就算你规定函数不能抛出异常，这个异常也会抛出。例如，就算你把`doAsyncWork`声明为**noexcept**，
+
+```cpp
+int doAsyncWork noexcept;   // 关于noexcept，请看条款14
+```
+
+这语句还是可能会抛出异常：
+
+```cpp
+std::thread t(doAsyncWork);  // 如果没有可获取的系统线程，就抛出异常
+```
+
+写得好的软件必须想个办法解决这个可能性，但如何解决呢？一个办法是在当前线程运行`doAsyncWork`，但这会导致负载不均衡的问题，而且，如果当前线程是个GUI线程，会导致响应时间变长。另一个方法是等待某些已存在的软件线程完成工作，然后再尝试创建一个新的**std::thread**对象，但是有可能发生这种事情：已存在的线程在等待`doAsyncWork`的处理（例如，`doAsyncWorkd`的返回值，或者通知条件变量）。
+
+即使你没有用完线程，你还是会有**oversubscription**（过载）的问题——当就绪状态（即非阻塞）的软件线程多于硬件线程的时候。如果发生了那种事，调度线程（通常是操作系统的一部分）会为软件线程分配CPU时间片，一个线程的时间片用完，就运行另一个线程，这其中发生了上下文切换。这种上下文切换会增加系统的线程管理开销。这种情况下，（1）CPU缓存会持有那个软件线程（即，它们会含有对于那软件线程有用的一些数据和一些指令），而（2）CPU核心上“新”运行的软件线程“污染”了CPU缓存上“旧的”线程数据（它曾经在该CPU核心运行过，且可能再次调度到该CPU核心运行）。
+
+避免**oversubscription**是很困难的，因为软件系统和硬件线程的最佳比例是取决于软件线程多久需要执行一次，而这是会动态改变的，例如，当一个线程从IO消耗型转换为CPU消耗型时。这最佳比例也取决于上下文切换的开销和软件线程使用CPU缓存的效率。再进一步说，硬件线程的数量和CPU缓存的细节（例如，缓存多大和多快）是取决于机器的体系结构，所以即使你在一个平台上让你的应用避免了**oversubscription**（保持硬件繁忙工作），也不能保证在另一种机器上你的方案能工作得好。
+
+如果你把这些问题扔给某个人去做，你的生活就很惬意啦，然后使用**std::async**就能显式地做这件事：
+
+```cpp
+auto fut = std::async(doAsyncWork);  // 线程管理的责任交给标准库的实现者
+```
+
+这个调用把线程管理的责任转交给C++标准库的实现者。例如，得到线程超标的异常的可能性绝大幅度减少，因为这个调用可能从不产生这个异常。“它是怎样做到的呢？”你可能好奇，“如果我申请多于系统提供的线程，使用**std::thread**和使用**std::async**有区别吗？”答案是有区别，因为当用默认发射策略（看条款36）调用**std::async**时，不能保证它会创建一个新的软件线程。而且，它允许调度器把指定函数（例如，`doAsyncWork`）运行在——请求`doAsyncWork`结果的线程中（例如，那个线程调用了**get**或者对**fut**使用**wait** ），如果系统**oversubsrcibed**或线程耗尽时，合理的调度器可以利用这个优势。
+
+如果你想用“在需求函数结果的线程上运行该函数”来欺骗自己，我提起过这会导致负载均衡的问题，这问题不会消失，只是由**std::async**和调度器来面对它们，而不是你。但是，当涉及到负载均衡问题时，调度器比你更加了解当前机器发生了什么，因为它管理所有进程的线程，而不是只是你的代码。
+
+使用**std::async**，GUI线程的响应性也是有问题的，因为调度器没有办法知道哪个线程需求紧凑的响应性。在这种情况下，你可以把**std::lanuch::async**发射策略传递给**std::async**，它那可以保证你想要运行的函数马上会在另一个线程中执行（看条款36）。
+
+最新技术水平的线程调度器使用了系统范围的线程池来避免**oversubscription**，而且调度器通过工作窃取算法来提高了硬件核心的负载均衡能力。C++标准库没有要求线程池或者工作窃取算法，而且，实话说，C++11并发技术的一些实现细节让我们很难利用到它们。但是，一些供应商会在它们的标准库实现中利用这种技术，所以我们有理由期待C++并发库会继续进步。如果你使用基于任务的方法进行编程，当它以后变智能了，你会自动获取到好处。另一方面，如果你直接使用**std::thread**进行编程，你要承担着处理线程耗尽、oversubscription、负载均衡的压力，更不用提你在程序中对这些问题的处理方案能否应用在同一台机器的另一个进程上。
+
+比起基于线程编程，基于任务的设计能分担你的线程管理之痛，而且它提供了一种很自然的方式，让你检查异步执行函数的结果（即，返回值或异常）。但是，有几种情况直接使用**std::thread**更适合，它们包括
+
+- 你需要使用内部的特定平台线程的API。C++并发API通常是以特定平台的低级API实现的，通常使用pthread或Window’s Thread。它们提供的API比C++提供的要多（例如，C++没有线程优先级的概念）。为了获取内部线程实现的API，**std::thread**对象有一个**native_handle**成员函数，而**std::future**（即**std::async**返回的类型）没有类似的东西。
+- 你需要且能够在你的应用中优化线程的用法。例如，你要在一个固定的机器平台上部署一个单进程的服务器软件。
+- 你需要在C++并发API之上实现线程技术。例如，实现一个C++不提供的线程池。
+
+不过，这些都是不常见的情况。大多数时候，你应该选择基于任务的设计，来代替线程。
+
+**总结**
+
+需要记住的3点：
+
+- **std::thread**的API没有提供直接获取异步运行函数返回值的方法，而且，如果这些函数抛出异常，程序会被终止。
+- 基于线程编程需要手动地管理：线程耗尽、**oversubscription**、负载均衡、适配新平台。
+- 借助默认发射策略的**std::async**，进行基于任务编程可以解决上面提到的大部分问题。
+
+------
+
+### [C++11 使用异步编程std::async和std::future](https://www.cnblogs.com/moodlxs/p/10111601.html)
+
+先说明一点：std::asyanc是std::future的高级封装， 一般我们不会直接使用std::futrue，而是使用对std::future的高级封装std::async。 下面分别说一下。
+
+#### 一、std::async基本用法
+
+std::future可以从异步任务中获取结果，一般与std::async配合使用，std::async用于创建异步任务，实际上就是创建一个线程执行相应任务。
+
+std::async就是异步编程的高级封装，封装了std::future的操作，基本上可以代替std::thread 的所有事情。
+
+std::async的操作，其实相当于封装了std::promise、std::packaged_task加上std::thread。
+
+```c++
+#include <iostream>
+#include <future>
+#include <chrono>
+
+using namespace std;
+
+void sleep(double seconds) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(1000 * seconds)));
+}
+
+bool is_prime(int x) {
+    for (int i = 0; i < x; ++i) {
+        sleep(1);
+    }
+    return true;
+}
+
+int main() {
+    future<bool> fut = async(is_prime, 4);
+    cout << "please wait";
+    chrono::milliseconds span(1000);
+    while (fut.wait_for(span) != future_status::ready) {
+        cout << ".";
+    }
+    cout << endl;
+
+    bool ret = fut.get();
+    cout << boolalpha << "final result: " << ret << endl;
+    return 0;
+}
+// 输出：
+please wait....
+final result: true
+```
+
+std::async会首先创建线程执行is_prime(700020007)， 任务创建之后，std::async立即返回一个std::future对象。
+
+主线程既可使用std::future::get获取结果，如果调用过程中，任务尚未完成，则主线程阻塞至任务完成。
+
+主线程也可使用std::future::wait_for等待结果返回，wait_for可设置超时时间，如果在超时时间之内任务完成，则返回std::future_status::ready状态；如果在超时时间之内任务尚未完成，则返回std::future_status::timeout状态。
+
+#### 二、std::future说明
+
+future对象是std::async、std::promise、std::packaged_task的底层对象，用来传递其他线程中操作的数据结果。
+
+#### 三、std::promise用法 
+
+std::promise的作用就是提供一个不同线程之间的数据同步机制，它可以存储一个某种类型的值，并将其传递给对应的future， 即使这个future不在同一个线程中也可以安全的访问到这个值。
+
+```c++
+// promise example
+#include <iostream>       // std::cout
+#include <functional>     // std::ref
+#include <thread>         // std::thread
+#include <future>         // std::promise, std::future
+
+void print_int(std::future<int>& fut) {
+    int x = fut.get();
+    std::cout << "value: " << x << '\n';
+}
+
+int main() {
+    std::promise<int> prom;                      // create promise
+
+    std::future<int> fut = prom.get_future();    // engagement with future
+
+    std::thread th1(print_int, std::ref(fut));  // send future to new thread，这里不使用ref，是编译报错：error: static assertion failed: std::thread arguments must be invocable after conversion to rvalues
+
+    prom.set_value(10);                         // fulfill promise
+    // (synchronizes with getting the future)
+    th1.join();
+    return 0;
+}
+// 输出：
+value: 10
+```
+
+#### 四、std::packaged_task用法
+
+std::packaged_task的作用就是提供一个不同线程之间的数据同步机制，它可以存储一个函数操作，并将其返回值传递给对应的future， 而这个future在另外一个线程中也可以安全的访问到这个值。
+
+示例代码：
+
+```c++
+#include <iostream>     // std::cout
+#include <future>       // std::packaged_task, std::future
+#include <chrono>       // std::chrono::seconds
+#include <thread>       // std::thread, std::this_thread::sleep_for
+
+// count down taking a second for each value:
+int countdown(int from, int to) {
+    for (int i = from; i != to; --i) {
+        std::cout << i << '\n';
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    std::cout << "Lift off!\n";
+    return from - to;
+}
+
+int main() {
+    std::packaged_task<int(int, int)> tsk(countdown);   // set up packaged_task
+    std::future<int> ret = tsk.get_future();            // get future
+
+    std::thread th(std::move(tsk), 10, 0);   // spawn thread to count down from 10 to 0
+
+    // ...
+
+    int value = ret.get();                  // wait for the task to finish and get result
+
+    std::cout << "The countdown lasted for " << value << " seconds.\n";
+
+    th.join();
+
+    return 0;
+}
+// 输出：
+10
+9
+8
+7
+6
+5
+4
+3
+2
+1
+Lift off!
+The countdown lasted for 10 seconds.
+```
+
+## [条款36：如果异步是必要的，则指定std::launch::async](https://blog.csdn.net/big_yellow_duck/article/details/52512445)
 
 
 
@@ -8295,16 +8910,6 @@ auto func = std::bind(
 
 
 ## 
-
-条款34：优先选用lambda式，而非std::bind
-
-
-
-# 第7章 并发API
-
-条款35：优先选用基于任务而非基于线程的程序设计
-
-条款36：如果异步是必要的，则指定std::launch::async
 
 条款37：使std::thread型别对象在所有路径皆不可联结
 
