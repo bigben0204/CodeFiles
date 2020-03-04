@@ -8895,6 +8895,349 @@ The countdown lasted for 10 seconds.
 
 ## [条款36：如果异步是必要的，则指定std::launch::async](https://blog.csdn.net/big_yellow_duck/article/details/52512445)
 
+当你调用**std::async**来执行一个函数（或一个可执行对象）时，你通常希望函数是异步执行的。但你没有要求**std::async**必须这样做，函数是根据**std::async**的发射策略（launch policy）来执行的。有两个标准策略，每个都是通过**std::launch**局部枚举（scoped enum， 看条款10）来表示。假设一个函数`f`要传递给**std::launch**执行，
+
+- **std::launch::async**发射策略意味着函数`f`必须异步执行，即在另一线程执行。
+- **std::launch::deferred**发射策略意味着函数`f`可能只会在——**std::async**返回的future对象调用**get**或**wait**时——执行。那就是，执行会推迟到其中一个调用发生。当调用**get**或**wait**时，`f`会同步执行，即，调用者会阻塞直到`f`运行结束。如果**get**或**wait**没有被调用，`f`就绝对不会执行。
+
+可能很奇怪，**std::async**的默认发射策略——它的默认策略是你不能显式指定的——不是两者其中的一种，相反，是两者进行或运算。下面两个函数完全是相同的意思：
+
+```cpp
+auto fut1 = std::async(f);       // 使用默认发射策略执行f
+
+auto fut2 = std::async(std::launch::async |     // 使用async或deferred执行f
+                       std::launch::deferred
+                       f);
+```
+
+默认的发射策略允许异步或同步执行函数`f`，就如条款35指出，这个灵活性让**std::async**与标准库的线程管理组件一起承担线程创建和销毁、避免过载、负责均衡的责任。这让用**std::async**进行并发编程变得很方便。
+
+但用**std::async**的默认发射策略会有一些有趣的含义。这语句给定一个线程t执行`f`，
+
+```cpp
+auto fut = std::async(f);        // 使用默认发射模式执行f
+```
+
+- 没有办法预知函数`f`是否会和线程t并发执行，因为`f`可能会被调度为推迟执行。
+- 没有办法预知函数`f`是否运行在——与调用**get**或**wait**函数的线程不同的——线程。如果那个线程是t，这句话的含义是没有办法预知`f`是否会运行在与t不同的线程。
+- 可能没有办法预知函数`f`是否执行完全，因为没有办法保证`fut`会调用**get**或**wait**。
+
+默认发射策略的调度灵活性经常会混淆使用**thread_local**变量，这意味着如果`f`写或读这种线程本地存储(Thread Local Storage，TLS)，预知取到哪个线程的本地变量是不可能的：
+
+```cpp
+auto fut = std::async(f);         // f使用的线程本地存储变量可能是独立的线程的，
+                                  // 也可能是fut调用get或wait的线程的
+```
+
+它也影响了基于**wait**循环中的超时情况，因为对一个推迟（策略为deferred）的任务（看条款35）调用**wait_for**或者**wait_until**会返回值**std::launch::deferred**。这意味着下面的循环，看起来最终会停止，但是，实际上可能会一直运行：
+
+```cpp
+using namespace std::literals;         // 对于C++14的持续时间后缀，请看条款34
+
+void f()           // f睡眠1秒后返回
+{
+    std::this_thread::sleep_for(1s);
+}
+
+auto fut = std::async(f);          // （概念上）异步执行f
+
+while(fut.wait_for(100ms) !=         // 循环直到f执行结束
+      std::future_status::ready)     // 但这可能永远不会发生
+{
+    ...
+}
+```
+
+如果`f`与调用**std::async**的线程并发执行（即，使用**std::launch::async**发射策略），这里就没有问题（假设`f`能结束执行，不会一直死循环）。但如果`f`被推迟（deferred），`fut.wait_for`将总是返回**std::future_status::deferred**。那永远也不会等于**std::future_status::ready**，所以循环永远不会终止。
+
+这种bug在开发或单元测试中很容易被忽略，因为它只会在机器负载很重时才会显现。在机器过载（oversubscription）或线程消耗完的状况下，任务很可能会被推迟（如果使用的是默认发射策略）。总之，如果不是过载或者线程耗尽，运行系统没有理由不调度任务并发执行。
+
+解决办法很简单：检查**std::async**返回的future，看它是否把任务推迟，然后呢，如果真的是那样，就避免进入基于超时的循环。不幸的是，没有办法直接询问future的任务是否被推迟。取而代之的是，你必须调用一个基于超时的函数——例如**wait_for**函数。在这种情况下，你不用等待任何事情，你只是要看看返回值是否为**std::future_status::deferred**，所以请相信这迂回的话语和用0来调用**wait_for**：
+
+```cpp
+auto fut = std::async(f);       // 如前
+
+if (fut.wait_for(0) == std::future_status::deferred)  // 如果任务被推迟，这里应该要写0ms
+{
+    ...     // fut使用get或wait来同步调用f
+} else {            // 任务没有被推迟
+    while(fut.wait_for(100ms) != 
+         std::future_status::ready) {       // 不可能无限循环（假定f会结束）
+
+      ...    // 任务没有被推迟也没有就绪，所以做一些并发的事情直到任务就绪
+    }
+
+    ...        // fut就绪
+}
+```
+
+本地试验：
+
+```c++
+#include <iostream>
+#include <future>
+#include <thread>
+
+using namespace std;
+
+void f() {
+    this_thread::sleep_for(2s);
+}
+
+int main() {
+    auto fut = async(f);
+    if (fut.wait_for(0ms) == future_status::deferred) {
+        cout << "sync" << endl;
+        fut.get();
+    } else {
+        cout << "async" << endl;
+        while (fut.wait_for(100ms) != future_status::ready) {
+        }
+    }
+    cout << "finish" << endl;
+    return 0;
+}
+// 输出：
+async
+finish
+```
+
+考虑多种因素的结论是，只要满足了下面的条件，以默认发射策略对任务使用**std::async**能正常工作：
+
+- 任务不需要与调用**get**或**wait**的线程并发执行。
+- 修改哪个线程的**thread_local**变量都没关系。
+- 要么保证**std::async**返回的future会调用**get**或**wait**，要么你能接受任务可能永远都不执行。
+- 使用**wait_for**或**wait_unitil**的代码要考虑到任务推迟的可能性。
+
+如果其中一个条件没有满足，你很可能是想要确保任务能异步执行。而那样做的方法是，当你调用**std::async**时，把**std::launch::async**作为第一个参数传递给它：
+
+```c++
+auto fut = std::async(std::launch::async, f);    // 异步发射f
+```
+
+事实上， 如果有一个函数的行为像**std::async**那样，但它会自动使用**std::launch::async**作为发射策略，那样就是一个方便的工作啦！它很容易写出来，棒极了。这是C++11的版本：
+
+```cpp
+template<typename F, typename... Ts>
+inline std::future<typename std::result_of<F(Ts...)>::type> reallyAsync(F&& f, Ts&&... params)     // 返回异步调用f(param...)的future
+{
+    return std::async(std::launch::async,
+                      std::forward<F>(f),
+                      std::forward<Ts>(params)...);
+}
+```
+
+这个函数接收一个可调用对象`f`和零个或多个参数`params`，并且把它们完美转发（看条款25）给**std::async**，传递**std::launch::async**作为发射策略。就像**std::async**那样，它返回一个类型为`f`调用`params`的结果的**std::future**，决定这个结果很容易，因为**std::result_of**这个**type trait**可以把结果给你。
+
+`reallyAsync`用起来就像**std::async**那样：
+
+```cpp
+auto fut = reallyAsync(f);    // 异步执行f，如果std::async抛异常reallyAsync也会抛异常
+```
+
+在C++14中，推断`reallyAsync`返回值类型的能力简化了函数声明：
+
+```cpp
+template<typename F, typename... Ts>
+inline auto reallyAsync(F&& f, Ts&&... params)          // C++14
+{
+    return std::async(std::launch::async,
+                      std::forward<F>(f),
+                      std::forward<Ts>(params)...);
+}
+```
+
+这个版本很清楚地让你知道`reallyAsync`除了使用**std::launch::async**发射策略调用**std::async**外，没做任何东西。
+
+**总结**
+
+需要记住的3点：
+
+- **std::async**的默认发射策略既允许任务异步执行，又允许任务同步执行。
+- 这个灵活性（上一点）导致了使用**thread_local**变量时的不确定性，它隐含着任务可能不会执行，它还影响了基于超时的**wait**调用的程序逻辑。
+- 如果异步执行是必需的，指定**std::launch::async**发射策略。
+
+## [条款37：使std::thread型别对象在所有路径皆不可联结](https://blog.csdn.net/big_yellow_duck/article/details/52522944)
+
+每个**std::thread**对象的状态都是这两种中的一种：joinable（可连接的）或unjoinable（不可连接的）。一个**可连接的std::thread**对应一个底层异步执行线程，例如，一个**std::thread**对应的一个底层线程，它会被阻塞或等待被调度，那么这个**std::thread**就是可连接的。**std::thread**对象对应的底层线程可以将代码运行至结束，也可将其视为可连接的。
+
+不可连接的**std::thread**的意思就如你想象那样：**std::thread**不是可连接的。不可连接的**std::thread**对象包括：
+
+- 默认构造的**std::thread**。这种**std::thread**没有函数可以执行，因此没有对应的底层执行线程。
+- 被移动过的**std::thread**。移动的结果是，一个**std::thread**对应的底层执行线程被对应到另一个**std::thread**。
+- 被连接过（调用了join）的**std::thread**。在调用了**join**之后，**std::thread**对应的底层执行线程结束运行，就没有对应的底层线程了。
+- 被分离（detach）的**std::thread**。**detach**把**std::thread**对象与它对应的底层执行线程分离开。
+
+**std::thread**的连接性是很重要的，其中一个原因是：如果一个可连接的线程对象执行了析构操作，那么程序会被终止。例如，假设我们有一个函数`doWork`，它的参数包含过滤器函数`filter`、一个最大值`maxVal`。`doWork`把0到`maxVal`之间值传给过滤器，然后满足特定条件就对满足过滤器的值进行计算。如果执行过滤器函数是费时的，而检查条件也是费时的，那么并发做这两件事是合理的。
+
+我们其实会更偏向于使用基于任务的设计（看条款35），但是让我们假定我们想要设置执行过滤器线程的优先级。条款35解释过请求使用线程的本机句柄（native handle）时，只能通过**std::thread**的API；基于任务的API没有提供这个功能。因此我们的方法是基于线程，而不是基于任务。
+
+我们可以提出这样的代码：
+
+```c++
+constexpr auto tenMillion = 10000000;     // 关于constexpr，看条款15
+
+bool doWork(std::function<bool(int)> filter,     // 返回是否会进行计算
+                      int maxVal = tenMillion)        // 关于std::function，看条款2
+{
+    std::vector<int> goodVals;           // 满足过滤器的值
+
+    std::thread t([&filter, maxVal, &goodVals] {
+        for (int i = 0; i <= maxVal; ++i) {
+            if (filter(i)) {
+                goodVals.push_back(i);
+            }
+        }
+    });
+
+    auto nh = t.native_handle();        // 获取t的本机句柄
+    ...                              // 使用t的本机句柄设置t的优先级
+
+    if (conditionsAreSatisfied()) {
+        t.join();                 // 等待t结束
+        performComputation(goodVals);       
+        return true;        // 会进行计算
+    }
+
+    return false;    // 不会进行计算
+}
+```
+
+在我解释这个代码为什么有问题之前，我想提一下`tenMillion`的初始值在C++14可以变得更有可读性，利用C++14的能力，把单引号作为数字的分隔符：
+
+```cpp
+constexpr auto tenMillion = 10'000'000;   // C++14
+```
+
+我还想提一下在线程`t`开始执行之后才去设置它的优先级，这有点像众所周知的马脱缰跑了后你才关上门。一个更好设计是以暂停状态启动线程`t`（因此可以在执行之前修改它的优先级），但我不想那部分的代码使你分心。如果你已经严重分心了，那么请去看条款39，因为那里展示了如何启动暂停的线程。
+
+回到`doWork`，如果`conditionsAreSatisfied()`返回**true**，那么没问题，但如果返回**false**或者抛出异常，那么在`doWork`的末尾，调用**std::thread**的析构函数时，它状态是可连接的，那会导致执行中的程序被终止。
+
+你可能想知道**std::thread**的析构函数为什么会表现出这种行为，那是因为另外两种明显的选项会更糟。它们是：
+
+- **隐式连接（join）**。在这种情况下，**std::thread**的析构函数会等待底层异步执行线程完成工作。这听起来合情合理，但是这会导致难以追踪的性能异常。例如，如果`conditionAreSatisfied()`已经返回**false**了，`doWork`函数还要等待过滤器函数的那个循环，这是违反直觉的。
+- **隐式分离（detach)**。在这种情况下，**std::thread**的析构函数会分离**std::thread**对象与底层执行线程之间的连接，而那个底层执行线程会继续执行。这听起来和**join**那个方法一样合理，但它导致更难调试的问题。例如，在`doWork`中，`goodVals`是个通过引用捕获的局部变量，它可以在lambda内被修改（通过**push_back**），然后，假如当lambda异步执行时，`conditionsAreSatisfied()`返回**false**。那种情况下，`doWork`会直接返回，它的局部变量（包括`goodVals`）会被销毁，`doWork`的栈帧会被弹出，但是线程仍然执行。
+  在接着`doWork`调用端之后的代码中，某个时刻，会调用其它函数，而至少一个函数可能会使用一部分或者全部`doWork`栈帧占据过的内存，我们先把这个函数称为`f`。当`f`运行时，`doWork`发起的lambda依然会异步执行。lambda在栈上对`goodVals`调用**push_back**，不过如今是在`f`的栈帧中。这样的调用会修改过去属于`goodVals`的内存，而那意味着从`f`的角度看，栈帧上的内存内容会自己改变！想想看你调试这个问题时会有多滑稽。
+
+标准委员会任务销毁一个可连接的线程实在太恐怖了，所以从根源上禁止它（通过指定可连接的线程的析构函数会终止程序）。
+
+这就把责任交给了你，如果你使用了一个**std::thread**对象，你要确保在它定义的作用域外的任何路径，使它变为不可连接。但是覆盖任何路径是很复杂的，它包括关闭流出范围然后借助**return**、**continue**、**break**、**goto**或异常来跳出，这有很多条路径。
+
+任何时候你想要在每一条路径都执行一些动作，那么最常用的方法是在局部对象的析构函数中执行动作。这些对象被称为了RAII对象，而产生它们的类被称为RAII类（RAII（Resource Acquisition Is Initialization）表示“资源获取就是初始化”，即使技术的关键是销毁，而不是初始化）。RAII类在标准库很常见，例子包括STL容器（每个容器的析构函数都会销毁容器的内容并释放内存）、标准智能指针（条款18-20解释了**std::unique_ptr**析构函数会对它指向的对象调用删除器，而**std::shared_ptr**和**std::weak_ptr**的析构函数会减少引用计数）、**std::fstream**对象（它们的析构函数会关闭对应的文件），而且还有很多。然而，没有关于**std::thread**的标准RAII类，可能是因为标准委员会拒绝把**join**或**detach**作为默认选项，这仅仅是不知道如何实现这样类。
+
+幸运的是，你自己写一个不会很难。例如，下面这个类，允许调用者指定`ThreadRAII`对象（一个**std::thread**的RAII对象）销毁时调用**join**或者**detach**：
+
+```cpp
+class ThreadRAII {
+public:
+    enum class DtorAction { join, detach };    // 关于enum class，请看条款10
+
+    ThreadRAII（std::thread&& t, DtorAction a)  // 在析构函数，对t采取动作a
+    : action(a), t(std::move(t)) {}
+
+    ~ThreadRAII()
+    {
+        if (t.joinable()) {          // 关于连接性测试，看下面
+            if (action == DtorAction::join) {
+                t.join();
+            } else {
+                t.detach();
+            }
+        }
+
+    std::thread& get() { return t; }
+
+private:
+    DtorAction action;
+    std::thread t;
+};
+```
+
+我希望这份代码是一目了然的，但下面的几点可能对你有帮助：
+
+- 构造函数只接受右值的**std::thread**，因为我们想要把传进来的**std::thread**对象移动到`ThreadRAII`对象里。（**std::thread**是不能被拷贝的类型。）
+- 对于调用者，构造函数的形参顺序的设计十分直观（指定**std::thread**作为第一个参数，而销毁动作作为第二个参数，比起反过来直观很多），但是，成员初始化列表被设计来匹配成员变量声明的顺序，成员变量的顺序是把**std::thread**放到最后。在这个类中，这顺序不会导致什么不同，不过一般来说，一个成员变量的初始化有可能依赖另一个成员变量，而因为**std::thread**对象初始化之后可能会马上运行函数，所以把它们声明在一个类的最后是一个很好的习惯。那保证了当**std::thread**构造的时候，所有在它之前的成员变量都已经被初始化，因此**std::thread**成员变量对应的底层异步执行线程可以安全地取得它们。
+- `ThreadRAII`提供了一个`get`函数，它是一个取得内部**std::thread**对象的入口，这类似于标准智能指针提供了`get`函数（它提供了取得内部原生指针的入口）。提供`get`可以避免`ThreadRAII`复制**std::thread**的所有接口，而这也意味着`ThreadRAII`可以用于请求**std::thread**对象的上下文。
+- `ThreadRAII`的析构函数在调用**std::thread**对象`t`的成员函数之前，它先检查确保`t`是可连接的。这是必需的，因为对一个不可连接的线程调用**join**或**detach**会产生未定义行为。某个用户构建了一个**std::thread**，然后用它创建`ThreadRAII`对象，再使用`get`请求获得`t`，接着移动`t`或者对`t`调用**join**或**detach**，这是有可能发生的，而这样的行为会导致`t`变得不可连接。
+  如果你担心这代码，
+  `if (t.joinable()) {`
+   `  if (action == DtorAction::join) {`
+   `    t.join();`
+   `  } else {`
+   `    t.detach();`
+   `  }`
+  `}`
+  存在竞争，因为在`t.joinable()`和调用**join**或**detach**之间，另一个线程可能让`t`变得不可连接。你的直觉是值得赞扬的，但是你的害怕是没有根据的。一个**std::thread**对象只能通过调用成员函数来从可连接状态转换为不可连接状态，例如，**join**、**detach**或移动操作。当`ThreadRAII`对象的析构函数被调用时，不应该有其他线程调用该对象的成员函数。如果这两个函数同时发生，那的确是竞争，但竞争没有发生在析构函数内，它是发生在试图同时调用两个成员函数（析构函数和其他）的用户代码内。一般来说，对于一个对象同时调用两个成员函数，也只有是**const**成员函数（看条款16）才能确保线程安全。
+
+在我们`doWork`的例子中使用`ThreadRAII`，代码是这样的：
+
+```cpp
+bool doWork(std::function<bool(int) filter, int maxVal = tenMillion)  // 如前
+{
+    std::vector<int> goodVals;         // 如前
+
+    ThreadRAII t(
+        std::thread([&filter, maxVal, &goodVals)       // 使用RAII对象
+                          {
+                              for (auto i = 0; i <= maxVal; ++i)
+                                  { if (filter)  goodVals.push_back(i); }
+                          }),
+                          ThreadRAII::DtorAction::join         // RAII动作
+    );
+
+    auto nh = t.get().native_handle(); 
+    ...
+
+    if (conditionsAreStatisfied()) {
+        t.get().join();
+        performConputation(goodVals);
+        return true;
+    }
+
+    return false;
+}
+```
+
+在这个例子中，我们选择在`ThreadRAII`析构函数中，对异步执行线程调用**join**函数，因为我们之前看到，调用**detach**函数会导致一些恶梦般的调试。我们之前也看到过**join**会导致性能异常（实话说，那调试起来也很不爽），但在未定义行为（**detach**给的）、程序终止（使用原始**std::thread**会产生）、性能异常之前做出选择，性能异常就像是瘸子里面挑出的将军 。
+
+额，条款39展示了使用`ThreadRAII`在**std::thread**销毁中进行**join**不会导致性能异常，而是导致挂起程序。这种问题的“合适的”解决方案是：和异步执行的lambda进行交流，当我们不需要它时候，它可以早早的返回；但C++11不支持这种可中断的线程。我们可以手动实现它们，但那个话题已经超越了这本书的范围了（在《C++并发编程实战》的章节9.2可以找到）。
+
+条款17解释过，因为`ThreadRAII`声明了析构函数，所以不会有编译器生成的移动操作，但这里`ThreadRAII`对象没有理由不能移动。如果编译器生成的这些函数，这些函数的可以行为是正确的，所以显示请求创建它们是适合的：
+
+```cpp
+class ThreadRAII {
+public:
+    enum class DtorAction { join, detach };    // 如前
+
+    ThreadRAII（std::thread&& t, DtorAction a)  // 如前
+     : action(a), t(std::move(t)) {}
+
+    ~ThreadRAII()
+    {
+        ...            // 如前
+    }
+
+
+    ThreadRAII(ThreadRAII&&) = default;       // 支持移动
+    ThreadRAA& operator=(ThreadRAII&) = default;
+
+    std::thread& get() { return t; }
+
+private:
+    DtorAction action;
+    std::thread t;
+};
+```
+
+**总结**
+
+需要记住的4点：
+\- 在所有路径上，让**std::thread**变得不可连接。
+\- 在销毁时用**join**会导致难以调试的性能异常。
+\- 在销毁时用**detach**会导致难以调试的未定义行为。
+\- 在成员变量列表最后声明**std::thread**。
+
+## [条款38：对变化多端的线程句柄析构函数行为保持关注](https://blog.csdn.net/big_yellow_duck/article/details/52541788)
 
 
 
@@ -8909,11 +9252,18 @@ The countdown lasted for 10 seconds.
 
 
 
-## 
 
-条款37：使std::thread型别对象在所有路径皆不可联结
 
-条款38：对变化多端的线程句柄析构函数行为保持关注
+
+
+
+
+
+ 
+
+
+
+
 
 条款39：考虑针对一次性事件通信使用以void为模板型别实参的期值
 
