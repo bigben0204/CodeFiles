@@ -9239,6 +9239,168 @@ private:
 
 ## [条款38：对变化多端的线程句柄析构函数行为保持关注](https://blog.csdn.net/big_yellow_duck/article/details/52541788)
 
+条款37解释过一个可连接的（joinable）线程对应着一个底层的系统执行线程，一个非推迟任务（看条款36）的future和系统线程也有类似的关系。这样的话，可以认为**std::thread**对象和future对象都可以操纵系统系统。
+
+从这个角度看，**std::thread**对象和future对象的析构函数表现出不同的行为是很有趣的。就如条款37提到，销毁一个可连接的**std::thread**对象会终止你的程序，因为另外两个选择——隐式**join**和隐式**detach**——被认为是更糟的选择。而销毁一个future，有时候会表现为隐式**join**，有时候会表现为隐式**detach**，有时候表现的行为既不是**join**也不是**detach**。它决不会导致程序终止，这种线程管理行为的方法值得我们仔细检查。
+
+我们从观察一个future开始吧，它是一个交流管道的一端，在这个交流管道中被叫方要把结果传给主叫方。被叫方（通常异步运行）把计算的结果写进交流管道（通常借助一个**std::promise**对象），而主叫方使用一个future来读取结果。你可以用下图来思考，虚线箭头展示了信息被叫这流向主叫：
+
+![](pictures/future被promise叫示例.png)
+
+但被叫方的结果存储在哪里呢？在主叫方future执行**get**之前，被叫方可能已经执行完了，因此结果不能存储在被叫的**std::promise**里。那个对象，会是被叫方的局部变量，在被叫执行结束后会被销毁。
+
+然而，结果也不能存储在主叫方的future中，因为（还有其他原因）一个**std::future**对象可能被用来创建一个**std::shared_future**（因此把被叫方结果的所有权从**std::future**转移到**std::shared_future**），而在最原始的**std::future**销毁之后，这个**std::shared_future**可能会被拷贝很多次。倘若被叫方的结果类型是不可被拷贝的（即只可移动类型），而那结果是只要有一个future引用它，它就会存在，那么，多个future中哪一个含有被叫方的结果呢？
+
+因为被叫方对象和主叫方对象都不适合存储结构，所以这个结果存在两者之外的地方。这个地方叫做**shared state**，**shared state**通常表现为一个基于堆实现的对象，但标准没有指定它的类型、接口和实现，所以标准库的作者可以用他们喜欢的方法来实现**shared state**。
+
+如下，我们可以把主叫、被叫、**shared state**之间的关系视图化，虚线箭头再次表现信息的流向：
+
+![](pictures/future主叫promise被叫sharedstate关系.png)
+
+**shared state**的存在很重要，因为future的析构函数的行为——该条款的话题——是由与它关联的**shared state**决定的。特别是：
+
+- **最后一个引用shared state（它借助std::aysnc创建了一个非推迟任务时产生）的future的析构函数会阻塞直到任务完成**。本质上，这种future的析构函数对底层异步执行任务的线程进行隐式的**join**。
+- **其他的future对象的析构函数只是简单地销毁future对象**。对于底层异步运行的任务，与对线程进行**detach**操作相似。对于最后一个future是推迟的任务的情况，这意味着推迟的任务将不会运行。
+
+这些规则听起来很复杂，但我们真正需要处理的是一个简单“正常的”行为和一个单独的例外而已。这正常的行为是：future的析构函数会销毁future对象。那意思是，它不会**join**任何东西，也不会**detach**任何东西，它也没有运行任何东西，它只是销毁 future的成员变量。（好吧。实际上，它还多做了些东西。它减少了**shared state**里的引用计数，这个**shared state**由future和被叫的**std::promise**共同操控。引用计数可以让库知道什么时候销毁**shared state**，关于引用计数的通用知识，请看条款19.）
+
+对于正常行为的那个例外，只有在future满足下面全部条件才会出现：
+
+- **future引用的shared state是在调用了std::async时被创建**。
+- **任务的发射策略是std::launch::async**（看条款36），要么是运行时系统选择的，要么是调用**std::async**时指定的。
+- **这个future是最后一个引用shared state的future**。对于**std::future**，它总是最后一个，而对于**std::shared_future**，当它们被销毁的时候，如果它们不是最后一个引用**shared state**的future，那么它们会表现出正常的行为（即，销毁成员变量）。
+
+只有当这些条件都被满足时，future的析构函数才会表现出特殊的行为，而这行为是：阻塞直到异步运行的任务结束。特别说明一下，这相当于对运行着**std::async**创建的任务的线程执行隐式**join**。
+
+这个例外对于正常的future析构函数行为来说，可以总结为“来自**std::async**的future在它们的析构函数里阻塞了。”对于初步近似，它是正确的，但有时候你需要的比初步近似要多，现在你已经知道了它所有的真相了。
+
+你可能又有另一种疑问，可能是“我好奇为什么会有这么奇怪的规则？”。这是个合理的问题，关于这个我只能告诉你，标准委员会想要避免隐式**detach**引发的问题（看条款37），但是他们又不想用原来的策略让程序终止（针对可连接的线程，看条款37），所以他们对隐式**join**妥协了。这个决定不是没有争议的，他们也有讨论过要在C++14中禁止这种行为。但最后，没有改变，所以future析构函数的行为在C++11和C++14相同。
+
+future的API没有提供方法判断future引用的**shared state**是否产生于**std::async**调用，所以给定任意的future对象，不可能知道它的析构函数是否会阻塞到异步执行任务的结束。这有一些有趣的含义：
+
+```cpp
+// 这个容器的析构函数可能会阻塞
+// 因为包含的future有可能引用了借助std::async发射的推迟任务的而产生的shared state
+std::vector<std::future<void>> futs;           // 关于std::future<void>，请看条款39
+
+class Widget {                // Widget对象的析构函数可能会阻塞
+public:
+    ...
+private:
+    std::shared_future<double> fut;
+};
+```
+
+当然，如果你有办法知道给定的future不满足触发特殊析构行为的条件（例如，通过程序逻辑），你就可以断定future不会阻塞在它的析构函数。例如，只有在**std::async**调用时出现的**shared state**才具有特殊行为的资格，但是有其他方法可以创建**shared state**。一个是**std::packaged_task**的使用，一个**std::packaged_task**对象包装一个可调用的对象，并且允许异步执行并获取该可调用对象产生的结果，这个结果就被放在**shared state**里。引用**shared state**的future可以借助**std::packaged_task**的**get_future**函数获取：
+
+```c++
+int calcValue();         // 需要运行的函数
+
+std::packaged_task<int()> pt(calcValue);   // 包装calcValue，因此它可以异步允许
+
+auto fut = pt.get_future();     // 得到pt的future
+```
+
+在这时，我们知道future对象`fut`没有引用由**std::async**调用的产生的**shared state**，所以它的析构函数将会表现出正常的行为。
+
+一旦**std::packaged_task**对象`pt`被创建，它就会被运行在线程中。（它也可以借助**std::async**调用，但是如果你想要用**std::async**运行一个任务，没有理由创建一个**std::packaged_task**对象，因为**std::async**能做**std::packaged_task**能做的任何事情。）
+
+**std::packaged_task**不能被拷贝，所以当把`pt`传递给一个**std::thread**构造函数时，它一定要被转换成一个右值（借助**std::move**——看条款23）：
+
+```
+std::thread t(std::move(pt));             // 在t上运行pt
+```
+
+这个例子让我们看到了一些future正常析构行为，但如果把这些语句放在同一个块中，就更容易看出来：
+
+```cpp
+{           // 块开始
+    std::packaged_task<int()> pt(calcValue);
+
+    auto fut = pt.get_future();
+
+    std::thread t(std::move(pt));
+
+   ...    // 看下面
+}         // 块结束
+```
+
+这里最有趣的代码是“…”，它在块结束之前，`t`创建之后。这里有趣的地方是在“…”中，`t`会发生什么。有3个基本的可能：
+
+- `t`什么都没做。在这种情况下，`t`在作用域结束时是可连接的（joinable），这将会导致程序终止（看条款37）。
+- `t`进行了**join**操作。在这种情况下，`fut`就不需要在析构时阻塞了，因为代码已经**join**了。
+- `t`进行了**detach**操作。在这种情况下，`fut`就不需要在析构时**detach**了，因为代码已经做了这件事了。
+
+换句话说，当你**shared state**对应的future是由**std::packaged_task**产生的，通常不需要采用特殊析构策略，因为操纵运行**std::packaged_task**的**std::thread**的代码会在终止、**join**、**detach**之间做出决定。
+
+本地试验，当t什么都没有做时，packaged_task线程的代码会直接终止：
+
+```c++
+#include <iostream>     // std::cout
+#include <future>       // std::packaged_task, std::future
+#include <chrono>       // std::chrono::seconds
+#include <thread>       // std::thread, std::this_thread::sleep_for
+
+using namespace std;
+using namespace literals;
+
+// count down taking a second for each value:
+int countdown(int from, int to) {
+    for (int i = from; i != to; --i) {
+        std::cout << i << '\n';
+        std::this_thread::sleep_for(500ms);
+    }
+    std::cout << "Lift off!\n";
+    return from - to;
+}
+
+int main() {
+    std::packaged_task<int(int, int)> tsk(countdown);   // set up packaged_task
+    std::future<int> ret = tsk.get_future();            // get future
+    std::thread th(std::move(tsk), 10, 0);   // spawn thread to count down from 10 to 0
+    std::this_thread::sleep_for(2s);
+    return 0;
+}
+// 输出：
+10
+9
+8
+7
+6
+terminate called without an active exception
+```
+
+本地试验，增加th.join()则与条款35中的packaged_task样例用法生成结果一样。
+
+如果把th.join()换成th.detach()，则没有线程终止的输出，如下：
+
+```c++
+int main() {
+    std::packaged_task<int(int, int)> tsk(countdown);   // set up packaged_task
+    std::future<int> ret = tsk.get_future();            // get future
+    std::thread th(std::move(tsk), 10, 0);   // spawn thread to count down from 10 to 0
+    std::this_thread::sleep_for(2s);
+    th.detach();
+    return 0;
+}
+// 输出：
+10
+9
+8
+7
+```
+
+**总结**
+
+需要记住的2点：
+
+- future的析构函数通常只是销毁future的成员变量。
+- 最后一个引用**shared state**（它是在借助std::aysnc创建了一个非推迟任务时产生）的future会阻塞到任务完本地试验：
+
+## 条款39：考虑针对一次性事件通信使用以void为模板型别实参的期值
+
+
+
 
 
 
@@ -9265,7 +9427,7 @@ private:
 
 
 
-条款39：考虑针对一次性事件通信使用以void为模板型别实参的期值
+
 
 条款40：对并发使用std::atomic，对特种内存使用volatile
 
