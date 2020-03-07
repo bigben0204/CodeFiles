@@ -1,4 +1,107 @@
 //------------------------------------------------------------------------------------------------
+// C++ 并发编程，std::unique_lock与std::lock_guard区别示例 https://www.cnblogs.com/xudong-bupt/p/9194394.html
+背景
+平时看代码时，也会使用到std::lock_guard，但是std::unique_lock用的比较少。在看并发编程，这里总结一下。方便后续使用。
+
+std::unique_lock也可以提供自动加锁、解锁功能，比std::lock_guard更加灵活。
+
+std::lock_guard
+std::lock_guard是RAII模板类的简单实现，功能简单。
+
+1.std::lock_guard 在构造函数中进行加锁，析构函数中进行解锁。
+2.锁在多线程编程中，使用较多，因此c++11提供了lock_guard模板类；在实际编程中，我们也可以根据自己的场景编写resource_guard RAII类，避免忘掉释放资源。
+
+下面是一个使用std::lock_guard的代码例子，1+2+ .. + 100的多线程实现，每个num只能由一个线程处理。：
+
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+std::mutex my_lock;
+
+void add(int &num, int &sum){
+    while(true){
+        std::lock_guard<std::mutex> lock(my_lock);  
+        if (num < 100){ //运行条件
+            num += 1;
+            sum += num;
+        }   
+        else {  //退出条件
+            break;
+        }   
+    }   
+}
+
+int main(){
+    int sum = 0;
+    int num = 0;
+    std::vector<std::thread> ver;   //保存线程的vector
+    for(int i = 0; i < 20; ++i){
+        std::thread t = std::thread(add, std::ref(num), std::ref(sum));
+        ver.emplace_back(std::move(t)); //保存线程
+    }   
+
+    std::for_each(ver.begin(), ver.end(), std::mem_fn(&std::thread::join)); //join
+    std::cout << sum << std::endl;  // 5050
+}
+
+std::unique_lock
+类 unique_lock 是通用互斥包装器，允许延迟锁定、锁定的有时限尝试、递归锁定、所有权转移和与条件变量一同使用。
+unique_lock比lock_guard使用更加灵活，功能更加强大。
+使用unique_lock需要付出更多的时间、性能成本。
+
+下面是try_lock的使用例子。
+#include <iostream>       // std::cout
+#include <thread>         // std::thread
+#include <mutex>          // std::mutex, std::unique_lock
+#include <vector>
+
+std::mutex mtx;           // mutex for critical section
+std::once_flag flag;
+
+void print_block(int n, char c) {
+    //unique_lock有多组构造函数, 这里std::defer_lock不设置锁状态
+    std::unique_lock<std::mutex> my_lock(mtx, std::defer_lock);
+    //尝试加锁, 如果加锁成功则执行，所以不一定输出几行***
+    //(适合定时执行一个job的场景, 一个线程执行就可以, 可以用更新时间戳辅助)
+    if (my_lock.try_lock()) {
+        for (int i = 0; i < n; ++i) {
+            std::cout << c;
+        }
+        std::cout << '\n';
+    }
+}
+
+void run_one(int& n) {
+    std::call_once(flag, [&n] { n = n + 1; }); //只执行一次, 适合延迟加载; 多线程static变量情况
+}
+
+int main() {
+    std::vector<std::thread> ver;
+    int num = 0;
+    for (auto i = 0; i < 10; ++i) {
+        ver.emplace_back(print_block, 50, '*');
+        ver.emplace_back(run_one, std::ref(num));
+    }
+
+    for (auto& t : ver) {
+        t.join();
+    }
+    std::cout << num << std::endl;
+    return 0;
+}
+// 输出：**************************************************
+**************************************************
+**************************************************
+**************************************************
+**************************************************
+**************************************************
+**************************************************
+**************************************************
+1
+//------------------------------------------------------------------------------------------------
 //extern作用
 //https://www.cnblogs.com/yc_sunniwell/archive/2010/07/14/1777431.html
 也就是说extern有两个作用，第一个,当它与"C"一起连用时，如: extern "C" void fun(int a, int b);则告诉编译器在编译fun这个函数名时按着C的规则去翻译相应的函数名而不是C++的，C++的规则在翻译这个函数名时会把fun这个名字变得面目全非，可能是fun@aBc_int_int#%$也可能是别的，这要看编译器的"脾气"了(不同的编译器采用的方法不一样)，为什么这么做呢，因为C++支持函数的重载啊，在这里不去过多的论述这个问题，如果你有兴趣可以去网上搜索，相信你可以得到满意的解释!
