@@ -8385,6 +8385,91 @@ class Solution {  // 5ms
 }
 ```
 
+使用C++写，正则表达式拆分字符串：
+
+```c++
+#include "gtest/gtest.h"
+#include <regex>
+
+using namespace std;
+
+class Solution {  // 48ms
+public:
+    string reverseWords(string s) {
+        regex re(" +");
+        vector<string> splitStr{sregex_token_iterator(s.begin(), s.end(), re, -1), sregex_token_iterator()};
+
+        string ret;
+        for_each(splitStr.rbegin(), splitStr.rend(), [&ret](const auto& word) {
+            if (!word.empty()) {
+                ret += word + " ";
+            }
+        });
+        return ret.substr(0, ret.size() - 1);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ("world! hello", solution.reverseWords("  hello world!  "));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ("example good a", solution.reverseWords("a good   example"));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ("blue is sky the", solution.reverseWords("the sky is blue"));
+}
+```
+
+原地算法：
+
+```c++
+class Solution {  // 4ms
+public:
+    string reverseWords(string s) {
+        // 翻转整个字符串
+        reverse(s.begin(), s.end());
+        // 依次翻转每个单词
+        reverseWord(s);
+        // 移除头尾和中间空格
+        removeSpaces(s);
+        return s;
+    }
+
+private:
+    void reverseWord(string& inStr) {
+        auto iterI = inStr.begin();
+        auto iterJ = inStr.begin();
+        while (iterJ != inStr.end()) {  // 这里判断iterI或iterJ都一样
+            while (distance(iterI, iterJ) > 0 || (iterI != inStr.end() && *iterI == ' ')) {
+                ++iterI;
+            }
+
+            while (distance(iterI, iterJ) < 0 || (iterJ != inStr.end() && *iterJ != ' ')) {
+                ++iterJ;
+            }
+
+            reverse(iterI, iterJ);
+        }
+    }
+
+    void removeSpaces(string& inStr) {
+        inStr.erase(0, inStr.find_first_not_of(" "));
+        inStr.erase(inStr.find_last_not_of(" ") + 1);
+        inStr.erase(unique(inStr.begin(), inStr.end(), [](char c1, char c2) { return c1 == ' ' && c1 == c2; }),
+                    inStr.end());
+    }
+};
+```
+
 ## [62. 不同路径](https://leetcode-cn.com/problems/unique-paths/)(华为题库)
 
 动态规划：
