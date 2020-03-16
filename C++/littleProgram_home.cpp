@@ -4189,12 +4189,51 @@ int main()
 			std::string str(match[a].first, match[a].second);
 			std::cout << str << "\n";
 			//如上两句实际就相当于下句
-			//std::cout << match[0].str();
+			//std::cout << match[a].str();
 		}
 	}
 }
 注意双反斜杠的使用，因为 C++ 将反斜杠作为转义字符使用。但 C++11 的原始字符串(raw string)可以用来避免这一问题。库 <regex> 不需要改动到现有的头文件，同时也不需要扩展现有的语言特性。
 
+
+// 标准库：http://www.cplusplus.com/reference/regex/regex_search/
+// regex_search example
+#include <iostream>
+#include <string>
+#include <regex>
+
+int main() {
+    std::string s("this subject has a submarine as a subsequence");
+    std::smatch m;
+    std::regex e("\\b(sub)([^ ]*)");   // matches words beginning by "sub"。这里可以用原生字符串：R"(\b(sub)([^ ]*))"
+
+    std::cout << "Target sequence: " << s << std::endl;
+    std::cout << "Regular expression: /\\b(sub)([^ ]*)/" << std::endl;
+    std::cout << "The following matches and submatches were found:" << std::endl;
+
+    while (std::regex_search(s, m, e)) {
+        for (auto x : m) {  // 可以写成for (std::string x : m)。这里迭代了三个对象，第1个是匹配对象，第2~。。。都是小括号中的匹配对象，所以对于每个sub开头的单词，由于正则表达式里有两个小括号，所以这里会输出三个对象
+            std::cout << x << " ";
+            // auto iter1 = x.first;  // x匹配的开始迭代器
+            // auto iter2 = x.second;  // x匹配的结束迭代器
+            // std::string tmp(iter1, iter2);  // 这里构造的tmp和x.str()是一样的值
+        }
+        // 这三句也和上面的for循环一样的效果，把每个m的三个迭代对象取出来
+        // const std::string& tmp = m[0].str();
+        // const std::string& tmp1 = m[1].str();
+        // const std::string& tmp2 = m[2].str();
+        std::cout << std::endl;
+        s = m.suffix().str();  // 匹配的剩余部分
+    }
+    return 0;
+}
+// 输出：
+Target sequence: this subject has a submarine as a subsequence
+Regular expression: /\b(sub)([^ ]*)/
+The following matches and submatches were found:
+subject sub ject 
+submarine sub marine 
+subsequence sub sequence 
 
 #include <iostream>
 #include <string>
@@ -4466,11 +4505,11 @@ int main()
 	std::string::const_iterator end = s.end();
 
 	//在两个字符串迭代器之间查找匹配项，直到遍历结束
-	while (std::regex_search(it, end, m, reg))
+	while (std::regex_search(it, end, m, reg))  // 这里使用的是迭代器的重载函数，上面使用过string入参的函数
 	{
 		// 是 new 还是 delete?
-		m[1].matched ? ++new_counter : ++delete_counter;//m[1].matched表示第一个分组是否找到匹配项，m[1].fisrt表示带上第一个匹配项的剩余字符串，m[1].second表示不带上第一个匹配项的剩余字符串，如果没有找到匹配项，则first和second都为""；m[2]及之后类推
-		it = m[0].second;//m[0].matched表示是否找到了全部匹配项，m[0].first表示带上全部匹配项的剩余字符串，m[0].second表示不带上全部匹配项的剩余字符串，而这里的全部匹配项是用|连接的，所以全部匹配项要么和m[1]相等，要么和m[2]相等
+		m[1].matched ? ++new_counter : ++delete_counter;//m[1].matched表示第一个分组是否找到匹配项，m[1].fisrt表示第一个子项的begin迭代器，m[1].second表示第一个子项的end迭代器，如果没有找到匹配项，则first和second都为""；m[2]及之后类推
+		it = m[0].second;//m[0].matched表示是否找到了全部匹配项，m[0].first表示全部匹配项的begin迭代器，m[0].second表示全部匹配项的end迭代器，而这里的全部匹配项是用|连接的，所以全部匹配项要么和m[1]相等，要么和m[2]相等
 	}
 
 	if (new_counter != delete_counter)
@@ -4506,8 +4545,8 @@ public:
 	template <typename T> 
 	void operator()(const T& what) 
 	{
-		//what对象是smatch类型，what[1]就是第1个匹配项，即(\\d+)，调用.str()得到匹配项的字符串类型string，再调用c_str()得到了对应const char*
-		sum_ += atoi(what[1].str().c_str());
+		//what对象是smatch类型，是match_results对象，每个[]取到的子项都是一个sub_match对象。其中what[1]就是第2个匹配项（第1个匹配项为整个匹配对象），即(\\d+)，调用.str()得到匹配项的字符串类型string，再调用c_str()得到了对应const char*
+		sum_ += atoi(what[1].str().c_str());  // 如果下面用sregex_token_iterator，则这里what是个sub_match对象即smatch对象match_results的[0]，这里只能用what.str().c_str()
 		//同下
 		//string intStr = what[1].str();
 		//sum_ += atoi(intStr.c_str());
@@ -4528,7 +4567,7 @@ int main()
 	
 	string s = "1,1,2,3,5,8,13,21";
 	
-	sregex_iterator it(s.begin(), s.end(), reg);
+	sregex_iterator it(s.begin(), s.end(), reg);  // sregex_iterator迭代器指向的是smatch对象，这里不能用来构造vector<string> v(it, end);，如果要构造vector，只能sregex_token_iterator
 	sregex_iterator end;
 
 	regex_callback c;
