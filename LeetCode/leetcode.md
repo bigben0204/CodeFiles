@@ -8432,33 +8432,77 @@ TEST_F(SolutionTest, Test3) {
 原地算法：
 
 ```c++
+// 使用字符串遍历查找反转单词
 class Solution {  // 4ms
 public:
     string reverseWords(string s) {
+        // 移除头尾和中间空格
+        removeSpaces(s);
         // 翻转整个字符串
         reverse(s.begin(), s.end());
         // 依次翻转每个单词
         reverseWord(s);
-        // 移除头尾和中间空格
-        removeSpaces(s);
         return s;
     }
 
 private:
     void reverseWord(string& inStr) {
-        auto iterI = inStr.begin();
-        auto iterJ = inStr.begin();
-        while (iterJ != inStr.end()) {  // 这里判断iterI或iterJ都一样
-            while (distance(iterI, iterJ) > 0 || (iterI != inStr.end() && *iterI == ' ')) {
-                ++iterI;
+        auto iterWordBegin = inStr.begin();
+        auto iterWordEnd = inStr.begin();
+        while (iterWordBegin != inStr.end()) {
+            iterWordBegin = iterWordEnd;
+            while (iterWordBegin != inStr.end() && *iterWordBegin == ' ') {
+                ++iterWordBegin;
             }
 
-            while (distance(iterI, iterJ) < 0 || (iterJ != inStr.end() && *iterJ != ' ')) {
-                ++iterJ;
+            iterWordEnd = iterWordBegin;
+            while (iterWordEnd != inStr.end() && *iterWordEnd != ' ') {
+                ++iterWordEnd;
             }
 
-            reverse(iterI, iterJ);
+            reverse(iterWordBegin, iterWordEnd);
         }
+    }
+
+    void removeSpaces(string& inStr) {
+        inStr.erase(0, inStr.find_first_not_of(" "));
+        inStr.erase(inStr.find_last_not_of(" ") + 1);
+        inStr.erase(unique(inStr.begin(), inStr.end(), [](char c1, char c2) { return c1 == ' ' && c1 == c2; }),
+                    inStr.end());
+    }
+};
+
+// 使用正则表达式来查找反转单词
+class Solution {
+public:
+    string reverseWords(string s) {
+        // 移除头尾和中间空格
+        removeSpaces(s);
+        // 翻转整个字符串
+        reverse(s.begin(), s.end());
+        // 依次翻转每个单词
+        reverseWord(s);
+        return s;
+    }
+
+private:
+    void reverseWord(string& inStr) {
+        auto cIterBegin = inStr.cbegin();
+        auto cIterEnd = inStr.cend();
+        smatch matchWord;
+        regex re("[^ ]+");
+        while (regex_search(cIterBegin, cIterEnd, matchWord, re)) {  // 这里regex_search必须使用const_iterator
+            auto iterWordBegin = convertCIterToIter(inStr.begin(), matchWord[0].first);  // 获取const_iterator对应的iterator
+            auto iterWordEnd = convertCIterToIter(inStr.begin(), matchWord[0].second);
+            reverse(iterWordBegin, iterWordEnd);  // 这里reverse必须使用iterator
+            cIterBegin = matchWord[0].second;
+        }
+    }
+
+    // 根据起始iterator和目标const_iterator获得目标iterator
+    string::iterator convertCIterToIter(string::iterator iterDst, string::const_iterator cIterDst) {
+        advance(iterDst, distance<string::const_iterator>(iterDst, cIterDst));  // distance的两个入参一个是iterator，一个是const_iterator，所以这里必须指定函数模板参数<string:const_iterator>
+        return iterDst;
     }
 
     void removeSpaces(string& inStr) {

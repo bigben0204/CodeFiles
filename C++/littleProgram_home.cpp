@@ -4252,7 +4252,7 @@ int main()
 	cmatch result; //结果  
 
 	//search 是匹配子字符串, match 是匹配整个字符串  
-	if (regex_search(strText.c_str(), result, testRegex, regex_constants::format_default))
+	if (regex_search(strText.c_str(), result, testRegex, regex_constants::format_default))  // format_default: Same as match_default. This constant has a value of zero**.
 	{
 		cout << result.str() << endl;
 	}
@@ -4369,7 +4369,7 @@ int main()
 	bool match = std::regex_search(weekend, result, pattern);
 	if (match)
 	{
-		for (size_t i = 1; i < result.size(); ++i)
+		for (size_t i = 1; i < result.size(); ++i)  // 这里从1开始，则是第一个小括号的内容
 		{
 			std::cout << result[i] << std::endl;
 		}
@@ -4382,8 +4382,26 @@ int main()
 Saturday
 
 请按任意键继续. . .
-上面这个例子只能返回第一个匹配的项，如果要返回所有匹配的子序列，可以使用下面的方式：
+上面这个例子只能返回第一个匹配的项，如果要返回所有匹配的子序列，则可以使用下面的while循环的方式：
+int main() {
+    // the source text
+    std::string weekend = "Saturday and Sunday day";
+    smatch match;
+    regex re(R"(\w*day)");
+    while (regex_search(weekend, match, re)) {
+        for (size_t i = 0; i < match.size(); ++i) {
+            std::cout << match[i] << std::endl;
+        }
+        weekend = match.suffix().str();
+    }
+    return 0;
+}
+// 输出：
+Saturday
+Sunday
+day
 
+或者使用：
 #include <iostream>
 #include <string>
 #include <regex>
@@ -4399,10 +4417,8 @@ int main()
 	const std::sregex_token_iterator end;  //需要注意一下这里
 	for (std::sregex_token_iterator i(weekend.begin(), weekend.end(), pattern); i != end; ++i)
 	{
-		std::cout << *i << std::endl;
+		std::cout << *i << std::endl;  // 这里的*i是sub_match对象
 	}
-	std::cout << std::endl;
-
 	return 0;
 }
 输出如下：
@@ -4411,7 +4427,18 @@ Sunday
 Friday
 Everyday
 
-请按任意键继续. . .
+如果使用sregex_iterator，则如下：
+int main() {
+    const std::regex pattern("\\w+day");
+    // the source text
+    std::string weekend = "Saturday and Sunday, but some Fridays also. Everyday is a good day.";
+
+    sregex_iterator end;
+    for (sregex_iterator begin(weekend.begin(), weekend.end(), pattern); begin != end; ++begin) {
+        cout << (*begin)[0].str() << endl;  // 或(*begin)[0]或(*begin).str()。这里的*begin是个match_results对象，
+    }
+    return 0;
+}
 
 
 下面的例子将元音字母打头的单词前面的a替换为an：
@@ -4431,11 +4458,13 @@ int main()
 
 	// the pattern for the transformation, using the second
 	// capture group
-	std::string replace = "an $2";
+	std::string replace = "an $2";  // $1指第1个小括号内容，$2指第2个小括号内容
 	std::string newtext = std::regex_replace(text, pattern, replace);
 	std::cout << newtext << std::endl;
 	std::cout << std::endl;
 
+    // regex pattern(R"(\ba (a|e|i|o|u))");
+    // const string& newText = regex_replace(text, pattern, "an $1");
 	return 0;
 }
 输出如下：
@@ -4528,7 +4557,21 @@ int main()
 输出如下：
 Leak detected!
 
-请按任意键继续. . .
+// 不区分大小写匹配
+int main() {
+    std::string s = "Calls to new must be followed by delete. Calling simply new results in a leak! Delete";
+    regex re("(new)|(delete)", regex_constants::icase);
+    auto it = s.cbegin();
+    auto end = s.cend();
+    smatch match;
+    int newCount = 0, deleteCount = 0;
+    while (regex_search(it, end, match, re)) {
+        match[1].matched ? ++newCount : ++deleteCount;
+        it = match[0].second;
+    }
+    cout << (newCount == deleteCount ? "same" : "not same") << endl;
+    return 0;
+}
 
 //将字符串里的以,分隔的数字匹配出来求和
 #include <iostream>
