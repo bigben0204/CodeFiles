@@ -1,4 +1,110 @@
 //------------------------------------------------------------------------------------------------
+// Linux判断目录是否为空
+#include <iostream>
+#include <dirent.h>
+
+using namespace std;
+
+int main() {
+    int num = 0;
+
+    DIR* dirp = opendir("/home/ben/Documents/EmptyDir1");  // 如果目录为空，则num为2；如果目录不存在，则dirp为nullptr
+    while (dirp) {
+        if (readdir(dirp) != NULL) {
+            ++num;
+        } else {
+            break;
+        }
+    }
+
+    closedir(dirp);
+    printf("%d\n", num);
+    return 0;
+}
+
+// 使用枚举值进行更精细的判断
+#include <iostream>
+#include <dirent.h>
+#include <cstring>
+
+using namespace std;
+
+enum class DirInfo { DIR_EMPTY, DIR_NOT_EMPTY, DIR_NOT_EXIST };
+
+DirInfo isDirEmpty(const char* dirname) {
+    /* 打开要进行匹配的文件目录 */
+    DIR* dir = opendir(dirname);
+    if (dir == nullptr) {
+        return DirInfo::DIR_NOT_EXIST;
+    }
+
+    struct dirent* dirent;
+    while (dirent = readdir(dir)) {
+        if ((strcmp(".", dirent->d_name) == 0) || (strcmp("..", dirent->d_name) == 0)) {
+            continue;
+        }
+        /*判断是否有目录和文件*/
+        if ((dirent->d_type == DT_DIR) || (dirent->d_type == DT_REG)) {
+            return DirInfo::DIR_NOT_EMPTY;
+        }
+    }
+
+    return DirInfo::DIR_EMPTY;
+}
+
+int main() {
+    cout << static_cast<int>(isDirEmpty("/home/ben/Documents/EmptyDir")) << endl;
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// Linux 软链接的查询、创建，删除  https://www.cnblogs.com/LiuYanYGZ/p/5499286.html https://blog.csdn.net/qq_15897815/article/details/87896934
+#include <iostream>
+#include <unistd.h>
+
+using namespace std;
+
+bool getLinkPath(const std::string& linkFilePath, char* buf, int count) {
+    int readRet = readlink(linkFilePath.c_str(), buf, count - 1);
+    if (readRet < 0 || readRet >= count - 1) {
+        return false;
+    }
+    buf[readRet] = '\0';
+    return true;
+}
+
+int main() {
+    constexpr int BUF_SIZE = 1024;
+    char path[BUF_SIZE] = {'\0'};
+    // 查询
+    if (getLinkPath("/home/ben/Documents/test", path, BUF_SIZE)) {
+        cout << "Link Path: \n" << path << endl;
+    } else {
+        cout << "Failed to read link" << endl;
+    }
+
+    // 创建
+    const std::string toLink = "/home/ben/Documents/test";
+    int symlinkRet = symlink("/home/ben/Documents/test1.txt", toLink.c_str());
+    if (symlinkRet < 0) {
+        cout << "Failed to symbol link." << endl;
+    } else {
+        cout << "Succeed to symbol link." << endl;
+    }
+
+    // 删除
+    if (symlinkRet < 0) {
+        int unlinkRet = unlink(toLink.c_str());
+        if (unlinkRet < 0) {
+            if (unlinkRet < 0) {
+                cout << "Failed to unlink symbol." << endl;
+            } else {
+                cout << "Succeed to unlink symbol." << endl;
+            }
+        }
+    }
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
 // C++ 并发编程，std::unique_lock与std::lock_guard区别示例 https://www.cnblogs.com/xudong-bupt/p/9194394.html
 背景
 平时看代码时，也会使用到std::lock_guard，但是std::unique_lock用的比较少。在看并发编程，这里总结一下。方便后续使用。
