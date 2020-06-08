@@ -1,4 +1,44 @@
 //------------------------------------------------------------------------------------------------
+// 通过设置unordered_map的reserve()方法，提高插入效率
+#include <iostream>
+#include <unordered_map>
+#include <sstream>
+#include <chrono>
+
+using namespace std;
+
+struct StudentInfo {
+    int id;
+    std::string name;
+};
+
+class Timer {
+public:
+    ~Timer() {
+        chrono::steady_clock::time_point end = chrono::steady_clock::now();
+        chrono::duration<double> timeUsed = chrono::duration_cast<chrono::duration<double>>(end - start_);
+        cout << "Elapse time : " << timeUsed.count() << "s" << endl;
+    }
+
+private:
+    chrono::steady_clock::time_point start_ = chrono::steady_clock::now();;
+};
+
+int main() {
+    unordered_map<int, StudentInfo> idStudentMap;
+    int maxNumber = 1000000;
+    idStudentMap.reserve(maxNumber);
+//    idStudentMap.rehash(maxNumber);
+//    unordered_map<int, int> idIdMap;
+    Timer timer;
+    for (int i = 0; i < maxNumber; ++i) {
+        idStudentMap.emplace(i, StudentInfo{i, "Kite"}); // 0.477314s  reserve()后：0.384201s
+//        idStudentMap.insert(make_pair(i, StudentInfo{i, "Kite"})); // 0.488069s
+//        idIdMap.emplace(i, i); // 0.285275s
+    }
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
 // Linux判断目录是否为空
 #include <iostream>
 #include <dirent.h>
