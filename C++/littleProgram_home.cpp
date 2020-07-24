@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------------------------
-// C++ 11 读写锁 https://blog.csdn.net/zxc024000/article/details/88814461
+// C++ 11 读写锁 https://blog.csdn.net/zxc024000/article/details/88814461 https://www.cnblogs.com/chen-cs/p/13065948.html
 // 需要自己实现读写锁
 #include <iostream>
 #include <mutex>
