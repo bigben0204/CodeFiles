@@ -1,4 +1,373 @@
 //------------------------------------------------------------------------------------------------
+// C++ 11 读写锁 https://blog.csdn.net/zxc024000/article/details/88814461
+// 需要自己实现读写锁
+#include <iostream>
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+class RWLock {
+public:
+    RWLock() : readCount_(0), writeCount_(0), isWriting_(false) {}
+
+    virtual ~RWLock() = default;
+
+    void lockWrite() {
+        std::unique_lock<std::mutex> gurad(mutex_);
+        ++writeCount_;
+        writeCond_.wait(gurad, [=] { return (0 == readCount_) && !isWriting_; });
+        isWriting_ = true;
+    }
+
+    void unlockWrite() {
+        std::unique_lock<std::mutex> gurad(mutex_);
+        isWriting_ = false;
+        if (0 == (--writeCount_)) {
+            // All read can go on
+            readCond_.notify_all();
+        } else {
+            // One write can go on
+            writeCond_.notify_one();
+        }
+    }
+
+    void lockRead() {
+        std::unique_lock<std::mutex> gurad(mutex_);
+        readCond_.wait(gurad, [=] { return 0 == writeCount_; });
+        ++readCount_;
+    }
+
+    void unlockRead() {
+        std::unique_lock<std::mutex> gurad(mutex_);
+        if (0 == (--readCount_) && writeCount_ > 0) {
+            // One write can go on
+            writeCond_.notify_one();
+        }
+    }
+
+private:
+    volatile int readCount_;
+    volatile int writeCount_;
+    volatile bool isWriting_;
+    std::mutex mutex_;
+    std::condition_variable readCond_;
+    std::condition_variable writeCond_;
+};
+
+class ReadGuard {
+public:
+    explicit ReadGuard(RWLock& lock) : rwLock_(lock) {
+        rwLock_.lockRead();
+    }
+
+    virtual ~ReadGuard() {
+        rwLock_.unlockRead();
+    }
+
+    ReadGuard(const ReadGuard&) = delete;
+
+    ReadGuard& operator=(const ReadGuard&) = delete;
+
+private:
+    RWLock& rwLock_;
+};
+
+class WriteGuard {
+public:
+    explicit WriteGuard(RWLock& lock) : rwLock_(lock) {
+        rwLock_.lockWrite();
+    }
+
+    virtual ~WriteGuard() {
+        rwLock_.unlockWrite();
+    }
+
+    WriteGuard(const WriteGuard&) = delete;
+
+    WriteGuard& operator=(const WriteGuard&) = delete;
+
+private:
+    RWLock& rwLock_;
+};
+
+RWLock g_rw_Lock;
+
+class Counter {
+public:
+    Counter() : value_(0) {}
+
+    std::size_t get() const {
+        ReadGuard autoSync(g_rw_Lock);
+        return value_;
+    }
+
+    void increase() {
+        WriteGuard autoSync(g_rw_Lock);
+        ++value_;
+    }
+
+    void reset() {
+        WriteGuard autoSync(g_rw_Lock);
+        value_ = 0;
+    }
+
+private:
+    std::size_t value_;
+};
+
+std::mutex g_io_mutex;
+
+void worker(Counter& counter) {
+    for (int i = 0; i < 3; ++i) {
+        counter.increase();
+        std::size_t value = counter.get();
+
+        std::lock_guard<std::mutex> lock(g_io_mutex);
+        std::cout << std::this_thread::get_id() << ": " << value << std::endl;
+    }
+}
+
+int main() {
+    Counter counter;
+
+    std::vector<std::thread> threads;
+    threads.emplace_back(&worker, std::ref(counter));
+    threads.emplace_back(&worker, std::ref(counter));
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    return 0;
+}
+// 输出：
+0x80004af50: 1
+0x80004b0e0: 2
+0x80004af50: 3
+0x80004b0e0: 4
+0x80004af50: 5
+0x80004b0e0: 6
+
+
+// C++ 17 读写锁 
+// https://segmentfault.com/a/1190000006941870?utm_source=tag-newest
+#include <iostream>
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+class Counter {
+public:
+    Counter() : value_(0) {}
+
+    std::size_t get() const {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        return value_;
+    }
+
+    void increase() {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        ++value_;
+    }
+
+    void reset() {
+        std::unique_lock<std::shared_mutex> lock(mutex_);
+        value_ = 0;
+    }
+
+private:
+    mutable std::shared_mutex mutex_;
+    std::size_t value_;
+};
+
+std::mutex g_io_mutex;
+
+void worker(Counter& counter) {
+    for (int i = 0; i < 3; ++i) {
+        counter.increase();
+        std::size_t value = counter.get();
+
+        std::lock_guard<std::mutex> lock(g_io_mutex);
+        std::cout << std::this_thread::get_id() << ": " << value << std::endl;
+    }
+}
+
+int main() {
+    Counter counter;
+
+    std::vector<std::thread> threads;
+    threads.emplace_back(&worker, std::ref(counter));
+    threads.emplace_back(&worker, std::ref(counter));
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    return 0;
+}
+// 输出：
+0x80004af50: 1
+0x80004b090: 2
+0x80004af50: 3
+0x80004b090: 4
+0x80004af50: 5
+0x80004b090: 6
+
+
+// https://www.jianshu.com/p/86abf93a05e7
+#include <iostream>
+
+#include <mutex>
+#include <shared_mutex>
+#include <thread>
+#include <list>
+
+#define READ_THREAD_COUNT 16
+#define LOOP_COUNT 50000
+
+typedef std::shared_lock<std::shared_mutex> ReadLock;
+typedef std::lock_guard<std::shared_mutex> WriteLock;
+typedef std::lock_guard<std::mutex> NormalLock;
+
+class Shared_mutex_counter {
+public:
+    Shared_mutex_counter() = default;
+
+    unsigned int get() const {
+        ReadLock lock(mutex);
+        return value;
+    }
+
+    void increment() {
+        WriteLock lock(mutex);
+        value++;
+    }
+
+private:
+    mutable std::shared_mutex mutex;
+    unsigned int value = 0;
+};
+
+class Mutex_counter {
+public:
+    Mutex_counter() = default;
+
+    unsigned int get() const {
+        NormalLock lock(mutex);
+        return value;
+    }
+
+    void increment() {
+        NormalLock lock(mutex);
+        value++;
+    }
+
+private:
+    mutable std::mutex mutex;
+    unsigned int value = 0;
+};
+
+class Timer {
+public:
+    Timer() {
+        m_begin = std::chrono::high_resolution_clock::now();
+    }
+
+    ~Timer() {
+        m_end = std::chrono::high_resolution_clock::now();
+        Consuming();
+    }
+
+    void Consuming() {
+        std::cout << "Time-consuming:"
+                  << std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(m_end - m_begin).count()
+                  << std::endl;
+    }
+
+private:
+    std::chrono::high_resolution_clock::time_point m_begin;
+    std::chrono::high_resolution_clock::time_point m_end;
+};
+
+void test_shared_mutex() {
+    Shared_mutex_counter counter;
+    unsigned int temp;
+
+    auto writer = [&counter]() {
+        for (unsigned int i = 0; i < LOOP_COUNT; i++) {
+            counter.increment();
+        }
+    };
+
+    auto reader = [&counter, &temp]() {
+        for (unsigned int i = 0; i < LOOP_COUNT; i++) {
+            temp = counter.get();
+        }
+    };
+
+    std::cout << "----- shared mutex test ------" << std::endl;
+    std::list<std::shared_ptr<std::thread>> threadlist;
+    {
+        Timer timer;
+
+        for (int i = 0; i < READ_THREAD_COUNT; i++) {
+            threadlist.push_back(std::make_shared<std::thread>(reader));
+        }
+        std::shared_ptr<std::thread> pw = std::make_shared<std::thread>(writer);
+
+        for (auto& it : threadlist) {
+            it->join();
+        }
+        pw->join();
+    }
+    std::cout << "count:" << counter.get() << ", temp:" << temp << std::endl;
+}
+
+void test_mutex() {
+    Mutex_counter counter;
+    unsigned int temp;
+
+    auto writer = [&counter]() {
+        for (unsigned int i = 0; i < LOOP_COUNT; i++) {
+            counter.increment();
+        }
+    };
+
+    auto reader = [&counter, &temp]() {
+        for (unsigned int i = 0; i < LOOP_COUNT; i++) {
+            temp = counter.get();
+        }
+    };
+
+    std::cout << "----- mutex test ------" << std::endl;
+    std::list<std::shared_ptr<std::thread>> threadlist;
+    {
+        Timer timer;
+
+        for (int i = 0; i < READ_THREAD_COUNT; i++) {
+            threadlist.push_back(std::make_shared<std::thread>(reader));
+        }
+
+        std::shared_ptr<std::thread> pw = std::make_shared<std::thread>(writer);
+
+        for (auto& it : threadlist) {
+            it->join();
+        }
+        pw->join();
+    }
+    std::cout << "count:" << counter.get() << ", temp:" << temp << std::endl;
+}
+
+int main() {
+    test_shared_mutex();
+    test_mutex();
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
 // 通过设置unordered_map的reserve()方法，提高插入效率
 #include <iostream>
 #include <unordered_map>
