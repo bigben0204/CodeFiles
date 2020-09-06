@@ -935,7 +935,399 @@ $ git checkout .
 
 //--------------------------------------------------------------------------------------------------------------
 # 深入理解Git的实现原理 https://www.cnblogs.com/mamingqian/p/9711975.html
+3.1 Git数据库
+ 
+我们提到了“Git数据库”，这是什么玩意儿呢？为了能够说清楚Git数据库的概念，我们暂且引入三个Git指令，通过这三个命令，我们就能一探git数据库的究竟。
+git init  用于创建一个空的git仓库，或重置一个已存在的git仓库
+git hash-object  git底层命令，用于向Git数据库中写入数据
+git cat-file  git底层命令，用于查看Git数据库中数据
 
+首先，我们用git init新建一个空的git仓库。（希望小伙伴们可以跟着我的节奏一起来实际操作一下，会加深理解。如果有还没有安装好git工具的同学，请自行百度安装，我不会讲安装的过程。）
+
+我们发现，GitTest目录下，除隐藏目录.git之外，并没有其他文件或文件夹。
+ 
+我们通过find .git命令查看新生成的空git仓库的结构，会发现其中有一个objects文件夹，这就是git数据库的存储位置。
+
+3.1 Git数据库的写入操作
+ 
+紧接着，我们利用git底层命令git hash-object向git数据库中写入一些内容。执行命令：
+$ echo "version 1" | git hash-object -w --stdin
+83baae61804e65cc73a7201a7252750c76066a30
+
+$ find .git/objects/ -type f
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+
+"|"表示这是一条通道命令，意思是把“|”前边的命令的输出作为“|”后边命令的输入。git hash-object -w --stdin 的意思是向git数据库中写入一条数据（-w）,这条数据的内容从标准输入中读取（--stdin）。
+ 
+命令执行后，会返回个长度为40位的hash值，这个hash值是将待存储的数据外加一个头部信息一起做SHA-1校验运算而得的校验和。在git数据库中，它有一个名字，叫做“键值（key）”。相应的，git数据库其实是一个简单的“键值对（key-value）”数据库。事实上，你向该数据库中插入任意类型的内容，它都会返回一个键值。通过返回的键值可以在任意时刻再次检索该内容。
+ 
+此时，我们再次执行find .git/objects/ -type f命令查看objects目录，会发现目录中多出了一个文件，这个文件存储在以新存入数据对应hash值的前2位命名的文件夹内，文件名为hash值的后38位。这就是git数据库的存储方式，一个文件对应一条内容，就是这么简单直接。
+
+3.2 Git数据库的查询操作
+ 
+我们可以通过git cat-file这个git底层命令查看数据库中某一键值对应的数据。执行
+ 
+$ git cat-file -t  83baa
+blob
+
+$ git cat-file -p 83baa
+version 1
+ 
+其中，-t选项用于查看键值对应数据的类型，-p选项用于查看键值对应的数据内容，83bba为数据键值的简写。
+ 
+由执行结果可见，所查询的键值对应的数据类型为blob，数据内容为“version 1”。blob对象我们称之为数据对象，这是git数据库能够存储的对象类型之一，后面我们还会讲到另外两种对象分别是树（tree）对象和提交（commit）对象。
+ 
+截止到这里，你已经掌握了如何向git数据库里存入内容和取出内容。这很简单但是却意义非凡，因为对git数据库的操作正是git系统的核心——git的版本控制功能就是基于它的对象数据库实现的。在git数据库里，存储着纳入git版本管理的所有文件的所有版本的完整镜像。
+ 
+git这么简单吗？不用怀疑，git就是这么简单，我们已经准确的抓住了它的根本要义——对象数据库。接下来我们会利用git数据库搭建起git的高楼大厦。
+
+3.3 使用Git跟踪文件变更
+ 
+我们明白，所谓跟踪文件变更，只不过是把文件变更过程中的各个状态完整记录下来。
+ 
+我们模拟一次文件变更的过程，看看仅仅利用git的对象数据库能不能实现“跟踪文件变更”的功能。
+ 
+首先，我们执行
+ 
+$ echo "version 1" > file.txt
+ 
+$ git hash-object -w file.txt
+83baae61804e65cc73a7201a7252750c76066a30
+ 
+我们把文本“version 1”写入file.txt中，并利用git hash-object -w file.txt命令将其保存入数据库中。如果你足够细心，会发现返回的hash键值和利用echo "version 1" | git hash-object -w --stdin写入数据库时是一致的，这很正常，因为我们写入的内容相同。git hash-object命令在只指定-w选项的时候，会把file.txt文件内容写入数据库。
+
+此时，执行
+ 
+$ find .git/objects -type f
+
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+
+ 
+会发现.git/objects目录中，依然只有一个文件。可见，git数据库存储文件时，只关心文件内容，与文件的名字无关。
+
+接下来，我们修改file.txt的内容，执行
+ 
+$ echo "version 2" > file.txt
+$ git hash-object -w file.txt
+1f7a7a472abf3dd9643fd615f6da379c4acb3e3a
+$ find .git/objects -type f
+.git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+
+ 
+我们发现，.git/objects下多出了一个文件，这是我们新保存进数据库的file.txt。接下来，我们执行git cat-file搞清楚这两条数据的内容分别是什么。执行
+ 
+$git cat-file -p 83baa
+version 1
+$git cat-file -p 1f7a7a
+version 2
+ 
+我们发现，file.txt的变更过程被完整的记录下来了。
+
+当前的file.txt中保存的内容是“version 2”，如果我们想把文件恢复到修改为“version 2”之前的状态，只需执行
+ 
+$ cat file.txt
+version 2
+$ git cat-file -p 83baa > file.txt
+$ cat file.txt
+version 1
+
+file.txt的内容成功恢复到了修改前的状态，变成了“version 1”。这其实就是版本回滚的实质。
+
+3.4 利用树对象（tree object）解决文件名保存和文件组织问题
+ 
+Git利用树对象（tree object）解决文件名保存的问题，树对象也能够将多个文件组织在一起。
+
+Git通过树（tree）对象将数据（blob）对象组织起来，这很类似于一种文件系统——blob对象对应文件内容，tree对象对应文件的目录和节点。一个树（tree）对象包含一条或多条记录，每条记录含有一个指向blob对象或tree对象的SHA-1指针，以及相应的模式、类型、文件名。
+ 
+有了树对象，我们就可以将文件系统任何时间点的状态保存在git数据库中，这是不是很激动人心呢？你的一个复杂的项目可能包含成百上千个文件和文件目录，有了树对象，这一切都不是问题。
+ 
+创建树对象
+ 
+通常，Git根据某一时刻暂存区所表示的状态创建并记录一个对应的树对象，如此重复便可以依次记录一系列的树对象。Git的暂存区是一个文件——.git/index。下面，我们通过创建树对象的过程来认识暂存区和树对象。
+ 
+为了创建一个树对象，我们需要通过暂存一些文件来创建一个暂存区。为此我们引入两个命令：
+ 
+git update-index     git底层命令，用于创建暂存区
+git ls-files --stage    git底层命令，用于查看暂存区内容
+git write-tree            git底层命令，用于将暂存区内容写入一个树对象
+
+
+我们将file.txt的第一个版本放入暂存区，执行
+ 
+$ find .git/index
+find: ‘.git/index’: No such file or directory
+$ git update-index --add file.txt
+$ find .git/index
+.git/index
+$ cat .git/index
+
+$ find .git/objects/ -type f
+.git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+$ git ls-files --stage
+100644 83baae61804e65cc73a7201a7252750c76066a30 0    file.txt
+$ git write-tree
+391a4e90ba882dbc9ea93855103f6b1fa6791cf6
+$ find .git/objects/ -type f
+.git/objects/39/1a4e90ba882dbc9ea93855103f6b1fa6791cf6
+.git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+
+分析执行结果：
+ 
+首先，我们注意.git/index文件的变化。在添加file.txt到暂存区前，index文件并不存在，这说明暂存区还没有创建。添加file.txt到暂存区的同时，index文件被创建。
+ 
+其次，我们看git数据库的变化。我们发现在执行git update-index 之后，git数据库并没有改变，依然是只有两条数据。在执行git write-tree之后，git数据库中多出了一条新的记录，键值为391a4e90ba882dbc9ea93855103f6b1fa6791cf6。
+ 
+我们执行git cat-file来查看一下多出来的这条记录是什么内容。执行
+ 
+$ git cat-file -t 391a4e
+tree
+$ git cat-file -p 391a4e
+100644 blob 83baae61804e65cc73a7201a7252750c76066a30    file.txt
+ 
+由执行结果可见，git数据库中新增加的记录是一个tree对象，该tree对象指向一个blob对象，hash键值为
+ 
+83baae61804e65cc73a7201a7252750c76066a30
+ 
+这一个blob对象是之前我们添加进数据库的。
+
+以上我们添加了一个已经存在在git数据库中的文件到暂存区，如果我们新建一个未曾保存到git数据库的文件存入暂存区，进而保存为tree对象，会有什么不同吗？我们试试看。执行
+ 
+$ echo "new file" > new
+$ git update-index --add new
+$ find .git/objects/ -type f
+.git/objects/39/1a4e90ba882dbc9ea93855103f6b1fa6791cf6 #tree对象
+.git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a #blob对象
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30 #blob对象
+.git/objects/fa/49b077972391ad58037050f2a75f74e3671e92 #新增的blob对象
+$ git write-tree
+228e49bb0bf19df94b49c3474f5d4ee55a371fbe #新生成的tree对象键值
+$ find .git/objects/ -type f
+.git/objects/39/1a4e90ba882dbc9ea93855103f6b1fa6791cf6
+.git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a
+.git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+.git/objects/fa/49b077972391ad58037050f2a75f74e3671e92
+.git/objects/22/8e49bb0bf19df94b49c3474f5d4ee55a371fbe #新增的tree对象
+
+$ git ls-files --stage
+100644 83baae61804e65cc73a7201a7252750c76066a30 0    file.txt
+100644 fa49b077972391ad58037050f2a75f74e3671e92 0    new
+
+
+ 
+由执行结果我们可以看到，这一次执行update-index之后，和上次不同，git数据库发生了变化，新增加了一条hash键值为“fa49b0”的数据；暂存区中也多出了文件new的信息。
+
+这说明两个问题：
+如果添加git数据库中尚未存储的数据到暂存区，则在执行update-index的时候，会同时把该数据保存到git数据库。
+添加文件进入暂存区的操作是追加操作，之前已经加入暂存区的文件依然存在——很多人会有误区，认为变更提交之后，暂存区就清空了。
+此时，我们查看新添加的树对象，执行
+
+$ git cat-file -p 228e49
+100644 blob 83baae61804e65cc73a7201a7252750c76066a30    file.txt
+100644 blob fa49b077972391ad58037050f2a75f74e3671e92    new
+ 
+此次write-tree写入数据库的是tree对象包含了两个文件。
+ 
+更进一步，我们是否能将一个子文件夹保存到树对象呢？尝试一下，执行
+ 
+$ mkdir new_dir
+$ git update-index --add new_dir
+error: new_dir: is a directory - add files inside instead
+fatal: Unable to process path new_dir
+ 
+我们发现，无法将一个新建的空文件夹添加到暂存区。错误提示告诉我们，应该将文件将文件夹中的文件加入到暂存区（add files inside instead）。
+
+
+OK，接下来，我们在新建的文件夹下写入一个文件，再尝试将这一文件加入暂存区。执行
+ 
+$ echo "file in new dir" > new_dir/new
+$ git update-index --add new_dir/new
+$ git ls-files --stage
+100644 83baae61804e65cc73a7201a7252750c76066a30 0    file.txt
+100644 fa49b077972391ad58037050f2a75f74e3671e92 0    new
+100644 138c554a661371c9c40ae62dfb5d51b48b9b3f6b 0    new_dir/new
+
+$ git write-tree
+06564b76e0fcf9f3600fd055265cf2d4c45847a8
+
+$ git cat-file -p 06564b
+100644 blob 83baae61804e65cc73a7201a7252750c76066a30    file.txt
+100644 blob fa49b077972391ad58037050f2a75f74e3671e92    new
+040000 tree 8d6bc0bdbba1d28caf4ee66a125169500080e206    new_dir
+
+
+从执行结果可见，文件夹new_dir对应一个tree对象。
+
+至此，在git数据库中，我们可以完整的记录文件的状态、文件夹的状态；并且可以把多个文件或文件夹组织在一起，记录他们的变更过程。我们离一个完善的版本控制系统似乎已经不远了，而这一切实现起来又是如此简单——我们只是通过几个命令操作git数据库就完成了这些功能。
+ 
+接下来，我们只要把数据库中各个版本的时序关系记录下来，再把对每一个版本更新的注释记录下来，不就完成了一个逻辑简单、功能强大、操作灵活的版本控制系统吗？
+ 
+那么，如何记录版本的时序关系，如何记录版本的更新注释呢？这就要引入另一个git数据对象——提交对象（commit object）。
+
+3.5 利用提交对象（commit object）记录版本间的时序关系和版本注释
+ 
+commit对象能够帮你记录什么时间，由什么人，因为什么原因提交了一个新的版本，这个新的版本的父版本又是谁。
+ 
+git提供了底层命令commit-tree来创建提交对象（commit object），我们需要为这个命令指定一个被提交的树对象的hash键值，以及该提交对象的父提交对象（如果是第一次提交，不需要指定父对象）。
+ 
+我们尝试将之前创建的树对象提交为commit 对象，执行
+$ git write-tree
+cb0fbcc484a3376b3e70958a05be0299e57ab495
+$ git commit-tree cb0fbcc -m "first commit"
+7020a97c0e792f340e00e1bb8edcbafcc4dfb60f
+$ git cat-file 7020a97
+tree cb0fbcc484a3376b3e70958a05be0299e57ab495
+author john <john@163.com> 1537961478 +0800
+committer john <john@163.com> 1537961478 +0800
+
+first commit
+ 
+在git commit-tree命令中，-m选项用于指定本次提交的注释。
+ 
+我们可以很清楚的看到，一个提交对象包含着所提交版本的树对象hash键值，author和commiter，以及修改和提交的时间，最后是本次提交的注释。
+ 
+其中committer和author是通过git config命令设置的。
+ 
+接下来，修改某个文件，重新创建一个树对象，并将这一树对象提交，作为项目的第二个提交版本。执行
+$ echo "new version" > file.txt
+$ git update-index file.txt
+$ git write-tree
+848e967643b947124acacc3a2d6c5a13c549231c
+$ git commit-tree 848e96 -p 7020a97 -m "second commit"
+e838c8678ef789df84c2666495663060c90975d7
+$ git cat-file -p e838c
+tree 848e967643b947124acacc3a2d6c5a13c549231c
+parent 7020a97c0e792f340e00e1bb8edcbafcc4dfb60f
+author john <john@163.com> 1537962442 +0800
+committer john <john@163.com> 1537962442 +0800
+
+second commit
+ 
+我们可以按照上述步骤，再提交第三个版本。
+ 
+$ echo "another version" > file.txt
+$ git update-index file.txt
+$ git write-tree
+92867fcc5e0f78c195c43d1de25aa78974fa8103
+$ git commit-tree 92867 -p e838c -m "third commit"
+491404fa6e6f95eb14683c3c06d10ddc5f8e883f
+$ git cat-file -p 49140
+tree 92867fcc5e0f78c195c43d1de25aa78974fa8103
+parent e838c8678ef789df84c2666495663060c90975d7
+author john <john@163.com> 1537963274 +0800
+committer john <john@163.com> 1537963274 +0800
+ 
+
+third commit
+ 
+提交完三个版本，我们通过git log 查看最近一个提交对象的提交记录
+ 
+$ git log 49140
+commit 491404fa6e6f95eb14683c3c06d10ddc5f8e883f
+Author: john <john@163.com>
+Date:   Wed Sep 26 20:01:14 2018 +0800
+
+    third commit
+
+commit e838c8678ef789df84c2666495663060c90975d7
+Author: john <john@163.com>
+Date:   Wed Sep 26 19:47:22 2018 +0800
+
+    second commit
+
+commit 7020a97c0e792f340e00e1bb8edcbafcc4dfb60f
+Author: john <john@163.com>
+Date:   Wed Sep 26 19:31:18 2018 +0800
+
+    first commit
+
+ 
+太神奇了： 就在刚才，我们围绕git数据库，仅凭几个底层数据库操作便完成了一个 Git 提交历史的创建。到此为止，我们已经完全掌握了git的内在逻辑。
+ 
+接触过git的小伙伴会发现，以上我们用到的这些指令在使用git过程中是用不到的。这是为什么呢？因为git对以上这些指令进行了封装，给用户提供了更便捷的操作命令，如add，commit等。
+ 
+每次我们运行 git add 和 git commit 命令时， Git 所做的实质工作是将被改写的文件保存为数据对象，更新暂存区，记录树对象，最后创建一个指明了顶层树对象和父提交的提交对象。 这三种主要的 Git 对象——数据对象、树对象、提交对象——最初均以单独文件的形式保存在 .git/objects 目录下。
+ 
+然而，小问题依然存在，截止目前为止，我们对版本和数据对象的操作都是基于hash键值的，这些毫无直观含义的字符串让人很头疼，不会有人愿意一直急着最新提交对应的hash键值的。git不会允许这样的问题存在的，它通过引入“引用（references）”来解决这一问题。
+ 
+3.6 Git的引用
+ 
+Git的引用（references）保存在.git/refs目录下。git的引用类似于一个指针，它指向的是某一个hash键值。
+ 
+创建一个引用实在再简单不过。我们只需把一个git对象的hash键值保存在以引用的名字命名的文件中即可。
+ 
+执行
+$ echo "491404fa6e6f95eb14683c3c06d10ddc5f8e883f" > .git/refs/heads/master
+$ cat .git/refs/heads/master
+491404fa6e6f95eb14683c3c06d10ddc5f8e883f
+ 
+就这样，我们便成功的建立了一个指向最新一个提交的引用，引用名为master
+ 
+在此之前我们查看提交记录需要执行 git log 491404，现在只需执行git log master。
+ 
+$ git log 491404
+commit 491404fa6e6f95eb14683c3c06d10ddc5f8e883f (HEAD -> master)
+Author: john <john@163.com>
+Date: Wed Sep 26 20:01:14 2018 +0800
+ 
+
+third commit
+ 
+
+commit e838c8678ef789df84c2666495663060c90975d7
+Author: john <john@163.com>
+Date: Wed Sep 26 19:47:22 2018 +0800
+ 
+
+second commit
+ 
+
+commit 7020a97c0e792f340e00e1bb8edcbafcc4dfb60f
+Author: john <john@163.com>
+Date: Wed Sep 26 19:31:18 2018 +0800
+ 
+
+first commit
+$ git log master
+commit 491404fa6e6f95eb14683c3c06d10ddc5f8e883f (HEAD -> master)
+Author: john <john@163.com>
+Date: Wed Sep 26 20:01:14 2018 +0800
+ 
+
+third commit
+ 
+
+commit e838c8678ef789df84c2666495663060c90975d7
+Author: john <john@163.com>
+Date: Wed Sep 26 19:47:22 2018 +0800
+ 
+
+second commit
+ 
+
+commit 7020a97c0e792f340e00e1bb8edcbafcc4dfb60f
+Author: john <john@163.com>
+Date: Wed Sep 26 19:31:18 2018 +0800
+ 
+
+first commit
+
+ 
+结果完全相同。
+ 
+Git并不提倡直接编辑引用文件，它提供了一个底层命令update-ref来创建或修改引用文件。
+ 
+echo "491404fa6e6f95eb14683c3c06d10ddc5f8e883f" > .git/refs/heads/master 命令可以简单的写作：
+ 
+$ git update-ref refs/heads/master 49140
+ 
+这基本就是 Git 分支的本质：一个指向某一系列提交之首的指针或引用。
+
+4. Git基本原理总结
+Git的核心是它的对象数据库，其中保存着git的对象，其中最重要的是blob、tree和commit对象，blob对象实现了对文件内容的记录，tree对象实现了对文件名、文件目录结构的记录，commit对象实现了对版本提交时间、版本作者、版本序列、版本说明等附加信息的记录。这三类对象，完美实现了git的基础功能：对版本状态的记录。
+Git引用是指向git对象hash键值的类似指针的文件。通过Git引用，我们可以更加方便的定位到某一版本的提交。Git分支、tags等功能都是基于Git引用实现的。
 //--------------------------------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------------------------------
