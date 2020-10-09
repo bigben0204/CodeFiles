@@ -1,4 +1,104 @@
 //------------------------------------------------------------------------------------------------
+// C++ 17的if复合表达式语法  https://www.bfilipek.com/2018/04/refactoring-with-c17-stdoptional.html
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    std::pair<int, bool> pair1 = {1, true};
+    if (auto[num, flag] = pair1; flag) {
+        cout << "flag is true" << endl;
+    }
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// C++ 的 string 为什么不提供 split 函数 https://www.zhihu.com/question/36642771/answer/68396084
+// 使用istream_iterator直接输出
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    auto sentence = "And I feel fine...";
+    istringstream iss(sentence);
+    copy(istream_iterator<string>(iss), istream_iterator<string>(), ostream_iterator<string>(cout, "\n"));
+    return 0;
+}
+// 输出：
+And
+I
+feel
+fine...
+
+// 使用istream_iterator和back_inserter构造vector<string>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    auto sentence = "And I feel fine...";
+    istringstream iss(sentence);
+    vector<string> tokens;
+    copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter(tokens));
+    for_each(tokens.begin(), tokens.end(), [](const auto& token) { cout << token << endl; });
+    return 0;
+}
+
+// 直接由istream_iterator构造vector<string>
+#include <iostream>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    auto sentence = "And I feel fine...";
+    istringstream iss(sentence);
+    vector<string> tokens{istream_iterator<string>(iss), istream_iterator<string>()};
+    for_each(tokens.begin(), tokens.end(), [](const auto& token) { cout << token << endl; });
+    return 0;
+}
+
+//-----
+// 一个优雅的split实现：
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+template<typename T>
+void split(const std::string& s, T& tokens, const std::string& delimiters = " ") {
+    std::string::size_type lastPos = s.find_first_not_of(delimiters);
+    std::string::size_type pos = s.find_first_of(delimiters, lastPos);
+    while (pos != std::string::npos || lastPos != std::string::npos) {
+        tokens.push_back(s.substr(lastPos, pos - lastPos));
+        lastPos = s.find_first_not_of(delimiters, pos);
+        pos = s.find_first_of(delimiters, lastPos);
+    }
+}
+
+int main() {
+    auto sentence = "And I feel fine...           ";
+    vector<string> tokens;
+    split(sentence, tokens);
+    for_each(tokens.begin(), tokens.end(), [](const auto& token) { cout << token << endl; });
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
 // C++ 11 读写锁 https://blog.csdn.net/zxc024000/article/details/88814461 https://www.cnblogs.com/chen-cs/p/13065948.html
 // 需要自己实现读写锁
 #include <iostream>

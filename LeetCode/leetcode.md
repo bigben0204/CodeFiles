@@ -10139,9 +10139,165 @@ TEST_F(SolutionTest, Test2) {
 
 所以，大家不要被各种高大上的名词吓到，再多的困难问题，奇技淫巧，也不过是基本套路的不断升级组合产生的。只要把住算法的底层原理，即可举一反三，逐个击破。
 
+## [84. 柱状图中最大的矩形](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)
 
+https://leetcode-cn.com/problems/largest-rectangle-in-histogram/solution/bao-li-jie-fa-zhan-by-liweiwei1419/ 可以看最后的单调栈总结
 
+1.暴力解法
 
+遍历以每个格子为高的矩形，找最大矩形：
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 超时
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        auto area = 0;
+        for (int index = 0; index < heights.size(); ++index) {
+            auto height = heights.at(index);
+
+            auto leftIndex = index;
+            while (leftIndex > 0 && heights.at(leftIndex - 1) >= height) {
+                --leftIndex;
+            }
+
+            auto rightIndex = index;
+            while (rightIndex < heights.size() - 1 && heights.at(rightIndex + 1) >= height) {
+                ++rightIndex;
+            }
+
+            auto tmpArea = height * (rightIndex - leftIndex + 1);
+            area = max(area, tmpArea);
+        }
+        return area;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> heights = {2, 1, 5, 6, 2, 3};
+    EXPECT_EQ(10, solution.largestRectangleArea(heights));
+}
+```
+
+2.单调栈+哨兵
+
+```c++
+class Solution {  // 12ms
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        auto area = 0;
+        heights.insert(heights.begin(), 0);
+        heights.push_back(0);
+
+        stack<int> stack;
+        stack.push(0);
+        for (int index = 1; index < heights.size(); ++index) {
+            while (heights.at(index) < heights.at(stack.top())) {
+                auto curIndex = stack.top();
+                stack.pop();
+                auto curHeight = heights.at(curIndex);
+                auto curWidth = index - stack.top() - 1;
+                area = max(area, curWidth * curHeight);
+            }
+            stack.push(index);
+        }
+        return area;
+    }
+};
+```
+
+## [136. 只出现一次的数字](https://leetcode-cn.com/problems/single-number/)
+
+1. 使用HashMap遍历一遍存储每个数字的个数，再从HashMap里找一遍哪个数字个数为1，时间和空间复杂度都为O(N)：
+
+```c++
+#include <unordered_map>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 80 ms/20 MB
+public:
+    int singleNumber(vector<int>& nums) {
+        unordered_map<int, int> numCountMap;
+        for_each(nums.begin(), nums.end(), [&](auto num) { ++numCountMap[num]; });
+        auto iter = find_if(numCountMap.begin(), numCountMap.end(),
+                            [](const auto& numCountPair) { return numCountPair.second == 1; });
+        return iter->first;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> nums = {2, 2, 1};
+    EXPECT_EQ(1, solution.singleNumber(nums));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<int> nums = {4, 1, 2, 1, 2};
+    EXPECT_EQ(4, solution.singleNumber(nums));
+}
+
+```
+
+2. 使用HashSet存储数字，发现已经存在，就删除掉，不存在就插入，最后留下的就是只出现一次的数字，时间和空间复杂度都为O(N)：
+
+```c++
+class Solution {  // 80 ms/19.8 MB
+public:
+    int singleNumber(vector<int>& nums) {
+        unordered_set<int> numSet;
+        for_each(nums.begin(), nums.end(), [&](auto num) {
+            if (numSet.find(num) != numSet.end()) {
+                numSet.erase(num);
+            } else {
+                numSet.insert(num);
+            }
+        });
+        
+        return *numSet.begin();
+    }
+};
+```
+
+3. 利用异或(XOR)的特性，使用线性时间：O(N)，不使用额外空间：O(1)：
+
+   1. 0 ⊕ 0 = 0， 0 ⊕ 1 = 1
+   2. 1 ⊕ 0 = 1，1 ⊕ 1 = 0
+   3. 满足交换律和结合律：a ⊕ b ⊕ a = (a ⊕ a) ⊕ b = 0 ⊕ b = b
+
+   总结下来就是：相同的数字⊕为0，不同的数字⊕为1
+
+   所以利用交换律和结合律：`num[0] ⊕ num[1] ⊕ ... num[n-1] = 所用重复数字异 ⊕ 唯一数字 = 0 ⊕ 唯一数字 = 唯一数字`
+
+```c++
+class Solution {  // 44 ms/16.7 MB
+public:
+    int singleNumber(vector<int>& nums) {
+        int num = nums.at(0);
+        for (int i = 1; i < nums.size(); ++i) {
+            num ^= nums.at(i);
+        }
+        return num;
+    }
+};
+```
 
 
 
