@@ -6,7 +6,7 @@ using namespace std;
 
 int main() {
     std::pair<int, bool> pair1 = {1, true};
-    if (auto[num, flag] = pair1; flag) {
+    if (auto[num, flag] = pair1; flag) {  // 这里同样可以使用auto&[num, flag]、const auto&[num, flag]或auto&&[num, flag]等引用方式
         cout << "flag is true" << endl;
     }
     return 0;
