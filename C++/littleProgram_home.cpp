@@ -1,4 +1,60 @@
 //------------------------------------------------------------------------------------------------
+// C++ template https://zhuanlan.zhihu.com/p/261146783
+// ²ÎÊı°ü
+#include <iostream>
+using namespace std;
+
+template<typename T>
+void DoSomething(T t) {
+    cout << "DoSometing: " << t << endl;
+}
+
+template<typename T>
+void EndOfDoSomthing(T t) {
+    cout << "EndOfDoSomthing: " << t << endl;
+}
+
+template<typename T>
+void Foo(T arg) {
+    EndOfDoSomthing(arg); //µİ¹é½â°ü½áÊø²Ù×÷
+    return;
+}
+
+template<typename T, typename ...Ts>
+void Foo(T arg, Ts... args) //ÕâÀïarg¾ÍÊÇµ±Ç°½â°ü³öµÄÊı¾İ£¬argsÊÇ´ıµİ¹é½â°üµÄÊı¾İ
+{
+    DoSomething(arg); //´¦Àíµ±Ç°½â°üÊı¾İ
+    Foo(args...); // µİ¹é½â°ü
+}
+
+int main() {
+    Foo(1, 1.5, 'a');
+};
+// Êä³ö£º
+DoSometing: 1
+DoSometing: 1.5
+EndOfDoSomthing: a
+//-------------------------------
+// ×Ô¶¯ÀàĞÍÍÆµ¼
+// auto&& ÍÆµ¼³öÀ´µÄÀàĞÍÊÇºÍÍ¨ÓÃÒıÓÃÒ»ÑùµÄ£¬»á¸ù¾İ±äÁ¿ÀàĞÍÎª×óÖµ»òÓÒÖµµÃµ½¶ÔÓ¦µÄ×óÓÒÖµÒıÓÃÀàĞÍ
+#include <iostream>
+
+using namespace std;
+
+template<typename T>
+class Type;
+
+int main() {
+    int i = 2;
+    auto&& i1 = i;  // ÀàĞÍÎªint&
+    Type<decltype(i1)> type1;  // error: aggregate 'Type<int&> type' has incomplete type and cannot be defined
+
+    auto&& i2 = 10;  // ÀàĞÍÎªint&&
+    Type<decltype(i2)> type2;  // error: aggregate 'Type<int&&> type2' has incomplete type and cannot be defined
+    return 0;
+}
+
+//------------------------------------------------------------------------------------------------
 // C++ 17µÄif¸´ºÏ±í´ïÊ½Óï·¨  https://www.bfilipek.com/2018/04/refactoring-with-c17-stdoptional.html
 #include <iostream>
 
@@ -22157,122 +22213,147 @@ CompositeÄ£Ê½Í¨¹ıºÍDecoratorÄ£Ê½ÓĞ×ÅÀàËÆµÄ½á¹¹Í¼£¬µ«ÊÇCompositeÄ£Ê½Ö¼ÔÚ¹¹ÔìÀà£¬¶
 #include <iostream>
 #include <string>
 #include <list>
-#include "boost/shared_ptr.hpp"
+#include <memory>
+
 using namespace std;
 
-class Company
-{
+class Company {
 public:
-	Company(const string& name): name_(name){ }
-	virtual ~Company() {}
-	virtual void add(boost::shared_ptr<Company> c) = 0;
-	virtual void remove(boost::shared_ptr<Company> c) = 0;
-	virtual void display(int depth) = 0;
-	virtual void lineOfDudy() = 0;
+    Company(const string& name) : name_(name) {}
+
+    virtual ~Company() {}
+
+    virtual void add(shared_ptr<Company> c) = 0;
+
+    virtual void remove(shared_ptr<Company> c) = 0;
+
+    virtual void display(int depth) = 0;
+
+    virtual void lineOfDudy() = 0;
+
 protected:
-	string name_;
+    string name_;
 };
 
-class ConcreteCompany: public Company
-{
+class ConcreteCompany : public Company {
 public:
-	ConcreteCompany(const string& name): Company(name){}
-	virtual void add(boost::shared_ptr<Company> c)
-	{
-		list_.push_back(c);
-	}
-	virtual void remove(boost::shared_ptr<Company> c)
-	{
-		list_.remove(c);
-	}
-	virtual void display(int depth)
-	{
-		cout << string(depth, '-') << name_ << endl;
-		for (list<boost::shared_ptr<Company> >::iterator iter = list_.begin(); iter != list_.end(); ++iter)
-		{
-			(*iter)->display(depth + 2);
-		}
-	}
-	virtual void lineOfDudy()
-	{
-		for (list<boost::shared_ptr<Company> >::iterator iter = list_.begin(); iter != list_.end(); ++iter)
-		{
-			(*iter)->lineOfDudy();
-		}
-	}
+    ConcreteCompany(const string& name) : Company(name) {}
+
+    virtual void add(shared_ptr<Company> c) {
+        list_.push_back(c);
+    }
+
+    virtual void remove(shared_ptr<Company> c) {
+        list_.remove(c);
+    }
+
+    virtual void display(int depth) {
+        cout << string(depth, '-') << name_ << endl;
+        for (auto iter = list_.begin(); iter != list_.end(); ++iter) {
+            (*iter)->display(depth + 2);
+        }
+    }
+
+    virtual void lineOfDudy() {
+        for (auto iter = list_.begin(); iter != list_.end(); ++iter) {
+            (*iter)->lineOfDudy();
+        }
+    }
+
 private:
-	list<boost::shared_ptr<Company> > list_;
+    list<shared_ptr<Company> >
+        list_;
 };
 
-class HRDepartment: public Company
-{
+class HRDepartment : public Company {
 public:
-	HRDepartment(const string& name): Company(name){}
-	virtual void add(boost::shared_ptr<Company> c)
-	{		
-	}
-	virtual void remove(boost::shared_ptr<Company> c)
-	{	
-	}
-	virtual void display(int depth)
-	{
-		cout << string(depth, '-') << name_ << endl;
-	}
-	virtual void lineOfDudy()
-	{
-		cout << name_ << ": employees management." << endl; 
-	}
+    HRDepartment(const string& name) : Company(name) {}
+
+    virtual void add(shared_ptr<Company> c) {
+    }
+
+    virtual void remove(shared_ptr<Company> c) {
+    }
+
+    virtual void display(int depth) {
+        cout << string(depth, '-') << name_ << endl;
+    }
+
+    virtual void lineOfDudy() {
+        cout << name_ << ": employees management." << endl;
+    }
 };
 
-class FinanceDepartment: public Company
-{
+class FinanceDepartment : public Company {
 public:
-	FinanceDepartment(const string& name): Company(name){}
-	virtual void add(boost::shared_ptr<Company> c)
-	{		
-	}
-	virtual void remove(boost::shared_ptr<Company> c)
-	{	
-	}
-	virtual void display(int depth)
-	{
-		cout << string(depth, '-') << name_ << endl;
-	}
-	virtual void lineOfDudy()
-	{
-		cout << name_ << ": finance management." << endl; 
-	}
+    FinanceDepartment(const string& name) : Company(name) {}
+
+    virtual void add(shared_ptr<Company> c) {
+    }
+
+    virtual void remove(shared_ptr<Company> c) {
+    }
+
+    virtual void display(int depth) {
+        cout << string(depth, '-') << name_ << endl;
+    }
+
+    virtual void lineOfDudy() {
+        cout << name_ << ": finance management." << endl;
+    }
 };
 
-int main()
-{
-	boost::shared_ptr<Company> root(new ConcreteCompany("Bei Jing Head Company"));
-	root->add(boost::shared_ptr<Company>(new HRDepartment("Head Company HR Department")));
-	root->add(boost::shared_ptr<Company>(new FinanceDepartment("Head Company Finance Department")));
+int main() {
+    shared_ptr<Company> root(new ConcreteCompany("Bei Jing Head Company"));
+    root->add(shared_ptr<Company>(new HRDepartment("Head Company HR Department")));
+    root->add(shared_ptr<Company>(new FinanceDepartment("Head Company Finance Department")));
 
-	boost::shared_ptr<Company> comp(new ConcreteCompany("Shang Hai East China Branch Company"));
-	comp->add(boost::shared_ptr<Company>(new HRDepartment("East China Branch Company HR Department")));
-	comp->add(boost::shared_ptr<Company>(new FinanceDepartment("East China Branch Company Finance Department")));
-	root->add(comp);
+    shared_ptr<Company> comp(new ConcreteCompany("Shang Hai East China Branch Company"));
+    comp->add(shared_ptr<Company>(new HRDepartment("East China Branch Company HR Department")));
+    comp->add(shared_ptr<Company>(new FinanceDepartment("East China Branch Company Finance Department")));
+    root->add(comp);
 
-	boost::shared_ptr<Company> comp1(new ConcreteCompany("Nan Jing Agency"));
-	comp1->add(boost::shared_ptr<Company>(new HRDepartment("Nan Jing Agency HR Department")));
-	comp1->add(boost::shared_ptr<Company>(new FinanceDepartment("Nan Jing Agency Finance Department")));
-	comp->add(comp1);
+    shared_ptr<Company> comp1(new ConcreteCompany("Nan Jing Agency"));
+    comp1->add(shared_ptr<Company>(new HRDepartment("Nan Jing Agency HR Department")));
+    comp1->add(shared_ptr<Company>(new FinanceDepartment("Nan Jing Agency Finance Department")));
+    comp->add(comp1);
 
-	boost::shared_ptr<Company> comp2(new ConcreteCompany("Hang Zhou Agency"));
-	comp2->add(boost::shared_ptr<Company>(new HRDepartment("Hang Zhou Agency HR Department")));
-	comp2->add(boost::shared_ptr<Company>(new FinanceDepartment("Hang Zhou Agency Finance Department")));
-	comp->add(comp2);
+    shared_ptr<Company> comp2(new ConcreteCompany("Hang Zhou Agency"));
+    comp2->add(shared_ptr<Company>(new HRDepartment("Hang Zhou Agency HR Department")));
+    comp2->add(shared_ptr<Company>(new FinanceDepartment("Hang Zhou Agency Finance Department")));
+    comp->add(comp2);
 
-	//comp->remove(comp2);
+    //comp->remove(comp2);
 
-	cout << "Structure Figure:" << endl;
-	root->display(1);
+    cout << "Structure Figure:" << endl;
+    root->display(1);
 
-	cout << "Duty Figure:" << endl;
-	root->lineOfDudy();
+    cout << "Duty Figure:" << endl;
+    root->lineOfDudy();
 }
+// Êä³ö£º
+Structure Figure:
+-Bei Jing Head Company
+---Head Company HR Department
+---Head Company Finance Department
+---Shang Hai East China Branch Company
+-----East China Branch Company HR Department
+-----East China Branch Company Finance Department
+-----Nan Jing Agency
+-------Nan Jing Agency HR Department
+-------Nan Jing Agency Finance Department
+-----Hang Zhou Agency
+-------Hang Zhou Agency HR Department
+-------Hang Zhou Agency Finance Department
+Duty Figure:
+Head Company HR Department: employees management.
+Head Company Finance Department: finance management.
+East China Branch Company HR Department: employees management.
+East China Branch Company Finance Department: finance management.
+Nan Jing Agency HR Department: employees management.
+Nan Jing Agency Finance Department: finance management.
+Hang Zhou Agency HR Department: employees management.
+Hang Zhou Agency Finance Department: finance management.
 //------------------------------------------------------------------------------------------------
 //´ó»°Éè¼ÆÄ£Ê½ P219 µü´úÆ÷Ä£Ê½
 µü´úÆ÷Ä£Ê½£¬Ìá¹©Ò»ÖÖ·½·¨Ë³Ğò·ÃÎÊÒ»¸ö¾ÛºÏ¶ÔÏóÖĞ¸÷¸öÔªËØ£¬¶øÓÖ²»±©Â¶¸Ã¶ÔÏóµÄÄÚ²¿±íÊ¾¡£
