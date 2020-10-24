@@ -1,4 +1,206 @@
 //------------------------------------------------------------------------------------------------
+// 采用组合模式进行目录管理
+// NodeInfo.h
+#ifndef TESTPROJECT_NODEINFO_H
+#define TESTPROJECT_NODEINFO_H
+
+#include <string>
+
+enum class NodeType {
+    NT_DIR,
+    NT_FILE,
+    NT_SYM_LINK
+};
+
+struct NodeInfo {
+    std::string path;
+    std::string checksum;
+    NodeType nodeType = NodeType::NT_DIR;
+    std::string symbolFrom;
+};
+
+#endif //TESTPROJECT_NODEINFO_H
+
+// NodeInfoMgr.h
+#ifndef TESTPROJECT_NODEINFOMGR_H
+#define TESTPROJECT_NODEINFOMGR_H
+
+#include <memory>
+#include "NodeInfo.h"
+
+class NodeInfoMgr;
+
+using NodeInfoMgrPtr = std::shared_ptr<NodeInfoMgr>;
+
+class NodeInfoMgr {
+public:
+    virtual ~NodeInfoMgr() noexcept = default;
+
+    virtual void addNodeInfo(const NodeInfo& nodeInfo, const std::string& relativePath = "") = 0;
+
+    virtual NodeInfoMgrPtr getNodeInfoMgr(const std::string& path) const = 0;
+
+    virtual void removePath(const std::string& path) = 0;
+
+    virtual void print(int depth) const = 0;
+
+    static NodeInfoMgrPtr create(const std::string& rootPath);
+};
+
+#endif //TESTPROJECT_NODEINFOMGR_H
+
+// NodeInfoMgr.cpp
+#include <unordered_map>
+#include <iostream>
+#include "NodeInfoMgr.h"
+
+using SubFileNameNodeInfoMgrMap = std::unordered_map<std::string, NodeInfoMgrPtr>;
+
+class NodeInfoMgrRoot : public NodeInfoMgr {
+public:
+    NodeInfoMgrRoot(const std::string& rootPath) : rootPath_(rootPath) {}
+
+    virtual ~NodeInfoMgrRoot() noexcept = default;
+
+    virtual void addNodeInfo(const NodeInfo& nodeInfo, const std::string& relativePath = "") override {
+        auto path = relativePath.empty() ? nodeInfo.path : relativePath;
+        path.erase(0, rootPath_.size() + 1);
+        if (path.empty()) {
+            nodeInfo_ = nodeInfo;
+        } else {
+            addNodeInfoToSub(nodeInfo, path);
+        }
+    }
+
+    virtual NodeInfoMgrPtr getNodeInfoMgr(const std::string& path) const override {
+        auto relativePath = getRelativePath(path);
+
+        auto fileName = getFileName(relativePath);
+        auto subFileNameIter = subFileNameNodeInfoMgrMap_.find(fileName);
+        if (subFileNameIter == subFileNameNodeInfoMgrMap_.end()) {
+            throw std::string("Path can not be obtained, path: " + path);
+        }
+
+        return fileName.size() == relativePath.size() ? subFileNameIter->second
+                                                      : subFileNameIter->second->getNodeInfoMgr(relativePath);
+    }
+
+    virtual void removePath(const std::string& path) override {
+        auto relativePath = getRelativePath(path);
+
+        auto fileName = getFileName(relativePath);
+        auto subFileNameIter = subFileNameNodeInfoMgrMap_.find(fileName);
+        if (subFileNameIter == subFileNameNodeInfoMgrMap_.end()) {
+            throw std::string("Path can not be obtained, path: " + path);
+        }
+
+        if (fileName.size() == relativePath.size()) {
+            subFileNameNodeInfoMgrMap_.erase(subFileNameIter);
+        } else {
+            subFileNameIter->second->removePath(relativePath);
+        }
+    }
+
+    virtual void print(int depth) const override {
+        std::cout << std::string(depth, '-') << rootPath_ << std::endl;
+        for (const auto& subFileNameNodeInfo: subFileNameNodeInfoMgrMap_) {
+            subFileNameNodeInfo.second->print(depth + 2);
+        }
+    }
+
+private:
+    std::string getRelativePath(const std::string& path) const {
+        auto relativePath = path;
+        relativePath.erase(0, rootPath_.size() + 1);
+        if (relativePath.empty()) {
+            throw std::string("Root path can not be obtained, path: " + path);
+        }
+        return relativePath;
+    }
+
+    void addNodeInfoToSub(const NodeInfo& nodeInfo, std::string relativePath) {
+        auto fileName = getFileName(relativePath);
+
+        auto subFileNameIter = subFileNameNodeInfoMgrMap_.find(fileName);
+        if (subFileNameIter == subFileNameNodeInfoMgrMap_.end()) {
+            auto nodeInfoMgr = NodeInfoMgr::create(fileName);
+            nodeInfoMgr->addNodeInfo(nodeInfo, relativePath);
+            subFileNameNodeInfoMgrMap_.emplace(fileName, nodeInfoMgr);
+        } else {
+            (*subFileNameIter).second->addNodeInfo(nodeInfo, relativePath);
+        }
+    }
+
+    std::string getFileName(const std::string& relativePath) const {
+        auto slashPos = relativePath.find("/");
+        return relativePath.substr(0, slashPos);
+    }
+
+private:
+    const std::string rootPath_;
+    NodeInfo nodeInfo_;
+    SubFileNameNodeInfoMgrMap subFileNameNodeInfoMgrMap_;
+};
+
+NodeInfoMgrPtr NodeInfoMgr::create(const std::string& rootPath) {
+    return std::make_shared<NodeInfoMgrRoot>(rootPath);
+}
+
+// main.cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include "src/NodeInfoMgr.h"
+
+using namespace std;
+
+int main() {
+    try {
+        auto rootPath = "/opt/buildtools"s;
+        auto nodeInfoMgr = NodeInfoMgr::create(rootPath);
+
+        std::vector<NodeInfo> nodeInfos = {{rootPath, "", NodeType::NT_DIR, ""},
+                                           {rootPath + "/abc", "", NodeType::NT_DIR, ""},
+                                           {rootPath + "/abc/def/file1", "111", NodeType::NT_FILE, ""},
+                                           {rootPath + "/abc/def/opt/file2", "111", NodeType::NT_FILE, ""},
+                                           {rootPath + "/abc/file1", "111", NodeType::NT_FILE, ""}};
+        for (const auto& nodeInfo : nodeInfos) {
+            nodeInfoMgr->addNodeInfo(nodeInfo);
+        }
+        nodeInfoMgr->print(0);
+
+        auto path = rootPath + "/abc/def/opt";
+        auto subNodeInfoMgr = nodeInfoMgr->getNodeInfoMgr(path);
+        subNodeInfoMgr->print(0);
+
+        cout << "After remove path: " << path << endl;
+        nodeInfoMgr->removePath(path);
+        nodeInfoMgr->print(0);
+        subNodeInfoMgr->print(0);
+
+    } catch (std::string& e) {
+        std::cout << "exception: " << e << std::endl;
+    }
+}
+// 输出：
+/opt/buildtools
+--abc
+----file1
+----def
+------opt
+--------file2
+------file1
+opt
+--file2
+After remove path: /opt/buildtools/abc/def/opt
+/opt/buildtools
+--abc
+----file1
+----def
+------file1
+opt
+--file2
+//------------------------------------------------------------------------------------------------
 // C++ template https://zhuanlan.zhihu.com/p/261146783
 // 参数包
 #include <iostream>
