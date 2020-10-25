@@ -1,4 +1,210 @@
 //------------------------------------------------------------------------------------------------
+// c++ class类型如何作为另一个类的成员 https://www.zhihu.com/question/419982799/answer/1461745869
+#include <iostream>
+#include <functional>
+#include <memory>
+
+using namespace std;
+
+class Pet;
+//前置声罗
+using PetPtr = std::unique_ptr<Pet>;
+using PetCreator = std::function<PetPtr()>;
+
+//+注意这个辅助结构体
+template<class T>
+struct ConstructHelper {
+    static_assert(std::is_base_of<Pet, T>::value, "T must be derived from Pet!");
+
+    //个这塑只简单示意一下，严格谢来服合SFINAE来做更好
+    //在C++20之后用concept就很简洁了
+    PetPtr operator()() {
+        return PetPtr(new T);
+    }
+};
+
+class Pet {
+public:
+    template<class T>
+    static void Register() {
+        curr_pet_type_ = ConstructHelper<T>();
+    }
+
+    static PetPtr CreateOne() {
+        return curr_pet_type_();
+    }
+
+    virtual void Show() = 0;
+
+private:
+    static PetCreator curr_pet_type_;  //注意这里最好赋值一个默认的
+};
+
+class Dog : public Pet {
+public:
+    void Show() override {
+        std::cout << "dog!" << std::endl;
+    }
+};
+
+class Cat : public Pet {
+public:
+    void Show() override {
+        std::cout << "cat!" << std::endl;
+    }
+};
+
+int main() {
+    Pet::Register<Dog>();
+    auto pet = Pet::CreateOne();
+    pet->Show();
+
+    Pet::Register<Cat>();
+    auto another_pet = Pet::CreateOne();
+    another_pet->Show();
+}
+// 链接报错：
+/usr/lib/gcc/x86_64-pc-cygwin/10/../../../../x86_64-pc-cygwin/bin/ld: CMakeFiles/TestProject.dir/main.cpp.o:main.cpp:(.rdata$.refptr._ZN3Pet14curr_pet_type_E[.refptr._ZN3Pet14curr_pet_type_E]+0x0): undefined reference to `Pet::curr_pet_type_'
+
+
+// ----------
+#include <iostream>
+#include <concepts>
+
+using namespace std;
+
+
+template<typename T>
+concept CanShow = requires(T animal) {
+    animal.show();
+};
+
+struct Dog {
+    void show() {
+        std::cout << "dog!" << std::endl;
+    }
+};
+
+struct Cat {
+    void show1() {
+        std::cout << "dog!" << std::endl;
+    }
+};
+
+template<CanShow Animal>  // 如果这里改为typename，则animal.show()编译报错：
+struct Pet {
+    Animal animal;
+
+    void get_one() {
+        animal.show();  // error: 'struct Cat' has no member named 'show'
+    }
+};
+
+int main() {
+    Pet<Dog> pet;
+    pet.get_one();
+
+    Pet<Cat> another_pet;  // CanShow可以让编译报错在这行：error: template constraint failure for 'template<class Animal>  requires  CanShow<Animal> struct Pet'
+    another_pet.get_one();
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// C++20 concept  https://zhuanlan.zhihu.com/p/107610017
+第1种用法：
+就是用了一个多余的auto关键字，来说明auto前面的Integral是一个concept：
+#include <iostream>
+#include <concepts>
+
+using namespace std;
+
+template<typename T>
+concept Integral = std::is_integral<T>::value;  // is_integral是个类模板，所有整数类型都被该模板特化了，都继承的true_type，其::value是true，其余未特化的类型都是false_type，其::value是false
+
+Integral auto Add(Integral auto a, Integral auto b) {
+    return a + b;
+}
+
+int main() {
+    Integral auto c = Add(1, 2);  // 也可以auto c = Add(1, 2)
+    cout << c << endl;
+    Integral auto c1 = Add(string("abc"), string("def"));  // error: use of function 'auto [requires ::Integral<<placeholder>, >] Add(auto:11, auto:12) [with auto:11 = std::basic_string<char>; auto:12 = std::basic_string<char>]' with unsatisfied constraints
+    return 0;
+}
+
+第2种用法：
+在template声明以后紧接着用关键字requires说明模板参数需要满足的concept，也很直观：
+// 这种用法不必对函数声明中的每个T都写成长长的 Integral auto
+//当函数参数较多时明显比第一种要好
+#include <iostream>
+#include <concepts>
+
+using namespace std;
+
+template<typename T>
+concept Integral = std::is_integral<T>::value;
+
+template<typename T>
+requires Integral<T> T Add(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    Integral auto c = Add(1, 2);
+    cout << c << endl;
+    auto c1 = Add(string("abc"), string("def"));// error: use of function 'T Add(T, T) [with T = std::basic_string<char>]' with unsatisfied constraints
+    return 0;
+}
+
+第3种用法：
+与第二种的区别就是将requires Integral<T> 挪动了位置，放在了函数声明的后面，效果是一样的：
+template<typename T>
+T Add(T a, T b) requires Integral<T> {
+    return a + b;
+}
+
+第4种用法：
+省略了requires关键字，直接将concept的名字放入到模板参数前面，同时也省去了平常模板声明用的typename或class，其实我觉得这种最直观，如下：
+template<Integral T>
+T Add(T a, T b) {
+    return a + b;
+}
+
+concept还可用于函数的重载，假设再加上一个普通的Add函数，上面的代码就可以编译通过，普通的Add函数就和C++20 之前的函数一样：
+加了这个函数以后，不满足Integral的参数就会调用这个函数，而满足Integral的参数会调用之前的concept定义的函数。编译器一如既往地选择最匹配的函数。
+
+#include <iostream>
+#include <concepts>
+
+using namespace std;
+
+template<typename T>
+concept Integral = std::is_integral<T>::value;
+
+template<Integral T>
+T Add(T a, T b) {
+    cout << "Integral T" << endl;
+    return a + b;
+}
+
+template<typename T>
+T Add(T a, T b) {
+    cout << "typename T" << endl;
+    return a + b;
+}
+
+int main() {
+    auto c1 = Add(1, 2);
+    cout << c1 << endl;
+    auto c = Add(1.0, 2.0);
+    cout << c << endl;
+    return 0;
+}
+// 输出：
+Integral T
+3
+typename T
+3
+//------------------------------------------------------------------------------------------------
 // 采用组合模式进行目录管理
 // NodeInfo.h
 #ifndef TESTPROJECT_NODEINFO_H
