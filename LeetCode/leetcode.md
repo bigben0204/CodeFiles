@@ -10299,13 +10299,96 @@ public:
 };
 ```
 
+## [409. 最长回文串](https://leetcode-cn.com/problems/longest-palindrome/)
+
+给定一个包含大写字母和小写字母的字符串，找到通过这些字母构造成的最长的回文串。
+
+在构造过程中，请注意区分大小写。比如 `"Aa"` 不能当做一个回文字符串。
+
+```python
+class Solution:  # 60 ms
+    def longestPalindrome(self, s: str) -> int:
+        char_count_dict = dict()
+        for c in s:
+            char_count_dict[c] = char_count_dict.get(c, 0) + 1
+
+        length = 0;
+        has_single = False
+        has_single_count_equals_one = False
+        for c, count in char_count_dict.items():
+            if count % 2 == 0:
+                length += count
+            else:
+                has_single = True
+                if count > 1:
+                    length += count - 1
+                else:
+                    has_single_count_equals_one = True
+
+        if has_single or has_single_count_equals_one:
+            length += 1
+        return length
+    
+class Solution:  # 48 ms
+    def longestPalindrome(self, s: str) -> int:
+        char_count_dict = Counter(s)
+        length = 0;
+        for count in char_count_dict.values():
+            length += count // 2 * 2
+            if length % 2 == 0 and count % 2 == 1:  # 长度是偶数并且某个字母又是奇数的时，才需要把长度加1
+                length += 1
+        return length
+```
+
+## [257. 二叉树的所有路径](https://leetcode-cn.com/problems/binary-tree-paths/)
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import unittest
+from typing import List
 
 
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
 
 
+class Solution:  # 48 ms
+    def binaryTreePaths(self, root: TreeNode) -> List[str]:
+        paths = []
+        self._search_tree_paths(root, '', paths)
+        return paths
+
+    def _search_tree_paths(self, root, prev_path: str, paths):
+        if not root:
+            return
+
+        current_path = prev_path + ('->' if prev_path else '') + str(root.val)
+        if not root.left and not root.right:
+            paths.append(current_path)
+        else:
+            self._search_tree_paths(root.left, current_path, paths)
+            self._search_tree_paths(root.right, current_path, paths)
 
 
+class TestSolution(unittest.TestCase):
+    def test_solution(self):
+        root_1 = TreeNode(1)
+        node_2 = TreeNode(2)
+        node_3 = TreeNode(3)
+        node_5 = TreeNode(5)
+        root_1.left = node_2
+        root_1.right = node_3
+        node_2.right = node_5
 
+        solution = Solution()
+        expect_list = ["1->2->5", "1->3"]
+        self.assertEqual(expect_list, solution.binaryTreePaths(root_1))
+```
 
 
 
