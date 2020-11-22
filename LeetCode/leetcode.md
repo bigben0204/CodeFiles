@@ -10390,11 +10390,119 @@ class TestSolution(unittest.TestCase):
         self.assertEqual(expect_list, solution.binaryTreePaths(root_1))
 ```
 
+## [202. 快乐数](https://leetcode-cn.com/problems/happy-number/)
 
+<https://leetcode-cn.com/problems/happy-number/solution/kuai-le-shu-by-leetcode-solution/>
 
+解法1：使用set保存遍历过数字，时间和空间复杂度均为O(logn)。
 
+```c++
+#include <unordered_set>
+#include "gtest/gtest.h"
 
+using namespace std;
 
+class Solution {  // 4 ms
+public:
+    bool isHappy(int n) {
+        int next = n;
+        unordered_set<long> nexts;
+        while (next != 1) {
+            next = getNext(next);
+            if (nexts.find(next) != nexts.end()) {
+                return false;
+            }
+            nexts.insert(next);
+        }
+        return true;
+    }
+
+private:
+    int getNext(int num) {
+        int sum = 0;
+        while (num > 0) {
+            int remainder = num % 10;
+            sum += remainder * remainder;
+            num = num / 10;
+        }
+        return sum;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(true, solution.isHappy(19));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(true, solution.isHappy(1));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ(false, solution.isHappy(2));
+}
+```
+
+解法2：使用快速指针，如果不是快乐数，则一定会出现循环并且快指针和慢指针数字重和时不等于1；如果是快乐数，则重和时等于1。
+
+```c++
+class Solution {  // 0 ms
+public:
+    bool isHappy(int n) {
+        int slow = getNext(n), fast = getNext(getNext(n));
+        while (slow != fast) {
+            slow = getNext(slow);
+            fast = getNext(getNext(fast));
+        }
+        return slow == 1;
+    }
+
+private:
+    int getNext(int num) {
+        int sum = 0;
+        while (num > 0) {
+            int remainder = num % 10;
+            sum += remainder * remainder;
+            num = num / 10;
+        }
+        return sum;
+    }
+};
+
+```
+
+解法3：数学法
+
+```c++
+class Solution {  // 4 ms
+public:
+    bool isHappy(int n) {
+        unordered_set<int> cycles = {4, 16, 37, 58, 89, 145, 42, 20};
+        int next = n;
+        while (next != 1 && cycles.find(next) == cycles.end()) {
+            next = getNext(next);
+        }
+        return next == 1;
+    }
+
+private:
+    int getNext(int num) {
+        int sum = 0;
+        while (num > 0) {
+            int remainder = num % 10;
+            sum += remainder * remainder;
+            num = num / 10;
+        }
+        return sum;
+    }
+};
+```
 
 
 
