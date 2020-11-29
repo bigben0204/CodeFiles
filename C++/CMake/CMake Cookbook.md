@@ -2,9 +2,9 @@
 
 源码下载<https://github.com/dev-cafe/cmake-cookbook>
 
-## 第1章 从可执行文件到库
+# 第1章 从可执行文件到库
 
-### [1.1 将单个源文件编译为可执行文件](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter1-1.1-chinese.md)
+## [1.1 将单个源文件编译为可执行文件](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter1-1.1-chinese.md)
 
 ```cpp
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
@@ -23,6 +23,7 @@ add_executable(hello-world ${DIR_SRCS})  # 生成可执行文件名称与工程�
 ```cpp
 $ cmake ..
 $ cmake --build .  # 与make一样效果。--build <dir> = Build a CMake-generated project binary tree. 可通过cmake -help查看帮助
+$ cmake --build . --target clean  # 与make clean效果一样
 ```
 
 **NOTE**:*CMake语言不区分大小写，但是参数区分大小写。*
@@ -117,7 +118,7 @@ CMake生成的目标比构建可执行文件的目标要多。可以使用`cmake
 - **install**，将执行项目安装规则。我们将在第10章中讨论安装规则。
 - **package**，此目标将调用CPack为项目生成可分发的包。打包和CPack将在第11章中讨论。
 
-### [1.2 切换生成器](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter1-1.2-chinese.md)
+## [1.2 切换生成器](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter1-1.2-chinese.md)
 
 CMake针对不同平台支持本地构建工具列表。同时支持命令行工具(如Unix Makefile和Ninja)和集成开发环境(IDE)工具。用以下命令，可在平台上找到生成器名单，以及已安装的CMake版本：
 
@@ -192,11 +193,7 @@ The following generators are available on this platform (* marks default):
 
 `cmake --build .`将`ninja`命令封装在一个跨平台的接口中。
 
-### [1.3 构建和链接静态库和动态库](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter1-1.3-chinese.md)
-
-**NOTE**: *这个示例代码可以在 https://github.com/dev-cafe/cmake-cookbook/tree/v1.0/chapter-01/recipe-03 找到，其中有C++和Fortran示例。该配置在CMake 3.5版(或更高版本)测试有效的，并且已经在GNU/Linux、macOS和Windows上进行了测试。*
-
-项目中会有单个源文件构建的多个可执行文件的可能。项目中有多个源文件，通常分布在不同子目录中。这种实践有助于项目的源代码结构，而且支持模块化、代码重用和关注点分离。同时，这种分离可以简化并加速项目的重新编译。本示例中，我们将展示如何将源代码编译到库中，以及如何链接这些库。
+## [1.3 构建和链接静态库和动态库](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter1-1.3-chinese.md)
 
 **准备工作**
 
@@ -545,7 +542,792 @@ drwxrwxr-x+ 1 Ben Ben      0 11月 27 22:38 CMakeFiles
 
 这是为什么呢？生成好的DSO组需要程序员限制符号的可见性。需要在编译器的帮助下实现，但不同的操作系统和编译器上，约定不同。CMake有一个机制来处理这个问题，我们将在第10章中解释它如何工作。
 
-### 1.4 用条件句控制编译
+## 1.4 用条件句控制编译
+
+**具体实施**
+
+从与上一个示例的的源代码开始，我们希望能够在不同的两种行为之间进行切换：
+
+1. 将`Message.hpp`和`Message.cpp`构建成一个库(静态或动态)，然后将生成库链接到`hello-world`可执行文件中。
+2. 将`Message.hpp`，`Message.cpp`和`hello-world.cpp`构建成一个可执行文件，但不生成任何一个库。
+
+让我们来看看如何使用`CMakeLists.txt`来实现：
+
+1. 首先，定义最低CMake版本、项目名称和支持的语言：
+
+   ```
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-04 LANGUAGES CXX)
+   ```
+
+2. 我们引入了一个新变量`USE_LIBRARY`，这是一个逻辑变量，值为`OFF`。我们还打印了它的值：
+
+   ```
+   set(USE_LIBRARY OFF)
+   message(STATUS "Compile sources into a library? ${USE_LIBRARY}")  # 加了status，以-- Compile source into a library? OFF显示；不加status，无前缀--
+   ```
+
+3. CMake中定义`BUILD_SHARED_LIBS`全局变量，并设置为`OFF`。调用`add_library`并省略第二个参数，将构建一个静态库：
+
+   ```
+   set(BUILD_SHARED_LIBS OFF)
+   ```
+
+4. 然后，引入一个变量`_sources`，包括`Message.hpp`和`Message.cpp`：
+
+   ```
+   list(APPEND _sources Message.hpp Message.cpp)
+   ```
+
+5. 然后，引入一个基于`USE_LIBRARY`值的`if-else`语句。如果逻辑为真，则`Message.hpp`和`Message.cpp`将打包成一个库：
+
+   ```
+   if(USE_LIBRARY)
+       # add_library will create a static library
+       # since BUILD_SHARED_LIBS is OFF
+       add_library(message ${_sources})
+       add_executable(hello-world hello-world.cpp)
+       target_link_libraries(hello-world message)
+   else()
+       add_executable(hello-world hello-world.cpp ${_sources})
+   endif()
+   ```
+
+6. 我们可以再次使用相同的命令集进行构建。由于`USE_LIBRARY`为`OFF`, `hello-world`可执行文件将使用所有源文件来编译。可以通过在GNU/Linux上，运行`objdump -x`命令进行验证。
+
+   ```c++
+   cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+   
+   project(recipe-04 LANGUAGES CXX)
+   
+   set(CMAKE_CXX_STANDARD 20)
+   
+   # introduce a toggle for using a library
+   set(USE_LIBRARY ON)
+   
+   message(STATUS "Compile sources into a library? ${USE_LIBRARY}")  # 加了status，以-- Compile source into a library? OFF显示；不加status，无前缀--
+   
+   # BUILD_SHARED_LIBS is a global flag offered by CMake
+   # to toggle the behavior of add_library
+   set(BUILD_SHARED_LIBS OFF)  # 这里设置为ON，则add_library会默认生成动态库
+   
+   # list sources
+   list(APPEND _sources Message.h Message.cpp)
+   
+   if (USE_LIBRARY)
+       # add_library will create a static library
+       # since BUILD_SHARED_LIBS is OFF
+       add_library(message ${_sources})  # 如果没有BUILD_SHARED_LIBS变量，则默认生成STATIC库
+   
+       add_executable(hello-world hello-world.cpp)
+   
+       target_link_libraries(hello-world message)
+   else ()
+       add_executable(hello-world hello-world.cpp ${_sources})
+   endif ()
+   ```
+
+**工作原理**
+
+我们介绍了两个变量：`USE_LIBRARY`和`BUILD_SHARED_LIBS`。这两个变量都设置为`OFF`。如CMake语言文档中描述，逻辑真或假可以用多种方式表示：
+
+- 如果将逻辑变量设置为以下任意一种：`1`、`ON`、`YES`、`true`、`Y`或非零数，则逻辑变量为`true`。
+- 如果将逻辑变量设置为以下任意一种：`0`、`OFF`、`NO`、`false`、`N`、`IGNORE、NOTFOUND`、空字符串，或者以`-NOTFOUND`为后缀，则逻辑变量为`false`。
+
+`USE_LIBRARY`变量将在第一个和第二个行为之间切换。`BUILD_SHARED_LIBS`是CMake的一个全局标志。因为CMake内部要查询`BUILD_SHARED_LIBS`全局变量，所以`add_library`命令可以在不传递`STATIC/SHARED/OBJECT`参数的情况下调用；如果为`false`或未定义，将生成一个静态库。
+
+这个例子说明，可以引入条件来控制CMake中的执行流。但是，当前的设置不允许从外部切换，不需要手动修改`CMakeLists.txt`。原则上，我们希望能够向用户开放所有设置，这样就可以在不修改构建代码的情况下调整配置，稍后将展示如何做到这一点。
+
+**NOTE**:*`else()`和`endif()`中的`()`，可能会让刚开始学习CMake代码的同学感到惊讶。其历史原因是，因为其能够指出指令的作用范围。例如，可以使用`if(USE_LIBRARY)…else(USE_LIBRARY)…endif(USE_LIBIRAY)`。这个格式并不唯一，可以根据个人喜好来决定使用哪种格式。*
+
+**TIPS**:*`_sources`变量是一个局部变量，不应该在当前范围之外使用，可以在名称前加下划线。*
+
+## 1.5 向用户显示选项
+
+前面的配置中，我们引入了条件句：通过硬编码的方式给定逻辑变量值。不过，这会影响用户修改这些变量。CMake代码没有向读者传达，该值可以从外部进行修改。推荐在`CMakeLists.txt`中使用`option()`命令，以选项的形式显示逻辑开关，用于外部设置，从而切换构建系统的生成行为。本节的示例将向您展示，如何使用这个命令。
+
+**具体实施**
+
+看一下前面示例中的静态/动态库示例。与其硬编码`USE_LIBRARY`为`ON`或`OFF`，现在为其设置一个默认值，同时也可以从外部进行更改：
+
+1. 用一个选项替换上一个示例的`set(USE_LIBRARY OFF)`命令。该选项将修改`USE_LIBRARY`的值，并设置其默认值为`OFF`：
+
+   ```
+   option(USE_LIBRARY "Compile sources into a library" OFF)  # 默认值为OFF
+   ```
+
+2. 现在，可以通过CMake的`-D`CLI选项，将信息传递给CMake来切换库的行为：
+
+   ```c++
+   $ mkdir -p build
+   $ cd build
+   $ cmake -D USE_LIBRARY=ON ..
+   -- ...
+   -- Compile sources into a library? ON
+   -- ...
+   
+   $ cmake --build .
+   Scanning dependencies of target message
+   [ 25%] Building CXX object CMakeFiles/message.dir/Message.cpp.o
+   [ 50%] Linking CXX static library libmessage.a
+   [ 50%] Built target message
+   Scanning dependencies of target hello-world
+   [ 75%] Building CXX object CMakeFiles/hello-world.dir/hello-world.cpp.o
+   [100%] Linking CXX executable hello-world
+   [100%] Built target hello-world
+   ```
+
+`-D`开关用于为CMake设置任何类型的变量：逻辑变量、路径等等。
+
+**工作原理**
+
+`option`可接受三个参数：
+
+```
+option(<option_variable> "help string" [initial value])
+```
+
+- `<option_variable>`表示该选项的变量的名称。
+- `"help string"`记录选项的字符串，在CMake的终端或图形用户界面中可见。
+- `[initial value]`选项的默认值，可以是`ON`或`OFF`。
+
+**更多信息**
+
+有时选项之间会有依赖的情况。示例中，我们提供生成静态库或动态库的选项。但是，如果没有将`USE_LIBRARY`逻辑设置为`ON`，则此选项没有任何意义。CMake提供`cmake_dependent_option()`命令用来定义依赖于其他选项的选项：
+
+```c++
+include(CMakeDependentOption)
+cmake_dependent_option(MAKE_STATIC_LIBRARY "Compile sources into a static library" OFF
+        "USE_LIBRARY" ON
+        )
+cmake_dependent_option(MAKE_SHARED_LIBRARY "Compile sources into a shared library" ON
+        "USE_LIBRARY" ON
+        )
+```
+
+如果`USE_LIBRARY`为`ON`，`MAKE_STATIC_LIBRARY`默认值为`OFF`，否则`MAKE_STATIC_LIBRARY`默认值为`ON`。可以这样运行：
+
+```
+$ cmake -D USE_LIBRARY=OFF -D MAKE_SHARED_LIBRARY=ON ..
+```
+
+这仍然不会构建库，因为`USE_LIBRARY`仍然为`OFF`。
+
+CMake有适当的机制，通过包含模块来扩展其语法和功能，这些模块要么是CMake自带的，要么是定制的。本例中，包含了一个名为`CMakeDependentOption`的模块。如果没有`include`这个模块，`cmake_dependent_option()`命令将不可用。参见 https://cmake.org/cmake/help/latest/module/CMakeDependentOption.html
+
+**TIPS**:*手册中的任何模块都可以以命令行的方式使用`cmake --help-module <name-of-module>`。例如，`cmake --help-module CMakeDependentOption`将打印刚才讨论的模块的手册页(帮助页面)。*
+
+完整CMakeLists.txt如下：
+
+`````c++
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+project(recipe-04 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+
+option(USE_LIBRARY OFF)  # Default value is OFF
+
+message(STATUS "Compile sources into a library? ${USE_LIBRARY}")
+
+include(CMakeDependentOption)
+# 如果USE_LIBRARY为true，则MAKE_STATIC_LIBRARY值为OFF，否则为ON
+cmake_dependent_option(MAKE_STATIC_LIBRARY "Compile sources into a static library" OFF
+        "USE_LIBRARY" ON
+        )
+cmake_dependent_option(MAKE_SHARED_LIBRARY "Compile sources into a shared library" ON
+        "USE_LIBRARY" ON
+        )
+
+# list sources
+list(APPEND _sources Message.cpp)
+
+message(STATUS "Compile sources into a STATIC library? ${MAKE_STATIC_LIBRARY}")
+message(STATUS "Compile sources into a SHARED library? ${MAKE_SHARED_LIBRARY}")
+if (USE_LIBRARY)
+    if (MAKE_SHARED_LIBRARY)
+        add_library(message SHARED ${_sources})
+    else ()
+        add_library(message STATIC ${_sources})
+    endif ()
+
+    add_executable(hello-world hello-world.cpp)
+    target_link_libraries(hello-world message)
+else ()
+    add_executable(hello-world hello-world.cpp ${_sources})
+endif ()
+`````
+
+## 1.6 指定编译器
+
+目前为止，我们还没有过多考虑如何选择编译器。CMake可以根据平台和生成器选择编译器，还能将编译器标志设置为默认值。然而，我们通常控制编译器的选择。在后面的示例中，我们还将考虑构建类型的选择，并展示如何控制编译器标志。
+
+**具体实施**
+
+如何选择一个特定的编译器？例如，如果想使用Intel或Portland Group编译器怎么办？CMake将语言的编译器存储在`CMAKE_<LANG>_COMPILER`变量中，其中`<LANG>`是受支持的任何一种语言，对于我们的目的是`CXX`、`C`或`Fortran`。用户可以通过以下两种方式之一设置此变量：
+
+1. 使用CLI中的`-D`选项，例如：
+
+   ```
+   $ cmake -D CMAKE_CXX_COMPILER=clang++ ..
+   ```
+
+2. 通过导出环境变量`CXX`(C++编译器)、`CC`(C编译器)和`FC`(Fortran编译器)。例如，使用这个命令使用`clang++`作为`C++`编译器：
+
+   ```
+   $ env CXX=clang++ cmake ..
+   ```
+
+到目前为止讨论的示例，都可以通过传递适当的选项，配置合适的编译器。
+
+**NOTE**:*CMake了解运行环境，可以通过其CLI的`-D`开关或环境变量设置许多选项。前一种机制覆盖后一种机制，但是我们建议使用`-D`显式设置选项。显式优于隐式，因为环境变量可能被设置为不适合(当前项目)的值。*
+
+我们在这里假设，其他编译器在标准路径中可用，CMake在标准路径中执行查找编译器。如果不是这样，用户将需要将完整的编译器可执行文件或包装器路径传递给CMake。
+
+**TIPS**:*我们建议使用`-D CMAKE_<LANG>_COMPILER`CLI选项设置编译器，而不是导出`CXX`、`CC`和`FC`。这是确保跨平台并与非POSIX兼容的唯一方法。为了避免变量污染环境，这些变量可能会影响与项目一起构建的外部库环境。*
+
+**工作原理**
+
+配置时，CMake会进行一系列平台测试，以确定哪些编译器可用，以及它们是否适合当前的项目。一个合适的编译器不仅取决于我们所使用的平台，还取决于我们想要使用的生成器。CMake执行的第一个测试基于项目语言的编译器的名称。例如，`cc`是一个工作的`C`编译器，那么它将用作`C`项目的默认编译器。GNU/Linux上，使用Unix Makefile或Ninja时, GCC家族中的编译器很可能是`C++`、`C`和`Fortran`的默认选择。Microsoft Windows上，将选择Visual Studio中的`C++`和`C`编译器(前提是Visual Studio是生成器)。如果选择MinGW或MSYS Makefile作为生成器，则默认使用MinGW编译器。
+
+**更多信息**
+
+我们的平台上的CMake，在哪里可以找到可用的编译器和编译器标志？CMake提供`--system-information`标志，它将把关于系统的所有信息转储到屏幕或文件中。要查看这个信息，请尝试以下操作：
+
+```
+$ cmake --system-information information.txt
+```
+
+文件中(本例中是`information.txt`)可以看到`CMAKE_CXX_COMPILER`、`CMAKE_C_COMPILER`和`CMAKE_Fortran_COMPILER`的默认值，以及默认标志。我们将在下一个示例中看到相关的标志。
+
+CMake提供了额外的变量来与编译器交互：
+
+- `CMAKE_<LANG>_COMPILER_LOADED`:如果为项目启用了语言`<LANG>`，则将设置为`TRUE`。
+- `CMAKE_<LANG>_COMPILER_ID`:编译器标识字符串，编译器供应商所特有。例如，`GCC`用于GNU编译器集合，`AppleClang`用于macOS上的Clang, `MSVC`用于Microsoft Visual Studio编译器。注意，不能保证为所有编译器或语言定义此变量。
+- `CMAKE_COMPILER_IS_GNU<LANG>`:如果语言`<LANG>`是GNU编译器集合的一部分，则将此逻辑变量设置为`TRUE`。注意变量名的`<LANG>`部分遵循GNU约定：C语言为`CC`, C++语言为`CXX`, Fortran语言为`G77`。
+- `CMAKE_<LANG>_COMPILER_VERSION`:此变量包含一个字符串，该字符串给定语言的编译器版本。版本信息在`major[.minor[.patch[.tweak]]]`中给出。但是，对于`CMAKE_<LANG>_COMPILER_ID`，不能保证所有编译器或语言都定义了此变量。
+
+我们可以尝试使用不同的编译器，配置下面的示例`CMakeLists.txt`。这个例子中，我们将使用CMake变量来探索已使用的编译器(及版本)：
+
+```
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+project(recipe-06 LANGUAGES CXX)
+
+message(STATUS "Is the C++ compiler loaded? ${CMAKE_CXX_COMPILER_LOADED}")
+if (CMAKE_CXX_COMPILER_LOADED)
+    message(STATUS "The C++ compiler ID is: ${CMAKE_CXX_COMPILER_ID}")
+    message(STATUS "Is the C++ from GNU? ${CMAKE_COMPILER_IS_GNUCXX}")
+    message(STATUS "The C++ compiler version is: ${CMAKE_CXX_COMPILER_VERSION}")
+endif ()
+message(STATUS "Is the C compiler loaded? ${CMAKE_C_COMPILER_LOADED}")
+if (CMAKE_C_COMPILER_LOADED)
+    message(STATUS "The C compiler ID is: ${CMAKE_C_COMPILER_ID}")
+    message(STATUS "Is the C from GNU? ${CMAKE_COMPILER_IS_GNUCC}")
+    message(STATUS "The C compiler version is: ${CMAKE_C_COMPILER_VERSION}")
+endif ()
+```
+
+注意，这个例子不包含任何目标，没有要构建的东西，我们只关注配置步骤:
+
+```
+$ cmake ..
+
+...
+-- Is the C++ compiler loaded? 1
+-- The C++ compiler ID is: GNU
+-- Is the C++ from GNU? 1
+-- The C++ compiler version is: 8.1.0
+-- Is the C compiler loaded? 1
+-- The C compiler ID is: GNU
+-- Is the C from GNU? 1
+-- The C compiler version is: 8.1.0
+...
+```
+
+当然，输出将取决于可用和已选择的编译器(及版本)。
+
+## 1.7 切换构建类型
+
+CMake可以配置构建类型，例如：Debug、Release等。配置时，可以为Debug或Release构建设置相关的选项或属性，例如：编译器和链接器标志。控制生成构建系统使用的配置变量是`CMAKE_BUILD_TYPE`。该变量默认为空，CMake识别的值为:
+
+1. **Debug**：用于在没有优化的情况下，使用带有调试符号构建库或可执行文件。
+2. **Release**：用于构建的优化的库或可执行文件，不包含调试符号。
+3. **RelWithDebInfo**：用于构建较少的优化库或可执行文件，包含调试符号。
+4. **MinSizeRel**：用于不增加目标代码大小的优化方式，来构建库或可执行文件。
+
+**具体实施**
+
+示例中，我们将展示如何为项目设置构建类型：
+
+1. 首先，定义最低CMake版本、项目名称和支持的语言：
+
+   ```
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)project(recipe-07 LANGUAGES C CXX)
+   ```
+
+2. 然后，设置一个默认的构建类型(本例中是Release)，并打印一条消息。要注意的是，该变量被设置为缓存变量，可以通过缓存进行编辑：
+
+   ```
+   if (NOT CMAKE_BUILD_TYPE)
+       set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+   endif()
+   message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+   ```
+
+3. 最后，打印出CMake设置的相应编译标志：
+
+   ```
+   message(STATUS "C flags, Debug configuration: ${CMAKE_C_FLAGS_DEBUG}")
+   message(STATUS "C flags, Release configuration: ${CMAKE_C_FLAGS_RELEASE}")
+   message(STATUS "C flags, Release configuration with Debug info: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+   message(STATUS "C flags, minimal Release configuration: ${CMAKE_C_FLAGS_MINSIZEREL}")
+   message(STATUS "C++ flags, Debug configuration: ${CMAKE_CXX_FLAGS_DEBUG}")
+   message(STATUS "C++ flags, Release configuration: ${CMAKE_CXX_FLAGS_RELEASE}")
+   message(STATUS "C++ flags, Release configuration with Debug info: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+   message(STATUS "C++ flags, minimal Release configuration: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+   ```
+
+4. 验证配置的输出:
+
+   ```
+   $ cmake ..
+   ...
+   -- Build type: Release
+   -- C flags, Debug configuration: -g
+   -- C flags, Release configuration: -O3 -DNDEBUG
+   -- C flags, Release configuration with Debug info: -O2 -g -DNDEBUG
+   -- C flags, minimal Release configuration: -Os -DNDEBUG
+   -- C++ flags, Debug configuration: -g
+   -- C++ flags, Release configuration: -O3 -DNDEBUG
+   -- C++ flags, Release configuration with Debug info: -O2 -g -DNDEBUG
+   -- C++ flags, minimal Release configuration: -Os -DNDEBUG
+   ```
+
+5. 切换构建类型:
+
+   ```
+   $ cmake -D CMAKE_BUILD_TYPE=Debug ..
+   -- Build type: Debug
+   -- C flags, Debug configuration: -g
+   -- C flags, Release configuration: -O3 -DNDEBUG
+   -- C flags, Release configuration with Debug info: -O2 -g -DNDEBUG
+   -- C flags, minimal Release configuration: -Os -DNDEBUG
+   -- C++ flags, Debug configuration: -g
+   -- C++ flags, Release configuration: -O3 -DNDEBUG
+   -- C++ flags, Release configuration with Debug info: -O2 -g -DNDEBUG
+   -- C++ flags, minimal Release configuration: -Os -DNDEBUG
+   ```
+
+**工作原理**
+
+我们演示了如何设置默认构建类型，以及如何(从命令行)覆盖它。这样，就可以控制项目，是使用优化，还是关闭优化启用调试。我们还看到了不同配置使用了哪些标志，这主要取决于选择的编译器。需要在运行CMake时显式地打印标志，也可以仔细阅读运行`CMake --system-information`的输出，以了解当前平台、默认编译器和语言的默认组合是什么。下一个示例中，我们将讨论如何为不同的编译器和不同的构建类型，扩展或调整编译器标志。
+
+**更多信息**
+
+我们展示了变量`CMAKE_BUILD_TYPE`，如何切换生成构建系统的配置(这个链接中有说明: https://cmake.org/cmake/help/v3.5/variable/CMAKE_BUILD_TYPE.html )。Release和Debug配置中构建项目通常很有用，例如：评估编译器优化级别的效果。对于单配置生成器，如Unix Makefile、MSYS Makefile或Ninja，因为要对项目重新配置，这里需要运行CMake两次。不过，CMake也支持复合配置生成器。这些通常是集成开发环境提供的项目文件，最显著的是Visual Studio和Xcode，它们可以同时处理多个配置。可以使用`CMAKE_CONFIGURATION_TYPES`变量可以对这些生成器的可用配置类型进行调整，该变量将接受一个值列表(可从这个链接获得文档:https://cmake.org/cmake/help/v3.5/variable/CMAKE_CONFIGURATION_TYPES.html)。
+
+下面是对Visual Studio的CMake调用:
+
+```
+$ mkdir -p build
+$ cd build
+$ cmake .. -G"Visual Studio 12 2017 Win64" -D CMAKE_CONFIGURATION_TYPES="Release;Debug"
+```
+
+将为Release和Debug配置生成一个构建树。然后，您可以使`--config`标志来决定构建这两个中的哪一个:
+
+```
+$ cmake --build . --config Release
+```
+
+**NOTE**:*当使用单配置生成器开发代码时，为Release版和Debug创建单独的构建目录，两者使用相同的源代码。这样，就可以在两者之间切换，而不用重新配置和编译。*
+
+## 1.8 设置编译器选项
+
+前面的示例展示了如何探测CMake，从而获得关于编译器的信息，以及如何切换项目中的编译器。后一个任务是控制项目的编译器标志。CMake为调整或扩展编译器标志提供了很大的灵活性，您可以选择下面两种方法:
+
+- CMake将编译选项视为目标属性。因此，可以根据每个目标设置编译选项，而不需要覆盖CMake默认值。
+- 可以使用`-D`CLI标志直接修改`CMAKE_<LANG>_FLAGS_<CONFIG>`变量。这将影响项目中的所有目标，并覆盖或扩展CMake默认值。
+
+本示例中，我们将展示这两种方法。
+
+**准备工作**
+
+编写一个示例程序，计算不同几何形状的面积，`computer_area.cpp`：
+
+```c++
+#include "geometry_circle.hpp"
+#include "geometry_polygon.hpp"
+#include "geometry_rhombus.hpp"
+#include "geometry_square.hpp"
+#include <cstdlib>
+#include <iostream>
+
+int main() {
+    using namespace geometry;
+    double radius = 2.5293;
+    double A_circle = area::circle(radius);
+    std::cout << "A circle of radius " << radius << " has an area of " << A_circle
+              << std::endl;
+    int nSides = 19;
+    double side = 1.29312;
+    double A_polygon = area::polygon(nSides, side);
+    std::cout << "A regular polygon of " << nSides << " sides of length " << side
+              << " has an area of " << A_polygon << std::endl;
+    double d1 = 5.0;
+    double d2 = 7.8912;
+    double A_rhombus = area::rhombus(d1, d2);
+    std::cout << "A rhombus of major diagonal " << d1 << " and minor diagonal " << d2
+              << " has an area of " << A_rhombus << std::endl;
+    double l = 10.0;
+    double A_square = area::square(l);
+    std::cout << "A square of side " << l << " has an area of " << A_square
+              << std::endl;
+    return EXIT_SUCCESS;
+}
+```
+
+函数的各种实现分布在不同的文件中，每个几何形状都有一个头文件和源文件。总共有4个头文件和5个源文件要编译：
+
+```
+.
+├─ CMakeLists.txt
+├─ compute-areas.cpp
+├─ geometry_circle.cpp
+├─ geometry_circle.hpp
+├─ geometry_polygon.cpp
+├─ geometry_polygon.hpp
+├─ geometry_rhombus.cpp
+├─ geometry_rhombus.hpp
+├─ geometry_square.cpp
+└─ geometry_square.hpp
+```
+
+**具体实施**
+
+现在已经有了源代码，我们的目标是配置项目，并使用编译器标示进行实验:
+
+1. 设置CMake的最低版本:
+
+   ```
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   ```
+
+2. 声明项目名称和语言:
+
+   ```
+   project(recipe-08 LANGUAGES CXX)
+   ```
+
+3. 然后，打印当前编译器标志。CMake将对所有C++目标使用这些:
+
+   ```
+   message("C++ compiler flags: ${CMAKE_CXX_FLAGS}")
+   ```
+
+4. 为目标准备了标志列表，其中一些将无法在Windows上使用:
+
+   ```
+   list(APPEND flags "-fPIC" "-Wall")if(NOT WIN32)  list(APPEND flags "-Wextra" "-Wpedantic")endif()
+   ```
+
+5. 添加了一个新的目标——`geometry`库，并列出它的源依赖关系:
+
+   ```
+   add_library(geometry
+     STATIC
+       geometry_circle.cpp
+       geometry_circle.hpp
+       geometry_polygon.cpp
+       geometry_polygon.hpp
+       geometry_rhombus.cpp
+       geometry_rhombus.hpp
+       geometry_square.cpp
+       geometry_square.hpp
+     )
+   ```
+
+6. 为这个库目标设置了编译选项:
+
+   ```
+   target_compile_options(geometry
+     PRIVATE
+       ${flags}
+     )
+   ```
+
+7. 然后，将生成`compute-areas`可执行文件作为一个目标:
+
+   ```
+   add_executable(compute-areas compute-areas.cpp)
+   ```
+
+8. 还为可执行目标设置了编译选项:
+
+   ```
+   target_compile_options(compute-areas
+     PRIVATE
+       "-fPIC"
+     )
+   ```
+
+9. 最后，将可执行文件链接到geometry库:
+
+   ```
+   target_link_libraries(compute-areas geometry)
+   ```
+
+完整CMakeLists.txt：
+
+```c++
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+project(recipe-08 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+
+message("C++ compiler flags: ${CMAKE_CXX_FLAGS}")
+
+list(APPEND flags "-fPIC" "-Wall")
+if (NOT WIN32)
+    list(APPEND flags "-Wextra" "-Wpedantic")
+endif ()
+
+add_library(geometry
+        STATIC
+        geometry_circle.cpp
+        geometry_circle.hpp
+        geometry_polygon.cpp
+        geometry_polygon.hpp
+        geometry_rhombus.cpp
+        geometry_rhombus.hpp
+        geometry_square.cpp
+        geometry_square.hpp
+        )
+
+target_compile_options(geometry
+        PRIVATE
+        ${flags}
+        )
+
+add_executable(compute-areas compute_areas.cpp)
+
+target_compile_options(compute-areas
+        PRIVATE
+        "-fPIC")
+
+target_link_libraries(compute-areas geometry)
+```
+
+--------------
+
+[**target_compile_definitions和target_compile_options中第二个参数的含义**](https://blog.csdn.net/qq_34369618/article/details/96358204)
+
+Libs can define their compile flags as PRIVATE, PUBLIC or INTERFACE.
+
+- PRIVATE basically means the flags are only applied to this library.
+- PUBLIC and INTERFACE flags are also applied to any target which links to it (i.e. its dependees);
+- the difference between these two being that INTERFACE flags aren’t applied to the library itself - only its dependees
+
+PRIVATE只把flag加入我这个库
+PUBLIC和INTERFACE会加入任何链接我的目标的编译属性
+INTERFACE不把flag加入我这个库，而指使别人怎么做
+
+---------------
+
+**如何工作**
+
+本例中，警告标志有`-Wall`、`-Wextra`和`-Wpedantic`，将这些标示添加到`geometry`目标的编译选项中； `compute-areas`和 `geometry`目标都将使用`-fPIC`标志。编译选项可以添加三个级别的可见性：`INTERFACE`、`PUBLIC`和`PRIVATE`。
+
+可见性的含义如下:
+
+- **PRIVATE**，编译选项会应用于给定的目标，不会传递给与目标相关的目标。我们的示例中， 即使`compute-areas`将链接到`geometry`库，`compute-areas`也不会继承`geometry`目标上设置的编译器选项。
+- **INTERFACE**，给定的编译选项将只应用于指定目标，并传递给与目标相关的目标。
+- **PUBLIC**，编译选项将应用于指定目标和使用它的目标。
+
+目标属性的可见性CMake的核心，我们将在本书中经常讨论这个话题。以这种方式添加编译选项，不会影响全局CMake变量`CMAKE_<LANG>_FLAGS_<CONFIG>`，并能更细粒度控制在哪些目标上使用哪些选项。
+
+我们如何验证，这些标志是否按照我们的意图正确使用呢？或者换句话说，如何确定项目在CMake构建时，实际使用了哪些编译标志？一种方法是，使用CMake将额外的参数传递给本地构建工具。本例中会设置环境变量`VERBOSE=1`：
+
+```c++
+$ mkdir -p build
+$ cd build
+$ cmake ..
+$ cmake --build . -- VERBOSE=1
+    
+... lots of output ...
+    
+[ 14%] Building CXX object CMakeFiles/geometry.dir/geometry_circle.cpp.o
+/usr/bin/c++ -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/geometry.dir/geometry_circle.cpp.o -c /home/bast/tmp/cmake-cookbook/chapter-01/recipe-08/cxx-example/geometry_circle.cpp
+[ 28%] Building CXX object CMakeFiles/geometry.dir/geometry_polygon.cpp.o
+/usr/bin/c++ -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/geometry.dir/geometry_polygon.cpp.o -c /home/bast/tmp/cmake-cookbook/chapter-01/recipe-08/cxx-example/geometry_polygon.cpp
+[ 42%] Building CXX object CMakeFiles/geometry.dir/geometry_rhombus.cpp.o
+/usr/bin/c++ -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/geometry.dir/geometry_rhombus.cpp.o -c /home/bast/tmp/cmake-cookbook/chapter-01/recipe-08/cxx-example/geometry_rhombus.cpp
+[ 57%] Building CXX object CMakeFiles/geometry.dir/geometry_square.cpp.o
+/usr/bin/c++ -fPIC -Wall -Wextra -Wpedantic -o CMakeFiles/geometry.dir/geometry_square.cpp.o -c /home/bast/tmp/cmake-cookbook/chapter-01/recipe-08/cxx-example/geometry_square.cpp
+    
+... more output ...
+
+[ 85%] Building CXX object CMakeFiles/compute-areas.dir/compute-areas.cpp.o
+/usr/bin/c++ -fPIC -o CMakeFiles/compute-areas.dir/compute-areas.cpp.o -c /home/bast/tmp/cmake-cookbook/chapter-01/recipe-08/cxx-example/compute-areas.cpp
+
+... more output ...
+```
+
+输出确认编译标志，确认指令设置正确。
+
+--------------
+
+修改geometry的编译选项为INTERFACE：
+
+```c++
+target_compile_options(geometry
+        INTERFACE
+        ${flags}
+        )
+可以看到如下：
+[ 57%] Building CXX object CMakeFiles/geometry.dir/geometry_square.cpp.o 
+/usr/bin/c++    -std=gnu++1z -o CMakeFiles/geometry.dir/geometry_square.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/geometry_square.cpp
+...
+[ 85%] Building CXX object CMakeFiles/compute-areas.dir/compute_areas.cpp.o
+/usr/bin/c++    -fPIC -Wall -Wextra -Wpedantic -std=gnu++1z -o CMakeFiles/compute-areas.dir/compute_areas.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/compute_areas.cpp
+```
+
+再修改compute-areas编译选项为INTERFACE，则看到编译内容和上面一样：
+
+```c++
+target_compile_options(compute-areas
+        INTERFACE
+        "-fPIC")
+```
+
+----------------
+
+控制编译器标志的第二种方法，不用对`CMakeLists.txt`进行修改。如果想在这个项目中修改`geometry`和`compute-areas`目标的编译器选项，可以使用CMake参数进行配置：
+
+```
+$ cmake -D CMAKE_CXX_FLAGS="-fno-exceptions -fno-rtti" ..
+```
+
+这将使用`-fno-rtti - fpic - wall - Wextra - wpedantic`配置`geometry`目标，同时使用`-fno exception -fno-rtti - fpic`配置`compute-areas`。
+
+**NOTE**:*本书中，我们推荐为每个目标设置编译器标志。使用`target_compile_options()`不仅允许对编译选项进行细粒度控制，而且还可以更好地与CMake的更高级特性进行集成。*
+
+---------------
+
+查看配置了在cmake命令中增加`CMAKE_CXX_FLAGS`效果：
+
+```c++
+$ cmake -D CMAKE_CXX_FLAGS="-fno-exceptions -fno-rtti" ..
+-- The CXX compiler identification is GNU 7.5.0
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ - works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+C++ compiler flags: -fno-exceptions -fno-rtti
+-- Configuring done
+-- Generating done
+
+$ cmake --build . -- VERBOSE=1  
+[ 57%] Building CXX object CMakeFiles/geometry.dir/geometry_square.cpp.o
+/usr/bin/c++    -fno-exceptions -fno-rtti   -fPIC -Wall -Wextra -Wpedantic -std=gnu++1z -o CMakeFiles/geometry.dir/geometry_square.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/geometry_square.cpp
+...
+[ 85%] Building CXX object CMakeFiles/compute-areas.dir/compute_areas.cpp.o
+/usr/bin/c++    -fno-exceptions -fno-rtti   -fPIC -std=gnu++1z -o CMakeFiles/compute-areas.dir/compute_areas.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/compute_areas.cpp
+```
+
+--------------
+
+**更多信息**
+
+大多数时候，编译器有特性标示。当前的例子只适用于`GCC`和`Clang`；其他供应商的编译器不确定是否会理解(如果不是全部)这些标志。如果项目是真正跨平台，那么这个问题就必须得到解决，有三种方法可以解决这个问题。
+
+最典型的方法是将所需编译器标志列表附加到每个配置类型CMake变量`CMAKE_<LANG>_FLAGS_<CONFIG>`。标志确定设置为给定编译器有效的标志，因此将包含在`if-endif`子句中，用于检查`CMAKE_<LANG>_COMPILER_ID`变量，例如：
+
+```c++
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
+  list(APPEND CMAKE_CXX_FLAGS "-fno-rtti" "-fno-exceptions")
+  list(APPEND CMAKE_CXX_FLAGS_DEBUG "-Wsuggest-final-types" "-Wsuggest-final-methods" "-Wsuggest-override")
+  list(APPEND CMAKE_CXX_FLAGS_RELEASE "-O3" "-Wno-unused")
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
+  list(APPEND CMAKE_CXX_FLAGS "-fno-rtti" "-fno-exceptions" "-Qunused-arguments" "-fcolor-diagnostics")
+  list(APPEND CMAKE_CXX_FLAGS_DEBUG "-Wdocumentation")
+  list(APPEND CMAKE_CXX_FLAGS_RELEASE "-O3" "-Wno-unused")
+endif()
+```
+
+更细粒度的方法是，不修改`CMAKE_<LANG>_FLAGS_<CONFIG>`变量，而是定义特定的标志列表：
+
+```
+set(COMPILER_FLAGS)
+set(COMPILER_FLAGS_DEBUG)
+set(COMPILER_FLAGS_RELEASE)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
+  list(APPEND CXX_FLAGS "-fno-rtti" "-fno-exceptions")
+  list(APPEND CXX_FLAGS_DEBUG "-Wsuggest-final-types" "-Wsuggest-final-methods" "-Wsuggest-override")
+  list(APPEND CXX_FLAGS_RELEASE "-O3" "-Wno-unused")
+endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
+  list(APPEND CXX_FLAGS "-fno-rtti" "-fno-exceptions" "-Qunused-arguments" "-fcolor-diagnostics")
+  list(APPEND CXX_FLAGS_DEBUG "-Wdocumentation")
+  list(APPEND CXX_FLAGS_RELEASE "-O3" "-Wno-unused")
+endif()
+```
+
+稍后，使用**生成器表达式**来设置编译器标志的基础上，为每个配置和每个目标生成构建系统:
+
+```
+target_compile_options(compute-areas
+        PRIVATE
+        ${CXX_FLAGS}
+        "$<$<CONFIG:Debug>:${CXX_FLAGS_DEBUG}>"
+        "$<$<CONFIG:Release>:${CXX_FLAGS_RELEASE}>"
+        )
+```
+
+当前示例中展示了这两种方法，我们推荐后者(特定于项目的变量和`target_compile_options`)。
+
+两种方法都有效，并在许多项目中得到广泛应用。不过，每种方式都有缺点。`CMAKE_<LANG>_COMPILER_ID`不能保证为所有编译器都定义。此外，一些标志可能会被弃用，或者在编译器的较晚版本中引入。与`CMAKE_<LANG>_COMPILER_ID`类似，`CMAKE_<LANG>_COMPILER_VERSION`变量不能保证为所有语言和供应商都提供定义。尽管检查这些变量的方式非常流行，但我们认为更健壮的替代方法是检查所需的标志集是否与给定的编译器一起工作，这样项目中实际上只使用有效的标志。结合特定于项目的变量、`target_compile_options`和生成器表达式，会让解决方案变得非常强大。我们将在第7章的第3节中展示，如何使用`check-and-set`模式。
+
+-----------
+
+使用上面的生成器表达式方式验证：
+
+```c++
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
+$ cmake --build . -- VERBOSE=1
+
+# 其中-O3 -DNDEBUG是Release模式时的默认选项
+[ 85%] Building CXX object CMakeFiles/compute-areas.dir/compute_areas.cpp.o
+/usr/bin/c++    -O3 -DNDEBUG   -fno-rtti -fno-exceptions -O3 -Wno-unused -std=gnu++1z -o CMakeFiles/compute-areas.dir/compute_areas.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/compute_areas.cpp
+
+###################
+$ cmake -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake --build . -- VERBOSE=1
+    
+# 其中-g是Debug模式时的默认选项
+[ 85%] Building CXX object CMakeFiles/compute-areas.dir/compute_areas.cpp.o
+/usr/bin/c++    -g   -fno-rtti -fno-exceptions -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override -std=gnu++1z -o CMakeFiles/compute-areas.dir/compute_areas.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/compute_areas.cpp
+
+###################
+$ cmake ..
+$ cmake --build . -- VERBOSE=1
+    
+# 如果不指定Release或Debug，则不会有对应的选项，也没有${CXX_FLAGS_DEBUG}和${CXX_FLAGS_RELEASE}
+[ 85%] Building CXX object CMakeFiles/compute-areas.dir/compute_areas.cpp.o
+/usr/bin/c++    -fno-rtti -fno-exceptions -std=gnu++1z -o CMakeFiles/compute-areas.dir/compute_areas.cpp.o -c /home/ben/Softwares/JetBrains/CppProjects/TestProject/compute_areas.cpp
+```
+
+--------------
+
+## 1.9 为语言设定标准
+
+
 
 
 
