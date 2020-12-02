@@ -1466,47 +1466,355 @@ target_link_libraries(animal-farm animals)
 
 
 
+# 第3章 检测外部库和程序
 
+本章中主要内容有:
 
+- 检测Python解释器
+- 检测Python库
+- 检测Python模块和包
+- 检测BLAS和LAPACK数学库
+- 检测OpenMP并行环境
+- 检测MPI并行环境
+- 检测Eigen库
+- 检测Boost库
+- 检测外部库:Ⅰ. 使用pkg-config
+- 检测外部库:Ⅱ. 书写find模块
 
+我们的项目常常会依赖于其他项目和库。本章将演示，如何检测外部库、框架和项目，以及如何链接到这些库。CMake有一组预打包模块，用于检测常用库和程序，例如：Python和Boost。可以使用`cmake --help-module-list`获得现有模块的列表。但是，不是所有的库和程序都包含在其中，有时必须自己编写检测脚本。本章将讨论相应的工具，了解CMake的`find`族命令:
 
+- **find_file**：在相应路径下查找命名文件
+- **find_library**：查找一个库文件
+- **find_package**：从外部项目查找和加载设置
+- **find_path**：查找包含指定文件的目录
+- **find_program**：找到一个可执行程序
 
+**NOTE**:*可以使用`--help-command`命令行显示CMake内置命令的打印文档。*
 
+## 3.1 检测Python解释器
 
+Python是一种非常流行的语言。许多项目用Python编写的工具，从而将主程序和库打包在一起，或者在配置或构建过程中使用Python脚本。这种情况下，确保运行时对Python解释器的依赖也需要得到满足。本示例将展示如何检测和使用Python解释器。
 
+我们将介绍`find_package`命令，这个命令将贯穿本章。
 
+**具体实施**
 
+我们将逐步建立`CMakeLists.txt`文件:
 
+1. 首先，定义CMake最低版本和项目名称。注意，这里不需要任何语言支持:
 
+   ```
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-01 LANGUAGES NONE)
+   ```
 
+2. 然后，使用`find_package`命令找到Python解释器:
 
+   ```
+   find_package(PythonInterp REQUIRED)
+   ```
 
+3. 然后，执行Python命令并捕获它的输出和返回值:
 
+   ```
+   execute_process(
+     COMMAND
+         ${PYTHON_EXECUTABLE} "-c" "print('Hello, world!')"
+     RESULT_VARIABLE _status
+     OUTPUT_VARIABLE _hello_world
+     ERROR_QUIET
+     OUTPUT_STRIP_TRAILING_WHITESPACE
+     )
+   ```
 
+4. 最后，打印Python命令的返回值和输出:
 
+   ```
+   message(STATUS "RESULT_VARIABLE is: ${_status}")
+   message(STATUS "OUTPUT_VARIABLE is: ${_hello_world}")
+   ```
 
+5. 配置项目:
 
+   ```
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   -- Found PythonInterp: /usr/bin/python (found version "3.6.5")
+   -- RESULT_VARIABLE is: 0
+   -- OUTPUT_VARIABLE is: Hello, world!
+   -- Configuring done
+   -- Generating done
+   -- Build files have been written to: /home/user/cmake-cookbook/chapter-03/recipe-01/example/build
+   ```
 
+完整CMakeLists.txt如下：
 
+```
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
+project(recipe-01 LANGUAGES NONE)
 
+set(CMAKE_CXX_STANDARD 20)
 
+#find_package(PythonInterp REQUIRED)  # python
+#find_package(PythonInterp 3.5 REQUIRED)  # -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.8.5", minimum required is "3.5")
+find_package(Python3 COMPONENTS Interpreter)  # python3
 
+execute_process(
+        COMMAND
+        ${Python3_EXECUTABLE} "-c" "print('Hello, world!')"  #${Python3_EXECUTABLE}, 参考https://cmake.org/cmake/help/v3.12/module/FindPython3.html
+        RESULT_VARIABLE _status
+        OUTPUT_VARIABLE _output
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
+message(STATUS "RESULT_VARIABLE is: ${_status}")
+message(STATUS "OUTPUT_VARIABLE is: ${_output}")
 
+# 输出：
+ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug$ cmake ..
+-- Found Python3: /usr/bin/python3.8 (found version "3.8.5") found components: Interpreter 
+-- RESULT_VARIABLE is: 0
+-- OUTPUT_VARIABLE is: Hello, world!
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ben/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug
+```
 
+**工作原理**
 
+`find_package`是用于发现和设置包的CMake模块的命令。这些模块包含CMake命令，用于标识系统标准位置中的包。CMake模块文件称为`Find<name>.cmake`，当调用`find_package(<name>)`时，模块中的命令将会运行。
 
+除了在系统上实际查找包模块之外，查找模块还会设置了一些有用的变量，反映实际找到了什么，也可以在自己的`CMakeLists.txt`中使用这些变量。对于Python解释器，相关模块为`FindPythonInterp.cmake`附带的设置了一些CMake变量:
 
+- **PYTHONINTERP_FOUND**：是否找到解释器
+- **PYTHON_EXECUTABLE**：Python解释器到可执行文件的路径
+- **PYTHON_VERSION_STRING**：Python解释器的完整版本信息
+- **PYTHON_VERSION_MAJOR**：Python解释器的主要版本号
+- **PYTHON_VERSION_MINOR** ：Python解释器的次要版本号
+- **PYTHON_VERSION_PATCH**：Python解释器的补丁版本号
 
+可以强制CMake，查找特定版本的包。例如，要求Python解释器的版本大于或等于2.7：`find_package(PythonInterp 2.7)`
 
+可以强制满足依赖关系:
 
+```
+find_package(PythonInterp REQUIRED)
+```
 
+如果在查找位置中没有找到适合Python解释器的可执行文件，CMake将中止配置。
 
+**TIPS**:*CMake有很多查找软件包的模块。我们建议在CMake在线文档中查询`Find<package>.cmake`模块，并在使用它们之前详细阅读它们的文档。`find_package`命令的文档可以参考 https://cmake.org/cmake/help/v3.5/command/find_package.html 。在线文档的一个很好的替代方法是浏览 https://github.com/Kitware/CMake/tree/master/Modules 中的CMake模块源代码——它们记录了模块使用的变量，以及模块可以在`CMakeLists.txt`中使用的变量。*
 
+-------------
 
+可以在CMake目录找到对应的cmake文件：
 
+`/home/ben/Softwares/cmake-3.17.0-Linux-x86_64/share/cmake-3.17/Modules/FindPython3.cmake`
 
+该cmake文件有说明会输出哪些变量：
+
+```
+...
+This module will set the following variables in your project
+(see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
+
+``Python3_FOUND``
+  System has the Python 3 requested components.
+``Python3_Interpreter_FOUND``
+  System has the Python 3 interpreter.
+``Python3_EXECUTABLE``
+  Path to the Python 3 interpreter.
+``Python3_INTERPRETER_ID``
+  A short string unique to the interpreter. Possible values include:
+    * Python
+    * ActivePython
+    * Anaconda
+    * Canopy
+    * IronPython
+...
+```
+
+-----------------
+
+**更多信息**
+
+软件包没有安装在标准位置时，CMake无法正确定位它们。用户可以使用CLI的`-D`参数传递相应的选项，告诉CMake查看特定的位置。Python解释器可以使用以下配置:
+
+```
+$ cmake -D PYTHON_EXECUTABLE=/custom/location/python ..
+```
+
+这将指定非标准`/custom/location/python`安装目录中的Python可执行文件。
+
+**NOTE**:*每个包都是不同的，`Find<package>.cmake`模块试图提供统一的检测接口。当CMake无法找到模块包时，我们建议您阅读相应检测模块的文档，以了解如何正确地使用CMake模块。可以在终端中直接浏览文档，本例中可使用`cmake --help-module FindPythonInterp`查看。*
+
+除了检测包之外，我们还想提到一个便于打印变量的helper模块。本示例中，我们使用了以下方法:
+
+```
+message(STATUS "RESULT_VARIABLE is: ${_status}")
+message(STATUS "OUTPUT_VARIABLE is: ${_hello_world}")
+```
+
+使用以下工具进行调试:
+
+```
+include(CMakePrintHelpers)
+cmake_print_variables(_status _output)
+```
+
+将产生以下输出:
+
+```
+-- _status="0" ; _output="Hello, world!"
+```
+
+有关打印属性和变量的更多信息，请参考 https://cmake.org/cmake/help/v3.5/module/CMakePrintHelpers.html 。
+
+## 3.2 检测Python库
+
+可以使用Python工具来分析和操作程序的输出。然而，还有更强大的方法可以将解释语言(如Python)与编译语言(如C或C++)组合在一起使用。一种是扩展Python，通过编译成共享库的C或C++模块在这些类型上提供新类型和新功能，这是第9章的主题。另一种是将Python解释器嵌入到C或C++程序中。两种方法都需要下列条件:
+
+- Python解释器的工作版本
+- Python头文件Python.h的可用性
+- Python运行时库libpython
+
+三个组件所使用的Python版本必须相同。我们已经演示了如何找到Python解释器；本示例中，我们将展示另外两种方式。
+
+**准备工作**
+
+我们将一个简单的Python代码，嵌入到C程序中，可以在Python文档页面上找到。源文件称为`hello-embedded-python.c`:
+
+```
+#include <Python.h>
+int main(int argc, char *argv[]) {
+  Py_SetProgramName(argv[0]); /* optional but recommended */
+  Py_Initialize();
+  PyRun_SimpleString("from time import time,ctime\n"
+                     "print 'Today is',ctime(time())\n");
+  Py_Finalize();
+  return 0;
+}
+```
+
+此代码将在程序中初始化Python解释器的实例，并使用Python的`time`模块，打印日期。
+
+**NOTE**:*嵌入代码可以在Python文档页面的 https://docs.python.org/2/extending/embedding.html 和 https://docs.python.org/3/extending/embedding.html 中找到。*
+
+## 具体实施
+
+以下是`CMakeLists.txt`中的步骤:
+
+1. 包含CMake最低版本、项目名称和所需语言:
+
+   ```
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-02 LANGUAGES C)
+   ```
+
+2. 制使用C99标准，这不严格要求与Python链接，但有时你可能需要对Python进行连接:
+
+   ```
+   set(CMAKE_C_STANDARD 99)
+   set(CMAKE_C_EXTENSIONS OFF)
+   set(CMAKE_C_STANDARD_REQUIRED ON)
+   ```
+
+3. 找到Python解释器。这是一个`REQUIRED`依赖:
+
+   ```
+   find_package(PythonInterp REQUIRED)
+   ```
+
+4. 找到Python头文件和库的模块，称为`FindPythonLibs.cmake`:
+
+   ```
+   find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} EXACT REQUIRED)
+   ```
+
+5. 使用`hello-embedded-python.c`源文件，添加一个可执行目标:
+
+   ```
+   add_executable(hello-embedded-python hello-embedded-python.c)
+   ```
+
+6. 可执行文件包含`Python.h`头文件。因此，这个目标的`include`目录必须包含Python的`include`目录，可以通过`PYTHON_INCLUDE_DIRS`变量进行指定:
+
+   ```
+   target_include_directories(hello-embedded-python
+     PRIVATE
+         ${PYTHON_INCLUDE_DIRS}
+       )
+   ```
+
+7. 最后，将可执行文件链接到Python库，通过`PYTHON_LIBRARIES`变量访问:
+
+   ```
+   target_link_libraries(hello-embedded-python
+     PRIVATE
+         ${PYTHON_LIBRARIES}
+       )
+   ```
+
+8. 现在，进行构建:
+
+   ```
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   ...
+   -- Found PythonInterp: /usr/bin/python (found version "3.6.5")
+   -- Found PythonLibs: /usr/lib/libpython3.6m.so (found suitable exact version "3.6.5")
+   ```
+
+9. 最后，执行构建，并运行可执行文件:
+
+   ```
+   $ cmake --build .
+   $ ./hello-embedded-python
+   Today is Thu Jun 7 22:26:02 2018
+   ```
+
+**工作原理**
+
+`FindPythonLibs.cmake`模块将查找Python头文件和库的标准位置。由于，我们的项目需要这些依赖项，如果没有找到这些依赖项，将停止配置，并报出错误。
+
+注意，我们显式地要求CMake检测安装的Python可执行文件。这是为了确保可执行文件、头文件和库都有一个匹配的版本。这对于不同版本，可能在运行时导致崩溃。我们通过`FindPythonInterp.cmake`中定义的`PYTHON_VERSION_MAJOR`和`PYTHON_VERSION_MINOR`来实现:
+
+```
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} EXACT REQUIRED)
+```
+
+使用`EXACT`关键字，限制CMake检测特定的版本，在本例中是匹配的相应Python版本的包括文件和库。我们可以使用`PYTHON_VERSION_STRING`变量，进行更接近的匹配:
+
+```
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
+```
+
+## 更多信息
+
+当Python不在标准安装目录中，我们如何确定Python头文件和库的位置是正确的？对于Python解释器，可以通过CLI的`-D`选项传递`PYTHON_LIBRARY`和`PYTHON_INCLUDE_DIR`选项来强制CMake查找特定的目录。这些选项指定了以下内容:
+
+- **PYTHON_LIBRARY**：指向Python库的路径
+- **PYTHON_INCLUDE_DIR**：Python.h所在的路径
+
+这样，就能获得所需的Python版本。
+
+**TIPS**:*有时需要将`-D PYTHON_EXECUTABLE`、`-D PYTHON_LIBRARY`和`-D PYTHON_INCLUDE_DIR`传递给CMake CLI，以便找到及定位相应的版本的组件。*
+
+要将Python解释器及其开发组件匹配为完全相同的版本可能非常困难，对于那些将它们安装在非标准位置或系统上安装了多个版本的情况尤其如此。CMake 3.12版本中增加了新的Python检测模块，旨在解决这个棘手的问题。我们`CMakeLists.txt`的检测部分也将简化为:
+
+```
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+```
+
+我们建议您阅读新模块的文档，地址是: https://cmake.org/cmake/help/v3.12/module/FindPython.html
+
+## 3.3 检测Python模块和包
 
 
 
