@@ -1818,13 +1818,140 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
 
 
+## [cmake教程(find_package使用)](https://cloud.tencent.com/developer/article/1338349)
+
+下面以工程demo为示例, 项目目录结构如下：
+
+```javascript
+├── cmake
+│   └── FindDEMOLIB.cmake
+├── CMakeLists.txt
+├── demo.cpp
+├── demo.h
+└── demoMain.cpp
+```
+
+其中demo.h和demo.cpp生成lib，demoMain.cpp链接对应的lib生成可执行文件
+
+文件内容如下:
+
+```c++
+//=========================demo.h===================
+#ifndef DEMO_H
+#define DEMO_H
+
+namespace demo {
+    void printDemo();
+}
+
+#endif //RECIPE_02_DEMO_H
 
 
 
+//======================demo.cpp==================
+#include "demo.h"
+#include <iostream>
 
+namespace demo {
+    void printDemo() {
+        std::cout << "this is demo" << std::endl;
+    }
+}
 
+//======================demoMain.cpp==================
+#include "demo.h"
 
+int main() {
+    demo::printDemo();
+    return 0;
+}
+```
 
+首先我们使用demo.h和demo.cpp 生成静态lib，并安装：
+
+```javascript
+ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug$ make install
+[ 50%] Built target demo_lib
+[100%] Built target demoMain
+Install the project...
+-- Install configuration: ""
+-- Installing: /home/ben/Softwares/JetBrains/CppProjects/TestProject/install/lib/libdemo_lib.a
+-- Up-to-date: /home/ben/Softwares/JetBrains/CppProjects/TestProject/install/include/demo.h
+```
+
+FindDEMOLIB.cmake的内容如下（精简版本）：
+
+```c++
+message(STATUS "now using FindDEMOLIB.cmake find demo lib")
+
+find_path(DEMOLIB_INCLUDE_DIR demo.h ${PROJECT_SOURCE_DIR}/install/include)
+message(STATUS "./h dir ${DEMOLIB_INCLUDE_DIR}")
+
+find_library(DEMOLIB_LIBRARY libdemo_lib.a ${PROJECT_SOURCE_DIR}/install/lib)
+message(STATUS "lib dir: ${DEMOLIB_LIBRARY}")
+
+if (DEMOLIB_INCLUDE_DIR AND DEMOLIB_LIBRARY)
+    set(DEMOLIB_FOUND TRUE)
+endif(DEMOLIB_INCLUDE_DIR AND DEMOLIB_LIBRARY)
+```
+
+主CMakeLists.txt内容如下：
+
+```c++
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
+project(demo LANGUAGES CXX)
+
+set(SRC_LIB demo.cpp)
+add_library(demo_lib STATIC ${SRC_LIB})
+
+install(TARGETS demo_lib DESTINATION ${PROJECT_SOURCE_DIR}/install/lib)
+install(FILES demo.h DESTINATION ${PROJECT_SOURCE_DIR}/install/include)
+
+set(SRC_EXE demoMain.cpp)
+
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+message(STATUS "cmake_module_path: ${CMAKE_INCLUDE_PATH}")
+find_package(DEMOLIB)
+
+if (DEMOLIB_FOUND)
+    add_executable(demoMain ${SRC_EXE})
+    message(STATUS "found demo ${DEMOLIB_INCLUDE_DIR} ${DEMOLIB_LIBRARY}")
+    include_directories(${DEMOLIB_INCLUDE_DIR})
+    target_link_libraries(demoMain ${DEMOLIB_LIBRARY})
+else()
+    message(STATUS "not found DEMOLIB_FOUND")
+endif(DEMOLIB_FOUND)
+```
+
+编译输出信息如下：
+
+```
+ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug$ cmake ..
+-- cmake_module_path: 
+-- now using FindDEMOLIB.cmake find demo lib
+-- ./h dir /home/ben/Softwares/JetBrains/CppProjects/TestProject/install/include
+-- lib dir: /home/ben/Softwares/JetBrains/CppProjects/TestProject/install/lib/libdemo_lib.a
+-- found demo /home/ben/Softwares/JetBrains/CppProjects/TestProject/install/include /home/ben/Softwares/JetBrains/CppProjects/TestProject/install/lib/libdemo_lib.a
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ben/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug
+```
+
+make：
+
+```
+ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug$ make
+[ 50%] Built target demo_lib
+[100%] Built target demoMain
+```
+
+运行：
+
+```
+ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug$ ./demoMain 
+this is demo
+```
 
 
 
