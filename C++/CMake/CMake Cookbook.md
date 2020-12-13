@@ -1703,7 +1703,7 @@ int main(int argc, char *argv[]) {
 
 **NOTE**:*嵌入代码可以在Python文档页面的 https://docs.python.org/2/extending/embedding.html 和 https://docs.python.org/3/extending/embedding.html 中找到。*
 
-## 具体实施
+**具体实施**
 
 以下是`CMakeLists.txt`中的步骤:
 
@@ -1795,7 +1795,7 @@ find_package(PythonInterp REQUIRED)
 find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED)
 ```
 
-## 更多信息
+**更多信息**
 
 当Python不在标准安装目录中，我们如何确定Python头文件和库的位置是正确的？对于Python解释器，可以通过CLI的`-D`选项传递`PYTHON_LIBRARY`和`PYTHON_INCLUDE_DIR`选项来强制CMake查找特定的目录。这些选项指定了以下内容:
 
@@ -1952,6 +1952,1067 @@ ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-buil
 ben@ben-virtual-machine:~/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug$ ./demoMain 
 this is demo
 ```
+
+
+
+# 第10章 编写安装程序
+
+## [10.1 安装项目](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter10-10.1-chinese.md)
+
+第一个示例中，将介绍我们的小项目和一些基本概念，这些概念也将在后面的示例中使用。安装文件、库和可执行文件是一项非常基础的任务，但是也可能会带来一些缺陷。我们将带您了解这些问题，并展示如何使用CMake有效地避开这些缺陷。
+
+**准备工作**
+
+第1章第3节的示例，几乎复用：只添加对UUID库的依赖。这个依赖是有条件的，如果没有找到UUID库，我们将通过预处理程序排除使用UUID库的代码。项目布局如下:
+
+```
+.
+├── CMakeLists.txt
+├── src
+│    ├── CMakeLists.txt
+│    ├── hello-world.cpp
+│    ├── Message.cpp
+│    └── Message.hpp
+└── tests
+    └── CMakeLists.txt
+```
+
+我们已经看到，有三个`CMakeLists.txt`，一个是主`CMakeLists.txt`，另一个是位于`src`目录下的，还有一个是位于`test`目录下的。
+
+`Message.hpp`头文件包含以下内容:
+
+```c++
+#pragma once
+
+#include <iosfwd>
+#include <string>
+
+class Message {
+public:
+    Message(const std::string& m) : message_(m) {}
+
+    friend std::ostream& operator<<(std::ostream& os, Message& obj) {
+        return obj.printObject(os);
+    }
+
+private:
+    std::string message_;
+
+    std::ostream& printObject(std::ostream& os);
+};
+
+std::string getUUID();
+
+```
+
+`Message.cpp`中有相应的实现：
+
+```c++
+#include "Message.hpp"
+
+#include <iostream>
+#include <string>
+
+#ifdef HAVE_UUID
+#include <uuid/uuid.h>
+#endif
+
+std::ostream& Message::printObject(std::ostream& os) {
+    os << "This is my very nice message: " << std::endl;
+    os << message_ << std::endl;
+    os << "...and here is its UUID: " << getUUID();
+
+    return os;
+}
+
+#ifdef HAVE_UUID
+std::string getUUID() {
+  uuid_t uuid;
+  uuid_generate(uuid);
+  char uuid_str[37];
+  uuid_unparse_lower(uuid, uuid_str);
+  uuid_clear(uuid);
+  std::string uuid_cxx(uuid_str);
+  return uuid_cxx;
+}
+#else
+
+std::string getUUID() { return "Ooooops, no UUID for you!"; }
+
+#endif
+```
+
+最后，示例`hello-world.cpp`内容如下:
+
+```c++
+#include <cstdlib>
+#include <iostream>
+
+#include "Message.hpp"
+
+int main() {
+    Message say_hello("Hello, CMake World!");
+
+    std::cout << say_hello << std::endl;
+
+    Message say_goodbye("Goodbye, CMake World");
+
+    std::cout << say_goodbye << std::endl;
+
+    return EXIT_SUCCESS;
+}
+
+```
+
+**具体实施**
+
+我们先来看一下主`CMakeLists.txt`:
+
+1. 声明CMake最低版本，并定义一个C++11项目。请注意，我们已经为我们的项目设置了一个版本，在`project`中使用`VERSION`进行指定:
+
+```c++
+# CMake 3.6 needed for IMPORTED_TARGET option
+# to pkg_search_module
+cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+project(recipe-01
+LANGUAGES CXX
+VERSION 1.0.0
+)
+# <<< General set up >>>
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+```
+
+2. 用户可以通过`CMAKE_INSTALL_PREFIX`变量定义安装目录。CMake会给这个变量设置一个默认值：Windows上的`C:\Program Files`和Unix上的`/usr/local`。我们将会打印安装目录的信息：
+
+```c++
+message(STATUS "Project will be installed to ${CMAKE_INSTALL_PREFIX}")
+```
+
+3. 默认情况下，我们更喜欢以Release的方式配置项目。用户可以通过`CMAKE_BUILD_TYPE`设置此变量，从而改变配置类型，我们将检查是否存在这种情况。如果没有，将设置为默认值:
+
+```c++
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
+```
+
+4. 接下来，告诉CMake在何处构建可执行、静态和动态库目标。便于在用户不打算安装项目的情况下，访问这些构建目标。这里使用标准CMake的`GNUInstallDirs.cmake`模块。这将确保的项目布局的合理性和可移植性：
+
+```c++
+include(GNUInstallDirs)
+
+# 如果不设置这几个参数，则生成文件不会按bin/lib目录存放
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+```
+
+5. 虽然，前面的命令配置了构建目录中输出的位置，但是需要下面的命令来配置可执行程序、库以及安装前缀中包含的文件的位置。它们大致遵循相同的布局，但是我们定义了新的`INSTALL_LIBDIR`、`INSTALL_BINDIR`、`INSTALL_INCLUDEDIR`和`INSTALL_CMAKEDIR`变量。当然，也可以覆盖这些变量：
+
+```c++
+# Offer the user the choice of overriding the installation directories
+set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
+set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header files")
+if(WIN32 AND NOT CYGWIN)
+    set(DEF_INSTALL_CMAKEDIR CMake)
+else()
+    set(DEF_INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME})
+endif()
+set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
+```
+
+6. 报告组件安装的路径:
+
+   ```c++
+   # Report to user
+   foreach(p LIB BIN INCLUDE CMAKE)
+     file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path )
+     message(STATUS "Installing ${p} components to ${_path}")
+     unset(_path)
+   endforeach()
+   ```
+
+7. 主`CMakeLists.txt`文件中的最后一个指令添加`src`子目录，启用测试，并添加`tests`子目录：
+
+   ```c++
+   add_subdirectory(src)
+   enable_testing()
+   add_subdirectory(tests)
+   ```
+
+现在我们继续分析`src/CMakeLists.txt`，其定义了构建的实际目标：
+
+1. 我们的项目依赖于UUID库：
+
+   ```
+   # Search for pkg-config and UUID
+   find_package(PkgConfig QUIET)
+   if(PKG_CONFIG_FOUND)
+     pkg_search_module(UUID uuid IMPORTED_TARGET)
+     if(TARGET PkgConfig::UUID)
+       message(STATUS "Found libuuid")
+       set(UUID_FOUND TRUE)
+     endif()
+   endif()
+   ```
+
+2. 我们希望建立一个动态库，将该目标声明为`message-shared`:
+
+   ```
+   add_library(message-shared SHARED "")
+   ```
+
+3. 这个目标由`target_sources`命令指定:
+
+   ```
+   target_sources(message-shared
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+     )
+   ```
+
+4. 我们为目标声明编译时定义和链接库。请注意，所有这些都是`PUBLIC`，以确保所有依赖的目标将正确继承它们:
+
+   ```
+     target_compile_definitions(message-shared
+     PUBLIC
+         $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+     )
+   target_link_libraries(message-shared
+     PUBLIC
+         $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+     )
+   ```
+
+5. 然后设置目标的附加属性:
+
+   ```
+   set_target_properties(message-shared
+     PROPERTIES
+       POSITION_INDEPENDENT_CODE 1
+       SOVERSION ${PROJECT_VERSION_MAJOR}
+       OUTPUT_NAME "message"
+       DEBUG_POSTFIX "_d"
+       PUBLIC_HEADER "Message.hpp"
+       MACOSX_RPATH ON
+       WINDOWS_EXPORT_ALL_SYMBOLS ON
+     )
+   ```
+
+6. 最后，为“Hello, world”程序添加可执行目标:
+
+   ```
+   add_executable(hello-world_wDSO hello-world.cpp)
+   ```
+
+7. `hello-world_wDSO`可执行目标，会链接到动态库：
+
+   ```
+   target_link_libraries(hello-world_wDSO
+     PUBLIC
+         message-shared
+     )
+   ```
+
+`src/CMakeLists.txt`文件中，还包含安装指令。考虑这些之前，我们需要设置可执行文件的`RPATH`：
+
+1. 使用CMake路径操作，我们可以设置`message_RPATH`变量。这将为GNU/Linux和macOS设置适当的`RPATH`:
+
+   ```
+   RPATH
+   file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
+   if(APPLE)
+       set(_rpath "@loader_path/${_rel}")
+   else()
+       set(_rpath "\$ORIGIN/${_rel}")
+   endif()
+   file(TO_NATIVE_PATH "${_rpath}/${INSTALL_LIBDIR}" message_RPATH)
+   ```
+
+2. 现在，可以使用这个变量来设置可执行目标`hello-world_wDSO`的`RPATH`(通过目标属性实现)。我们也可以设置额外的属性，稍后会对此进行更多的讨论:
+
+   ```
+   set_target_properties(hello-world_wDSO
+     PROPERTIES
+       MACOSX_RPATH ON
+       SKIP_BUILD_RPATH OFF
+       BUILD_WITH_INSTALL_RPATH OFF
+       INSTALL_RPATH "${message_RPATH}"
+       INSTALL_RPATH_USE_LINK_PATH ON
+     )
+   ```
+
+3. 终于可以安装库、头文件和可执行文件了！使用CMake提供的`install`命令来指定安装位置。注意，路径是相对的，我们将在后续进一步讨论这一点:
+
+   ```
+   install(
+     TARGETS
+       message-shared
+       hello-world_wDSO
+     ARCHIVE
+       DESTINATION ${INSTALL_LIBDIR}
+       COMPONENT lib
+     RUNTIME
+       DESTINATION ${INSTALL_BINDIR}
+       COMPONENT bin
+     LIBRARY
+       DESTINATION ${INSTALL_LIBDIR}
+       COMPONENT lib
+     PUBLIC_HEADER
+       DESTINATION ${INSTALL_INCLUDEDIR}/message
+       COMPONENT dev
+     )
+   ```
+
+`tests`目录中的`CMakeLists.txt`文件包含简单的指令，以确保“Hello, World”可执行文件能够正确运行：
+
+```
+add_test(
+  NAME test_shared
+  COMMAND $<TARGET_FILE:hello-world_wDSO>
+  )
+```
+
+现在让我们配置、构建和安装项目，并查看结果。添加安装指令时，CMake就会生成一个名为`install`的新目标，该目标将运行安装规则:
+
+```c++
+$ mkdir -p build
+$ cd build
+$ cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$HOME/Software/recipe-01  # cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/ben/temp ..
+$ cmake --build . --target install  # 和make install一样
+```
+
+GNU/Linux构建目录的内容如下:
+
+```c++
+build
+├── bin
+│    └── hello-world_wDSO
+├── CMakeCache.txt
+├── CMakeFiles
+├── cmake_install.cmake
+├── CTestTestfile.cmake
+├── install_manifest.txt
+├── lib64
+│    ├── libmessage.so -> libmessage.so.1
+│    └── libmessage.so.1
+├── Makefile
+├── src
+├── Testing
+└── tests
+```
+
+另一方面，在安装位置，可以找到如下的目录结构:
+
+```c++
+$HOME/Software/recipe-01/
+├── bin
+│    └── hello-world_wDSO
+├── include
+│    └── message
+│        └── Message.hpp
+└── lib64
+    ├── libmessage.so -> libmessage.so.1
+    └── libmessage.so.1
+```
+
+这意味着安装指令中给出的位置，是相对于用户给定的`CMAKE_INSTALL_PREFIX`路径。
+
+**工作原理**
+
+这个示例有三个要点我们需要更详细地讨论：
+
+- 使用`GNUInstallDirs.cmake`定义目标安装的标准位置
+- 在动态库和可执行目标上设置的属性，特别是`RPATH`的处理
+- 安装指令
+
+**安装到标准位置**
+
+对于项目的安装来说，什么是好的布局呢？如果只有自己使用该项目，那就无所谓好或坏的布局。然而，一旦向外部发布产品，和他人共用该项目，就应该在安装项目时提供一个合理的布局。幸运的是，我们可以遵循一些标准，CMake可以帮助我们做到这一点。实际上，`GNUInstallDirs.cmake`模块所做的就是定义这样一组变量，这些变量是安装不同类型文件的子目录的名称。在例子中，使用了以下内容:
+
+- **CMAKE_INSTALL_BINDIR**：这将用于定义用户可执行文件所在的子目录，即所选安装目录下的`bin`目录。
+- **CMAKE_INSTALL_LIBDIR**：这将扩展到目标代码库(即静态库和动态库)所在的子目录。在64位系统上，它是`lib64`，而在32位系统上，它只是`lib`。
+- **CMAKE_INSTALL_INCLUDEDIR**：最后，我们使用这个变量为C头文件获取正确的子目录，该变量为`include`。
+
+然而，用户可能希望覆盖这些选项。我们允许在主`CMakeLists.txt`文件中使用以下方式覆盖选项:
+
+```
+# Offer the user the choice of overriding the installation directories
+# 这里只是重新定义了一个INSTALL_LIBDIR变量，最终使用还是在install DESTINATION ${INSTALL_LIBDIR}这里，这个变量可以取任意名称
+set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
+set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header files")
+```
+
+这重新定义了在项目中使用的`INSTALL_BINDIR`、`INSTALL_LIBDIR`和`INSTALL_INCLUDEDIR`变量。我们还定义了`INSTALL_CMAKEDIR`变量，但它所扮演的角色将在接下来的几个示例中详细讨论。
+
+**TIPS**:*`GNUInstallDirs.cmake`模块定义了额外的变量，这些变量将有助于，将已安装的文件放置到所选安装前缀的子目录中。请参考CMake在线文档:https://cmake.org/cmake/help/v3.6/module/GNUInstallDirs.html*
+
+**目标属性和RPATH处理**
+
+让我们更仔细地看看在动态库目标上设置的属性，需要设置以下内容:
+
+- `POSITION_INDEPENDENT_CODE 1`：设置生成位置无关代码所需的编译器标志。有关更多信息，请参考https://en.wikipedia.org/wiki/position-independentent_code
+- `SOVERSION ${PROJECT_VERSION_MAJOR}` : 这是动态库提供的应用程序编程接口(API)版本。在设置语义版本之后，将其设置为与项目的主版本一致。CMake目标也有一个版本属性，可以用来指定目标的构建版本。注意，`SOVERSION`和`VERSION`有所不同：随着时间的推移，提供相同API的多个构建版本。本例中，我们不关心这种的粒度控制：仅使用`SOVERSION`属性设置API版本就足够了，CMake将为我们将`VERSION`设置为相同的值。相关详细信息，请参考官方文档:https://cmake.org/cmake/help/latest/prop_tgt/SOVERSION.html
+- `OUTPUT_NAME "message"`：这告诉CMake库的名称`message`，而不是目标`message-shared`的名称，`libmessage.so.1`将在构建时生成。从前面给出的构建目录和安装目录的也可以看出，`libmessage.so`的符号链接也将生成。
+- `DEBUG_POSTFIX "_d"`：这告诉CMake，如果我们以Debug配置构建项目，则将`_d`后缀添加到生成的动态库。
+- `PUBLIC_HEADER "Message.hpp"`：我们使用这个属性来设置头文件列表(本例中只有一个头文件)，声明提供的API函数。这主要用于macOS上的动态库目标，也可以用于其他操作系统和目标。有关详细信息，请参见官方文档:https://cmake.org/cmake/help/v3.6/prop_tgt/PUBLIC_HEADER.html
+- `MACOSX_RPATH ON`：这将动态库的`install_name`部分(目录)设置为macOS上的`@rpath`。
+- `WINDOWS_EXPORT_ALL_SYMBOLS ON`：这将强制在Windows上编译以导出所有符号。注意，这通常不是一个好的方式，我们将在第2节中展示如何生成导出头文件，以及如何在不同的平台上保证符号的可见性。
+
+现在讨论一下`RPATH`。我们将`hello-world_wDSO`可执行文件链接到`libmessage.so.1`，这意味着在执行时，将加载动态库。因此，有关库位置的信息需要在某个地方进行编码，以便加载程序能够成功地完成其工作。库的定位有两种方法:
+
+- 通过设置环境变量通知链接器:
+  - GNU/Linux上，这需要将路径附加到`LD_LIBRARY_PATH`环境变量中。注意，这很可能会污染系统中所有应用程序的链接器路径，并可能导致符号冲突( https://gms.tf/ld_library_path-considered-harmful.htm )。
+  - macOS上，可以设置`DYLD_LIBRARY_PATH`变量。这与GNU/Linux上的`LD_LIBRARY_PATH`有相同的问题，可以通过使用`DYLD_FALLBACK_LIBRARY_PATH`变量来(部分的)改善这种情况。请看下面的链接，获取相关例子: https://stackoverflow.com/a/3172515/2528668
+- 可被编码到可执行文件中，使用`RPATH`可以设置可执行文件的运行时搜索路径
+
+后一种方法更健壮。但是，设置动态对象的`RPATH`时，应该选择哪个路径？我们需要确保可执行文件总是找到正确的动态库，不管它是在构建树中运行还是在安装树中运行。这需要通过设置`hello-world_wDSO`目标的`RPATH`相关属性来实现的，通过`$ORIGIN`(在GNU/Linux上)或`@loader_path`(在macOS上)变量来查找与可执行文件本身位置相关的路径:
+
+```c++
+# Prepare RPATH
+file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
+if(APPLE)
+    set(_rpath "@loader_path/${_rel}")
+else()
+    set(_rpath "\$ORIGIN/${_rel}")
+endif()
+file(TO_NATIVE_PATH "${_rpath}/${INSTALL_LIBDIR}" message_RPATH)
+```
+
+当设置了message_RPATH变量，目标属性将完成剩下的工作:
+
+```c++
+set_target_properties(hello-world_wDSO
+    PROPERTIES
+    MACOSX_RPATH ON
+    SKIP_BUILD_RPATH OFF
+    BUILD_WITH_INSTALL_RPATH OFF
+    INSTALL_RPATH "${message_RPATH}"
+    INSTALL_RPATH_USE_LINK_PATH ON
+  )
+```
+
+让我们详细研究一下这个命令：
+
+- `SKIP_BUILD_RPATH OFF`：告诉CMake生成适当的`RPATH`，以便能够在构建树中运行可执行文件。
+- `BUILD_WITH_INSTALL_RPATH OFF`：关闭生成可执行目标，使其`RPATH`调整为与安装树的`RPATH`相同。在构建树中不运行可执行文件。
+- `INSTALL_RPATH "${message_RPATH}"`：将已安装的可执行目标的`RPATH`设置为先前的路径。
+- `INSTALL_RPATH_USE_LINK_PATH ON`：告诉CMake将链接器搜索路径附加到可执行文件的`RPATH`中。
+
+**NOTE**:*加载器在Unix系统上如何工作的更多信息，可参见:http://longwei.github.io/rpath_origin/*
+
+**安装指令**
+
+最后，看一下安装指令。我们需要安装一个可执行文件、一个库和一个头文件。可执行文件和库是构建目标，因此我们使用安装命令的`TARGETS`选项。可以同时设置多个目标的安装规则：CMake知道它们是什么类型的目标，无论其是可执行程序库、动态库，还是静态库:
+
+```
+install(
+  TARGETS
+    message-shared
+    hello-world_wDSO
+```
+
+可执行文件将安装在`RUNTIME DESTINATION`，将其设置为`${INSTALL_BINDIR}`。动态库安装到`LIBRARY_DESTINATION`，将其设置为`${INSTALL_LIBDIR}`。静态库将安装到`ARCHIVE DESTINATION`，将其设置为`${INSTALL_LIBDIR}`:
+
+```c++
+ARCHIVE
+  DESTINATION ${INSTALL_LIBDIR}
+  COMPONENT lib
+RUNTIME
+  DESTINATION ${INSTALL_BINDIR}
+  COMPONENT bin
+LIBRARY
+  DESTINATION ${INSTALL_LIBDIR}
+  COMPONENT lib
+```
+
+注意，这里不仅指定了`DESTINATION`，还指定了`COMPONENT`。使用`cmake --build . --target install`安装命令，所有组件会按预期安装完毕。然而，有时只安装其中一些可用的。这就是`COMPONENT`关键字帮助我们做的事情。例如，当只要求安装库，我们可以执行以下步骤:
+
+```
+$ cmake -D COMPONENT=lib -P cmake_install.cmake  # 这里可以使用make install，或cmake --build . --target install，或cmake -P cmake_install.cmake
+```
+
+自从`Message.hpp`头文件设置为项目的公共头文件，我们可以使用`PUBLIC_HEADER`关键字将其与其他目标安装到选择的目的地:`${INSTALL_INCLUDEDIR}/message`。库用户现在可以包含头文件：`#include <message/Message.hpp>`，这需要在编译时，使用`-I`选项将正确的头文件查找路径位置传递给编译器。
+
+安装指令中的各种目标地址会被解释为相对路径，除非使用绝对路径。但是相对于哪里呢？根据不同的安装工具而不同，而CMake可以去计算目标地址的绝对路径。当使用`cmake --build . --target install`，路径将相对于`CMAKE_INSTALL_PREFIX`计算。但当使用CPack时，绝对路径将相对于`CPACK_PACKAGING_INSTALL_PREFIX`计算。CPack的用法将在第11章中介绍。
+
+**NOTE**:*Unix Makefile和Ninja生成器还提供了另一种机制:`DESTDIR`。可以在`DESTDIR`指定的目录下重新定位整个安装树。也就是说，`env DESTDIR=/tmp/stage cmake --build . --target install`将安装相对于`CMAKE_INSTALL_PREFIX`和`/tmp/stage`目录。可以在这里阅读更多信息:https://www.gnu.org/prep/standards/html_node/DESTDIR.html*
+
+**更多信息**
+
+正确设置`RPATH`可能相当麻烦，但这对于用户来说无法避免。默认情况下，CMake设置可执行程序的`RPATH`，假设它们将从构建树运行。但是，安装之后`RPATH`被清除，当用户想要运行`hello-world_wDSO`时，就会出现问题。使用Linux上的`ldd`工具，我们可以检查构建树中的`hello-world_wDSO`可执行文件，运行`ldd hello-world_wDSO`将得到以下结果:
+
+```c++
+libmessage.so.1 => /home/user/cmake-cookbook/chapter-10/recipe-01/cxx-example/build/lib64/libmessage.so.1(0x00007f7a92e44000)
+```
+
+在安装目录中运行`ldd hello-world_wDSO`将得到以下结果:
+
+```
+libmessage.so.1 => Not found
+```
+
+这显然是不行的。但是，总是硬编码`RPATH`来指向构建树或安装目录也是错误的：这两个位置中的任何一个都可能被删除，从而导致可执行文件的损坏。这里给出的解决方案为构建树和安装目录中的可执行文件设置了不同的`RPATH`，因此它总是指向“有意义”的位置；也就是说，尽可能接近可执行文件。在构建树中运行`ldd`显示相同的输出:
+
+```
+libmessage.so.1 => /home/roberto/Workspace/robertodr/cmake-cookbook/chapter-10/recipe-01/cxx-example/build/lib64/libmessage.so.1(0x00007f7a92e44000)
+```
+
+另外，在安装目录下，我们得到:
+
+```
+libmessage.so.1 => /home/roberto/Software/ch10r01/bin/../lib64/libmessage.so.1 (0x00007fbd2a725000)
+```
+
+我们使用了带有目标参数的CMake安装命令，因为我们需要安装构建目标。而该命令还有另外4个参数:
+
+- **FILES**和**PROGRAMS**，分别用于安装文件或程序。安装后，并设置安装文件适当的权限。对于文件，对所有者具有读和写权限，对组以及其他用户和组具有读权限。对于程序，将授予执行权限。注意，`PROGRAMS`要与非构建目标的可执行程序一起使用。参见: https://cmake.org/cmake/help/v3.6/command/install.html#installing-files
+- **DIRECTORY**，用于安装目录。当只给出一个目录名时，它通常被理解为相对于当前源目录。可以对目录的安装粒度进行控制。请参考在线文档： https://cmake.org/cmake/help/v3.6/command/install.html#installing-directories
+- **SCRIPT**，可以使用它在CMake脚本中定义自定义安装规则。参见： https://cmake.org/cmake/help/v3.6/command/install.html#custom-installation-logic
+- **EXPORT**，我们将此参数的讨论推迟到第3节，该参数用于导出目标。
+
+完整CMakeLists.txt：
+
+```c++
+# CMake 3.6 needed for IMPORTED_TARGET option
+# to pkg_search_module
+cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+
+project(recipe-01
+  LANGUAGES CXX
+  VERSION 1.0.0
+  )
+
+# <<< General set up >>>
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+message(STATUS "Project will be installed to ${CMAKE_INSTALL_PREFIX}")
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
+
+include(GNUInstallDirs)
+
+# 如果不设置这几个参数，则生成文件不会按bin/lib目录存放
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})  # 静态库
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})  # 动态库
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})  # 可执行文件
+
+# Offer the user the choice of overriding the installation directories
+# 这里只是重新定义了一个INSTALL_LIBDIR变量，最终使用还是在install DESTINATION ${INSTALL_LIBDIR}这里，这个变量可以取任意名称
+set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
+set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header files")
+if(WIN32 AND NOT CYGWIN)
+  set(DEF_INSTALL_CMAKEDIR CMake)
+else()
+  set(DEF_INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME})
+endif()
+set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
+
+# Report to user
+foreach(p LIB BIN INCLUDE CMAKE)
+  file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path )
+  message(STATUS "Installing ${p} components to ${_path}")
+  unset(_path)
+endforeach()
+
+add_subdirectory(src)
+
+enable_testing()
+
+add_subdirectory(tests)
+```
+
+src/CMakeLists.txt：
+
+```c++
+# Search for pkg-config and UUID
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  pkg_search_module(UUID uuid IMPORTED_TARGET)
+  if(TARGET PkgConfig::UUID)
+    message(STATUS "Found libuuid")
+    set(UUID_FOUND TRUE)
+  endif()
+endif()
+
+# <<< Build targets >>>
+
+# SHARED library
+add_library(message-shared SHARED "")
+
+target_sources(message-shared
+  PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+  )
+# message('CMAKE_CURRENT_LIST_DIR: ${CMAKE_CURRENT_LIST_DIR}')  # /home/ben/Softwares/JetBrains/CppProjects/cmake-cookbook-master/chapter-10/recipe-01/cxx-example/src
+# message('CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}')  # /home/ben/Softwares/JetBrains/CppProjects/cmake-cookbook-master/chapter-10/recipe-01/cxx-example/cmake-build-debug
+# message('CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}')  # /home/ben/Softwares/JetBrains/CppProjects/cmake-cookbook-master/chapter-10/recipe-01/cxx-example
+
+target_compile_definitions(message-shared
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+  )
+
+target_link_libraries(message-shared
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+  )
+
+set_target_properties(message-shared
+  PROPERTIES
+    POSITION_INDEPENDENT_CODE 1  # 设置生成位置无关代码所需的编译器标志
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    OUTPUT_NAME "message"
+    DEBUG_POSTFIX "_d"
+    PUBLIC_HEADERSS "Message.hpp"
+    MACOSX_RPATH ON
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+  )
+
+# EXECUTABLES
+add_executable(hello-world_wDSO hello-world.cpp)
+
+target_link_libraries(hello-world_wDSO
+  PUBLIC
+    message-shared
+  )
+
+# file(RELATIVE_PATH variable directory file): RELATIVE_PAT推断出指定文件相对于特定目录的路径。
+# ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR}: /home/ben/temp/bin ${CMAKE_INSTALL_PREFIX}: /home/ben/temp'
+# so _rel=../
+# Prepare RPATH
+file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
+if(APPLE)
+  set(_rpath "@loader_path/${_rel}")
+else()
+  set(_rpath "\$ORIGIN/${_rel}")  # _rpath: $ORIGIN/../
+endif()
+# file(TO_NATIVE_PATH path result): TO_NATIVE_PATH与TO_CMAKE_PATH类似，但执行反向操作，将cmake风格的路径转换为操作系统特定风格的路径表式形式。
+file(TO_NATIVE_PATH "${_rpath}/${INSTALL_LIBDIR}" message_RPATH)  # message_RPATH: $ORIGIN/../lib
+
+
+set_target_properties(hello-world_wDSO
+  PROPERTIES
+    MACOSX_RPATH ON
+    SKIP_BUILD_RPATH OFF
+    BUILD_WITH_INSTALL_RPATH OFF
+    INSTALL_RPATH "${message_RPATH}"  # tell the target where to find lib: $ORIGIN/../lib
+    INSTALL_RPATH_USE_LINK_PATH ON
+  )
+
+# <<< Install and export targets >>>
+
+install(
+  TARGETS
+    message-shared
+    hello-world_wDSO
+  ARCHIVE
+    DESTINATION ${INSTALL_LIBDIR}
+    COMPONENT lib
+  RUNTIME
+    DESTINATION ${INSTALL_BINDIR}
+    COMPONENT bin
+  LIBRARY
+    DESTINATION ${INSTALL_LIBDIR}
+    COMPONENT lib
+  PUBLIC_HEADER
+    DESTINATION ${INSTALL_INCLUDEDIR}/message
+    COMPONENT dev
+  )
+```
+
+tests/CMakeLists.txt：
+
+```c++
+add_test(
+  NAME test_shared
+  COMMAND $<TARGET_FILE:hello-world_wDSO>
+  )
+```
+
+file命令：https://blog.csdn.net/tantion/article/details/84378266
+set_target_properties: https://cmake.org/cmake/help/v3.17/manual/cmake-properties.7.html#target-properties
+RPATH: https://blog.csdn.net/zhangzq86/article/details/80718559
+
+## 10.2 生成输出头文件
+
+设想一下，当我们的小型库非常受欢迎时，许多人都在使用它。然而，一些客户希望在安装时使用静态库，而另一些客户也注意到所有符号在动态库中都是可见的。最佳方式是规定动态库只公开最小的符号，从而限制代码中定义的对象和函数对外的可见性。我们希望在默认情况下，动态库定义的所有符号都对外隐藏。这将使得项目的贡献者，能够清楚地划分库和外部代码之间的接口，因为他们必须显式地标记所有要在项目外部使用的符号。因此，我们需要完成以下工作：
+
+- 使用同一组源文件构建动态库和静态库
+- 确保正确分隔动态库中符号的可见性
+
+第1章第3节中，已经展示了CMake提供了与平台无关的方式实现的功能。但是，没有处理符号可见性的问题。我们将用当前的配方重新讨论这两点。
+
+**准备工作**
+
+我们仍将使用与前一个示例中基本相同的代码，但是我们需要修改`src/CMakeLists.txt`和`Message.hpp`头文件。后者将包括新的、自动生成的头文件`messageExport.h`:
+
+```c++
+#pragma once
+
+#include <iosfwd>
+#include <string>
+
+#include "messageExport.h"
+
+class message_EXPORT Message {
+public:
+    Message(const std::string& m) : message_(m) {}
+
+    friend std::ostream& operator<<(std::ostream& os, Message& obj) {
+        return obj.printObject(os);
+    }
+
+private:
+    std::string message_;
+
+    std::ostream& printObject(std::ostream& os);
+};
+
+std::string getUUID();
+
+```
+
+`Message`类的声明中引入了`message_EXPORT`预处理器指令，这个指令将让编译器生成对库的用户可见的符号。
+
+**具体实施**
+
+除了项目的名称外，主`CMakeLists.txt`文件没有改变。首先，看看`src`子目录中的`CMakeLists.txt`文件，所有工作实际上都在这里进行。我们将重点展示对之前示例的修改之处:
+
+1. 为消息传递库声明`SHARED`库目标及其源。注意，编译定义和链接库没有改变:
+
+   ```c++
+   add_library(message-shared SHARED "")
+   target_sources(message-shared
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+     )
+   target_compile_definitions(message-shared
+       PUBLIC
+         $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+     )
+   target_link_libraries(message-shared
+     PUBLIC
+         $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+     )
+   ```
+
+2. 设置目标属性。将`${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h`头文件添加到公共头列表中，作为`PUBLIC_HEADER`目标属性的参数。`CXX_VISIBILITY_PRESET`置和`VISIBILITY_INLINES_HIDDEN`属性将在下一节中讨论:
+
+   ```c++
+   set_target_properties(message-shared
+     PROPERTIES
+       POSITION_INDEPENDENT_CODE 1
+       CXX_VISIBILITY_PRESET hidden
+       VISIBILITY_INLINES_HIDDEN 1
+       SOVERSION ${PROJECT_VERSION_MAJOR}
+       OUTPUT_NAME "message"
+       DEBUG_POSTFIX "_d"
+       PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
+       MACOSX_RPATH ON
+     )
+   ```
+
+3. 包含`GenerateExportHeader.cmake`模块并调用`generate_export_header`函数，这将在构建目录的子目录中生成`messageExport.h`头文件。我们将稍后会详细讨论这个函数和生成的头文件:
+
+   ```c++
+   include(GenerateExportHeader)
+   generate_export_header(message-shared
+     BASE_NAME "message"
+     EXPORT_MACRO_NAME "message_EXPORT"
+     EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
+     DEPRECATED_MACRO_NAME "message_DEPRECATED"
+     NO_EXPORT_MACRO_NAME "message_NO_EXPORT"
+     STATIC_DEFINE "message_STATIC_DEFINE"
+     NO_DEPRECATED_MACRO_NAME "message_NO_DEPRECATED"
+     DEFINE_NO_DEPRECATED
+     )
+   ```
+
+4. 当要更改符号的可见性(从其默认值-隐藏值)时，都应该包含导出头文件。我们已经在`Message.hpp`头文件例这样做了，因为想在库中公开一些符号。现在将`${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}`目录作为`message-shared`目标的`PUBLIC`包含目录列出：
+
+   ```c++
+   target_include_directories(message-shared
+     PUBLIC
+         ${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}
+     )
+   ```
+
+现在，可以将注意力转向静态库的生成：
+
+1. 添加一个库目标来生成静态库。将编译与静态库相同的源文件，以获得此动态库目标：
+
+   ```
+   add_library(message-static STATIC "")
+   target_sources(message-static
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+     )
+   ```
+
+2. 设置编译器定义，包含目录和链接库，就像我们为动态库目标所做的一样。但请注意，我们添加了`message_STATIC_DEFINE`编译时宏定义，为了确保我们的符号可以适当地暴露:
+
+   ```
+   target_compile_definitions(message-static
+     PUBLIC
+         message_STATIC_DEFINE
+         $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+     )
+   target_include_directories(message-static
+         PUBLIC
+         ${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}
+     )
+   target_link_libraries(message-static
+     PUBLIC
+         $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+     )
+   ```
+
+3. 还设置了`message-static`目标的属性:
+
+   ```
+   set_target_properties(message-static
+     PROPERTIES
+       POSITION_INDEPENDENT_CODE 1
+       ARCHIVE_OUTPUT_NAME "message"
+       DEBUG_POSTFIX "_sd"
+       RELEASE_POSTFIX "_s"
+       PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
+     )
+   ```
+
+4. 除了链接到消息动态库目标的`hello-world_wDSO`可执行目标之外，还定义了另一个可执行目标`hello-world_wAR`，这个链接指向静态库:
+
+   ```
+   add_executable(hello-world_wAR hello-world.cpp)
+   target_link_libraries(hello-world_wAR
+       PUBLIC
+           message-static
+       )
+   ```
+
+5. 安装指令现在多了`message-static`和`hello-world_wAR`目标，其他没有改变:
+
+   ```
+   install(
+     TARGETS
+       message-shared
+       message-static
+       hello-world_wDSO
+       hello-world_wAR
+     ARCHIVE
+       DESTINATION ${INSTALL_LIBDIR}
+       COMPONENT lib
+     RUNTIME
+       DESTINATION ${INSTALL_BINDIR}
+       COMPONENT bin
+     LIBRARY
+       DESTINATION ${INSTALL_LIBDIR}
+       COMPONENT lib
+     PUBLIC_HEADER
+       DESTINATION ${INSTALL_INCLUDEDIR}/message
+       COMPONENT dev
+     )
+   ```
+
+**工作原理**
+
+此示例演示了，如何设置动态库的符号可见性。最好的方式是在默认情况下隐藏所有符号，显式地只公开那些需要使用的符号。这需要分为两步实现。首先，需要指示编译器隐藏符号。当然，不同的编译器将有不同的可用选项，并且直接在`CMakeLists.txt`中设置这些选项并不是是跨平台的。CMake通过在动态库目标上设置两个属性，提供了一种健壮的跨平台方法来设置符号的可见性：
+
+- `CXX_VISIBILITY_PRESET hidden`：这将隐藏所有符号，除非显式地标记了其他符号。当使用GNU编译器时，这将为目标添加`-fvisibility=hidden`标志。
+- `VISIBILITY_INLINES_HIDDEN 1`：这将隐藏内联函数的符号。如果使用GNU编译器，这对应于`-fvisibility-inlines-hidden`
+
+Windows上，这都是默认行为。实际上，我们需要在前面的示例中通过设置`WINDOWS_EXPORT_ALL_SYMBOLS`属性为`ON`来覆盖它。
+
+如何标记可见的符号？这由预处理器决定，因此需要提供相应的预处理宏，这些宏可以扩展到所选平台上，以便编译器能够理解可见性属性。CMake中有现成的`GenerateExportHeader.cmake`模块。这个模块定义了`generate_export_header`函数，我们调用它的过程如下：
+
+```
+include(GenerateExportHeader)generate_export_header(message-shared  BASE_NAME "message"  EXPORT_MACRO_NAME "message_EXPORT"  EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"  DEPRECATED_MACRO_NAME "message_DEPRECATED"  NO_EXPORT_MACRO_NAME "message_NO_EXPORT"  STATIC_DEFINE "message_STATIC_DEFINE"  NO_DEPRECATED_MACRO_NAME "message_NO_DEPRECATED"  DEFINE_NO_DEPRECATED  )
+```
+
+该函数生成`messageExport.h`头文件，其中包含预处理器所需的宏。根据`EXPORT_FILE_NAME`选项的请求，在目录`${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}`中生成该文件。如果该选项为空，则头文件将在当前二进制目录中生成。这个函数的第一个参数是现有的目标(示例中是`message- shared`)，函数的基本调用只需要传递现有目标的名称即可。可选参数，用于细粒度的控制所有生成宏，也可以传递：
+
+- BASE_NAME：设置生成的头文件和宏的名称。
+- EXPORT_MACRO_NAME：设置导出宏的名称。
+- EXPORT_FILE_NAME：设置导出头文件的名称。
+- DEPRECATED_MACRO_NAME：设置弃用宏的名称。这是用来标记将要废弃的代码，如果客户使用该宏定义，编译器将发出一个将要废弃的警告。
+- NO_EXPORT_MACRO_NAME：设置不导出宏的名字。
+- STATIC_DEFINE：用于定义宏的名称，以便使用相同源编译静态库时使用。
+- NO_DEPRECATED_MACRO_NAME：设置宏的名称，在编译时将“将要废弃”的代码排除在外。
+- DEFINE_NO_DEPRECATED：指示CMake生成预处理器代码，以从编译中排除“将要废弃”的代码。
+
+GNU/Linux上，使用GNU编译器，CMake将生成以下`messageExport.h`头文件:
+
+```c++
+#ifndef message_EXPORT_H
+#define message_EXPORT_H
+
+#ifdef message_STATIC_DEFINE
+#  define message_EXPORT
+#  define message_NO_EXPORT
+#else
+#  ifndef message_EXPORT
+#    ifdef message_shared_EXPORTS
+        /* We are building this library */
+#      define message_EXPORT __attribute__((visibility("default")))
+#    else
+        /* We are using this library */
+#      define message_EXPORT __attribute__((visibility("default")))
+#    endif
+#  endif
+
+#  ifndef message_NO_EXPORT
+#    define message_NO_EXPORT __attribute__((visibility("hidden")))
+#  endif
+#endif
+
+#ifndef message_DEPRECATED
+#  define message_DEPRECATED __attribute__ ((__deprecated__))
+#endif
+
+#ifndef message_DEPRECATED_EXPORT
+#  define message_DEPRECATED_EXPORT message_EXPORT message_DEPRECATED
+#endif
+
+#ifndef message_DEPRECATED_NO_EXPORT
+#  define message_DEPRECATED_NO_EXPORT message_NO_EXPORT message_DEPRECATED
+#endif
+
+#if 1 /* DEFINE_NO_DEPRECATED */
+#  ifndef message_NO_DEPRECATED
+#    define message_NO_DEPRECATED
+#  endif
+#endif
+
+#endif /* message_EXPORT_H */
+
+```
+
+我们可以使用`message_EXPORT`宏，预先处理用户公开类和函数。弃用可以通过在前面加上`message_DEPRECATED`宏来实现。
+
+从`messageExport.h`头文件的内容可以看出，所有符号都应该在静态库中可见，这就是`message_STATIC_DEFINE`宏起了作用。当声明了目标，我们就将其设置为编译时定义。静态库的其他目标属性如下:
+
+- `ARCHIVE_OUTPUT_NAME "message"`：这将确保库文件的名称是`message`，而不是`message-static`。
+- `DEBUG_POSTFIX "_sd"`：这将把给定的后缀附加到库名称中。当目标构建类型为Release时，为静态库添加”_sd”后缀。
+- `RELEASE_POSTFIX "_s"`：这与前面的属性类似，当目标构建类型为Release时，为静态库添加后缀“_s”。
+
+--------------------
+
+本地试验，如果修改`generate_export_header`函数的目标为`message-static`
+
+```c++
+generate_export_header(message-static
+  BASE_NAME "message"
+  EXPORT_MACRO_NAME "message_EXPORT"
+  EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
+  DEPRECATED_MACRO_NAME "message_DEPRECATED"
+  NO_EXPORT_MACRO_NAME "message_NO_EXPORT"
+  STATIC_DEFINE "message_STATIC_DEFINE"
+  NO_DEPRECATED_MACRO_NAME "message_NO_DEPRECATED"
+  DEFINE_NO_DEPRECATED
+  )
+```
+
+则生成的`messageExport.h`内容如下：
+
+```c++
+
+#ifndef message_EXPORT_H
+#define message_EXPORT_H
+
+#ifdef message_STATIC_DEFINE
+#  define message_EXPORT
+#  define message_NO_EXPORT
+#else
+#  ifndef message_EXPORT
+#    ifdef message_static_EXPORTS
+        /* We are building this library */
+#      define message_EXPORT 
+#    else
+        /* We are using this library */
+#      define message_EXPORT 
+#    endif
+#  endif
+
+#  ifndef message_NO_EXPORT
+#    define message_NO_EXPORT 
+#  endif
+#endif
+
+#ifndef message_DEPRECATED
+#  define message_DEPRECATED __attribute__ ((__deprecated__))
+#endif
+
+#ifndef message_DEPRECATED_EXPORT
+#  define message_DEPRECATED_EXPORT message_EXPORT message_DEPRECATED
+#endif
+
+#ifndef message_DEPRECATED_NO_EXPORT
+#  define message_DEPRECATED_NO_EXPORT message_NO_EXPORT message_DEPRECATED
+#endif
+
+#if 1 /* DEFINE_NO_DEPRECATED */
+#  ifndef message_NO_DEPRECATED
+#    define message_NO_DEPRECATED
+#  endif
+#endif
+
+#endif /* message_EXPORT_H */
+```
+
+
+
+
+
+------------
+
+**更多信息**
+
+构建动态库时，隐藏内部符号是一个很好的方式。这意味着库会缩小，因为向用户公开的内容要小于库中的内容。这定义了应用程序二进制接口(ABI)，通常情况下应该与应用程序编程接口(API)一致。这分两个阶段进行：
+
+1. 使用适当的编译器标志。
+2. 使用预处理器变量(示例中是`message_EXPORT`)标记要导出的符号。编译时，将解除这些符号(类和函数)的隐藏。
+
+静态库只是目标文件的归档。因此，可以将源代码编译成目标文件，然后归档器将它们捆绑到归档文件中。这时没有ABI的概念：所有符号在默认情况下都是可见的，编译器的可见标志不影响静态归档。但是，如果要从相同的源文件构建动态和静态库，则需要一种方法来赋予`message_EXPORT`预处理变量意义，这两种情况都会出现在代码中。这里使用`GenerateExportHeader.cmake`模块，它定义一个包含所有逻辑的头文件，用于给出这个预处理变量的正确定义。对于动态库，它将给定的平台与编译器相组合。注意，根据构建或使用动态库，宏定义也会发生变化。幸运的是，CMake为我们解决了这个问题。对于静态库，它将扩展为一个空字符串，执行我们期望的操作——什么也不做。
+
+细心的读者会注意到，构建此处所示的静态和共享库实际上需要编译源代码两次。对于我们的简单示例来说，这不是一个很大的开销，但会显得相当麻烦，即使对于只比示例稍大一点的项目来说，也是如此。为什么我们选择这种方法，而不是使用第1章第3节的方式呢？`OBJECT`库负责编译库的第一步：从源文件到对象文件。该步骤中，预处理器将介入并计算`message_EXPORT`。由于对象库的编译只发生一次，`message_EXPORT`被计算为构建动态库库或静态库兼容的值。因此，为了避免歧义，我们选择了更健壮的方法，即编译两次，为的就是让预处理器正确地评估变量的可见性。
+
+**NOTE**:*有关动态共享对象、静态存档和符号可见性的更多细节，建议阅读:http://people.redhat.com/drepper/dsohowto.pdf*
+
+## 10.3 输出目标
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
