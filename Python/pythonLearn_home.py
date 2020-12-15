@@ -9517,7 +9517,12 @@ class TestSolution(TestCase):
         output = Solution().getHint("1807", "7810")
         self.assertEqual(output, '1A3B')
 #-----------------------------------------------------------------------------------------
-
+# 列表推导式构造dict，map函数构造dict
+if __name__ == '__main__':
+    d1 = {i: i for i in [1, 2]}
+    print(d1)
+    d2 = dict(map(lambda i: (i, i), [1, 2]))
+    print(d2)
 
 #-----------------------------------------------------------------------------------------
 
