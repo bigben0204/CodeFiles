@@ -372,7 +372,7 @@ CMake还能够生成特殊类型的库，这不会在构建系统中产生输出
 
 现在展示`OBJECT`库的使用，修改`CMakeLists.txt`，如下：
 
-```
+```cmake
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 project(recipe-03 LANGUAGES CXX)
@@ -1961,6 +1961,542 @@ this is demo
 - 通过最小化测试时间，高效地运行测试，最大限度地提高运行测试的概率——理想情况下，每次代码修改都该如此。
 
 ## 4.1 创建一个简单的单元测试
+
+CTest是CMake的测试工具，本示例中，我们将使用CTest进行单元测试。为了保持对CMake/CTest的关注，我们的测试代码会尽可能的简单。计划是编写和测试能够对整数求和的代码，示例代码只会对整数进行累加，不处理浮点数。就像年轻的卡尔•弗里德里希•高斯(Carl Friedrich Gauss)，被他的老师测试从1到100求和所有自然数一样，我们将要求代码做同样的事情。为了说明CMake没有对实际测试的语言进行任何限制，我们不仅使用C++可执行文件测试代码，还使用Python脚本和shell脚本作为测试代码。为了简单起见，我们将不使用任何测试库来实现，但是我们将在 后面的示例中介绍C++测试框架。
+
+**准备工作**
+
+代码示例由三个文件组成。实现源文件`sum_integs.cpp`对整数向量进行求和，并返回累加结果：
+
+```c++
+#include "sum_integers.hpp"
+#include <vector>
+int sum_integers(const std::vector<int> integers) {
+    auto sum = 0;
+    for (auto i : integers) {
+        sum += i;
+    }
+    return sum;
+}
+```
+
+这个示例是否是优雅的实现并不重要，接口以`sum_integers`的形式导出。接口在`sum_integers.hpp`文件中声明，详情如下:
+
+```c++
+#pragma once
+#include <vector>
+int sum_integers(const std::vector<int> integers);
+```
+
+最后，main函数在`main.cpp`中定义，从`argv[]`中收集命令行参数，将它们转换成整数向量，调用`sum_integers`函数，并将结果打印到输出中:
+
+```c++
+#include "sum_integers.hpp"
+#include <iostream>
+#include <string>
+#include <vector>
+// we assume all arguments are integers and we sum them up
+// for simplicity we do not verify the type of arguments
+int main(int argc, char *argv[]) {
+    std::vector<int> integers;
+    for (auto i = 1; i < argc; i++) {
+        integers.push_back(std::stoi(argv[i]));
+    }
+    auto sum = sum_integers(integers);
+    std::cout << sum << std::endl;
+}
+```
+
+测试这段代码使用C++实现(`test.cpp`)，Bash shell脚本实现(`test.sh`)和Python脚本实现(`test.py`)，只要实现可以返回一个零或非零值，从而CMake可以解释为成功或失败。
+
+C++例子(`test.cpp`)中，我们通过调用`sum_integers`来验证1 + 2 + 3 + 4 + 5 = 15：
+
+```c++
+#include "sum_integers.hpp"
+#include <vector>
+int main() {
+    auto integers = {1, 2, 3, 4, 5};
+  if (sum_integers(integers) == 15) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+```
+
+Bash shell脚本调用可执行文件：
+
+```shell
+#!/usr/bin/env bash
+EXECUTABLE=$1
+OUTPUT=$($EXECUTABLE 1 2 3 4)
+if [ "$OUTPUT" = "10" ]
+then
+    exit 0
+else
+    exit 1
+fi
+```
+
+此外，Python脚本调用可执行文件(使用`--executable`命令行参数传递)，并使用`--short`命令行参数执行：
+
+```python
+import subprocess
+import argparse
+# test script expects the executable as argument
+parser = argparse.ArgumentParser()
+parser.add_argument('--executable',
+                                         help='full path to executable')
+parser.add_argument('--short',
+                                         default=False,
+                    action='store_true',
+                    help='run a shorter test')
+args = parser.parse_args()
+def execute_cpp_code(integers):
+    result = subprocess.check_output([args.executable] + integers)
+    return int(result)
+if args.short:
+    # we collect [1, 2, ..., 100] as a list of strings
+    result = execute_cpp_code([str(i) for i in range(1, 101)])
+    assert result == 5050, 'summing up to 100 failed'
+else:
+    # we collect [1, 2, ..., 1000] as a list of strings
+    result = execute_cpp_code([str(i) for i in range(1, 1001)])
+    assert result == 500500, 'summing up to 1000 failed'
+```
+
+**具体实施**
+
+现在，我们将逐步描述如何为项目设置测试：
+
+1. 对于这个例子，我们需要C++11支持，可用的Python解释器，以及Bash shell:
+
+    ```cmake
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    project(recipe-01 LANGUAGES CXX)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    find_package(PythonInterp REQUIRED)
+    find_program(BASH_EXECUTABLE NAMES bash REQUIRED)
+    ```
+
+2. 然后，定义库及主要可执行文件的依赖关系，以及测试可执行文件：
+
+    ```cmake
+    # example library
+    add_library(sum_integers sum_integers.cpp)
+    # main code
+    add_executable(sum_up main.cpp)
+    target_link_libraries(sum_up sum_integers)
+    # testing binary
+    add_executable(cpp_test test.cpp)
+    target_link_libraries(cpp_test sum_integers)
+    ```
+
+3. 最后，打开测试功能并定义四个测试。最后两个测试， 调用相同的Python脚本，先没有任何命令行参数，再使用`--short`：
+
+    ```cmake
+    enable_testing()
+    add_test(
+      NAME bash_test
+      COMMAND ${BASH_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.sh $<TARGET_FILE:sum_up>
+      )
+    add_test(
+      NAME cpp_test
+      COMMAND $<TARGET_FILE:cpp_test>
+      )
+    add_test(
+      NAME python_test_long
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py --executable $<TARGET_FILE:sum_up>
+      )
+    add_test(
+      NAME python_test_short
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py --short --executable $<TARGET_FILE:sum_up>
+      )
+    ```
+
+4. 现在，我们已经准备好配置和构建代码。先手动进行测试：
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ cmake --build .
+    $ ./sum_up 1 2 3 4 5
+    15
+    ```
+
+5. 然后，我们可以用`ctest`运行测试集：
+
+    ```shell
+    $ ctest
+    Test project /home/user/cmake-recipes/chapter-04/recipe-01/cxx-example/build
+    Start 1: bash_test
+    1/4 Test #1: bash_test ........................ Passed 0.01 sec
+    Start 2: cpp_test
+    2/4 Test #2: cpp_test ......................... Passed 0.00 sec
+    Start 3: python_test_long
+    3/4 Test #3: python_test_long ................. Passed 0.06 sec
+    Start 4: python_test_short
+    4/4 Test #4: python_test_short ................ Passed 0.05 sec
+    100% tests passed, 0 tests failed out of 4
+    Total Test time (real) = 0.12 sec
+    ```
+
+6. 还应该尝试中断实现，以验证测试集是否能捕捉到更改。
+
+**工作原理**
+
+这里的两个关键命令：
+
+- `enable_testing()`，测试这个目录和所有子文件夹(因为我们把它放在主`CMakeLists.txt`)。
+- `add_test()`，定义了一个新的测试，并设置测试名称和运行命令。
+
+```cmake
+add_test(
+  NAME cpp_test
+  COMMAND $<TARGET_FILE:cpp_test>
+  )
+```
+
+上面的例子中，使用了生成器表达式:`$<TARGET_FILE:cpp_test>`。生成器表达式，是在生成**构建系统生成时**的表达式。我们将在第5章第9节中详细地描述生成器表达式。此时，我们可以声明`$<TARGET_FILE:cpp_test>`变量，将使用`cpp_test`可执行目标的完整路径进行替换。
+
+生成器表达式在测试时非常方便，因为不必显式地将可执行程序的位置和名称，可以硬编码到测试中。以一种可移植的方式实现这一点非常麻烦，因为可执行文件和可执行后缀(例如，Windows上是`.exe`后缀)的位置在不同的操作系统、构建类型和生成器之间可能有所不同。使用生成器表达式，我们不必显式地了解位置和名称。
+
+也可以将参数传递给要运行的`test`命令，例如：
+
+```cmake
+add_test(
+  NAME python_test_short
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py --short --executable $<TARGET_FILE:sum_up>
+  )
+```
+
+这个例子中，我们按顺序运行测试，并展示如何缩短总测试时间并行执行测试(第8节)，执行测试用例的子集(第9节)。这里，可以自定义测试命令，可以以任何编程语言运行测试集。CTest关心的是，通过命令的返回码测试用例是否通过。CTest遵循的标准约定是，返回零意味着成功，非零返回意味着失败。可以返回零或非零的脚本，都可以做测试用例。
+
+既然知道了如何定义和执行测试，那么了解如何诊断测试失败也很重要。为此，我们可以在代码中引入一个bug，让所有测试都失败:
+
+```shell
+Start 1: bash_test
+1/4 Test #1: bash_test ........................***Failed 0.01 sec
+    Start 2: cpp_test
+2/4 Test #2: cpp_test .........................***Failed 0.00 sec
+    Start 3: python_test_long
+3/4 Test #3: python_test_long .................***Failed 0.06 sec
+    Start 4: python_test_short
+4/4 Test #4: python_test_short ................***Failed 0.06 sec
+0% tests passed, 4 tests failed out of 4
+Total Test time (real) = 0.13 sec
+The following tests FAILED:
+1 - bash_test (Failed)
+2 - cpp_test (Failed)
+3 - python_test_long (Failed)
+4 - python_test_short (Failed)
+Errors while running CTest
+```
+
+如果我们想了解更多，可以查看文件`test/Temporary/lasttestsfailure.log`。这个文件包含测试命令的完整输出，并且在分析阶段，要查看的第一个地方。使用以下CLI开关，可以从CTest获得更详细的测试输出：
+
+- `--output-on-failure`:将测试程序生成的任何内容打印到屏幕上，以免测试失败。
+- `-v`:将启用测试的详细输出。
+- `-vv`:启用更详细的输出。
+
+CTest提供了一个非常方快捷的方式，可以重新运行以前失败的测试；要使用的CLI开关是`--rerun-failed`，在调试期间非常有用。
+
+**更多信息**
+
+考虑以下定义:
+
+```cmake
+add_test(
+  NAME python_test_long
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py --executable $<TARGET_FILE:sum_up>
+  )
+```
+
+前面的定义可以通过显式指定脚本运行的`WORKING_DIRECTORY`重新表达，如下:
+
+```cmake
+add_test(
+  NAME python_test_long
+  COMMAND ${PYTHON_EXECUTABLE} test.py --executable $<TARGET_FILE:sum_up>
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+```
+
+测试名称可以包含`/`字符，按名称组织相关测试也很有用，例如：
+
+```cmake
+add_test(
+  NAME python/long
+  COMMAND ${PYTHON_EXECUTABLE} test.py --executable $<TARGET_FILE:sum_up>
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+```
+
+有时候，我们需要为测试脚本设置环境变量。这可以通过`set_tests_properties`实现:
+
+```cmake
+set_tests_properties(python_test
+  PROPERTIES
+    ENVIRONMENT
+      ACCOUNT_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+      ACCOUNT_HEADER_FILE=${CMAKE_CURRENT_SOURCE_DIR}/account/account.h
+      ACCOUNT_LIBRARY_FILE=$<TARGET_FILE:account>
+  )
+```
+
+这种方法在不同的平台上并不总可行，CMake提供了解决这个问题的方法。下面的代码片段与上面给出的代码片段相同，在执行实际的Python测试脚本之前，通过`CMAKE_COMMAND`调用CMake来预先设置环境变量:
+
+```cmake
+add_test(
+  NAME
+      python_test
+  COMMAND
+    ${CMAKE_COMMAND} -E env
+    ACCOUNT_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+    ACCOUNT_HEADER_FILE=${CMAKE_CURRENT_SOURCE_DIR}/account/account.h
+    ACCOUNT_LIBRARY_FILE=$<TARGET_FILE:account>
+    ${PYTHON_EXECUTABLE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/account/test.py
+  )
+```
+
+同样，要注意使用生成器表达式`$<TARGET_FILE:account>`来传递库文件的位置。
+
+我们已经使用`ctest`命令执行测试，CMake还将为生成器创建目标(Unix Makefile生成器为`make test`，Ninja工具为`ninja test`，或者Visual Studio为`RUN_TESTS`)。这意味着，还有另一种(几乎)可移植的方法来运行测试：
+
+```shell
+$ cmake --build . --target test
+```
+
+不幸的是，当使用Visual Studio生成器时，我们需要使用`RUN_TESTS`来代替:
+
+```shell
+$ cmake --build . --target RUN_TESTS
+```
+
+**NOTE**:*`ctest`提供了丰富的命令行参数。其中一些内容将在以后的示例中探讨。要获得完整的列表，需要使用`ctest --help`来查看。命令`cmake --help-manual ctest`会将向屏幕输出完整的ctest手册。*
+
+## 4.2 使用Catch2库进行单元测试
+
+前面的配置中，使用返回码来表示`test.cpp`测试的成功或失败。对于简单功能没问题，但是通常情况下，我们想要使用一个测试框架，它提供了相关基础设施来运行更复杂的测试，包括固定方式进行测试，与数值公差的比较，以及在测试失败时输出更好的错误报告。这里，我们用目前比较流行的测试库Catch2( https://github.com/catchorg/Catch2 )来进行演示。这个测试框架有个很好的特性，它可以通过单个头库包含在项目中进行测试，这使得编译和更新框架特别容易。这个配置中，我们将CMake和Catch2结合使用，来测试上一个求和代码。
+
+我们需要`catch.hpp`头文件，可以从 https://github.com/catchorg/Catch2 (我们使用的是版本2.0.1)下载，并将它与`test.cpp`一起放在项目的根目录下。
+
+**准备工作**
+
+`main.cpp`、`sum_integers.cpp`和`sum_integers.hpp`与之前的示例相同，但将更新`test.cpp`:
+
+```cmake
+#include "sum_integers.hpp"
+// this tells catch to provide a main()
+// only do this in one cpp file
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+#include <vector>
+TEST_CASE("Sum of integers for a short vector", "[short]")
+{
+  auto integers = {1, 2, 3, 4, 5};
+  REQUIRE(sum_integers(integers) == 15);
+}
+TEST_CASE("Sum of integers for a longer vector", "[long]")
+{
+  std::vector<int> integers;
+  for (int i = 1; i < 1001; ++i)
+  {
+    integers.push_back(i);
+  }
+  REQUIRE(sum_integers(integers) == 500500);
+}
+```
+
+`catch.hpp`头文件可以从https://github.com/catchorg/Catch2 (版本为2.0.1)下载，并将它与`test.cpp`放在项目的根目录中。
+
+**具体实施**
+
+使用Catch2库，需要修改之前的所使用`CMakeList.txt`：
+
+1. 保持`CMakeLists.txt`大多数部分内容不变:
+
+    ```cmake
+    # set minimum cmake version
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    # project name and language
+    project(recipe-02 LANGUAGES CXX)
+    # require C++11
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    # example library
+    add_library(sum_integers sum_integers.cpp)
+    # main code
+    add_executable(sum_up main.cpp)
+    target_link_libraries(sum_up sum_integers)
+    # testing binary
+    add_executable(cpp_test test.cpp)
+    target_link_libraries(cpp_test sum_integers)
+    ```
+
+2. 对于上一个示例的配置，需要保留一个测试，并重命名它。注意，`--success`选项可传递给单元测试的可执行文件。这是一个Catch2选项，测试成功时，也会有输出:
+
+    ```cmake
+    enable_testing()
+    add_test(
+      NAME catch_test
+      COMMAND $<TARGET_FILE:cpp_test> --success
+      )
+    ```
+
+3. 就是这样！让我们来配置、构建和测试。CTest中，使用`-V`选项运行测试，以获得单元测试可执行文件的输出:
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ cmake --build .
+    $ ctest -V
+    UpdateCTestConfiguration from :/home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/build/DartConfiguration.tcl
+    UpdateCTestConfiguration from :/home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/build/DartConfiguration.tcl
+    Test project /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/build
+    Constructing a list of tests
+    Done constructing a list of tests
+    Updating test list for fixtures
+    Added 0 tests to meet fixture requirements
+    Checking test dependency graph...
+    Checking test dependency graph end
+    test 1
+    Start 1: catch_test
+    1: Test command: /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/build/cpp_test "--success"
+    1: Test timeout computed to be: 10000000
+    1:
+    1: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    1: cpp_test is a Catch v2.0.1 host application.
+    1: Run with -? for options
+    1:
+    1: ----------------------------------------------------------------
+    1: Sum of integers for a short vector
+    1: ----------------------------------------------------------------
+    1: /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:10
+    1: ...................................................................
+    1:
+    1: /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:12:
+    1: PASSED:
+    1: REQUIRE( sum_integers(integers) == 15 )
+    1: with expansion:
+    1: 15 == 15
+    1:
+    1: ----------------------------------------------------------------
+    1: Sum of integers for a longer vector
+    1: ----------------------------------------------------------------
+    1: /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:15
+    1: ...................................................................
+    1:
+    1: /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:20:
+    1: PASSED:
+    1: REQUIRE( sum_integers(integers) == 500500 )
+    1: with expansion:
+    1: 500500 (0x7a314) == 500500 (0x7a314)
+    1:
+    1: ===================================================================
+    1: All tests passed (2 assertions in 2 test cases)
+    1:
+    1/1 Test #1: catch_test ....................... Passed 0.00 s
+    100% tests passed, 0 tests failed out of 1
+    Total Test time (real) = 0.00 se
+    ```
+
+4. 我们也可以测试`cpp_test`的二进制文件，可以直接从Catch2中看到输出:
+
+    ```shell
+    $ ./cpp_test --success
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    cpp_test is a Catch v2.0.1 host application.
+    Run with -? for options
+    -------------------------------------------------------------------
+    Sum of integers for a short vector
+    -------------------------------------------------------------------
+    /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:10
+    ...................................................................
+    /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:12:
+    PASSED:
+    REQUIRE( sum_integers(integers) == 15 )
+    with expansion:
+    15 == 15
+    -------------------------------------------------------------------
+    Sum of integers for a longer vector
+    -------------------------------------------------------------------
+    /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:15
+    ...................................................................
+    /home/user/cmake-cookbook/chapter-04/recipe-02/cxx-example/test.cpp:20:
+    PASSED:
+    REQUIRE( sum_integers(integers) == 500500 )
+    with expansion:
+    500500 (0x7a314) == 500500 (0x7a314)
+    ===================================================================
+    All tests passed (2 assertions in 2 test cases)
+    ```
+
+5. Catch2将生成一个可执行文件，还可以尝试执行以下命令，以探索单元测试框架提供的选项:
+
+    ```shell
+    $ ./cpp_test --help
+    ```
+
+**工作原理**
+
+Catch2是一个单头文件测试框架，所以不需要定义和构建额外的目标。只需要确保CMake能找到`catch.hpp`，从而构建`test.cpp`即可。为了方便起见，将它放在与`test.cpp`相同的目录中，我们可以选择一个不同的位置，并使用`target_include_directory`指示该位置。另一种方法是将头部封装到接口库中，这可以在Catch2文档中说明( https://github.com/catchorg/catch2/blob/maste/docs/build.systems.md#cmake ):
+
+```
+# Prepare "Catch" library for other executables 
+set(CATCH_INCLUDE_DIR
+${CMAKE_CURRENT_SOURCE_DIR}/catch) 
+add_library(Catch
+INTERFACE) 
+target_include_directories(Catch INTERFACE
+${CATCH_INCLUDE_DIR})
+```
+
+然后，我们对库进行如下链接:
+
+```
+target_link_libraries(cpp_test Catch)
+```
+
+回想一下第3中的讨论，在第1章从简单的可执行库到接口库，是CMake提供的伪目标库，这些伪目标库对于指定项目外部目标的需求非常有用。
+
+-----------
+
+本地试验，增加Catch Interface库后，可将catch.hpp文件移到catch目录，同时test.cpp中引用头文件为`#include "catch.hpp"`，而不用指定catch目录：
+
+```
+├── catch
+│   └── catch.hpp
+└── test.cpp
+```
+
+```cmake
+# Prepare "Catch" library for other executables
+set(CATCH_INCLUDE_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/catch)
+add_library(Catch
+        INTERFACE)
+target_include_directories(Catch INTERFACE
+        ${CATCH_INCLUDE_DIR})
+
+# testing binary
+add_executable(cpp_test test.cpp)
+target_link_libraries(cpp_test sum_integers Catch)
+```
+
+--------------------
+
+**更多信息**
+
+这是一个简单的例子，主要关注CMake。当然，Catch2提供了更多功能。有关Catch2框架的完整文档，可访问 https://github.com/catchorg/Catch2 。
+
+Catch2代码库包含有CMake函数，用于解析Catch测试并自动创建CMake测试，不需要显式地输入`add_test()`函数，可见 https://github.com/catchorg/Catch2/blob/master/contrib/ParseAndAddCatchTests.cmake 。
 
 
 
