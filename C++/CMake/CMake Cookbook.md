@@ -2498,6 +2498,934 @@ target_link_libraries(cpp_test sum_integers Catch)
 
 Catch2代码库包含有CMake函数，用于解析Catch测试并自动创建CMake测试，不需要显式地输入`add_test()`函数，可见 https://github.com/catchorg/Catch2/blob/master/contrib/ParseAndAddCatchTests.cmake 。
 
+## 4.3 使用Google Test库进行单元测试
+
+本示例中，我们将演示如何在CMake的帮助下使用Google Test框架实现单元测试。与前一个配置相比，Google Test框架不仅仅是一个头文件，也是一个库，包含两个需要构建和链接的文件。可以将它们与我们的代码项目放在一起，但是为了使代码项目更加轻量级，我们将选择在配置时，下载一个定义良好的Google Test，然后构建框架并链接它。我们将使用较新的`FetchContent`模块(从CMake版本3.11开始可用)。第8章中会继续讨论`FetchContent`，在这里将讨论模块在底层是如何工作的，并且还将演示如何使用`ExternalProject_Add`进行模拟。此示例的灵感来自(改编自) https://cmake.org/cmake/help/v3.11/module/FetchContent.html 示例。
+
+**准备工作**
+
+`main.cpp`、`sum_integers.cpp`和`sum_integers.hpp`与之前相同，修改`test.cpp`:
+
+```c++
+#include "sum_integers.hpp"
+#include "gtest/gtest.h"
+#include <vector>
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+TEST(example, sum_zero) {
+  auto integers = {1, -1, 2, -2, 3, -3};
+  auto result = sum_integers(integers);
+  ASSERT_EQ(result, 0);
+}
+TEST(example, sum_five) {
+  auto integers = {1, 2, 3, 4, 5};
+  auto result = sum_integers(integers);
+  ASSERT_EQ(result, 15);
+}
+```
+
+如上面的代码所示，我们显式地将`gtest.h`，而不将其他Google Test源放在代码项目存储库中，会在配置时使用`FetchContent`模块下载它们。
+
+**具体实施**
+
+下面的步骤描述了如何设置`CMakeLists.txt`，使用GTest编译可执行文件及其相应的测试:
+
+1. 与前两个示例相比，`CMakeLists.txt`的开头基本没有变化，CMake 3.11才能使用`FetchContent`模块:
+
+    ```cmake
+    # set minimum cmake version
+    cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+    # project name and language
+    project(recipe-03 LANGUAGES CXX)
+    # require C++11
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    # example library
+    add_library(sum_integers sum_integers.cpp)
+    # main code
+    add_executable(sum_up main.cpp)
+    target_link_libraries(sum_up sum_integers)
+    ```
+
+2. 然后引入一个`if`，检查`ENABLE_UNIT_TESTS`。默认情况下，它为`ON`，但有时需要设置为`OFF`，以免在没有网络连接时，也能使用Google Test:
+
+    ```cmake
+    option(ENABLE_UNIT_TESTS "Enable unit tests" ON)
+    message(STATUS "Enable testing: ${ENABLE_UNIT_TESTS}")
+    if(ENABLE_UNIT_TESTS)
+        # all the remaining CMake code will be placed here
+    endif()
+    ```
+
+3. `if`内部包含`FetchContent`模块，声明要获取的新内容，并查询其属性:
+
+    ```cmake
+    include(FetchContent)
+    FetchContent_Declare(
+      googletest
+      GIT_REPOSITORY https://github.com/google/googletest.git
+      GIT_TAG release-1.8.0
+    )
+    FetchContent_GetProperties(googletest)
+    ```
+
+4. 如果内容还没有获取到，将尝试获取并配置它。这需要添加几个可以链接的目标。本例中，我们对`gtest_main`感兴趣。该示例还包含一些变通方法，用于使用在Visual Studio下的编译:
+
+    ```cmake
+    if(NOT googletest_POPULATED)
+      FetchContent_Populate(googletest)
+      # Prevent GoogleTest from overriding our compiler/linker options
+      # when building with Visual Studio
+      set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+      # Prevent GoogleTest from using PThreads
+      set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
+      # adds the targers: gtest, gtest_main, gmock, gmock_main
+      add_subdirectory(
+        ${googletest_SOURCE_DIR}
+        ${googletest_BINARY_DIR}
+        )
+      # Silence std::tr1 warning on MSVC
+      if(MSVC)
+        foreach(_tgt gtest gtest_main gmock gmock_main)
+          target_compile_definitions(${_tgt}
+            PRIVATE
+                "_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING"
+          )
+        endforeach()
+      endif()
+    endif()
+    ```
+
+5. 然后，使用`target_sources`和`target_link_libraries`命令，定义`cpp_test`可执行目标并指定它的源文件:
+
+    ```cmake
+    add_executable(cpp_test "")
+    target_sources(cpp_test
+      PRIVATE
+          test.cpp
+      )
+    target_link_libraries(cpp_test
+      PRIVATE
+        sum_integers
+        gtest_main
+      )
+    ```
+
+6. 最后，使用`enable_test`和`add_test`命令来定义单元测试:
+
+    ```cmake
+    enable_testing()
+    add_test(
+      NAME google_test
+      COMMAND $<TARGET_FILE:cpp_test>
+      )
+    ```
+
+7. 现在，准备配置、构建和测试项目:
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ cmake --build .
+    $ ctest
+    Test project /home/user/cmake-cookbook/chapter-04/recipe-03/cxx-example/build
+        Start 1: google_test
+    1/1 Test #1: google_test ...................... Passed 0.00 sec
+    100% tests passed, 0 tests failed out of 1
+    Total Test time (real) = 0.00 sec
+    ```
+
+8. 可以直接运行`cpp_test`:
+
+    ```shell
+    $ ./cpp_test
+    [==========] Running 2 tests from 1 test case.
+    [----------] Global test environment set-up.
+    [----------] 2 tests from example
+    [ RUN ] example.sum_zero
+    [ OK ] example.sum_zero (0 ms)
+    [ RUN ] example.sum_five
+    [ OK ] example.sum_five (0 ms)
+    [----------] 2 tests from example (0 ms total)
+    [----------] Global test environment tear-down
+    [==========] 2 tests from 1 test case ran. (0 ms total)
+    [ PASSED ] 2 tests.
+    ```
+
+**工作原理**
+
+`FetchContent`模块支持通过`ExternalProject`模块，在配置时填充内容，并在其3.11版本中成为CMake的标准部分。而`ExternalProject_Add()`在构建时(见第8章)进行下载操作，这样`FetchContent`模块使得构建可以立即进行，这样获取的主要项目和外部项目(在本例中为Google Test)仅在第一次执行CMake时调用，使用`add_subdirectory`可以嵌套。
+
+为了获取Google Test，首先声明外部内容:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.8.0
+)
+```
+
+本例中，我们获取了一个带有特定标记的Git库(release-1.8.0)，但是我们也可以从Subversion、Mercurial或HTTP(S)源获取一个外部项目。有关可用选项，可参考相应的`ExternalProject_Add`命令的选项，网址是https://cmake.org/cmake/help/v3.11/module/ExternalProject.html 。
+
+调用`FetchContent_Populate()`之前，检查是否已经使用`FetchContent_GetProperties()`命令处理了内容填充；否则，调用`FetchContent_Populate()`超过一次后，就会抛出错误。
+
+`FetchContent_Populate(googletest)`用于填充源并定义`googletest_SOURCE_DIR`和`googletest_BINARY_DIR`，可以使用它们来处理Google Test项目(使用`add_subdirectory()`，因为它恰好也是一个CMake项目):
+
+```cmake
+add_subdirectory(
+  ${googletest_SOURCE_DIR}
+  ${googletest_BINARY_DIR}
+  )
+```
+
+前面定义了以下目标：`gtest`、`gtest_main`、`gmock`和`gmock_main`。这个配置中，作为单元测试示例的库依赖项，我们只对`gtest_main`目标感兴趣：
+
+```cmake
+target_link_libraries(cpp_test
+  PRIVATE
+    sum_integers
+    gtest_main
+)
+```
+
+构建代码时，可以看到如何正确地对Google Test进行配置和构建。有时，我们希望升级到更新的Google Test版本，这时需要更改的唯一一行就是详细说明`GIT_TAG`的那一行。
+
+**更多信息**
+
+了解了`FetchContent`及其构建时的近亲`ExternalProject_Add`，我们将在第8章中重新讨论这些命令。有关可用选项的详细讨论，可参考https://cmake.org/cmake/help/v3.11/module/FetchContent.html 。
+
+本示例中，我们在配置时获取源代码，也可以将它们安装在系统环境中，并使用`FindGTest`模块来检测库和头文件(https://cmake.org/cmake/help/v3.5/module/FindTest.html )。从3.9版开始，CMake还提供了一个Google Test模块(https://cmake.org/cmake/help/v3.9/module/GoogleTest.html )，它提供了一个`gtest_add_tests`函数。通过搜索Google Test宏的源代码，可以使用此函数自动添加测试。
+
+当然，Google Test有许多有趣的的特性，可在 https://github.com/google/googletest 查看。
+
+## [4.4 使用Boost Test进行单元测试](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter4-4.4-chinese.md)
+
+## 4.5 使用动态分析来检测内存缺陷
+
+内存缺陷：写入或读取越界，或者内存泄漏(已分配但从未释放的内存)，会产生难以跟踪的bug，最好尽早将它们检查出来。Valgrind( [http://valgrind.org](http://valgrind.org/) )是一个通用的工具，用来检测内存缺陷和内存泄漏。本节中，我们将在使用CMake/CTest测试时使用Valgrind对内存问题进行警告。
+
+**准备工作**
+
+对于这个配置，需要三个文件。第一个是测试的实现(我们可以调用文件`leaky_implementation.cpp`):
+
+```cpp
+#include "leaky_implementation.hpp"
+int do_some_work() {
+  // we allocate an array
+  double *my_array = new double[1000];
+  // do some work
+  // ...
+  // we forget to deallocate it
+  // delete[] my_array;
+  return 0;
+}
+```
+
+还需要相应的头文件(`leaky_implementation.hpp`):
+
+```cpp
+#pragma once
+int do_some_work();
+```
+
+并且，需要测试文件(`test.cpp`):
+
+```c++
+#include "leaky_implementation.hpp"
+int main() {
+  int return_code = do_some_work();
+  return return_code;
+}
+```
+
+我们希望测试通过，因为`return_code`硬编码为`0`。这里我们也期望检测到内存泄漏，因为`my_array`没有释放。
+
+**具体实施**
+
+下面展示了如何设置CMakeLists.txt来执行代码动态分析:
+
+1. 我们首先定义CMake最低版本、项目名称、语言、目标和依赖关系:
+
+    ```cmake
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    project(recipe-05 LANGUAGES CXX)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    add_library(example_library leaky_implementation.cpp)
+    add_executable(cpp_test test.cpp)
+    target_link_libraries(cpp_test example_library)
+    ```
+
+2. 然后，定义测试目标，还定义了`MEMORYCHECK_COMMAND`:
+
+    ```cmake
+    find_program(MEMORYCHECK_COMMAND NAMES valgrind)
+    set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")
+    # add memcheck test action
+    include(CTest)
+    enable_testing()
+    add_test(
+      NAME cpp_test
+      COMMAND $<TARGET_FILE:cpp_test>
+      )
+    ```
+
+3. 运行测试集，报告测试通过情况，如下所示:
+
+    ```shell
+    $ ctest
+    Test project /home/user/cmake-recipes/chapter-04/recipe-05/cxx-example/build
+    Start 1: cpp_test
+    1/1 Test #1: cpp_test ......................... Passed 0.00 sec
+    100% tests passed, 0 tests failed out of 1
+    Total Test time (real) = 0.00 sec
+    ```
+
+4. 现在，我们希望检查内存缺陷，可以观察到被检测到的内存泄漏:
+
+    ```shell
+    $ ctest -T memcheck
+    Site: myhost
+    Build name: Linux-c++
+    Create new tag: 20171127-1717 - Experimental
+    Memory check project /home/user/cmake-recipes/chapter-04/recipe-05/cxx-example/build
+    Start 1: cpp_test
+    1/1 MemCheck #1: cpp_test ......................... Passed 0.40 sec
+    100% tests passed, 0 tests failed out of 1
+    Total Test time (real) = 0.40 sec
+    -- Processing memory checking output:
+    1/1 MemCheck: #1: cpp_test ......................... Defects: 1
+    MemCheck log files can be found here: ( * corresponds to test number)
+    /home/user/cmake-recipes/chapter-04/recipe-05/cxx-example/build/Testing/Temporary/MemoryChecker.*.log
+    Memory checking results:
+    Memory Leak - 1
+    ```
+
+    -------------------
+
+    本地验证，需要安装valgrind，否则只会显示如下两行：
+
+    ```shell
+    $ ctest -T memcheck
+    Site: ben-virtual-machine
+    Build name: Linux-c++
+    ```
+
+    -----------------------------------
+
+5. 最后一步，应该尝试修复内存泄漏，并验证`ctest -T memcheck`没有报告错误。
+
+**工作原理**
+
+使用`find_program(MEMORYCHECK_COMMAND NAMES valgrind)`查找valgrind，并将`MEMORYCHECK_COMMAND`设置为其绝对路径。我们显式地包含CTest模块来启用`memcheck`测试操作，可以使用`CTest -T memcheck`来启用这个操作。此外，使用`set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full")`，将相关参数传递给Valgrind。内存检查会创建一个日志文件，该文件可用于详细记录内存缺陷信息。
+
+**NOTE**:*一些工具，如代码覆盖率和静态分析工具，可以进行类似地设置。然而，其中一些工具的使用更加复杂，因为需要专门的构建和工具链。Sanitizers就是这样一个例子。有关更多信息，请参见https://github.com/arsenm/sanitizers-cmake 。另外，请参阅第14章，其中讨论了AddressSanitizer和ThreadSanitizer。*
+
+**更多信息**
+
+该方法可向测试面板报告内存缺陷，这里演示的功能也可以独立于测试面板使用。我们将在第14章中重新讨论，与CDash一起使用的情况。
+
+有关Valgrind及其特性和选项的文档，请参见[http://valgrind.org](http://valgrind.org/) 。
+
+## 4.6 预期测试失败
+
+理想情况下，我们希望所有的测试能在每个平台上通过。然而，也可能想要测试预期的失败或异常是否会在受控的设置中进行。这种情况下，我们将把预期的失败定义为成功。我们认为，这通常应该交给测试框架(例如：Catch2或Google Test)的任务，它应该检查预期的失败并向CMake报告成功。但是，在某些情况下，您可能希望将测试的非零返回代码定义为成功；换句话说，您可能想要颠倒成功和失败的定义。在本示例中，我们将演示这种情况。
+
+**准备工作**
+
+这个配置的测试用例是一个很小的Python脚本(`test.py`)，它总是返回1，CMake将其解释为失败:
+
+```python
+import sys
+# simulate a failing test
+sys.exit(1)
+```
+
+**实施步骤**
+
+如何编写CMakeLists.txt来完成我们的任务:
+
+1. 这个示例中，不需要任何语言支持从CMake，但需要Python:
+
+    ```cmake
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    project(recipe-06 LANGUAGES NONE)
+    find_package(PythonInterp REQUIRED)
+    ```
+
+2. 然后，定义测试并告诉CMake，测试预期会失败:
+
+    ```cmake
+    enable_testing()
+    add_test(example ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
+    set_tests_properties(example PROPERTIES WILL_FAIL true)
+    ```
+
+3. 最后，报告是一个成功的测试，如下所示:
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ cmake --build .
+    $ ctest
+    Test project /home/user/cmake-recipes/chapter-04/recipe-06/example/build
+    Start 1: example
+    1/1 Test #1: example .......................... Passed 0.00 sec
+    100% tests passed, 0 tests failed out of 1
+    Total Test time (real) = 0.01 sec
+    ```
+
+**工作原理**
+
+使用`set_tests_properties(example PROPERTIES WILL_FAIL true)`，将属性`WILL_FAIL`设置为`true`，这将转换成功与失败。但是，这个特性不应该用来临时修复损坏的测试。
+
+**更多信息**
+
+如果需要更大的灵活性，可以将测试属性`PASS_REGULAR_EXPRESSION`和`FAIL_REGULAR_EXPRESSION`与`set_tests_properties`组合使用。如果设置了这些参数，测试输出将根据参数给出的正则表达式列表进行检查，如果匹配了正则表达式，测试将通过或失败。可以在测试中设置其他属性，完整的属性列表可以参考：https://cmake.org/cmake/help/v3.5/manual/cmake-properties.7.html#properties-on-tests 。
+
+## 4.7 使用超时测试运行时间过长的测试
+
+理想情况下，测试集应该花很短的时间进行，以便开发人员经常运行测试，并使每个提交(变更集)进行测试成为可能(或更容易)。然而，有些测试可能会花费更长的时间或者被卡住(例如，由于高文件I/O负载)，我们可能需要设置超时来终止耗时过长的测试，它们延迟了整个测试，并阻塞了部署管道。本示例中，我们将演示一种设置超时的方法，可以针对每个测试设置不同的超时。
+
+**准备工作**
+
+这个示例是一个Python脚本(`test.py`)，它总是返回0。为了保持这种简单性，并保持对CMake方面的关注，测试脚本除了等待两秒钟外什么也不做。实际中，这个测试脚本将执行更有意义的工作:
+
+```python
+import sys
+import time
+# wait for 2 seconds
+time.sleep(2)
+# report success
+sys.exit(0)
+```
+
+**具体实施**
+
+我们需要通知CTest终止测试，如下:
+
+1. 我们定义项目名称，启用测试，并定义测试:
+
+    ```cmake
+    # set minimum cmake version
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    # project name
+    project(recipe-07 LANGUAGES NONE)
+    # detect python
+    find_package(PythonInterp REQUIRED)
+    # define tests
+    enable_testing()
+    # we expect this test to run for 2 seconds
+    add_test(example ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
+    ```
+
+2. 另外，我们为测试指定时限，设置为10秒:
+
+    ```cmake
+    set_tests_properties(example PROPERTIES TIMEOUT 10)
+    ```
+
+3. 知道了如何进行配置和构建，并希望测试能够通过:
+
+    ```shell
+    $ ctest
+    Test project /home/user/cmake-recipes/chapter-04/recipe-07/example/build
+    Start 1: example
+    1/1 Test #1: example .......................... Passed 2.01 sec
+    100% tests passed, 0 tests failed out of 1
+    Total Test time (real) = 2.01 sec
+    ```
+
+4. 现在，为了验证超时是否有效，我们将`test.py`中的`sleep`命令增加到11秒，并重新运行测试:
+
+    ```shell
+    $ ctest
+    Test project /home/user/cmake-recipes/chapter-04/recipe-07/example/build
+    Start 1: example
+    1/1 Test #1: example ..........................***Timeout 10.01 sec
+    0% tests passed, 1 tests failed out of 1
+    Total Test time (real) = 10.01 sec
+    The following tests FAILED:
+    1 - example (Timeout)
+    Errors while running CTest
+    ```
+
+**工作原理**
+
+`TIMEOUT`是一个方便的属性，可以使用`set_tests_properties`为单个测试指定超时时间。如果测试运行超过了这个设置时间，不管出于什么原因(测试已经停止或者机器太慢)，测试将被终止并标记为失败。
+
+## 4.8 并行测试
+
+大多数现代计算机都有4个或更多个CPU核芯。CTest有个非常棒的特性，能够并行运行测试，如果您有多个可用的核。这可以减少测试的总时间，而减少总测试时间才是真正重要的，从而开发人员频繁地进行测试。本示例中，我们将演示这个特性，并讨论如何优化测试以获得最大的性能。
+
+其他测试可以进行相应地表示，我们把这些测试脚本放在`CMakeLists.txt`同目录下面的test目录中。
+
+**准备工作**
+
+我们假设测试集包含标记为a, b，…，j的测试用例，每一个都有特定的持续时间:
+
+| 测试用例   | 该单元的耗时 |
+| :--------- | :----------- |
+| a, b, c, d | 0.5          |
+| e, f, g    | 1.5          |
+| h          | 2.5          |
+| i          | 3.5          |
+| j          | 4.5          |
+
+时间单位可以是分钟，但是为了保持简单和简短，我们将使用秒。为简单起见，我们可以用Python脚本表示`test a`，它消耗0.5个时间单位:
+
+```
+import sysimport time# wait for 0.5 secondstime.sleep(0.5)# finally report successsys.exit(0)
+```
+
+其他测试同理。我们将把这些脚本放在`CMakeLists.txt`下面，一个名为`test`的目录中。
+
+**具体实施**
+
+对于这个示例，我们需要声明一个测试列表，如下:
+
+1. `CMakeLists.txt`非常简单：
+
+    ```cmake
+    # set minimum cmake version
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    # project name
+    project(recipe-08 LANGUAGES NONE)
+    # detect python
+    find_package(PythonInterp REQUIRED)
+    # define tests
+    enable_testing()
+    add_test(a ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/a.py)
+    add_test(b ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/b.py)
+    add_test(c ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/c.py)
+    add_test(d ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/d.py)
+    add_test(e ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/e.py)
+    add_test(f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/f.py)
+    add_test(g ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/g.py)
+    add_test(h ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/h.py)
+    add_test(i ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/i.py)
+    add_test(j ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/j.py)
+    ```
+
+2. 我们可以配置项目，使用`ctest`运行测试，总共需要17秒:
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ ctest
+    
+    Start 1: a
+    1/10 Test #1: a ................................ Passed 0.51 sec
+    Start 2: b
+    2/10 Test #2: b ................................ Passed 0.51 sec
+    Start 3: c
+    3/10 Test #3: c ................................ Passed 0.51 sec
+    Start 4: d
+    4/10 Test #4: d ................................ Passed 0.51 sec
+    Start 5: e
+    5/10 Test #5: e ................................ Passed 1.51 sec
+    Start 6: f
+    6/10 Test #6: f ................................ Passed 1.51 sec
+    Start 7: g
+    7/10 Test #7: g ................................ Passed 1.51 sec
+    Start 8: h
+    8/10 Test #8: h ................................ Passed 2.51 sec
+    Start 9: i
+    9/10 Test #9: i ................................ Passed 3.51 sec
+    Start 10: j
+    10/10 Test #10: j ................................ Passed 4.51 sec
+    100% tests passed, 0 tests failed out of 10
+    Total Test time (real) = 17.11 sec
+    ```
+
+3. 现在，如果机器有4个内核可用，我们可以在不到5秒的时间内在4个内核上运行测试集:
+
+    ```shell
+    $ ctest --parallel 4
+    
+    Start 10: j
+    Start 9: i
+    Start 8: h
+    Start 5: e
+    1/10 Test #5: e ................................ Passed 1.51 sec
+    Start 7: g
+    2/10 Test #8: h ................................ Passed 2.51 sec
+    Start 6: f
+    3/10 Test #7: g ................................ Passed 1.51 sec
+    Start 3: c
+    4/10 Test #9: i ................................ Passed 3.63 sec
+    5/10 Test #3: c ................................ Passed 0.60 sec
+    Start 2: b
+    Start 4: d
+    6/10 Test #6: f ................................ Passed 1.51 sec
+    7/10 Test #4: d ................................ Passed 0.59 sec
+    8/10 Test #2: b ................................ Passed 0.59 sec
+    Start 1: a
+    9/10 Test #10: j ................................ Passed 4.51 sec
+    10/10 Test #1: a ................................ Passed 0.51 sec
+    100% tests passed, 0 tests failed out of 10
+    Total Test time (real) = 4.74 sec
+    ```
+
+----------------------------
+
+本地验证：如果不设置Test的COST属性，首次运行时，仍是按abcd...这样的顺序运行。首次运行过后，会有缓存记录用例耗时长短`cmake-build-debug/Testing/Temporary/CTestCostData.txt`，再次运行，则会按耗时长到短来并行运行用例。
+
+如果设置Test的COST属性`set_tests_properties(j PROPERTIES COST 4.5)`，则首次或非首次并行运行时，都会按耗时长到短来运行用例 。
+
+https://cmake.org/cmake/help/v3.9/prop_test/COST.html
+
+COST
+
+Set this to a floating point value. Tests in a test set will be run in descending order of cost.
+
+This property describes the cost of a test. You can explicitly set this value; tests with higher COST values will run first.
+
+--------------------------
+
+**工作原理**
+
+可以观察到，在并行情况下，测试j、i、h和e同时开始。当并行运行时，总测试时间会有显著的减少。观察`ctest --parallel 4`的输出，我们可以看到并行测试运行从最长的测试开始，最后运行最短的测试。从最长的测试开始是一个非常好的策略。这就像打包移动的盒子：从较大的项目开始，然后用较小的项目填补空白。a-j测试在4个核上的叠加比较，从最长的开始，如下图所示:
+
+```
+--> time
+core 1: jjjjjjjjj
+core 2: iiiiiiibd
+core 3: hhhhhggg
+core 4: eeefffac
+```
+
+按照定义测试的顺序运行，运行结果如下:
+
+```
+--> time
+core 1: aeeeiiiiiii
+core 2: bfffjjjjjjjjj
+core 3: cggg
+core 4: dhhhhh
+```
+
+按照定义测试的顺序运行测试，总的来说需要更多的时间，因为这会让2个核大部分时间处于空闲状态(这里的核3和核4)。CMake知道每个测试的时间成本，是因为我们先顺序运行了测试，将每个测试的成本数据记录在`test/Temporary/CTestCostData.txt`文件中:
+
+```
+a 1 0.506776
+b 1 0.507882
+c 1 0.508175
+d 1 0.504618
+e 1 1.51006
+f 1 1.50975
+g 1 1.50648
+h 1 2.51032
+i 1 3.50475
+j 1 4.51111
+```
+
+如果在配置项目之后立即开始并行测试，它将按照定义测试的顺序运行测试，在4个核上的总测试时间明显会更长。这意味着什么呢？这意味着，我们应该减少的时间成本来安排测试？这是一种决策，但事实证明还有另一种方法，我们可以自己表示每次测试的时间成本:
+
+```cmake
+add_test(a ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/a.py)
+add_test(b ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/b.py)
+add_test(c ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/c.py)
+add_test(d ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/d.py)
+set_tests_properties(a b c d PROPERTIES COST 0.5)
+add_test(e ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/e.py)
+add_test(f ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/f.py)
+add_test(g ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/g.py)
+set_tests_properties(e f g PROPERTIES COST 1.5)
+add_test(h ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/h.py)
+set_tests_properties(h PROPERTIES COST 2.5)
+add_test(i ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/i.py)
+set_tests_properties(i PROPERTIES COST 3.5)
+add_test(j ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/j.py)
+set_tests_properties(j PROPERTIES COST 4.5)
+```
+
+成本参数可以是一个估计值，也可以从`test/Temporary/CTestCostData.txt`中提取。
+
+**更多信息**
+
+除了使用`ctest --parallel N`，还可以使用环境变量`CTEST_PARALLEL_LEVEL`将其设置为所需的级别。
+
+## 4.9 运行测试子集
+
+前面的示例中，我们学习了如何在CMake的帮助下并行运行测试，并讨论了从最长的测试开始是最高效的。虽然，这种策略将总测试时间最小化，但是在特定特性的代码开发期间，或者在调试期间，我们可能不希望运行整个测试集。对于调试和代码开发，我们只需要能够运行选定的测试子集。在本示例中，我们将实现这一策略。
+
+**准备工作**
+
+在这个例子中，我们假设总共有六个测试：前三个测试比较短，名称分别为`feature-a`、`feature-b`和`feature-c`，还有三个长测试，名称分别是`feature-d`、`benchmark-a`和`benchmark-b`。这个示例中，我们可以用Python脚本表示这些测试，可以在其中调整休眠时间:
+
+```python
+import sys
+import time
+# wait for 0.1 seconds
+time.sleep(0.1)
+# finally report success
+sys.exit(0)
+```
+
+**具体实施**
+
+以下是我们CMakeLists.txt文件内容的详细内容:
+
+1. `CMakeLists.txt`中，定义了六个测试:
+
+    ```cmake
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    # project name
+    project(recipe-09 LANGUAGES NONE)
+    # detect python
+    find_package(PythonInterp REQUIRED)
+    # define tests
+    enable_testing()
+    add_test(
+      NAME feature-a
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/feature-a.py
+      )
+    add_test(
+      NAME feature-b
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/feature-b.py
+      )
+    add_test(
+      NAME feature-c
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/feature-c.py
+      )
+    add_test(
+      NAME feature-d
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/feature-d.py
+      )
+    add_test(
+      NAME benchmark-a
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/benchmark-a.py
+      )
+    add_test(
+      NAME benchmark-b
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/benchmark-b.py
+      )
+    ```
+
+2. 此外，我们给较短的测试贴上`quick`的标签，给较长的测试贴上`long`的标签:
+
+    ```cmake
+    set_tests_properties(
+      feature-a
+      feature-b
+      feature-c
+      PROPERTIES
+          LABELS "quick"
+      )
+    set_tests_properties(
+      feature-d
+      benchmark-a
+      benchmark-b
+      PROPERTIES
+          LABELS "long"
+      )
+    ```
+
+3. 我们现在可以运行测试集了，如下:
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ ctest
+    
+    Start 1: feature-a
+    1/6 Test #1: feature-a ........................ Passed 0.11 sec
+    Start 2: feature-b
+    2/6 Test #2: feature-b ........................ Passed 0.11 sec
+    Start 3: feature-c
+    3/6 Test #3: feature-c ........................ Passed 0.11 sec
+    Start 4: feature-d
+    4/6 Test #4: feature-d ........................ Passed 0.51 sec
+    Start 5: benchmark-a
+    5/6 Test #5: benchmark-a ...................... Passed 0.51 sec
+    Start 6: benchmark-b
+    6/6 Test #6: benchmark-b ...................... Passed 0.51 sec
+    100% tests passed, 0 tests failed out of 6
+    Label Time Summary:
+    long = 1.54 sec*proc (3 tests)
+    quick = 0.33 sec*proc (3 tests)
+    Total Test time (real) = 1.87 sec
+    ```
+
+**工作原理**
+
+现在每个测试都有一个名称和一个标签。CMake中所有的测试都是有编号的，所以它们也带有唯一编号。定义了测试标签之后，我们现在可以运行整个集合，或者根据它们的名称(使用正则表达式)、标签或编号运行测试。
+
+按名称运行测试(运行所有具有名称匹配功能的测试):
+
+```shell
+$ ctest -R feature
+
+Start 1: feature-a
+1/4 Test #1: feature-a ........................ Passed 0.11 sec
+Start 2: feature-b
+2/4 Test #2: feature-b ........................ Passed 0.11 sec
+Start 3: feature-c
+3/4 Test #3: feature-c ........................ Passed 0.11 sec
+Start 4: feature-d
+4/4 Test #4: feature-d ........................ Passed 0.51 sec
+100% tests passed, 0 tests failed out of 4
+```
+
+按照标签运行测试(运行所有的长测试):
+
+```shell
+$ ctest -L long
+
+Start 4: feature-d
+1/3 Test #4: feature-d ........................ Passed 0.51 sec
+Start 5: benchmark-a
+2/3 Test #5: benchmark-a ...................... Passed 0.51 sec
+Start 6: benchmark-b
+3/3 Test #6: benchmark-b ...................... Passed 0.51 sec
+100% tests passed, 0 tests failed out of 3
+```
+
+根据数量运行测试(运行测试2到4)产生的结果是:
+
+```shell
+$ ctest -I 2,4 （2,4之间不能有空格）
+
+Start 2: feature-b
+1/3 Test #2: feature-b ........................ Passed 0.11 sec
+Start 3: feature-c
+2/3 Test #3: feature-c ........................ Passed 0.11 sec
+Start 4: feature-d
+3/3 Test #4: feature-d ........................ Passed 0.51 sec
+100% tests passed, 0 tests failed out of 3
+```
+
+**更多信息**
+
+尝试使用`$ ctest --help`，将看到有大量的选项可供用来定制测试。
+
+## 4.10 使用测试固件
+
+这个示例的灵感来自于Craig Scott，我们建议读者也参考相应的博客文章来了解更多的背景知识，https://crascit.com/2016/10/18/test-fixtures-withcmake-ctest/ ，此示例的动机是演示如何使用测试固件。这对于更复杂的测试非常有用，这些测试需要在测试运行前进行设置，以及在测试完成后执行清理操作(例如：创建示例数据库、设置连接、断开连接、清理测试数据库等等)。我们需要运行一个设置或清理操作的测试，并能够以一种可预测和健壮的方式自动触发这些步骤，而不需要引入代码重复。这些设置和清理步骤可以委托给测试框架(例如Google Test或Catch2)，我们在这里将演示如何在CMake级别实现测试固件。
+
+**准备工作**
+
+我们将准备4个Python脚本，并将它们放在`test`目录下:`setup.py`、`features-a.py`、`features-b.py`和`clean-up.py`。
+
+**具体实施**
+
+我们从`CMakeLists.txt`结构开始，附加一些步骤如下:
+
+1. 基础CMake语句:
+
+    ```cmake
+    # set minimum cmake version
+    cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+    # project name
+    project(recipe-10 LANGUAGES NONE)
+    # detect python
+    find_package(PythonInterp REQUIRED)
+    # define tests
+    enable_testing()
+    ```
+
+2. 然后，定义了4个测试步骤，并将它们绑定到一个固件上:
+
+    ```cmake
+    add_test(
+      NAME setup
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/setup.py
+      )
+    set_tests_properties(
+      setup
+      PROPERTIES
+          FIXTURES_SETUP my-fixture
+      )
+    add_test(
+      NAME feature-a
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/feature-a.py
+      )
+    add_test(
+      NAME feature-b
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/feature-b.py
+      )
+    set_tests_properties(
+      feature-a
+      feature-b
+      PROPERTIES
+          FIXTURES_REQUIRED my-fixture
+      )
+    add_test(
+      NAME cleanup
+      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/cleanup.py
+      )
+    set_tests_properties(
+      cleanup
+      PROPERTIES
+          FIXTURES_CLEANUP my-fixture
+      )
+    ```
+
+3. 运行整个集合，如下面的输出所示:
+
+    ```shell
+    $ mkdir -p build
+    $ cd build
+    $ cmake ..
+    $ ctest
+    
+    Start 1: setup
+    1/4 Test #1: setup ............................ Passed 0.01 sec
+    Start 2: feature-a
+    2/4 Test #2: feature-a ........................ Passed 0.01 sec
+    Start 3: feature-b
+    3/4 Test #3: feature-b ........................ Passed 0.00 sec
+    Start 4: cleanup
+    4/4 Test #4: cleanup .......................... Passed 0.01 sec
+    100% tests passed, 0 tests failed out of 4
+    ```
+
+4. 然而，当我们试图单独运行测试特性时。它正确地调用设置步骤和清理步骤:
+
+    ```shell
+    $ ctest -R feature-a
+    
+    Start 1: setup
+    1/3 Test #1: setup ............................ Passed 0.01 sec
+    Start 2: feature-a
+    2/3 Test #2: feature-a ........................ Passed 0.00 sec
+    Start 4: cleanup
+    3/3 Test #4: cleanup .......................... Passed 0.01 sec
+    100% tests passed, 0 tests failed out of 3
+    ```
+
+**工作原理**
+
+在本例中，我们定义了一个文本固件，并将其称为`my-fixture`。我们为安装测试提供了`FIXTURES_SETUP`属性，并为清理测试了`FIXTURES_CLEANUP`属性，并且使用`FIXTURES_REQUIRED`，我们确保测试`feature-a`和`feature-b`都需要安装和清理步骤才能运行。将它们绑定在一起，可以确保在定义良好的状态下，进入和离开相应的步骤。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 第10章 编写安装程序
