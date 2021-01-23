@@ -9525,8 +9525,32 @@ if __name__ == '__main__':
     print(d2)
 
 #-----------------------------------------------------------------------------------------
+# 使用subprocess.check_output执行命令获取输出结果
+import subprocess
+import sys
 
+# for simplicity we do not check number of
+# arguments and whether the file really exists
+file_path = sys.argv[-1]
 
+try:
+    output = subprocess.check_output(['size', file_path]).decode('utf-8')
+except FileNotFoundError:
+    print('command "size" is not available on this platform')
+    sys.exit(0)
+
+size = 0.0
+for line in output.split('\n'):
+    if file_path in line:
+        # we are interested in the 4th number on this line
+        size = int(line.split()[3])
+
+print('{0:.3f} MB'.format(size/1.0e6))
+
+# 在Linux环境上执行size二进制程序：
+$ size /home/ben/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug/TestProject
+   text    data     bss     dec     hex filename
+   7747     744     280    8771    2243 /home/ben/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug/TestProject
 #-----------------------------------------------------------------------------------------
 
 
