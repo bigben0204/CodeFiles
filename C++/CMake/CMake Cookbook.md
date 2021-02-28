@@ -4499,9 +4499,3468 @@ static size of executable:
 
 ## 5.7 探究编译器标志命令
 
+设置编译器标志，对是否能正确编译至关重要。不同的编译器供应商，为类似的特性实现有不同的标志。即使是来自同一供应商的不同编译器版本，在可用标志上也可能存在细微的差异。有时，会引入一些便于调试或优化目的的新标志。本示例中，我们将展示如何检查所选编译器是否可用某些标志。
+
+**准备工作**
+
+Sanitizers(请参考https://github.com/google/Sanitizers )已经成为静态和动态代码分析的非常有用的工具。通过使用适当的标志重新编译代码并链接到必要的库，可以检查内存错误(地址清理器)、未初始化的读取(内存清理器)、线程安全(线程清理器)和未定义的行为(未定义的行为清理器)相关的问题。与同类型分析工具相比，Sanitizers带来的性能损失通常要小得多，而且往往提供关于检测到的问题的更详细的信息。缺点是，代码(可能还有工具链的一部分)需要使用附加的标志重新编译。
+
+本示例中，我们将设置一个项目，使用不同的Sanitizers来编译代码，并展示如何检查，编译器标志是否正确使用。
+
+**具体实施**
+
+Clang编译器已经提供了Sanitizers，GCC也将其引入工具集中。它们是为C和C++程序而设计的。最新版本的Fortran也能使用这些编译标志，并生成正确的仪表化库和可执行程序。不过，本文将重点介绍C++示例。
+
+1. 声明一个C++11项目：
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-07 LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 声明列表`CXX_BASIC_FLAGS`，其中包含构建项目时始终使用的编译器标志`-g3`和`-O1`:
+
+   ```cmake
+   list(APPEND CXX_BASIC_FLAGS "-g3" "-O1")
+   ```
+
+3. 这里需要包括CMake模块`CheckCXXCompilerFlag.cmake`。C的模块为`CheckCCompilerFlag.cmake`，Fotran的模块为`CheckFortranCompilerFlag.cmake`(Fotran的模块是在CMake 3.3添加)：
+
+   ```cmake
+   include(CheckCXXCompilerFlag)
+   ```
+
+4. 我们声明一个`ASAN_FLAGS`变量，它包含Sanitizer所需的标志，并设置`CMAKE_REQUIRED_FLAGS`变量，`check_cxx_compiler_flag`函数在内部使用该变量:
+
+   ```cmake
+   set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+   set(CMAKE_REQUIRED_FLAGS ${ASAN_FLAGS})
+   ```
+
+5. 我们调用`check_cxx_compiler_flag`来确保编译器理解`ASAN_FLAGS`变量中的标志。调用函数后，我们取消设置`CMAKE_REQUIRED_FLAGS`:
+
+   ```cmake
+   check_cxx_compiler_flag(${ASAN_FLAGS} asan_works)
+   unset(CMAKE_REQUIRED_FLAGS)
+   ```
+
+6. 如果编译器理解这些选项，我们将变量转换为一个列表，用分号替换空格:
+
+   ```cmake
+   if(asan_works)
+       string(REPLACE " " ";" _asan_flags ${ASAN_FLAGS})
+   ```
+
+7. 我们添加了一个可执行的目标，为代码定位Sanitizer:
+
+   ```cmake
+   add_executable(asan-example asan-example.cpp)
+   ```
+
+8. 我们为可执行文件设置编译器标志，以包含基本的和Sanitizer标志:
+
+   ```cmake
+   target_compile_options(asan-example
+     PUBLIC
+       ${CXX_BASIC_FLAGS}
+       ${_asan_flags}
+     )
+   ```
+
+9. 最后，我们还将Sanitizer标志添加到链接器使用的标志集中。这将关闭`if(asan_works)`块:
+
+   ```cmake
+   target_link_libraries(asan-example PUBLIC ${_asan_flags})
+   endif()
+   ```
+
+完整的示例源代码还展示了如何编译和链接线程、内存和未定义的行为清理器的示例可执行程序。这里不详细讨论这些，因为我们使用相同的模式来检查编译器标志。
+
+**NOTE**:*在GitHub上可以找到一个定制的CMake模块，用于在您的系统上寻找对Sanitizer的支持:https://github.com/arsenm/sanitizers-cmake*
+
+**工作原理**
+
+`check_<lang>_compiler_flag`函数只是`check_<lang>_source_compiles`函数的包装器。这些包装器为特定代码提供了一种快捷方式。在用例中，检查特定代码片段是否编译并不重要，重要的是编译器是否理解一组标志。
+
+Sanitizer的编译器标志也需要传递给链接器。可以使用`check_<lang>_compiler_flag`函数来实现，我们需要在调用之前设置`CMAKE_REQUIRED_FLAGS`变量。否则，作为第一个参数传递的标志将只对编译器使用。
+
+当前配置中需要注意的是，使用字符串变量和列表来设置编译器标志。使用`target_compile_options`和`target_link_libraries`函数的字符串变量，将导致编译器和/或链接器报错。CMake将传递引用的这些选项，从而导致解析错误。这说明有必要用列表和随后的字符串操作来表示这些选项，并用分号替换字符串变量中的空格。实际上，CMake中的列表是分号分隔的字符串。
+
+**更多信息**
+
+我们将在第7章，编写一个函数来测试和设置编译器标志，到时候再来回顾，并概括测试和设置编译器标志的模式。
+
+## 5.8 探究可执行命令
+
+目前为止，我们已经展示了如何检查给定的源代码，是否可以由所选的编译器编译，以及如何确保所需的编译器和链接器标志可用。此示例中，将显示如何检查是否可以在当前系统上编译、链接和运行代码。
+
+**准备工作**
+
+本示例的代码示例是复用第3章第9节的配置，并进行微小的改动。之前，我们展示了如何在您的系统上找到ZeroMQ库并将其链接到一个C程序中。本示例中，在生成实际的C++程序之前，我们将检查一个使用GNU/Linux上的系统UUID库的小型C程序是否能够实际运行。
+
+**具体实施**
+
+开始构建C++项目之前，我们希望检查GNU/Linux上的UUID系统库是否可以被链接。这可以通过以下一系列步骤来实现:
+
+1. 声明一个混合的C和C++11程序。这是必要的，因为我们要编译和运行的测试代码片段是使用C语言完成:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+   project(recipe-08 LANGUAGES CXX C)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 我们需要在系统上找到UUID库。这通过使用`pkg-config`实现的。要求搜索返回一个CMake导入目标使用`IMPORTED_TARGET`参数:
+
+   ```cmake
+   find_package(PkgConfig REQUIRED QUIET)
+   pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
+   if(TARGET PkgConfig::UUID)
+       message(STATUS "Found libuuid")
+   endif()
+   ```
+
+3. 接下来，需要使用`CheckCSourceRuns.cmake`模块。C++的是`CheckCXXSourceRuns.cmake`模块。但到CMake 3.11为止，Fortran语言还没有这样的模块:
+
+   ```cmake
+   include(CheckCSourceRuns)  # 这里可以使用CheckCXXSourceRuns
+   ```
+
+4. 我们声明一个`_test_uuid`变量，其中包含要编译和运行的C代码段:
+
+   ```cmake
+   set(_test_uuid
+   "
+   #include <uuid/uuid.h>
+   int main(int argc, char * argv[]) {
+     uuid_t uuid;
+     uuid_generate(uuid);
+     return 0;
+   }
+   ")
+   ```
+
+5. 我们声明`CMAKE_REQUIRED_LIBRARIES`变量后，对`check_c_source_runs`函数的调用。接下来，调用`check_c_source_runs`，其中测试代码作为第一个参数，`_runs`变量作为第二个参数，以保存执行的检查结果。之后，取消`CMAKE_REQUIRED_LIBRARIES`变量的设置:
+
+   ```cmake
+   set(CMAKE_REQUIRED_LIBRARIES PkgConfig::UUID)
+   check_c_source_runs("${_test_uuid}" _runs)  # 可以使用check_cxx_source_runs
+   unset(CMAKE_REQUIRED_LIBRARIES)
+   ```
+
+6. 如果检查没有成功，要么是代码段没有编译，要么是没有运行，我们会用致命的错误停止配置:
+
+   ```cmake
+   if(NOT _runs)
+       message(FATAL_ERROR "Cannot run a simple C executable using libuuid!")
+   endif()
+   ```
+
+7. 若成功，我们继续添加C++可执行文件作为目标，并链接到UUID:
+
+   ```cmake
+   add_executable(use-uuid use-uuid.cpp)
+   target_link_libraries(use-uuid
+     PUBLIC
+         PkgConfig::UUID
+     )
+   ```
+
+**工作原理**
+
+`check_<lang>_source_runs`用于C和C++的函数，与`check_<lang>_source_compile`相同，但在实际运行生成的可执行文件的地方需要添加一个步骤。对于`check_<lang>_source_compiles`, `check_<lang>_source_runs`的执行可以通过以下变量来进行:
+
+- CMAKE_REQUIRED_FLAGS：设置编译器标志。
+- CMAKE_REQUIRED_DEFINITIONS：设置预编译宏。
+- CMAKE_REQUIRED_INCLUDES：设置包含目录列表。
+- CMAKE_REQUIRED_LIBRARIES：设置可执行目标需要连接的库列表。
+
+由于使用`pkg_search_module`生成的为导入目标，所以只需要将`CMAKE_REQUIRES_LIBRARIES`设置为`PkgConfig::UUID`，就可以正确设置包含目录。
+
+正如`check_<lang>_source_compiles`是`try_compile`的包装器，`check_<lang>_source_runs`是CMake中另一个功能更强大的命令的包装器:`try_run`。因此，可以编写一个`CheckFortranSourceRuns.cmake`模块，通过适当包装`try_run`, 提供与C和C++模块相同的功能。
+
+**NOTE**:*`pkg_search_module`只能定义导入目标(CMake 3.6),但目前的示例可以使工作，3.6之前版本的CMake可以通过手动设置所需的包括目录和库`check_c_source_runs`如下:`set(CMAKE_REQUIRED_INCLUDES $ {UUID_INCLUDE_DIRS})`和`set(CMAKE_REQUIRED_LIBRARIES $ {UUID_LIBRARIES})`。*
+
+## 5.9 使用生成器表达式微调配置和编译
+
+CMake提供了一种特定于领域的语言，来描述如何配置和构建项目。自然会引入描述特定条件的变量，并在`CMakeLists.txt`中包含基于此的条件语句。
+
+本示例中，我们将重新讨论生成器表达式。第4章中，以简洁地引用显式的测试可执行路径，使用了这些表达式。生成器表达式为逻辑和信息表达式，提供了一个强大而紧凑的模式，这些表达式在生成构建系统时进行评估，并生成特定于每个构建配置的信息。换句话说，生成器表达式用于引用仅在生成时已知，但在配置时未知或难于知晓的信息；对于文件名、文件位置和库文件后缀尤其如此。
+
+本例中，我们将使用生成器表达式，有条件地设置预处理器定义，并有条件地链接到消息传递接口库(Message Passing Interface, MPI)，并允许我们串行或使用MPI构建相同的源代码。
+
+**NOTE**:*本例中，我们将使用一个导入的目标来链接到MPI，该目标仅从CMake 3.9开始可用。但是，生成器表达式可以移植到CMake 3.0或更高版本。*
+
+**准备工作**
+
+我们将编译以下示例源代码(`example.cpp`):
+
+```c++
+#include <iostream>
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+int main()
+{
+#ifdef HAVE_MPI
+  // initialize MPI
+  MPI_Init(NULL, NULL);
+    
+  // query and print the rank
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  std::cout << "hello from rank " << rank << std::endl;
+    
+  // initialize MPI
+  MPI_Finalize();
+#else
+  std::cout << "hello from a sequential binary" << std::endl;
+#endif /* HAVE_MPI */
+}
+```
+
+代码包含预处理语句(`#ifdef HAVE_MPI ... #else ... #endif`)，这样我们就可以用相同的源代码编译一个顺序的或并行的可执行文件了。
+
+**具体实施**
+
+编写`CMakeLists.txt`文件时，我们将重用第3章第6节的一些构建块:
+
+1. 声明一个C++11项目：
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+   project(recipe-09 LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 然后，我们引入一个选项`USE_MPI`来选择MPI并行化，并将其设置为默认值`ON`。如果为`ON`，我们使用`find_package`来定位MPI环境:
+
+   ```cmake
+   option(USE_MPI "Use MPI parallelization" ON)
+   if(USE_MPI)
+       find_package(MPI REQUIRED)  # 配置为REQUIRED如果找不到则报错，配置为QUIET如果找不到则不报错
+   endif()
+   ```
+
+3. 然后定义可执行目标，并有条件地设置相应的库依赖项(`MPI::MPI_CXX`)和预处理器定义(`HAVE_MPI`)，稍后将对此进行解释:
+
+   ```cmake
+   add_executable(example example.cpp)
+   target_link_libraries(example
+     PUBLIC
+         $<$<BOOL:${MPI_FOUND}>:MPI::MPI_CXX>
+     )
+   target_compile_definitions(example
+     PRIVATE
+         $<$<BOOL:${MPI_FOUND}>:HAVE_MPI>
+     )
+   ```
+
+4. 如果找到MPI，还将打印由`FindMPI.cmake`导出的`INTERFACE_LINK_LIBRARIES`，为了方便演示，使用了`cmake_print_properties()`函数:
+
+   ```cmake
+   if(MPI_FOUND)
+     include(CMakePrintHelpers)
+     cmake_print_properties(
+       TARGETS MPI::MPI_CXX
+       PROPERTIES INTERFACE_LINK_LIBRARIES
+       )
+   endif()
+   ```
+
+5. 首先使用默认MPI配置。观察`cmake_print_properties()`的输出:
+
+   ```shell
+   $ mkdir -p build_mpi
+   $ cd build_mpi
+   $ cmake ..
+   
+   -- ...
+   --
+   Properties for TARGET MPI::MPI_CXX:
+   MPI::MPI_CXX.INTERFACE_LINK_LIBRARIES = "-Wl,-rpath -Wl,/usr/lib/openmpi -Wl,--enable-new-dtags -pthread;/usr/lib/openmpi/libmpi_cxx.so;/usr/lib/openmpi/libmpi.so"
+   ```
+
+6. 编译并运行并行例子:
+
+   ```shell
+   $ cmake --build .
+   $ mpirun -np 2 ./example
+   
+   hello from rank 0
+   hello from rank 1
+   ```
+
+7. 现在，创建一个新的构建目录，这次构建串行版本:
+
+   ```shell
+   $ mkdir -p build_seq
+   $ cd build_seq
+   $ cmake -D USE_MPI=OFF ..
+   $ cmake --build .
+   $ ./example
+   
+   hello from a sequential binary
+   ```
+
+**工作原理**
+
+CMake分两个阶段生成项目的构建系统：配置阶段(解析`CMakeLists.txt`)和生成阶段(实际生成构建环境)。生成器表达式在第二阶段进行计算，可以使用仅在生成时才能知道的信息来调整构建系统。生成器表达式在交叉编译时特别有用，一些可用的信息只有解析`CMakeLists.txt`之后，或在多配置项目后获取，构建系统生成的所有项目可以有不同的配置，比如Debug和Release。
+
+本例中，将使用生成器表达式有条件地设置链接依赖项并编译定义。为此，可以关注这两个表达式:
+
+```cmake
+target_link_libraries(example
+  PUBLIC
+      $<$<BOOL:${MPI_FOUND}>:MPI::MPI_CXX>
+  )
+target_compile_definitions(example
+  PRIVATE
+      $<$<BOOL:${MPI_FOUND}>:HAVE_MPI>
+  )
+```
+
+如果`MPI_FOUND`为真，那么`$<BOOL:${MPI_FOUND}>`的值将为1。本例中，`$<$<BOOL:${MPI_FOUND}>:MPI::MPI_CXX>`将计算`MPI::MPI_CXX`，第二个生成器表达式将计算结果存在`HAVE_MPI`。如果将`USE_MPI`设置为`OFF`，则`MPI_FOUND`为假，两个生成器表达式的值都为空字符串，因此不会引入链接依赖关系，也不会设置预处理定义。
+
+我们可以通过`if`来达到同样的效果:
+
+```cmake
+if(MPI_FOUND)
+  target_link_libraries(example
+    PUBLIC
+        MPI::MPI_CXX
+    )
+  target_compile_definitions(example
+    PRIVATE
+        HAVE_MPI
+    )
+endif()
+```
+
+这个解决方案不太优雅，但可读性更好。我们可以使用生成器表达式来重新表达`if`语句，而这个选择取决于个人喜好。但当我们需要访问或操作文件路径时，生成器表达式尤其出色，因为使用变量和`if`构造这些路径可能比较困难。本例中，我们更注重生成器表达式的可读性。第4章中，我们使用生成器表达式来解析特定目标的文件路径。第11章中，我们会再次来讨论生成器。
+
+**更多信息**
+
+CMake提供了三种类型的生成器表达式:
+
+- **逻辑表达式**，基本模式为`$<condition:outcome>`。基本条件为0表示false, 1表示true，但是只要使用了正确的关键字，任何布尔值都可以作为条件变量。
+- **信息表达式**，基本模式为`$<information>`或`$<information:input>`。这些表达式对一些构建系统信息求值，例如：包含目录、目标属性等等。这些表达式的输入参数可能是目标的名称，比如表达式`$<TARGET_PROPERTY:tgt,prop>`，将获得的信息是tgt目标上的prop属性。
+- **输出表达式**，基本模式为`$<operation>`或`$<operation:input>`。这些表达式可能基于一些输入参数，生成一个输出。它们的输出可以直接在CMake命令中使用，也可以与其他生成器表达式组合使用。例如,`- I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>`将生成一个字符串，其中包含正在处理的目标的包含目录，每个目录的前缀由`-I`表示。
+
+有关生成器表达式的完整列表，请参考https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html
+
+# 第6章 生成源码
+
+## 6.1 配置时生成源码
+
+代码生成在配置时发生，例如：CMake可以检测操作系统和可用库；基于这些信息，我们可以定制构建的源代码。本节和下面的章节中，我们将演示如何生成一个简单源文件，该文件定义了一个函数，用于报告构建系统配置。
+
+**准备工作**
+
+此示例的代码使用Fortran和C语言编写，第9章将讨论混合语言编程。主程序是一个简单的Fortran可执行程序，它调用一个C函数`print_info()`，该函数将打印配置信息。值得注意的是，在使用Fortran 2003时，编译器将处理命名问题(对于C函数的接口声明)，如示例所示。我们将使用的`main.cpp`作为源文件:
+
+```cpp
+#include "print_info_test.h"
+
+int main() {
+    print_info();
+    return 0;
+}
+```
+
+C函数`print_info()`在模板文件`print_info_test.h.in`中定义。在配置时，以`@`开头和结尾的变量将被替换为实际值:
+
+```cpp
+#ifndef __PRINT_INFO_TEST_H__
+#define __PRINT_INFO_TEST_H__
+
+#include <stdio.h>
+#include <unistd.h>
+
+void print_info(void) {
+    printf("\n");
+    printf("Configuration and build information\n");
+    printf("-----------------------------------\n");
+    printf("\n");
+    printf("Who compiled                | %s\n", "@_user_name@");
+    printf("Compilation hostname        | %s\n", "@_host_name@");
+    printf("Fully qualified domain name | %s\n", "@_fqdn@");
+    printf("Operating system            | %s\n",
+           "@_os_name@, @_os_release@, @_os_version@");
+    printf("Platform                    | %s\n", "@_os_platform@");
+    printf("Processor info              | %s\n",
+           "@_processor_name@, @_processor_description@");
+    printf("CMake version               | %s\n", "@CMAKE_VERSION@");
+    printf("CMake generator             | %s\n", "@CMAKE_GENERATOR@");
+    printf("Configuration time          | %s\n", "@_configuration_time@");
+    printf("Fortran compiler            | %s\n", "@CMAKE_Fortran_COMPILER@");
+    printf("C compiler                  | %s\n", "@CMAKE_C_COMPILER@");
+    printf("\n");
+
+    fflush(stdout);
+}
+
+#endif
+```
+
+**具体实施**
+
+在CMakeLists.txt中，我们首先必须对选项进行配置，并用它们的值替换`print_info.test..in`中相应的占位符。然后，将Fortran和C源代码编译成一个可执行文件:
+
+1. 声明了一个C/CXX混合项目:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+   
+   project(recipe-01 LANGUAGES C CXX)
+   ```
+
+2. 使用`execute_process`为项目获取当且使用者的信息:
+
+   ```cmake
+   execute_process(
+     COMMAND
+         whoami
+     TIMEOUT
+         1
+     OUTPUT_VARIABLE
+         _user_name
+     OUTPUT_STRIP_TRAILING_WHITESPACE
+     )
+   ```
+
+3. 使用`cmake_host_system_information()`函数(已经在第2章第5节遇到过)，可以查询很多系统信息:
+
+   ```cmake
+   # host name information
+   cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
+   cmake_host_system_information(RESULT _fqdn QUERY FQDN)
+   # processor information
+   cmake_host_system_information(RESULT _processor_name QUERY PROCESSOR_NAME)
+   cmake_host_system_information(RESULT _processor_description QUERY PROCESSOR_DESCRIPTION)
+   # os information
+   cmake_host_system_information(RESULT _os_name QUERY OS_NAME)
+   cmake_host_system_information(RESULT _os_release QUERY OS_RELEASE)
+   cmake_host_system_information(RESULT _os_version QUERY OS_VERSION)
+   cmake_host_system_information(RESULT _os_platform QUERY OS_PLATFORM)
+   ```
+
+4. 捕获配置时的时间戳，并通过使用字符串操作函数:
+
+   ```cmake
+   string(TIMESTAMP _configuration_time "%Y-%m-%d %H:%M:%S [UTC]" UTC)
+   ```
+
+5. 现在，准备好配置模板文件`print_info.c.in`。通过CMake的`configure_file`函数生成代码。注意，这里只要求以`@`开头和结尾的字符串被替换:
+
+   ```cmakes
+   configure_file(print_info_test.h.in print_info_test.h @ONLY)
+   ```
+
+6. 最后，我们添加一个可执行目标，并定义目标源：
+
+   ```cmake
+   add_executable(example "")
+   
+   target_include_directories(example
+           PRIVATE
+           ${CMAKE_CURRENT_BINARY_DIR}
+           )
+   
+   target_sources(example
+           PRIVATE
+           main.cpp
+           )
+   ```
+
+7. 下面是一个输出示例：
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   $ cmake --build .
+   $ ./example
+   
+   Configuration and build information
+   -----------------------------------
+   
+   Who compiled                | ben
+   Compilation hostname        | ben-virtual-machine
+   Fully qualified domain name | ben-virtual-machine
+   Operating system            | Linux, 5.8.0-43-generic, #49~20.04.1-Ubuntu SMP Fri Feb 5 09:57:56 UTC 2021
+   Platform                    | x86_64
+   Processor info              | Unknown P6 family, 4 core Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz
+   CMake version               | 3.16.3
+   CMake generator             | Unix Makefiles
+   Configuration time          | 2021-02-12 08:49:40 [UTC]
+   Fortran compiler            | CMAKE_Fortran_COMPILER-NOTFOUND
+   C compiler                  | /usr/bin/cc
+   
+   ```
+
+**工作原理**
+
+`configure_file`命令可以复制文件，并用变量值替换它们的内容。示例中，使用`configure_file`修改模板文件的内容，并将其复制到一个位置，然后将其编译到可执行文件中。如何调用`configure_file`:
+
+```cmake
+configure_file(print_info_test.h.in print_info_test.h @ONLY)
+```
+
+第一个参数是模板的名称为`print_info_test.h.in`。CMake假设输入文件的目录，与项目的根目录相对；也就是说，在`${CMAKE_CURRENT_SOURCE_DIR}/print_info_test.h.in`。我们选择`print_info_test.h`，作为第二个参数是配置文件的名称。假设输出文件位于相对于项目构建目录的位置：`${CMAKE_CURRENT_BINARY_DIR}/print_info_test.h`。
+
+输入和输出文件作为参数时，CMake不仅将配置`@VAR@`变量，还将配置`${VAR}`变量。如果`${VAR}`是语法的一部分，并且不应该修改(例如在shell脚本中)，那么就很不方便。为了在引导CMake，应该将选项`@ONLY`传递给`configure_file`的调用，如前所述。
+
+**更多信息**
+
+注意，用值替换占位符时，CMake中的变量名应该与将要配置的文件中使用的变量名完全相同，并放在`@`之间。可以在调用`configure_file`时定义的任何CMake变量。我们的示例中，这包括所有内置的CMake变量，如`CMAKE_VERSION`或`CMAKE_GENERATOR`。此外，每当修改模板文件时，重新生成代码将触发生成系统的重新生成。这样，配置的文件将始终保持最新。
+
+**TIPS**:*通过使用`CMake --help-variable-list`，可以从CMake手册中获得完整的内部CMake变量列表。*
+
+**NOTE**:*`file(GENERATE…)`为提供了一个有趣的替代`configure_file`，这是因为`file`允许将生成器表达式作为配置文件的一部分进行计算。但是，每次运行CMake时，`file(GENERATE…)`都会更新输出文件，这将强制重新构建依赖于该输出的所有目标。详细可参见https://crascit.com/2017/04/18/generated-sources-in-cmake-build 。
+
+---------------
+
+configure_file说明：<https://www.cnblogs.com/gaox97329498/p/10952732.html>
+
+```cmake
+configure_file(<input> <output>
+               [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
+               [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+```
+
+`configure_file` 主要实现如下两个功能:
+
+1. 将 `<input>` **文件**里面的内容全部复制到 `<output>` 文件中；
+2. 根据参数规则，替换 `@VAR@` 或 `${VAR}` 变量；
+
+**参数解析**
+
+1. COPYONLY
+   - 仅拷贝 `<input>` **文件**里面的内容到 `<output>` 文件， **不进行变量的替换**；
+2. ESCAPE_QUOTES
+   - 使用反斜杠（C语言风格）来进行转义；
+3. @ONLY
+   - 限制替换， 仅仅替换 `@VAR@` 变量， 不替换 `${VAR}` 变量
+4. NEWLINE_STYLE
+   - 指定输入文件的新行格式， 例如：Unix 中使用的是 `\n`, windows 中使用的 `\r\n`
+
+**注意: ** `COPYONLY` 和 `NEWLINE_STYLE` 是冲突的，不能同时使用；
+
+-------------------
+
+## 6.2 使用Python在配置时生成源码
+
+本示例中，我们将再次从模板`print_info.c.in`生成`print_info.c`。但这一次，将假设CMake函数`configure_file()`没有创建源文件，然后使用Python脚本模拟这个过程。当然，对于实际的项目，我们可能更倾向于使用`configure_file()`，但有时使用Python生成源代码的需要时，我们也应该知道如何应对。
+
+这个示例有严重的限制，不能完全模拟`configure_file()`。我们在这里介绍的方法，不能生成一个自动依赖项，该依赖项将在构建时重新生成`print_info.c`。换句话说，如果在配置之后删除生成的`print_info.c`，则不会重新生成该文件，构建也会失败。要正确地模拟`configure_file()`，需要使用`add_custom_command()`和`add_custom_target()`。我们将在第3节中使用它们，来克服这个限制。
+
+这个示例中，我们将使用一个简单的Python脚本。这个脚本将读取`print_info.c.in`。用从CMake传递给Python脚本的参数替换文件中的占位符。对于更复杂的模板，我们建议使用外部工具，比如Jinja(参见[http://jinja.pocoo.org](http://jinja.pocoo.org/) )。
+
+```python
+def configure_file(input_file, output_file, vars_dict):
+  with input_file.open('r') as f:
+      template = f.read()
+  for var in vars_dict: 
+      template = template.replace('@' + var + '@', vars_dict[var])
+  with output_file.open('w') as f:
+      f.write(template)
+```
+
+这个函数读取一个输入文件，遍历`vars_dict`变量中的目录，并用对应的值替换`@key@`，再将结果写入输出文件。这里的键值对，将由CMake提供。
+
+**准备工作**
+
+`print_info_test.h.in`和`main.cpp`与之前的示例相同。此外，我们将使用Python脚本`configuration.py`，它提供了一个函数:
+
+```python
+def configure_file(input_file, output_file, vars_dict):
+  with input_file.open('r') as f:
+      template = f.read()
+  for var in vars_dict:
+      template = template.replace('@' + var + '@', vars_dict[var])
+  with output_file.open('w') as f:
+      f.write(template)
+```
+
+该函数读取输入文件，遍历`vars_dict`字典的所有键，用对应的值替换模式`@key@`，并将结果写入输出文件(键值由CMake提供)。
+
+**具体实施**
+
+与前面的示例类似，我们需要配置一个模板文件，但这一次，使用Python脚本模拟`configure_file()`函数。我们保持CMakeLists.txt基本不变，并提供一组命令进行替换操作`configure_file(print_info.c.in print_info.c @ONLY)`，接下来将逐步介绍这些命令:
+
+1. 首先，构造一个变量`_config_script`，它将包含一个Python脚本，稍后我们将执行这个脚本:
+
+   ```cmake
+   set(_config_script
+   "
+   from pathlib import Path
+   source_dir = Path('${CMAKE_CURRENT_SOURCE_DIR}')
+   binary_dir = Path('${CMAKE_CURRENT_BINARY_DIR}')
+   input_file = source_dir / 'print_info.c.in'
+   output_file = binary_dir / 'print_info.c'
+   import sys
+   sys.path.insert(0, str(source_dir))
+   from configurator import configure_file
+   vars_dict = {
+     '_user_name': '${_user_name}',
+     '_host_name': '${_host_name}',
+     '_fqdn': '${_fqdn}',
+     '_processor_name': '${_processor_name}',
+     '_processor_description': '${_processor_description}',
+     '_os_name': '${_os_name}',
+     '_os_release': '${_os_release}',
+     '_os_version': '${_os_version}',
+     '_os_platform': '${_os_platform}',
+     '_configuration_time': '${_configuration_time}',
+     'CMAKE_VERSION': '${CMAKE_VERSION}',
+     'CMAKE_GENERATOR': '${CMAKE_GENERATOR}',
+     'CMAKE_Fortran_COMPILER': '${CMAKE_Fortran_COMPILER}',
+     'CMAKE_C_COMPILER': '${CMAKE_C_COMPILER}',
+   }
+   configure_file(input_file, output_file, vars_dict)
+   ")
+   ```
+
+2. 使用`find_package`让CMake使用Python解释器:
+
+   ```cmake
+   find_package(PythonInterp QUIET REQUIRED)
+   ```
+
+3. 如果找到Python解释器，则可以在CMake中执行`_config_script`，并生成`print_info.c`文件:
+
+   ```cmake
+   execute_process(
+     COMMAND
+         ${PYTHON_EXECUTABLE} "-c" ${_config_script}
+     )
+   ```
+
+4. 之后，定义可执行目标和依赖项，这与前一个示例相同。所以，得到的输出没有变化。
+
+**工作原理**
+
+回顾一下对CMakeLists.txt的更改。
+
+我们执行了一个Python脚本生成`print_info_test.h`。运行Python脚本前，首先检测Python解释器，并构造Python脚本。Python脚本导入`configure_file`函数，我们在`configuration.py`中定义了这个函数。为它提供用于读写的文件位置，并将其值作为键值对。
+
+此示例展示了生成配置的另一种方法，将生成任务委托给外部脚本，可以将配置报告编译成可执行文件，甚至库目标。我们在前面的配置中认为的第一种方法更简洁，但是使用本示例中提供的方法，我们可以灵活地使用Python(或其他语言)，实现任何在配置时间所需的步骤。使用当前方法，我们可以通过脚本的方式执行类似`cmake_host_system_information()`的操作。
+
+但要记住，这种方法也有其局限性，它不能在构建时重新生成`print_info_test.c`的自动依赖项。下一个示例中，我们应对这个挑战。
+
+**更多信息**
+
+我们可以使用`get_cmake_property(_vars VARIABLES)`来获得所有变量的列表，而不是显式地构造`vars_dict`(这感觉有点重复)，并且可以遍历`_vars`的所有元素来访问它们的值:
+
+```cmake
+get_cmake_property(_vars VARIABLES)
+foreach(_var IN ITEMS ${_vars})
+  message("variable ${_var} has the value ${${_var}}") 
+endforeach()
+```
+
+使用这种方法，可以隐式地构建`vars_dict`。但是，必须注意转义包含字符的值，例如:`;`， Python会将其解析为一条指令的末尾。
+
+## 6.3 构建时使用Python生成源码
+
+构建时根据某些规则生成冗长和重复的代码，同时避免在源代码存储库中显式地跟踪生成的代码生成源代码，是开发人员工具箱中的一个重要工具，例如：根据检测到的平台或体系结构生成不同的源代码。或者，可以使用Python，根据配置时收集的输入，在构建时生成高效的C++代码。其他生成器解析器，比如：Flex (https://github.com/westes/flex )和Bison(https://www.gnu.org/software/bison/ )；元对象编译器，如Qt的moc(http://doc.qt.io/qt5/moc.html )；序列化框架，如谷歌的protobuf (https://developers.google.com/protocol-buffers/ )。
+
+**准备工作**
+
+为了提供一个具体的例子，我们需要编写代码来验证一个数字是否是质数。现在有很多算法，例如：可以用埃拉托色尼的筛子(sieve of Eratosthenes)来分离质数和非质数。如果有很多验证数字，我们不希望对每一个数字都进行Eratosthenes筛选。我们想要做的是将所有质数一次制表，直到数字的上限，然后使用一个表查的方式，找来验证大量的数字。
+
+本例中，将在编译时使用Python为查找表(质数向量)生成C++代码。当然，为了解决这个特殊的编程问题，我们还可以使用C++生成查询表，并且可以在运行时执行查询。
+
+让我们从`generate.py`脚本开始。这个脚本接受两个命令行参数——一个整数范围和一个输出文件名:
+
+```python
+"""
+Generates C++ vector of prime numbers up to max_number
+using sieve of Eratosthenes.
+"""
+import pathlib
+import sys
+# for simplicity we do not verify argument list
+max_number = int(sys.argv[-2])
+output_file_name = pathlib.Path(sys.argv[-1])
+
+numbers = range(2, max_number + 1)
+is_prime = {number: True for number in numbers}
+
+for number in numbers:
+  current_position = number
+  if is_prime[current_position]:
+    while current_position <= max_number:
+      current_position += number
+      is_prime[current_position] = False
+        
+primes = (number for number in numbers if is_prime[number])
+
+code = """#pragma once
+
+#include <vector>
+
+const std::size_t max_number = {max_number};
+std::vector<int> & primes() {{
+  static std::vector<int> primes;
+  {push_back}
+  return primes;
+}}
+"""
+push_back = '\n'.join([' primes.push_back({:d});'.format(x) for x in primes])
+output_file_name.write_text(
+code.format(max_number=max_number, push_back=push_back))
+```
+
+我们的目标是生成一个`primes.hpp`，并将其包含在下面的示例代码中:
+
+```cpp
+#include "primes.hpp"
+
+#include <iostream>
+#include <vector>
+
+int main() {
+  std::cout << "all prime numbers up to " << max_number << ":";
+  for (auto prime : primes())
+      std::cout << " " << prime;
+  std::cout << std::endl;
+  return 0;
+}
+```
+
+**具体实施**
+
+下面是CMakeLists.txt命令的详解:
+
+1. 首先，定义项目并检测Python解释器:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-03 LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   find_package(PythonInterp QUIET REQUIRED)
+   ```
+
+2. 将生成的代码放在`${CMAKE_CURRENT_BINARY_DIR}/generate`下，需要告诉CMake创建这个目录:
+
+   ```cmake
+   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)  # 使用file命令创建目录
+   ```
+
+3. Python脚本要求质数的上限，使用下面的命令，我们可以设置一个默认值:
+
+   ```cmake
+   set(MAX_NUMBER "100" CACHE STRING "Upper bound for primes")
+   ```
+
+4. 接下来，定义一个自定义命令来生成头文件:
+
+   ```cmakes
+   add_custom_command(
+     OUTPUT
+         ${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp
+     COMMAND
+         ${PYTHON_EXECUTABLE} generate.py ${MAX_NUMBER}     ${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp
+     WORKING_DIRECTORY
+         ${CMAKE_CURRENT_SOURCE_DIR}
+     DEPENDS
+         generate.py
+   )
+   ```
+
+5. 最后，定义可执行文件及其目标，包括目录和依赖关系:
+
+   ```cmakes
+   add_executable(example "")
+   target_sources(example
+     PRIVATE
+         example.cpp
+         ${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp
+     )
+   target_include_directories(example
+     PRIVATE
+         ${CMAKE_CURRENT_BINARY_DIR}/generated
+     )
+   ```
+
+6. 准备测试:
+
+   ```shell
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   $ cmake --build .
+   $ ./example
+   all prime numbers up to 100: 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79
+   ```
+
+**具体实施**
+
+为了生成头文件，我们定义了一个自定义命令，它执行`generate.py`脚本，并接受`${MAX_NUMBER}`和文件路径(`${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp`)作为参数:
+
+```cmake
+add_custom_command(
+  OUTPUT
+      ${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp
+  COMMAND
+      ${PYTHON_EXECUTABLE} generate.py ${MAX_NUMBER} ${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp
+  WORKING_DIRECTORY
+      ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS
+      generate.py
+  )
+```
+
+为了生成源代码，我们需要在可执行文件的定义中，使用`target_sources`很容易实现添加源代码作为依赖项:
+
+```cmake
+target_sources(example
+  PRIVATE
+      example.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/generated/primes.hpp
+  )
+```
+
+前面的代码中，我们不需要定义新的目标。**头文件将作为示例的依赖项生成，并在每次`generate.py`脚本更改时重新生成。如果代码生成脚本生成多个源文件，那么要将所有生成的文件列出，做为某些目标的依赖项。**
+
+**更多信息**
+
+我们提到所有的生成文件，都应该作为某个目标的依赖项。但是，我们可能不知道这个文件列表，因为它是由生成文件的脚本决定的，这取决于我们提供给配置的输入。这种情况下，我们可能会尝试使用`file(GLOB…)`将生成的文件收集到一个列表中(参见https://cmake.org/cmake/help/v3.5/command/file.html )。
+
+`file(GLOB…)`在配置时执行，而代码生成是在构建时发生的。因此可能需要一个间接操作，将`file(GLOB…)`命令放在一个单独的CMake脚本中，使用`${CMAKE_COMMAND} -P`执行该脚本，以便在构建时获得生成的文件列表。
+
+## 6.4 记录项目版本信息以便报告
+
+代码版本很重要，不仅是为了可重复性，还为了记录API功能或简化支持请求和bug报告。源代码通常处于某种版本控制之下，例如：可以使用Git标记附加额外版本号(参见[https://semver.org](https://semver.org/) )。然而，不仅需要对源代码进行版本控制，而且可执行文件还需要记录项目版本，以便将其打印到代码输出或用户界面上。
+
+本例中，将在CMake源文件中定义版本号。我们的目标是在配置项目时将程序版本记录到头文件中。然后，生成的头文件可以包含在代码的正确位置和时间，以便将代码版本打印到输出文件或屏幕上。
+
+**准备工作**
+
+将使用以下C文件(`example.c`)打印版本信息:
+
+```cpp
+#include "version.h"
+
+#include <stdio.h>
+
+int main() {
+  printf("This is output from code %s\n", PROJECT_VERSION);
+  printf("Major version number: %i\n", PROJECT_VERSION_MAJOR);
+  printf("Minor version number: %i\n", PROJECT_VERSION_MINOR);
+    
+  printf("Hello CMake world!\n");
+}
+```
+
+这里，假设`PROJECT_VERSION_MAJOR`、`PROJECT_VERSION_MINOR`和`PROJECT_VERSION`是在`version.h`中定义的。目标是从以下模板中生成`version.h.in`:
+
+```cpp
+#pragma once
+
+#define PROJECT_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define PROJECT_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define PROJECT_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+#define PROJECT_VERSION "v@PROJECT_VERSION@"
+```
+
+这里使用预处理器定义，也可以使用字符串或整数常量来提高类型安全性(稍后我们将对此进行演示)。从CMake的角度来看，这两种方法是相同的。
+
+**如何实施**
+
+我们将按照以下步骤，在模板头文件中对版本进行注册:
+
+1. 要跟踪代码版本，我们可以在CMakeLists.txt中调用CMake的`project`时定义项目版本:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-04 VERSION 2.0.1 LANGUAGES C)
+   ```
+
+2. 然后，基于`version.h.in`生成`version.h`:
+
+   ```cmake
+   configure_file(
+     version.h.in
+     generated/version.h
+     @ONLY
+     )
+   ```
+
+3. 最后，我们定义了可执行文件，并提供了目标包含路径:
+
+   ```cmake
+   add_executable(example example.c)
+   target_include_directories(example
+     PRIVATE
+         ${CMAKE_CURRENT_BINARY_DIR}/generated
+     )
+   ```
+
+**工作原理**
+
+当使用版本参数调用CMake的`project`时，CMake将为项目设置`PROJECT_VERSION_MAJOR`、`PROJECT_VERSION_MINOR`和`PROJECT_VERSION_PATCH`。此示例中的关键命令是`configure_file`，它接受一个输入文件(本例中是`version.h.in`)，通过将`@`之间的占位符替换成对应的CMake变量，生成一个输出文件(本例中是`generate/version.h`)。它将`@PROJECT_VERSION_MAJOR@`替换为2，以此类推。使用关键字`@ONLY`，我们将`configure_file`限制为只替换`@variables@`，而不修改`${variables}`。后一种形式在`version.h.in`中没有使用。但是，当使用CMake配置shell脚本时，会经常出现。
+
+生成的头文件可以包含在示例代码中，可以打印版本信息:
+
+```sh
+$ mkdir -p build
+$ cd build
+$ cmake ..
+$ cmake --build .
+$ ./example
+
+This is output from code v2.0.1
+Major version number: 2
+Minor version number: 0
+Hello CMake world!
+```
+
+**NOTE**:*CMake以`x.y.z`格式给出的版本号，并将变量`PROJECT_VERSION`和`<project-name>_VERSION`设置为给定的值。此外,`PROJECT_VERSION_MAJOR`(`<project-name>_VERSION_MAJOR`),`PROJECT_VERSION_MINOR`(`<project-name>_VERSION_MINOR`) `PROJECT_VERSION_PATCH`(`<project-name>_VERSION_PATCH`)和`PROJECT_VERSION_TWEAK`(`<project-name>_VERSION_TWEAK`),将分别设置为`X`, `Y`, `Z`和`t`。*
+
+**更多信息**
+
+为了确保只有当CMake变量被认为是一个真正的常量时，才定义预处理器变量，可以使用`configure_file`，在配置的头文件中使用`#cmakedefine`而不是`#define`。
+
+根据是否定义了CMake变量并将其计算为一个真正的常量，`#cmakedefine YOUR_VARIABLE`将被替换为`#define YOUR_VARIABLE …`或者`/* #undef YOUR_VARIABLE */`。还有`#cmakedefine01`，将根据变量是否定义，将变量设置为`0`或`1`。
+
+## 6.5 从文件中记录项目版本
+
+这个示例的目的和前一个相似，但是出发点不同。我们计划是从文件中读取版本信息，而不是将其设置在CMakeLists.txt中。将版本保存在单独文件中的动机，是允许其他构建框架或开发工具使用独立于CMake的信息，而无需将信息复制到多个文件中。与CMake并行使用的构建框架的一个例子是Sphinx文档框架，它生成文档并将其部署到阅读文档服务中，以便在线提供代码文档。
+
+**准备工作**
+
+我们将从一个名为`VERSION`的文件开始，其中包含以下内容:
+
+```
+2.0.1-rc-2
+```
+
+这一次，选择更安全的数据类型，并将`PROGRAM_VERSION`定义为`version.hpp.in`中的字符串常量:
+
+```cpp
+#pragma once
+#include <string>
+const std::string PROGRAM_VERSION = "@PROGRAM_VERSION@";
+```
+
+下面的源码(`example.cpp`)，将包含生成的`version.hpp`:
+
+```cpp
+// provides PROGRAM_VERSION
+#include "version.hpp"
+#include <iostream>
+
+int main() {
+  std::cout << "This is output from code v" << PROGRAM_VERSION
+  << std::endl;
+  std::cout << "Hello CMake world!" << std::endl;
+}
+```
+
+**具体实施**
+
+逐步来完成我们的任务:
+
+1. CMakeLists.txt定义了最低版本、项目名称、语言和标准:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-05 LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 从文件中读取版本信息如下:
+
+   ```cmake
+   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+       file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PROGRAM_VERSION)  # 读文件内容到变量PROGRAM_VERSION
+       string(STRIP "${PROGRAM_VERSION}" PROGRAM_VERSION)  # 去除空格换行符
+   else()
+       message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/VERSION not found")
+   endif()
+   ```
+
+3. 配置头文件:
+
+   ```cmake
+   configure_file(
+     version.hpp.in
+     generated/version.hpp
+     @ONLY
+     )
+   ```
+
+4. 最后，定义了可执行文件及其依赖关系:
+
+   ```cmake
+   add_executable(example example.cpp)
+   target_include_directories(example
+     PRIVATE
+         ${CMAKE_CURRENT_BINARY_DIR}/generated
+     )
+   ```
+
+5. 进行测试:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   $ cmake --build .
+   $ ./example
+   
+   This is output from code v2.0.1-rc-2
+   Hello CMake world!
+   ```
+
+**工作原理**
+
+我们使用以下构造，从一个名为VERSION的文件中读取版本字符串:
+
+```cmake
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" PROGRAM_VERSION)
+  string(STRIP "${PROGRAM_VERSION}" PROGRAM_VERSION)
+else()
+    message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/VERSION not found")
+endif()
+```
+
+这里，首先检查该文件是否存在，如果不存在，则发出错误消息。如果存在，将内容读入`PROGRAM_VERSION`变量中，该变量会去掉尾部的空格。当设置了变量`PROGRAM_VERSION`，就可以使用它来配置`version.hpp.in`，生成`generated/version.hpp`:
+
+```cmake
+configure_file(
+  version.hpp.in
+  generated/version.hpp
+  @ONLY
+  )
+```
+
+## 6.6 配置时记录Git Hash值
+
+大多数现代源代码存储库都使用Git作为版本控制系统进行跟踪，这可以归功于存储库托管平台GitHub的流行。因此，我们将在本示例中使用Git；然而，实际中会根据具体的动机和实现，可以转化为其他版本控制系统。我们以Git为例，提交的Git Hash决定了源代码的状态。因此，为了标记可执行文件，我们将尝试将Git Hash记录到可执行文件中，方法是将哈希字符串记录在一个头文件中，该头文件可以包含在代码中。
+
+**准备工作**
+
+我们需要两个源文件，类似于前面的示例。其中一个将配置记录的Hash(`version.hpp.in`)，详情如下:
+
+```cpp
+#pragma once
+#include <string>
+const std::string GIT_HASH = "@GIT_HASH@";
+```
+
+还需要一个示例源文件(`example.cpp`)，将Hash打印到屏幕上:
+
+```cpp
+#include "version.hpp"
+
+#include <iostream>
+
+int main() {
+    std::cout << "This code has been configured from version " << GIT_HASH << std::endl;
+}
+```
+
+此示例还假定在Git存储库中至少有一个提交。因此，使用`git init`初始化这个示例，并使用`git add <filename>`，然后使用`git commit`创建提交，以便获得一个有意义的示例。
+
+**具体实施**
+
+下面演示了从Git记录版本信息的步骤:
+
+1. 定义项目和支持语言:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-06 LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 定义`GIT_HASH`变量:
+
+   ```cmake
+   # in case Git is not available, we default to "unknown"
+   set(GIT_HASH "unknown")
+   # find Git and if available set GIT_HASH variable
+   find_package(Git QUIET)
+   if(GIT_FOUND)
+     execute_process(
+       COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%h
+       OUTPUT_VARIABLE GIT_HASH
+       OUTPUT_STRIP_TRAILING_WHITESPACE
+       ERROR_QUIET  # 这个选项注掉，则会报错
+       WORKING_DIRECTORY
+           ${CMAKE_CURRENT_SOURCE_DIR}
+     )
+   endif()
+   message(STATUS "Git hash is ${GIT_HASH}")
+   ```
+
+3. `CMakeLists.txt`剩余的部分，类似于之前的示例:
+
+   ```cmake
+   # generate file version.hpp based on version.hpp.in
+   configure_file(
+     version.hpp.in
+     generated/version.hpp
+     @ONLY
+     )
+     
+   # example code
+   add_executable(example example.cpp)
+   
+   # needs to find the generated header file
+   target_include_directories(example
+     PRIVATE
+         ${CMAKE_CURRENT_BINARY_DIR}/generated
+     )
+   ```
+
+4. 验证输出(Hash不同):
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   $ cmake --build .
+   $ ./example
+   
+   This code has been configured from version d58c64f
+   ```
+
+**工作原理**
+
+使用`find_package(Git QUIET)`来检测系统上是否有可用的Git。如果有(`GIT_FOUND`为`True`)，运行一个Git命令:`${GIT_EXECUTABLE} log -1 --pretty=format:%h`。这个命令给出了当前提交Hash的简短版本。当然，这里我们可以灵活地运行Git命令。我们要求`execute_process`命令将结果放入名为`GIT_HASH`的变量中，然后删除任何尾随的空格。使用`ERROR_QUIET`，如果Git命令由于某种原因失败，我们不会停止配置。
+
+由于Git命令可能会失败(源代码已经分发到Git存储库之外)，或者Git在系统上不可用，我们希望为这个变量设置一个默认值，如下所示:
+
+```
+set(GIT_HASH "unknown")
+```
+
+此示例有一个问题，Git Hash是在配置时记录的，而不是在构建时记录。下一个示例中，我们将演示如何实现后一种方法。
+
+## 6.7 构建时记录Git Hash值
+
+前面的示例中，在配置时记录了代码存储库(Git Hash)的状态。然而，前一种方法有一个令人不满意的地方，如果在配置代码之后更改分支或提交更改，则源代码中包含的版本记录可能指向错误的Git Hash值。在这个示例中，我们将演示如何在构建时记录Git Hash(或者，执行其他操作)，以确保每次构建代码时都运行这些操作，因为我们可能只配置一次，但是会构建多次。
+
+**准备工作**
+
+我们将使用与之前示例相同的`version.hpp.in`，只会对`example.cpp`文件进行修改，以确保它打印构建时Git提交Hash值:
+
+```cpp
+#include "version.hpp"
+
+#include <iostream>
+
+int main() {
+    std::cout << "This code has been built from version " << GIT_HASH << std::endl;
+}
+```
+
+**具体实施**
+
+将Git信息保存到`version.hpp`头文件在构建时需要进行以下操作:
+
+1. 把前一个示例的`CMakeLists.txt`中的大部分代码移到一个单独的文件中，并将该文件命名为`git-hash.cmake`:
+
+   ```cmake
+   # in case Git is not available, we default to "unknown"
+   set(GIT_HASH "unknown")
+   # find Git and if available set GIT_HASH variable
+   find_package(Git QUIET)
+   if(GIT_FOUND)
+     execute_process(
+       COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%h
+       OUTPUT_VARIABLE GIT_HASH
+       OUTPUT_STRIP_TRAILING_WHITESPACE
+       ERROR_QUIET
+       )
+   endif()
+   message(STATUS "Git hash is ${GIT_HASH}")
+   # generate file version.hpp based on version.hpp.in
+   configure_file(
+     ${CMAKE_CURRENT_LIST_DIR}/version.hpp.in
+     ${TARGET_DIR}/generated/version.hpp
+     @ONLY
+     )
+   ```
+
+2. `CMakeLists.txt`熟悉的部分:
+
+   ```cmake
+   # set minimum cmake version
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   # project name and language
+   project(recipe-07 LANGUAGES CXX)
+   # require C++11
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   # example code
+   add_executable(example example.cpp)
+   # needs to find the generated header file
+   target_include_directories(example
+     PRIVATE
+         ${CMAKE_CURRENT_BINARY_DIR}/generated
+     )
+   ```
+
+3. `CMakeLists.txt`的剩余部分，记录了每次编译代码时的`Git Hash`:
+
+   ```cmake
+   add_custom_command(
+    OUTPUT
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/version.hpp
+    ALL
+    COMMAND
+        ${CMAKE_COMMAND} -D TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/git-hash.cmake
+    WORKING_DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+   # rebuild version.hpp every time
+   add_custom_target(
+    get_git_hash
+    ALL
+    DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/version.hpp
+    )
+   # version.hpp has to be generated
+   # before we start building example
+   add_dependencies(example get_git_hash)
+   ```
+
+**工作原理**
+
+示例中，在构建时执行CMake代码。为此，定义了一个自定义命令:
+
+```cmake
+add_custom_command(
+  OUTPUT
+      ${CMAKE_CURRENT_BINARY_DIR}/generated/version.hpp
+  ALL
+  COMMAND
+      ${CMAKE_COMMAND} -D TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/git-hash.cmake
+  WORKING_DIRECTORY
+      ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+```
+
+我们还定义了一个目标:
+
+```cmake
+add_custom_target(
+  get_git_hash
+  ALL
+  DEPENDS
+      ${CMAKE_CURRENT_BINARY_DIR}/generated/version.hpp
+  )
+```
+
+自定义命令调用CMake来执行`git-hash.cmake`脚本。这里使用CLI的`-P`开关，通过传入脚本的位置实现的。请注意，可以像往常一样使用CLI开关`-D`传递选项。`git-hash.cmake`脚本生成`${TARGET_DIR}/generated/version.hpp`。自定义目标被添加到`ALL`目标中，并且依赖于自定义命令的输出。换句话说，当构建默认目标时，我们确保自定义命令已经运行。此外，自定义命令将`ALL`目标作为输出。这样，我们就能确保每次都会生成`version.hpp`了。
+
+**更多信息**
+
+我们可以改进配置，以便在记录的`Git Hash`外，包含其他的信息。检测构建环境是否“污染”(即是否包含未提交的更改和未跟踪的文件)，或者“干净”。可以使用`git describe --abbrev=7 --long --always --dirty --tags`检测这些信息。根据可重现性，甚至可以将Git的状态，完整输出记录到头文件中，我们将这些功能作为课后习题留给读者自己完成。
+
+# 第7章 构建项目
+
+## 7.1 使用函数和宏重用代码
+
+任何编程语言中，函数允许我们抽象(隐藏)细节并避免代码重复，CMake也不例外。本示例中，我们将以宏和函数为例进行讨论，并介绍一个宏，以便方便地定义测试和设置测试的顺序。我们的目标是定义一个宏，能够替换`add_test`和`set_tests_properties`，用于定义每组和设置每个测试的预期开销(第4章，第8节)。
+
+**准备工作**
+
+我们将基于第4章第2节中的例子。`main.cpp`、`sum_integers.cpp`和`sum_integers.hpp`文件不变，用来计算命令行参数提供的整数队列的和。单元测试(`test.cpp`)的源代码也没有改变。我们还需要Catch 2头文件，`catch.hpp`。与第4章相反，我们将把源文件放到子目录中，并形成以下文件树(稍后我们将讨论CMake代码):
+
+```
+.
+├── CMakeLists.txt
+├── src
+│     ├── CMakeLists.txt
+│     ├── main.cpp
+│     ├── sum_integers.cpp
+│     └── sum_integers.hpp
+└── tests
+      ├── catch.hpp
+      ├── CMakeLists.txt
+      └── test.cpp
+```
+
+**具体实施**
+
+1. 定义了CMake最低版本、项目名称和支持的语言，并要求支持C++11标准:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-01 LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 根据GNU标准定义`binary`和`library`路径:
+
+   ```cmakes
+   include(GNUInstallDirs)
+   
+   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+       ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+       ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+       ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+   ```
+
+3. 最后，使用`add_subdirectory`调用`src/CMakeLists.txt`和`tests/CMakeLists.txt`:
+
+   ```cmake
+   add_subdirectory(src)
+   enable_testing()
+   add_subdirectory(tests)
+   ```
+
+4. `src/CMakeLists.txt`定义了源码目标:
+
+   ```cmake
+   set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+   add_library(sum_integers sum_integers.cpp)
+   add_executable(sum_up main.cpp)
+   target_link_libraries(sum_up sum_integers)
+   ```
+
+5. `tests/CMakeLists.txt`中，构建并链接`cpp_test`可执行文件:
+
+   ```cmake
+   add_executable(cpp_test test.cpp)
+   target_link_libraries(cpp_test sum_integers)
+   ```
+
+6. 定义一个新宏`add_catch_test`:
+
+   ```cmake
+   macro(add_catch_test _name _cost)
+     math(EXPR num_macro_calls "${num_macro_calls} + 1")
+     message(STATUS "add_catch_test called with ${ARGC} arguments: ${ARGV}")
+     set(_argn "${ARGN}")
+     if(_argn)
+         message(STATUS "oops - macro received argument(s) we did not expect: ${ARGN}")
+     endif()
+     add_test(
+       NAME
+         ${_name}
+       COMMAND
+         $<TARGET_FILE:cpp_test>
+       [${_name}] --success --out
+       ${PROJECT_BINARY_DIR}/tests/${_name}.log --durations yes
+       WORKING_DIRECTORY
+         ${CMAKE_CURRENT_BINARY_DIR}
+       )
+     set_tests_properties(
+       ${_name}
+       PROPERTIES
+           COST ${_cost}
+       )
+   endmacro()
+   ```
+
+7. 最后，使用`add_catch_test`定义了两个测试。此外，还设置和打印了变量的值:
+
+   ```cmake
+   set(num_macro_calls 0)
+   add_catch_test(short 1.5)
+   add_catch_test(long 2.5 extra_argument)
+   message(STATUS "in total there were ${num_macro_calls} calls to add_catch_test")
+   ```
+
+8. 现在，进行测试。配置项目(输出行如下所示):
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   
+   -- ...
+   -- add_catch_test called with 2 arguments: short;1.5
+   -- add_catch_test called with 3 arguments: long;2.5;extra_argument
+   -- oops - macro received argument(s) we did not expect: extra_argument
+   -- in total there were 2 calls to add_catch_test
+   -- ...
+   ```
+
+9. 最后，构建并运行测试:
+
+   ```sh
+   $ cmake --build .
+   $ ctest
+   ```
+
+10. 长时间的测试会先开始:
+
+    ```sh
+    Start 2: long
+    1/2 Test #2: long ............................. Passed 0.00 sec
+    Start 1: short
+    2/2 Test #1: short ............................ Passed 0.00 sec
+    
+    100% tests passed, 0 tests failed out of 2
+    ```
+
+**工作原理**
+
+这个配置中的新添加了`add_catch_test`宏。这个宏需要两个参数`_name`和`_cost`，可以在宏中使用这些参数来调用`add_test`和`set_tests_properties`。参数前面的下划线，是为了向读者表明这些参数只能在宏中访问。另外，宏自动填充了`${ARGC}`(参数数量)和`${ARGV}`(参数列表)，我们可以在输出中验证了这一点:
+
+```sh
+-- add_catch_test called with 2 arguments: short;1.5
+-- add_catch_test called with 3 arguments: long;2.5;extra_argument
+```
+
+宏还定义了`${ARGN}`，用于保存最后一个参数之后的参数列表。此外，我们还可以使用`${ARGV0}`、`${ARGV1}`等来处理参数。我们演示一下，如何捕捉到调用中的额外参数(`extra_argument`):
+
+```cmake
+add_catch_test(long 2.5 extra_argument)
+```
+
+我们使用了以下方法:
+
+```cmake
+set(_argn "${ARGN}")
+if(_argn)
+    message(STATUS "oops - macro received argument(s) we did not expect: ${ARGN}")
+endif()
+```
+
+这个`if`语句中，我们引入一个新变量，但不能直接查询`ARGN`，因为它不是通常意义上的CMake变量。使用这个宏，我们可以通过它们的名称和命令来定义测试，还可以指示预期的开销，这会让耗时长的测试在耗时短测试之前启动，这要归功于`COST`属性。
+
+我们可以用一个函数来实现它，而不是使用相同语法的宏:
+
+```cmake
+function(add_catch_test _name _cost)
+    ...
+endfunction()
+```
+
+**宏和函数之间的区别在于它们的变量范围**。宏在调用者的范围内执行，而函数有自己的变量范围。换句话说，如果我们使用宏，需要设置或修改对调用者可用的变量。如果不去设置或修改输出变量，最好使用函数。我们注意到，可以在函数中修改父作用域变量，但这必须使用`PARENT_SCOPE`显式表示:
+
+```cmake
+set(variable_visible_outside "some value" PARENT_SCOPE)
+```
+
+为了演示作用域，我们在定义宏之后编写了以下调用:
+
+```cmake
+set(num_macro_calls 0)
+add_catch_test(short 1.5)
+add_catch_test(long 2.5 extra_argument)
+message(STATUS "in total there were ${num_macro_calls} calls to add_catch_test")
+```
+
+在宏内部，将`num_macro_calls`加1:
+
+```cmake
+math(EXPR num_macro_calls "${num_macro_calls} + 1")
+```
+
+这时产生的输出:
+
+```sh
+-- in total there were 2 calls to add_catch_test
+```
+
+如果我们将宏更改为函数，测试仍然可以工作，但是`num_macro_calls`在父范围内的所有调用中始终为0。**将CMake宏想象成类似函数是很有用的，这些函数被直接替换到它们被调用的地方(在C语言中内联)。将CMake函数想象成黑盒函数很有必要。黑盒中，除非显式地将其定义为`PARENT_SCOPE`，否则不会返回任何内容。CMake中的函数没有返回值。**
+
+**更多信息**
+
+可以在宏中嵌套函数调用，也可以在函数中嵌套宏调用，但是这就需要仔细考虑变量的作用范围。如果功能可以使用函数实现，那么这可能比宏更好，因为它对父范围状态提供了更多的默认控制。
+
+我们还应该提到在`src/cmakelist .txt`中使用`CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE`:
+
+```cmake
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)  # 如果没有这行命令，则报错：/home/ben/Softwares/JetBrains/CppProjects/cmake-cookbook-master/chapter-07/recipe-01/cxx-example/tests/test.cpp:1:10: fatal error: sum_integers.hpp: No such file or directory
+    1 | #include "sum_integers.hpp"
+```
+
+这个命令会将当前目录，添加到`CMakeLists.txt`中定义的所有目标的`interface_include_directory`属性中。换句话说，我们不需要使用`target_include_directory`来添加`cpp_test`所需头文件的位置。
+
+## 7.2 将CMake源代码分成模块
+
+项目通常从单个`CMakeLists.txt`文件开始，随着时间的推移，这个文件会逐渐增长。本示例中，我们将演示一种将`CMakeLists.txt`分割成更小单元的机制。将`CMakeLists.txt`拆分为模块有几个动机，这些模块可以包含在主`CMakeLists.txt`或其他模块中:
+
+- 主`CMakeLists.txt`更易于阅读。
+- CMake模块可以在其他项目中重用。
+- 与函数相结合，模块可以帮助我们限制变量的作用范围。
+
+本示例中，我们将演示如何定义和包含一个宏，该宏允许我们获得CMake的彩色输出(用于重要的状态消息或警告)。
+
+**准备工作**
+
+本例中，我们将使用两个文件，主`CMakeLists.txt`和`cmake/colors.cmake`:
+
+```
+.
+├── cmake
+│     └── colors.cmake
+└── CMakeLists.txt
+```
+
+`cmake/colors.cmake`文件包含彩色输出的定义:
+
+```cmake
+# colorize CMake output
+# code adapted from stackoverflow: http://stackoverflow.com/a/19578320
+# from post authored by https://stackoverflow.com/users/2556117/fraser
+macro(define_colors)
+  if(WIN32)
+    # has no effect on WIN32
+    set(ColourReset "")
+    set(ColourBold "")
+    set(Red "")
+    set(Green "")
+    set(Yellow "")
+    set(Blue "")
+    set(Magenta "")
+    set(Cyan "")
+    set(White "")
+    set(BoldRed "")
+    set(BoldGreen "")
+    set(BoldYellow "")
+    set(BoldBlue "")
+    set(BoldMagenta "")
+    set(BoldCyan "")
+    set(BoldWhite "")
+  else()
+    string(ASCII 27 Esc)
+    set(ColourReset "${Esc}[m")
+    set(ColourBold "${Esc}[1m")
+    set(Red "${Esc}[31m")
+    set(Green "${Esc}[32m")
+    set(Yellow "${Esc}[33m")
+    set(Blue "${Esc}[34m")
+    set(Magenta "${Esc}[35m")
+    set(Cyan "${Esc}[36m")
+    set(White "${Esc}[37m")
+    set(BoldRed "${Esc}[1;31m")
+    set(BoldGreen "${Esc}[1;32m")
+    set(BoldYellow "${Esc}[1;33m")
+    set(BoldBlue "${Esc}[1;34m")
+    set(BoldMagenta "${Esc}[1;35m")
+    set(BoldCyan "${Esc}[1;36m")
+    set(BoldWhite "${Esc}[1;37m")
+  endif()
+endmacro()
+```
+
+**具体实施**
+
+来看下我们如何使用颜色定义，来生成彩色状态消息:
+
+1. 从一个熟悉的头部开始:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-02 LANGUAGES NONE)
+   ```
+
+2. 然后，将`cmake`子目录添加到CMake模块搜索的路径列表中:
+
+   ```cmake
+   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+   ```
+
+3. 包括`colors.cmake`模块，调用其中定义的宏:
+
+   ```cmake
+   include(colors)  # 指定包含的cmake模块名称
+   define_colors()  # 包含宏
+   ```
+
+4. 最后，打印了不同颜色的信息:
+
+   ```cmake
+   message(STATUS "This is a normal message")
+   message(STATUS "${Red}This is a red${ColourReset}")
+   message(STATUS "${BoldRed}This is a bold red${ColourReset}")
+   message(STATUS "${Green}This is a green${ColourReset}")
+   message(STATUS "${BoldMagenta}This is bold${ColourReset}")
+   ```
+
+5. 测试一下(如果使用macOS或Linux，以下的输出应该出现屏幕上):
+
+    ![colors](pictures/7-2_colors.png)
+
+**工作原理**
+
+这个例子中，不需要编译代码，也不需要语言支持，我们已经用`LANGUAGES NONE`明确了这一点：
+
+```cmake
+project(recipe-02 LANGUAGES NONE)
+```
+
+我们定义了`define_colors`宏，并将其放在`cmake/colors.cmake`。因为还是希望使用调用宏中定义的变量，来更改消息中的颜色，所以我们选择使用宏而不是函数。我们使用以下行包括宏和调用`define_colors`:
+
+```cmake
+include(colors)
+define_colors()
+```
+
+我们还需要告诉CMake去哪里查找宏:
+
+```cmake
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+```
+
+`include(colors)`命令指示CMake搜索`${CMAKE_MODULE_PATH}`，查找名称为`colors.cmake`的模块。
+
+例子中，我们没有按以下的方式进行：
+
+```cmake
+include(cmake/colors.cmake)
+```
+
+而是使用一个显式包含的方式:
+
+```cmake
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(colors)
+```
+
+**更多信息**
+
+推荐的做法是在模块中定义宏或函数，然后调用宏或函数。将包含模块用作函数调用不是很好的方式。除了定义函数和宏以及查找程序、库和路径之外，包含模块不应该做更多的事情。实际的`include`命令不应该定义或修改变量，其原因是重复的`include`(可能是偶然的)不应该引入任何不想要的副作用。在第5节中，我们将创建一个防止多次包含的保护机制。
+
+## 7.3 编写函数来测试和设置编译器标志
+
+前两个示例中，我们使用了宏。本示例中，将使用一个函数来抽象细节并避免代码重复。我们将实现一个接受编译器标志列表的函数。该函数将尝试用这些标志逐个编译测试代码，并返回编译器理解的第一个标志。这样，我们将了解几个新特性：函数、列表操作、字符串操作，以及检查编译器是否支持相应的标志。
+
+**准备工作**
+
+按照上一个示例的推荐，我们将在(`set_compiler_flag.cmake`)模块中定义函数，然后调用函数。该模块包含以下代码，我们将在后面详细讨论:
+
+```cmake
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckFortranCompilerFlag)
+function(set_compiler_flag _result _lang)
+  # build a list of flags from the arguments
+  set(_list_of_flags)
+  # also figure out whether the function
+  # is required to find a flag
+  set(_flag_is_required FALSE)
+  foreach(_arg IN ITEMS ${ARGN})
+      string(TOUPPER "${_arg}" _arg_uppercase)
+      if(_arg_uppercase STREQUAL "REQUIRED")
+          set(_flag_is_required TRUE)
+      else()
+          list(APPEND _list_of_flags "${_arg}")
+      endif()
+  endforeach()
+  
+  set(_flag_found FALSE)
+  # loop over all flags, try to find the first which works
+  foreach(flag IN ITEMS ${_list_of_flags})
+      unset(_flag_works CACHE)
+      if(_lang STREQUAL "C")
+          check_c_compiler_flag("${flag}" _flag_works)
+      elseif(_lang STREQUAL "CXX")
+          check_cxx_compiler_flag("${flag}" _flag_works)
+      elseif(_lang STREQUAL "Fortran")
+          check_Fortran_compiler_flag("${flag}" _flag_works)
+      else()
+          message(FATAL_ERROR "Unknown language in set_compiler_flag: ${_lang}")
+          endif()
+          
+    # if the flag works, use it, and exit
+    # otherwise try next flag
+    if(_flag_works)
+      set(${_result} "${flag}" PARENT_SCOPE)
+      set(_flag_found TRUE)
+      break()
+    endif()
+  endforeach()
+  
+  # raise an error if no flag was found
+  if(_flag_is_required AND NOT _flag_found)
+      message(FATAL_ERROR "None of the required flags were supported")
+  endif()
+endfunction()
+```
+
+**具体实施**
+
+展示如何在CMakeLists.txt中使用`set_compiler_flag`函数:
+
+1. 定义最低CMake版本、项目名称和支持的语言(本例中是C和C++):
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-03 LANGUAGES C CXX)
+   ```
+
+2. 显示包含`set_compiler_flag.cmake`:
+
+   ```cmake
+   include(set_compiler_flag.cmake)
+   ```
+
+3. 测试C标志列表:
+
+   ```cmakes
+   set_compiler_flag(
+     working_compile_flag C REQUIRED
+     "-foo" # this should fail
+     "-wrong" # this should fail
+     "-wrong" # this should fail
+     "-Wall" # this should work with GNU
+     "-warn all" # this should work with Intel
+     "-Minform=inform" # this should work with PGI
+     "-nope" # this should fail
+     )
+   message(STATUS "working C compile flag: ${working_compile_flag}")
+   ```
+
+4. 测试C++标志列表:
+
+   ```cmake
+   set_compiler_flag(
+     working_compile_flag CXX REQUIRED
+     "-foo" # this should fail
+     "-g" # this should work with GNU, Intel, PGI
+     "/RTCcsu" # this should work with MSVC
+     )
+     
+   message(STATUS "working CXX compile flag: ${working_compile_flag}")
+   ```
+
+5. 现在，我们可以配置项目并验证输出。只显示相关的输出，相应的输出可能会因编译器的不同而有所不同:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   
+   -- ...
+   -- Performing Test _flag_works
+   -- Performing Test _flag_works - Failed
+   -- Performing Test _flag_works
+   -- Performing Test _flag_works - Failed
+   -- Performing Test _flag_works
+   -- Performing Test _flag_works - Failed
+   -- Performing Test _flag_works
+   -- Performing Test _flag_works - Success
+   -- working C compile flag: -Wall
+   -- Performing Test _flag_works
+   -- Performing Test _flag_works - Failed
+   -- Performing Test _flag_works
+   -- Performing Test _flag_works - Success
+   -- working CXX compile flag: -g
+   -- ...
+   ```
+
+-----------
+
+本地验证，使用clion自带cmake无法通过任意一个选项的检测，使用系统安装/usr/bin/cmake可以正常通过选项检测。
+
+-------------------
+
+**工作原理**
+
+这里使用的模式是:
+
+1. 定义一个函数或宏，并将其放入模块中
+2. 包含模块
+3. 调用函数或宏
+
+从输出中，可以看到代码检查列表中的每个标志。一旦检查成功，它就打印成功的编译标志。看看`set_compiler_flag.cmake`模块的内部，这个模块又包含三个模块:
+
+```cmake
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckFortranCompilerFlag)
+```
+
+这都是标准的CMake模块，CMake将在`${CMAKE_MODULE_PATH}`中找到它们。这些模块分别提供`check_c_compiler_flag`、`check_cxx_compiler_flag`和`check_fortran_compiler_flag`宏。然后定义函数:
+
+```cmake
+function(set_compiler_flag _result _lang)
+    ...
+endfunction()
+```
+
+`set_compiler_flag`函数需要两个参数，`_result`(保存成功编译标志或为空字符串)和`_lang`(指定语言:C、C++或Fortran)。
 
 
 
+我们也能这样调用函数:
+
+```
+set_compiler_flag(working_compile_flag C REQUIRED "-Wall" "-warn all")
+```
+
+这里有五个调用参数，但是函数头只需要两个参数。这意味着`REQUIRED`、`-Wall`和`-warn all`将放在`${ARGN}`中。从`${ARGN}`开始，我们首先使用`foreach`构建一个标志列表。同时，从标志列表中过滤出`REQUIRED`，并使用它来设置`_flag_is_required`:
+
+```cmake
+# build a list of flags from the arguments
+set(_list_of_flags)
+# also figure out whether the function
+# is required to find a flag
+set(_flag_is_required FALSE)
+foreach(_arg IN ITEMS ${ARGN})
+  string(TOUPPER "${_arg}" _arg_uppercase)
+  if(_arg_uppercase STREQUAL "REQUIRED")
+      set(_flag_is_required TRUE)
+  else()
+      list(APPEND _list_of_flags "${_arg}")
+  endif()
+endforeach()
+```
+
+现在，我们将循环`${_list_of_flags}`，尝试每个标志，如果`_flag_works`被设置为`TRUE`，我们将`_flag_found`设置为`TRUE`，并中止进一步的搜索:
+
+```cmake
+set(_flag_found FALSE)
+# loop over all flags, try to find the first which works
+foreach(flag IN ITEMS ${_list_of_flags})
+
+  unset(_flag_works CACHE)
+  if(_lang STREQUAL "C")
+      check_c_compiler_flag("${flag}" _flag_works)
+  elseif(_lang STREQUAL "CXX")
+      check_cxx_compiler_flag("${flag}" _flag_works)
+  elseif(_lang STREQUAL "Fortran")
+      check_Fortran_compiler_flag("${flag}" _flag_works)
+  else()
+      message(FATAL_ERROR "Unknown language in set_compiler_flag: ${_lang}")
+  endif()
+  
+  # if the flag works, use it, and exit
+  # otherwise try next flag
+  if(_flag_works)
+      set(${_result} "${flag}" PARENT_SCOPE)
+      set(_flag_found TRUE)
+      break()
+  endif()
+endforeach()
+```
+
+`unset(_flag_works CACHE)`确保`check_*_compiler_flag`的结果，不会在使用`_flag_works result`变量时，使用的是缓存结果。
+
+如果找到了标志，并且`_flag_works`设置为`TRUE`，我们就将`_result`映射到的变量:
+
+```
+set(${_result} "${flag}" PARENT_SCOPE)
+```
+
+这需要使用`PARENT_SCOPE`来完成，因为我们正在修改一个变量，希望打印并在函数体外部使用该变量。请注意，如何使用`${_result}`语法解引用，从父范围传递的变量`_result`的值。不管函数的名称是什么，这对于确保工作标志被设置非常有必要。如果没有找到任何标志，并且该标志设置了`REQUIRED`，那我们将使用一条错误消息停止配置:
+
+```cmake
+# raise an error if no flag was found
+if(_flag_is_required AND NOT _flag_found)
+    message(FATAL_ERROR "None of the required flags were supported")
+endif()
+```
+
+**更多信息**
+
+我们也可以使用宏来完成这个任务，而使用函数可以对范围有更多的控制。我们知道函数只能可以修改结果变量。
+
+另外，需要在编译和链接时设置一些标志，方法是为`check_<lang>_compiler_flag`函数设置`CMAKE_REQUIRED_FLAGS`。如第5章，第7节中讨论的那样，Sanitizer就是这种情况。
+
+## 7.4 用指定参数定义函数或宏
+
+前面的示例中，我们研究了函数和宏，并使用了位置参数。这个示例中，我们将定义一个带有命名参数的函数。我们将复用第1节中的示例，使用函数和宏重用代码，而不是使用以下代码定义测试：`add_catch_test(short 1.5)`。
+
+我们将这样调用函数:
+
+```cmake
+add_catch_test(
+    NAME
+      short
+  LABELS
+      short
+      cpp_test
+  COST
+      1.5
+  )
+```
+
+**准备工作**
+
+我们使用第1节中的示例，使用函数和宏重用代码，并保持C++源代码不变，文件树保持不变：
+
+```
+.
+├── cmake
+│     └── testing.cmake
+├── CMakeLists.txt
+├── src
+│     ├── CMakeLists.txt
+│     ├── main.cpp
+│     ├── sum_integers.cpp
+│     └── sum_integers.hpp
+└── tests
+    ├── catch.hpp
+    ├── CMakeLists.txt
+    └── test.cpp
+```
+
+**具体实施**
+
+我们对CMake代码进行一些修改，如下所示:
+
+1. `CMakeLists.txt`顶部中只增加了一行，因为我们将包括位于`cmake`下面的模块:
+
+   ```cmake
+   list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+   ```
+
+2. 保持`src/CMakeLists.txt`。
+
+3. `tests/CMakeLists.txt`中，将`add_catch_test`函数定义移动到`cmake/testing.cmake`，并且定义两个测试:
+
+   ```cmake
+   add_executable(cpp_test test.cpp)
+   target_link_libraries(cpp_test sum_integers)
+   include(testing)
+   add_catch_test(
+     NAME
+         short
+     LABELS
+         short
+         cpp_test
+     COST
+         1.5
+     )
+   add_catch_test(
+     NAME
+         long
+     LABELS
+         long
+         cpp_test
+     COST
+         2.5
+     )
+   ```
+
+4. `add_catch_test`在`cmake/testing.cmake`中定义:
+
+   ```cmake
+   function(add_catch_test)
+     set(options)
+     set(oneValueArgs NAME COST)
+     set(multiValueArgs LABELS DEPENDS REFERENCE_FILES)
+     cmake_parse_arguments(add_catch_test
+       "${options}"
+       "${oneValueArgs}"
+       "${multiValueArgs}"
+       ${ARGN}
+       )
+     message(STATUS "defining a test ...")
+     message(STATUS " NAME: ${add_catch_test_NAME}")
+     message(STATUS " LABELS: ${add_catch_test_LABELS}")
+     message(STATUS " COST: ${add_catch_test_COST}")
+     message(STATUS " REFERENCE_FILES: ${add_catch_test_REFERENCE_FILES}")
+     
+     add_test(
+       NAME
+           ${add_catch_test_NAME}
+       COMMAND
+           $<TARGET_FILE:cpp_test>
+       [${add_catch_test_NAME}] --success --out
+           ${PROJECT_BINARY_DIR}/tests/${add_catch_test_NAME}.log --durations yes
+       WORKING_DIRECTORY
+           ${CMAKE_CURRENT_BINARY_DIR}
+       )
+       
+     set_tests_properties(${add_catch_test_NAME}
+       PROPERTIES
+           LABELS "${add_catch_test_LABELS}"
+       )
+       
+     if(add_catch_test_COST)
+       set_tests_properties(${add_catch_test_NAME}
+       PROPERTIES
+           COST ${add_catch_test_COST}
+       )
+     endif()
+     
+     if(add_catch_test_DEPENDS)
+       set_tests_properties(${add_catch_test_NAME}
+         PROPERTIES
+             DEPENDS ${add_catch_test_DEPENDS}
+         )
+     endif()
+     
+     if(add_catch_test_REFERENCE_FILES)
+       file(
+         COPY
+             ${add_catch_test_REFERENCE_FILES}
+         DESTINATION
+             ${CMAKE_CURRENT_BINARY_DIR}
+         )
+     endif()
+   endfunction()
+   ```
+
+5. 测试输出:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   
+   -- ...
+   -- defining a test ...
+   -- NAME: short
+   -- LABELS: short;cpp_test
+   -- COST: 1.5
+   -- REFERENCE_FILES:
+   -- defining a test ...
+   -- NAME: long
+   -- LABELS: long;cpp_test
+   -- COST: 2.5
+   -- REFERENCE_FILES:
+   -- ...
+   ```
+
+6. 最后，编译并测试：
+
+   ```sh
+    $ cmake --build .
+    $ ctest
+   ```
+
+**工作原理**
+
+示例的特点是其命名参数，因此我们可以将重点放在`cmake/testing.cmake`模块上。CMake提供`cmake_parse_arguments`命令，我们使用函数名(`add_catch_test`)选项(我们的例子中是`none`)、单值参数(`NAME`和`COST`)和多值参数(`LABELS`、`DEPENDS`和`REFERENCE_FILES`)调用该命令:
+
+```cmake
+function(add_catch_test)
+  set(options)
+  set(oneValueArgs NAME COST)  # 单值变量
+  set(multiValueArgs LABELS DEPENDS REFERENCE_FILES)  # 多值变量
+  cmake_parse_arguments(add_catch_test  # 解析出来的变量前缀
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+    )
+...
+endfunction()
+```
+
+`cmake_parse_arguments`命令解析选项和参数，并在例子中定义如下:
+
+- add_catch_test_NAME
+- add_catch_test_COST
+- add_catch_test_LABELS
+- add_catch_test_DEPENDS
+- add_catch_test_REFERENCE_FILES
+
+可以查询，并在函数中使用这些变量。这种方法使我们有机会用更健壮的接口和更具有可读的函数/宏调用，来实现函数和宏。
+
+**更多信息**
+
+选项关键字(本例中我们没有使用)由`cmake_parse_arguments`定义为`TRUE`或`FALSE`。`add_catch_test`函数，还提供`test`命令作为一个命名参数，为了更简洁的演示，我们省略了这个参数。
+
+**TIPS**:*`cmake_parse_arguments`命令在cmake 3.5的版本前中的`CMakeParseArguments.cmake`定义。因此，可以在`CMake/test.cmake`顶部的使用`include(CMakeParseArguments)`命令使此示例能与CMake早期版本一起工作。*
+
+## 7.5 重新定义函数和宏
+
+我们已经提到模块包含不应该用作函数调用，因为模块可能被包含多次。本示例中，我们将编写我们自己的“包含保护”机制，如果多次包含一个模块，将触发警告。内置的`include_guard`命令从3.10版开始可以使用，对于C/C++头文件，它的行为就像`#pragma`一样。对于当前版本的CMake，我们将演示如何重新定义函数和宏，并且展示如何检查CMake版本，对于低于3.10的版本，我们将使用定制的“包含保护”机制。
+
+**准备工作**
+
+这个例子中，我们将使用三个文件:
+
+```
+.
+├── cmake
+│     ├── custom.cmake
+│     └── include_guard.cmake
+└── CMakeLists.txt
+```
+
+`custom.cmake`模块包含以下代码:
+
+```cmake
+include_guard(GLOBAL)
+message(STATUS "custom.cmake is included and processed")
+```
+
+我们稍后会对`cmake/include_guard.cmake`进行讨论。
+
+**具体实施**
+
+我们对三个CMake文件的逐步分解:
+
+1. 示例中，我们不会编译任何代码，因此我们的语言要求是`NONE`:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   project(recipe-05 LANGUAGES NONE)
+   ```
+
+2. 定义一个`include_guard`宏，将其放在一个单独的模块中:
+
+   ```cmake
+   # (re)defines include_guard
+   include(cmake/include_guard.cmake)
+   ```
+
+3. `cmake/include_guard.cmake`文件包含以下内容(稍后将详细讨论):
+
+   ```cmake
+   macro(include_guard)
+     if (CMAKE_VERSION VERSION_LESS "3.10")
+       # for CMake below 3.10 we define our
+       # own include_guard(GLOBAL)
+       message(STATUS "calling our custom include_guard")
+       
+       # if this macro is called the first time
+       # we start with an empty list
+       if(NOT DEFINED included_modules)
+         set(included_modules)
+       endif()
+       
+       if ("${CMAKE_CURRENT_LIST_FILE}" IN_LIST included_modules)
+         message(WARNING "module ${CMAKE_CURRENT_LIST_FILE} processed more than once")
+       endif()
+       
+       list(APPEND included_modules ${CMAKE_CURRENT_LIST_FILE})
+       else()
+       # for CMake 3.10 or higher we augment
+       # the built-in include_guard
+       message(STATUS "calling the built-in include_guard")
+       
+       _include_guard(${ARGV})
+     endif()
+   endmacro()
+   ```
+
+4. 主CMakeLists.txt中，我们模拟了两次包含自定义模块的情况:
+
+   ```cmake
+   include(cmake/custom.cmake)
+   include(cmake/custom.cmake)
+   ```
+
+5. 最后，使用以下命令进行配置:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   ```
+
+6. 使用CMake 3.10及更高版本的结果如下:
+
+   ```sh
+   -- calling the built-in include_guard
+   -- custom.cmake is included and processed
+   -- calling the built-in include_guard
+   ```
+
+7. 使用CMake得到3.10以下的结果如下:
+
+   ```sh
+   - calling our custom include_guard
+   -- custom.cmake is included and processed
+   -- calling our custom include_guard
+   CMake Warning at cmake/include_guard.cmake:7 (message):
+   module /home/user/example/cmake/custom.cmake processed more than once
+   Call Stack (most recent call first):
+   cmake/custom.cmake:1 (include_guard)
+   CMakeLists.txt:12 (include)
+   ```
+
+**工作原理**
+
+`include_guard`宏包含两个分支，一个用于CMake低于3.10，另一个用于CMake高于3.10:
+
+```cmake
+macro(include_guard)
+  if (CMAKE_VERSION VERSION_LESS "3.10")
+      # ...
+  else()
+      # ...
+  endif()
+endmacro()
+```
+
+如果CMake版本低于3.10，进入第一个分支，并且内置的`include_guard`不可用，所以我们自定义了一个:
+
+```cmake
+message(STATUS "calling our custom include_guard")
+# if this macro is called the first time
+# we start with an empty list
+if(NOT DEFINED included_modules)
+    set(included_modules)
+endif()
+
+if ("${CMAKE_CURRENT_LIST_FILE}" IN_LIST included_modules)
+    message(WARNING "module ${CMAKE_CURRENT_LIST_FILE} processed more than once")
+endif()
+
+list(APPEND included_modules ${CMAKE_CURRENT_LIST_FILE})
+```
+
+如果第一次调用宏，则`included_modules`变量没有定义，因此我们将其设置为空列表。然后检查`${CMAKE_CURRENT_LIST_FILE}`是否是`included_modules`列表中的元素。如果是，则会发出警告；如果没有，我们将`${CMAKE_CURRENT_LIST_FILE}`追加到这个列表。CMake输出中，我们可以验证自定义模块的第二个包含确实会导致警告。
+
+CMake 3.10及更高版本的情况有所不同；在这种情况下，存在一个内置的`include_guard`，我们用自己的宏接收到参数并调用它:
+
+```cmake
+macro(include_guard)
+  if (CMAKE_VERSION VERSION_LESS "3.10")
+      # ...
+  else()
+      message(STATUS "calling the built-in include_guard")
+      
+      _include_guard(${ARGV})
+  endif()
+endmacro()
+```
+
+这里，`_include_guard(${ARGV})`指向内置的`include_guard`。本例中，使用自定义消息(“调用内置的`include_guard`”)进行了扩展。这种模式为我们提供了一种机制，来重新定义自己的或内置的函数和宏，这对于调试或记录日志来说非常有用。
+
+**NOTE**:*这种模式可能很有用，但是应该谨慎使用，因为CMake不会对重新定义的宏或函数进行警告。*
+
+## 7.6 使用废弃函数、宏和变量
+
+“废弃”是在不断发展的项目开发过程中一种重要机制，它向开发人员发出信号，表明将来某个函数、宏或变量将被删除或替换。在一段时间内，函数、宏或变量将继续可访问，但会发出警告，最终可能会上升为错误。
+
+**准备工作**
+
+我们将从以下CMake项目开始:
+
+```cmake
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+
+project(recipe-06 LANGUAGES NONE)
+
+macro(custom_include_guard)
+  if(NOT DEFINED included_modules)
+      set(included_modules)
+  endif()
+
+  if ("${CMAKE_CURRENT_LIST_FILE}" IN_LIST included_modules)
+      message(WARNING "module ${CMAKE_CURRENT_LIST_FILE} processed more than once")
+  endif()
+  
+  list(APPEND included_modules ${CMAKE_CURRENT_LIST_FILE})
+endmacro()
+
+include(cmake/custom.cmake)
+
+message(STATUS "list of all included modules: ${included_modules}")
+```
+
+这段代码定义了一个自定义的”包含保护”机制，包括一个自定义模块(与前一个示例中的模块相同)，并打印所有包含模块的列表。对于CMake 3.10或更高版本有内置的`include_guard`。但是，不能简单地删除`custom_include_guard`和`${included_modules}`，而是使用一个“废弃”警告来弃用宏和变量。某个时候，可以将该警告转换为`FATAL_ERROR`，使代码停止配置，并迫使开发人员对代码进行修改，切换到内置命令。
+
+**具体实施**
+
+“废弃”函数、宏和变量的方法如下:
+
+1. 首先，定义一个函数，我们将使用它来弃用一个变量:
+
+   ```cmake
+   function(deprecate_variable _variable _access)
+     if(_access STREQUAL "READ_ACCESS")
+         message(DEPRECATION "variable ${_variable} is deprecated")
+     endif()
+   endfunction()
+   ```
+
+2. 然后，如果CMake的版本大于3.9，我们重新定义`custom_include_guard`并将`variable_watch`附加到`included_modules`中:
+
+   ```cmake
+   if (CMAKE_VERSION VERSION_GREATER "3.9")
+     # deprecate custom_include_guard
+     macro(custom_include_guard)
+       message(DEPRECATION "custom_include_guard is deprecated - use built-in include_guard instead")
+       _custom_include_guard(${ARGV})
+     endmacro()
+     
+     # deprecate variable included_modules
+     variable_watch(included_modules deprecate_variable)
+   endif()
+   ```
+
+3. CMake3.10以下版本的项目会产生以下结果:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   
+   -- custom.cmake is included and processed
+   -- list of all included modules: /home/user/example/cmake/custom.cmake
+   ```
+
+4. CMake 3.10及以上将产生预期的“废弃”警告:
+
+   ```sh
+   CMake Deprecation Warning at CMakeLists.txt:26 (message):
+   custom_include_guard is deprecated - use built-in include_guard instead
+   Call Stack (most recent call first):
+   cmake/custom.cmake:1 (custom_include_guard)
+   CMakeLists.txt:34 (include)
+   -- custom.cmake is included and processed
+   CMake Deprecation Warning at CMakeLists.txt:19 (message):
+   variable included_modules is deprecated
+   Call Stack (most recent call first):
+   CMakeLists.txt:9999 (deprecate_variable)
+   CMakeLists.txt:36 (message)
+   -- list of all included modules: /home/user/example/cmake/custom.cmake
+   ```
+
+**工作原理**
+
+弃用函数或宏相当于重新定义它，如前面的示例所示，并使用`DEPRECATION`打印消息:
+
+```cmake
+macro(somemacro)
+  message(DEPRECATION "somemacro is deprecated")
+  _somemacro(${ARGV})
+endmacro()
+```
+
+可以通过定义以下变量来实现对变量的弃用:
+
+```cmake
+function(deprecate_variable _variable _access)
+  if(_access STREQUAL "READ_ACCESS")
+      message(DEPRECATION "variable ${_variable} is deprecated")
+  endif()
+endfunction()
+```
+
+然后，这个函数被添加到将要“废弃”的变量上:
+
+```cmake
+variable_watch(somevariable deprecate_variable)
+```
+
+如果在本例中`${included_modules}`是读取 (`READ_ACCESS`)，那么`deprecate_variable`函数将发出带有`DEPRECATION`的消息。
+
+## 7.7 add_subdirectory的限定范围
+
+本章剩下的示例中，我们将讨论构建项目的策略，并限制变量的范围和副作用，目的是降低代码的复杂性和简化项目的维护。这个示例中，我们将把一个项目分割成几个范围有限的CMakeLists.txt文件，这些文件将使用`add_subdirectory`命令进行处理。
+
+**准备工作**
+
+由于我们希望展示和讨论如何构造一个复杂的项目，所以需要一个比“hello world”项目更复杂的例子:
+
+- https://en.wikipedia.org/wiki/Cellular_automaton#Elementary_cellular_automata
+- http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
+
+我们的代码将能够计算任何256个基本细胞自动机，例如：规则90 (Wolfram代码):
+
+![img](https://static.sitestack.cn/projects/CMake-Cookbook/images/chapter7/7-7-1.png)
+
+我们示例代码项目的结构如下:
+
+```
+.
+├── CMakeLists.txt
+├── external
+│    ├── CMakeLists.txt
+│    ├── conversion.cpp
+│    ├── conversion.hpp
+│    └── README.md
+├── src
+│    ├── CMakeLists.txt
+│    ├── evolution
+│    │    ├── CMakeLists.txt
+│    │    ├── evolution.cpp
+│    │    └── evolution.hpp
+│    ├── initial
+│    │    ├── CMakeLists.txt
+│    │    ├── initial.cpp
+│    │    └── initial.hpp
+│    ├── io
+│    │    ├── CMakeLists.txt
+│    │    ├── io.cpp
+│    │    └── io.hpp
+│    ├── main.cpp
+│    └── parser
+│        ├── CMakeLists.txt
+│        ├── parser.cpp
+│        └── parser.hpp
+└── tests
+    ├── catch.hpp
+    ├── CMakeLists.txt
+    └── test.cpp
+```
+
+我们将代码分成许多库来模拟真实的大中型项目，可以将源代码组织到库中，然后将库链接到可执行文件中。
+
+主要功能在`src/main.cpp`中:
+
+```cpp
+#include "conversion.hpp"
+#include "evolution.hpp"
+#include "initial.hpp"
+#include "io.hpp"
+#include "parser.hpp"
+
+#include <iostream>
+
+int main(int argc, char *argv[]) {
+
+  // parse arguments
+  int length, num_steps, rule_decimal;
+  std::tie(length, num_steps, rule_decimal) = parse_arguments(argc, argv);
+
+  // print information about parameters
+  std::cout << "length: " << length << std::endl;
+  std::cout << "number of steps: " << num_steps << std::endl;
+  std::cout << "rule: " << rule_decimal << std::endl;
+
+  // obtain binary representation for the rule
+  std::string rule_binary = binary_representation(rule_decimal);
+
+  // create initial distribution
+  std::vector<int> row = initial_distribution(length);
+
+  // print initial configuration
+  print_row(row);
+
+  // the system evolves, print each step
+  for (int step = 0; step < num_steps; step++) {
+    row = evolve(row, rule_binary);
+    print_row(row);
+  }
+}
+
+```
+
+`external/conversion.cpp`文件包含要从十进制转换为二进制的代码。
+
+我们在这里模拟这段代码是由`src`外部的“外部”库提供的:
+
+```cpp
+#include "conversion.hpp"
+#include <bitset>
+#include <string>
+std::string binary_representation(const int decimal) {
+    return std::bitset<8>(decimal).to_string();
+}
+```
+
+`src/evolution/evolution.cpp`文件为一个时限传播系统:
+
+```cpp
+#include "evolution.hpp"
+
+#include <string>
+#include <vector>
+
+std::vector<int> evolve(const std::vector<int> row, const std::string rule_binary) {
+  std::vector<int> result;
+  
+  for (auto i = 0; i < row.size(); ++i) {
+    auto left = (i == 0 ? row.size() : i) - 1;
+    auto center = i;
+    auto right = (i + 1) % row.size();
+    auto ancestors = 4 * row[left] + 2 * row[center] + 1 * row[right];
+    ancestors = 7 - ancestors;
+    auto new_state = std::stoi(rule_binary.substr(ancestors, 1));
+    result.push_back(new_state);
+  }
+  return result;
+}
+```
+
+`src/initial/initial.cpp`文件，对出进行初始化:
+
+```cpp
+#include "initial.hpp"
+
+#include <vector>
+
+std::vector<int> initial_distribution(const int length) {
+
+  // we start with a vector which is zeroed out
+  std::vector<int> result(length, 0);
+  
+  // more or less in the middle we place a living cell
+  result[length / 2] = 1;
+  
+  return result;
+}
+```
+
+`src/io/io.cpp`文件包含一个函数输出打印行:
+
+```cpp
+#include "io.hpp"
+#include <algorithm>
+#include <iostream>
+#include <vector>
+void print_row(const std::vector<int> row) {
+  std::for_each(row.begin(), row.end(), [](int const &value) {
+      std::cout << (value == 1 ? '*' : ' ');
+  });
+  std::cout << std::endl;
+}
+```
+
+`src/parser/parser.cpp`文件解析命令行输入:
+
+```cpp
+#include "parser.hpp"
+
+#include <cassert>
+#include <string>
+#include <tuple>
+
+std::tuple<int, int, int> parse_arguments(int argc, char *argv[]) {
+  assert(argc == 4 && "program called with wrong number of arguments");
+  
+  auto length = std::stoi(argv[1]);
+  auto num_steps = std::stoi(argv[2]);
+  auto rule_decimal = std::stoi(argv[3]);
+  
+  return std::make_tuple(length, num_steps, rule_decimal);
+}
+```
+
+最后，`tests/test.cpp`包含两个使用Catch2库的单元测试:
+
+```cpp
+#include "evolution.hpp"
+// this tells catch to provide a main()
+// only do this in one cpp file
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+
+#include <string>
+#include <vector>
+
+TEST_CASE("Apply rule 90", "[rule-90]") {
+  std::vector<int> row = {0, 1, 0, 1, 0, 1, 0, 1, 0};
+  std::string rule = "01011010";
+  std::vector<int> expected_result = {1, 0, 0, 0, 0, 0, 0, 0, 1};
+  REQUIRE(evolve(row, rule) == expected_result);
+}
+
+TEST_CASE("Apply rule 222", "[rule-222]") {
+  std::vector<int> row = {0, 0, 0, 0, 1, 0, 0, 0, 0};
+  std::string rule = "11011110";
+  std::vector<int> expected_result = {0, 0, 0, 1, 1, 1, 0, 0, 0};
+  REQUIRE(evolve(row, rule) == expected_result);
+}
+```
+
+相应的头文件包含函数声明。有人可能会说，对于这个小代码示例，项目包含了太多子目录。请注意，这只是一个项目的简化示例，通常包含每个库的许多源文件，理想情况下，这些文件被放在到单独的目录中。
+
+**具体实施**
+
+让我们来详细解释一下CMake所需的功能:
+
+1. `CMakeLists.txt`顶部非常类似于第1节，代码重用与函数和宏:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   
+   project(recipe-07 LANGUAGES CXX)
+   
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   
+   include(GNUInstallDirs)
+   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+   ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+   ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+   ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+   
+   # defines targets and sources
+   add_subdirectory(src)
+   
+   # contains an "external" library we will link to
+   add_subdirectory(external)
+   
+   # enable testing and define tests
+   enable_testing()
+   add_subdirectory(tests)
+   ```
+
+2. 目标和源在`src/CMakeLists.txt`中定义(转换目标除外):
+
+   ```cmake
+   add_executable(automata main.cpp)
+   
+   add_subdirectory(evolution)
+   add_subdirectory(initial)
+   add_subdirectory(io)
+   add_subdirectory(parser)
+   
+   target_link_libraries(automata
+     PRIVATE
+       conversion
+       evolution
+       initial
+       io
+       parser
+     )
+   ```
+
+3. 转换库在`external/CMakeLists.txt`中定义:
+
+   ```cmake
+   add_library(conversion "")
+   
+   target_sources(conversion
+     PRIVATE
+       ${CMAKE_CURRENT_LIST_DIR}/conversion.cpp
+     PUBLIC
+       ${CMAKE_CURRENT_LIST_DIR}/conversion.hpp
+     )
+     
+   target_include_directories(conversion
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}
+     )
+   ```
+
+4. `src/CMakeLists.txt`文件添加了更多的子目录，这些子目录又包含`CMakeLists.txt`文件。`src/evolution/CMakeLists.txt`包含以下内容:
+
+   ```cmake
+   add_library(evolution "")
+   
+   target_sources(evolution
+     PRIVATE
+         evolution.cpp
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}/evolution.hpp
+     )
+     
+   target_include_directories(evolution
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}
+     )
+   ```
+
+5. 单元测试在`tests/CMakeLists.txt`中注册:
+
+   ```cmake
+   add_executable(cpp_test test.cpp)
+   
+   target_link_libraries(cpp_test evolution)
+   
+   add_test(
+     NAME
+         test_evolution
+     COMMAND
+         $<TARGET_FILE:cpp_test>
+     )
+   ```
+
+6. 配置和构建项目产生以下输出:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   $ cmake --build .
+   
+   Scanning dependencies of target conversion
+   [ 7%] Building CXX object external/CMakeFiles/conversion.dir/conversion.cpp.o
+   [ 14%] Linking CXX static library ../lib64/libconversion.a
+   [ 14%] Built target conversion
+   Scanning dependencies of target evolution
+   [ 21%] Building CXX object src/evolution/CMakeFiles/evolution.dir/evolution.cpp.o
+   [ 28%] Linking CXX static library ../../lib64/libevolution.a
+   [ 28%] Built target evolution
+   Scanning dependencies of target initial
+   [ 35%] Building CXX object src/initial/CMakeFiles/initial.dir/initial.cpp.o
+   [ 42%] Linking CXX static library ../../lib64/libinitial.a
+   [ 42%] Built target initial
+   Scanning dependencies of target io
+   [ 50%] Building CXX object src/io/CMakeFiles/io.dir/io.cpp.o
+   [ 57%] Linking CXX static library ../../lib64/libio.a
+   [ 57%] Built target io
+   Scanning dependencies of target parser
+   [ 64%] Building CXX object src/parser/CMakeFiles/parser.dir/parser.cpp.o
+   [ 71%] Linking CXX static library ../../lib64/libparser.a
+   [ 71%] Built target parser
+   Scanning dependencies of target automata
+   [ 78%] Building CXX object src/CMakeFiles/automata.dir/main.cpp.o
+   [ 85%] Linking CXX executable ../bin/automata
+   [ 85%] Built target automata
+   Scanning dependencies of target cpp_test
+   [ 92%] Building CXX object tests/CMakeFiles/cpp_test.dir/test.cpp.o
+   [100%] Linking CXX executable ../bin/cpp_test
+   [100%] Built target cpp_test
+   ```
+
+7. 最后，运行单元测试:
+
+   ```sh
+   $ ctest
+   
+   Running tests...
+   Start 1: test_evolution
+   1/1 Test #1: test_evolution ................... Passed 0.00 sec
+   100% tests passed, 0 tests failed out of 1
+   ```
+
+**工作原理**
+
+我们可以将所有代码放到一个源文件中。不过，每次编辑都需要重新编译。将源文件分割成更小、更易于管理的单元是有意义的。可以将所有源代码都编译成一个库或可执行文件。实际上，项目更喜欢将源代码编译分成更小的、定义良好的库。这样做既是为了本地化和简化依赖项，也是为了简化代码维护。这意味着如在这里所做的那样，由许多库构建一个项目是一种常见的情况。
+
+为了讨论CMake结构，我们可以从定义每个库的单个CMakeLists.txt文件开始，自底向上进行，例如`src/evolution/CMakeLists.txt`:
+
+```cmake
+add_library(evolution "")
+
+target_sources(evolution
+  PRIVATE
+      evolution.cpp
+  PUBLIC
+      ${CMAKE_CURRENT_LIST_DIR}/evolution.hpp
+  )
+  
+target_include_directories(evolution
+  PUBLIC
+      ${CMAKE_CURRENT_LIST_DIR}
+  )
+```
+
+这些单独的`CMakeLists.txt`文件定义了库。本例中，我们首先使用`add_library`定义库名，然后定义它的源和包含目录，以及它们的目标可见性：实现文件(`evolution.cpp`:`PRIVATE`)，而接口头文件`evolution.hpp`定义为`PUBLIC`，因为我们将在`main.cpp`和`test.cpp`中访问它。定义尽可能接近代码目标的好处是，对于该库的修改，只需要变更该目录中的文件即可；换句话说，也就是库依赖项被封装。
+
+向上移动一层，库在`src/CMakeLists.txt`中封装:
+
+```cmake
+add_executable(automata main.cpp)
+
+add_subdirectory(evolution)
+add_subdirectory(initial)
+add_subdirectory(io)
+add_subdirectory(parser)
+
+target_link_libraries(automata
+  PRIVATE
+    conversion
+    evolution
+    initial
+    io
+    parser
+  )
+```
+
+文件在主`CMakeLists.txt`中被引用。这意味着使用`CMakeLists.txt`文件，构建我们的项目。这种方法对于许多项目来说是可用的，并且它可以扩展到更大型的项目，而不需要在目录间的全局变量中包含源文件列表。`add_subdirectory`方法的另一个好处是它隔离了作用范围，因为子目录中定义的变量在父范围中不能访问。
+
+**更多信息**
+
+使用`add_subdirectory`调用树构建项目的一个限制是，CMake不允许将`target_link_libraries`与定义在当前目录范围之外的目标一起使用。对于本示例来说，这不是问题。在下一个示例中，我们将演示另一种方法，我们不使用`add_subdirectory`，而是使用`module include`来组装不同的`CMakeLists.txt`文件，它允许我们链接到当前目录之外定义的目标。
+
+CMake可以使用Graphviz图形可视化软件([http://www.graphviz.org](http://www.graphviz.org/) )生成项目的依赖关系图:
+
+```sh
+$ cd build
+$ cmake --graphviz=example.dot ..
+$ dot -T png example.dot -o example.png
+```
+
+生成的图表将显示不同目录下的目标之间的依赖关系:
+
+![img](https://static.sitestack.cn/projects/CMake-Cookbook/images/chapter7/7-7-2.png)
+
+本书中，我们一直在构建源代码之外的代码，以保持源代码树和构建树是分开的。这是推荐的方式，允许我们使用相同的源代码配置不同的构建(顺序的或并行的，Debug或Release)，而不需要复制源代码，也不需要在源代码树中生成目标文件。使用以下代码片段，可以保护您的项目免受内部构建的影响:
+
+```cmake
+if(${PROJECT_SOURCE_DIR} STREQUAL ${PROJECT_BINARY_DIR})
+    message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
+endif()
+```
+
+认识到构建结构与源结构类似很有用。示例中，将`message`打印输出插入到`src/CMakeLists.txt`中:
+
+```cmake
+message("current binary dir is ${CMAKE_CURRENT_BINARY_DIR}")  # current binary dir is /cygdrive/d/Program Files/JetBrains/CppProject/cmake-cookbook-master/chapter-07/recipe-07/cxx-example/cmake-build-debug/src
+```
+
+在`build`下构建项目时，我们将看到`build/src`的打印输出。
+
+在CMake的3.12版本中，`OBJECT`库是组织大型项目的另一种可行方法。对我们的示例的惟一修改是在库的`CMakeLists.tx`t中。源文件将被编译成目标文件：既不存档到静态库中，也不链接到动态库中。例如：
+
+```cmake
+add_library(io OBJECT "")
+
+target_sources(io
+  PRIVATE
+      io.cpp
+  PUBLIC
+      ${CMAKE_CURRENT_LIST_DIR}/io.hpp
+  )
+  
+target_include_directories(io
+  PUBLIC
+      ${CMAKE_CURRENT_LIST_DIR}
+  )
+```
+
+主`CMakeLists.txt`保持不变:`automata`可执行目标将这些目标文件链接到最终的可执行文件。使用也有要求需求，例如：在对象库上设置的目录、编译标志和链接库，将被正确地继承。有关CMake 3.12中引入的对象库新特性的更多细节，请参考官方文档: https://cmake.org/cmake/help/v3.12/manual/cmake-buildsystem.7.html#object-libraries
+
+-------------------
+
+本地试验，在根目录里的CMakeLists.txt中增加如下命令，可以make时自动生成example.dot及example.png：<https://stackoverflow.com/questions/42577241/cmake-graphviz-auto-generated/42577803>
+
+```cmake
+add_custom_target(graphviz ALL
+        COMMAND "${CMAKE_COMMAND}" "--graphviz=example.dot" ${CMAKE_CURRENT_LIST_DIR}
+        COMMAND dot -T png example.dot -o example.png
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+```
+
+----------------------------
+
+## 7.8 使用target_sources避免全局变量
+
+本示例中，我们将讨论前一个示例的另一种方法，并不使用`add_subdirectory`的情况下，使用`module include`组装不同的CMakeLists.txt文件。这种方法的灵感来自https://crascit.com/2016/01/31/enhance-sours-file-handling-with-target_sources/ ，其允许我们使用`target_link_libraries`链接到当前目录之外定义的目标。
+
+**具体实施**
+
+1. 主`CMakeLists.txt`包含以下内容:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   
+   project(recipe-08 LANGUAGES CXX)
+   
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   
+   include(GNUInstallDirs)
+   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+   ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+   ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+   ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+   
+   # defines targets and sources
+   include(src/CMakeLists.txt)
+   include(external/CMakeLists.txt)
+   
+   enable_testing()
+   add_subdirectory(tests)  # 如果这里也改成include(tests/CMakeLists.txt)，则tests/CMakeLists.txt文件中的test.cpp需要配置绝对路径为：add_executable(cpp_test ${CMAKE_CURRENT_LIST_DIR}/test.cpp)。否则只写成add_executable(cpp_test test.cpp)，则报错找不到test.cpp
+   ```
+
+2. 与前一个示例相比，`external/CMakeLists.txt`文件没有变化。
+
+3. `src/CMakeLists.txt`文件定义了两个库(automaton和evolution):
+
+   ```cmake
+   add_library(automaton "")  # 库在src的CMakeLists中定义，库包含的源文件在子目录中initial/io/parser中定义
+   add_library(evolution "")  # 库在src的CMakeLists中定义，库包含的源文件在子目录中evolution中定义
+   
+   include(${CMAKE_CURRENT_LIST_DIR}/evolution/CMakeLists.txt)
+   include(${CMAKE_CURRENT_LIST_DIR}/initial/CMakeLists.txt)
+   include(${CMAKE_CURRENT_LIST_DIR}/io/CMakeLists.txt)
+   include(${CMAKE_CURRENT_LIST_DIR}/parser/CMakeLists.txt)
+   
+   add_executable(automata "")
+   
+   target_sources(automata
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+     )
+     
+   target_link_libraries(automata
+     PRIVATE
+       automaton
+       conversion
+     )
+   ```
+
+4. `src/evolution/CMakeLists.txt`文件包含以下内容:
+
+   ```cmake
+   target_sources(automaton
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/evolution.cpp
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}/evolution.hpp
+     )
+     
+   target_include_directories(automaton
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}
+     )
+     
+   target_sources(evolution
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/evolution.cpp
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}/evolution.hpp
+     )
+     
+   target_include_directories(evolution
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}
+     )
+   ```
+
+5. 其余`CMakeLists.txt`文件和`src/initial/CMakeLists.txt`相同:
+
+   ```cmake
+   target_sources(automaton
+     PRIVATE
+         ${CMAKE_CURRENT_LIST_DIR}/initial.cpp
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}/initial.hpp
+     )
+     
+   target_include_directories(automaton
+     PUBLIC
+         ${CMAKE_CURRENT_LIST_DIR}
+     )
+   ```
+
+6. 配置、构建和测试的结果与前面的方法相同:
+
+   ```sh
+   $ mkdir -p build
+   $ cd build
+   $ cmake ..
+   $ cmake --build build
+   $ ctest
+   
+   Running tests...
+   Start 1: test_evolution
+   1/1 Test #1: test_evolution ................... Passed 0.00 sec
+   100% tests passed, 0 tests failed out of 1
+   ```
+
+**工作原理**
+
+与之前的示例不同，我们定义了三个库:
+
+- conversion(在external定义)
+- automaton(包含除转换之外的所有源)
+- evolution(在`src/evolution`中定义，并通过`cpp_test`链接)
+
+本例中，通过使用`include()`引用`CMakeLists.txt`文件，我们在父范围内，仍然能保持所有目标可用:
+
+```cmake
+include(src/CMakeLists.txt)
+include(external/CMakeLists.txt)
+```
+
+我们可以构建一个包含树，记住当进入子目录(`src/CMakeLists.txt`)时，我们需要使用相对于父范围的路径:
+
+```cmake
+include(${CMAKE_CURRENT_LIST_DIR}/evolution/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/initial/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/io/CMakeLists.txt)
+include(${CMAKE_CURRENT_LIST_DIR}/parser/CMakeLists.txt)
+```
+
+这样，我们就可以定义并链接到通过`include()`语句访问文件树中任何位置的目标。但是，我们应该选择在对维护人员和代码贡献者容易看到的地方，去定义它们。
+
+**更多信息**
+
+我们可以再次使用CMake和Graphviz (http://www.graphviz.org/)生成这个项目的依赖关系图:
+
+```sh
+$ cd build
+$ cmake --graphviz=example.dot ..
+$ dot -T png example.dot -o example.png
+```
+
+对于当前设置，我们得到如下依赖关系图:
+
+![7.8 使用target_sources避免全局变量 - 图1](https://static.sitestack.cn/projects/CMake-Cookbook/images/chapter7/7-8-1.png)
+
+## 7.9 组织Fortran项目
+
+该节没看
+
+# 第8章 超级构建模式
+
+## [8.1 使用超级构建模式](https://www.bookstack.cn/read/CMake-Cookbook/content-chapter8-8.1-chinese.md)
+
+本示例通过一个简单示例，介绍超级构建模式。我们将展示如何使用`ExternalProject_Add`命令来构建一个的“Hello, World”程序。
+
+**准备工作**
+
+本示例将从以下源代码(`Hello-World.cpp`)构建“Hello, World”可执行文件:
+
+```cpp
+#include <cstdlib>
+#include <iostream>
+#include <string>
+
+std::string say_hello() { return std::string("Hello, CMake superbuild world!"); }
+
+int main()
+{
+  std::cout << say_hello() << std::endl;
+  return EXIT_SUCCESS;
+}
+```
+
+项目结构如下:
+
+```
+.
+├── CMakeLists.txt
+└── src
+      ├── CMakeLists.txt
+      └── hello-world.cpp
+```
+
+**具体实施**
+
+让我们看一下根目录下的CMakeLists.txt：
+
+1. 声明一个C++11项目，以及CMake最低版本:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   
+   project(recipe-01 LANGUAGES CXX)
+   
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 为当前目录和底层目录设置`EP_BASE`目录属性:
+
+   ```cmake
+   set_property(DIRECTORY PROPERTY EP_BASE ${CMAKE_BINARY_DIR}/subprojects)
+   ```
+
+3. 包括`ExternalProject.cmake`标准模块。该模块提供了`ExternalProject_Add`函数:
+
+   ```cmake
+   include(ExternalProject)
+   ```
+
+4. “Hello, World”源代码通过调用`ExternalProject_Add`函数作为外部项目添加的。外部项目的名称为`recipe-01_core`:
+
+   ```cmake
+   ExternalProject_Add(${PROJECT_NAME}_core
+   ```
+
+5. 使用`SOURCE_DIR`选项为外部项目设置源目录:
+
+   ```cmake
+   SOURCE_DIR${CMAKE_CURRENT_LIST_DIR}/src
+   ```
+
+6. `src`子目录包含一个完整的CMake项目。为了配置和构建它，通过`CMAKE_ARGS`选项将适当的CMake选项传递给外部项目。例子中，只需要通过C++编译器和C++标准的要求即可:
+
+   ```cmake
+   CMAKE_ARGS
+     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+     -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+     -DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
+     -DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
+   ```
+
+7. 我们还设置了C++编译器标志。这些通过使用`CMAKE_CACHE_ARGS`选项传递到`ExternalProject_Add`中:
+
+   ```cmake
+   CMAKE_CACHE_ARGS
+       -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+   ```
+
+8. 我们配置外部项目，使它进行构建:
+
+   ```cmake
+   BUILD_ALWAYS    1
+   ```
+
+9. 安装步骤不会执行任何操作(我们将在第4节中重新讨论安装，在第10章中安装超级构建，并编写安装程序):
+
+   ```cmake
+   INSTALL_COMMAND
+       ""
+   )
+   ```
+
+现在，我们来看看`src/CMakeLists.txt`。由于我们将“Hello, World”源文件作为一个外部项目添加，这是一个独立项目的`CMakeLists.txt`文件:
+
+1. 这里声明CMake版本最低要求:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+   ```
+
+2. 声明一个C++项目：
+
+   ```cmake
+   project(recipe-01_core LANGUAGES CXX)
+   ```
+
+3. 最终，使用`hello-world.cpp`源码文件生成可执行目标`hello-world`：
+
+   ```cmake
+   add_executable(hello-world hello-world.cpp)
+   ```
+
+配置构建项目：
+
+```sh
+$ mkdir -p build
+$ cmake ..
+$ cmake --build .
+```
+
+构建目录的结构稍微复杂一些，`subprojects`文件夹的内容如下:
+
+```
+build/subprojects/
+├── Build
+│    └── recipe-01_core
+│        ├── CMakeCache.txt
+│        ├── CMakeFiles
+│        ├── cmake_install.cmake
+│        ├── hello-world
+│        └── Makefile
+├── Download
+│    └── recipe-01_core
+├── Install
+│    └── recipe-01_core
+├── Stamp
+│    └── recipe-01_core
+│        ├── recipe-01_core-configure
+│        ├── recipe-01_core-done
+│        ├── recipe-01_core-download
+│        ├── recipe-01_core-install
+│        ├── recipe-01_core-mkdir
+│        ├── recipe-01_core-patch
+│        └── recipe-01_core-update
+└── tmp
+    └── recipe-01_core
+        ├── recipe-01_core-cache-.cmake
+        ├── recipe-01_core-cfgcmd.txt
+        └── recipe-01_core-cfgcmd.txt.in
+```
+
+`recipe-01_core`已经构建到`build/subprojects`子目录中，称为`Build/recipe-01_core`(这是我们设置的`EP_BASE`)。
+
+`hello-world`可执行文件在`Build/recipe-01_core`下创建，其他子文件夹`tmp/recipe-01_core`和`Stamp/recipe-01_core`包含临时文件，比如：CMake缓存脚本`recipe-01_core-cache-.cmake`和已执行的外部构建项目的各步骤的时间戳文件。
+
+**工作原理**
+
+`ExternalProject_Add`命令可用于添加第三方源。然而，第一个例子展示了，如何将自己的项目，分为不同CMake项目的集合管理。本例中，主`CMakeLists.txt`和子`CMakeLists.txt`都声明了一个CMake项目，它们都使用了`project`命令。
+
+`ExternalProject_Add`有许多选项，可用于外部项目的配置和编译等所有方面。这些选择可以分为以下几类:
+
+- **Directory**：它们用于调优源码的结构，并为外部项目构建目录。本例中，我们使用`SOURCE_DIR`选项让CMake知道源文件在`${CMAKE_CURRENT_LIST_DIR}/src`文件夹中。用于构建项目和存储临时文件的目录，也可以在此类选项或目录属性中指定。通过设置`EP_BASE`目录属性，CMake将按照以下布局为各个子项目设置所有目录:
+
+  ```
+  TMP_DIR = <EP_BASE>/tmp/<name>
+  STAMP_DIR = <EP_BASE>/Stamp/<name>
+  DOWNLOAD_DIR = <EP_BASE>/Download/<name>
+  SOURCE_DIR = <EP_BASE>/Source/<name>
+  BINARY_DIR = <EP_BASE>/Build/<name>
+  INSTALL_DIR = <EP_BASE>/Install/<name>
+  ```
+
+- **Download**：外部项目的代码可能需要从在线存储库或资源处下载。
+
+- **Update**和**Patch**：可用于定义如何更新外部项目的源代码或如何应用补丁。
+
+- **Configure**：默认情况下，CMake会假定外部项目是使用CMake配置的。如下面的示例所示，我们并不局限于这种情况。如果外部项目是CMake项目，`ExternalProject_Add`将调用CMake可执行文件，并传递选项。对于当前的示例，我们通过`CMAKE_ARGS`和`CMAKE_CACHE_ARGS`选项传递配置参数。前者作为命令行参数直接传递，而后者通过CMake脚本文件传递。示例中，脚本文件位于`build/subprojects/tmp/recipe-01_core/recipe-01_core- cache-.cmake`。然后，配置如以下所示:
+
+  ```sh
+  $ cmake -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_STANDARD=11
+  -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_STANDARD_REQUIRED=ON
+  -C/home/roberto/Workspace/robertodr/cmake-cookbook/chapter-08/recipe-01/cxx-example/build/subprojects/tmp/recipe-01_core/recipe-01_core-cache-.cmake "-GUnix Makefiles" /home/roberto/Workspace/robertodr/cmake-cookbook/chapter-08/recipe-01/cxx-example/src
+  ```
+
+- **Build**：可用于调整外部项目的实际编译。我们的示例使用`BUILD_ALWAYS`选项确保外部项目总会重新构建。
+
+- **Install**：这些选项用于配置应该如何安装外部项目。我们的示例将`INSTALL_COMMAND`保留为空，我们将在第10章(编写安装程序)中更详细地讨论与CMake的安装。
+
+- **Test**：为基于源代码构建的软件运行测试总是不错的想法。`ExternalProject_Add`的这类选项可以用于此目的。我们的示例没有使用这些选项，因为“Hello, World”示例没有任何测试，但是在第5节中，您将管理超级构建的项目，届时将触发一个测试步骤。
+
+`ExternalProject.cmake`定义了`ExternalProject_Get_Property`命令，该命令对于检索外部项目的属性非常有用。外部项目的属性是在首次调用`ExternalProject_Add`命令时设置的。例如，在配置`recipe-01_core`时，检索要传递给CMake的参数可以通过以下方法实现:
+
+```cmake
+ExternalProject_Get_Property(${PROJECT_NAME}_core CMAKE_ARGS)
+message(STATUS "CMAKE_ARGS of ${PROJECT_NAME}_core ${CMAKE_ARGS}")  # -- CMAKE_ARGS of recipe-01_core -DCMAKE_CXX_COMPILER=/usr/bin/c++.exe;-DCMAKE_CXX_STANDARD=11;-DCMAKE_CXX_EXTENSIONS=OFF;-DCMAKE_CXX_STANDARD_REQUIRED=ON
+```
+
+**NOTE**:*`ExternalProject_Add`的完整选项列表可以在CMake文档中找到:https://cmake.org/cmake/help/v3.5/module/ExternalProject.html#command:ExternalProject_Add*
+
+**更多信息**
+
+下面的示例中，我们将详细讨论`ExternalProject_Add`命令的灵活性。然而，有时我们希望使用的外部项目可能需要执行额外的步骤。由于这个原因，`ExternalProject.cmake`模块定义了以下附加命令:
+
+1. `ExternalProject_Add_Step`: 当添加了外部项目，此命令允许将附加的命令作为自定义步骤锁定在其上。参见:https://cmake.org/cmake/help/v3.5/module/externalproject.htm#command:externalproject_add_step
+2. `ExternalProject_Add_StepTargets`:允许将外部项目中的步骤(例如：构建和测试步骤)定义为单独的目标。这意味着可以从完整的外部项目中单独触发这些步骤，并允许对项目中的复杂依赖项，进行细粒度控制。参见:https://cmake.org/cmake/help/v3.5/module/ExternalProject.htm#command:externalproject_add_steptargets
+3. `ExternalProject_Add_StepDependencies`:外部项目的步骤有时可能依赖于外部目标，而这个命令的设计目的就是处理这些情况。参见:https://cmake.org/cmake/help/v3.5/module/ExternalProject.html#command:externalproject_add_stepdependencies
+
+## 8.2 使用超级构建管理依赖项:Ⅰ.Boost库
+
+## 8.3 使用超级构建管理依赖项:Ⅱ.FFTW库
+
+## 8.4 使用超级构建管理依赖项:Ⅲ.Google Test框架
+
+## 8.5 使用超级构建支持项目
+
+`ExternalProject`和`FetchContent`是CMake库中两个非常强大的工具。经过前面的示例，我们应该相信超级构建方法，在管理复杂依赖关系的项目时是多么有用。目前为止，我们已经展示了如何使用`ExternalProject`来处理以下问题:
+
+- 存储在源树中的源
+- 从在线服务器上，检索/获取可用的存档资源
+
+前面的示例展示了，如何使用`FetchContent`处理开源Git存储库中可用的依赖项。本示例将展示，如何使用`ExternalProject`达到同样的效果。最后，将介绍一个示例，该示例将在第10章第4节中重用。
+
+**准备工作**
+
+这个超级构建的源代码树现在应该很熟悉了:
+
+```
+.
+├── CMakeLists.txt
+├── external
+│    └── upstream
+│        ├── CMakeLists.txt
+│        └── message
+│            └── CMakeLists.txt
+└── src
+    ├── CMakeLists.txt
+    └── use_message.cpp
+```
+
+根目录有一个`CMakeLists.txt`，我们知道它会配合超级构建。子目录`src`和`external`中是我们自己的源代码，CMake指令需要满足对消息库的依赖，我们将在本例中构建消息库。
+
+**具体实施**
+
+目前为止，建立超级构建的过程应该已经很熟悉了。让我们再次看看必要的步骤，从根目录的`CMakeLists.txt`开始:
+
+1. 声明一个C++11项目，并对项目构建类型的默认值进行设置。
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+   
+   project(recipe-05 LANGUAGES CXX)
+   
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   
+   if(NOT DEFINED CMAKE_BUILD_TYPE OR "${CMAKE_BUILD_TYPE}" STREQUAL "")
+       set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+   endif()
+   
+   message(STATUS "Build type set to ${CMAKE_BUILD_TYPE}")
+   ```
+
+2. 设置`EP_BASE`目录属性。这将固定`ExternalProject`管理所有子项目的布局:
+
+   ```cmake
+   set_property(DIRECTORY PROPERTY EP_BASE ${CMAKE_BINARY_DIR}/subprojects)
+   ```
+
+3. 我们设置了`STAGED_INSTALL_PREFIX`。与之前一样，这个位置将作为依赖项的构建树中的安装目录:
+
+   ```cmake
+   set(STAGED_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/stage)
+   message(STATUS "${PROJECT_NAME} staged install: ${STAGED_INSTALL_PREFIX}")
+   ```
+
+4. 将`external/upstream`作为子目录添加：
+
+   ```cmake
+   add_subdirectory(external/upstream)
+   ```
+
+5. 添加`ExternalProject_Add`，这样我们的项目也将由超级构建管理:
+
+   ```cmake
+   include(ExternalProject)
+   ExternalProject_Add(${PROJECT_NAME}_core
+     DEPENDS
+         message_external
+     SOURCE_DIR
+         ${CMAKE_CURRENT_SOURCE_DIR}/src
+     CMAKE_ARGS
+       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+       -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+       -DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
+       -DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
+       -Dmessage_DIR=${message_DIR}
+       CMAKE_CACHE_ARGS
+       -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+       -DCMAKE_PREFIX_PATH:PATH=${CMAKE_PREFIX_PATH}
+     BUILD_ALWAYS
+         1
+     INSTALL_COMMAND
+         ""
+     )
+   ```
+
+`external/upstream`的`CMakeLists.txt`中只包含一条命令:
+
+```cmake
+add_subdirectory(message)
+```
+
+跳转到`message`文件夹，我们会看到对消息库的依赖的常用命令:
+
+1. 首先，调用`find_package`找到一个合适版本的库:
+
+   ```cmake
+   find_package(message 1 CONFIG QUIET)
+   ```
+
+2. 如果找到，会通知用户，并添加一个虚拟`INTERFACE`库:
+
+   ```cmake
+   get_property(_loc TARGET message::message-shared PROPERTY LOCATION)
+   message(STATUS "Found message: ${_loc} (found version ${message_VERSION})")
+   add_library(message_external INTERFACE) # dummy
+   ```
+
+3. 如果没有找到，再次通知用户并继续使用`ExternalProject_Add`:
+
+   ```cmake
+   message(STATUS "Suitable message could not be located, Building message instead.")
+   ```
+
+4. 该项目托管在一个公共Git库中，使用`GIT_TAG`选项指定下载哪个分支。和之前一样，将`UPDATE_COMMAND`选项置为空:
+
+   ```cmake
+   include(ExternalProject)
+   ExternalProject_Add(message_external
+     GIT_REPOSITORY
+         https://github.com/dev-cafe/message.git
+     GIT_TAG
+         master
+     UPDATE_COMMAND
+         ""
+   ```
+
+5. 外部项目使用CMake配置和构建，传递必要的构建选项:
+
+   ```cmake
+     CMAKE_ARGS
+       -DCMAKE_INSTALL_PREFIX=${STAGED_INSTALL_PREFIX}
+       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+       -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+       -DCMAKE_CXX_EXTENSIONS=${CMAKE_CXX_EXTENSIONS}
+       -DCMAKE_CXX_STANDARD_REQUIRED=${CMAKE_CXX_STANDARD_REQUIRED}
+     CMAKE_CACHE_ARGS
+         -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}
+   ```
+
+6. 项目安装后进行测试:
+
+   ```cmake
+       TEST_AFTER_INSTALL
+           1
+   ```
+
+7. 我们不希望看到下载进度，也不希望在屏幕上报告配置、构建和安装信息，所以选择关闭`ExternalProject_Add`:
+
+   ```cmake
+     DOWNLOAD_NO_PROGRESS
+         1
+     LOG_CONFIGURE
+         1
+     LOG_BUILD
+         1
+     LOG_INSTALL
+         1
+   )
+   ```
+
+8. 为了确保子项目在超级构建的其余部分中是可见的，我们设置了`message_DIR`目录:
+
+   ```cmake
+   if(WIN32 AND NOT CYGWIN)
+       set(DEF_message_DIR ${STAGED_INSTALL_PREFIX}/CMake)
+   else()
+       set(DEF_message_DIR ${STAGED_INSTALL_PREFIX}/share/cmake/message)
+   endif()
+   
+   file(TO_NATIVE_PATH "${DEF_message_DIR}" DEF_message_DIR)
+   set(message_DIR ${DEF_message_DIR}
+   CACHE PATH "Path to internally built messageConfig.cmake" FORCE)
+   ```
+
+最后，来看一下`src`目录上的`CMakeLists.txt`：
+
+1. 同样，声明一个C++11项目:
+
+   ```cmake
+   cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+   project(recipe-05_core
+   LANGUAGES CXX
+   )
+   set(CMAKE_CXX_STANDARD 11)
+   set(CMAKE_CXX_EXTENSIONS OFF)
+   set(CMAKE_CXX_STANDARD_REQUIRED ON)
+   ```
+
+2. 项目需要消息库:
+
+   ```cmake
+   find_package(message 1 CONFIG REQUIRED)
+   get_property(_loc TARGET message::message-shared PROPERTY LOCATION)
+   message(STATUS "Found message: ${_loc} (found version ${message_VERSION})")
+   ```
+
+3. 声明一个可执行目标，并将其链接到消息动态库:
+
+   ```cmake
+   add_executable(use_message use_message.cpp)
+   
+   target_link_libraries(use_message
+     PUBLIC
+         message::message-shared
+     )
+   ```
+
+**工作原理**
+
+示例展示了`ExternalProject_Add`的一些新选项:
+
+1. **GIT_REPOSITORY**:这可以用来指定包含依赖项源的存储库的URL。CMake还可以使用其他版本控制系统，比如CVS (CVS_REPOSITORY)、SVN (SVN_REPOSITORY)或Mercurial (HG_REPOSITORY)。
+2. **GIT_TAG**:默认情况下，CMake将检出给定存储库的默认分支。然而，最好依赖于一个稳定的版本。这可以通过这个选项指定，它可以接受Git将任何标识符识别为“版本”信息，例如：Git提交SHA、Git标记或分支名称。CMake所理解的其他版本控制系统也可以使用类似的选项。
+3. **TEST_AFTER_INSTALL**:依赖项很可能有自己的测试套件，您可能希望运行测试套件，以确保在超级构建期间一切顺利。此选项将在安装步骤之后立即运行测试。
+
+`ExternalProject_Add`可以理解的其他测试选项如下:
+
+- **TEST_BEFORE_INSTALL**:将在安装步骤之前运行测试套件
+- **TEST_EXCLUDE_FROM_MAIN**:可以从测试套件中，删除对外部项目的主要目标的依赖
+
+这些选项都假定外部项目使用CTest管理测试。如果外部项目不使用CTest来管理测试，我们可以通过`TEST_COMMAND`选项来执行测试。
+
+即使是为属于自己项目的模块引入超级构建模式，也需要引入额外的层，重新声明小型CMake项目，并通过`ExternalProject_Add`显式地传递配置设置。引入这个附加层的好处是，清晰地分离了变量和目标范围，这可以帮助管理由多个组件组成的项目中的复杂性、依赖性和名称空间，这些组件可以是内部的，也可以是外部的，并由CMake组合在一起。
+
+# 第9章 语言混合项目
 
 
 
