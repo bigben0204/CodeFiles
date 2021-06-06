@@ -4287,6 +4287,8 @@ endif (NOT CMAKE_BUILD_TYPE)
 
 add_executable(TestProject main.cpp)
 
+target_link_libraries(TestProject pthread)
+
 add_custom_command(
         TARGET
         TestProject
