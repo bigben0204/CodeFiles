@@ -1,0 +1,32 @@
+windows安装ndoejs：
+https://blog.csdn.net/weixin_40936211/article/details/88866358
+https://www.cnblogs.com/zhouyu2017/p/6485265.html
+
+IDEA搭建react
+https://www.jianshu.com/p/08dcd72ff424
+https://www.cnblogs.com/dslx/p/10824087.html
+
+
+设置环境变量：
+NODE_PATH=E:\Program Files\nodejs\node_modules
+修改User环境变量：
+Path：E:\Program_Files\nodejs\node_global
+
+npm config set prefix "E:\Program_Files\nodejs\node_global"
+npm config set cache "E:\Program_Files\nodejs\node_cache"
+
+验证：
+npm install express -g --registry=https://registry.npm.taobao.org
+npm install create-react-app -g --registry=https://registry.npm.taobao.org
+
+
+问题解决：
+1. 修改带空格的路径：https://blog.csdn.net/weixin_40030173/article/details/115632419
+解决方案：
+执行：npm config edit
+将带空格的路径改写为：D:\Program_Files\nodejs\node_modules\npm\node_cache (这是 windows 的一种路径表达方式)
+或者直接执行
+npm config set cache "D:\Program_Files\nodejs\node_modules\npm\node_cache"--global
+
+2. 修改源：https://blog.csdn.net/X_0419/article/details/111181557
+npm config set registry https://registry.npm.taobao.org
