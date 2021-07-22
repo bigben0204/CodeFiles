@@ -793,17 +793,110 @@ export default App;
 
 ### ES6 解构  
 
+在 JavaScript ES6 中有一种更方便的方法来访问对象和数组的属性，叫做解构。比较下面JavaScript ES5 和 ES6 的代码片段。
 
+```react
+const user = {
+    firstname: 'Robin',
+    lastname: 'Wieruch',
+};
+// ES5
+var firstname = user.firstname;
+var lastname = user.lastname;
+console.log(firstname + ' ' + lastname);
+// output: Robin Wieruch
 
+// ES6
+const { firstname, lastname } = user;
+console.log(firstname + ' ' + lastname);
+// output: Robin Wieruch
+```
 
+在 JavaScript ES5 中每次访问对象的属性都需要额外添加一行代码，但在 JavaScript ES6 中可以在一行中进行。可读性最好的方法是在将对象解构成多个属性时使用多行。
 
+```react
+const {
+	firstname,
+	lastname
+} = user;  
+```
 
+对于数组一样可以使用解构，同样，多行代码会使你的代码保持可读性。
 
+```react
+const users = ['Robin', 'Andrew', 'Dan'];
+const [
+    userOne,
+    userTwo,
+    userThree
+] = users;
+console.log(userOne, userTwo, userThree);
+// output: Robin Andrew Dan
+```
 
+也许你已经注意到，程序组件内的状态对象也可以使用同样的方式解构，你可以让 map 和 filter 部分的代码更简短。  
 
+```react
+render() {
+        const {searchTerm, list} = this.state;
+        return (
+            <div className="App">
+				...                
+                {list.filter(isSearched(searchTerm)).map(item =>
+                ...
+                )}
+            </div>
+```
 
+你也可以使用 ES5 或者 ES6 的方式来做：
 
+```react
+// ES5
+var searchTerm = this.state.searchTerm;
+var list = this.state.list;
+// ES6
+const { searchTerm, list } = this.state;
+```
 
+但由于这本书大部分时候都使用了 JavaScript ES6，所以你也可以坚持使用它。  
+
+### 受控组件  
+
+你已经了解了 React 中的单向数据流，同样的规则适用于更新本地状态 searchTerm 来过滤列表的输入框。当状态变化时， render() 方法将再次运行，并使用最新状态中的 searchTerm值来作为过滤条件。
+
+但是我们是否忘记了输入元素的一些东西？一个 HTML 输入标签带有一个 value 属性，这个属性通常有一个值作为输入框的显示，在本例中，它是 searchTerm 属性。然而，看起来我们在 React 好像并不需要它。
+
+这是错误的，表单元素比如 \<input\>, \<textarea\> 和 \<select\> 会以原生 HTML 的形式保存他们自己的状态。一旦有人从外部做了一些修改，它们就会修改内部的值，在 React 中这被称为不受控组件，因为它们自己处理状态。在 React 中，你应该确保这些元素变为受控组件。
+
+你应该怎么做呢？你只需要设置输入框的值属性，这个值已经在 searchTerm 状态属性中保存了，那么为什么不从这里访问呢？  
+
+```react
+class App extends Component {
+    ...
+
+    render() {
+        const {searchTerm, list} = this.state;
+        return (
+            <div className="App">
+                <form>
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={this.onSearchChange}
+                    />
+                </form>
+                ...
+            </div>
+        );
+    }
+}
+```
+
+就是这样。现在输入框的单项数据流循环是自包含的，组件内部状态是输入框的唯一数据来源。
+
+整个内部状态管理和单向数据流可能对你来说比较新，但你一旦习惯了它，你就会自然而然的在 React 中实现它。一般来说， React 带来一种新的模式，将单向数据流引入到单页面应用的生态中，到目前为止，它已经被几个框架和库所采用。  
+
+### 拆分组件  
 
 
 
