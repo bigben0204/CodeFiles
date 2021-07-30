@@ -1232,6 +1232,342 @@ const Search = ({value, onChange, children}) => {
 
 ### 给组件声明样式  
 
+让我们给你的应用和组件添加一些基本的样式。你可以复用 src/App.css 和 src/index.css 文件。因为你是用 create-react-app 来创建的，所以这些文件应该已经在你的项目中了。它们应该也被引入到你的 src/App.js 和 src/index.js 文件中了。我准备了一些 CSS，你可以直接复制粘贴到这些文件中，你也可以随意使用你自己的样式。  
+
+首先，给你的整个应用声明样式。  
+
+```css
+body {
+    color: #222;
+    background: #f4f4f4;
+    font: 400 14px CoreSans, Arial, sans-serif;
+}
+
+a {
+    color: #222;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul, li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+input {
+    padding: 10px;
+    border-radius: 5px;
+    outline: none;
+    margin-right: 10px;
+    border: 1px solid #dddddd;
+}
+
+button {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #dddddd;
+    background: transparent;
+    color: #808080;
+    cursor: pointer;
+}
+
+button:hover {
+    color: #222;
+}
+
+*:focus {
+    outline: none;
+}
+```
+
+其次，在 App 文件中给你的组件声明样式。  
+
+```css
+.page {
+    margin: 20px;
+}
+
+.interactions {
+    text-align: center;
+}
+
+.table {
+    margin: 20px 0;
+}
+
+.table-header {
+    display: flex;
+    line-height: 24px;
+    font-size: 16px;
+    padding: 0 10px;
+    justify-content: space-between;
+}
+
+.table-empty {
+    margin: 200px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.table-row {
+    display: flex;
+    line-height: 24px;
+    white-space: nowrap;
+    margin: 10px 0;
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid #e3e3e3;
+}
+
+.table-header > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 5px;
+}
+
+.table-row > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 5px;
+}
+
+.button-inline {
+    border-width: 0;
+    background: transparent;
+    color: inherit;
+    text-align: inherit;
+    -webkit-font-smoothing: inherit;
+    padding: 0;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+.button-active {
+    border-radius: 0;
+    border-bottom: 1px solid #38BB6C;
+}
+```
+
+现在你可以在一些组件中使用这些样式。但是别忘了使用 React 的 className，而不是HTML 的 class 属性。
+首先，将它应用到你的 App ES6 类组件中。
+
+```react
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            list,
+            searchTerm: '',
+        }
+
+        this.onSearchChange = this.onSearchChange.bind(this);
+        this.onDismiss = this.onDismiss.bind(this);
+    }
+
+    onDismiss(id) {
+        const updateList = this.state.list.filter(item => item.objectID !== id);
+        this.setState({list: updateList});
+    }
+
+    onSearchChange(event) {
+        this.setState({searchTerm: event.target.value});
+    }
+
+    render() {
+        const {searchTerm, list} = this.state;
+        return (
+            <div className="page">
+                <div className="interactions">
+                    <Search
+                        value={searchTerm}
+                        onChange={this.onSearchChange}
+                    >
+                        Search
+                    </Search>
+                </div>
+                <Table
+                    list={list}
+                    pattern={searchTerm}
+                    onDismiss={this.onDismiss}
+                />
+            </div>
+        );
+    }
+}
+```
+
+其次，将它应用到你的 Table 函数式无状态组件中。  
+
+```react
+const Table = ({list, pattern, onDismiss}) =>
+    <div className="table">
+        {list.filter(isSearched(pattern)).map(item =>
+            <div key={item.objectID} className="table-row">
+                        <span>
+                            <a href={item.url}>{item.title}</a>
+                        </span>
+                <span>{item.author}</span>
+                <span>{item.num_comments}</span>
+                <span>{item.points}</span>
+                <span>
+                    <Button
+                        onClick={() => onDismiss(item.objectID)}
+                        className="button-inline"
+                    >
+                        Dismiss
+                    </Button>
+                </span>
+            </div>
+        )}
+    </div>
+```
+
+现在你已经给你的应用和组件添加了基本的 CSS 样式，看起来应该非常不错。如你所知， JSX 混合了 HTML 和 JavaScript。现在有人呼吁将 CSS 也加入进去，这就叫作内联样式(inline style)。你可以定义 JavaScript 对象，并传给一个元素的 style 属性。
+
+让我们通过使用内联样式来使 Table 的列宽自适应。  
+
+```react
+const Table = ({list, pattern, onDismiss}) =>
+    <div className="table">
+        {list.filter(isSearched(pattern)).map(item =>
+            <div key={item.objectID} className="table-row">
+                <span style={{width: '40%'}}>
+                    <a href={item.url}>{item.title}</a>
+                </span>
+                <span style={{width: '30%'}}>
+                    {item.author}
+                </span>
+                <span style={{width: '10%'}}>
+                    {item.num_comments}
+                </span>
+                <span style={{width: '10%'}}>
+                    {item.points}
+                </span>
+                <span style={{width: '10%'}}>
+                    <Button
+                        onClick={() => onDismiss(item.objectID)}
+                        className="button-inline"
+                    >
+                        Dismiss
+                    </Button>
+                </span>
+            </div>
+        )}
+    </div>
+```
+
+现在样式已经内联了。你可以在你的元素之外定义一个 style 对象，这样可以让它变得更整洁。  
+
+```react
+const largeColumn = {
+    width: '40%',
+};
+const midColumn = {
+    width: '30%',
+};
+const smallColumn = {
+    width: '10%',
+};
+
+const Table = ({list, pattern, onDismiss}) =>
+    <div className="table">
+        {list.filter(isSearched(pattern)).map(item =>
+            <div key={item.objectID} className="table-row">
+                <span style={largeColumn}>
+                    <a href={item.url}>{item.title}</a>
+                </span>
+                <span style={midColumn}>
+                    {item.author}
+                </span>
+                <span style={smallColumn}>
+                    {item.num_comments}
+                </span>
+                <span style={smallColumn}>
+                    {item.points}
+                </span>
+                <span style={smallColumn}>
+                    <Button
+                        onClick={() => onDismiss(item.objectID)}
+                        className="button-inline"
+                    >
+                        Dismiss
+                    </Button>
+                </span>
+            </div>
+        )}
+    </div>
+```
+
+随后你可以将它们用于你的 columns ： `<span style={smallColumn}>`。
+
+总而言之，关于 React 中的样式，你会找到不同的意见和解决方案。现在你已经用过纯 CSS 和内联样式了。这足以开始。
+
+在这里我不想下定论，但是想给你一些更多的选择。你可以自行阅读并应用它们。但是如果你刚开始使用 React，目前我会推荐你坚持纯 CSS 和内联样式 。
+
+你已经学习了编写一个 React 应用所需要的基础知识了！让我们来回顾一下前面几个章节:
+• React
+– 使用 this.state 和 setState() 来管理你的内部组件状态
+– 将函数或者类方法传递到你的元素处理器
+– 在 React 中使用表单或者事件来添加交互
+– 在 React 中单向数据流是一个非常重要的概念
+– 拥抱 controlled components
+– 通过 children 和可复用组件来组合组件
+– ES6 类组件和函数式无状态组件的使用方法和实现
+– 给你的组件声明样式的方法
+• ES6
+– 绑定到一个类的函数叫作类方法
+– 解构对象和数组
+– 默认参数
+• General
+– 高阶函数
+该休息一下了，吸收这些知识然后转化成你自己的东西。你可以用你已有的代码来做个实验。另外，你可以进一步阅读官方文档75
+你可以在官方代码仓库76找到源码。  
+
+## 使用真实的 API  
+
+现在是时候使用真实的 API 了，老是处理样本数据会变得很无聊。
+
+如果你对 API 不熟悉，我建议你去读读我的博客，里面有关于我是怎样了解 API 的。
+
+你知道 Hacker News78 这个平台吗？它是一个很棒的技术新闻整合平台。在本书中，你将使用它的 API 来获取热门资讯。它有一个基础 API 79 和一个搜索 API 80来获取数据。后者使我们可以去搜索 Hacker News 上的资讯。你也可以通过 API 规范来了解它的数据结构。  
+
+### 生命周期方法  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
