@@ -1536,25 +1536,406 @@ const Table = ({list, pattern, onDismiss}) =>
 
 ### 生命周期方法  
 
+在你开始在组件中通过 API 来获取数据之前，你需要知道 React 的生命周期方法。这些方法是嵌入 React 组件生命周期中的一组挂钩。它们可以在 ES6 类组件中使用，但是不能在无状态组件中使用。
 
+你还记得前章中讲过的 JavaScript ES6 类以及如何在 React 中使用它们吗？除了 render() 方法外，还有几个方法可以在 React ES6 类组件中被覆写。所有的这些都是生命周期方法。现在让我们来深入了解他们：
 
+通过之前的学习，你已经知道两种能够用在 ES6 类组件中的生命周期方法： constructor() 和 render()。
 
+constructor（构造函数）只有在组件实例化并插入到 DOM 中的时候才会被调用。组件实例化的过程称作组件的挂载（mount）。
 
+render() 方法也会在组件挂载的过程中被调用，同时当组件更新的时候也会被调用。每当组件的状态（state）或者属性（props）改变时，组件的 render() 方法都会被调用。
 
+现在你了解了更多关于这两个生命周期方法的知识，也知道它们什么时候会被调用了。你也已经在前面的学习中使用过它们了。但是 React 里还有更多的生命周期方法。  
 
+在组件挂载的过程中还有另外两个生命周期方法： componentWillMount() 和 componentDidMount()。构造函数（constructor）最先执行， componentWillMount() 会在 render() 方法之前执行，而 componentDidMount() 在 render() 方法之后执行。  
 
+总而言之，在挂载过程中有四个生命周期方法，它们的调用顺序是这样的：
 
+* constructor()
+* componentWillMount()
+* render()
+* componentDidMount()  
 
+但是当组件的状态或者属性改变的时候用来更新组件的生命周期是什么样的呢？总的来说，它一共有5个生命周期方法用于组件更新，调用顺序如下：  
 
+* componentWillReceiveProps()
+* shouldComponentUpdate()
+* componentWillUpdate()
+* render()
+* componentDidUpdate()  
 
+最后但同样重要的，组件卸载也有生命周期。它只有一个生命周期方法： componentWillUnmount()。  
 
+但是毕竟你不用一开始就了解所有生命周期方法。这样可能吓到你，而你也并不会用到所有的方法。即使在一个很大的 React 应用当中，除了 constructor() 和 render() 比较常用外，你只会用到一小部分生命周期函数。即使这样，了解每个生命周期方法的适用场景还是对你有帮助的：  
 
+* constructor(props) - 它在组件初始化时被调用。在这个方法中，你可以设置初始化状态以及绑定类方法。
+* componentWillMount() - 它在 render() 方法之前被调用。这就是为什么它可以用作去设置组件内部的状态，因为它不会触发组件的再次渲染。但一般来说，还是推荐在 constructor() 中去初始化状态。
+* render() - 这个生命周期方法是必须有的，它返回作为组件输出的元素。这个方法应该是一个纯函数，因此不应该在这个方法中修改组件的状态。它把属性和状态作为输入并且返回（需要渲染的）元素
+* componentDidMount() - 它仅在组件挂载后执行一次。这是发起异步请求去 API 获取数据的绝佳时期。获取到的数据将被保存在内部组件的状态中然后在 render() 生命周期方法中展示出来。
+* componentWillReceiveProps(nextProps) - 这个方法在一个更新生命周（update lifecycle）中被调用。新的属性会作为它的输入。因此你可以利用 this.props 来对比之后的属性和之前的属性，基于对比的结果去实现不同的行为。此外，你可以基于新的属性来设置组件的状态。
+* shouldComponentUpdate(nextProps, nextState) - 每次组件因为状态或者属性更改而更新时，它都会被调用。你将在成熟的 React 应用中使用它来进行性能优化。在一个更新生命周期中，组件及其子组件将根据该方法返回的布尔值来决定是否重新渲染。这样你可以阻止组件的渲染生命周期（render lifecycle）方法，避免不必要的渲染。
+* componentWillUpdate(nextProps, nextState) - 这个方法是 render() 执行之前的最后一个方法。你已经拥有下一个属性和状态，它们可以在这个方法中任由你处置。你可以利用这个方法在渲染之前进行最后的准备。注意在这个生命周期方法中你不能再触发 setState()。如果你想基于新的属性计算状态，你必须利用componentWillReceiveProps()。
+* componentDidUpdate(prevProps, prevState) - 这个方法在 render() 之后立即调用。你可以用它当成操作 DOM 或者执行更多异步请求的机会。
+* componentWillUnmount() - 它会在组件销毁之前被调用。你可以利用这个生命周期
+  方法去执行任何清理任务。  
 
+之前你已经用过了 constructor() 和 render() 生命周期方法。对于 ES6 类组件来说他们是常用的生命周期方法。实际上 render() 是必须有的，否则它将不会返回一个组件实例。 
 
+还有另一个生命周期方法： componentDidCatch(error, info)。它在 React 1681 中引入，用来捕获组件的错误。举例来说，在你的应用中展示样本数据本来是没问题的。但是可能会有列表的本地状态被意外设置成 null 的情况发生（例如从外部 API 获取列表失败时，你把本地状态设置为空了）。然后它就不能像之前一样去过滤（filter）和映射（map）这个列表，因为它不是一个空列表（[]）而是 null。这时组件就会崩溃，然后整个应用就会挂掉。现在你可以用 componentDidCatch() 来捕获错误，将它存在本地的状态中，然后像用户展示一条信息，说明应用发生了错误。  
 
+### 获取数据  
 
+现在你已经做好了从 Hacker News API 获取数据的准备。我们可以用上文所提到过的componentDidMount() 生命周期方法来获取数据。你将使用 JavaScript 原生的 fetch API 来发起请求。
 
+在开始之前，让我们设置好 URL 常量和默认参数，来将 API 请求分解成几步。  
 
+```react
+import './App.css';
+import {Component} from "react";
+
+const DEFAULT_QUERY = 'redux';
+
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+```
+
+在 JavaScript ES6 中，你可以用模板字符串（template strings）去连接字符串。你将用它来拼接最终的 API 访问地址。  
+
+```react
+// ES6
+const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+
+// ES5
+var url = PATH_BASE + PATH_SEARCH + '?' + PARAM_SEARCH + DEFAULT_QUERY;
+
+console.log(url);
+// output: https://hn.algolia.com/api/v1/search?query=redux
+```
+
+这样就可以保证以后你 URL 组合的灵活性。
+
+让我们开始使用 API 请求，在这个请求中将用到上述的网址。整个数据获取的过程在下面代码中一次给出，但后面会对每一步做详细解释。  
+
+```react
+class App extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            result: null,
+            searchTerm: DEFAULT_QUERY,
+        }
+
+        this.setSearchTopStories = this.setSearchTopStories.bind(this);
+        this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
+        this.onSearchChange = this.onSearchChange.bind(this);
+        this.onDismiss = this.onDismiss.bind(this);
+    }
+
+    setSearchTopStories(result) {
+        this.setState({result});
+    }
+
+    fetchSearchTopStories(searchTerm) {
+        fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`)
+            .then(response => response.json())
+            .then(result => this.setSearchTopStories(result))
+            .catch(e => e);
+    }
+
+    componentDidMount() {
+        const {searchTerm} = this.state;
+        this.fetchSearchTopStories(searchTerm);
+    }
+
+    onDismiss(id) {
+        const {result} = this.state;
+        const list = result.hits;
+        const updateList = list.filter(item => item.objectID !== id);
+        result.hits = updateList;
+        this.setState({result});
+    }
+
+    onSearchChange(event) {
+        this.setState({searchTerm: event.target.value});
+    }
+
+    render() {
+        const {searchTerm, result} = this.state;
+        if (!result) {
+            return null;
+        }
+
+        return (
+            <div className="page">
+                <div className="interactions">
+                    <Search
+                        value={searchTerm}
+                        onChange={this.onSearchChange}
+                    >
+                        Search
+                    </Search>
+                </div>
+                <Table
+                    list={result.hits}
+                    pattern={searchTerm}
+                    onDismiss={this.onDismiss}
+                />
+            </div>
+        );
+    }
+}
+```
+
+这段代码做了很多事。我想把它分成更小的代码段，但是那样又会让人很难去理解每段代码之间的关系。接下来我就来详细解释代码中的每一步。
+
+首先，你可以移除样本列表了，因为你将从 Hacker News API 得到一个真实的列表。这些样本数据已经没用了。现在组件将一个空的列表结果以及一个默认的搜索词作为初始状态。这个默认搜索词也同样用在 Search 组件的输入字段和第一个 API 请求中。
+
+其次，在组件挂载之后，它用了 componentDidMount() 生命周期方法去获取数据。在第一次获取数据时，使用的是本地状态中的默认搜索词。它将获取与“redux”相关的资讯，因为它是默认的参数。
+
+再次，这里使用的是原生的 fetch API。 JavaScript ES6 模板字符串允许组件利用 searchTerm来组成 URL。该 URL 是原生 fetch API 函数的参数。返回的响应需要被转化成 JSON 格式的数据结构。这是在处理 JSON 数据结构时，原生的 fetch API 中的强制步骤。最后将处理后的响应赋值给组件内部状态中的结果。此外，我们用一段 catch 代码来处理出错的情况。如果在发起请求时出现错误，这个函数会进入到 catch 中而不是 then 中。在本书之后的章节中，将涵盖错误处理的内容。
+
+最后但同样重要的是，不要忘记在构造函数中绑定你的组件方法。
+
+现在你可以用获取的数据去代替样本数据了。然而，你必须注意一点，这个结果不仅仅是一个数据的列表。它也是一个复杂的对象， 它包含了元数据信息以及一系列的 hits，在我们的应用里就是这些资讯86。你可以在 render() 方法中用 console.log(this.state); 将这些信息打印出来，以便有一个直观的认识。
+
+在接下来的步骤中，你将把之前的得到的结果渲染出来。但我们不会什么都渲染，在刚开始没有拿到结果时，我们会返回空。一旦 API 请求成功，我们会将结果保存在状态里，然后 App 组件将用更新后的状态重新渲染。  
+
+让我们回顾一下在组将的整个生命周期中发生了什么。首先组件通过构造函数得到初始化，之后它将初始化的状态渲染出来。但是你阻止了组件的显示，因为此时本地状态中的结果为空。 React 允许组件通过返回 null 来不渲染任何东西。接着 componentDidMount() 生命周期函数执行。在这个方法中你从 Hacker News API 中异步地拿到了数据。一旦数据到达，组件就通过 setSearchTopStories() 函数改变组件内部的状态。之后，因为状态的更新，更新生命周期开始运行。组件再次执行 render() 方法，但这次组件的内部状态中的结果已经填充，不再是空了。因此组件将重新渲染 Table 组件的内容。
+
+你使用了大多数浏览器支持的原生 fetch API 来执行对 API 的异步请求。 create-react-app 中的配置保证了它被所有浏览器支持。你也可以使用第三方库来代替原生 fetch API，例如：superagent87 和 axios88。
+
+让我们重回到你的应用，现在你应该可以看到资讯列表了。然而，现在应用中仍然存在两个 bug。第一，“Dismiss”按钮不工作。因为它还不能处理这个复杂的 result 对象。当我们点击“Dismiss”按钮时，它仍然在操作之前那个简单的 result 对象。第二，当这个列表显示出来之后，你再尝试搜索其他的东西时，它只会在客户端过滤已有的列表，即使初始化的资讯搜索是在服务器端进行的。我们期待的行为是：当我们使用 Search 组件时，从 API拿到新的结果，而不是去过滤样本数据。不用担心，两个 bug 都将在之后的章节中得到修复。  
+
+### 扩展操作符  
+
+“Dismiss”按钮之所以不工作，是因为 onDismiss() 方法不能处理复杂的 result 对象。它现在还只能处理一个本地状态中的简单列表。但是现在这个列表已经不再是简单的平铺列表了。现在，让我们去操作这个 result 对象而不是去操作列表。
+
+```react 
+    onDismiss(id) {
+        const isNotId = item => item.objectID != id;
+        const updateHits = this.state.result.hits.filter(isNotId);
+        this.setState({
+            ...
+        });
+    }
+```
+
+那现在 setState() 中发生了什么呢？很遗憾，这个 result 是一个复杂的对象。资讯（hits）列表只是这个对象的众多属性之一。所以，当某一项资讯从 result 对象中移除时，只能更新资讯列表，其他的属性还是得保持原样。
+
+解决方法之一是直接改变 result 对象中的 hits 字段。我将演示这个方法，但实际操作中我们一般不这样做。  
+
+```react
+// don't do this
+this.state.result.hits = updateHits;
+```
+
+React 拥护不可变的数据结构。因此你不应该改变一个对象（或者直接改变状态）。更好的做法是基于现在拥有的资源来创建一个新的对象。这样就没有任何对象被改变了。这样做的好处是数据结构将保持不变，因为你总是返回一个新对象，而之前的对象保持不变。  
+
+因此你可以用 JavaScript ES6 中的 Object.assign() 函数来到达这样的目的。它把接收的第一个参数作为目标对象，后面的所有参数作为源对象。然后把所有的源对象合并到目标对象中。只要把目标对象设置成一个空对象，我们就得到了一个新的对象。这种做法是拥抱不变性的，因为没有任何源对象被改变。以下是代码实现：  
+
+```react
+const updatedHitsObj = {hits: updatedHits};
+const updatedResult = Object.assign({}, this.state.result, updatedHitsObj);
+```
+
+当遇到相同的属性时，排在后面的对象会覆写先前对象的该属性。现在让我们用它来改写onDismiss() 方法：  
+
+```react
+    onDismiss(id) {
+        const isNotId = item => item.objectID !== id;
+        const updatedHits = this.state.result.hits.filter(isNotId);
+        this.setState({
+            result: Object.assign({}, this.state.result, {hits: updatedHits})
+        });
+    }
+```
+
+这已经是一个解决方案了。但是在 JavaScript ES6 以及之后的 JavaScript 版本中还有一个更简单的方法。现在我将向你介绍扩展操作符。它只由三个点组成： ...。当使用它时，数组或对象中的每一个值都会被拷贝到一个新的数组或对象。
+
+让我们先来看一下 ES6 中数组的扩展运算符，虽然你现在还用不到它。
+
+```react
+const userList = ['Robin', 'Andrew', 'Dan'];
+const additionalUser = 'Jordan';
+const allUsers = [...userList, additionalUser];
+
+console.log(allUsers);
+// output: ['Robin', 'Andrew', 'Dan', 'Jordan']
+```
+
+这里 allUsers 是一个全新的数组变量，而变量 userList 和 additionalUser 还是和原来一样。用这个运算符，你甚至可以合并两个数组到一个新的数组中。  
+
+```react
+const oldUsers = ['Robin', 'Andrew'];
+const newUsers = ['Dan', 'Jordan'];
+const allUsers = [ ...oldUsers, ...newUsers ];
+
+console.log(allUsers);
+// output: ['Robin', 'Andrew', 'Dan', 'Jordan']
+```
+
+现在让我们来看看对象的扩展运算符。它并不是 JavaScript ES6 中的用法。它是针对下一个 JavaScript 版本的提出的92，然而它已经在 React 社区开始使用了。这就是为什么需要在create-react-app 配置中加入了这个功能。
+
+本质上来说，对象的扩展运算符和数组的扩展运算符是一样的，只是用在了对象上。  
+
+```react
+const userNames = { firstname: 'Robin', lastname: 'Wieruch' };
+const age = 28;
+const user = { ...userNames, age };  // { firstname: 'Robin', lastname: 'Wieruch', age: 28 }
+
+console.log(user);
+// output: { firstname: 'Robin', lastname: 'Wieruch', age: 28 }
+```
+
+本地试验，如果不使用...，则只是对象引用：
+
+```react
+const userNames = { firstname: 'Robin', lastname: 'Wieruch' };
+const age = 28;
+const user = { userNames, age };  // 这里是两个对象，userNames和age，而不是{ firstname: 'Robin', lastname: 'Wieruch', age: 28 }
+console.log(user);
+
+userNames.firstname = 'Jason';
+console.log(userNames);
+console.log(user);
+```
+
+类似于之前数组的例子，以下是扩展多个对象的例子。  
+
+```react
+const userNames = { firstname: 'Robin', lastname: 'Wieruch' };
+const userAge = { age: 28 };
+const user = { ...userNames, ...userAge };
+console.log(user);
+// output: { firstname: 'Robin', lastname: 'Wieruch', age: 28 }
+```
+
+最终，它可以用来代替 Object.assign()。  
+
+```react
+onDismiss(id) {
+    const isNotId = item => item.objectID !== id;
+    const updatedHits = this.state.result.hits.filter(isNotId);
+    this.setState({
+        result: {...this.state.result, hits: updatedHits}
+    });
+}
+```
+
+现在 “Dismiss” 按钮可以再次工作了，因为 onDismiss() 方法已经能够处理这个复杂的 result对象了，并且知道当要忽略掉列表中的某一项时怎么去更新列表了。  
+
+### 条件渲染  
+
+React 应用很早就引入了条件渲染。但本书还没有提到过，因为目前为止还没有合适的用例。条件渲染用于你需要决定渲染哪个元素时。有些时候也可以是渲染一个元素或者什么都不渲染。其实最简单的条件渲染，只需要用 JSX 中的 if-else 就可以实现。
+
+组件内部状态中的 result 对象的初始值为空。当 API 的结果还没返回时，此时的 App 组件没有返回任何元素。这已经是一个条件渲染了，因为在某个特定条件下， render() 方法提前返回了。根据条件， App 组件渲染它的元素或者什么都不渲染。  
+
+现在，让我们更进一步。因为只有 Table 组件的渲染依赖于 result，所以将它包在一个独立的条件渲染中才比较合理。即使 result 为空，其它的所有组件还是应该被渲染。你只需要在 JSX 中加上一个三元运算符就可以达到这样的目的。  
+
+通过这样的方式，即使`fetchSearchTopStories`方法未获得列表，界面仍可显示`Search`对象：
+
+```react
+class App extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            result: null,
+            searchTerm: DEFAULT_QUERY,
+        }
+
+        this.setSearchTopStories = this.setSearchTopStories.bind(this);
+        this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
+        this.onSearchChange = this.onSearchChange.bind(this);
+        this.onDismiss = this.onDismiss.bind(this);
+    }
+
+    setSearchTopStories(result) {
+        this.setState({result});
+    }
+
+    fetchSearchTopStories(searchTerm) {
+        fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`)
+            .then(response => response.json())
+            .then(result => this.setSearchTopStories(result))
+            .catch(e => e);
+    }
+
+    componentDidMount() {
+        const {searchTerm} = this.state;
+        this.fetchSearchTopStories(searchTerm);
+    }
+
+    onDismiss(id) {
+        const isNotId = item => item.objectID !== id;
+        const updatedHits = this.state.result.hits.filter(isNotId);
+        this.setState({
+            result: {...this.state.result, hits: updatedHits}
+        });
+    }
+
+    onSearchChange(event) {
+        this.setState({searchTerm: event.target.value});
+    }
+
+    render() {
+        const {searchTerm, result} = this.state;
+        
+        return (
+            <div className="page">
+                <div className="interactions">
+                    <Search
+                        value={searchTerm}
+                        onChange={this.onSearchChange}
+                    >
+                        Search
+                    </Search>
+                </div>
+                {result
+                    ? <Table
+                        list={result.hits}
+                        pattern={searchTerm}
+                        onDismiss={this.onDismiss}
+                    />
+                    : null
+                }
+
+            </div>
+        );
+    }
+}
+```
+
+这是实现条件渲染的第二种方式。第三种则是运用 && 逻辑运算符。在 JavaScript 中， true && 'Hello World' 的值永远是“Hello World”。而 false && 'Hello World' 的值则永远是false。  
+
+```react
+const result = true && 'Hello World';
+console.log(result);
+// output: Hello World
+const result = false && 'Hello World';
+console.log(result);
+// output: false
+```
+
+在 React 中你也可以利用这个运算符。如果条件判断为 true， && 操作符后面的表达式的值将会被输出。如果条件判断为 false， React 将会忽略并跳过后面的表达式。这个操作符可以用来实现 Table 组件的条件渲染，因为它返回一个 Table 组件或者什么都不返回（**应该是返回一个Table组件或返回null**）。
+
+```react
+{result && <Table
+    list={result.hits}
+    pattern={searchTerm}
+    onDismiss={this.onDismiss}
+    />
+}
+```
+
+这是 React 中使用条件渲染的一些方式。你可以在条件渲染代码大全95中找到更多的选择，了解不同的条件渲染方式和它们的适用场景。
+
+现在，你应该能够在你的应用中看到获取的数据。并且当数据正在获取时，你也可以看到除了 Table 组件以外的所有东西。一旦请求完成并且数据存入本地状态之后， Table 组件也将被渲染出来。因为 render() 方法再次执行，而且这时条件渲染判定为展示 Table 组件。  
+
+### 客户端或服务端搜索  
 
 
 
