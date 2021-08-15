@@ -10504,11 +10504,196 @@ private:
 };
 ```
 
+## [970. 强整数](https://leetcode-cn.com/problems/powerful-integers/)
 
+```cpp
+#include <unordered_set>
+#include <cmath>
+#include <algorithm>
+#include "gtest/gtest.h"
 
+using namespace std;
 
+class Solution {  // 0ms, 6.7MB
+public:
+    vector<int> powerfulIntegers(int x, int y, int bound) {
+        std::unordered_set<int> ret;
+        int iMax = getMaxPower(bound, x);
+        int jMax = getMaxPower(bound, y);
+        for (int i = 0; i <= iMax; ++i) {
+            for (int j = 0; j <= jMax; ++j) {
+                int powerfulInteger = pow(x, i) + pow(y, j);
+                if (powerfulInteger <= bound) {
+                    ret.insert(powerfulInteger);
+                } else {
+                    break;
+                }
+            }
+        }
+        std::vector<int> retList;
+        std::copy(ret.begin(), ret.end(), std::back_inserter(retList));
+        return retList;
+    }
 
+private:
+    int getMaxPower(int bound, int inputNumber) {
+        if (bound == 0) {
+            return 0;
+        } else if (inputNumber == 1) {
+            return 1;
+        }
+        return log(bound) / log(inputNumber);
+    }
+};
 
+class SolutionTest : public testing::Test {
+protected:
+    void executeEquation(const std::vector<int>& expected, std::vector<int>&& ret) {
+        std::sort(ret.begin(), ret.end());
+        EXPECT_EQ(expected, ret);
+    }
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    const vector<int>& expected = std::vector<int>({2, 3, 4, 5, 7, 9, 10});
+    vector<int>&& ret = solution.powerfulIntegers(2, 3, 10);
+    executeEquation(expected, std::move(ret));
+}
+
+TEST_F(SolutionTest, Test2) {
+    const vector<int>& expected = std::vector<int>({2, 4, 6, 8, 10, 14});
+    vector<int>&& ret = solution.powerfulIntegers(3, 5, 15);
+    executeEquation(expected, std::move(ret));
+}
+
+TEST_F(SolutionTest, Test3) {
+    const vector<int>& expected = std::vector<int>({2, 3, 5, 9});
+    vector<int>&& ret = solution.powerfulIntegers(2, 1, 10);
+    executeEquation(expected, std::move(ret));
+}
+
+TEST_F(SolutionTest, Test4) {
+    const vector<int>& expected = std::vector<int>();
+    vector<int>&& ret = solution.powerfulIntegers(2, 3, 0);
+    executeEquation(expected, std::move(ret));
+}
+```
+
+## [946. 验证栈序列](https://leetcode-cn.com/problems/validate-stack-sequences/)
+
+把每个要pop的值判断是否已经压过栈，如果压过栈并且是栈顶值就pop出来，如果压过栈不是栈顶值，则顺序不对。如果同有压过栈就压栈直到该值。
+
+```cpp
+#include <vector>
+#include <unordered_set>
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 12ms, 16.1MB
+public:
+    bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+        std::stack<int> pushedStack;
+        std::unordered_set<int> alreadyPushed;
+        int indexToPush = 0;
+        for (const auto& poppedNum : popped) {
+            bool isNumAlreadyPushed = alreadyPushed.find(poppedNum) != alreadyPushed.end();
+            if (isNumAlreadyPushed) {
+                if (pushedStack.top() != poppedNum) {
+                    return false;
+                }
+            } else {
+                pushNum(pushed, pushedStack, alreadyPushed, indexToPush);
+                while (pushedStack.top() != poppedNum) {
+                    pushNum(pushed, pushedStack, alreadyPushed, indexToPush);
+                }
+            }
+            pushedStack.pop();
+        }
+        return true;
+    }
+
+private:
+    void pushNum(const vector<int>& pushed, std::stack<int>& pushedStack, std::unordered_set<int>& alreadyPushed,
+                 int& indexToPush) {
+        const auto& numToPush = pushed.at(indexToPush++);
+        pushedStack.push(numToPush);
+        alreadyPushed.insert(numToPush);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> pushed = std::vector<int>({1, 2, 3, 4, 5});
+    vector<int> popped = std::vector<int>({4, 5, 3, 2, 1});
+    EXPECT_TRUE(solution.validateStackSequences(pushed, popped));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<int> pushed = std::vector<int>({1, 2, 3, 4, 5});
+    vector<int> popped = std::vector<int>({4, 3, 5, 1, 2});
+    EXPECT_FALSE(solution.validateStackSequences(pushed, popped));
+}
+
+TEST_F(SolutionTest, Test3) {
+    vector<int> pushed = std::vector<int>({1, 2, 3, 4, 5});
+    vector<int> popped = std::vector<int>({1, 2, 3, 4, 5});
+    EXPECT_TRUE(solution.validateStackSequences(pushed, popped));
+}
+
+TEST_F(SolutionTest, Test4) {
+    vector<int> pushed = std::vector<int>({1, 2, 3, 4, 5});
+    vector<int> popped = std::vector<int>({5, 4, 3, 2, 1});
+    EXPECT_TRUE(solution.validateStackSequences(pushed, popped));
+}
+```
+
+[官方解答](https://leetcode-cn.com/problems/validate-stack-sequences/solution/yan-zheng-zhan-xu-lie-by-leetcode/)：
+
+方法一： 贪心
+思路
+
+所有的元素一定是按顺序 push 进去的，重要的是怎么 pop 出来？
+
+假设当前栈顶元素值为 2，同时对应的 popped 序列中下一个要 pop 的值也为 2，那就必须立刻把这个值 pop 出来。因为之后的 push 都会让栈顶元素变成不同于 2 的其他值，这样再 pop 出来的数 popped 序列就不对应了。
+
+算法
+
+将 pushed 队列中的每个数都 push 到栈中，同时检查这个数是不是 popped 序列中下一个要 pop 的值，如果是就把它 pop 出来。
+
+最后，检查不是所有的该 pop 出来的值都是 pop 出来了。
+
+```cpp
+// 执行用时：4 ms, 在所有 C++ 提交中击败了98.73%的用户
+// 内存消耗：15.1 MB, 在所有 C++ 提交中击败了6.64%的用户
+class Solution {
+public:
+    bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+        std::stack<int> pushedStack;
+        int length = pushed.size();
+        int indexToPop = 0;
+        for (const auto& numToPush : pushed) {
+            pushedStack.push(numToPush);
+            while (!pushedStack.empty() && indexToPop < length && pushedStack.top() == popped.at(indexToPop)) {
+                pushedStack.pop();
+                ++indexToPop;
+            }
+        }
+        return indexToPop == length;
+    }
+};
+```
 
 
 
