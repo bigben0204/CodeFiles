@@ -89,7 +89,7 @@ To find the routable IP, run this command and examine the `EXTERNAL-IP` column:
 kubectl get services balanced
 ```
 
-Your deployment is now available at <EXTERNAL-IP>:8080
+Your deployment is now available at `http://<EXTERNAL-IP>:8080`
 
 
 
@@ -176,13 +176,13 @@ The connection to the server <server-name:port> was refused - did you specify th
 kubectl cluster-info dump
 ```
 
-
+# [你好，Minikube](https://kubernetes.io/zh/docs/tutorials/hello-minikube/)
 
 ## 创建 Deployment
 
 Kubernetes [*Pod*](https://kubernetes.io/zh/docs/concepts/workloads/pods/) 是由一个或多个 为了管理和联网而绑定在一起的容器构成的组。 本教程中的 Pod 只有一个容器。 Kubernetes [*Deployment*](https://kubernetes.io/zh/docs/concepts/workloads/controllers/deployment/) 检查 Pod 的健康状况，并在 Pod 中的容器终止的情况下重新启动新的容器。 Deployment 是管理 Pod 创建和扩展的推荐方法。
 
-1. 使用 `kubectl create` 命令创建管理 Pod 的 Deployment。该 Pod 根据提供的 Docker 镜像运行 Container。
+1.  使用 `kubectl create` 命令创建管理 Pod 的 Deployment。该 Pod 根据提供的 Docker 镜像运行 Container。
 
    ```shell
    # kubectl create deployment hello-node --image=k8s.gcr.io/echoserver:1.4
@@ -350,35 +350,289 @@ minikube stop
 minikube delete
 ```
 
+# [使用服务来访问集群中的应用](https://kubernetes.io/zh/docs/tasks/access-application-cluster/service-access-application-cluster/)
 
+## 教程目标
 
+- 运行 Hello World 应用的两个实例。
+- 创建一个服务对象来暴露 node port。
+- 使用服务对象来访问正在运行的应用。
 
+## 为运行在两个 pod 中的应用创建一个服务
 
+这是应用程序部署的配置文件：
 
+[`service/access/hello-application.yaml` ](https://raw.githubusercontent.com/kubernetes/website/main/content/zh/examples/service/access/hello-application.yaml)![Copy service/access/hello-application.yaml to clipboard](https://d33wubrfki0l68.cloudfront.net/0901162ab78eb4ff2e9e5dc8b17c3824befc91a6/44ccd/images/copycode.svg)
 
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+spec:
+  selector:
+    matchLabels:
+      run: load-balancer-example
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: load-balancer-example
+    spec:
+      containers:
+        - name: hello-world
+          image: gcr.io/google-samples/node-hello:1.0
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+```
 
+1. 在你的集群中运行一个 Hello World 应用： 使用上面的文件创建应用程序 Deployment：
 
+   ```shell
+   # kubectl apply -f https://k8s.io/examples/service/access/hello-application.yaml
+   # 使用本地文件，并修改image为zhangguanzhang/gcr.io.google-samples.node-hello:1.0，如下
+   kubectl apply -f hello-application.yaml
+   # 界面回显：
+   deployment.apps/hello-world created
+   ```
+   
+   上面的命令创建一个 [Deployment](https://kubernetes.io/zh/docs/concepts/workloads/controllers/deployment/) 对象 和一个关联的 [ReplicaSet](https://kubernetes.io/zh/docs/concepts/workloads/controllers/replicaset/) 对象。 这个 ReplicaSet 有两个 [Pod](https://kubernetes.io/zh/docs/concepts/workloads/pods/)， 每个 Pod 都运行着 Hello World 应用。
+   
+   hello-application.yaml内容如下：
+   
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: hello-world
+   spec:
+     selector:
+       matchLabels:
+         run: load-balancer-example
+     replicas: 2
+     template:
+       metadata:
+         labels:
+           run: load-balancer-example
+       spec:
+         containers:
+           - name: hello-world
+             image: gcr.io/google-samples/node-hello:1.0
+             ports:
+               - containerPort: 8080
+                 protocol: TCP
+   ```
+   
+2. 展示 Deployment 的信息：
 
+   ```shell
+   kubectl get deployments hello-world
+   kubectl describe deployments hello-world
+   ```
 
+3. 展示你的 ReplicaSet 对象信息：
 
+   ```shell
+   kubectl get replicasets
+   kubectl describe replicasets
+   ```
 
+4. 创建一个服务对象来暴露 Deployment：
 
+   ```shell
+   kubectl expose deployment hello-world --type=NodePort --name=example-service
+   ```
 
+   可以配置hello-service.yaml：
 
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: example-service
+   spec:
+     type: NodePort
+     selector:
+       run: load-balancer-example
+     ports:
+       - protocol: TCP
+         port: 8080
+         #targetPort: 80
+         #nodePort: 32222
+   ```
 
+   并通过如下命令启动：
 
+   ```shell
+   kubectl apply -f hello-service.yaml
+   ```
 
+5. 展示 Service 信息：
 
+   ```shell
+   kubectl describe services example-service
+   ```
 
+   输出类似于：
 
+   ```shell
+   Name:                     example-service
+   Namespace:                default
+   Labels:                   <none>
+   Annotations:              <none>
+   Selector:                 run=load-balancer-example
+   Type:                     NodePort
+   IP Family Policy:         SingleStack
+   IP Families:              IPv4
+   IP:                       10.98.187.149
+   IPs:                      10.98.187.149
+   Port:                     <unset>  8080/TCP
+   TargetPort:               8080/TCP
+   NodePort:                 <unset>  31417/TCP
+   Endpoints:                172.17.0.3:8080,172.17.0.4:8080
+   Session Affinity:         None
+   External Traffic Policy:  Cluster
+   Events:                   <none>
+   ```
 
+   注意服务中的 NodePort 值。例如在上面的输出中，NodePort 是 31417。
 
+   或通过：
 
+   ```shell
+   kubectl get service -o wide
+   ```
 
+   输出：
 
+   ```shell
+   example-service   NodePort    10.98.187.149   <none>        8080:31417/TCP   10m   run=load-balancer-example
+   kubernetes        ClusterIP   10.96.0.1       <none>        443/TCP          70m   <none>
+   ```
 
+6. 列出运行 Hello World 应用的 Pod：
 
+   ```shell
+   kubectl get pods --selector="run=load-balancer-example" --output=wide
+   ```
 
+   输出类似于：
+
+   ```shell
+   NAME                           READY   STATUS    ...  IP           NODE
+   hello-world-2895499144-bsbk5   1/1     Running   ...  10.200.1.4   worker1
+   hello-world-2895499144-m1pwt   1/1     Running   ...  10.200.2.5   worker2
+   ```
+
+7. 获取运行 Hello World 的 pod 的其中一个节点的公共 IP 地址。如何获得此地址取决于你设置集群的方式。 例如，如果你使用的是 Minikube，则可以通过运行 `kubectl cluster-info` 来查看节点地址。 如果你使用的是 Google Compute Engine 实例，则可以使用 `gcloud compute instances list` 命令查看节点的公共地址。
+
+   输出：
+
+   ```shell
+   ben@ben-virtual-machine:~/Softwares/kubectl/config$ kubectl cluster-info
+   Kubernetes control plane is running at https://192.168.49.2:8443
+   CoreDNS is running at https://192.168.49.2:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+   
+   To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+   ```
+
+   192.168.49.2 即为公共IP。
+
+   
+
+8. 在你选择的节点上，创建一个防火墙规则以开放节点端口上的 TCP 流量。 例如，如果你的服务的 NodePort 值为 31568，请创建一个防火墙规则以允许 31568 端口上的 TCP 流量。 不同的云提供商提供了不同方法来配置防火墙规则。
+
+9. 使用节点地址和 node port 来访问 Hello World 应用：
+
+    ```shell
+    curl http://<public-node-ip>:<node-port>
+    #本例为：
+    curl http://192.168.49.2:31417
+    Hello Kubernetes!
+    ```
+
+    这里的 `<public-node-ip>` 是你节点的公共 IP 地址，`<node-port>` 是你服务的 NodePort 值。 对于请求成功的响应是一个 hello 消息：
+
+    ```shell
+    Hello Kubernetes!
+    ```
+
+    通过如下命令，也可以查看访问地址：
+
+    ```shell
+    ben@ben-virtual-machine:~/Softwares/kubectl/config$ minikube service example-service
+    |-----------|-----------------|-------------|---------------------------|
+    | NAMESPACE |      NAME       | TARGET PORT |            URL            |
+    |-----------|-----------------|-------------|---------------------------|
+    | default   | example-service |        8080 | http://192.168.49.2:31417 |
+    |-----------|-----------------|-------------|---------------------------|
+    * Opening service default/example-service in default browser...
+    ```
+
+## 使用服务配置文件
+
+作为 `kubectl expose` 的替代方法，你可以使用 [服务配置文件](https://kubernetes.io/zh/docs/concepts/services-networking/service/) 来创建服务。
+
+## 清理现场
+
+想要删除服务，输入以下命令：
+
+```shell
+kubectl delete services example-service
+# 或
+kubectl delete -f hello-service.yaml
+```
+
+想要删除运行 Hello World 应用的 Deployment、ReplicaSet 和 Pod，输入以下命令：
+
+```shell
+kubectl delete deployment hello-world
+# 或
+kubectl delete -f hello-application.yaml
+```
+
+-----
+
+通过 kubectl describe 可以查看example-service 与 Pod 的对应关系。<https://www.cnblogs.com/shuaiyin/p/11070096.html>
+
+```shell
+kubectl describe service example-service
+kubectl get pod -o wide
+```
+
+输出：
+
+```shell
+ben@ben-virtual-machine:~/Softwares/kubectl/config$ kubectl describe service example-service
+Name:                     example-service
+Namespace:                default
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 run=load-balancer-example
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.98.187.149
+IPs:                      10.98.187.149
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  31417/TCP
+Endpoints:                172.17.0.3:8080,172.17.0.4:8080
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+ben@ben-virtual-machine:~/Softwares/kubectl/config$ kubectl get pod -o wide
+NAME                           READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+hello-world-5d4489bdb7-4jm77   1/1     Running   0          21m   172.17.0.3   minikube   <none>           <none>
+hello-world-5d4489bdb7-r8lcp   1/1     Running   0          21m   172.17.0.4   minikube   <none>           <none>
+```
+
+Endpoints 罗列了两个 Pod 的 IP 和端口。我们知道 Pod 的 IP 是在容器中配置的，那么 Service 的 Cluster IP 又是配置在哪里的呢？CLUSTER-IP 又是如何映射到 Pod IP 的呢？
+
+答案是 iptables
+
+-------------
 
 
 

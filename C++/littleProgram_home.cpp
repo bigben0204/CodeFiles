@@ -1,4 +1,53 @@
 //------------------------------------------------------------------------------------------------
+// 打印自定义类型
+// Message.h
+#include <iosfwd>
+#include <string>
+
+class Message {
+public:
+    Message(const std::string& m) : message_(m) {}
+
+    friend std::ostream& operator<<(std::ostream& os, Message& obj) {
+        return obj.printObject(os);
+    }
+
+private:
+    std::string message_;
+
+    std::ostream& printObject(std::ostream& os);
+};
+
+// Message.cpp
+#include "Message.h"
+#include <iostream>
+#include <string>
+
+std::ostream& Message::printObject(std::ostream& os) {
+    os << "This is my very nice message: " << std::endl;
+    os << message_;
+    return os;
+}
+
+// main.cpp
+#include "Message.h"
+
+#include <cstdlib>
+#include <iostream>
+
+int main() {
+    Message say_hello("Hello, CMake World!");
+    std::cout << say_hello << std::endl;
+    Message say_goodbye("Goodbye, CMake World");
+    std::cout << say_goodbye << std::endl;
+    return EXIT_SUCCESS;
+}
+// 输出：
+This is my very nice message: 
+Hello, CMake World!
+This is my very nice message: 
+Goodbye, CMake World
+//------------------------------------------------------------------------------------------------
 // c++ class类型如何作为另一个类的成员 https://www.zhihu.com/question/419982799/answer/1461745869
 #include <iostream>
 #include <functional>
