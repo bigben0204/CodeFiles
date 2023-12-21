@@ -1,4 +1,3181 @@
 //------------------------------------------------------------------------------------------------
+// for循环优化 https://blog.csdn.net/everydaynews/article/details/135040174?utm_source=miniapp_weixin
+#include <iostream>
+#include "timer.h"
+
+// 计算n的阶乘
+__attribute__((noinline))
+int calc(int n)
+{
+    int fact = 1;
+    for (int i = 1; i <= n; ++i) {
+        fact *= i;
+    }
+    return fact;
+}
+
+__attribute__((noinline))
+int calcExpand(int n)
+{
+    int fact0 = 1, fact1 = 1, fact2 = 1, fact3 = 1;
+    for (int i = 1; i <= n; i = i + 4) {
+        fact0 *= i;
+        fact1 *= i + 1;
+        fact2 *= i + 2;
+        fact3 *= i + 3;
+    }
+    return fact0 * fact1 * fact2 * fact3;
+}
+
+__attribute__((noinline))
+int calc4Times(int n)
+{
+    int fact = 1;
+    for (int i = 1; i <= n; i = i + 4) {
+        fact *= i;
+        fact *= i + 1;
+        fact *= i + 2;
+        fact *= i + 3;
+    }
+    return fact;
+}
+
+int main(int argc, char* argv[])
+{
+    int n = 1000000000;
+    if (argc == 2) {
+        n = std::stoi(argv[1]);
+    }
+
+    {
+        Timer timer;
+        std::cout << calc(n) << std::endl;
+    }
+    
+    {
+        Timer timer;
+        std::cout << calcExpand(n) << std::endl;
+    }
+
+    {
+        Timer timer;
+        std::cout << calc4Times(n) << std::endl;
+    }
+    return 0;
+}
+// 输出：
+0
+Elapse time : 3.77504s
+0
+Elapse time : 0.797523s
+0
+Elapse time : 1.36245s
+// 增加-O3优化选项后add_compile_options(-O3)，再运行：
+0
+Elapse time : 0.836877s
+0
+Elapse time : 0.186382s
+0
+Elapse time : 0.509822s
+// 去掉-O3，在int变量前增加register，再运行，性能接近-O3选项：
+0
+Elapse time : 0.770656s
+0
+Elapse time : 0.247247s
+0
+Elapse time : 0.736393s
+
+背景知识：CPU内部架构
+指令流水线(pipeline)
+所谓流水线，是把指令的执行过程分成多个阶段，每个阶段使用CPU内部不同的硬件资源来完成。以经典的5级流水线为例，一条指令的执行被分为5个阶段：
+? 取指(IF)：从内存中取出一条指令。
+? 译码(ID)：对指令进行解码，确定该指令要执行的操作。
+? 执行(EX)：执行该指令要执行的操作。
+? 访存(MEM)：进行内存访问操作。
+? 写回(WB)：把执行的结果写回寄存器或内存。
+在时钟信号的驱动下，CPU依次来执行这些步骤，这就构成了指令流水线(pipeline)。如下图所示：
+在CPU内部，执行每个阶段使用不同的硬件资源，从而可以让多条指令的执行时间相互重叠。当第一条指令完成取指，进入译码阶段时，第二条指令就可以进入取指阶段了。以此类推，在一个5级流水线中，理想情况下，可以有5条不同的指令的不同阶段在同时执行，因此每个时钟周期都会有一条指令完成执行，从而大大提高了CPU执行指令的吞吐率，从而提高CPU整体性能。这就叫做ILP - 指令级并行（Instruction Level Parallelism）。如下图所示：
+通过把指令执行分为多个阶段，CPU每个时钟周期只处理一个阶段的工作，这样大大简化了CPU内部负责每个阶段的功能单元，每个时钟周期要做的事情少了，提高时钟频率也变得简单了。
+
+前面说过，有了流水线技术，理想情况下，每个时钟周期，CPU可以完成一条指令的执行。那有没有什么方法，可以让CPU在每个时钟周期，完成多条指令的执行呢，这岂不是会大大提高CPU整体性能吗？
+当然有！这就是Superscalar技术！（除此之外还有VLIW，不是本文重点，不再展开讨论。）
+
+超标量(Superscalar)
+Superscalar，通过在CPU内部实现多条指令流水线，可以真正实现多条命令并行执行，也被称为多发射数据通路技术。以双发射流水线为例，每个时钟周期，CPU可以同时读取两条指令，然后同时对这两条指令进行译码，同时执行，然后同时写回。如下图所示：
+目前为止，这一切看起来都很完美，对吧？然而，现实往往没有理想那么丰满！接着往下看吧。
+
+流水线冲突
+大家可能注意到了，前面多次强调过，“在理想状态下”，为什么呢？
+
+现实中程序的指令序列之间往往存在各种各样的依赖和相关性，而CPU为了解决这种指令间的依赖和相关性，有时候不得不“停顿”下来，直到这些依赖得到解决，这就导致CPU指令流水线无法总是保持“全速运行”。
+这种现象被称之为Pipeline Hazard，很多资料翻译为“流水线冒险”，我觉得“流水线冲突”更为贴切易懂。
+归结起来，有三种情况：
+? 数据冲突(Data Hazard)
+? 控制冲突(Control Hazard)
+? 结构冲突(Structure Hazard)
+下面分别举例解释这三种类型的冲突。
+数据冲突
+所谓数据冲突，简单讲，就是两条在流水线中并行执行的指令，第二条指令需要用到第一条指令的执行结果，因此第二条指令的执行不得不暂停，一直到可以获取到第一条指令的执行结果为止。
+比如，用伪代码举例：
+x = 1;
+y = x;
+要对y进行赋值，必须要先得到x的值，因此这两条语句无法完全并行执行。
+这只是其中的一种典型情况，其他情况不再赘述。
+
+控制冲突
+所谓控制冲突，简单讲，就是在CPU在执行分支跳转时，无法预知下一条要执行的指令。
+比如：
+if(a > 100) {
+    x = 1;
+} else {
+    y = 2;
+}
+在CPU计算出a > 100这个条件是否成立之前，无法确定接下来是应该执行x = 1 还是执行 y = 2。
+为了解决这个问题，CPU可以简单的让流水线停顿一直到确定下一条要执行的指令，也可以采取如分支预测(branch prediction)和推测执行(speculation execution)等手段，但是，预测失败的话，流水线往往会受到比较严重的性能惩罚。之后会有专门的文章分析这个问题，感兴趣的话，可以右上角关注一下！
+
+结构冲突
+结构冲突，简单来说，就是多条指令同时竞争同一个硬件资源，由于硬件资源短缺，无法同时满足所有指令的执行请求。如两条并行执行的命令需要同时访问内存，而内存地址译码单元可能只有一个，这就产生了结构冲突。
+有了上面这些基础知识做铺垫，接下来就可以开始真正分析这个问题了。
+
+test.c为什么性能最差？
+对于计算阶乘，test.c可能是最简单直观、可读性最强的算法。不过可惜的是，它也是性能最差的。
+
+我们再看一下test.c的源码：
+说它性能最差，主要有三点原因：
+1. 热点路径无用指令太多。
+2. 热点路径跳转指令太多。
+3. 热点路径内存访问太多。
+注意，这里说的无用指令，是指对计算阶乘本身不产生直接影响的指令，但是它们对整个算法的正确性仍然是必不可少的！
+为例方便理解，我们来分别看下test.c不加优化选项和加了-O3编译之后的汇编代码。
+test.c不加优化选项时
+先是不加优化选项的：
+绿色方框标注出来的8 ~ 14行是for循环，也就是主循环体。其中，蓝色方框标注出来的8 ~ 11行是真正计算阶乘的代码，12 ~ 14行是循环控制代码，对计算阶乘来说，则是无用代码。
+不难看出：
+1. 热点路径上，也就是循环体内无用指令占比是3/7 = 42%！即便在不考虑其他因素的情况下，CPU单单用来执行这些无用的指令，也是一笔不小的开销！
+2. 整个阶乘计算过程中，循环体内需要执行1000000000次条件跳转指令！条件跳转又会造成控制冲突，使得流水线无法全速运行，从而造成巨大的性能损失。
+3. 整个函数一共有10个内存访问操作，而循环体内就有6个内存操作！尽管很多时候可以通过Cache来缓解，但相对于CPU计算速度来说，内存操作仍然是非常慢的，而且容易造成流水线冲突！
+那加了-O3优化选项之后，编译器能不能帮我们解决这些问题呢？
+test.c加了-O3优化选项后
+现在我们看下加了-O3之后的汇编代码：
+首先，不得不感叹，现在的编译器的优化真的是太强大了！直接把整个for循环优化成了4条指令！
+不难看出，对于test.c而言，加了-O3之后，GCC做的最大的优化是把所有变量存放在寄存器中，消除了所有的内存访问操作！
+可以回过头去看下优化之前的汇编代码，整个函数一共有10个内存访问操作，其中6个是在循环体内，而加了-O3之后，整个函数没有任何内存访问操作！难怪-O3编译后性能提升那么多！由此可见，内存访问相对寄存器访问的开销实在是太大了！当然，即便不使用-O3，也有优化内存操作的办法，这个后面再讲。
+但是，也不难看出，对于其他两个问题，GCC并没有帮我们解决：现在无用指令占比是 2/4 = 50%! 整个阶乘计算过程，仍然需要执行1000000000次条件跳转指令，仍然无法充分发挥流水线和superscalar的指令并行执行能力！
+
+知道了test.c性能差的原因之后，现在我们来看看，通过手动循环展开，test_2.c又帮我们解决什么问题呢？
+test_2.c性能提升原因
+再看下test_2.c的源码：
+通过对循环进行4次展开，之前每次循环执行1次乘法，现在每次循环执行4次，这就带来了三点很重要的变化：
+1. 循环次数减少75%，无用指令减少了，相应的CPU执行这些指令本身的开销也少了。
+2. 计算过程中，热点路径的条件跳转指令少了75%，这样就减少了由于控制相关引起的流水线冲突，提升了流水线执行的效率。
+3. 提升了指令的并行度，使得CPU superscalar的技术得到更充分的发挥，提高了每个时钟周期并行执行指令的条数。
+这也就是为什么在使用同样的编译选项时，test_2.c比test.c的性能提升了200%！不过，热点路径上内存访问操作太多的问题仍然存在。其实，这个其实很好解决，我会在下文给出解决方法。我们先把注意力放在这里所说的三点变化上。
+对于第1点和第2点，有了前面介绍的指令流水线的背景知识，即便从C语言的角度也很好理解，不需要过多解释。
+
+至于第3点，为了便于理解，我们和test_3.c对比来看。
+test_3.c性能差的原因
+再看下test_3.c的代码:
+test_3.c虽然也把循环进行了4次展开，但是展开的方式和test_2.c是不一样的。
+test_2.c是这样展开的：
+fact0 *= i;
+fact1 *= i + 1;
+fact2 *= i + 2;
+fact3 *= i + 3;
+
+而test_3.c则是这样做的：
+fact *= i;
+fact *= i + 1;
+fact *= i + 2;
+fact *= i + 3;
+很明显，后面一条指令执行前，必须要先知道前面一条语句计算的结果。还记得前面讲过的造成流水线冲突的三个原因吗？这就是典型的数据依赖，会造成流水线冲突！
+可见，虽然test_3.c也通过循环展开，减少了无用指令，也减少了热点路径上分支跳转引起的流水线控制冲突，但它同时引入了数据依赖，进而导致流水线冲突，仍然无法发挥流水线和superscalar的指令级并行执行的能力！
+这就是为什么，用同样的选项编译时，test_3.c虽然比未经过循环展开的test.c性能稍微提升了一点点，但相比同样循环展开且没有引入数据相关性的test_2.c来说，性能仍然是非常差的！
+
+最后，来看一下前面遗留的那个问题：不加优化选项的情况下，怎么解决热点路径内存访问过多的问题。
+杀手锏：优化热点路径内存访问
+其实很简单，只需要把test_2.c中定义局部变量的时候加上register关键字就可以了：
+C语言中，register关键字的作用是建议编译器，尽可能地把变量存放在寄存器中，以加快其访问速度。
+我们现在看下，加了register关键字后，test_2.c的性能如何呢？
+为方便对比，我们再看下添加register之前，test_2.c的耗时：
+然后是加了register关键字之后的耗时：
+看到差异了吧，相差3倍！加了register后，几乎达到了和加-O3优化选项一样的性能！
+当然，register的使用还有很多限制，而且它只是给编译器的一种建议，不是强制要求，编译器只能尽量满足，当变量太多，寄存器不够用的时候，还是不得不把变量放到栈中，这和-O3的行为是一样的。
+register不是本文重点，限于篇幅，不再赘述。
+
+小结
+循环展开是一种非常重要的优化方法，也是编译器后端中常用的一种优化方式，它可以通过减少热点路径上的“无用指令”以及分支指令的个数，来更好地发挥CPU指令流水线的指令并行执行能力，从而提高程序整体性能。
+很多时候，我们可以借助编译器来帮我们实现这种优化，但编译器也有失效的时候，比如文中这个例子。这时，我们就不得不手动来进行循环展开来优化程序性能。循环展开时，必须尽量减少语句间的相互依赖。
+此外，循环展开的次数并没有一个固定的公式，需要根据具体代码和CPU来决定，通常需要多次尝试来找到一个最优值。
+不过，手动循环展开往往是以牺牲代码可读性为代价的，因此使用时也做好取舍。此外，循环展开还会在一定程度上增加程序代码段的大小，还可能会影响到程序局部性，对cache产生影响，因此使用时候，要仔细权衡。
+//------------------------------------------------------------------------------------------------
+// 虚基类 https://blog.csdn.net/jia0511/article/details/7699472 https://blog.csdn.net/weixin_44696891/article/details/128753115
+虚基类的构造函数
+前面讲过，为了初始化基类的子对象，派生类的构造函数要调用基类的构造函数。对于虚基类来讲，由于派生类的对象中只有一个虚基类子对象。为保证虚基类子对象只被初始化一次，这个虚基类构造函数必须只被调用一次。
+由于继承结构的层次可能很深，规定将在建立对象时所指定的类称为最派生类。
+C++规定，虚基类子对象是由最派生类的构造函数通过调用虚基类的构造函数进行初始化的。如果一个派生类有一个直接或间接的虚基类，那么派生类的构造函数的成员初始列表中必须列出对虚基类构造函数的调用。如果未被列出，则表示使用该虚基类的缺省构造函数来初始化派生类对象中的虚基类子对象。
+从虚基类直接或间接继承的派生类中的构造函数的成员初始化列表中都要列出这个虚基类构造函数 的调用。但是，只有用于建立对象的那个最派生类的构造函数调用虚基类的构造函数，而该派生类的基类中所列出的对这个虚基类的构造函数调用在执行中被忽略，这样便保证了对虚基类的对象只初始化一次。
+C++又规定，在一个成员初始化列表中出现对虚基类和非虚基类构造函数的调用，则虚基类的构造函数先于非虚基类的构造函数的执行。
+
+#include <iostream>
+
+class Person {
+public:
+    Person(const std::string& name, char sex, int age) : name_(name), sex_(sex), age_(age) {
+        std::cout << "Person Constructor" << std::endl;
+    }
+
+    virtual ~Person() noexcept = default;
+
+protected:
+    std::string name_;
+    char sex_;
+    int age_;
+};
+
+class Teacher : virtual public Person {
+public:
+    Teacher(const std::string& name, char sex, int age, const std::string& title) : Person(name, sex, age),
+                                                                                    title_(title) {
+        std::cout << "Teacher Constructor" << std::endl;
+    }
+
+    virtual ~Teacher() noexcept override = default;
+
+protected:
+    std::string title_;
+};
+
+class Student : virtual public Person {
+public:
+    Student(const std::string& name, char sex, int age, float score) : Person(name, sex, age), score_(score) {
+        std::cout << "Student Constructor" << std::endl;
+    }
+
+    virtual ~Student() noexcept override = default;
+
+protected:
+    float score_;
+};
+
+class Graduate : public Teacher, public Student {
+public:
+    // 这里不显示指定Person构造，则报错：error: no matching function for call to 'Person::Person()'
+    // 如果不指定virtual继承，则这里指定Person构造，则报错：error: type 'Person' is not a direct base of 'Graduate'
+    Graduate(const std::string& name, char sex, int age, const std::string& title, float score, float wage) : Teacher(
+        name, sex, age, title), Student(name, sex, age, score), Person(name, sex, age), wage_(wage) {
+        std::cout << "Graduate Constructor" << std::endl;
+    }
+
+    void show() {
+        std::cout << "name: " << name_ << std::endl;
+        std::cout << "age: " << age_ << std::endl;
+        std::cout << "sex: " << sex_ << std::endl;
+        std::cout << "score: " << score_ << std::endl;
+        std::cout << "title: " << title_ << std::endl;
+        std::cout << "wage: " << wage_ << std::endl;
+    }
+
+private:
+    float wage_;
+};
+
+int main() {
+    Graduate graduate("Lilei", 'M', 24, "assistant", 98, 12688);
+    graduate.show();
+    return 0;
+}
+//
+Person Constructor
+Teacher Constructor
+Student Constructor
+Graduate Constructor
+name: Lilei
+age: 24
+sex: M
+score: 98
+title: assistant
+wage: 12688
+//------------------------------------------------------------------------------------------------
+// 私有继承 https://blog.csdn.net/feng19870412/article/details/128976631
+#include <iostream>
+
+class Base {
+public:
+    void publicShow() {
+        std::cout << __func__ << std::endl;
+    }
+
+protected:
+    void protectedShow() {
+        std::cout << __func__ << std::endl;
+    }
+
+private:
+    void privateShow() {
+        std::cout << __func__ << std::endl;
+    }
+};
+
+class Derived : private Base {  // 相当于把Base的public和protected变成Derived的private。而原先Base里的private本来也无法访问，各种继承类型都访问不到Base的private函数和变量
+public:
+    void publicShowDerived() {
+        std::cout << __func__ << std::endl;
+        publicShow();
+        protectedShow();
+//        privateShow(); 无法访问，各种继承均报错：error: 'void Base::privateShow()' is private within this context
+    }
+};
+
+int main() {
+    Base base;
+    base.publicShow();
+
+    Derived derived;
+    derived.publicShowDerived();
+    return 0;
+}
+//
+publicShow
+publicShowDerived
+publicShow
+protectedShow
+//------------------------------------------------------------------------------------------------
+// 实现shared_ptr
+// 自己写的
+#include <iostream>
+#include <atomic>
+#include <memory>
+
+template<typename T>
+class SharedPtr {
+public:
+    SharedPtr(T* o) : o_(o), count_(new std::atomic_int(1)) {
+        std::cout << "SharedPtr() new o_: " << *o_ << ", new count_(1)" << std::endl;
+    }
+
+    SharedPtr(const SharedPtr<T>& other) : o_(other.o_), count_(other.count_) {
+        ++(*count_);
+    }
+
+    SharedPtr& operator=(const SharedPtr<T>& other) {
+        if (&other == this) {
+            return *this;
+        }
+
+        if (*count_ != 0) {
+            decreaseCount();
+        }
+
+        o_ = other.o_;
+        count_ = other.count_;
+        ++(*count_);
+        return *this;
+    }
+
+    ~SharedPtr() {
+        decreaseCount();
+    }
+
+    T* get() const {
+        return o_;
+    }
+
+    int use_count() const {
+        return *count_;
+    }
+
+    void reset(T* o = nullptr) {
+        decreaseCount();
+        o_ = o;
+        if (o_ != nullptr) {
+            count_ = new std::atomic_int(1);
+            std::cout << "new o_: " << *o_ << ", reset() new count_(1)" << std::endl;
+        }
+    }
+
+    T* release() {
+        --(*count_);
+        if (*count_ == 0) {
+            delete count_;
+            count_ = nullptr;
+            std::cout << "release() detele count_" << std::endl;
+        }
+
+        T* o = o_;
+        o_ = nullptr;
+        return o;
+    }
+
+    T& operator*() const {
+        return *o_;
+    }
+
+    T* operator->() const {
+        return o_;
+    }
+
+private:
+    void decreaseCount() {
+        --(*count_);
+        if (*count_ == 0) {
+            std::cout << "decreaseCount() delete o_ and delete count_. o_: " << *o_ << std::endl;
+
+            delete o_;
+            o_ = nullptr;
+
+            delete count_;
+            count_ = nullptr;
+        }
+    }
+
+private:
+    T* o_;
+    std::atomic_int* count_;
+};
+
+int main() {
+    SharedPtr<int> pInt1(new int(10));
+    std::cout << pInt1.use_count() << std::endl;
+    SharedPtr<int> pInt2(pInt1);
+    std::cout << pInt1.use_count() << std::endl;
+
+    pInt2 = pInt1;
+    std::cout << pInt1.use_count() << std::endl;
+
+    pInt2.reset();
+    std::cout << pInt1.use_count() << std::endl;
+
+    pInt1.reset(new int(11));
+    std::cout << pInt1.use_count() << std::endl;
+
+    pInt2 = pInt1;
+    std::cout << pInt2.use_count() << std::endl;
+
+    std::cout << *pInt1 << std::endl;
+    return 0;
+}
+// 输出：
+1
+2
+2
+1
+decreaseCount() delete o_ and delete count_. o_: 10
+new o_: 11, reset() new count_(1)
+1
+2
+11
+decreaseCount() delete o_ and delete count_. o_: 11
+
+
+// 源码：
+// https://blog.csdn.net/Huuaaaaa/article/details/128660585 
+// https://blog.csdn.net/weixin_43798887/article/details/116464334
+
+//------------------------------------------------------------------------------------------------
+// 在shared_ptr源码中看到release方法中调用的：delete this
+#include <iostream>
+#include <vector>
+
+class Base {
+public:
+    virtual ~Base() noexcept {
+        std::cout << "~Base()" << std::endl;
+        // delete this; // 死循环
+    };
+
+    virtual void destroy() {
+        delete this;
+    }
+
+    virtual void show() {
+        std::cout << "Base() show()" << std::endl;
+    }
+
+    void display() {
+        std::cout << "Base() display()" << std::endl;
+    }
+
+    void print() {
+        std::cout << "i: " << i_ << std::endl;
+    }
+
+private:
+    int i_ = 100;
+};
+
+class Derived : public Base {
+public:
+    ~Derived() noexcept override {
+        std::cout << "~Derived()" << std::endl;
+    }
+
+//    void destroy() override {  // 是否重写destroy，效果一样 https://www.jianshu.com/p/d0cdc115e1e9
+//        delete this;
+//    }
+    virtual void show() {
+        std::cout << "Derived() show()" << std::endl;
+    }
+};
+
+int main() {
+    Base* base = new Derived;
+    base->print();
+    base->destroy();  // 效果同：delete base;
+    base->display(); // 正常打印：Base() display()
+    base->print();  // 未定义：i: 2072043688
+    base->show();  // 异常退出：exit code 139
+    return 0;
+}
+// 
+i: 100
+~Derived()
+~Base()
+Base() display()
+i: 2072043688
+
+delete删除的是内存中数据段内容（包括堆，类对象的数据成员和虚函数表指针），不包含代码内容，类的成员函数单独存放在代码段中。所以只要不调用虚函数和数据成员变量，就可以在deletethis之后继续调用类的成员函数。
+
+
+// 参考：https://www.jianshu.com/p/d0cdc115e1e9
+1. delete 执行了哪些步骤？
+在对类指针使用delete时，实际发生了两个步骤。
+A:先是调用该类的析构函数，以做数据成员的释放工作，以及一些finish code，这一切由程序员自己定义。
+B:然后再调用operator delete(void*)释放该对象实例的内存数据。这是一个对象在消亡之前的所做的最后动作。一般不要override这个函数，如果要，务必记住最后调用系统的::operator delete真正释放该对象所占用的内存。
+一般来说，内存释放释放的只能是数据段的内容（包括堆和栈，但释放栈上的内存由系统进行），而代码段的内存，除一些病毒攻击等非正常强行改写手段外，在内存中是永远不会释放/改变的，直到程序结束，因此在内存释放后也是可以访问的。所以，一般所谓的释放内存delete操作，是在数据段进行的释放。
+
+2. 在类的成员函数中调用delete this
+在类的成员函数中能不能调用delete this？答案是肯定的，能调用，而且很多老一点的库都有这种代码。假设这个成员函数名字叫release，而delete this就在这个release方法中被调用，那么这个对象在调用release方法后，还能进行其他操作，如调用该对象的其他方法么？答案仍然是肯定 的，调用release之后还能调用其他的方法，但是有个前提：被调用的方法不涉及这个对象的数据成员和虚函数。说到这里，相信大家都能明白为什么会这样 了。
+
+根本原因在于delete操作符的功能和类对象的内存模型。当一个类对象声明时，系统会为其分配内存空间。在类对象的内存空间中，只有数据成员和虚函数表指针，并不包含代码内容，类的成员函数单独放在代码段中。在调用成员函数时，隐含传递一个this指针，让成员函数知道当前是哪个对象在调用它。当 调用delete this时，类对象的内存空间被释放。在delete this之后进行的其他任何函数调用，只要不涉及到this指针的内容，都能够正常运行。一旦涉及到this指针，如操作数据成员，调用虚函数等，就会出现不可预期的问题。
+
+为什么是不可预期的问题？delete this之后不是释放了类对象的内存空间了么，那么这段内存应该已经还给系统，不再属于这个进程。照这个逻辑来看，应该发生指针错误，无访问权限之类的令系统崩溃的问题才对啊？这个问题牵涉到操作系统的内存管理策略。delete this释放了类对象的内存空间，但是内存空间却并不是马上被回收到系统中，可能是缓冲或者其他什么原因，导致这段内存空间暂时并没有被系统收回。此时这段内存是可以访问的，你可以加上100，加上200，但是其中的值却是不确定的。当你获取数据成员，可能得到的是一串很长的未初始化的随机数；访问虚函数表，指针无效的可能性非常高，造成系统崩溃。
+
+大致明白在成员函数中调用delete this会发生什么之后，再来看看另一个问题，如果在类的析构函数中调用delete this，会发生什么？实验告诉我们，会导致堆栈溢出。原因很简单，delete的本质是“为将被释放的内存调用一个或多个析构函数，然后，释放内存” (来自effective c++)。显然，delete this会去调用本对象的析构函数，而析构函数中又调用delete this，形成无限递归，造成堆栈溢出，系统崩溃。
+
+// https://blog.csdn.net/dell17951/article/details/82883972/
+C++中”delete this”的注意事项
+你必须100%绝对确保”this”对象是通过new分配的（不是通过new[]，不是placement new，不是栈上的局部对象，不是全局对象，不是另一个对象的数据成员；仅仅只是通过原始的new运算符）
+你必须100%绝对确保调用”delete this”操作的成员函数是最后调用的成员函数
+你必须100%绝对确保在当前函数中”delete this”后，调用的其他成员函数不会读取”this”对象。
+你必须100%确保再也不会使用”this”指针。即使你使用this指针和其他指针比较，例如nullptr，打印this指针，转换this指针等等。
+//------------------------------------------------------------------------------------------------
+// trim函数
+std::string trim(std::string& str, const std::string& chars = " \r\n\t") {
+    if (str.empty()) {
+        return str;
+    }
+    str.erase(0, str.find_first_not_of(chars));
+    str.erase(str.find_last_not_of(chars) + 1);
+    return str;
+}
+//------------------------------------------------------------------------------------------------
+// nan https://vimsky.com/examples/usage/cpp-tutorial-nan-function-with-example-02.html https://blog.csdn.net/weixin_45579645/article/details/131963055
+#include <cmath>
+TEST(Test, TestLineBase) {
+    double n = nan("");
+    std::cout << isnan(n) << std::endl;  // 1
+}
+//------------------------------------------------------------------------------------------------
+// double比较 https://www.codenong.com/10420448/
+template<typename T>
+bool equalFloats(T lhs, T rhs) {
+    return std::fabs(lhs - rhs) < std::numeric_limits<T>::epsilon();
+}
+
+// 输出精度 https://blog.csdn.net/u013619254/article/details/50421182
+TEST(UtilsTest, TestTimeStampConvert) {
+    std::cout << 10.123456789 << "\n";  // 10.1235，默认共显示6位
+    std::cout << std::setiosflags(std::ios::fixed) << std::setprecision(6) << 10.123456789 << "\n";  // 10.123457，小数点后6位
+}
+
+//------------------------------------------------------------------------------------------------
+// 时间戳和日期相互转换 https://blog.csdn.net/e295166319/article/details/72846416
+// https://blog.csdn.net/weijianjain/article/details/129118102
+// https://linuxcpp.0voice.com/?id=16228
+// https://www.cnblogs.com/renjiashuo/p/6913668.html
+
+#include "gtest/gtest.h"
+
+int timeStrToStamp(const std::string& timeStr, const std::string& fmt = "%d-%d-%d %d:%d:%d") {
+    char* cha = (char*) timeStr.c_str();
+    tm tm_;
+    int year, month, day, hour, minute, second;
+    sscanf(cha, fmt.c_str(), &year, &month, &day, &hour, &minute, &second);
+    tm_.tm_year = year - 1900;
+    tm_.tm_mon = month - 1;
+    tm_.tm_mday = day;
+    tm_.tm_hour = hour;
+    tm_.tm_min = minute;
+    tm_.tm_sec = second;
+    tm_.tm_isdst = 0;
+    time_t t_ = mktime(&tm_);
+    return t_;
+}
+
+std::string timeStamp2Str(time_t timeStamp, const std::string& fmt = "%Y-%m-%d %H:%M:%S") {
+    struct tm* timeInfo = nullptr;
+    char buffer[80];
+    timeInfo = localtime(&timeStamp);
+    strftime(buffer, 80, fmt.c_str(), timeInfo);
+    return std::string(buffer);
+}
+
+TEST(UtilsTest, TestTimeStampConvert) {
+    std::string timeStr = "2017-01-05 12:13:14";
+    time_t timet = timeStrToStamp(timeStr);
+    std::cout << timet << std::endl;  // 1483589594
+    const std::string& expectTimeStr = timeStamp2Str(timet);
+    EXPECT_EQ(expectTimeStr, timeStr);
+}
+//------------------------------------------------------------------------------------------------
+// weak_ptr 使用
+#include <iostream>
+#include <vector>
+#include <memory>
+
+class Test {
+public:
+    int a = 1;
+    int b = 2;
+};
+
+int main() {
+    std::shared_ptr<Test> test = std::make_shared<Test>();
+    std::cout << test->a << std::endl;
+    std::cout << test->b << std::endl;
+    std::cout << "shared_ptr used_count(): " << test.use_count() << std::endl;
+
+    std::weak_ptr<Test> wTest = test;
+    auto test2 = wTest.lock();  // 使用lock()获取观察对象，会增加计数
+    std::cout << "shared_ptr used_count(): " << test.use_count() << std::endl;
+
+    // weak_ptr没有重载operator*和->，这是特意的，因为它不共享指针，不能操作资源，这是它弱的原因
+    std::cout << wTest.lock()->a << std::endl;
+    std::cout << wTest.lock()->b << std::endl;
+
+    test2.reset();
+    test.reset();
+    std::cout << wTest.lock().get() << std::endl; // 这时test中的Test*对象为null了，但shared_ptr对象不为空，由于还有弱引用对象，weak_count不为0，所以shared_ptr中管理T*的_Sp_counted_ptr对象还未删除
+    std::cout << wTest.lock().use_count() << std::endl;
+
+    return 0;
+}
+// 输出
+1
+2
+shared_ptr used_count(): 1
+shared_ptr used_count(): 2
+1
+2
+//------------------------------------------------------------------------------------------------
+// vector在push_back时会进行扩容，不一定在原先的地址，会导致迭代器失效
+// vector在push_back时会进行扩容，不一定在原先的地址，会导致迭代器失效
+int main() {
+    std::vector<int> ints = {1, 2, 3};  // size()和capacity()都是3
+    std::cout << ints.size() << std::endl; // 3
+    std::cout << ints.capacity() << std::endl; // 3
+    auto it = ints.begin();
+    std::cout << *it << std::endl;  // 1
+    ints.push_back(4);
+    std::cout << ints.capacity() << std::endl; // 6，2倍扩容
+    std::cout << *it << std::endl;  // 未知
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// C++指针比较 https://blog.csdn.net/fishhg/article/details/6410390 https://blog.csdn.net/nirendao/article/details/115103731
+对于没有继承关系的指针，指针比较的就是地址值。
+对于有继承关系的指针，C++指针比较的不是地址，而是对象同一性问题。即指针地址可以不同，而比较的结果却相同。
+这个问题用多重继承比较直观；存在一个从子类到任一个基类的预定义转化。一个基类的指针是与其派生类的指针＝＝的，并不是因为地址相同而是类型相同，因为派生类就是基类，就像班长就是学生一样。（这从更抽象的一个层次来对待指针）
+一个非常重要的经验，处理指向对象的引用或指针时，必须小心避免丢失类型信息（如把指针赋值给void*指针）。一旦复制到void *类型，就会
+去掉类型信息，编译器就别无他法，只好求助于原始地址比较了；而这样的比较对于指向类对象的指针来说，很少会是正确的。
+
+这个文章里有介绍：https://blog.csdn.net/noahzuo/article/details/51135968
+
+//
+#include <iostream>
+
+class Base1 {
+public:
+    virtual void func1() {}
+};
+
+class Base2 {
+public:
+    virtual void func2() {}
+};
+
+class Derived : public Base1, public Base2 {
+public:
+    virtual void func1() {}
+
+    virtual void func2() {}
+};
+
+int main() {
+    Derived derived, derived2;
+    Base1* pBase1 = &derived;
+    Base2* pBase2 = &derived;
+    Derived* pDerived = &derived;
+    Derived* pDerived2 = &derived2;
+
+    std::cout << "pBase1: " << pBase1 << "\n"
+              << "pBase2: " << pBase2 << "\n"
+              << "pDerived: " << pDerived << "\n"
+              << "pDerived2: " << pDerived2 << std::endl;
+    std::cout << "pBase1 == pDerived: " << std::boolalpha << (pBase1 == pDerived) << std::endl;
+    std::cout << "pBase2 == pDerived: " << std::boolalpha << (pBase2 == pDerived) << std::endl;
+    std::cout << "(uint64_t) pBase1 == (uint64_t) pBase2: " << std::boolalpha
+              << ((uint64_t) pBase1 == (uint64_t) pBase2) << std::endl;  // 指针是一个地址值，把地址值转成整数而已，这里对地址值转成的整数进行比较，直接比较指针，由于没有继承关系，无法进行比较，如下行
+//    std::cout << "pBase1 == pBase2: " << std::boolalpha << (pBase1 == pBase2) << std::endl;  // error: comparison between distinct pointer types 'Base1*' and 'Base2*' lacks a cast
+//    std::cout << "(uint64_t)(&derived) == pDerived: " << std::boolalpha << ((uint64_t)(&derived) == pDerived) << std::endl;  // error: ISO C++ forbids comparison between pointer and integer [-fpermissive]
+//    std::cout << "(int)(&derived) == pDerived: " << std::boolalpha << ((int)(&derived) == pDerived) << std::endl;  // error: cast from 'Derived*' to 'int' loses precision [-fpermissive]
+//    std::cout << "(ulong)(&derived) == pDerived: " << std::boolalpha << ((ulong)(&derived) == pDerived) << std::endl;  // error: ISO C++ forbids comparison between pointer and integer [-fpermissive]
+    std::cout << "pDerived > pDerived2: " << std::boolalpha << (pDerived > pDerived2)
+              << std::endl;  // On stack, address is allocated from high to low
+
+
+    // https://blog.csdn.net/afei198409/article/details/17416759?spm=1001.2101.3001.6650.1&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-17416759-blog-115103731.235%5Ev38%5Epc_relevant_anti_vip_base&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-1-17416759-blog-115103731.235%5Ev38%5Epc_relevant_anti_vip_base&utm_relevant_index=2
+    int i1 = 1, i2 = 1;
+    int* p1 = &i1;
+    int* p2 = &i1;
+    std::cout << "p1 == p2: " << std::boolalpha << (p1 == p2) << std::endl;  // true，指针值比较，均为i1地址，相同
+    int* p3 = &i2;
+    std::cout << "p1 == p3: " << std::boolalpha << (p1 == p3) << std::endl;  // false，指针值比较，i1和i2地址不同，不相同
+
+    // 如果单纯的是两个不相关的指针进行比较，一般编译不通过。 https://blog.csdn.net/yangxingpa/article/details/78779787
+    int name[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int* pName1 = name, * pName1_1 = pName1 + 8 - 1;
+    std::cout << "pName1 < pName1_1: " << std::boolalpha << (pName1 < pName1_1) << std::endl;  // pName1、pName1_1比较的就是地址。对于这两个指针，指向这个数组前面元素的指针小于指向后面元素的指针。不是根据指向的值。
+    int name2[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int* pName2 = name2;
+    std::cout << "pName1 > pName2: " << std::boolalpha << (pName1 > pName2) << std::endl;  // 栈地址从大到小分配
+    return 0;
+}
+// 
+pBase1: 0x7ffffcbd0
+pBase2: 0x7ffffcbd8
+pDerived: 0x7ffffcbd0
+pDerived2: 0x7ffffcbc0
+pBase1 == pDerived: true
+pBase2 == pDerived: true
+(uint64_t) pBase1 == (uint64_t) pBase2: false
+pDerived > pDerived2: true
+p1 == p2: true
+p1 == p3: false
+pName1 < pName1_1: true
+pName1 > pName2: true
+//------------------------------------------------------------------------------------------------
+// const char* 字符串常量比较 https://blog.csdn.net/m0_56844552/article/details/130643157
+const 修饰的字符串常量
+如果 const 用于修饰字符串常量，那么该字符串常量将存储在常量存储区（Constant Storage Area）。
+常量存储区是用于存储常量字符串和全局常量的特殊内存区域，其中的数据在程序运行期间保持不变。
+
+#include <iostream>
+
+int main() {
+    const char* p1 = "123456789";
+    const char* p2 = "123456789";
+    std::cout << std::boolalpha << (p1 == p2)  << std::endl;  // true
+    return 0;
+}
+
+// https://blog.csdn.net/mmindian/article/details/125991827
+"hello world"这个字符串被当作常量而且被放置在此程序的内存静态区。
+c为一个字符型指针，若为局部变量，则存储在栈内，该指针变量里面存了个地址，
+
+该地址为字符串中第一个字母h的地址。
+当使用printf()输出时，格式化时选择%s，会输出hello world，这是printf()遇到结尾符号'\0'即停止显示打印。
+
+字符串"hello world"是个常量，存储在一片连续的内存中，末尾有结尾符表示字符串的结束。
+
+所有的字符窜常量都被放在静态内存区。
+因为字符串常量很少需要修改，放在静态内存区会提高效率。
+
+char str1[] = "abcd";
+char str2[] = "abcd";
+ 
+const char str3[] = "abcd";
+const char str4[] = "abcd";
+ 
+const char *str5 = "abcd";
+const char *str6 = "abcd";
+ 
+char *str7 = "abcd";
+char *str8 = "abcd";
+ 
+cout << ( str1 == str2 ) << endl;
+cout << ( str3 == str4 ) << endl;
+cout << ( str5 == str6 ) << endl;
+cout << ( str7 == str8 ) << endl;
+结果是：0 0 1 1
+str1,str2,str3,str4是数组变量，它们有各自的内存空间；字符数组作为局部变量被存储在栈区；
+而str5,str6,str7,str8是指针，它们指向相同的常量区域。"abcd"被存储在静态数据区，而且是全局的。
+//------------------------------------------------------------------------------------------------
+// 函数运行用时统计模块 https://blog.csdn.net/u010323563/article/details/123958072
+
+//perf_time.h
+#ifndef GTEST_PROJECT_PERF_TIME_H
+#define GTEST_PROJECT_PERF_TIME_H
+
+#include <string>
+
+namespace PerfTime {
+// 耗时统计类型
+enum class PerfType {
+    PERF_E2E = 0, // 端到端类型，支持多线程
+    PERF_ACC      // 累加类型，支持多线程
+};
+
+void StartHit(PerfType type, const char* mark); // 开始打点
+void EndHit(PerfType type, const char* mark); // 结束打点
+void OutputReport(bool isOutputFile = false, const std::string& file = "", bool isOutputCmd = true); // 输出报告
+}
+
+#endif //GTEST_PROJECT_PERF_TIME_H
+
+
+//perf_time.cpp
+#include "perf_time.h"
+#include <string>
+#include <vector>
+#include <map>
+#include <mutex>
+#include <chrono>
+#include <algorithm>
+#include <numeric>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+namespace PerfTime {
+using UINT64 = unsigned long long;
+//using namespace std::chrono;
+
+// 打点类型
+struct HitInfo {
+    PerfType type;
+    UINT64 timePoint;
+    bool isStart = true;
+
+    HitInfo(UINT64 tp, PerfType type, bool isStart) : timePoint(tp), type(type), isStart(isStart) {}
+};
+
+// 统计数据
+struct StatisticsInfo {
+    UINT64 callCount;
+    UINT64 costTime;
+
+    StatisticsInfo(UINT64 call, UINT64 time) : callCount(call), costTime(time) {}
+};
+
+// 统计功能实现类
+class Interface {
+public:
+    static void StartHit(PerfType type, const std::string& mark);
+
+    static void EndHit(PerfType type, const std::string& mark);
+
+    static void OutputReport(bool isOutputFile, const std::string& file, bool isOutPutCmd);
+
+    static UINT64 GetSysTimePoint();
+
+private:
+    static std::map<std::string, StatisticsInfo> Cal();
+
+    static void InsertHitInfo(PerfType type, const std::string& mark, bool isStart);
+
+    static std::mutex mtRecord;
+    static std::map<std::string, std::vector<HitInfo>> record;
+};
+
+// 静态数据成员定义
+std::mutex Interface::mtRecord;
+std::map<std::string, std::vector<HitInfo>> Interface::record;
+
+UINT64 Interface::GetSysTimePoint() {
+    using namespace std::chrono;
+    return time_point_cast<std::chrono::microseconds>(steady_clock::now()).time_since_epoch().count();
+}
+
+void Interface::InsertHitInfo(PerfType type, const std::string& mark, bool isStart) {
+    auto tp = GetSysTimePoint();
+    std::lock_guard<std::mutex> lck(mtRecord);
+    record[mark].emplace_back(tp, type, isStart);
+}
+
+void Interface::StartHit(PerfType type, const std::string& mark) {
+    InsertHitInfo(type, mark, true);
+}
+
+void Interface::EndHit(PerfType type, const std::string& mark) {
+    InsertHitInfo(type, mark, false);
+}
+
+void Interface::OutputReport(bool isOutputFile, const std::string& file, bool isOutPutCmd) {
+    std::map<std::string, StatisticsInfo> res = Cal();
+    std::ostringstream oss;
+    int index = 0;
+    for (const auto& item: res) {
+        oss << ++index << ". " << item.first << "\n" << "CallCount: " <<
+            item.second.callCount << ", Time: " <<
+            item.second.costTime << " (microseconds) | " <<
+            item.second.costTime / 1000.0 << " (milliseconds) | " <<
+            item.second.costTime / (1000.0 * 1000.0) << " (seconds)\n";
+    }
+
+    if (isOutPutCmd) {
+        std::cout << oss.str() << std::flush;
+    }
+    
+    if (isOutputFile) {
+        std::ofstream ofs;
+        ofs.open(file, std::ofstream::out | std::ofstream::ate);
+
+        if (ofs.is_open()) {
+            ofs << oss.str() << std::flush;
+        }
+    }
+}
+
+std::map<std::string, StatisticsInfo> Interface::Cal() {
+    std::map<std::string, std::vector<HitInfo>> recordCp;
+    {
+        std::lock_guard<std::mutex> lck(mtRecord);
+        recordCp = record;
+    }
+
+    // 循环计算每个 mark 耗时信息
+    std::map<std::string, StatisticsInfo> res;
+    for (const auto& oneRecord: recordCp) {
+        std::vector<UINT64> startVec;
+        std::vector<UINT64> endVec;
+        const std::string& mark = oneRecord.first;
+        const std::vector<HitInfo>& hitInfos = oneRecord.second;
+        for (auto& hitInfo: hitInfos) {
+            if (hitInfo.isStart) {
+                startVec.push_back(hitInfo.timePoint);
+                continue;
+            }
+            endVec.push_back(hitInfo.timePoint);
+        }
+
+        // 简单校验打点数据是否为空
+        if (startVec.empty() || endVec.empty()) {
+            res.insert({mark, {0, 0}});
+        }
+
+        // 计算耗时
+        if (hitInfos.back().type == PerfType::PERF_E2E) {
+            // 端到端类型
+            UINT64 durTime = *(std::max_element(endVec.cbegin(), endVec.cend())) -
+                             *(std::min_element(startVec.cbegin(), startVec.cend()));
+            res.insert({mark, {1, durTime}});
+        } else {
+            // 累加类型
+            if (endVec.size() != startVec.size()) {
+                // 数据校验，开始打点和结束打点数量需要一致
+                res.insert({mark, {0, 0}});
+                continue;
+            }
+            UINT64 durTime = std::accumulate(endVec.cbegin(), endVec.cend(), 0) -
+                             std::accumulate(startVec.cbegin(), startVec.cend(), 0);
+            res.insert({mark, {endVec.size(), durTime}});
+        }
+    }
+    return res;
+}
+
+void StartHit(PerfType type, const char* mark) {
+    Interface::StartHit(type, mark);
+}
+
+void EndHit(PerfType type, const char* mark) {
+    Interface::EndHit(type, mark);
+}
+
+void OutputReport(bool isOutputFile, const std::string& file, bool isOutputCmd) {
+    Interface::OutputReport(isOutputFile, file, isOutputCmd);
+}
+}
+
+// main.cpp
+#include "perf_time.h"
+#include <thread>
+#include <chrono>
+
+void fun1() {
+    // 睡眠 200ms 模拟函数处理耗时
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+}
+
+void fun2() {
+    // 睡眠 150ms 模拟函数处理耗时
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
+void fun3() {
+    // 睡眠 100ms 模拟函数处理耗时
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
+void threadFun() {
+    PerfTime::StartHit(PerfTime::PerfType::PERF_ACC, "fun3_cost");
+    fun3();
+    PerfTime::EndHit(PerfTime::PerfType::PERF_ACC, "fun3_cost");
+}
+
+int main() {
+    PerfTime::StartHit(PerfTime::PerfType::PERF_E2E, "main");
+
+    // 端到端测试
+    PerfTime::StartHit(PerfTime::PerfType::PERF_E2E, "fun1_cost");
+    fun1();
+    PerfTime::EndHit(PerfTime::PerfType::PERF_E2E, "fun1_cost");
+
+    // 累加耗时测试
+    for (int i = 0; i < 5; ++i) {
+        PerfTime::StartHit(PerfTime::PerfType::PERF_ACC, "fun2_cost");
+        fun2();
+        PerfTime::EndHit(PerfTime::PerfType::PERF_ACC, "fun2_cost");
+    }
+
+    // 多线程测试
+    std::thread threads[10];
+    for (int i = 0; i < 10; ++i) {
+        threads[i] = std::thread(threadFun);
+    }
+    for (int i = 0; i < 10; ++i) {
+        if (threads[i].joinable()) {
+            threads[i].join();
+        }
+    }
+
+    PerfTime::EndHit(PerfTime::PerfType::PERF_E2E, "main");
+
+    // 输出报告
+    PerfTime::OutputReport(false, "d:\\report.txt", true);
+    return 0;
+}
+// 输出：
+1. fun1_cost
+CallCount: 1, Time: 187983 (microseconds) | 187.983 (milliseconds) | 0.187983 (seconds)
+2. fun2_cost
+CallCount: 5, Time: 559744 (microseconds) | 559.744 (milliseconds) | 0.559744 (seconds)
+3. fun3_cost
+CallCount: 10, Time: 1129089 (microseconds) | 1129.09 (milliseconds) | 1.12909 (seconds)
+4. main
+CallCount: 1, Time: 863237 (microseconds) | 863.237 (milliseconds) | 0.863237 (seconds)
+//------------------------------------------------------------------------------------------------
+// 模拟抛硬币，给定A一个序列，B使用哪个序列可以最大概率获胜。如A：DDDD，B选择：UDDD 最大概率获取
+#include <iostream>
+#include <vector>
+#include <random>
+#include <future>
+#include <functional>
+
+struct SequenceInfo {
+    std::string sequence;
+    double probability;
+};
+
+class CoinSequenceCalculator {
+public:
+    SequenceInfo calBestProbabilitySequence(const std::string& inputSequence, int simulateCount = 10000)
+    {
+        const auto& allSequence = getAllSequence(inputSequence.size());
+        const auto& bestSequenceInfo = getBestSequenceInfo(inputSequence, allSequence, simulateCount);
+        return bestSequenceInfo;
+    }
+
+private:
+    enum class SimulationResult {
+        WIN_A, WIN_B
+    };
+
+private:
+    std::vector<std::string> getAllSequence(int length)
+    {
+        std::string sequence;
+        std::vector<std::string> allSequence;
+        calAllSequence(length, sequence, allSequence);
+        return allSequence;
+    }
+
+    void calAllSequence(int length, std::string& sequence, std::vector<std::string>& allSequence)
+    {
+        if (sequence.size() == length) {
+            allSequence.push_back(sequence);
+            return;
+        }
+
+        for (const auto& eachSide: {UP_STR, DOWN_STR}) {
+            sequence.push_back(eachSide);
+            calAllSequence(length, sequence, allSequence);
+            sequence.pop_back();
+        }
+    }
+
+    // 起全部序列个数一样多的线程
+    SequenceInfo getBestSequenceInfo(const std::string& sequenceA, const std::vector<std::string>& allSequence,
+                                     int simulateCount)
+    {
+        std::vector<std::future<std::pair<std::string, double>>> allSequenceProbability;
+        for (const auto& tmpSequence: allSequence) {
+            std::packaged_task<std::pair<std::string, double>(const std::string&, const std::string&, int)> task(
+                std::bind(&CoinSequenceCalculator::getSimulationProbability, this, std::placeholders::_1,
+                          std::placeholders::_2, std::placeholders::_3));
+
+            allSequenceProbability.emplace_back(task.get_future());
+            std::thread(std::move(task), sequenceA, tmpSequence, simulateCount).detach();
+        }
+
+        std::string sequence;
+        double probability = 0;
+        for (auto& sequenceProbability: allSequenceProbability) {
+            const auto& [tmpSequence, tmpProbability] = sequenceProbability.get();
+            if (tmpProbability > probability) {
+                probability = tmpProbability;
+                sequence = tmpSequence;
+            }
+        }
+
+        return {sequence, probability};
+    }
+
+    std::pair<std::string, double> getSimulationProbability(const std::string& sequenceA, const std::string& sequenceB,
+                                                            int count)
+    {
+        int winBCount = 0;
+        for (int i = 0; i < count; ++i) {
+            if (simulateSequence(sequenceA, sequenceB) == SimulationResult::WIN_B) {
+                ++winBCount;
+            }
+        }
+        std::cout << "tmpSequence: << " << sequenceB << ", tmpProbability: "
+                  << (static_cast<double>(winBCount) / count) << std::endl;
+        return {sequenceB, static_cast<double>(winBCount) / count};
+    };
+
+    SimulationResult simulateSequence(const std::string& sequenceA, const std::string& sequenceB)
+    {
+        std::string simulateSequence;
+        while (true) {
+            simulateSequence.push_back(getOneCoinSimulation());
+            int sequenceLength = sequenceA.size();
+            int simulateSeqLength = simulateSequence.size();
+            if (simulateSeqLength < sequenceLength) {
+                continue;
+            }
+
+            if (simulateSequence.compare(simulateSeqLength - sequenceLength, sequenceLength, sequenceA) == 0) {
+                return SimulationResult::WIN_A;
+            } else if (simulateSequence.compare(simulateSeqLength - sequenceLength, sequenceLength, sequenceB) == 0) {
+                return SimulationResult::WIN_B;
+            }
+        }
+    }
+
+    char getOneCoinSimulation()
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::binomial_distribution<> distrib;
+        return distrib(gen) == 0 ? UP_STR : DOWN_STR;
+    }
+
+private:
+    static const char UP_STR;
+    static const char DOWN_STR;
+};
+
+const char CoinSequenceCalculator::UP_STR = 'U';
+const char CoinSequenceCalculator::DOWN_STR = 'D';
+
+class Timer {
+public:
+    ~Timer()
+    {
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> timeUsed = std::chrono::duration_cast<std::chrono::duration<double >>(end - start_);
+        std::cout << "Elapse time : " << timeUsed.count() << "s" << std::endl;
+    }
+
+private:
+    std::chrono::steady_clock::time_point start_ = std::chrono::steady_clock::now();;
+};
+
+int main()
+{
+    CoinSequenceCalculator calculator;
+    Timer timer;
+    const auto& sequenceInfo = calculator.calBestProbabilitySequence("DDDD");
+    std::cout << "sequence: " << sequenceInfo.sequence << ", max probability: " << sequenceInfo.probability
+              << std::endl;
+    return 0;
+}
+
+//
+tmpSequence: << UUUD, tmpProbability: 0.6796
+tmpSequence: << DUUU, tmpProbability: 0.6389
+tmpSequence: << UDUU, tmpProbability: 0.6238
+tmpSequence: << DUUD, tmpProbability: 0.6407
+tmpSequence: << UDUD, tmpProbability: 0.6296
+tmpSequence: << DDUU, tmpProbability: 0.5915
+tmpSequence: << UDDU, tmpProbability: 0.6271
+tmpSequence: << UUDU, tmpProbability: 0.6279
+tmpSequence: << UUDD, tmpProbability: 0.7469
+tmpSequence: << DDUD, tmpProbability: 0.6037
+tmpSequence: << DUDU, tmpProbability: 0.5792
+tmpSequence: << UUUU, tmpProbability: 0.5016
+tmpSequence: << DUDD, tmpProbability: 0.7071
+tmpSequence: << UDDD, tmpProbability: 0.9362
+tmpSequence: << DDDU, tmpProbability: 0.504
+tmpSequence: << DDDD, tmpProbability: 0
+sequence: UDDD, max probability: 0.9362
+Elapse time : 7.79399s
+
+// 单线程版本
+class CoinSequenceCalculator {
+public:
+    // ...
+
+private:
+    // ...
+    SequenceInfo getBestSequenceInfo(const std::string& sequenceA, const std::vector<std::string>& allSequence,
+                                     int simulateCount)
+    {
+        std::string sequence;
+        double probability = 0;
+        for (const auto& tmpSequence: allSequence) {
+            double tmpProbability = getSimulationProbability(sequenceA, tmpSequence, simulateCount);
+            static int index = 0;
+            std::cout << ++index << " tmpSequence: << " << tmpSequence << ", tmpProbability: " << tmpProbability << std::endl;
+
+            if (tmpProbability > probability) {
+                probability = tmpProbability;
+                sequence = tmpSequence;
+            }
+        }
+        return {sequence, probability};
+    }
+
+    // ...
+};
+
+// 单线程版本
+1 tmpSequence: << UUUU, tmpProbability: 0.5022
+2 tmpSequence: << UUUD, tmpProbability: 0.6646
+3 tmpSequence: << UUDU, tmpProbability: 0.631
+4 tmpSequence: << UUDD, tmpProbability: 0.7468
+5 tmpSequence: << UDUU, tmpProbability: 0.6315
+6 tmpSequence: << UDUD, tmpProbability: 0.6307
+7 tmpSequence: << UDDU, tmpProbability: 0.6255
+8 tmpSequence: << UDDD, tmpProbability: 0.9357
+9 tmpSequence: << DUUU, tmpProbability: 0.6399
+10 tmpSequence: << DUUD, tmpProbability: 0.6398
+11 tmpSequence: << DUDU, tmpProbability: 0.5775
+12 tmpSequence: << DUDD, tmpProbability: 0.6995
+13 tmpSequence: << DDUU, tmpProbability: 0.5962
+14 tmpSequence: << DDUD, tmpProbability: 0.6016
+15 tmpSequence: << DDDU, tmpProbability: 0.4963
+16 tmpSequence: << DDDD, tmpProbability: 0
+sequence: UDDD, max probability: 0.9357
+Elapse time : 27.0612s
+
+
+// 使用线程池版本
+//coin_sequence_calculator.h
+#ifndef GTEST_PROJECT_COIN_SEQUENCE_CALCULATOR_H
+#define GTEST_PROJECT_COIN_SEQUENCE_CALCULATOR_H
+
+#include <random>
+#include <iostream>
+#include "thread_pool.h"
+
+struct SequenceInfo {
+    std::string sequence;
+    double probability;
+};
+
+class CoinSequenceCalculator {
+public:
+    enum class Type {
+        SIMULATION, FORMULA
+    };
+
+public:
+    virtual ~CoinSequenceCalculator() noexcept = default;
+
+    virtual SequenceInfo calBestProbabilitySequence(const std::string& inputSequence) = 0;
+
+    static std::unique_ptr<CoinSequenceCalculator> create(Type type, int simulationCount = 10000);
+};
+
+#endif //GTEST_PROJECT_COIN_SEQUENCE_CALCULATOR_H
+
+
+//coin_sequence_calculator.cpp
+#include "coin_sequence_calculator.h"
+
+static const char UP_STR = 'U';
+static const char DOWN_STR = 'D';
+
+class CoinSequenceCalculatorSimulationImpl : public CoinSequenceCalculator {
+public:
+    CoinSequenceCalculatorSimulationImpl(int simulateCount) : simulateCount_(simulateCount) {
+    }
+
+    virtual ~CoinSequenceCalculatorSimulationImpl() noexcept = default;
+
+    virtual SequenceInfo calBestProbabilitySequence(const std::string& inputSequence) override {
+        const auto& allSequence = getAllSequence(inputSequence.size());
+        const auto& bestSequenceInfo = getBestSequenceInfo(inputSequence, allSequence, simulateCount_);
+        return bestSequenceInfo;
+    }
+
+private:
+    enum class SimulationResult {
+        WIN_A, WIN_B
+    };
+
+private:
+    std::vector<std::string> getAllSequence(int length) {
+        std::string sequence;
+        std::vector<std::string> allSequence;
+        calAllSequence(length, sequence, allSequence);
+        return allSequence;
+    }
+
+    void calAllSequence(int length, std::string& sequence, std::vector<std::string>& allSequence) {
+        if (sequence.size() == length) {
+            allSequence.push_back(sequence);
+            return;
+        }
+
+        for (const auto& eachSide: {UP_STR, DOWN_STR}) {
+            sequence.push_back(eachSide);
+            calAllSequence(length, sequence, allSequence);
+            sequence.pop_back();
+        }
+    }
+
+    SequenceInfo getBestSequenceInfo(const std::string& sequenceA, const std::vector<std::string>& allSequence,
+                                     int simulateCount) {
+        ThreadPool threadPool;
+        threadPool.init();
+        std::vector<std::future<std::pair<std::string, double>>> allSequenceProbability;
+        for (const auto& tmpSequence: allSequence) {
+            allSequenceProbability.emplace_back(threadPool.submit(
+                std::bind(&CoinSequenceCalculatorSimulationImpl::getSimulationProbability, this, std::placeholders::_1,
+                          std::placeholders::_2, std::placeholders::_3), sequenceA, tmpSequence,
+                simulateCount));
+        }
+
+        std::string sequence;
+        double probability = 0;
+        for (auto& sequenceProbability: allSequenceProbability) {
+            const auto& [tmpSequence, tmpProbability] = sequenceProbability.get();
+            if (tmpProbability > probability) {
+                probability = tmpProbability;
+                sequence = tmpSequence;
+            }
+        }
+        threadPool.shutdown();
+
+        return {sequence, probability};
+    }
+
+    std::pair<std::string, double> getSimulationProbability(const std::string& sequenceA, const std::string& sequenceB,
+                                                            int count) {
+        int winBCount = 0;
+        for (int i = 0; i < count; ++i) {
+            if (simulateSequence(sequenceA, sequenceB) == SimulationResult::WIN_B) {
+                ++winBCount;
+            }
+        }
+        std::cout << "tmpSequence: << " << sequenceB << ", tmpProbability: "
+                  << (static_cast<double>(winBCount) / count) << std::endl;
+        return {sequenceB, static_cast<double>(winBCount) / count};
+    };
+
+    SimulationResult simulateSequence(const std::string& sequenceA, const std::string& sequenceB) {
+        std::string simulateSequence;
+        while (true) {
+            simulateSequence.push_back(getOneCoinSimulation());
+            int sequenceLength = sequenceA.size();
+            int simulateSeqLength = simulateSequence.size();
+            if (simulateSeqLength < sequenceLength) {
+                continue;
+            }
+
+            if (simulateSequence.compare(simulateSeqLength - sequenceLength, sequenceLength, sequenceA) == 0) {
+                return SimulationResult::WIN_A;
+            } else if (simulateSequence.compare(simulateSeqLength - sequenceLength, sequenceLength, sequenceB) == 0) {
+                return SimulationResult::WIN_B;
+            }
+        }
+    }
+
+    char getOneCoinSimulation() {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::binomial_distribution<> distrib;
+        return distrib(gen) == 0 ? UP_STR : DOWN_STR;
+    }
+
+private:
+    int simulateCount_;
+};
+
+class CoinSequenceCalculatorFormulaImpl : public CoinSequenceCalculator {
+public:
+    CoinSequenceCalculatorFormulaImpl() {
+    }
+
+    virtual ~CoinSequenceCalculatorFormulaImpl() noexcept = default;
+
+    virtual SequenceInfo calBestProbabilitySequence(const std::string& inputSequence) override {
+        const auto& allSequence = getTwoSequence(inputSequence);
+        const auto& bestSequenceInfo = getBestSequenceInfo(inputSequence, allSequence);
+        return bestSequenceInfo;
+    }
+
+private:
+    std::vector<std::string> getTwoSequence(const std::string& inputSequence) {
+        const std::string& prefix = inputSequence.substr(0, inputSequence.size() - 1);
+        return {UP_STR + prefix, DOWN_STR + prefix};
+    }
+
+    SequenceInfo getBestSequenceInfo(const std::string& sequenceA, const std::vector<std::string>& allSequence) {
+        std::string sequence;
+        double probability = 0;
+        for (const auto& tmpSequence: allSequence) {
+            double tmpProbability = getProbabilityByFormula(sequenceA, tmpSequence);
+            std::cout << "tmpSequence: << " << tmpSequence << ", tmpProbability: " << tmpProbability << std::endl;
+            if (tmpProbability > probability) {
+                probability = tmpProbability;
+                sequence = tmpSequence;
+            }
+        }
+        return {sequence, probability};
+    }
+
+    /*
+L(10110, 10110) = (10010)2 = 18
+L(10110, 01011) = (00001)2 = 1
+L(01011, 01011) = (10000)2 = 16
+L(01011, 10110) = (01001)2 = 9
+那么， 01 串 a 和 b 的胜率之比就是
+(L(b, b) – L(b, a)) : (L(a, a) – L(a, b))
+     */
+    double getProbabilityByFormula(const std::string& seqA, const std::string& seqB) {
+        int lbb = getLvalue(seqB, seqB);
+        int lba = getLvalue(seqB, seqA);
+        int laa = getLvalue(seqA, seqA);
+        int lab = getLvalue(seqA, seqB);
+        return static_cast<double>(laa - lab) / ((lbb - lba) + (laa - lab));
+    }
+
+    int getLvalue(const std::string& lhsSeq, const std::string& rhsSeq) {
+        int value = 0;
+        int seqLength = lhsSeq.size();
+        for (int i = 0; i < lhsSeq.size(); ++i) {
+            value <<= 1;
+            if (lhsSeq.compare(i, seqLength - i, rhsSeq, 0, seqLength - i) == 0) {
+                value += 1;
+            }
+        }
+        return value;
+    }
+};
+
+std::unique_ptr<CoinSequenceCalculator> CoinSequenceCalculator::create(Type type, int simulationCount) {
+    if (type == Type::SIMULATION) {
+        return std::make_unique<CoinSequenceCalculatorSimulationImpl>(simulationCount);
+    } else if (type == Type::FORMULA) {
+        return std::make_unique<CoinSequenceCalculatorFormulaImpl>();
+    }
+    return std::unique_ptr<CoinSequenceCalculator>();
+}
+
+//thread_pool.h
+#ifndef GTEST_PROJECT_THREAD_POOL_H
+#define GTEST_PROJECT_THREAD_POOL_H
+
+#include <queue>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
+#include <future>
+#include <functional>
+
+template<typename T>
+class SafeQueue {
+public:
+    SafeQueue() {
+    }
+
+    SafeQueue(SafeQueue&& other) {
+    }
+
+    ~SafeQueue() {
+    }
+
+    bool empty() // 返回队列是否为空
+    {
+        std::unique_lock<std::mutex> lock(mutex_); // 互斥信号变量加锁，防止m_queue被改变
+        return queue_.empty();
+    }
+
+    int size() {
+        std::unique_lock<std::mutex> lock(mutex_); // 互斥信号变量加锁，防止m_queue被改变
+        return queue_.size();
+    }
+
+    // 队列添加元素
+    void enqueue(T& t) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        queue_.emplace(t);
+    }
+
+    // 队列取出元素
+    bool dequeue(T& t) {
+        std::unique_lock<std::mutex> lock(mutex_); // 队列加锁
+        if (queue_.empty()) {
+            return false;
+        }
+        t = std::move(queue_.front()); // 取出队首元素，返回队首元素值，并进行右值引用
+        queue_.pop(); // 弹出入队的第一个元素
+        return true;
+    }
+
+private:
+    std::queue<T> queue_; //利用模板函数构造队列
+    std::mutex mutex_; // 访问互斥信号量
+};
+
+class ThreadPool {
+public:
+    // 线程池构造函数
+    ThreadPool(const int n_threads = -1)
+        : isInit_(false), isShutdown_(false),
+          threads_(n_threads > 0 ? n_threads : std::thread::hardware_concurrency()) {
+    }
+
+    ~ThreadPool() {
+        if (!isShutdown_) {
+            shutdown();
+        }
+    }
+
+    ThreadPool(const ThreadPool&) = delete;
+
+    ThreadPool(ThreadPool&&) = delete;
+
+    ThreadPool& operator=(const ThreadPool&) = delete;
+
+    ThreadPool& operator=(ThreadPool&&) = delete;
+
+    // Inits thread pool
+    bool init() {
+        if (!isInit_) {
+            for (int i = 0; i < threads_.size(); ++i) {
+                threads_.at(i) = std::thread(ThreadWorker(this, i)); // 分配工作线程
+            }
+            isInit_ = true;
+        }
+        return isInit_;
+    }
+
+    // Waits until threads finish their current task and shutdowns the pool
+    void shutdown() {
+        isShutdown_ = true;
+        conditionalLock_.notify_all(); // 通知，唤醒所有工作线程
+
+        for (int i = 0; i < threads_.size(); ++i) {
+            if (threads_.at(i).joinable()) // 判断线程是否在等待
+            {
+                threads_.at(i).join(); // 将线程加入到等待队列
+            }
+        }
+    }
+
+    // Submit a function to be executed asynchronously by the pool
+    template<typename F, typename... Args>
+    auto submit(F&& f, Args&& ...args) -> std::future<decltype(f(args...))> {
+        static bool dummyInit = init();
+        // Create a function with bounded parameter ready to execute
+        std::function<decltype(f(args...))()> func = std::bind(std::forward<F>(f),
+                                                               std::forward<Args>(args)...); // 连接函数和参数定义，特殊函数类型，避免左右值错误
+
+        // Encapsulate it into a shared pointer in order to be able to copy construct
+        auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))() >>(func);
+
+        // Warp packaged task into void function
+        std::function<void()> warpper_func = [task_ptr]() {
+            (*task_ptr)();
+        };
+
+        // 队列通用安全封包函数，并压入安全队列
+        queue_.enqueue(warpper_func);
+        // 唤醒一个等待中的线程
+        conditionalLock_.notify_one();
+        // 返回先前注册的任务指针
+        return task_ptr->get_future();
+    }
+
+private:
+    class ThreadWorker // 内置线程工作类
+    {
+    public:
+        // 构造函数
+        ThreadWorker(ThreadPool* pool, const int id) : threadPool_(pool), id_(id) {
+        }
+
+        // 重载()操作
+        void operator()() {
+            std::function<void()> func; // 定义基础函数类func
+
+            bool dequeued; // 是否正在取出队列中元素
+            while (!threadPool_->isShutdown_) {
+                {
+                    // 为线程环境加锁，互访问工作线程的休眠和唤醒
+                    std::unique_lock<std::mutex> lock(threadPool_->conditionalMutex_);
+
+                    // 如果任务队列为空，阻塞当前线程
+                    if (threadPool_->queue_.empty()) {
+                        threadPool_->conditionalLock_.wait(lock); // 等待条件变量通知，开启线程
+                    }
+
+                    // 取出任务队列中的元素
+                    dequeued = threadPool_->queue_.dequeue(func);
+                }
+
+                // 如果成功取出，执行工作函数
+                if (dequeued) {
+                    func();
+                }
+            }
+        }
+
+    private:
+        int id_; // 工作id
+        ThreadPool* threadPool_; // 所属线程池
+    };
+
+private:
+    bool isInit_; // 线程池是否关闭
+    bool isShutdown_; // 线程池是否关闭
+    std::vector<std::thread> threads_; // 工作线程队列
+    SafeQueue<std::function<void()>> queue_; // 执行函数安全队列，即任务队列
+    std::mutex conditionalMutex_; // 线程休眠锁互斥变量
+    std::condition_variable conditionalLock_; // 线程环境锁，可以让线程处于休眠或者唤醒状态
+};
+
+#endif //GTEST_PROJECT_THREAD_POOL_H
+
+//timer.h
+#ifndef GTEST_PROJECT_TIMER_H
+#define GTEST_PROJECT_TIMER_H
+
+#include <iostream>
+#include "chrono"
+
+class Timer {
+public:
+    ~Timer() {
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> timeUsed = std::chrono::duration_cast<std::chrono::duration<double >>(
+            end - start_);
+        std::cout << "Elapse time : " << timeUsed.count() << "s" << std::endl;
+    }
+
+private:
+    std::chrono::steady_clock::time_point start_ = std::chrono::steady_clock::now();;
+};
+
+#endif //GTEST_PROJECT_TIMER_H
+
+//main.cpp
+#include <iostream>
+#include "timer.h"
+#include "coin_sequence_calculator.h"
+
+void calCoinMaxProbabilitySequence(CoinSequenceCalculator& calculator, const std::string& inputSequence) {
+    Timer timer;
+    const auto& sequenceInfo = calculator.calBestProbabilitySequence(inputSequence);
+    std::cout << "sequence: " << sequenceInfo.sequence << ", max probability: " << sequenceInfo.probability
+              << std::endl;
+}
+
+int main() {
+    const std::string inputSequence = "UDUUD";
+
+    auto simulationCalculator = CoinSequenceCalculator::create(CoinSequenceCalculator::Type::SIMULATION);
+    calCoinMaxProbabilitySequence(*simulationCalculator, inputSequence);
+
+    std::cout << "--------------------------------------------------------" << std::endl;
+
+    auto formulaCalculator = CoinSequenceCalculator::create(CoinSequenceCalculator::Type::FORMULA);
+    calCoinMaxProbabilitySequence(*formulaCalculator, inputSequence);
+
+    return 0;
+}
+// 输出：
+tmpSequence: << UUUDD, tmpProbability: 0.5288
+tmpSequence: << UUUUD, tmpProbability: 0.5681
+tmpSequence: << UUDDD, tmpProbability: 0.4695
+tmpSequence: << UUDUD, tmpProbability: 0.504
+tmpSequence: << UUDDU, tmpProbability: 0.4727
+tmpSequence: << UUUDU, tmpProbability: 0.6024
+tmpSequence: << UUUUU, tmpProbability: 0.3666
+tmpSequence: << UUDUU, tmpProbability: 0.5861
+tmpSequence: << UDUUU, tmpProbability: 0.497
+tmpSequence: << UDUDD, tmpProbability: 0.5019
+tmpSequence: << UDDUU, tmpProbability: 0.4989
+tmpSequence: << UDDUD, tmpProbability: 0.4926
+tmpSequence: << UDDDU, tmpProbability: 0.4963
+tmpSequence: << UDUDU, tmpProbability: 0.4951
+tmpSequence: << UDDDD, tmpProbability: 0.5044
+tmpSequence: << UDUUD, tmpProbability: 0
+tmpSequence: << DUUUU, tmpProbability: 0.536
+tmpSequence: << DUUUD, tmpProbability: 0.5335
+tmpSequence: << DUDDU, tmpProbability: 0.5004
+tmpSequence: << DUDUD, tmpProbability: 0.4803
+tmpSequence: << DUUDD, tmpProbability: 0.3368
+tmpSequence: << DUUDU, tmpProbability: 0.404
+tmpSequence: << DUDUU, tmpProbability: 0.7166
+tmpSequence: << DUDDD, tmpProbability: 0.4921
+tmpSequence: << DDUUU, tmpProbability: 0.5377
+tmpSequence: << DDUUD, tmpProbability: 0.5255
+tmpSequence: << DDDUU, tmpProbability: 0.5328
+tmpSequence: << DDUDU, tmpProbability: 0.6056
+tmpSequence: << DDUDD, tmpProbability: 0.4737
+tmpSequence: << DDDDU, tmpProbability: 0.5248
+tmpSequence: << DDDUD, tmpProbability: 0.5287
+tmpSequence: << DDDDD, tmpProbability: 0.3616
+sequence: DUDUU, max probability: 0.7166
+Elapse time : 14.8377s
+--------------------------------------------------------
+tmpSequence: << UUDUU, tmpProbability: 0.583333
+tmpSequence: << DUDUU, tmpProbability: 0.708333
+sequence: DUDUU, max probability: 0.708333
+Elapse time : 1.6e-05s
+
+//------------------------------------------------------------------------------------------------
+// 深入理解C++在.h头文件中定义函数导致的multiple definition https://blog.csdn.net/huangdenan/article/details/120716473
+问题：某个头文件中声明并定义了一个函数，然后在多个源码文件中调用该函数，编译链接时出现了该函数multiple definition问题，在头文件中添加了 #ifndef 头也不行，经过尝试发现如果将该函数的声明和定义分开到.h和.cpp文件之后问题消失，为什么不能将函数直接定义在.h文件中呢？
+
+针对该问题，抽象出如下几个问题：
+
+1头文件中只可放置函数声明，不可放置函数定义吗？
+以下面的程序为例：
+
+// a.h
+
+#ifndef __a_h__
+#define __a_h__
+void funcA(void);   // 声明
+void funcA(void)    // 定义
+{
+}
+#endif
+
+// b.h
+#ifndef __b_h__
+#define __b_h__
+void funcB(void);
+#endif
+
+// b.cpp
+#include "b.h"
+#include "a.h"
+void funcB(void)
+{
+    funcA();
+}
+
+//c.h
+#ifndef __c_h__
+#define __c_h__
+void funcC(void);
+#endif
+
+//c.cpp
+#include "c.h"
+#include "a.h"
+void funcC(void)
+{
+    funcA();
+}
+
+//main.cpp
+
+#include "b.h"
+#include "c.h"
+int main(int argc, char* argv[])
+{
+    funcB();
+    funcC();
+    return 0;
+}
+
+上述代码编译链接的时候编译器（g++）会报如下错误：
+
+c.o: In function funcA()': c.cpp:(.text+0x0): multiple definition offuncA()’
+b.o:b.cpp:(.text+0x0): first defined here
+collect2: ld returned 1 exit status
+
+为什么编译器在链接的时候会抱怨“funcA()重复定义”？
+
+其实本质问题就是funcA的定义被放在了a.h中，如果写在a.cpp中，就不会有重复定义的问题。下面分析一下编译过程都发生了什么，这样更容易从编译器的角度理解此问题。
+
+编译器处理include指令很简单粗暴，就是直接把头文件中的内容包含进来。所以b.cpp、c.cpp和main.cpp代码展开后可以简化为：
+
+// b.cpp
+
+void funcA(void);   // 声明
+void funcA(void)    // 定义
+{}
+void funcB(void);
+void funcB(void)
+{
+    funcA();
+}
+
+// c.cpp
+void funcA(void);   // 声明
+void funcA(void)    // 定义
+{}
+void funcC(void);
+void funcC(void)
+{
+    funcA();
+}
+
+// main.cpp
+
+void funcB(void);
+void funcC(void);
+int main(int argc, char* argv[])
+{
+    funcB();
+    funcC();
+    return 0;
+}
+
+编译的时候，C++是采用独立编译，就是每个cpp单独编译成对应的.o文件，最后链接器再将多个.o文件链接成可执行程序。所以从编译的时候，从各个cpp文件看，编译没有任何问题。但是能发现一个问题，b.o中声明和定义了一次funcA()，c.o中也声明和定义funcA()，这就是编译器报重复定义的原因。有人可能会问，既然是从同一份文件include过来的函数funcA，那么定义都是同一份，为什么编译器不会智能的处理一下，让链接时候不报错呢？
+
+其实编译器链接的时候，并不知道b.cpp中定义的funcA与c.cpp中定义的funcA是同一个文件include过来的，它只会认为如果有两份定义，而且这两份定义如果实现不同，那么到底以哪个为准呢？既然决定不了，那就干脆报错好了。
+
+2. 为什么有些头文件中直接把函数定义都写进去了？
+刚才的分析，可以得出结论：头文件中只做变量和函数的声明，而不要定义，否则就会有重复定义的错误。但是有几种情况是例外的。
+
+内联函数的定义
+类（class）的定义
+const 和 static 变量
+
+以上几种可以在头文件中定义，下面逐个进行解释。
+
+内联的目的就是在编译期让编译器把使用函数的地方直接替换掉，而不是像普通函数一样通过链接器把地址链接上。这种情况，如果定义没有在头文件的话，编译器是无法进行函数替换的。所以C++规定，内联函数可以在程序中定义多次，只要内联函数定义在同一个cpp中只出现一次就行。
+按照这个理论，上述a.h简单修改一下就可以避免重复定义了。
+
+// a.h
+#ifndef __a_h__
+#define __a_h__
+inline void funcA(void);   // 内联声明
+void funcA(void)    // 定义
+{}
+#endif
+
+此外，类（class）的定义，可以放在头文件中。
+
+用类创建对象的时候，编译器要知道对象如何布局才能分配内存，因此类的定义需要在头文件中。一般情况下，我们把类内成员函数的定义放在cpp文件中，但是如果直接在class中完成函数声明+定义的话，这种函数会被编译器当作inline的，因此满足上面inline函数可以放在头文件的规则。但是如果声明和定义分开实现，但是都放在头文件中，那就会报重复定义了！！
+
+const 和 static 变量，可以放在头文件中。
+
+const对象默认是static的，而不是extern的，所以即使放在头文件中声明和定义。多个cpp引用同一个头文件，互相也没有感知，所以不会导致重复定义。
+
+3. 模板函数/类中要求头文件中必须包含定义才能进行模板实例化，这种定义放在头文件的情况会不会有问题？
+前面分析可知，头文件中要么只有函数声明，要么是含有inline函数的定义。但是模板的定义(包括非inline函数/成员函数)要求声明和实现都必须放在头文件中，难道没有“重复定义”的问题？？？
+答案当然是不会有问题（要不template早就被抱怨死了）。其实编译器也考虑到会遇到类似的问题，在编译器或连接器的某处已经有防止重定义的处理了。
+//------------------------------------------------------------------------------------------------
+// g++编译
+g++ -g -o main main.cpp
+-g：增加调试信息
+
+gdb main
+l <tab> 可以关联出所有
+l main.cpp:0
+b main.cpp:80 断点
+r：运行
+n：运行到下一行
+s：运行到函数内部
+return：当前函数返回
+回车：执行上一命令
+
+ctrl+x ctrl+a：可以打开调试窗口
+focus n：修改聚焦窗口
+refresh：刷新调试窗口
+//------------------------------------------------------------------------------------------------
+// 最小栈
+/*
+push
+pop
+top
+getMin
+
+20W data
+Time: O(1)
+
+int
+list
+std::vector<int> 
+int size;
+MinStack，力扣上有原题的，不过面试官有些新的要求，比如说数据量保持在20W左右，不能使用标准库里的stack结构，使用的内存尽量少。
+然后要在他给的在线网页里开发，是个Linux环境的纯文本的编辑器，没有代码提示，写完之后，要自己写gcc编译命令编程二进制，如果有问题最好再gdb单步调试
+*/
+
+#include <iostream>
+#include <vector>
+
+class MinStack {
+public:
+    void push(int value) {
+        if (stack_.size() > size_) {
+            stack_.at(size_) = value;
+            minValueStack_.at(size_) = std::min(value, minValueStack_.at(size_ - 1));
+        } else {
+            stack_.push_back(value);
+            if (size_ == 0) {
+                minValueStack_.push_back(value);
+            } else {
+                minValueStack_.push_back(std::min(value, minValueStack_.at(size_ - 1)));
+            }    
+        }
+        ++size_;
+    }
+    
+    void pop() {
+        checkStack();
+        --size_;
+    }
+    
+    int top() {
+        checkStack();
+        return stack_.at(size_ - 1);
+    }
+    
+    int getMin() {
+        checkStack();
+        return minValueStack_.at(size_ - 1);
+    }
+    
+private:
+    void checkStack() {
+        if (size_ == 0) {
+            throw std::runtime_error(std::string("stack is empty"));
+        }
+    }
+    
+private:
+    std::vector<int> stack_;
+    std::vector<int> minValueStack_;
+    int size_ = 0;
+};
+
+
+int main() {
+    MinStack minStack;
+    minStack.push(3);
+    minStack.push(1);
+    minStack.push(2);
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.pop();
+    minStack.pop();
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    // minStack.pop();
+    // std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.push(4);
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.push(2);
+    std::cout << "min: " << minStack.getMin() << "\n";
+}
+
+
+/*
+push
+pop
+top
+getMin
+
+20W data
+Time: O(1)
+
+int
+list
+std::vector<int> 
+int size;
+*/
+
+#include <iostream>
+#include <vector>
+#include <climits>
+
+class MinStack {
+public:
+    void push(int value) {        
+        int subValue = (stack_.empty() ? 0 : value - min_);
+        stack_.push_back(subValue);
+        min_ = std::min(min_, value);  // 这里必须在subValue计算之后更新min，否则会导致subValue计算有问题
+    }
+    
+    void pop() {
+        checkStack();
+        int topValue = stack_.at(stack_.size() - 1);
+        stack_.resize(stack_.size() - 1);
+        if (topValue < 0) {
+            min_ = min_ - topValue;
+        }
+    }
+    
+    int top() {
+        checkStack();
+        int topValue = stack_.at(stack_.size() - 1);
+        if (topValue >= 0) {
+           return min_ + topValue;
+        }
+        return min_;
+    }
+    
+    int getMin() {
+        checkStack();
+        return min_;
+    }
+    
+private:
+    void checkStack() {
+        if (stack_.empty()) {
+            throw std::runtime_error(std::string("stack is empty"));
+        }
+    }
+    
+private:
+    std::vector<int> stack_;
+    int min_ = INT_MAX;
+};
+
+
+int main() {
+    MinStack minStack;
+    minStack.push(5);
+    minStack.push(4);
+    minStack.push(4);
+    minStack.push(4);
+    
+    minStack.pop();
+    minStack.pop();
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.pop();
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.push(5);
+    minStack.push(4);
+    minStack.push(4);
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+}
+
+// MinStack
+/* push 3:
+ *  stack: 0, min: 3
+ * push 1:
+ *  stack: 0 -2, min: 1
+ * push 2:
+ *  stack: 0 -2 1, min: 1
+ * 
+ * top: -> 2
+ *  stack: 0 -2 1, min: 1
+ * pop:
+ *  stack: 0 -2, min: 1
+ * top: -> 1
+ *  stack: 0 -2, min: 1
+ * pop:
+ *  stack: 0, min: 3
+ * top: -> 3 
+ *  stack: 0, min: 3
+ * pop:
+ *  stack: , min: ?
+*/
+
+#include <iostream>
+#include <climits>
+#include <vector>
+
+class MinStack {
+public:
+    void push(int value) {
+        if (stack_.empty()) {
+            stack_.push_back(0);
+            min_ = value;
+        } else {
+            stack_.push_back(value - min_);
+            min_ = std::min(min_, value);
+        }
+    }
+
+    void pop() {
+        check();
+        int topValue = *stack_.rbegin();
+        if (topValue < 0) {
+            min_ -= topValue;
+        }
+        stack_.resize(stack_.size() - 1);
+    }
+
+    int top() {
+        check();
+        int topValue = *stack_.rbegin();
+        if (topValue >= 0) {
+            return min_ + topValue;
+        }
+        return min_;
+    }
+
+    int getMin() {
+        return min_;
+    }
+
+private:
+    void check() {
+        if (stack_.empty()) {
+            throw std::runtime_error("stack is empty");
+        }
+    }
+
+private:
+    std::vector<int> stack_;
+    int min_ = INT_MAX;
+};
+
+int main() {
+    MinStack minStack;
+    minStack.push(3);
+    minStack.push(1);
+    minStack.push(2);
+
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.pop();
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+    
+    minStack.pop();
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+
+    minStack.pop();
+
+    minStack.push(5);
+    std::cout << "top: " << minStack.top() << "\n";
+    std::cout << "min: " << minStack.getMin() << "\n";
+
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// ifstream读文件 https://blog.csdn.net/m0_72128260/article/details/128737897
+#include <iostream>
+#include <fstream>
+#include <array>
+
+void test() {
+    std::ifstream ifs("littleProgram_home.cpp", std::ios::in);
+    if (!ifs.is_open()) {
+        std::cout << "failed to open" << std::endl;
+        return;
+    }
+
+    constexpr int maxCount = 179100;
+    std::array<std::string, maxCount> strings;  // string使用堆空间，不会溢出。使用array或vector来保存每行，约为2倍内存，即文件6M，占用内存约为12M。这里猜测看到的内存不是直接使用的内存，是堆空间占用的全部内存，每行line会申请堆内存，再还给堆，有些并未归还给操作系统。
+    std::string line;
+    int index = 0;
+    while (std::getline(ifs, line) && index < maxCount) {
+        strings[index++] = line;
+    }
+    std::cout << strings.size() << std::endl;
+}
+
+void test() {
+    std::ifstream ifs("littleProgram_home.cpp", std::ios::in);
+    if (!ifs.is_open()) {
+        std::cout << "failed to open" << std::endl;
+        return;
+    }
+
+    std::vector<char> strings(6*1024*1024, 'a');  // 通过这个方式验证，直接设置vector为6M，则可以完整读入整个6M文件，此时程序占用内存也约为6M。
+    ifs.read(&strings[0], strings.size());
+    std::cout << strings.size() << std::endl;
+}
+
+void test2() {
+    std::ifstream ifs("littleProgram_home.cpp", std::ios::in);
+    if (!ifs.is_open()) {
+        std::cout << "failed to open" << std::endl;
+        return;
+    }
+
+    constexpr int maxCount = 2000;
+    std::array<char, 1024> charBuf;  // 大小为1024字节=1K
+    std::array<std::array<char, 1024>, maxCount> strings;  // array使用栈空间大小：maxCount * 1K，栈空间大小为2M(windows)/8M(linux)，所以在maxCount为2000左右时，栈空间大小约为2M，再大就运行失败
+    std::string line;
+    int index = 0;
+    while (ifs.read(strings[index++].data(), 1024) && index < maxCount) {
+    }
+    
+    // 同下，直接栈空间举出
+    //std::array<char, 2 * 1024 * 1024> strings;
+    //ifs.read(strings.data(), strings.size());
+    std::cout << strings.size() << std::endl;
+}
+
+void test3() {
+    std::string s;
+    // s.resize(10*1024*1024);  // 占用内存同for循环，这里resize会初始化
+    for (int i = 0; i < 10*1024*1024; ++i) {  // 一个string保存10M个char，则占用内存约为10M，一个char是1字节，共10MB大小
+        s.append("a");
+    }
+    std::cout << s.size() << ", capacity: " << s.capacity() << std::endl;
+}
+
+void test4() {
+    std::vector<std::string> strs;
+    for (int i = 0; i < 10; ++i) {
+        strs.emplace_back(std::string(1024 * 1024, 'a'));  // 每个占用1M，总占用内存约为10M
+    }
+    std::cout << strs.size() << ", capacity: " << strs.capacity() << std::endl;
+}
+
+int main() {
+    test();
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// 魔方计算
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class MatrixCalculator {
+    using POS = std::pair<int, int>;
+    using MATRIX = std::vector<std::vector<int>>;
+public:
+    MATRIX getMatrix(int dimension) {
+        dimension_ = dimension;
+        MATRIX matrix(dimension, std::vector<int>(dimension, 0));
+        int maxNum = dimension * dimension;
+        POS pos = {0, 0};
+        for (int num = 1; num <= maxNum; ++num) {
+            pos = getNextPos(num, pos, matrix);
+            matrix[pos.first][pos.second] = num;
+        }
+        return matrix;
+    }
+
+private:
+    POS getNextPos(int num, const POS& curPos, MATRIX& matrix) {
+        int row = curPos.first, col = curPos.second;
+        POS nextPos;
+        if (num == 1) {
+            nextPos = {0, (dimension_ - 1) / 2};
+        } else if (row == 0 && col == dimension_ - 1) {
+            nextPos = {getNext(row + 1), col};
+        } else if (row == 0 && col != dimension_ - 1) {
+            nextPos = {getNext(row - 1), getNext(col + 1)};
+        } else if (row != 0 && col == dimension_ - 1) {
+            nextPos = {getNext(row - 1), 0};
+        } else {
+            nextPos = {getNext(row - 1), getNext(col + 1)};
+        }
+        if (matrix[nextPos.first][nextPos.second] != 0) {
+            nextPos = {getNext(row + 1), col};
+        }
+        return nextPos;
+    }
+
+    int getNext(int next) {
+        if (next == dimension_) {
+            return 0;
+        } else if (next == -1) {
+            return dimension_ - 1;
+        }
+        return next;
+    }
+
+private:
+    int dimension_ = 0;
+};
+
+class SolutionTest2 : public testing::Test {
+protected:
+    MatrixCalculator solution;
+};
+
+TEST_F(SolutionTest2, Test1) {
+    std::vector<std::vector<int>> expect = {{8, 1, 6}, {3, 5, 7}, {4, 9, 2}};
+    EXPECT_EQ(expect, solution.getMatrix(3));
+}
+
+TEST_F(SolutionTest2, Test2) {
+    std::vector<std::vector<int>> expect = {{17, 24, 1, 8, 15}, {23, 5, 7, 14, 16}, {4, 6, 13, 20, 22},
+                                            {10, 12, 19, 21, 3}, {11, 18, 25, 2, 9}};
+    EXPECT_EQ(expect, solution.getMatrix(5));
+}
+//------------------------------------------------------------------------------------------------
+// 比较版本号
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    std::vector<std::string> split(const std::string& s, const std::string& delimiters) {
+        std::vector<std::string> tokens;
+        auto lastPos = s.find_first_not_of(delimiters);
+        auto pos = s.find_first_of(delimiters, lastPos);
+        while (lastPos != std::string::npos || pos != std::string::npos) {
+            std::string&& subVersion = s.substr(lastPos, pos - lastPos);
+            subVersion.erase(0, subVersion.find_first_not_of("0"));
+            if (subVersion.empty()) {
+                subVersion = "0";
+            }
+
+            tokens.push_back(subVersion);
+            lastPos = s.find_first_not_of(delimiters, pos);
+            pos = s.find_first_of(delimiters, lastPos);
+        }
+        return tokens;
+    }
+
+    int compareSubVersion(const std::string& subVersion1, const std::string& subVersion2) {
+        if (subVersion1.size() == subVersion2.size()) {
+            return subVersion1.compare(subVersion2);
+        }
+        return subVersion1.size() > subVersion2.size() ? 1 : -1;
+    }
+
+    int compareVersion(const std::string& version1, const std::string& version2) {
+        std::vector<std::string> subVersions1 = split(version1, ".");
+        std::vector<std::string> subVersions2 = split(version2, ".");
+        int maxLength = std::max(subVersions1.size(), subVersions2.size());
+        for (int i = 0; i < maxLength; ++i) {
+            const std::string& subVersion1 = i < subVersions1.size() ? subVersions1[i] : "0";
+            const std::string& subVersion2 = i < subVersions2.size() ? subVersions2[i] : "0";
+            int subResult = compareSubVersion(subVersion1, subVersion2);
+            if (subResult != 0) {
+                return subResult;
+            }
+        }
+        return 0;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(0, solution.compareVersion("1.0", "1.0.0"));
+    EXPECT_EQ(0, solution.compareVersion("0", "0"));
+    EXPECT_EQ(0, solution.compareVersion("0.0", "0.0"));
+    EXPECT_EQ(1, solution.compareVersion("1", "0"));
+    EXPECT_EQ(-1, solution.compareVersion("0", "1"));
+    EXPECT_EQ(0, solution.compareVersion(".", "."));
+    EXPECT_EQ(0, solution.compareVersion("12345678901234567890123456789012.0", "12345678901234567890123456789012.0"));
+    EXPECT_EQ(1, solution.compareVersion("12345678901234567890123456789012.0", "12345678901234567890123456789011.0"));
+    EXPECT_EQ(-1, solution.compareVersion("12345678901234567890123456789012.0", "12345678901234567890123456789013.0"));
+    EXPECT_EQ(-1, solution.compareVersion("1234567890123456789012345678901.0", "12345678901234567890123456789013.0"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(-1, solution.compareVersion("0.1", "1.1"));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ(1, solution.compareVersion("1.32", "1.1"));
+}
+
+TEST_F(SolutionTest, Test4) {
+    EXPECT_EQ(0, solution.compareVersion("0001.01", "1.001"));
+}
+
+TEST_F(SolutionTest, Test5) {
+    EXPECT_EQ(-1, solution.compareVersion("1.0", "1.01.1"));
+}
+
+TEST_F(SolutionTest, Test6) {
+    EXPECT_EQ(0, solution.compareVersion("1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1", "1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1"));
+}
+//------------------------------------------------------------------------------------------------
+// 结构体的sizeof计算 https://blog.csdn.net/GL3_24/article/details/100170043
+在计算结构体大小的时候存在对齐的问题
+
+类型      对齐方式（变量存放的起始地址相对于结构的起始地址的偏移量） 
+Char      偏移量必须为sizeof(char)即1的倍数 
+Short     偏移量必须为sizeof(short)即2的倍数 
+int         偏移量必须为sizeof(int)即4的倍数 
+float      偏移量必须为sizeof(float)即4的倍数 
+double   偏移量必须为sizeof(double)即8的倍数 
+
+偏移量指的是结构体变量中成员的地址和结构体变量地址的差。结构体大小等于最后一个成员的偏移量加上最后一个成员的大小。
+然而，在实际中，存储变量时地址要求对齐，编译器在编译程序时会遵循两条原则：
+  （1）结构体变量中成员的偏移量必须是成员大小的整数倍（0被认为是任何数的整数倍） 
+  （2）结构体大小必须是所有成员大小的整数倍，也即所有成员大小的公倍数。
+
+下面详细讲解：
+
+struct stru{
+	char a;   //第一个成员a的偏移量为0
+	int b;    //第二个成员b的偏移量是第一个成员的偏移量加上第一个成员的大小（0+1=1，但是必须是第二个变量类型长度4的倍数，即为4）
+	float c;  //第三个成员c的偏移量是第二个成员的偏移量加上第二个成员的大小（4+4=8，但是必须是第三个变量类型长度4的倍数，即为8）
+	double d; //第四个成员d的偏移量是第三个成员的偏移量加上第三个成员的大小（8+4=12，但是必须是第四个变量类型长度8的倍数，即为16）  
+};
+//最后计算结构体大小等于最后一个成员（第四个）的偏移量（16）加上最后一个成员的大小（8）。
+//即16+8(double)=24
+//另外结构体大小必须是所有成员大小的整数倍，也即所有成员大小的公倍数。
+//大于等于24并且1,4,4,8的公倍数------>24
+
+那么我在加一个变量int e；则猜猜结构体大小是多少？
+下面进行讲解：
+struct stru{
+	char a;   //第一个成员a的偏移量为0
+	int b;    //第二个成员b的偏移量是第一个成员的偏移量加上第一个成员的大小（0+1=1，但是必须是第二个变量类型长度4的倍数，即为4）
+	float c;  //第三个成员c的偏移量是第二个成员的偏移量加上第二个成员的大小（4+4=8，是第三个变量类型长度4的倍数，即为8）
+	double d; //第四个成员d的偏移量是第三个成员的偏移量加上第三个成员的大小（8+4=12，但是必须是第四个变量类型长度8的倍数，即为16） 
+	int e;	  //第五个成员e的偏移量是第四个成员的偏移量加上第四个成员的大小（16+8=24，是第五个变量类型长度4的倍数，即为24）  
+};
+//最后计算结构体大小等于最后一个成员（第五个）的偏移量（24）加上最后一个成员的大小（4）。
+//即24+4(double)=28
+//另外结构体大小必须是所有成员大小的整数倍，也即所有成员大小的公倍数。
+//大于等于28并且1,4,4,8,4的公倍数------>32
+
+struct A {
+    char c;      
+    char c1[24];
+    char c2[15];
+    double d;
+    char c3;
+    char c4;
+    int i1;
+    int i2;
+    char c5;
+};
+变量            大小   偏移量
+char c;	        1	    0
+char c1[24];	24	    1
+char c2[15];	15	    25
+double d;	    8	    40
+char c3;	    1	    48
+char c4;	    1	    49
+int i1;	        4	    52
+int i2;	        4	    56
+char c5;	    1	    60
+                59	    64
+所以sizeof(struct A)=64
+
+struct B {
+    char c;
+    char c1[24];
+    char c2[15];
+    double d;
+    char c3;
+    char c4;
+    int i1;
+    int i2;
+    char c5;
+}__attribute__((packed));
+所以sizeof(struct B)=59
+
+#include <iostream>
+#include <array>
+#include <climits>
+#include <emmintrin.h>
+#include <sys/unistd.h>
+
+struct A {
+    char c;
+    char c1[24];
+    char c2[15];
+    double d;
+    char c3;
+    char c4;
+    int i1;
+    int i2;
+    char c5;
+};
+struct B {
+    char c;
+    char c1[24];
+    char c2[15];
+    double d;
+    char c3;
+    char c4;
+    int i1;
+    int i2;
+    char c5;
+}__attribute__((packed));
+
+struct C{
+    char a;   //第一个成员a的偏移量为0
+    int b;    //第二个成员b的偏移量是第一个成员的偏移量加上第一个成员的大小（0+1=1，但是必须是第二个变量类型长度4的倍数，即为4）
+    float c;  //第三个成员c的偏移量是第二个成员的偏移量加上第二个成员的大小（4+4=8，但是必须是第三个变量类型长度4的倍数，即为8）
+    double d; //第四个成员d的偏移量是第三个成员的偏移量加上第三个成员的大小（8+4=12，但是必须是第四个变量类型长度8的倍数，即为16）
+};
+struct D{
+    char a;   //第一个成员a的偏移量为0
+    int b;    //第二个成员b的偏移量是第一个成员的偏移量加上第一个成员的大小（0+1=1，但是必须是第二个变量类型长度4的倍数，即为4）
+    float c;  //第三个成员c的偏移量是第二个成员的偏移量加上第二个成员的大小（4+4=8，但是必须是第三个变量类型长度4的倍数，即为8）
+    double d; //第四个成员d的偏移量是第三个成员的偏移量加上第三个成员的大小（8+4=12，但是必须是第四个变量类型长度8的倍数，即为16）
+}__attribute__((packed));
+//最后计算结构体大小等于最后一个成员（第四个）的偏移量（16）加上最后一个成员的大小（8）。
+//即16+8(double)=24
+//另外结构体大小必须是所有成员大小的整数倍，也即所有成员大小的公倍数。
+//大于等于24并且1,4,4,8的公倍数------>24
+
+int main() {
+    printf("%ld\n", sizeof(struct A));  // 64
+    printf("%ld\n", sizeof(struct B));  // 59
+    printf("%ld\n", sizeof(struct C));  // 24
+    printf("%ld\n", sizeof(struct D));  // 17
+    return 0;
+}
+
+//packed https://www.baidu.com/s?ie=UTF-8&wd=__attribute__((packed))
+attribute((packed)) 是GCC编译器的一个扩展，用于告诉编译器取消结构体成员之间的字节对齐，使得结构体大小与成员变量的总大小相等，减少内存空间的浪费。
+例如，我们有一个结构体定义如下：
+struct MyStruct {
+    uint8_t a;
+    uint16_t b;
+    uint32_t c;
+}__attribute__((packed));
+在使用__attribute__((packed))后，编译器不会在a、b、c之间插入填充字节，而是直接按照变量的顺序连续存储。这样的话，假设a占用1字节，b占用2字节，c占用4字节，那么整个结构体占用的大小就是7字节，而不是默认的8字节。
+需要注意的是，在使用__attribute__((packed))时，编译器会取消结构体成员之间的字节对齐，这可能导致访问结构体中成员变量的性能下降，因为在某些硬件平台上，对齐的访问效率更高。另外，如果结构体中存在多字节的成员变量，并且没有使用__attribute__((packed))，编译器会自动进行字节对齐。
+需要注意的是，__attribute__((packed))是GCC特有的语法，不具有标准C语言的可移植性。在其他编译器中可能有对应的扩展或语法。
+//------------------------------------------------------------------------------------------------
+// 正负数存储
+对于char：
+ 127~01111111:7f
+-128~10000000->10000000取反(01111111)+1:80
+  -1~11111111->00000001取反(11111110)+1:ff
+所以对于有符号数，127是char最大值，128是-128，129是-127，一直到255是-1，256是0，257是1。
+//------------------------------------------------------------------------------------------------
+// fork出的子进程与父进程互不影响
+#include <iostream>
+#include <sys/unistd.h>
+
+int global_var = 0;
+int main() {
+    std::cout << getpid() << std::endl;  // 当前进程PID
+    pid_t pid = fork();
+    if (pid == 0) {  // 子进程
+        ++global_var;
+        printf("%d,%d,%d\n", getpid(), pid, global_var);
+    } else {  // 父进程
+        ++global_var;
+        printf("%d,%d,%d\n", getpid(), pid, global_var);
+    }
+}
+// 输出：
+1468
+1468,1470,1
+1470,0,1
+
+// https://zhuanlan.zhihu.com/p/401087855?utm_medium=social&utm_oi=1125335207238418432
+fork() 系统调用将创建一个与父进程几乎一样的新进程，之后继续执行下面的指令。程序可以根据 fork() 的返回值，确定当前处于父进程中，还是子进程中——在父进程中，返回值为新创建子进程的进程 ID，在子进程中，返回值是 0。一些使用多进程模型的服务器程序（比如 sshd），就是通过 fork() 系统调用来实现的，每当新用户接入时，系统就会专门创建一个新进程，来服务该用户。
+
+在 fork() 系统调用刚刚执行完的那一刻，子进程即可拥有一份与父进程完全一样的数据拷贝。对于已打开的文件，内核会增加每个文件描述符的引用计数，每个进程都可以用相同的文件句柄访问同一个文件。
+
+深入理解了这些底层行为细节，就可以顺理成章地理解 fork() 的一些行为表现和正确使用规范，无需死记硬背，也可获得一些别人踩过坑后才能获得的经验。
+
+比如，使用多进程模型的网络服务程序中，为什么要在子进程中关闭监听套接字，同时要在父进程中关闭新连接的套接字呢？
+
+原因在于 fork() 执行之后，所有已经打开的套接字都被增加了引用计数，在其中任一个进程中都无法彻底关闭套接字，只能减少该文件的引用计数。因此，在 fork() 之后，每个进程立即关闭不再需要的文件是个好的策略，否则很容易导致大量没有正确关闭的文件一直占用系统资源的现象。这让我想到了管道，父子进程各自关闭自己不使用的一端，当时很疑惑，干嘛要关啊，不用就不用呗，放那碍你啥事了，现在想想，出于安全考虑，关闭确实是个好习惯。
+//------------------------------------------------------------------------------------------------
+// design a set of API.
+// f(x) = 0. x?
+using Fn = std::function<float(float)>;
+
+float getZeroValue(Fn fn, float zeroDelta, float minX, float maxX)  // 使用接口类多态实现
+{
+    // 做入参校验
+    if (fn == nullptr) {
+        return nan;
+    }
+    if (zeroDelta <= 0) {
+        return nan;
+    }
+    if (minX > maxX) {
+        return nan;
+    }
+    
+
+    float minValue = fn(minX), maxValue = fn(maxY);
+    bool isIncre = maxValue > minValue;
+    
+    float left = minX, right = maxX;
+    float mid = (left + right) / 2;
+    float value = fn(mid);
+    while (abs(value) > zeroDelta) {
+        if (value > 0) {
+            if (isIncre) {
+                right = mid;
+            } else {
+                left = mid;
+            }
+        } else {
+            if (isIncre) {
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+        float mid = (left + right) / 2;
+        value = fn(mid);
+    }
+    return mid;    
+}
+
+//------------------------------------------------------------------------------------------------
+// 将地址保存的值做强制转换
+int main() {
+    int a = 123;
+    float& f = reinterpret_cast<float&>(a);
+    std::cout << f << std::endl;
+
+    float* fp = reinterpret_cast<float*>(&a);
+    std::cout << *fp << std::endl;
+    return 0;
+}
+// 输出：
+1.7236e-43
+1.7236e-43
+//------------------------------------------------------------------------------------------------
+// 优先队列：https://blog.csdn.net/QMU111/article/details/127795273
+一、优先队列(priority_queue)
+优先队列的本质是堆，但它具有队列的所有操作特性，与普通队列不同的地方就是出队的时候按照优先级顺序出队，这个优先级即最大堆或最小堆的规则（即大的为top优先出队或小的为top优先出队），在队列的基础上加了个堆排序。
+
+以O(log n) 的效率查找一个队列中的最大值或者最小值，其中是最大值还是最小值是根据创建的优先队列的性质来决定的。
+
+二、priority_queue
+对于这个模板类priority_queue，它是STL所提供的一个非常有效的容器。
+
+作为队列的一个延伸，优先队列包含在头文件#include < queue > 中
+
+C ++中的优先队列是STL中的派生容器，它仅考虑最高优先级元素。队列遵循FIFO策略，而优先队列根据优先级弹出元素，即，优先级最高的元素首先弹出。
+
+它在某些方面类似于普通队列，但在以下方面有所不同：
+在优先队列中，队列中的每个元素都与某个优先级相关联，但是优先级在队列数据结构中不存在。
+优先队列中具有最高优先级的元素将被首先删除，而队列遵循FIFO（先进先出）策略，这意味着先插入的元素将被首先删除。
+如果存在多个具有相同优先级的元素，则将考虑该元素在队列中的顺序。
+注意：优先队列是普通队列的扩展版本，但优先级最高的元素将首先从优先队列中删除。
+
+三、优先队列的语法
+priority_queue<Type, Container, Functional>
+其中Type 为数据类型， Container 为保存数据的容器，Functional 为元素比较方式。
+1.在STL中，默认情况下（不加后面两个参数）是以vector为容器，以 operator< 为比较方式，所以在只使用第一个参数时，优先队列默认是一个最大堆，每次输出的堆顶元素是此时堆中的最大元素。
+2.用到最小堆，则一般要把模板的三个参数都带进去。
+STL里面定义了一个仿函数 greater<>，对于基本类型可以用这个仿函数声明最小堆(升序)
+
+四、大顶堆与小顶堆
+大顶堆（降序）
+//构造一个空的优先队列（此优先队列默认为大顶堆）
+priority_queue big_heap;
+//另一种构建大顶堆的方法
+priority_queue<int,vector,less > big_heap2;
+
+小顶堆（升序）
+//构造一个空的优先队列,此优先队列是一个小顶堆
+priority_queue<int,vector,greater > small_heap;
+注意事项
+需要注意的是，如果使用less和greater，需要头文件：
+
+#include <functional>
+1
+我们通过使用push()函数插入元素，并且插入操作与普通队列相同。但是，当我们使用pop()函数从队列中删除元素时，优先级最高的元素将首先被删除。
+
+五、优先队列的成员函数
+函数	描述
+push()	它将新元素插入优先队列。
+pop()	它将优先级最高的元素从队列中删除。
+top()	此函数用于寻址优先队列的最顶层元素。
+size()	返回优先队列的大小。
+empty()	它验证队列是否为空。基于验证，它返回队列的状态。
+swap()	它将优先队列的元素与具有相同类型和大小的另一个队列交换。
+emplace()	它在优先队列的顶部插入一个新元素。
+具体用法：
+
+假设type类型为int，则：
+
+bool empty() const 返回值为true，说明队列为空；
+int size() const 返回优先队列中元素的数量；
+void pop() 删除队列顶部的元素，也即根节点
+int top() 返回队列中的顶部元素，但不删除该元素；
+void push(int arg) 将元素arg插入到队列之中；
+六、举例
+让我们创建一个简单的优先队列程序。
+示例
+
+#include <iostream>
+#include<queue>
+using namespace std;
+int main()
+{
+ priority_queue<int> p;  // 变量声明.
+ p.push(10); // 插入 10 到队列, top=10
+ p.push(30); // 插入 30 到队列, top=30
+ p.push(20); // 插入 20 到队列, top=20
+ cout<<"可用元素的数量 到 'p' :"<<p.size()<<endl;
+ while(!p.empty())
+ {
+     cout << p.top() <<endl; 
+     p.pop();
+ }
+ return 0;
+}
+
+注意其中的priority_queue p; // 变量声明，<>中只有第一个参数，所以是最大堆优先级
+
+在上面的代码中，我们创建了一个优先队列，在其中插入三个元素，即10、30、20。在插入这些元素之后，我们使用while循环显示优先队列的所有元素。
+
+输出结果
+
+可用元素的数量 到 ‘p’ :3
+30
+20
+10
+
+让我们看看优先队列的另一个示例。
+示例
+
+#include <iostream>
+#include<queue>
+using namespace std;
+int main()
+{
+   priority_queue<int> p;  //优先队列声明
+   priority_queue<int> q;  //优先队列声明
+   p.push(1); // 插入 '1' 到 p.
+   p.push(2); // 插入 '2' 到 p.
+   p.push(3); // 插入 '3' 到 p.
+   p.push(4); // 插入 '4' 到 p.
+   q.push(5); // 插入 '5' 到 q.
+   q.push(6); // 插入 '6' 到 q.
+   q.push(7); // 插入 '7' 到 q.
+   q.push(8); // 插入 '8' 到 q.
+   p.swap(q);
+   cout << "p队列元素是 : " <<endl;
+   while(!p.empty())
+   {
+      cout << p.top() <<endl;
+       p.pop();
+   }
+   cout << "q优先队列元素是 :" <<endl;
+    while(!q.empty())
+   {
+     cout << q.top() <<endl;
+       q.pop();
+   }
+    return 0;
+}
+
+在上面的代码中，我们声明了两个优先队列，即p和q。我们在“ p”优先队列中插入了四个元素，在“ q”优先队列中插入了四个元素。插入元素之后，我们使用swap()函数将’p’队列的元素与’q’队列交换。
+
+输出结果
+
+p优先队列元素是:
+8
+7
+6
+5
+q优先队列元素是：
+4
+3
+2
+1
+
+如果要按照最小堆优先级
+priority_queue<Type, Container, Functional>
+
+写入程序中就是priority_queue<int, vector, greater > q;
+
+#include<bits/stdc++.h> 
+using namespace std;
+int main(){
+    priority_queue<int, vector<int>, greater<int> > q;
+    for( int i= 0; i< 10; ++i ) 
+    {
+		int temp;
+		cin>>temp; 
+		q.push(temp);
+	}
+    while( !q.empty() ){
+        cout << q.top() << endl;
+        q.pop();
+    }     
+    getchar();
+    return 0;
+}
+
+七、优先队列与结构体结合
+#include <iostream>
+#include <queue>
+using namespace std;
+ 
+typedef struct _A
+{
+	int l;
+	int r;
+	int label;
+}A;
+
+bool operator > (A a1, A a2){
+	return a1.l > a2.l;
+}
+
+bool operator < (A a1, A a2){
+	return a1.r < a2.r;
+}
+ 
+priority_queue<A, vector<A>, greater<A> > que1;		// 递增 - 对应>
+priority_queue<A, vector<A>, less<A> > que2;		// 递减 - 对应<
+ 
+ 
+int main()
+{
+ 
+    //  l  r  label
+    A a1 = {1, 2, 1};
+    A a2 = {6, 7, 2};
+    A a3 = {3, 5, 3};
+    A a4 = {2, 3, 4};
+    A a5 = {4, 10, 5};
+    que1.push(a1);
+    que1.push(a2);
+    que1.push(a3);
+    que1.push(a4);
+    que1.push(a5);
+    
+    que2.push(a1);
+    que2.push(a2);
+    que2.push(a3);
+    que2.push(a4);
+    que2.push(a5);
+    cout << "按照l递增：";
+    while(!que1.empty()){
+    	cout << "a" << que1.top().label << "<";
+    	que1.pop();
+    }
+    cout << endl;
+    cout << "按照r递减：";
+    while(!que2.empty()){
+        cout << "a" << que2.top().label << ">";
+        que2.pop();
+    }
+    cout << endl;
+    return 0;
+}
+
+//------------------------------------------------------------------------------------------------
+// 根据树后序遍历和中序遍历，计算前序遍历
+#include <iostream>
+#include <vector>
+
+std::vector<std::string> getLines() {
+    std::string line;
+    std::vector<std::string> lines;
+    while (std::getline(std::cin, line)) {
+        lines.push_back(line);
+        if (line.empty()) {
+            break;
+        }
+    }
+    return lines;
+}
+
+void calcBeforeOrder(const std::string& afterOrder, const std::string& inOrder, std::string& beforeOrder) {
+    if (afterOrder.empty()) {
+        return;
+    }
+
+    char root = afterOrder.at(afterOrder.size() - 1);
+    beforeOrder.push_back(root);
+
+    int rootInOrderPos = inOrder.find(root);
+    const auto& subLeftAfterOrder = afterOrder.substr(0, rootInOrderPos);
+    const auto& subLeftInOrder = inOrder.substr(0, rootInOrderPos);
+    calcBeforeOrder(subLeftAfterOrder, subLeftInOrder, beforeOrder);
+
+    const auto& subRightAfterOrder = afterOrder.substr(rootInOrderPos, afterOrder.size() - rootInOrderPos - 1);
+    const auto& subRightInOrder = inOrder.substr(rootInOrderPos + 1);
+    calcBeforeOrder(subRightAfterOrder, subRightInOrder, beforeOrder);
+}
+
+int main() {
+    const auto& lines = getLines();
+    const auto& afterOrder = lines.at(0);
+    const auto& inOrder = lines.at(1);
+    std::string beforeOrder;
+    calcBeforeOrder(afterOrder, inOrder, beforeOrder);
+    std::cout << beforeOrder << std::endl;
+    return 0;
+}
+
+TEST(TestOrder, test1) {
+    std::string beforeOrder;
+    calcBeforeOrder("DGJHEBIFCA", "DBGEHJACIF", beforeOrder);
+    EXPECT_EQ(beforeOrder, "ABDEGHJCFI");
+}
+
+//------------------------------------------------------------------------------------------------
+// 从标准输入读多行并进行空格拆分，排序后输出
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+#include <regex>
+
+std::vector<std::string> getLines() {
+    std::vector<std::string> lines;
+    std::string line;
+    while (getline(std::cin, line)) {
+        if (line.empty()) {
+            break;
+        }
+        lines.push_back(line);
+    }
+    return lines;
+}
+
+std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
+    std::ostringstream oss;
+    bool firstLine = true;
+    for (const auto& s: strings) {
+        if (firstLine) {
+            oss << s;
+            firstLine = false;
+        } else {
+            oss << delimiter << s;
+        }
+    }
+    return oss.str();
+}
+
+std::string sum(const std::string& line) {
+//    std::istringstream iss(line);
+//    std::string tmp;
+//    std::vector<std::string> strings;
+//    while (iss >> tmp) {
+//        strings.push_back(tmp);
+//    }
+    std::regex re(" +");
+    std::vector<std::string> strings{std::sregex_token_iterator(line.begin(), line.end(), re, -1),
+                                      std::sregex_token_iterator()};
+    std::sort(strings.begin(), strings.end());
+    return join(strings, " ");
+}
+
+int main() {
+    auto&& lines = getLines();
+    for (const auto& line: lines) {
+        std::cout << sum(line) << std::endl;
+    }
+    return 0;
+}
+//------------------------------------------------------------------------------------------------
+// C++11实现异步定时器 https://www.cnblogs.com/gtarcoder/p/4924097.html
+// timer.h
+#ifndef GTESTMODULEPROJECT_TIMER_H
+#define GTESTMODULEPROJECT_TIMER_H
+
+#include <functional>
+#include <chrono>
+#include <thread>
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <condition_variable>
+
+class Timer {
+public:
+    Timer() : expired_(true), try_to_expire_(false) {
+    }
+
+    Timer(const Timer& t) {
+        expired_ = t.expired_.load();
+        try_to_expire_ = t.try_to_expire_.load();
+    }
+
+    ~Timer() {
+        Expire();
+        //      std::cout << "timer destructed!" << std::endl;
+    }
+
+    void StartTimer(int interval, std::function<void()> task) {
+        if (expired_ == false) {
+            //          std::cout << "timer is currently running, please expire it first..." << std::endl;
+            return;
+        }
+        expired_ = false;
+        std::thread([this, interval, task]() {
+            while (!try_to_expire_) {  // 没有收到尝试结束开关try_to_expire_，就一直循环运行
+                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+                task();
+            }
+            //          std::cout << "stop task..." << std::endl;
+            {
+                std::lock_guard<std::mutex> locker(mutex_);
+                expired_ = true;
+                expired_cond_.notify_one();
+            }
+        }).detach();
+    }
+
+    void Expire() {
+        if (expired_) {
+            return;
+        }
+
+        if (try_to_expire_) {
+            //          std::cout << "timer is trying to expire, please wait..." << std::endl;
+            return;
+        }
+        try_to_expire_ = true;
+        {
+            std::unique_lock<std::mutex> locker(mutex_);
+            expired_cond_.wait(locker, [this] { return expired_ == true; });  // 尝试结束开关try_to_expire_设置后，需要等待定时器任务运行完成再正常退出
+            if (expired_ == true) {
+                //              std::cout << "timer expired!" << std::endl;
+                try_to_expire_ = false;
+            }
+        }
+    }
+
+    template<typename callable, class... arguments>
+    void SyncWait(int after, callable&& f, arguments&& ... args) {
+        std::function<typename std::result_of<callable(arguments...)>::type()> task
+            (std::bind(std::forward<callable>(f), std::forward<arguments>(args)...));
+        std::this_thread::sleep_for(std::chrono::milliseconds(after));
+        task();
+    }
+
+    template<typename callable, class... arguments>
+    void AsyncWait(int after, callable&& f, arguments&& ... args) {
+        std::function<typename std::result_of<callable(arguments...)>::type()> task
+            (std::bind(std::forward<callable>(f), std::forward<arguments>(args)...));
+
+        std::thread([after, task]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(after));
+            task();
+        }).detach();
+    }
+
+private:
+    std::atomic<bool> expired_;
+    std::atomic<bool> try_to_expire_;
+    std::mutex mutex_;
+    std::condition_variable expired_cond_;
+};
+
+#endif //GTESTMODULEPROJECT_TIMER_H
+
+// main.cpp
+#include <iostream>
+#include "timer.h"
+
+void EchoFunc(std::string&& s) {
+    std::cout << "test : " << s << std::endl;
+}
+
+int main() {
+    Timer t;
+    //周期性执行定时任务
+    t.StartTimer(1000, std::bind(EchoFunc, "hello world!"));
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+    std::cout << "try to expire timer!" << std::endl;
+    t.Expire();
+
+    //周期性执行定时任务
+    t.StartTimer(1000, std::bind(EchoFunc, "hello c++11!"));
+    std::this_thread::sleep_for(std::chrono::seconds(4));
+    std::cout << "try to expire timer!" << std::endl;
+    t.Expire();
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    //只执行一次定时任务
+    //同步
+    t.SyncWait(1000, EchoFunc, "hello world!");
+    //异步
+    t.AsyncWait(1000, EchoFunc, "hello c++11!");
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    return 0;
+}
+// 输出：
+test : hello world!
+test : hello world!
+test : hello world!
+try to expire timer!
+test : hello world!
+test : hello c++11!
+test : hello c++11!
+test : hello c++11!
+try to expire timer!
+test : hello c++11!
+test : hello world!
+test : hello c++11!
+//------------------------------------------------------------------------------------------------
+// 以二进制格式读入文件，并一次性获取文件内容
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
+
+int main()
+{
+    std::string filePath = "/usr/bin/cmake";
+    std::ifstream ifs(filePath, std::ios_base::binary);
+    std::ostringstream oss;
+    oss << ifs.rdbuf();
+    const std::string& content = oss.str();
+    cout << "content size: " << content.size() << endl;
+    return 0;
+}
+// 输出：
+content size: 5944072
+
+// 通过stat命令查看大小一致：
+stat /usr/bin/cmake
+  File: /usr/bin/cmake
+  Size: 5944072         Blocks: 11616      IO Block: 4096   regular file
+Device: 805h/2053d      Inode: 411470      Links: 1
+Access: (0755/-rwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2022-01-10 23:58:01.943805426 +0800
+Modify: 2020-02-06 20:53:45.000000000 +0800
+Change: 2021-01-09 15:29:48.163413164 +0800
+ Birth: -
+//------------------------------------------------------------------------------------------------
 // 打印自定义类型
 // Message.h
 #include <iosfwd>
@@ -602,6 +3779,20 @@ void split(const std::string& s, T& tokens, const std::string& delimiters = " ")
         lastPos = s.find_first_not_of(delimiters, pos);
         pos = s.find_first_of(delimiters, lastPos);
     }
+}
+
+// 结果返回
+template<typename T>
+inline auto split(const std::string& s, const std::string& delimiters = " ") {
+    T tokens;
+    std::string::size_type lastPos = s.find_first_not_of(delimiters);
+    std::string::size_type pos = s.find_first_of(delimiters, lastPos);
+    while (pos != std::string::npos || lastPos != std::string::npos) {
+        tokens.push_back(s.substr(lastPos, pos - lastPos));
+        lastPos = s.find_first_not_of(delimiters, pos);
+        pos = s.find_first_of(delimiters, lastPos);
+    }
+    return tokens;
 }
 
 int main() {

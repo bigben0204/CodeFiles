@@ -1,0 +1,64 @@
+1. 更新所有模块
+conda update --all
+
+2. 把不使用的模块全部删除（而不是仅仅删除旧版本模块）
+conda clean -p或conda clean -a
+
+# https://www.jb51.net/article/184947.htm
+# conda
+conda update conda
+# anaconda(升级anaconda前需要先升级conda)
+conda update anaconda
+# anaconda-navigator
+conda update anaconda-navigator
+# spyder
+conda update spyder
+# 所有包
+conda update --all
+# 尽量避免使用conda update --all命令，可能会出现部分包降级的问题
+
+
+3. Anaconda创建虚拟化环境：
+1)创建：
+conda create -n [env_name] python=[version]
+例：conda create -n test python=3.9.12
+2)删除：
+conda remove -n [env_name] --all
+例：conda remove -n test --all
+3)激活：
+conda activate [env_name]
+例：conda activate test
+4)退出：
+conda deactivate
+5)安装包：
+conda install -n [env_name] [package]
+例：conda install -n test scrapy
+6)查看所有环境：
+conda env list
+
+在指定路径：
+创建（如果需要继承anaconda环境包，最后要增加anaconda）：
+conda create --prefix="d:\Anaconda3\envs\test" python=3.9.12 [anaconda]
+删除：
+conda remove --prefix="d:\Anaconda3\envs\test" --all
+激活：
+conda activate "d:\Anaconda3\envs\test"
+退出：
+conda deactivate
+安装包：
+conda install --prefix=d:\Anaconda3\envs\test scrapy
+conda install --prefix=d:\Anaconda3\envs\test anaconda
+卸载包：
+conda uninstall --prefix=d:\Anaconda3\envs\test scrapy
+查看所有环境：
+conda env list
+回显：
+# conda environments:
+#
+                         D:\Anaconda3
+base                  *  d:\Anaconda3
+test                     d:\Anaconda3\envs\test
+
+4. 查看安装包 https://www.python100.com/html/CU1Q93FN44W3.html
+conda list
+

@@ -1,4 +1,11 @@
 //------------------------------------------------------------------------------------------------
+// 异常的分类 https://blog.csdn.net/qq_35939148/article/details/86644744
+java.lang.Throwable
+|-- Error错误：JVM内部的严重问题。无法恢复。程序人员不用处理。 
+|--Exception异常：普通的问题。通过合理的处理，程序还可以回到正常执行流程。要求编程人员要进行处理。
+|--RuntimeException:也叫非受检异常(unchecked exception).这类异常是编程人员的逻辑问题。应该承担责任。Java编译器不进行强制要求处理。 也就是说，这类异常再程序中，可以进行处理，也可以不处理。
+|--非RuntimeException:也叫受检异常(checked exception).这类异常是由一些外部的偶然因素所引起的。Java编译器强制要求处理。也就是说，程序必须进行对这类异常进行处理。
+//------------------------------------------------------------------------------------------------
 //打印任务：某个打印机根据打印队列执行打印任务。打印任务分为九个优先级，分别采用数字1~9表示，数字越大优先级越高。打印机每次从队列头部取出第一个任务A，然后检查队列余下任务中有没有比A优先级更高的任务，如果有比A优先级高的任务，则将任务A放到队列尾部，否则执行任务A的打印。请编写一个程序，根据输入的打印队列，输出实际打印顺序。
 // 输入：9,3,5 -> 输出：0,2,1
 // 输入：1,3,1 -> 输出：2,0,1
@@ -35615,8 +35622,10 @@ try {
 } catch (NoSuchElementException e) {
 }
 这非常类似于本条目刚开始时对数组进行迭代的例子。除了代码繁琐且令人误解之外，这个基于异常的模式可能执行起来也比标准模式更差，并且还可能掩盖系统中其他不相关部分中的Bug。
+异常（exception）是为了在异常情况下使用面设计的。不要将它们用于普通的控制流，也不要编写迫使它们这么做的API。
 //------------------------------------------------------------------------------------------------
-
+//Effective Java 第9章 异常 P211
+//第58条：对可恢复的情况使用受检异常，对编程错误使用运行时异常 P214
 //------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------
@@ -52912,8 +52921,124 @@ public class TwoInterceptor implements HandlerInterceptor {
 
 访问url：http://localhost:8080/one/index
 //------------------------------------------------------------------------------------------------
+// JDBC连接
+// loadbalance: https://dev.mysql.com/doc/connector-j/8.1/en/connector-j-connp-props-high-availability-and-clustering.html#cj-conn-prop_ha.loadBalanceStrategy
+package org.example;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Properties;
 
+public class Main {
+    private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String DB_URL_PATTERN = "jdbc:mysql:loadbalance://%s/%s?rewriteBatchedStatements=true";
+
+    public static void main(String[] args) throws Exception {
+        String jdbcAddress = args[0];
+        String db = args[1];
+        String table = args[2];
+        String user = args[3];
+        String passwd = args[4];
+
+        String dbUrl = String.format(DB_URL_PATTERN, jdbcAddress, db);
+
+        Properties properties = new Properties();
+        properties.setProperty("user", user);
+        properties.setProperty("password", passwd);
+
+        Class.forName(JDBC_DRIVER);
+        Connection conn = DriverManager.getConnection(dbUrl, properties);
+        // Connection conn = DriverManager.getConnection(dbUrl, user, passwd);
+        System.out.println(String.format("conn url: %s", conn.getMetaData().getURL()));
+        //Query
+        Statement stmtQuery = conn.createStatement();
+        ResultSet resultSet = stmtQuery.executeQuery( String.format("select count(1) from %s", table) );
+
+        while (resultSet.next()) {
+            System.out.println(resultSet.getString(1));
+        }
+    }
+}
+// 输出：
+conn url: jdbc:mysql:loadbalance://182.42.233.101:9030/tpch?rewriteBatchedStatements=true
+25
+
+// pom.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>DorisJDBC</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.18</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>testJDBC</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.example.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.example.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
 //------------------------------------------------------------------------------------------------
 
 

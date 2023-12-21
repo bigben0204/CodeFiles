@@ -1,3 +1,7 @@
+# 学习
+
+## [队列 & 栈](https://leetcode.cn/leetbook/read/queue-stack/ga4o2/)
+
 # 1. LeetCode
 
 <https://leetcode.com/problemset/all/>
@@ -845,81 +849,6 @@ class Solution {
 }
 ```
 
-## 516. 最长回文子序列
-
-<https://leetcode-cn.com/problems/longest-palindromic-subsequence/>
-
-状态：
-f[i][j] 表示 s 的第 i 个字符到第 j 个字符组成的子串中，最长的回文序列长度是多少。
-
-转移方程：
-如果 s 的第 i 个字符和第 j 个字符相同的话
-f[i][j] = f[i + 1][j - 1] + 2
-
-如果 s 的第 i 个字符和第 j 个字符不同的话
-f[i][j] = max(f[i + 1][j], f[i][j - 1])
-
-然后注意遍历顺序，i 从最后一个字符开始往前遍历，j 从 i + 1 开始往后遍历，这样可以保证每个子问题都已经算好了。
-
-初始化：
-f[i][i] = 1 单个字符的最长回文序列是 1
-
-结果：
-f[0][n - 1]
-
-```java
-                b    b    b    a    b
-        下标j   0    1    2    3    4
- 下标i
-    0           1    2    3    3    4
-    1           0    1    2    2    3
-    2           0    0    1    1    3
-    3           0    0    0    1    1
-    4           0    0    0    0    1
-```
-
-```java
-//DynamicSolution.java
-package test;
-
-public class DynamicSolution {
-    public int longestPalindromeSubseq(String s) {
-        int n = s.length();
-        int[][] f = new int[n][n];
-        for (int i = n - 1; i >= 0; i--) {
-            f[i][i] = 1;
-            for (int j = i + 1; j < n; j++) {
-                if (s.charAt(i) == s.charAt(j)) {
-                    f[i][j] = f[i + 1][j - 1] + 2;
-                } else {
-                    f[i][j] = Math.max(f[i + 1][j], f[i][j - 1]);
-                }
-            }
-        }
-        return f[0][n - 1];
-    }
-}
-
-//DynamicSolutionTest.java
-package test;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
-public class DynamicSolutionTest {
-    @Test
-    public void test() {
-        assertEquals(4, new DynamicSolution().longestPalindromeSubseq("bbbab"));
-    }
-}
-```
-
-另一个解法：
-原题相当于，原字符串s与倒置后所得字符串_s，计算两个字符串的最长公共子序列。
-Tip:必须用dp[1...n1][1...n2]来存储公共子序列长度，边界默认为0，否则的话在i-1和j-1关于0的边界处处理起来略复杂。
-同 5、两个字符串最大公共子序列
-
 ## 299. Bulls and Cows
 
 <https://leetcode.com/problems/bulls-and-cows/>
@@ -1717,118 +1646,70 @@ public class TwoSumTest {
 }
 ```
 
-## [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)(华为题库)
+```c++
+#include <vector>
+#include <unordered_map>
+#include "gtest/gtest.h"
 
-```java
-package leetcode;
+using namespace std;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * https://www.cnblogs.com/grandyang/p/4606334.html
- * 3    Longest Substring Without Repeating Characters
- */
-public class LongestSubstring {
-    public int lengthOfLongestSubstring(String s) {
-        int[] m = new int[256];
-        Arrays.fill(m, -1);
-        int res = 0, left = -1;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            left = Math.max(left, m[c]); //取滑窗左边位置
-            m[c] = i;
-            res = Math.max(res, i - left); //取res和当前滑窗的最大长度
-        }
-        return res;
-    }
-
-    public int lengthOfLongestSubstringWithMap(String s) {
-        Map<Character, Integer> characterPosMap = new HashMap<>();
-        int res = 0, left = -1;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            left = Math.max(left, characterPosMap.getOrDefault(c, -1)); //取滑窗左侧位置
-            characterPosMap.put(c, i);
-            res = Math.max(res, i - left); //取res和当前滑窗的最大长度
-        }
-        return res;
-    }
-
-    public int lengthOfLongestSubstringWithSet(String s) {
-        int res = 0, left = 0, right = 0;
-        Set<Character> characterSet = new HashSet<>();
-        while (right < s.length()) {
-            char c = s.charAt(right);
-            if (!characterSet.contains(c)) {
-                characterSet.add(c);
-                right++;
-                res = Math.max(res, characterSet.size());
-            } else {
-                characterSet.remove(s.charAt(left++)); //只要发现right对应的字符串在滑窗(即Set)中存在，就不断往右移滑窗左侧，直到滑窗不包含right字符
-            }
-        }
-        return res;
-    }
-}
-
-//test
-package leetcode;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
-public class LongestSubstringTest {
-
-    private static final LongestSubstring LONGEST_SUBSTRING = new LongestSubstring();
-
-    @Test
-    public void lengthOfLongestSubstring() {
-        String s = "abcabcbb";
-        int length = 3;
-        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
-    }
-
-    @Test
-    public void lengthOfLongestSubstring2() {
-        String s = "bbbbb";
-        int length = 1;
-        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
-    }
-
-    @Test
-    public void lengthOfLongestSubstring3() {
-        String s = "pwwkew";
-        int length = 3;
-        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
-    }
-}
-
-// C++
 class Solution {
 public:
-    int lengthOfLongestSubstring(string s) {
-        unordered_set<char> uniqueChars;
-        int longestLength = 0, right = 0, left = 0;
-        int strLength = s.length();
-        while (right < strLength) {
-            char c = s.at(right);
-            if (uniqueChars.find(c) == uniqueChars.end()) {
-                uniqueChars.insert(c);
-                ++right;
-                longestLength = max<int>(longestLength, uniqueChars.size());
-            } else {
-                uniqueChars.erase(s.at(left++));
+    vector<int> twoSum(vector<int>& nums, int target) {
+        const auto& numIndexMap = initNumIndexMap(nums);
+
+        std::vector<int> twoIndex;
+        for (int index = 0; index < nums.size(); ++index) {
+            int secondNum = target - nums.at(index);
+            auto secondNumIter = numIndexMap.find(secondNum);
+            if (secondNumIter != numIndexMap.end() && (*secondNumIter).second != index) {
+                twoIndex = {index, (*secondNumIter).second};
+                break;
             }
         }
-        return longestLength;
+        return twoIndex;
+    }
+
+private:
+    std::unordered_map<int, int> initNumIndexMap(vector<int>& nums) {
+        std::unordered_map<int, int> numIndexMap;
+        for (int index = 0; index < nums.size(); ++index) {
+            numIndexMap[nums.at(index)] = index;
+        }
+        return numIndexMap;
     }
 };
+
+class SolutionTest : public testing::Test {
+protected:
+    static Solution solution;
+};
+
+Solution SolutionTest::solution;
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> nums = {2, 7, 11, 15};
+    int target = 9;
+    vector<int> expect = {0, 1};
+    EXPECT_EQ(expect, solution.twoSum(nums, target));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<int> nums = {3, 2, 4};
+    int target = 6;
+    vector<int> expect = {1, 2};
+    EXPECT_EQ(expect, solution.twoSum(nums, target));
+}
+
+TEST_F(SolutionTest, Test3) {
+    vector<int> nums = {3, 3};
+    int target = 6;
+    vector<int> expect = {0, 1};
+    EXPECT_EQ(expect, solution.twoSum(nums, target));
+}
 ```
+
+
 
 ## [621. Task Scheduler](<https://leetcode.com/problems/task-scheduler/>)(华为题库)
 
@@ -2649,111 +2530,6 @@ TEST(SolutionTest, Test3) {
 }
 ```
 
-## [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)(华为题库)
-
-动态规划：
-
-![](pictures\5. 最长回访子串（方法三：动态规划）.png)
-
-```c++
-#include "gtest/gtest.h"
-
-using namespace std;
-
-class Solution {  // 使用lambda表达式耗时1408ms，把lambda表达式换成private方法运行超时
-public:
-    string longestPalindrome(string s) {
-        string maxPalindrome;
-        vector<bool> matrix(s.size(), false);
-        vector<vector<bool>> intsIJ(s.size(), matrix);
-
-        auto calculateMaxPalindrome = [&](int i, int j, string& maxPalindrome) {
-            if (j - i + 1 > maxPalindrome.size()) {
-                maxPalindrome = s.substr(i, j - i + 1);
-            }
-        };
-
-        for (int i = s.size() - 1; i >= 0; --i) {
-            for (int j = i; j < s.size(); ++j) {
-                if (i == j) {
-                    intsIJ.at(i).at(j) = true;
-                    calculateMaxPalindrome(i, j, maxPalindrome);
-                } else if (i + 1 == j) {
-                    if (s.at(i) == s.at(j)) {
-                        intsIJ.at(i).at(j) = true;
-                        calculateMaxPalindrome(i, j, maxPalindrome);
-                    }
-                } else {
-                    intsIJ.at(i).at(j) = intsIJ.at(i + 1).at(j - 1) && s.at(i) == s.at(j);
-                    if (intsIJ.at(i).at(j)) {
-                        calculateMaxPalindrome(i, j, maxPalindrome);
-                    }
-                }
-            }
-        }
-
-        return maxPalindrome;
-    }
-};
-
-TEST(SolutionTest, Test1) {
-    string inputStr = "babad";
-    string expectedPalindrome = "aba";
-    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
-}
-
-TEST(SolutionTest, Test2) {
-    string inputStr = "cbbd";
-    string expectedPalindrome = "bb";
-    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
-}
-
-TEST(SolutionTest, Test3) {
-    string inputStr = "aaaa";
-    string expectedPalindrome = "aaaa";
-    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
-}
-```
-
-[方法四：中心扩展算法](https://leetcode-cn.com/problems/longest-palindromic-substring/solution/zui-chang-hui-wen-zi-chuan-by-leetcode/)：
-
-每次以一个字符或两个相邻字符向左右扩展，查找以这一个字符或两个字符为中心的最长回文字符：
-
-```c++
-class Solution {  // 64ms
-public:
-    string longestPalindrome(string s) {
-        if (s.empty()) {
-            return "";
-        }
-
-        int start = 0, end = 0;
-        for (int i = 0; i < s.length(); i++) {
-            int len1 = expandAroundCenter(s, i, i);
-            int len2 = expandAroundCenter(s, i, i + 1);
-            int len = max(len1, len2);
-            if (len > end - start + 1) {
-                start = i - (len - 1) / 2;
-                end = i + len / 2;
-            }
-        }
-        return s.substr(start, end - start + 1);
-    }
-
-private:
-    int expandAroundCenter(string s, int left, int right) {
-        int L = left, R = right;
-        while (L >= 0 && R < s.length() && s.at(L) == s.at(R)) {
-            L--;
-            R++;
-        }
-        return R - L - 1;
-    }
-};
-```
-
-[Manacher算法的详细讲解](https://www.jianshu.com/p/116aa58b7d81)
-
 ## [2. 两数相加](https://leetcode-cn.com/problems/add-two-numbers/)(华为题库)
 
 ```c++
@@ -3181,232 +2957,61 @@ public:
         return res;
     }
 };
-```
 
-## [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)(华为题库)（只看没做）
-
-<https://leetcode-cn.com/problems/number-of-islands/solution/dao-yu-shu-liang-by-leetcode/>
-
-深度搜索：
-
-遍历全部二维网格，如果任意一个单元格为1，则使用深度搜索把与该单元格相连的全部单元格设置为0：
-
-```c++
-#include "gtest/gtest.h"
-
-using namespace std;
-
-class Solution {  // 8ms
+// https://leetcode.cn/problems/decode-string/solutions/264391/zi-fu-chuan-jie-ma-by-leetcode-solution/
+class Solution {
 public:
-    int numIslands(vector<vector<char>>& grid) {
-        int nr = grid.size();
-        if (!nr) {
-            return 0;
-        }
-        int nc = grid[0].size();
-
-        int num_islands = 0;
-        for (int r = 0; r < nr; ++r) {
-            for (int c = 0; c < nc; ++c) {
-                if (grid[r][c] == '1') {
-                    ++num_islands;
-                    dfs(grid, r, c);
-                }
-            }
-        }
-
-        return num_islands;
+    string decodeString(string s) {
+        src = s;
+        ptr = 0;
+        return getString();
     }
 
 private:
-    void dfs(vector<vector<char>>& grid, int r, int c) {
-        int nr = grid.size();
-        int nc = grid[0].size();
-
-        grid[r][c] = '0';
-        if (r - 1 >= 0 && grid[r - 1][c] == '1') {
-            dfs(grid, r - 1, c);
+    string getString() {
+        if (ptr == src.size() || src[ptr] == ']') {
+            // String -> EPS
+            return "";
         }
-        if (r + 1 < nr && grid[r + 1][c] == '1') {
-            dfs(grid, r + 1, c);
-        }
-        if (c - 1 >= 0 && grid[r][c - 1] == '1') {
-            dfs(grid, r, c - 1);
-        }
-        if (c + 1 < nc && grid[r][c + 1] == '1') {
-            dfs(grid, r, c + 1);
-        }
-    }
-};
 
-TEST(SolutionTest, Test1) {
-    vector<vector<char>> grid = {
-        {'1', '1', '1', '1', '0'},
-        {'1', '1', '0', '1', '0'},
-        {'1', '1', '0', '0', '0'},
-        {'0', '0', '0', '0', '0'},
-    };
-    EXPECT_EQ(1, Solution().numIslands(grid));
-}
+        char cur = src[ptr];
+        int repTime = 1;
+        string ret;
 
-TEST(SolutionTest, Test2) {
-    vector<vector<char>> grid = {
-        {'1', '1', '0', '0', '0'},
-        {'1', '1', '0', '0', '0'},
-        {'0', '0', '1', '0', '0'},
-        {'0', '0', '0', '1', '1'},
-    };
-    EXPECT_EQ(3, Solution().numIslands(grid));
-}
-```
-
-广度搜索：
-
-同样遍历二维表格，任意一个单元格值为1，则使用队列进行广度搜索，把相邻的1都标为0，再去遍历下一个单元格。
-
-```c++
-class Solution {
-public:
-    int numIslands(vector<vector<char>>& grid) {
-        int nr = grid.size();
-        if (!nr) {
-            return 0;
-        }
-        int nc = grid[0].size();
-
-        int num_islands = 0;
-        for (int r = 0; r < nr; ++r) {
-            for (int c = 0; c < nc; ++c) {
-                if (grid[r][c] == '1') {
-                    ++num_islands;
-                    grid[r][c] = '0'; // mark as visited
-                    queue<pair<int, int>> neighbors;
-                    neighbors.push({r, c});
-                    while (!neighbors.empty()) {
-                        auto rc = neighbors.front();
-                        neighbors.pop();
-                        int row = rc.first, col = rc.second;
-                        if (row - 1 >= 0 && grid[row - 1][col] == '1') {
-                            neighbors.push({row - 1, col});
-                            grid[row - 1][col] = '0';
-                        }
-                        if (row + 1 < nr && grid[row + 1][col] == '1') {
-                            neighbors.push({row + 1, col});
-                            grid[row + 1][col] = '0';
-                        }
-                        if (col - 1 >= 0 && grid[row][col - 1] == '1') {
-                            neighbors.push({row, col - 1});
-                            grid[row][col - 1] = '0';
-                        }
-                        if (col + 1 < nc && grid[row][col + 1] == '1') {
-                            neighbors.push({row, col + 1});
-                            grid[row][col + 1] = '0';
-                        }
-                    }
-                }
+        if (isdigit(cur)) {
+            // String -> Digits [ String ] String
+            // 解析 Digits
+            repTime = getDigits();
+            // 过滤左括号
+            ++ptr;
+            // 解析 String
+            string str = getString();
+            // 过滤右括号
+            ++ptr;
+            // 构造字符串
+            while (repTime--) {
+                ret += str;
             }
+        } else if (isalpha(cur)) {
+            // String -> Char String
+            // 解析 Char
+            ret = string(1, src[ptr++]);
         }
 
-        return num_islands;
-    }
-};
-```
-
-并查集 
-
-遍历二维网格，将竖直或水平相邻的陆地联结。最终，返回并查集数据结构中相连部分的数量。
-
-下面的动画展示了整个算法。
-
-```c++
-class UnionFind {
-public:
-    UnionFind(vector<vector<char>>& grid) {
-        count = 0;
-        int m = grid.size();
-        int n = grid[0].size();
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                if (grid[i][j] == '1') {
-                    parent.push_back(i * n + j);
-                    ++count;
-                }
-                else {
-                    parent.push_back(-1);
-                }
-                rank.push_back(0);
-            }
-        }
+        return ret + getString();
     }
 
-    int find(int i) { // path compression
-        if (parent[i] != i) {
-            parent[i] = find(parent[i]);
+    int getDigits() {
+        int ret = 0;
+        while (ptr < src.size() && isdigit(src[ptr])) {
+            ret = ret * 10 + src[ptr++] - '0';
         }
-        return parent[i];
-    }
-
-    void Union(int x, int y) { // union with rank
-        int rootx = find(x);
-        int rooty = find(y);
-        if (rootx != rooty) {
-            if (rank[rootx] > rank[rooty]) {
-                parent[rooty] = rootx;
-            }
-            else if (rank[rootx] < rank[rooty]) {
-                parent[rootx] = rooty;
-            }
-            else {
-                parent[rooty] = rootx;
-                rank[rootx] += 1;
-            }
-            --count;
-        }
-    }
-
-    int getCount() const {
-        return count;
+        return ret;
     }
 
 private:
-    vector<int> parent;
-    vector<int> rank;
-    int count; // # of connected components
-};
-
-class Solution {
-public:
-    int numIslands(vector<vector<char>>& grid) {
-        int nr = grid.size();
-        if (!nr) {
-            return 0;
-        }
-        int nc = grid[0].size();
-
-        UnionFind uf(grid);
-        int num_islands = 0;
-        for (int r = 0; r < nr; ++r) {
-            for (int c = 0; c < nc; ++c) {
-                if (grid[r][c] == '1') {
-                    grid[r][c] = '0';
-                    if (r - 1 >= 0 && grid[r - 1][c] == '1') {
-                        uf.Union(r * nc + c, (r - 1) * nc + c);
-                    }
-                    if (r + 1 < nr && grid[r + 1][c] == '1') {
-                        uf.Union(r * nc + c, (r + 1) * nc + c);
-                    }
-                    if (c - 1 >= 0 && grid[r][c - 1] == '1') {
-                        uf.Union(r * nc + c, r * nc + c - 1);
-                    }
-                    if (c + 1 < nc && grid[r][c + 1] == '1') {
-                        uf.Union(r * nc + c, r * nc + c + 1);
-                    }
-                }
-            }
-        }
-
-        return uf.getCount();
-    }
+    string src;
+    size_t ptr;
 };
 ```
 
@@ -3623,78 +3228,6 @@ public:
             }
         }
         return leftPoint == 0 ? 1 : 0;
-    }
-};
-```
-
-## [739. 每日温度](https://leetcode-cn.com/problems/daily-temperatures/)(华为题库)
-
-用双循环遍历，比较慢：
-
-```c++
-class Solution {  // 2312ms
-public:
-    vector<int> dailyTemperatures(vector<int>& T) {
-        vector<int> days;
-        for (auto tempIter = T.begin(); tempIter != T.end(); ++tempIter) {
-            auto iterGreater = find_if(tempIter + 1, T.end(), [=](int temperature) { return temperature > *tempIter; });
-            days.push_back(iterGreater == T.end() ? 0 : distance(tempIter, iterGreater));
-        }
-        return move(days);
-    }
-};
-```
-
-优化代码：
-
-<https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
-
-温度总共就30到100，把每个温度值都记录在next向量中，每来一个温度，就查找比它高的全部温度，看哪个温度的位置离它最近：
-
-```c++
-class Solution {  // 256ms
-public:
-    vector<int> dailyTemperatures(vector<int>& T) {
-        vector<int> ans(T.size(), 0);
-        vector<int> next(101, numeric_limits<int>::max());
-        for (int i = T.size() - 1; i >= 0; --i) {
-            int warmer_index = numeric_limits<int>::max();
-            for (int t = T[i] + 1; t <= 100; ++t) {
-                if (next[t] < warmer_index) {
-                    warmer_index = next[t];
-                }
-            }
-            if (warmer_index < numeric_limits<int>::max()) {
-                ans[i] = warmer_index - i;
-            }
-            next[T[i]] = i;
-        }
-        return move(ans);
-    }
-};
-```
-
-使用栈的方法（如果某些数据在使用后就没用了，可以考虑用栈）：
-
-<https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
-
-stack里存的自顶向下递增的元素的索引，倒序每新来一个元素，就把栈里比它小的元素全部弹出（因为当前元素索引又小，值又比早入栈的元素大，所以早入栈的那些元素在之后的比较中不会起任何作用），此时栈顶的元素即是值刚刚比它大，索引又最小的元素，再把该新元素入栈：
-
-```c++
-class Solution {
-public:
-    vector<int> dailyTemperatures(vector<int>& T) {
-        vector<int> ans(T.size(), 0);
-        stack<int> stack;
-        for (int i = T.size() - 1; i >= 0; --i) {
-            while (!stack.empty() && T[i] >= T[stack.top()]) {
-                stack.pop();
-            }
-            ans[i] = stack.empty() ? 0 : stack.top() - i;
-            stack.push(i);
-        }
-
-        return move(ans);
     }
 };
 ```
@@ -4718,6 +4251,74 @@ class Solution {  // 2ms
 }
 ```
 
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import copy
+import unittest
+from typing import List
+
+'''
+执行用时：
+44 ms
+, 在所有 Python3 提交中击败了
+30.08%
+的用户
+内存消耗：
+15 MB
+, 在所有 Python3 提交中击败了
+95.31%
+的用户
+'''
+class Solution:
+    def __init__(self):
+        self._res = []
+
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        self._res = []
+        track = []
+        used = [False] * len(nums)
+        self._back_trace(nums, used, track)
+        return self._res
+
+    def _back_trace(self, nums, used, track):
+        if len(track) == len(nums):
+            self._res.append(copy.deepcopy(track))
+            return
+
+        for index, num in enumerate(nums):
+            if used[index]:
+                continue
+
+            used[index] = True
+            track.append(num)
+            self._back_trace(nums, used, track)
+            track.pop(-1)
+            used[index] = False
+
+
+class SolutionTest(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test1(self):
+        nums = [1, 2, 3]
+        expected = [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
+        self.assertEqual(expected, self._SOLUTION.permute(nums))
+
+    def test2(self):
+        nums = [0, 1]
+        expected = [[0, 1], [1, 0]]
+        self.assertEqual(expected, self._SOLUTION.permute(nums))
+
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+
+
+
+
 ## [567. 字符串的排列](https://leetcode-cn.com/problems/permutation-in-string/)(华为可信认证2019-12-6专业级)
 
 参考46.全排列的方式，将s1的所有组合遍历，判断是否在s2中（超时）：
@@ -5658,125 +5259,6 @@ class Solution {
 }
 ```
 
-## [15. 三数之和](https://leetcode-cn.com/problems/3sum/)(华为题库)
-
-自己写的，参考第1题：两数之和的方法，依次判断每个数字取反后，是否可以由其它两个数字相加获得。（超时）
-
-```java
-//
-package test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-class Solution {  // 超时
-    public List<List<Integer>> threeSum(int[] nums) {
-        Set<List<Integer>> threeSet = new HashSet<>();
-        for (int i = 0; i < nums.length; i++) {
-            twoSumForOneLoop(nums, -nums[i], i, threeSet);
-        }
-        return new ArrayList<>(threeSet);
-    }
-
-    private void twoSumForOneLoop(int[] nums, int target, int excludedIndex, Set<List<Integer>> threeSet) {
-        Map<Integer, Integer> valuePosMap = new HashMap<>();
-
-        for (int firstIndex = 0; firstIndex < nums.length; firstIndex++) {
-            if (firstIndex == excludedIndex) {
-                continue;
-            }
-
-            int firstValue = nums[firstIndex];
-            int secondValue = target - firstValue;
-            if (valuePosMap.containsKey(secondValue)) {
-                List<Integer> combination = Arrays.asList(-target, firstValue, secondValue);
-                Collections.sort(combination);
-                threeSet.add(combination);
-            } else {
-                valuePosMap.put(firstValue, firstIndex);
-            }
-        }
-    }
-}
-
-//
-package test;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
-public class SolutionTest {
-    private static final Solution SOLUTION = new Solution();
-
-    @Test
-    public void test1() {
-        int[] nums = {-1, 0, 1, 2, -1, -4};
-        List<List<Integer>> expected = Arrays.asList(Arrays.asList(-1, -1, 2), Arrays.asList(-1, 0, 1));
-        assertEquals(expected, SOLUTION.threeSum(nums));
-    }
-}
-```
-
-别人的解法<https://leetcode.com/problems/3sum/discuss/448047/My-simple-java-solution>：
-
-排序+双指针遍历 
-
-```java
-package test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-class Solution {  // 51ms
-    public List<List<Integer>> threeSum(int[] nums) {
-        List<List<Integer>> res = new ArrayList<>();
-
-        int n = nums.length;
-        Arrays.sort(nums);
-        for (int i = 0; i < nums.length; i++) {
-            if (nums[i] > 0 || i + 3 > n) {  // 如果最小值已经大于0了，或者剩余不足3个值了，则无需处理
-                return res;
-            }
-            if (i > 0 && nums[i] == nums[i - 1]) {  // 如果下一个值和前一个值相同，则无需处理，因为所有情况都由前一个i-1处理过了
-                continue;
-            }
-
-            int target = -nums[i];
-            int l = i + 1;
-            int r = n - 1;
-            while (l < r) {
-                int actual = nums[l] + nums[r];
-                if (actual == target) {
-                    res.add(Arrays.asList(nums[i], nums[l], nums[r]));
-                    do {
-                        ++l;  // 跳过所有和当前l一样的值
-                    } while (l < r && nums[l - 1] == nums[l]);
-                    do {
-                        --r;  // 跳过所有和当前r一样的值
-                    } while (l < r && nums[r + 1] == nums[r]);
-                } else if (actual < target) {  // 如果实际值小于target，则增加小值
-                    l++;
-                } else {  // 如果实际值大于target，则减少大值
-                    r--;
-                }
-            }
-        }
-        return res;
-    }
-}
-```
-
 ## [547. 朋友圈](https://leetcode-cn.com/problems/friend-circles/)(华为题库)（只看没做）
 
 自己写的，有问题。
@@ -6605,6 +6087,113 @@ public class Solution {  // 16ms
 }
 ```
 
+c++广度搜索
+
+```cpp
+#include <unordered_map>
+#include <algorithm>
+#include <queue>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    void solve(vector<vector<char>>& board) {
+        int m = board.size();
+        int n = board.at(0).size();
+        fillAllEdgeO(board, m, n);
+
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (board.at(i).at(j) == 'A') {
+                    board.at(i).at(j) = 'O';
+                } else if (board.at(i).at(j) == 'O') {
+                    board.at(i).at(j) = 'X';
+                }
+            }
+        }
+    }
+
+private:
+    void fillAllEdgeO(vector<vector<char>>& board, int m, int n) {
+        std::queue<std::pair<int, int>> pairQueue;
+        for (int i = 0; i < m; ++i) {
+            if (board.at(i).at(0) == 'O') {
+                pairQueue.emplace(i, 0);
+                board.at(i).at(0) = 'A';
+            }
+            if (board.at(i).at(n - 1) == 'O') {
+                pairQueue.emplace(i, n - 1);
+                board.at(i).at(n - 1) = 'A';
+            }
+        }
+
+        for (int j = 1; j < n - 1; ++j) {
+            if (board.at(0).at(j) == 'O') {
+                pairQueue.emplace(0, j);
+                board.at(0).at(j) = 'A';
+            }
+            if (board.at(m - 1).at(j) == 'O') {
+                pairQueue.emplace(m - 1, j);
+                board.at(m - 1).at(j) = 'A';
+            }
+        }
+
+        std::vector<std::pair<int, int>> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        while (!pairQueue.empty()) {
+            int x = pairQueue.front().first;
+            int y = pairQueue.front().second;
+            pairQueue.pop();
+            for (const auto& direction: directions) {
+                int newX = x + direction.first;
+                int newY = y + direction.second;
+                if (newX < 0 || newX >= m || newY < 0 || newY >= n || board.at(newX).at(newY) != 'O') {
+                    continue;
+                }
+                pairQueue.emplace(newX, newY);
+                board.at(newX).at(newY) = 'A';
+            }
+        }
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<vector<char>> board = {{'X', 'O', 'X', 'O', 'X', 'O'},
+                                  {'O', 'X', 'O', 'X', 'O', 'X'},
+                                  {'X', 'O', 'X', 'O', 'X', 'O'},
+                                  {'O', 'X', 'O', 'X', 'O', 'X'}};
+    solution.solve(board);
+//    EXPECT_EQ(true, );
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<vector<char>> board = {
+        {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'O', 'O', 'X', 'O', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'X', 'O', 'X', 'O', 'X', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'X', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'}};
+    solution.solve(board);
+    vector<vector<char>> expected = {
+        {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'O', 'O', 'X', 'O', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'X', 'O', 'X', 'O', 'X', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'X', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'},
+        {'X', 'X', 'X', 'X', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X'}};
+    EXPECT_EQ(expected, board);
+}
+```
+
+
+
 ## [56. 合并区间](https://leetcode-cn.com/problems/merge-intervals/)(华为题库)
 
 先排序，再每两个区域依次判断：
@@ -6994,638 +6583,6 @@ public class SolutionTest {
         assertEquals(11, SOLUTION.minimumTotal(triangle));
     }
 }
-```
-
-## [98. 验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)(华为题库)
-
-自己写的都有问题：
-
-```java
-package test;
-
-import java.util.LinkedList;
-import java.util.Queue;
-
-class TreeNode {
-    int val;
-    TreeNode left;
-    TreeNode right;
-
-    TreeNode(int x) {
-        val = x;
-    }
-}
-
-class Solution {
-    public boolean isValidBST(TreeNode root) {
-        Queue<TreeNode> queue = new LinkedList<>();
-        queue.add(root);
-        while (!queue.isEmpty()) {
-            TreeNode treeNode = queue.remove();
-            if (treeNode == null) {
-                continue;
-            }
-
-            TreeNode left = treeNode.left;
-            if (left != null) {
-                if (left.val >= treeNode.val) {
-                    return false;
-                }
-                queue.add(left);
-            }
-
-            TreeNode right = treeNode.right;
-            if (right != null) {
-                if (right.val <= treeNode.val) {
-                    return false;
-                }
-                queue.add(right);
-            }
-        }
-        return true;
-    }
-}
-
-class Solution {
-    public boolean isValidBST(TreeNode root) {
-        if (root == null) {
-            return true;
-        }
-        if (!check(root, null, null)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean check(TreeNode treeNode, Integer leftMaxVal, Integer rightMinVal) {
-        if (!checkLeft(treeNode, leftMaxVal == null ? treeNode.val : leftMaxVal, rightMinVal)) {
-            return false;
-        }
-        if (!checkRight(treeNode, leftMaxVal, rightMinVal == null ? treeNode.val : rightMinVal)) {
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkLeft(TreeNode treeNode, Integer leftMaxVal, Integer rightMinVal) {
-        TreeNode left = treeNode.left;
-        if (left != null) {
-            if (left.val >= treeNode.val) {  // 左子节点值不能大于等于父节点
-                return false;
-            }
-            if (rightMinVal != null && left.val <= rightMinVal) {
-                return false;
-            }
-            return check(left, Math.max(left.val, leftMaxVal == null ? left.val : leftMaxVal.intValue()),
-                Math.min(left.val, rightMinVal == null ? left.val : rightMinVal.intValue()));
-        }
-        return true;
-    }
-
-    private boolean checkRight(TreeNode treeNode, Integer leftMaxVal, Integer rightMinVal) {
-        TreeNode right = treeNode.right;
-        if (right != null) {
-            if (right.val <= treeNode.val) {
-                return false;
-            }
-            if (leftMaxVal != null && right.val >= leftMaxVal) {
-                return false;
-            }
-            return check(right, Math.max(right.val, leftMaxVal == null ? right.val : leftMaxVal.intValue()),
-                Math.min(right.val, rightMinVal == null ? right.val : rightMinVal.intValue()));
-        }
-        return true;
-    }
-}
-
-//
-package test;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
-public class SolutionTest {
-    private static Solution SOLUTION;
-
-    @Before
-    public void before() {
-        SOLUTION = new Solution();
-    }
-
-    @Test
-    public void test1() {
-        TreeNode treeNode1 = new TreeNode(5);
-        TreeNode treeNode2 = new TreeNode(1);
-        TreeNode treeNode3 = new TreeNode(4);
-        treeNode1.left = treeNode2;
-        treeNode1.right = treeNode3;
-
-        TreeNode treeNode4 = new TreeNode(3);
-        TreeNode treeNode5 = new TreeNode(6);
-        treeNode3.left = treeNode4;
-        treeNode3.right = treeNode5;
-
-        assertEquals(false, SOLUTION.isValidBST(treeNode1));
-    }
-
-    @Test
-    public void test2() {
-        TreeNode treeNode1 = new TreeNode(5);
-        TreeNode treeNode2 = new TreeNode(1);
-        TreeNode treeNode3 = new TreeNode(7);
-        treeNode1.left = treeNode2;
-        treeNode1.right = treeNode3;
-
-        TreeNode treeNode4 = new TreeNode(4);
-        TreeNode treeNode5 = new TreeNode(8);
-        treeNode3.left = treeNode4;
-        treeNode3.right = treeNode5;
-
-        assertEquals(false, SOLUTION.isValidBST(treeNode1));
-    }
-
-    @Test
-    public void test3() {
-        TreeNode treeNode1 = new TreeNode(5);
-        TreeNode treeNode2 = new TreeNode(1);
-        TreeNode treeNode3 = new TreeNode(7);
-        treeNode1.left = treeNode2;
-        treeNode1.right = treeNode3;
-
-        TreeNode treeNode4 = new TreeNode(6);
-        TreeNode treeNode5 = new TreeNode(8);
-        treeNode3.left = treeNode4;
-        treeNode3.right = treeNode5;
-
-        assertEquals(true, SOLUTION.isValidBST(treeNode1));
-    }
-
-    @Test
-    public void test4() {
-        TreeNode treeNode1 = new TreeNode(0);
-        assertEquals(true, SOLUTION.isValidBST(treeNode1));
-    }
-
-    @Test
-    public void test5() {
-        TreeNode treeNode1 = new TreeNode(1);
-        TreeNode treeNode2 = new TreeNode(1);
-        treeNode1.left = treeNode2;
-        assertEquals(false, SOLUTION.isValidBST(treeNode1));
-    }
-}
-```
-
-别人的优化算法：
-
-<https://leetcode-cn.com/problems/validate-binary-search-tree/solution/yan-zheng-er-cha-sou-suo-shu-by-leetcode/>
-
-方法一: 递归
-
-```java
-package test;
-
-class TreeNode {
-    int val;
-    TreeNode left;
-    TreeNode right;
-
-    TreeNode(int x) {
-        val = x;
-    }
-}
-
-class Solution {  // 1ms
-    public boolean isValidBST(TreeNode root) {
-        return helper(root, null, null);
-    }
-
-    private boolean helper(TreeNode node, Integer lower, Integer upper) {
-        if (node == null) {
-            return true;
-        }
-
-        int val = node.val;
-        if (lower != null && val <= lower) {
-            return false;
-        }
-        if (upper != null && val >= upper) {
-            return false;
-        }
-
-        if (!helper(node.left, lower, val)) {
-            return false;
-        }
-        if (!helper(node.right, val, upper)) {
-            return false;
-        }
-        return true;
-    }
-}
-```
-
-方法二: 迭代
-
-通过使用栈，上面的递归法可以转化为迭代法。这里使用深度优先搜索，比广度优先搜索要快一些。（感觉说的有些问题，看起来这里使用的是广度搜索）
-
-```java
-class Solution {  // 5ms
-    private Queue<TreeNode> queue = new LinkedList();
-    private Queue<Integer> lowers = new LinkedList();
-    private Queue<Integer> uppers = new LinkedList();
-
-    public boolean isValidBST(TreeNode root) {
-        Integer lower = null, upper = null, val;
-        update(root, lower, upper);
-
-        while (!queue.isEmpty()) {
-            root = queue.poll();
-            lower = lowers.poll();
-            upper = uppers.poll();
-
-            if (root == null) {
-                continue;
-            }
-            val = root.val;
-            if (lower != null && val <= lower) {
-                return false;
-            }
-            if (upper != null && val >= upper) {
-                return false;
-            }
-            update(root.left, lower, val);
-            update(root.right, val, upper);
-        }
-        return true;
-    }
-
-    private void update(TreeNode root, Integer lower, Integer upper) {
-        queue.add(root);
-        lowers.add(lower);
-        uppers.add(upper);
-    }
-}
-```
-
-方法三：中序遍历
-
-我们使用
-[中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/er-cha-shu-de-zhong-xu-bian-li-by-leetcode/)
-`左子树 -> 结点 -> 右子树`的顺序。
-
-```java
-class Solution {  // 3ms
-    public boolean isValidBST(TreeNode root) {
-        Stack<TreeNode> stack = new Stack();
-        double inorder = -Double.MAX_VALUE;  // 这里用double是因为有个测试用例的节点值为Integer.MIN_VALUE，如果使用int则失败
-
-        while (!stack.isEmpty() || root != null) {
-            while (root != null) {
-                stack.push(root);
-                root = root.left;
-            }
-            root = stack.pop();
-            // If next element in inorder traversal
-            // is smaller than the previous one
-            // that's not BST.
-            if (root.val <= inorder) {
-                return false;
-            }
-            inorder = root.val;
-            root = root.right;
-        }
-        return true;
-    }
-}
-```
-
-参考下面的中序遍历的递归算法：
-
-```java
-class Solution {
-    private double inOrderValue = -Double.MAX_VALUE;
-
-    public boolean isValidBST(TreeNode root) {
-        return inOrderRecursively(root);
-    }
-
-    private boolean inOrderRecursively(TreeNode root) {
-        if (root == null) {
-            return true;
-        }
-
-        if (!inOrderRecursively(root.left)) {
-            return false;
-        }
-
-        if (root.val <= inOrderValue) {
-            return false;
-        }
-        inOrderValue = root.val;
-
-        if (!inOrderRecursively(root.right)) {
-            return false;
-        }
-
-        return true;
-    }
-}
-```
-
-### 二叉树遍历算法讲解
-
-<https://blog.csdn.net/qq_33243189/article/details/80222629>
-
-<https://blog.csdn.net/coder__666/article/details/80349039>
-
-<https://www.cnblogs.com/llhthinker/p/4747962.html>
-
-以如下二叉树为样例：
-
-![](pictures\二叉树数据样例.png)
-
-#### 1.前序遍历
-
-递归
-
-```java
-//
-package test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-class TreeNode<T> {
-    T val;
-    TreeNode<T> left;
-    TreeNode<T> right;
-
-    TreeNode(T x) {
-        val = x;
-    }
-}
-
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> preOrder(TreeNode<T> root) {
-        preOrderRecursively(root);
-        return output;
-    }
-
-    private void preOrderRecursively(TreeNode<T> root) {
-        if (root != null) {
-            output.add(root.val);
-            preOrderRecursively(root.left);
-            preOrderRecursively(root.right);
-        }
-    }
-}
-```
-
-非递归：
-
-```java
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> preOrder(TreeNode<T> root) {
-        Stack<TreeNode<T>> stack = new Stack<>();
-        while (root != null || !stack.isEmpty()) {
-            while (root != null) {  // 不断的找左子节点，输出后再入栈
-                output.add(root.val);
-                stack.push(root);
-                root = root.left;
-            }
-            if (!stack.isEmpty()) {  // 当找不到左子节点后，栈顶中的元素弹出，并获取其右子节点重复上述操作
-                root = stack.pop();
-                root = root.right;
-            }
-        }
-        return output;
-    }
-}
-```
-
-测试用例：
-
-```java
-//
-package test;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
-public class SolutionTest {
-    private static final Solution<String> SOLUTION = new Solution();
-
-    @Test
-    public void test1() {
-        TreeNode<String> treeNode1 = new TreeNode<>("A");
-
-        TreeNode<String> treeNode2 = new TreeNode<>("B");
-        treeNode1.left = treeNode2;
-
-        TreeNode<String> treeNode3 = new TreeNode<>("C");
-        treeNode2.right = treeNode3;
-
-        TreeNode<String> treeNode4 = new TreeNode<>("D");
-        treeNode3.left = treeNode4;
-
-        TreeNode<String> treeNode5 = new TreeNode<>("E");
-        treeNode1.right = treeNode5;
-
-        TreeNode<String> treeNode6 = new TreeNode<>("F");
-        treeNode5.right = treeNode6;
-
-        TreeNode<String> treeNode7 = new TreeNode<>("G");
-        treeNode6.left = treeNode7;
-
-        TreeNode<String> treeNode8 = new TreeNode<>("H");
-        TreeNode<String> treeNode9 = new TreeNode<>("K");
-        treeNode7.left = treeNode8;
-        treeNode7.right = treeNode9;
-
-        List<String> expected = "ABCDEFGHK".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
-        assertEquals(expected, SOLUTION.preOrder(treeNode1));
-    }
-}
-```
-
-#### 2.中序遍历
-
-递归：
-
-```java
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> inOrder(TreeNode<T> root) {
-        inOrderRecursively(root);
-        return output;
-    }
-
-    private void inOrderRecursively(TreeNode<T> root) {
-        if (root == null) {
-            return;
-        }
-
-        inOrderRecursively(root.left);
-        output.add(root.val);
-        inOrderRecursively(root.right);
-    }
-}
-
-```
-
-非递归：
-
-```java
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> inOrder(TreeNode<T> root) {
-        Stack<TreeNode<T>> stack = new Stack<>();
-        while (root != null || !stack.isEmpty()) {
-            while (root != null) {  // 不断的找左子节点，并直接入栈
-                stack.push(root);
-                root = root.left;
-            }
-
-            if (!stack.isEmpty()) {  // 当找不到左子节点后，栈顶中的元素弹出，输出，并获取其右子节点重复上述操作
-                root = stack.pop();
-                output.add(root.val);
-                root = root.right;
-            }
-        }
-        return output;
-    }
-}
-```
-
-测试用例：
-
-```java
-List<String> expected = "BDCAEHGKF".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
-assertEquals(expected, SOLUTION.inOrder(treeNode1));    
-```
-
-#### 3.后序遍历
-
-递归：
-
-```java
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> postOrder(TreeNode<T> root) {
-        postOrderRecursively(root);
-        return output;
-    }
-
-    private void postOrderRecursively(TreeNode<T> root) {
-        if (root == null) {
-            return;
-        }
-        
-        postOrderRecursively(root.left);
-        postOrderRecursively(root.right);
-        output.add(root.val);
-    }
-}
-```
-
-非递归：
-
-```java
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> postOrder(TreeNode<T> root) {
-        int left = 1;  // 在辅助栈里表示左节点
-        int right = 2;  // 在辅助栈里表示右节点
-        Stack<TreeNode<T>> stack = new Stack<>();
-        Stack<Integer> stack2 = new Stack<>();  // 辅助栈，用来判断子节点返回父节点时处于左节点还是右节点。
-
-        while (root != null || !stack.empty()) {
-            while (root != null) {  // 将节点压入栈1，并在栈2将节点标记为左节点
-                stack.push(root);
-                stack2.push(left);
-                root = root.left;
-            }
-
-            while (!stack.empty() && stack2.peek() == right) {  // 如果是从右子节点返回父节点，则任务完成，将两个栈的栈顶弹出
-                stack2.pop();
-                output.add(stack.pop().val);
-            }
-
-            if (!stack.empty() && stack2.peek() == left) {  // 如果是从左子节点返回父节点，则将标记改为右子节点
-                stack2.pop();
-                stack2.push(right);
-                root = stack.peek().right;
-            }
-        }
-        return output;
-    }
-}
-```
-
-测试用例：
-
-```java
-List<String> expected = "DCBHKGFEA".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
-assertEquals(expected, SOLUTION.postOrder(treeNode1));
-```
-
-#### 4.层次遍历
-
-就是广度搜索遍历。
-
-与树的前中后序遍历的DFS思想不同，层次遍历用到的是BFS思想。一般DFS用递归去实现（也可以用栈实现），BFS需要用队列去实现。
-层次遍历的步骤是：
-    1.对于不为空的结点，先把该结点加入到队列中
-    2.从队中拿出结点，如果该结点的左右结点不为空，就分别把左右结点加入到队列中
-    3.重复以上操作直到队列为空
-
-```java
-class Solution<T> {
-    private List<T> output = new ArrayList<>();
-
-    public List<T> levelTraverse(TreeNode<T> root) {
-        Queue<TreeNode<T>> queue = new LinkedList<>();
-        queue.add(root);
-        while (!queue.isEmpty()) {
-            TreeNode<T> treeNode = queue.remove();
-            if (treeNode == null) {
-                continue;
-            }
-            output.add(treeNode.val);
-
-            if (treeNode.left != null) {
-                queue.add(treeNode.left);
-            }
-
-            if (treeNode.right != null) {
-                queue.add(treeNode.right);
-            }
-        }
-        return output;
-    }
-}
-```
-
-测试用例：
-
-```java
-List<String> expected = "ABECFDGHK".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
-assertEquals(expected, SOLUTION.levelTraverse(treeNode1));
 ```
 
 ## [1162. 地图分析](https://leetcode-cn.com/problems/as-far-from-land-as-possible/)(华为题库)
@@ -10695,85 +9652,9521 @@ public:
 };
 ```
 
+## [8. 字符串转换整数 (atoi)](https://leetcode.cn/problems/string-to-integer-atoi/)
 
+```c++
+#include <climits>
+#include <algorithm>
+#include "gtest/gtest.h"
 
+using namespace std;
 
+class Solution {
+public:
+    int myAtoi(string s) {
+        bool isPositive = true;
+        if (!preprocess(s, isPositive)) {
+            return 0;
+        }
 
+        keepNumberStr(s);
+        if (s.size() > (std::to_string(INT_MAX)).size()) {
+            return isPositive ? INT_MAX : INT_MIN;
+        }
 
+        long numberLong = 0;
+        try {
+            numberLong = std::stol(s);
+        } catch (...) {
+            return numberLong;
+        }
 
+        numberLong *= isPositive ? 1 : -1;
+        return std::min<long>(std::max<long>(numberLong, INT_MIN), INT_MAX);
+    }
 
+private:
+    void keepNumberStr(std::string& input) {
+        input.erase(std::find_if(input.begin(), input.end(), [](auto c) { return !isdigit(c); }), input.end());
+        input.erase(0, input.find_first_not_of('0'));
+    }
 
+    bool preprocess(std::string& s, bool& isPositive) {
+        s.erase(0, s.find_first_not_of(' '));
+        if (s.empty()) {
+            return false;
+        }
 
+        auto firstChar = s.at(0);
+        isPositive = true;
+        bool isInputValid = true;
+        if (firstChar == '+') {
+            s.erase(0, 1);
+        } else if (isdigit(firstChar)) {
+        } else if (firstChar == '-') {
+            s.erase(0, 1);
+            isPositive = false;
+        } else {
+            isInputValid = false;
+        }
+        return isInputValid;
+    }
+};
 
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
 
+TEST_F(SolutionTest, Test1) {
+    const auto& input = "42"s;
+    int expect = 42;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test2) {
+    const auto& input = "    -42"s;
+    int expect = -42;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test3) {
+    const auto& input = "        "s;
+    int expect = 0;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test4) {
+    const auto& input = "+1234"s;
+    int expect = 1234;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test5) {
+    const auto& input = "4193 with words"s;
+    int expect = 4193;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test6) {
+    const auto& input = "92233720368547758065461061 good luck"s;
+    int expect = INT_MAX;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test7) {
+    const auto& input = "-922337203685477580834214321 good luck"s;
+    int expect = INT_MIN;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test8) {
+    const auto& input = "-+10"s;
+    int expect = 0;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test9) {
+    const auto& input = "  0000000000012345678"s;
+    int expect = 12345678;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test10) {
+    const auto& input = "+  0000000000012345678"s;
+    int expect = 0;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test11) {
+    const auto& input = "  +0000000000012345678"s;
+    int expect = 12345678;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test12) {
+    const auto& input = "00000-42a1234"s;
+    int expect = 0;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
 
+TEST_F(SolutionTest, Test13) {
+    const auto& input = "2147483648"s;
+    int expect = 2147483647;
+    EXPECT_EQ(expect, solution.myAtoi(input));
+}
+```
 
+[直接每位数字判断]([字符串转换整数 (atoi) - 字符串转换整数 (atoi) - 力扣（LeetCode）](https://leetcode.cn/problems/string-to-integer-atoi/solution/zi-fu-chuan-zhuan-huan-zheng-shu-atoi-by-leetcode-/))：
 
+```c++
+class Solution {
+public:
+    int myAtoi(std::string s) {
+        auto validIndex = s.find_first_not_of(' ');
+        if (validIndex == std::string::npos) {
+            return 0;
+        }
 
+        bool isPositive = s.at(validIndex) == '-' ? false : true;
+        validIndex += (s.at(validIndex) == '+' || s.at(validIndex) == '-') ? 1 : 0;
 
+        int ret = 0;
+        while (validIndex < s.size() && isdigit(s.at(validIndex))) {
+            int bitNum = s.at(validIndex) - '0';
+            if (ret > INT_MAX / 10 || (ret == INT_MAX / 10 && bitNum > INT_MAX % 10)) {
+                return isPositive ? INT_MAX : INT_MIN;
+            }
+            ret = ret * 10 + bitNum;
+            ++validIndex;
+        }
+        return isPositive ? ret : -ret;
+    }
+};
+```
 
+[用流的方式](https://leetcode.cn/problems/string-to-integer-atoi/solution/zi-fu-chuan-zhuan-huan-zheng-shu-atoi-by-leetcode-/)：
 
+```c++
+class Solution {
+public:
+    int myAtoi(string s) {
+        stringstream inputSs(s);
+        int ret = 0;
+        inputSs >> ret;  // 从读到的第1个属于int的有效字符（+/-/数字）开始直到不属于int的字符，解析成int
+        return ret;
+    }
+};
+```
 
+[使用Python的正则表达式](https://leetcode.cn/problems/string-to-integer-atoi/solution/python-1xing-zheng-ze-biao-da-shi-by-knifezhu/)：
 
+正则表达式设置了^开头，所以查找的结果num的list列表最多只有一个值。
 
+int(*num)是对num解包，如果num列表只有一个值，则将此一个值传入int()函数中；如果num列表为空，则int()返回0；如果num列表有多个值，则解包传入int()函数报错。
 
+```python
+import re
+import unittest
 
 
+class Solution:
+    INT_MAX = 2147483647
+    INT_MIN = -2147483648
 
+    def myAtoi(self, str: str) -> int:
+        str = str.lstrip()  # 清除左边多余的空格
+        num_re = re.compile(r'^[\+\-]?\d+')  # 设置正则规则
+        num = num_re.findall(str)  # 查找匹配的内容
+        num = int(*num)  # 由于返回的是个列表，解包并且转换成整数
+        return max(min(num, self.INT_MAX), self.INT_MIN)  # 返回值
 
 
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
 
+    def test_solution(self):
+        input_str = r'92233720368547758065461061 good luck'
+        expect_value = Solution.INT_MAX
+        self.assertEqual(expect_value, self._SOLUTION.myAtoi(input_str))
+```
 
+使用C++正则表达式
 
+```c++
+#include <climits>
+#include <algorithm>
+#include <regex>
+#include "gtest/gtest.h"
 
+using namespace std;
 
+class Solution {
+public:
+    int myAtoi(string s) {
+        bool isPositive = true;
+        if (!preprocess(s, isPositive)) {
+            return 0;
+        }
 
+        if (s.size() > (std::to_string(INT_MAX)).size()) {
+            return isPositive ? INT_MAX : INT_MIN;
+        }
 
+        long numberLong = 0;
+        try {
+            numberLong = std::stol(s);
+        } catch (...) {
+            return numberLong;
+        }
 
+        numberLong *= isPositive ? 1 : -1;
+        return std::min<long>(std::max<long>(numberLong, INT_MIN), INT_MAX);
+    }
 
+private:
+    bool preprocess(std::string& s, bool& isPositive) {
+        s.erase(0, s.find_first_not_of(' '));
 
+        std::regex re(R"(^[\+\-]?\d+)");
+        std::smatch result;
+        if (!std::regex_search(s, result, re)) {
+            return false;
+        }
 
+        s = result.str();
+        isPositive = s.at(0) == '-' ? false : true;
+        if (s.at(0) == '+' || s.at(0) == '-') {
+            s.erase(0, 1);
+        }
 
+        s.erase(0, s.find_first_not_of('0'));
+        return true;
+    }
+};
 
+// 优化正则表达式
+class Solution {
+public:
+    int myAtoi(string s) {
+        bool isPositive = true;
+        if (!preprocess(s, isPositive)) {
+            return 0;
+        }
 
+        if (s.size() > (std::to_string(INT_MAX)).size()) {
+            return isPositive ? INT_MAX : INT_MIN;
+        }
 
+        long numberLong = 0;
+        try {
+            numberLong = std::stol(s);
+        } catch (...) {
+            return numberLong;
+        }
 
+        numberLong *= isPositive ? 1 : -1;
+        return std::min<long>(std::max<long>(numberLong, INT_MIN), INT_MAX);
+    }
 
+private:
+    bool preprocess(std::string& s, bool& isPositive) {
+        s.erase(0, s.find_first_not_of(' '));
 
+        std::regex re(R"(^([\+\-]?)(\d+))");
+        std::smatch result;
+        if (!std::regex_search(s, result, re)) {
+            return false;
+        }
 
+        isPositive = result[1].str() == "-" ? false : true;  // 第1个小括号的内容
+        s = result[2].str();  // 第2个小括号内容
 
+        s.erase(0, s.find_first_not_of('0'));
+        return true;
+    }
+};
 
+```
 
+[状态机](https://leetcode.cn/problems/string-to-integer-atoi/solution/zi-fu-chuan-zhuan-huan-zheng-shu-atoi-by-leetcode-/)
 
+方法一：自动机
+思路
 
+字符串处理的题目往往涉及复杂的流程以及条件情况，如果直接上手写程序，一不小心就会写出极其臃肿的代码。
 
+因此，为了有条理地分析每个输入字符的处理方法，我们可以使用自动机这个概念：
 
+我们的程序在每个时刻有一个状态 s，每次从序列中输入一个字符 c，并根据字符 c 转移到下一个状态 s'。这样，我们只需要建立一个覆盖所有情况的从 s 与 c 映射到 s' 的表格即可解决题目中的问题。
 
+算法
 
+我们也可以用下面的表格来表示这个自动机：
 
+' '	+/-	number	other
+start	start	signed	in_number	end
+signed	end	end	in_number	end
+in_number	end	end	in_number	end
+end	end	end	end	end
+接下来编程部分就非常简单了：我们只需要把上面这个状态转换表抄进代码即可。
 
+另外自动机也需要记录当前已经输入的数字，只要在 s' 为 in_number 时，更新我们输入的数字，即可最终得到输入的数字。
 
+```c++
+#include <climits>
+#include <regex>
+#include <unordered_map>
+#include "gtest/gtest.h"
 
+using namespace std;
 
+class Automaton {
+    std::string state = "start";
+    std::unordered_map<std::string, std::vector<std::string>> table = {
+        {"start", {"start", "signed", "in_number", "end"}},
+        {"signed", {"end", "end", "in_number", "end"}},
+        {"in_number", {"end", "end", "in_number", "end"}},
+        {"end", {"end", "end", "end", "end"}}
+    };
 
+    int get_col(char c) {
+        if (isspace(c)) {
+            return 0;
+        }
+        if (c == '+' or c == '-') {
+            return 1;
+        }
+        if (isdigit(c)) {
+            return 2;
+        }
+        return 3;
+    }
 
+public:
+    int sign = 1;
+    long long ans = 0;
 
+    void get(char c) {
+        state = table[state][get_col(c)];
+        if (state == "in_number") {
+            ans = ans * 10 + c - '0';
+            ans = sign == 1 ? min(ans, (long long) INT_MAX) : min(ans, -(long long) INT_MIN);
+        } else if (state == "signed") {
+            sign = c == '+' ? 1 : -1;
+        }
+    }
+};
 
+class Solution {
+public:
+    int myAtoi(string str) {
+        Automaton automaton;
+        for (char c: str) {
+            automaton.get(c);
+        }
+        return automaton.sign * automaton.ans;
+    }
+};
+```
 
+## [49. 字母异位词分组](https://leetcode.cn/problems/group-anagrams/)
 
+```c++
+#include <algorithm>
+#include "gtest/gtest.h"
 
+using namespace std;
 
+class Solution {
+public:
+    bool test(std::string s1, std::string s2) {
+        std::sort(s1.begin(), s1.end());
+        std::sort(s2.begin(), s2.end());
+        return s1 == s2;
+    }
+};
 
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
 
+TEST_F(SolutionTest, Test1) {
+    const auto& input1 = "anagram"s;
+    const auto& input2 = "nagaram"s;
+    EXPECT_TRUE(solution.test(input1, input2));
+}
 
+TEST_F(SolutionTest, Test2) {
+    const auto& input1 = "anagra"s;
+    const auto& input2 = "nagaram"s;
+    EXPECT_FALSE(solution.test(input1, input2));
+}
+
+// 使用hash map比较
+class Solution {
+public:
+    bool test(std::string s1, std::string s2) {
+        const auto& firstCharCountMap = getCharCountMap(s1);
+        const auto& secondCharCountMap = getCharCountMap(s2);
+        return firstCharCountMap == secondCharCountMap;
+    }
+
+private:
+    std::unordered_map<char, int> getCharCountMap(const std::string& inputStr) {
+        std::unordered_map<char, int> charCountMap;
+        for (auto c: inputStr) {
+            ++charCountMap[c];
+        }
+        return charCountMap;
+    }
+};
+```
+
+## [三个字符串是否能组成等腰三角形](https://blog.csdn.net/Adong366/article/details/122115925)
+
+```c++
+#include <algorithm>
+#include <unordered_map>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    bool isTwoSidesSameTriangle(std::string s1, std::string s2, std::string s3) {
+        int side1 = 0, side2 = 0, side3 = 0;
+        if (!isThreeSidesValid(s1, s2, s3, side1, side2, side3)) {
+            return false;
+        }
+
+        if (!isThreeSidesValidForTriangle(side1, side2, side3)) {
+            return false;
+        }
+
+        return isTwoSidesSame(side1, side2, side3);
+    }
+
+private:
+    bool isThreeSidesValid(const std::string& s1, const std::string& s2, const std::string& s3,
+                           int& side1, int& side2, int& side3) {
+        try {
+            side1 = std::stoi(s1);
+            side2 = std::stoi(s2);
+            side3 = std::stoi(s3);
+            return true;
+        } catch (...) {
+            return false;
+        }
+    }
+
+    bool isThreeSidesValidForTriangle(int side1, int side2, int side3) {
+        return side1 + side2 > side3 && side1 + side3 > side2 && side2 + side3 > side1 &&
+               abs(side1 - side2) < side3 && abs(side1 - side3) < side2 && abs(side2 - side3) < side1;
+    }
+
+    bool isTwoSidesSame(int side1, int side2, int side3) {
+        return (side1 == side2 && side1 != side3) || (side1 == side3 && side1 != side2) ||
+               (side2 == side3 && side2 != side1);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    const auto& input1 = "10"s;
+    const auto& input2 = "7"s;
+    const auto& input3 = "7"s;
+    EXPECT_TRUE(solution.isTwoSidesSameTriangle(input1, input2, input3));
+}
+
+TEST_F(SolutionTest, Test2) {
+    const auto& input1 = "10"s;
+    const auto& input2 = "7"s;
+    const auto& input3 = "8"s;
+    EXPECT_FALSE(solution.isTwoSidesSameTriangle(input1, input2, input3));
+}
+
+TEST_F(SolutionTest, Test3) {
+    const auto& input1 = "10"s;
+    const auto& input2 = "7"s;
+    const auto& input3 = "3"s;
+    EXPECT_FALSE(solution.isTwoSidesSameTriangle(input1, input2, input3));
+}
+
+TEST_F(SolutionTest, Test4) {
+    const auto& input1 = ""s;
+    const auto& input2 = "7"s;
+    const auto& input3 = "3"s;
+    EXPECT_FALSE(solution.isTwoSidesSameTriangle(input1, input2, input3));
+}
+```
+
+## Json相似度（没太看懂）
+
+对比非固定层级json，给出相似度，完全相同的key 相似度1
+
+非list类的不相同是0，list你可以算0.5
+
+{"key1": [4,1,2,3],
+
+"key2": "abc",
+
+"key3": "string" }
+
+{"key1": [1,2,3, 4],
+
+"key2": "abc",
+
+"key3": [] }
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import json
+import unittest
+
+
+class Solution:
+    def get_similarity(self, json_str1, json_str2):
+        json1 = json.loads(json_str1)
+        json2 = json.loads(json_str2)
+        similarity = 0.0
+        for key1, value1 in json1.items():
+            value2 = json2.get(key1)
+            if value2 is None:
+                continue
+
+            similarity += 1
+
+            type1 = type(value1)
+            type2 = type(value2)
+
+            if type1 != type2:
+                continue
+
+            if type1 == type2:
+                similarity += 0.5
+
+            if type1 == type2 and type1 == list:
+                value1.sort()
+                value2.sort()
+                pass
+            elif type1 == type2 and type1 == str:
+                pass
+            elif type1 == type2 and type1 == int:
+                pass
+
+        return similarity
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution(self):
+        json_str1 = r'''
+{"key1": [4,1,2,3],
+"key2": "abc",
+"key3": "string" }
+'''
+        json_str2 = r'''
+{"key1": [1,2,3,4],
+"key2": "abc",
+"key3": [] }
+'''
+        self.assertEqual(4.0, self._SOLUTION.get_similarity(json_str1, json_str2))
+```
+
+遍历非固定层级 json，把key用如下形式输出为列表：
+
+{"a":1,"b":1,"c":[{"d":123},{"e":1234}]} -> ["a", "b", "c_0_d", "c_1_e"]
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import json
+import unittest
+
+
+class Solution:
+    _INVALID_INDEX = -1
+    _START_INDEX = 0
+
+    def gen_json_key_index(self, str):
+        json_value = json.loads(str)
+        output_list = []
+        start_str = ''
+        self._gen_key_index(json_value, start_str, output_list, self._START_INDEX)
+        return output_list
+
+    def _gen_key_index(self, json_value, start_str, output_list, index):
+        if type(json_value) != dict:  # isinstance(json_value, dict)
+            return self._INVALID_INDEX
+
+        for key, value in json_value.items():
+            tmp_str = f'{start_str}_{index}_{key}' if start_str else key
+            value_type = type(value)
+            if value_type == list:
+                self._process_list_value(value, tmp_str, output_list)
+            elif value_type == dict:
+                self._gen_key_index(value, tmp_str, output_list, self._START_INDEX)
+            else:
+                output_list.append(tmp_str)
+            index += 1
+        return len(json_value)
+
+    def _process_list_value(self, value, tmp_str, output_list):
+        start_index = self._START_INDEX
+        for each_value in value:
+            start_index = self._gen_key_index(each_value, tmp_str, output_list, start_index)
+            if start_index == self._INVALID_INDEX:
+                output_list.append(tmp_str)
+                break
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution(self):
+        input_str = r'''
+{
+	"a": 1,
+	"b": 1,
+	"c": [
+		{
+			"d": 123,
+			"e": 1234
+		}
+	]
+}
+        '''
+        expect_value = ["a", "b", "c_0_d", "c_1_e"]
+        self.assertEqual(expect_value, self._SOLUTION.gen_json_key_index(input_str))
+
+    def test_solution2(self):
+        input_str = r'''
+{
+	"a": 1,
+	"b": 1,
+	"c": [
+		{
+			"d": 123,
+			"e": 1234
+		},
+		{
+			"f": 123,
+			"g": 1234
+		}
+	]
+}
+        '''
+        expect_value = ["a", "b", "c_0_d", "c_1_e", "c_2_f", "c_3_g"]
+        self.assertEqual(expect_value, self._SOLUTION.gen_json_key_index(input_str))
+
+    def test_solution3(self):
+        input_str = r'''
+{
+	"a": 1,
+	"b": 1,
+	"c": {
+		"d": 123,
+		"e": 1234
+	}
+}
+        '''
+        expect_value = ["a", "b", "c_0_d", "c_1_e"]
+        self.assertEqual(expect_value, self._SOLUTION.gen_json_key_index(input_str))
+
+    def test_solution4(self):
+        input_str = r'''
+{
+	"a": 1,
+	"b": 1,
+	"c": {
+		"d": {
+		    "f": 111,
+		    "g": 222
+		},
+		"e": 1234
+	}
+}
+        '''
+        expect_value = ["a", "b", "c_0_d_0_f", "c_0_d_1_g", "c_1_e"]
+        self.assertEqual(expect_value, self._SOLUTION.gen_json_key_index(input_str))
+
+    def test_solution5(self):
+        input_str = r'''
+{
+	"a": 1,
+	"b": 1,
+	"c": [
+		1,
+		2,
+		3,
+		4
+	]
+}
+        '''
+        expect_value = ["a", "b", "c"]
+        self.assertEqual(expect_value, self._SOLUTION.gen_json_key_index(input_str))
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+```
+
+## 计算任意数字的N次方根
+
+使用二分法：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+
+
+class Solution:
+    def __init__(self, root_num=None, dest_num=None, points_num=None, points_precision=None):
+        self._root_num = root_num
+        self._dest_num = dest_num
+        self._points_num = points_num
+        self._points_precision = points_precision
+        self._recursion_count = 0
+
+    def calc_root(self, root_num, dest_num, points_num):
+        self.__init__(root_num, dest_num, points_num, 0.1 ** (points_num + 2))
+        return self._calc_root_by_recursion(1, dest_num)
+
+    def _calc_root_by_recursion(self, begin, end):
+        self._recursion_count += 1
+        if begin ** self._root_num == self._dest_num:
+            return begin
+        if end ** self._root_num == self._dest_num:
+            return end
+
+        if (end - begin) <= self._points_precision:
+            print(f'recursion count: {self._recursion_count}')
+            split_points_list = str(begin).split('.')
+            return float(split_points_list[0] + '.' + split_points_list[1][:self._points_num])
+
+        half = (begin + end) / 2
+        if half ** self._root_num > self._dest_num:
+            return self._calc_root_by_recursion(begin, half)
+        else:
+            return self._calc_root_by_recursion(half, end)
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        self.assertEqual(1.41421, self._SOLUTION.calc_root(root_num=2, dest_num=2, points_num=5))
+
+    def test_solution2(self):
+        self.assertEqual(1.4142135623730, self._SOLUTION.calc_root(root_num=2, dest_num=2, points_num=13))
+
+    def test_solution3(self):
+        self.assertEqual(1.732, self._SOLUTION.calc_root(root_num=2, dest_num=3, points_num=3))
+
+    def test_solution4(self):
+        self.assertEqual(1.44224, self._SOLUTION.calc_root(root_num=3, dest_num=3, points_num=5))
+# 输出
+test_solution.py::TestSolution::test_solution1 PASSED                    [ 25%]recursion count: 25
+test_solution.py::TestSolution::test_solution2 PASSED                    [ 50%]recursion count: 51
+test_solution.py::TestSolution::test_solution3 PASSED                    [ 75%]recursion count: 19
+test_solution.py::TestSolution::test_solution4 PASSED                    [100%]recursion count: 26
+```
+
+使用步进法：
+
+```python
+class Solution:
+    def __init__(self, root_num=None, dest_num=None, points_num=None):
+        self._root_num = root_num
+        self._dest_num = dest_num
+        self._points_num = points_num
+        self._recursion_count = 0
+
+    def calc_root(self, root_num, dest_num, points_num):
+        self.__init__(root_num, dest_num, points_num)
+
+        start_num = 1
+        for point_num in range(1, points_num + 1):
+            start_num = self._get_each_point_num(start_num, 0.1 ** point_num)
+
+        print(f'recursion count: {self._recursion_count}')
+        split_points_list = str(start_num).split('.')
+        return float(split_points_list[0] + '.' + split_points_list[1][:self._points_num])
+
+    def _get_each_point_num(self, start_num, interval):
+        precious_num = start_num
+        tmp_num = start_num
+        while tmp_num <= self._dest_num:
+            self._recursion_count += 1
+
+            if tmp_num ** self._root_num > self._dest_num:
+                return precious_num
+            precious_num = tmp_num
+            tmp_num += interval
+
+        # 标准的range的step只能为整数，不能为小数，可以使用numpy.arange来迭代小数，但有些精度问题
+        # import numpy
+        # for tmp_num in numpy.arange(start_num, self._dest_num, interval):
+        #    self._recursion_count += 1
+
+        #    if tmp_num ** self._root_num > self._dest_num:
+        #        return precious_num
+        #    precious_num = tmp_num
+# 输出：
+test_solution.py::TestSolution::test_solution1 PASSED                    [ 25%]recursion count: 22
+test_solution.py::TestSolution::test_solution2 PASSED                    [ 50%]recursion count: 67
+test_solution.py::TestSolution::test_solution3 PASSED                    [ 75%]recursion count: 18
+test_solution.py::TestSolution::test_solution4 PASSED                    [100%]recursion count: 26
+```
+
+## 最小的因子和
+
+一个正整数N，可拆成多个因子相乘，比如
+
+100 = 2\*50 = 4\*5\*5 = 100\*1 …..
+
+他们的因子和分别对应50+2、4+5+5、100+1；
+
+现在对正整数N，编程实现，计算出最小的因子和；
+
+```c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    int GetMinSum(int inputNum) const
+    {
+        std::vector<int> nums;
+        SplitNum(inputNum, nums);
+        if (nums.size() == 1) {
+            nums.push_back(1);
+        }
+
+        int minSum = GetSum(nums);
+        return minSum;
+    }
+
+private:
+    void SplitNum(int inputNum, std::vector<int>& nums) const
+    {
+        int leftNum = 0;
+        bool isSplit = false;
+        for (int i = 2; i < inputNum / 2; ++i) {
+            if (inputNum % i == 0) {
+                nums.push_back(i);
+                leftNum = inputNum / i;
+                isSplit = true;
+                break;
+            }
+        }
+
+        if (isSplit) {
+            SplitNum(leftNum, nums);
+        } else {
+            nums.push_back(inputNum);
+        }
+    }
+
+    int GetSum(const std::vector<int>& nums) const
+    {
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+        return sum;
+    }
+};
+
+int main() {
+    Solution solution;
+    std::cout << solution.GetMinSum(9) << std::endl;
+    std::cout << solution.GetMinSum(5) << std::endl;
+    std::cout << solution.GetMinSum(100) << std::endl;
+    return 0;
+}
+```
+
+## [543. 二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/)
+
+前序遍历每个节点获取其直径（通过后序遍历获取每个节点的最大深度），参考<[东哥带你刷二叉树（纲领篇） :: labuladong的算法小抄 (gitee.io)](https://labuladong.gitee.io/algo/1/4/)>
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+
+# 执行用时：576 ms, 在所有 Python3 提交中击败了5.12% 的用户
+# 内存消耗：17.3 MB, 在所有 Python3 提交中击败了20.48% 的用户
+# Definition for a binary tree node.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+class Solution:
+    def __init__(self):
+        self._max_diameter = 0
+
+    def diameterOfBinaryTree(self, root):
+        self._traverse(root)
+        return self._max_diameter
+
+    def _traverse(self, root):
+        if root is None:
+            return
+
+        left_depth = self._max_depth(root.left)
+        right_depth = self._max_depth(root.right)
+        self._max_diameter = max(left_depth + right_depth, self._max_diameter)
+
+        self._traverse(root.left)
+        self._traverse(root.right)
+
+    def _max_depth(self, root):
+        if root is None:
+            return 0
+
+        left_depth = self._max_depth(root.left)
+        right_depth = self._max_depth(root.right)
+        return max(left_depth, right_depth) + 1
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        tn4 = TreeNode(4)
+        tn5 = TreeNode(5)
+        tn2 = TreeNode(2, tn4, tn5)
+        tn3 = TreeNode(3)
+        tn1 = TreeNode(1, tn2, tn3)
+        self.assertEqual(3, self._SOLUTION.diameterOfBinaryTree(tn1))
+```
+
+优化：
+
+在后序遍历计算所有节点的最大深度的同时把直径计算出来，可以认为是通过一个副作用来完成计算
+
+```python
+# 执行用时： 48 ms , 在所有 Python3 提交中击败了 71.61% 的用户 
+# 内存消耗： 17.3 MB , 在所有 Python3 提交中击败了 25.63% 的用户
+class Solution:
+    def __init__(self):
+        self._max_diameter = 0
+
+    def diameterOfBinaryTree(self, root):
+        self._max_depth(root)
+        return self._max_diameter
+
+    def _max_depth(self, root):
+        if root is None:
+            return 0
+
+        left_depth = self._max_depth(root.left)
+        right_depth = self._max_depth(root.right)
+        self._max_diameter = max(self._max_diameter, left_depth + right_depth)
+
+        return max(left_depth, right_depth) + 1
+```
+
+## [325. 和等于 k 的最长子数组长度](https://cloud.tencent.com/developer/article/1787698)
+
+给定一个数组 nums 和一个目标值 k，找到和等于 k 的最长子数组长度。 如果不存在任意一个符合要求的子数组，则返回 0。
+
+注意: nums 数组的总和是一定在 32 位有符号整数范围之内的。
+
+算法：用m保存每个sum所对应的前n个数字下标。这样每次用全部数字总和sum-k，如果值存在于m中，则说明有一个子数组求和为k。这时再计算这个子数组长度`i - m[sum - k]`，看是否更大。
+
+```cpp
+#include <unordered_map>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int maxSubArrayLen(vector<int>& nums, int k) {
+        unordered_map<int, int> m;//前缀和，idx
+        m[0] = -1;
+        int i, sum = 0, maxlen = 0;
+        for (i = 0; i < nums.size(); ++i) {
+            sum += nums[i];
+            if (m.count(sum - k)) {
+                maxlen = max(maxlen, i - m[sum - k]);
+            }
+            if (!m.count(sum)) {
+                m[sum] = i;
+            }
+        }
+        return maxlen;
+    }
+};
+
+// 用find代替count
+class Solution {
+public:
+    int maxSubArrayLen(vector<int>& nums, int k) {
+        std::unordered_map<int, int> sumIndexMap = {{0, -1}};
+        int sum = 0;
+        int maxLen = 0;
+        for (int i = 0; i < nums.size(); ++i) {
+            sum += nums[i];
+            auto iter = sumIndexMap.find(sum - k);
+            if (iter != sumIndexMap.end()) {
+                maxLen = std::max(maxLen, i - (*iter).second);
+            }
+            if (sumIndexMap.find(sum) == sumIndexMap.end()) {
+                sumIndexMap.emplace(sum, i);
+            }
+        }
+        return maxLen;
+    }
+};
+
+// 暴力破解
+class Solution {
+public:
+    int maxSubArrayLen(vector<int>& nums, int k) {
+        int maxLen = 0;
+        for (int i = 0; i < nums.size(); ++i) {
+            for (int j = i; j < nums.size(); ++j) {
+                int sum = getSum(nums, i, j);
+                if (sum == k) {
+                    maxLen = max(maxLen, j - i + 1);
+                }
+            }
+        }
+        return maxLen;
+    }
+
+private:
+    int getSum(const vector<int>& nums, int i, int j) {
+        int sum = 0;
+        for (int index = i; index <= j; ++index) {
+            sum += nums[index];
+        }
+        return sum;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {1, -1, 5, -2, 3};
+    int k = 3;
+    EXPECT_EQ(4, solution.maxSubArrayLen(nums, k));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> nums = {-2, -1, 2, 1};
+    int k = 1;
+    EXPECT_EQ(2, solution.maxSubArrayLen(nums, k));
+}
+```
+
+
+
+
+
+# 深度优先搜索
+
+## [模板1](https://leetcode.cn/leetbook/read/queue-stack/gp5a7/)
+
+```java
+/*
+ * Return true if there is a path from cur to target.
+ */
+boolean DFS(Node cur, Node target, Set<Node> visited) {
+    return true if cur is target;
+    for (next : each neighbor of cur) {
+        if (next is not in visited) {
+            add next to visted;
+            return true if DFS(next, target, visited) == true;
+        }
+    }
+    return false;
+}
+```
+
+## 模板2
+
+```java
+/*
+ * Return true if there is a path from cur to target.
+ */
+boolean DFS(int root, int target) {
+    Set<Node> visited;
+    Stack<Node> s;  // 这里是栈，广度优先搜索这里是队列
+    add root to s;
+    while (s is not empty) {
+        Node cur = the top element in s;
+        return true if cur is target;
+        for (Node next : the neighbors of cur) {
+            if (next is not in visited) {
+                add next to s;
+                add next to visited;
+            }
+        }
+        remove cur from s;
+    }
+    return false;
+}
+```
+
+
+
+## [200. 岛屿数量](https://leetcode-cn.com/problems/number-of-islands/)(华为题库)（只看没做）
+
+<https://leetcode-cn.com/problems/number-of-islands/solution/dao-yu-shu-liang-by-leetcode/>
+
+深度搜索：
+
+遍历全部二维网格，如果任意一个单元格为1，则使用深度搜索把与该单元格相连的全部单元格设置为0：
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 8ms
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) {
+            return 0;
+        }
+        int nc = grid[0].size();
+
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    ++num_islands;
+                    dfs(grid, r, c);
+                }
+            }
+        }
+
+        return num_islands;
+    }
+
+private:
+    void dfs(vector<vector<char>>& grid, int r, int c) {
+        int nr = grid.size();
+        int nc = grid[0].size();
+
+        grid[r][c] = '0';
+        if (r - 1 >= 0 && grid[r - 1][c] == '1') {
+            dfs(grid, r - 1, c);
+        }
+        if (r + 1 < nr && grid[r + 1][c] == '1') {
+            dfs(grid, r + 1, c);
+        }
+        if (c - 1 >= 0 && grid[r][c - 1] == '1') {
+            dfs(grid, r, c - 1);
+        }
+        if (c + 1 < nc && grid[r][c + 1] == '1') {
+            dfs(grid, r, c + 1);
+        }
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    vector<vector<char>> grid = {
+        {'1', '1', '1', '1', '0'},
+        {'1', '1', '0', '1', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '0', '0', '0'},
+    };
+    EXPECT_EQ(1, Solution().numIslands(grid));
+}
+
+TEST(SolutionTest, Test2) {
+    vector<vector<char>> grid = {
+        {'1', '1', '0', '0', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '1', '0', '0'},
+        {'0', '0', '0', '1', '1'},
+    };
+    EXPECT_EQ(3, Solution().numIslands(grid));
+}
+```
+
+广度搜索：
+
+同样遍历二维表格，任意一个单元格值为1，则使用队列进行广度搜索，把相邻的1都标为0，再去遍历下一个单元格。
+
+```c++
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) {
+            return 0;
+        }
+        int nc = grid[0].size();
+
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    ++num_islands;
+                    grid[r][c] = '0'; // mark as visited
+                    queue<pair<int, int>> neighbors;
+                    neighbors.push({r, c});
+                    while (!neighbors.empty()) {
+                        auto rc = neighbors.front();
+                        neighbors.pop();
+                        int row = rc.first, col = rc.second;
+                        if (row - 1 >= 0 && grid[row - 1][col] == '1') {
+                            neighbors.push({row - 1, col});
+                            grid[row - 1][col] = '0';
+                        }
+                        if (row + 1 < nr && grid[row + 1][col] == '1') {
+                            neighbors.push({row + 1, col});
+                            grid[row + 1][col] = '0';
+                        }
+                        if (col - 1 >= 0 && grid[row][col - 1] == '1') {
+                            neighbors.push({row, col - 1});
+                            grid[row][col - 1] = '0';
+                        }
+                        if (col + 1 < nc && grid[row][col + 1] == '1') {
+                            neighbors.push({row, col + 1});
+                            grid[row][col + 1] = '0';
+                        }
+                    }
+                }
+            }
+        }
+
+        return num_islands;
+    }
+};
+```
+
+并查集 
+
+遍历二维网格，将竖直或水平相邻的陆地联结。最终，返回并查集数据结构中相连部分的数量。
+
+下面的动画展示了整个算法。
+
+```c++
+class UnionFind {
+public:
+    UnionFind(vector<vector<char>>& grid) {
+        count = 0;
+        int m = grid.size();
+        int n = grid[0].size();
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (grid[i][j] == '1') {
+                    parent.push_back(i * n + j);
+                    ++count;
+                }
+                else {
+                    parent.push_back(-1);
+                }
+                rank.push_back(0);
+            }
+        }
+    }
+
+    int find(int i) { // path compression
+        if (parent[i] != i) {
+            parent[i] = find(parent[i]);
+        }
+        return parent[i];
+    }
+
+    void Union(int x, int y) { // union with rank
+        int rootx = find(x);
+        int rooty = find(y);
+        if (rootx != rooty) {
+            if (rank[rootx] > rank[rooty]) {
+                parent[rooty] = rootx;
+            }
+            else if (rank[rootx] < rank[rooty]) {
+                parent[rootx] = rooty;
+            }
+            else {
+                parent[rooty] = rootx;
+                rank[rootx] += 1;
+            }
+            --count;
+        }
+    }
+
+    int getCount() const {
+        return count;
+    }
+
+private:
+    vector<int> parent;
+    vector<int> rank;
+    int count; // # of connected components
+};
+
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) {
+            return 0;
+        }
+        int nc = grid[0].size();
+
+        UnionFind uf(grid);
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    grid[r][c] = '0';
+                    if (r - 1 >= 0 && grid[r - 1][c] == '1') {
+                        uf.Union(r * nc + c, (r - 1) * nc + c);
+                    }
+                    if (r + 1 < nr && grid[r + 1][c] == '1') {
+                        uf.Union(r * nc + c, (r + 1) * nc + c);
+                    }
+                    if (c - 1 >= 0 && grid[r][c - 1] == '1') {
+                        uf.Union(r * nc + c, r * nc + c - 1);
+                    }
+                    if (c + 1 < nc && grid[r][c + 1] == '1') {
+                        uf.Union(r * nc + c, r * nc + c + 1);
+                    }
+                }
+            }
+        }
+
+        return uf.getCount();
+    }
+};
+```
+
+## [98. 验证二叉搜索树](https://leetcode.cn/problems/validate-binary-search-tree/)
+
+```cpp
+#include <climits>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+};
+
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        return checkVal(root, LONG_MIN, LONG_MAX);
+    }
+
+private:
+    bool checkVal(TreeNode* node, long lower, long upper) {
+        if (node == nullptr) {
+            return true;
+        }
+
+        if (node->val >= upper || node->val <= lower) {
+            return false;
+        }
+        return checkVal(node->left, lower, node->val) && checkVal(node->right, node->val, upper);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::unique_ptr<TreeNode> root = std::make_unique<TreeNode>(2);
+    std::unique_ptr<TreeNode> left = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> right = std::make_unique<TreeNode>(3);
+    root->left = left.get();
+    root->right = right.get();
+    EXPECT_TRUE(solution.isValidBST(root.get()));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::unique_ptr<TreeNode> root5 = std::make_unique<TreeNode>(5);
+    std::unique_ptr<TreeNode> node3 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> node7 = std::make_unique<TreeNode>(7);
+    std::unique_ptr<TreeNode> node1 = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> node4 = std::make_unique<TreeNode>(4);
+    std::unique_ptr<TreeNode> node6 = std::make_unique<TreeNode>(6);
+    std::unique_ptr<TreeNode> node8 = std::make_unique<TreeNode>(8);
+    root5->left = node3.get();
+    root5->right = node7.get();
+    node3->left = node1.get();
+    node3->right = node4.get();
+    node7->left = node6.get();
+    node7->right = node8.get();
+    std::vector<int> expected = {4, 5, 2, 6, 7, 3, 1};
+    EXPECT_TRUE(solution.isValidBST(root5.get()));
+}
+```
+
+自己写的都有问题：
+
+```java
+package test;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+
+    TreeNode(int x) {
+        val = x;
+    }
+}
+
+class Solution {
+    public boolean isValidBST(TreeNode root) {
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            TreeNode treeNode = queue.remove();
+            if (treeNode == null) {
+                continue;
+            }
+
+            TreeNode left = treeNode.left;
+            if (left != null) {
+                if (left.val >= treeNode.val) {
+                    return false;
+                }
+                queue.add(left);
+            }
+
+            TreeNode right = treeNode.right;
+            if (right != null) {
+                if (right.val <= treeNode.val) {
+                    return false;
+                }
+                queue.add(right);
+            }
+        }
+        return true;
+    }
+}
+
+class Solution {
+    public boolean isValidBST(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        if (!check(root, null, null)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean check(TreeNode treeNode, Integer leftMaxVal, Integer rightMinVal) {
+        if (!checkLeft(treeNode, leftMaxVal == null ? treeNode.val : leftMaxVal, rightMinVal)) {
+            return false;
+        }
+        if (!checkRight(treeNode, leftMaxVal, rightMinVal == null ? treeNode.val : rightMinVal)) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkLeft(TreeNode treeNode, Integer leftMaxVal, Integer rightMinVal) {
+        TreeNode left = treeNode.left;
+        if (left != null) {
+            if (left.val >= treeNode.val) {  // 左子节点值不能大于等于父节点
+                return false;
+            }
+            if (rightMinVal != null && left.val <= rightMinVal) {
+                return false;
+            }
+            return check(left, Math.max(left.val, leftMaxVal == null ? left.val : leftMaxVal.intValue()),
+                Math.min(left.val, rightMinVal == null ? left.val : rightMinVal.intValue()));
+        }
+        return true;
+    }
+
+    private boolean checkRight(TreeNode treeNode, Integer leftMaxVal, Integer rightMinVal) {
+        TreeNode right = treeNode.right;
+        if (right != null) {
+            if (right.val <= treeNode.val) {
+                return false;
+            }
+            if (leftMaxVal != null && right.val >= leftMaxVal) {
+                return false;
+            }
+            return check(right, Math.max(right.val, leftMaxVal == null ? right.val : leftMaxVal.intValue()),
+                Math.min(right.val, rightMinVal == null ? right.val : rightMinVal.intValue()));
+        }
+        return true;
+    }
+}
+
+//
+package test;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static Solution SOLUTION;
+
+    @Before
+    public void before() {
+        SOLUTION = new Solution();
+    }
+
+    @Test
+    public void test1() {
+        TreeNode treeNode1 = new TreeNode(5);
+        TreeNode treeNode2 = new TreeNode(1);
+        TreeNode treeNode3 = new TreeNode(4);
+        treeNode1.left = treeNode2;
+        treeNode1.right = treeNode3;
+
+        TreeNode treeNode4 = new TreeNode(3);
+        TreeNode treeNode5 = new TreeNode(6);
+        treeNode3.left = treeNode4;
+        treeNode3.right = treeNode5;
+
+        assertEquals(false, SOLUTION.isValidBST(treeNode1));
+    }
+
+    @Test
+    public void test2() {
+        TreeNode treeNode1 = new TreeNode(5);
+        TreeNode treeNode2 = new TreeNode(1);
+        TreeNode treeNode3 = new TreeNode(7);
+        treeNode1.left = treeNode2;
+        treeNode1.right = treeNode3;
+
+        TreeNode treeNode4 = new TreeNode(4);
+        TreeNode treeNode5 = new TreeNode(8);
+        treeNode3.left = treeNode4;
+        treeNode3.right = treeNode5;
+
+        assertEquals(false, SOLUTION.isValidBST(treeNode1));
+    }
+
+    @Test
+    public void test3() {
+        TreeNode treeNode1 = new TreeNode(5);
+        TreeNode treeNode2 = new TreeNode(1);
+        TreeNode treeNode3 = new TreeNode(7);
+        treeNode1.left = treeNode2;
+        treeNode1.right = treeNode3;
+
+        TreeNode treeNode4 = new TreeNode(6);
+        TreeNode treeNode5 = new TreeNode(8);
+        treeNode3.left = treeNode4;
+        treeNode3.right = treeNode5;
+
+        assertEquals(true, SOLUTION.isValidBST(treeNode1));
+    }
+
+    @Test
+    public void test4() {
+        TreeNode treeNode1 = new TreeNode(0);
+        assertEquals(true, SOLUTION.isValidBST(treeNode1));
+    }
+
+    @Test
+    public void test5() {
+        TreeNode treeNode1 = new TreeNode(1);
+        TreeNode treeNode2 = new TreeNode(1);
+        treeNode1.left = treeNode2;
+        assertEquals(false, SOLUTION.isValidBST(treeNode1));
+    }
+}
+```
+
+别人的优化算法：
+
+<https://leetcode-cn.com/problems/validate-binary-search-tree/solution/yan-zheng-er-cha-sou-suo-shu-by-leetcode/>
+
+方法一: 递归
+
+```java
+package test;
+
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+
+    TreeNode(int x) {
+        val = x;
+    }
+}
+
+class Solution {  // 1ms
+    public boolean isValidBST(TreeNode root) {
+        return helper(root, null, null);
+    }
+
+    private boolean helper(TreeNode node, Integer lower, Integer upper) {
+        if (node == null) {
+            return true;
+        }
+
+        int val = node.val;
+        if (lower != null && val <= lower) {
+            return false;
+        }
+        if (upper != null && val >= upper) {
+            return false;
+        }
+
+        if (!helper(node.left, lower, val)) {
+            return false;
+        }
+        if (!helper(node.right, val, upper)) {
+            return false;
+        }
+        return true;
+    }
+}
+```
+
+方法二: 迭代
+
+通过使用栈，上面的递归法可以转化为迭代法。这里使用深度优先搜索，比广度优先搜索要快一些。（感觉说的有些问题，看起来这里使用的是广度搜索）
+
+```java
+class Solution {  // 5ms
+    private Queue<TreeNode> queue = new LinkedList();
+    private Queue<Integer> lowers = new LinkedList();
+    private Queue<Integer> uppers = new LinkedList();
+
+    public boolean isValidBST(TreeNode root) {
+        Integer lower = null, upper = null, val;
+        update(root, lower, upper);
+
+        while (!queue.isEmpty()) {
+            root = queue.poll();
+            lower = lowers.poll();
+            upper = uppers.poll();
+
+            if (root == null) {
+                continue;
+            }
+            val = root.val;
+            if (lower != null && val <= lower) {
+                return false;
+            }
+            if (upper != null && val >= upper) {
+                return false;
+            }
+            update(root.left, lower, val);
+            update(root.right, val, upper);
+        }
+        return true;
+    }
+
+    private void update(TreeNode root, Integer lower, Integer upper) {
+        queue.add(root);
+        lowers.add(lower);
+        uppers.add(upper);
+    }
+}
+```
+
+方法三：中序遍历
+
+二叉搜索树的中序遍历是单调递增的，所以我们使用[中序遍历](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/er-cha-shu-de-zhong-xu-bian-li-by-leetcode/)
+`左子树 -> 结点 -> 右子树`的顺序。
+
+```java
+class Solution {  // 3ms
+    public boolean isValidBST(TreeNode root) {
+        Stack<TreeNode> stack = new Stack();
+        double inorder = -Double.MAX_VALUE;  // 这里用double是因为有个测试用例的节点值为Integer.MIN_VALUE，如果使用int则失败
+
+        while (!stack.isEmpty() || root != null) {
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
+            root = stack.pop();
+            // If next element in inorder traversal
+            // is smaller than the previous one
+            // that's not BST.
+            if (root.val <= inorder) {
+                return false;
+            }
+            inorder = root.val;
+            root = root.right;
+        }
+        return true;
+    }
+}
+```
+
+参考下面的中序遍历的递归算法：
+
+```java
+class Solution {
+    private double inOrderValue = -Double.MAX_VALUE;
+
+    public boolean isValidBST(TreeNode root) {
+        return inOrderRecursively(root);
+    }
+
+    private boolean inOrderRecursively(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+
+        if (!inOrderRecursively(root.left)) {
+            return false;
+        }
+
+        if (root.val <= inOrderValue) {
+            return false;
+        }
+        inOrderValue = root.val;
+
+        if (!inOrderRecursively(root.right)) {
+            return false;
+        }
+
+        return true;
+    }
+}
+```
+
+### 二叉树遍历算法讲解
+
+<https://blog.csdn.net/qq_33243189/article/details/80222629>
+
+<https://blog.csdn.net/coder__666/article/details/80349039>
+
+<https://www.cnblogs.com/llhthinker/p/4747962.html>
+
+以如下二叉树为样例：
+
+![](pictures\二叉树数据样例.png)
+
+#### 1.前序遍历
+
+递归
+
+```java
+//
+package test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+class TreeNode<T> {
+    T val;
+    TreeNode<T> left;
+    TreeNode<T> right;
+
+    TreeNode(T x) {
+        val = x;
+    }
+}
+
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> preOrder(TreeNode<T> root) {
+        preOrderRecursively(root);
+        return output;
+    }
+
+    private void preOrderRecursively(TreeNode<T> root) {
+        if (root != null) {
+            output.add(root.val);
+            preOrderRecursively(root.left);
+            preOrderRecursively(root.right);
+        }
+    }
+}
+```
+
+非递归：
+
+```java
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> preOrder(TreeNode<T> root) {
+        Stack<TreeNode<T>> stack = new Stack<>();
+        while (root != null || !stack.isEmpty()) {
+            while (root != null) {  // 不断的找左子节点，输出后再入栈
+                output.add(root.val);
+                stack.push(root);
+                root = root.left;
+            }
+            if (!stack.isEmpty()) {  // 当找不到左子节点后，栈顶中的元素弹出，并获取其右子节点重复上述操作
+                root = stack.pop();
+                root = root.right;
+            }
+        }
+        return output;
+    }
+}
+```
+
+测试用例：
+
+```java
+//
+package test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution<String> SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        TreeNode<String> treeNode1 = new TreeNode<>("A");
+
+        TreeNode<String> treeNode2 = new TreeNode<>("B");
+        treeNode1.left = treeNode2;
+
+        TreeNode<String> treeNode3 = new TreeNode<>("C");
+        treeNode2.right = treeNode3;
+
+        TreeNode<String> treeNode4 = new TreeNode<>("D");
+        treeNode3.left = treeNode4;
+
+        TreeNode<String> treeNode5 = new TreeNode<>("E");
+        treeNode1.right = treeNode5;
+
+        TreeNode<String> treeNode6 = new TreeNode<>("F");
+        treeNode5.right = treeNode6;
+
+        TreeNode<String> treeNode7 = new TreeNode<>("G");
+        treeNode6.left = treeNode7;
+
+        TreeNode<String> treeNode8 = new TreeNode<>("H");
+        TreeNode<String> treeNode9 = new TreeNode<>("K");
+        treeNode7.left = treeNode8;
+        treeNode7.right = treeNode9;
+
+        List<String> expected = "ABCDEFGHK".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
+        assertEquals(expected, SOLUTION.preOrder(treeNode1));
+    }
+}
+```
+
+#### 2.中序遍历
+
+递归：
+
+```java
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> inOrder(TreeNode<T> root) {
+        inOrderRecursively(root);
+        return output;
+    }
+
+    private void inOrderRecursively(TreeNode<T> root) {
+        if (root == null) {
+            return;
+        }
+
+        inOrderRecursively(root.left);
+        output.add(root.val);
+        inOrderRecursively(root.right);
+    }
+}
+
+```
+
+非递归：
+
+```java
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> inOrder(TreeNode<T> root) {
+        Stack<TreeNode<T>> stack = new Stack<>();
+        while (root != null || !stack.isEmpty()) {
+            while (root != null) {  // 不断的找左子节点，并直接入栈
+                stack.push(root);
+                root = root.left;
+            }
+
+            if (!stack.isEmpty()) {  // 当找不到左子节点后，栈顶中的元素弹出，输出，并获取其右子节点重复上述操作
+                root = stack.pop();
+                output.add(root.val);
+                root = root.right;
+            }
+        }
+        return output;
+    }
+}
+```
+
+测试用例：
+
+```java
+List<String> expected = "BDCAEHGKF".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
+assertEquals(expected, SOLUTION.inOrder(treeNode1));    
+```
+
+#### 3.后序遍历
+
+递归：
+
+```java
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> postOrder(TreeNode<T> root) {
+        postOrderRecursively(root);
+        return output;
+    }
+
+    private void postOrderRecursively(TreeNode<T> root) {
+        if (root == null) {
+            return;
+        }
+        
+        postOrderRecursively(root.left);
+        postOrderRecursively(root.right);
+        output.add(root.val);
+    }
+}
+```
+
+非递归：
+
+```java
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> postOrder(TreeNode<T> root) {
+        int left = 1;  // 在辅助栈里表示左节点
+        int right = 2;  // 在辅助栈里表示右节点
+        Stack<TreeNode<T>> stack = new Stack<>();
+        Stack<Integer> stack2 = new Stack<>();  // 辅助栈，用来判断子节点返回父节点时处于左节点还是右节点。
+
+        while (root != null || !stack.empty()) {
+            while (root != null) {  // 将节点压入栈1，并在栈2将节点标记为左节点
+                stack.push(root);
+                stack2.push(left);
+                root = root.left;
+            }
+
+            while (!stack.empty() && stack2.peek() == right) {  // 如果是从右子节点返回父节点，则任务完成，将两个栈的栈顶弹出
+                stack2.pop();
+                output.add(stack.pop().val);
+            }
+
+            if (!stack.empty() && stack2.peek() == left) {  // 如果是从左子节点返回父节点，则将标记改为右子节点
+                stack2.pop();
+                stack2.push(right);
+                root = stack.peek().right;
+            }
+        }
+        return output;
+    }
+}
+```
+
+测试用例：
+
+```java
+List<String> expected = "DCBHKGFEA".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
+assertEquals(expected, SOLUTION.postOrder(treeNode1));
+```
+
+C++写的后序遍历：
+
+```cpp
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+
+class Solution {
+public:
+    vector<int> traverseTree(TreeNode* root) {
+        vector<int> res;
+        std::stack<TreeNode*> stack;
+
+        int left = -1, right = 1;
+        std::stack<int> helpStack;
+        while (root != nullptr || !stack.empty()) {
+            while (root != nullptr) {
+                stack.push(root);
+                helpStack.push(left);
+                root = root->left;
+            }
+
+            while (!stack.empty() && helpStack.top() == right) {
+                res.push_back(stack.top()->val);
+                stack.pop();
+                helpStack.pop();
+            }
+
+            if (!stack.empty() && helpStack.top() == left) {
+                helpStack.top() = right;
+                root = stack.top()->right;
+            }
+        }
+        //        dfs(root, res);
+        return res;
+    }
+
+private:
+//    void dfs(TreeNode* node, std::vector<int>& res) {
+//        if (node == nullptr) {
+//            return;
+//        }
+//
+//        res.push_back(node->val);
+//        dfs(node->left, res);
+//        dfs(node->right, res);
+//    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1_preOrder) {
+    std::unique_ptr<TreeNode> root1 = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> node2 = std::make_unique<TreeNode>(2);
+    std::unique_ptr<TreeNode> node3 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> node4 = std::make_unique<TreeNode>(4);
+    std::unique_ptr<TreeNode> node5 = std::make_unique<TreeNode>(5);
+    std::unique_ptr<TreeNode> node6 = std::make_unique<TreeNode>(6);
+    std::unique_ptr<TreeNode> node7 = std::make_unique<TreeNode>(7);
+    root1->left = node2.get();
+    root1->right = node3.get();
+    node2->left = node4.get();
+    node2->right = node5.get();
+    node3->left = node6.get();
+    node3->right = node7.get();
+    std::vector<int> expected = {1, 2, 4, 5, 3, 6, 7};
+    EXPECT_EQ(expected, solution.traverseTree(root1.get()));
+}
+
+TEST_F(SolutionTest, Test1_inOrder) {
+    std::unique_ptr<TreeNode> root1 = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> node2 = std::make_unique<TreeNode>(2);
+    std::unique_ptr<TreeNode> node3 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> node4 = std::make_unique<TreeNode>(4);
+    std::unique_ptr<TreeNode> node5 = std::make_unique<TreeNode>(5);
+    std::unique_ptr<TreeNode> node6 = std::make_unique<TreeNode>(6);
+    std::unique_ptr<TreeNode> node7 = std::make_unique<TreeNode>(7);
+    root1->left = node2.get();
+    root1->right = node3.get();
+    node2->left = node4.get();
+    node2->right = node5.get();
+    node3->left = node6.get();
+    node3->right = node7.get();
+    std::vector<int> expected = {4, 2, 5, 1, 6, 3, 7};
+    EXPECT_EQ(expected, solution.traverseTree(root1.get()));
+}
+
+TEST_F(SolutionTest, Test1_postOrder) {
+    std::unique_ptr<TreeNode> root1 = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> node2 = std::make_unique<TreeNode>(2);
+    std::unique_ptr<TreeNode> node3 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> node4 = std::make_unique<TreeNode>(4);
+    std::unique_ptr<TreeNode> node5 = std::make_unique<TreeNode>(5);
+    std::unique_ptr<TreeNode> node6 = std::make_unique<TreeNode>(6);
+    std::unique_ptr<TreeNode> node7 = std::make_unique<TreeNode>(7);
+    root1->left = node2.get();
+    root1->right = node3.get();
+    node2->left = node4.get();
+    node2->right = node5.get();
+    node3->left = node6.get();
+    node3->right = node7.get();
+    std::vector<int> expected = {4, 5, 2, 6, 7, 3, 1};
+    EXPECT_EQ(expected, solution.traverseTree(root1.get()));
+}
+```
+
+
+
+#### 4.层次遍历
+
+就是广度搜索遍历。
+
+与树的前中后序遍历的DFS思想不同，层次遍历用到的是BFS思想。一般DFS用递归去实现（也可以用栈实现），BFS需要用队列去实现。
+层次遍历的步骤是：
+    1.对于不为空的结点，先把该结点加入到队列中
+    2.从队中拿出结点，如果该结点的左右结点不为空，就分别把左右结点加入到队列中
+    3.重复以上操作直到队列为空
+
+```java
+class Solution<T> {
+    private List<T> output = new ArrayList<>();
+
+    public List<T> levelTraverse(TreeNode<T> root) {
+        Queue<TreeNode<T>> queue = new LinkedList<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            TreeNode<T> treeNode = queue.remove();
+            if (treeNode == null) {
+                continue;
+            }
+            output.add(treeNode.val);
+
+            if (treeNode.left != null) {
+                queue.add(treeNode.left);
+            }
+
+            if (treeNode.right != null) {
+                queue.add(treeNode.right);
+            }
+        }
+        return output;
+    }
+}
+```
+
+测试用例：
+
+```java
+List<String> expected = "ABECFDGHK".chars().mapToObj(i -> (char) i).map(String::valueOf).collect(Collectors.toList());
+assertEquals(expected, SOLUTION.levelTraverse(treeNode1));
+```
+
+## [99. 恢复二叉搜索树](https://leetcode.cn/problems/recover-binary-search-tree/)
+
+```cpp
+#include <stack>
+#include <climits>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+
+// 隐式中序遍历
+class Solution {
+public:
+    void recoverTree(TreeNode* root) {
+        stack<TreeNode*> stk;
+        TreeNode* x = nullptr;
+        TreeNode* y = nullptr;
+        TreeNode* pred = nullptr;
+
+        while (!stk.empty() || root != nullptr) {
+            while (root != nullptr) {
+                stk.push(root);
+                root = root->left;
+            }
+            root = stk.top();
+            stk.pop();
+            if (pred != nullptr && root->val < pred->val) {
+                y = root;
+                if (x == nullptr) {
+                    x = pred;
+                } else {
+                    break;
+                }
+            }
+            pred = root;
+            root = root->right;
+        }
+
+        swap(x->val, y->val);
+    }
+};
+
+class Solution2 {
+public:
+    bool isValidBST(TreeNode* root) {
+        return checkVal(root, LONG_MIN, LONG_MAX);
+    }
+
+private:
+    bool checkVal(TreeNode* node, long lower, long upper) {
+        if (node == nullptr) {
+            return true;
+        }
+
+        if (node->val >= upper || node->val <= lower) {
+            return false;
+        }
+        return checkVal(node->left, lower, node->val) && checkVal(node->right, node->val, upper);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+    Solution2 solution2;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::unique_ptr<TreeNode> root3 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> left1 = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> right4 = std::make_unique<TreeNode>(4);
+    std::unique_ptr<TreeNode> right4_left2 = std::make_unique<TreeNode>(2);
+    root3->left = left1.get();
+    root3->right = right4.get();
+    right4->left = right4_left2.get();
+    EXPECT_FALSE(solution2.isValidBST(root3.get()));
+    solution.recoverTree(root3.get());
+    EXPECT_TRUE(solution2.isValidBST(root3.get()));
+}
+
+// 显示中序遍历
+class Solution {
+public:
+    void inorder(TreeNode* root, vector<int>& nums) {
+        if (root == nullptr) {
+            return;
+        }
+        inorder(root->left, nums);
+        nums.push_back(root->val);
+        inorder(root->right, nums);
+    }
+
+    pair<int,int> findTwoSwapped(vector<int>& nums) {
+        int n = nums.size();
+        int index1 = -1, index2 = -1;
+        for (int i = 0; i < n - 1; ++i) {
+            if (nums[i + 1] < nums[i]) {
+                index2 = i + 1;
+                if (index1 == -1) {
+                    index1 = i;
+                } else {
+                    break;
+                }
+            }
+        }
+        int x = nums[index1], y = nums[index2];
+        return {x, y};
+    }
+    
+    void recover(TreeNode* r, int count, int x, int y) {
+        if (r != nullptr) {
+            if (r->val == x || r->val == y) {
+                r->val = r->val == x ? y : x;
+                if (--count == 0) {
+                    return;
+                }
+            }
+            recover(r->left, count, x, y);
+            recover(r->right, count, x, y);
+        }
+    }
+
+    void recoverTree(TreeNode* root) {
+        vector<int> nums;
+        inorder(root, nums);
+        pair<int,int> swapped= findTwoSwapped(nums);
+        recover(root, 2, swapped.first, swapped.second);
+    }
+};
+
+```
+
+## [113. 路径总和 II](https://leetcode.cn/problems/path-sum-ii/)
+
+```cpp
+// dfs
+class Solution {
+public:
+    vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+        std::vector<std::vector<int>> paths;
+        searchAllPaths(paths, root, std::vector<int>(), targetSum);
+        return paths;
+    }
+private:
+    void searchAllPaths(vector<vector<int>>& paths, TreeNode* node, vector<int> path, int targetSum) {
+        if (node == nullptr) {
+            return;
+        }
+
+        path.push_back(node->val);
+        targetSum -= node->val;
+        if (node->left == nullptr && node->right == nullptr) {
+            if (targetSum == 0) {
+                paths.push_back(path);
+            }
+            return;
+        }
+        searchAllPaths(paths, node->left, path, targetSum);
+        searchAllPaths(paths, node->right, path, targetSum);
+    }
+};
+
+// bfs https://leetcode.cn/problems/path-sum-ii/solutions/427759/lu-jing-zong-he-ii-by-leetcode-solution/
+class Solution {
+public:
+    vector<vector<int>> ret;
+    unordered_map<TreeNode*, TreeNode*> parent;
+
+    void getPath(TreeNode* node) {
+        vector<int> tmp;
+        while (node != nullptr) {
+            tmp.emplace_back(node->val);
+            node = parent[node];
+        }
+        reverse(tmp.begin(), tmp.end());
+        ret.emplace_back(tmp);
+    }
+
+    vector<vector<int>> pathSum(TreeNode* root, int targetSum) {
+        if (root == nullptr) {
+            return ret;
+        }
+
+        queue<TreeNode*> que_node;
+        queue<int> que_sum;
+        que_node.emplace(root);
+        que_sum.emplace(0);
+
+        while (!que_node.empty()) {
+            TreeNode* node = que_node.front();
+            que_node.pop();
+            int rec = que_sum.front() + node->val;
+            que_sum.pop();
+
+            if (node->left == nullptr && node->right == nullptr) {
+                if (rec == targetSum) {
+                    getPath(node);
+                }
+            } else {
+                if (node->left != nullptr) {
+                    parent[node->left] = node;
+                    que_node.emplace(node->left);
+                    que_sum.emplace(rec);
+                }
+                if (node->right != nullptr) {
+                    parent[node->right] = node;
+                    que_node.emplace(node->right);
+                    que_sum.emplace(rec);
+                }
+            }
+        }
+
+        return ret;
+    }
+};
+```
+
+### [一篇文章解决所有二叉树路径问题（问题分析+分类模板+题目剖析）](https://leetcode.cn/problems/path-sum-ii/solutions/1/yi-pian-wen-zhang-jie-jue-suo-you-er-cha-oo63/)
+
+解题模板 这类题通常用深度优先搜索(DFS)和广度优先搜索(BFS)解决，BFS较DFS繁琐，这里为了简洁只展现DFS代码 下面是我对两类题目的分析与模板 
+
+一、自顶而下： dfs
+
+```cpp
+// 一般路径：
+vector<vector<int>>res;
+void dfs(TreeNode*root,vector<int>path)
+{
+    if(!root) return;  //根节点为空直接返回
+    path.push_back(root->val);  //作出选择
+    if(!root->left && !root->right) //如果到叶节点  
+    {
+        res.push_back(path);
+        return;
+    }
+    dfs(root->left,path);  //继续递归
+    dfs(root->right,path);
+}
+
+# **给定和的路径：**
+void dfs(TreeNode*root, int sum, vector<int> path)
+{
+    if (!root)
+        return;
+    sum -= root->val;
+    path.push_back(root->val);
+    if (!root->left && !root->right && sum == 0)
+    {
+        res.push_back(path);
+        return;
+    }
+    dfs(root->left, sum, path);
+    dfs(root->right, sum, path);
+}
+
+```
+
+这类题型DFS注意点： 1、如果是找路径和等于给定target的路径的，那么可以不用新增一个临时变量cursum来判断当前路径和， 只需要用给定和target减去节点值，最终结束条件判断target==0即可
+
+2、是否要回溯：二叉树的问题大部分是不需要回溯的，原因如下： 二叉树的递归部分：dfs(root->left),dfs(root->right)已经把可能的路径穷尽了, 因此到任意叶节点的路径只可能有一条，绝对不可能出现另外的路径也到这个满足条件的叶节点的;
+
+而对比二维数组(例如迷宫问题)的DFS,for循环向四个方向查找每次只能朝向一个方向，并没有穷尽路径， 因此某一个满足条件的点可能是有多条路径到该点的
+
+并且visited数组标记已经走过的路径是会受到另外路径是否访问的影响，这时候必须回溯
+
+3、找到路径后是否要return: 取决于题目是否要求找到叶节点满足条件的路径,如果必须到叶节点,那么就要return; 但如果是到任意节点都可以，那么必不能return,因为这条路径下面还可能有更深的路径满足条件，还要在此基础上继续递归
+
+4、是否要双重递归(即调用根节点的dfs函数后，继续调用根左右节点的pathsum函数)：看题目要不要求从根节点开始的，还是从任意节点开始
+
+二、非自顶而下： 这类题目一般解题思路如下： 设计一个辅助函数maxpath，调用自身求出以一个节点为根节点的左侧最长路径left和右侧最长路径right，那么经过该节点的最长路径就是left+right 接着只需要从根节点开始dfs,不断比较更新全局变量即可
+
+```cpp
+int res=0;
+int maxPath(TreeNode *root) //以root为路径起始点的最长路径
+{
+    if (!root)
+        return 0;
+    int left=maxPath(root->left);
+    int right=maxPath(root->right);
+    res = max(res, left + right + root->val); //更新全局变量  
+    return max(left, right);   //返回左右路径较长者
+}
+```
+
+这类题型DFS注意点： 1、left,right代表的含义要根据题目所求设置，比如最长路径、最大路径和等等
+
+2、全局变量res的初值设置是0还是INT_MIN要看题目节点是否存在负值,如果存在就用INT_MIN，否则就是0
+
+3、注意两点之间路径为1，因此一个点是不能构成路径的
+
+
+
+## [437. 路径总和 III](https://leetcode.cn/problems/path-sum-iii/)
+
+```c++
+/*
+时间
+20 ms
+击败
+66.85%
+内存
+15.5 MB
+击败
+75.33%
+时间复杂度：O(N^2)
+空间复杂度：O(N)
+*/
+class Solution {
+public:
+    int pathSum(TreeNode* root, int targetSum) {
+        if (root == nullptr) {
+            return sum_;
+        }
+        dfs(root, targetSum);
+        pathSum(root->left, targetSum);
+        pathSum(root->right, targetSum);
+        return sum_;
+    }
+
+private:
+    void dfs(TreeNode* node, long targetSum) {
+        if (node == nullptr) {
+            return;
+        }
+
+        targetSum -= node->val;
+        if (targetSum == 0) {
+            ++sum_;
+        }
+        dfs(node->left, targetSum);
+        dfs(node->right, targetSum);
+    }
+
+private:
+    int sum_ = 0;
+};
+
+// 前缀和 https://leetcode.cn/problems/path-sum-iii/solutions/1021296/lu-jing-zong-he-iii-by-leetcode-solution-z9td/
+/*
+时间
+详情
+12ms
+击败 93.24%使用 C++ 的用户
+内存
+详情
+18.37mb
+击败 22.48%使用 C++ 的用户
+
+时间复杂度：O(n)
+空间复杂度：O(N)
+*/
+class Solution {
+public:
+    int pathSum(TreeNode* root, int targetSum) {
+        prefixSumCount_[0] = 1;
+        return dfs(root, 0, targetSum);
+    }
+
+private:
+    int dfs(TreeNode* node, long long curr, int targetSum) {
+        if (node == nullptr) {
+            return 0;
+        }
+
+        int ret = 0;
+        curr += node->val;
+        auto iter = prefixSumCount_.find(curr - targetSum);
+        if (iter != prefixSumCount_.end()) {
+            ret = iter->second;
+        }
+
+        ++prefixSumCount_[curr];
+        ret += dfs(node->left, curr, targetSum);
+        ret += dfs(node->right, curr, targetSum);
+        --prefixSumCount_[curr];
+        return ret;
+    }
+
+private:
+    std::unordered_map<long long, int> prefixSumCount_;
+};
+```
+
+## [988. 从叶结点开始的最小字符串](https://leetcode.cn/problems/smallest-string-starting-from-leaf/)
+
+```cpp
+#include <queue>
+#include <numeric>
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+/*
+时间
+详情
+8ms
+击败 88.31%使用 C++ 的用户
+内存
+详情
+18.79mb
+击败 45.02%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string smallestFromLeaf(TreeNode* root) {
+        path_.push_back('z' + 1);
+        dfs(root, "");
+        return path_;
+    }
+
+private:
+    void dfs(TreeNode* node, std::string str) {
+        if (node == nullptr) {
+            return;
+        }
+
+        str.push_back((node->val + 'a'));
+        if (node->left == nullptr && node->right == nullptr) {
+            std::reverse(str.begin(), str.end());
+            if (path_ > str) {
+                path_.swap(str);
+            }
+        }
+        dfs(node->left, str);
+        dfs(node->right, str);
+    }
+
+private:
+    std::string path_;
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::unique_ptr<TreeNode> roota = std::make_unique<TreeNode>(0);
+    std::unique_ptr<TreeNode> nodeb = std::make_unique<TreeNode>(1);
+    std::unique_ptr<TreeNode> nodec = std::make_unique<TreeNode>(2);
+    std::unique_ptr<TreeNode> noded1 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> nodee1 = std::make_unique<TreeNode>(4);
+    std::unique_ptr<TreeNode> noded2 = std::make_unique<TreeNode>(3);
+    std::unique_ptr<TreeNode> nodee2 = std::make_unique<TreeNode>(4);
+    roota->left = nodeb.get();
+    roota->right = nodec.get();
+    nodeb->left = noded1.get();
+    nodeb->right = nodee1.get();
+    nodec->left = noded2.get();
+    nodec->right = nodee2.get();
+
+    EXPECT_EQ("dba", solution.smallestFromLeaf(roota.get()));
+}
+```
+
+## [124. 二叉树中的最大路径和](https://leetcode.cn/problems/binary-tree-maximum-path-sum/)
+
+```cpp
+/*
+时间
+详情
+16ms
+击败 95.85%使用 C++ 的用户
+内存
+详情
+26.39mb
+击败 39.03%使用 C++ 的用户
+*/
+
+class Solution {
+public:
+    int maxPathSum(TreeNode* root) {
+        dfs(root);
+        return maxSum_;
+    }
+
+private:
+    int dfs(TreeNode* node) {
+        if (node == nullptr) {
+            return 0;
+        }
+
+        int left = std::max(dfs(node->left), 0);
+        int right = std::max(dfs(node->right), 0);
+        maxSum_ = std::max(maxSum_, left + right + node->val);
+        return std::max(left, right) + node->val;
+    }
+
+private:
+    int maxSum_ = INT_MIN;
+};
+```
+
+## [687. 最长同值路径](https://leetcode.cn/problems/longest-univalue-path/)
+
+```cpp
+/*
+时间
+详情
+112ms
+击败 76.11%使用 C++ 的用户
+内存
+详情
+68.45mb
+击败 54.86%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int longestUnivaluePath(TreeNode* root) {
+        if (root == nullptr) {
+            return longestPath_;
+        }
+
+        dfs(root);
+        return longestPath_;
+    }
+
+private:
+    int dfs(TreeNode* node) {
+        if (node == nullptr) {
+            return 0;
+        }
+
+        int left = dfs(node->left);
+        int right = dfs(node->right);
+        if (node->left != nullptr && node->val == node->left->val) {
+            ++left;
+        } else {
+            left = 0;
+        }
+        if (node->right != nullptr && node->val == node->right->val) {
+            ++right;
+        } else {
+            right = 0;
+        }
+        longestPath_ = std::max(longestPath_, left + right);
+        return std::max(left, right);
+    }
+
+private:
+    int longestPath_ = 0;
+};
+```
+
+## [543. 二叉树的直径](https://leetcode.cn/problems/diameter-of-binary-tree/)
+
+```cpp
+/*
+时间
+详情
+12ms
+击败 46.30%使用 C++ 的用户
+内存
+详情
+19.23mb
+击败 74.59%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int diameterOfBinaryTree(TreeNode* root) {
+        if (root == nullptr) {
+            return diameter_;
+        }
+
+        dfs(root);
+        return diameter_;
+    }
+
+private:
+    int dfs(TreeNode* node) {
+        if (node == nullptr) {
+            return 0;
+        }
+
+        int left = dfs(node->left);
+        int right = dfs(node->right);
+        diameter_ = std::max(diameter_, left + right);
+        return std::max(left, right) + 1;
+    }
+
+private:
+    int diameter_ = 0;
+};
+
+```
+
+
+
+## [114. 二叉树展开为链表](https://leetcode.cn/problems/flatten-binary-tree-to-linked-list/)
+
+```cpp
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        if (root == nullptr) {
+            return;
+        }
+
+        while (root != nullptr) {
+            if (root->left != nullptr) {
+                TreeNode* preNode = root->left;
+                while (preNode->right != nullptr) {
+                    preNode = preNode->right;
+                }
+
+                preNode->right = root->right;
+                root->right = root->left;
+                root->left = nullptr;
+            }
+            root = root->right;
+        }
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    auto root1 = std::make_unique<TreeNode>(1);
+    auto node2 = std::make_unique<TreeNode>(2);
+    auto node3 = std::make_unique<TreeNode>(3);
+    auto node4 = std::make_unique<TreeNode>(4);
+    auto node5 = std::make_unique<TreeNode>(5);
+    auto node6 = std::make_unique<TreeNode>(6);
+    root1->left = node2.get();
+    root1->right = node5.get();
+    node2->left = node3.get();
+    node2->right = node4.get();
+    node5->right = node6.get();
+
+    solution.flatten(root1.get());
+
+    EXPECT_EQ(1, root1->val);
+    EXPECT_EQ(2, root1->right->val);
+    EXPECT_EQ(3, root1->right->right->val);
+    EXPECT_EQ(4, root1->right->right->right->val);
+    EXPECT_EQ(5, root1->right->right->right->right->val);
+    EXPECT_EQ(6, root1->right->right->right->right->right->val);
+}
+
+// 使用迭代实现前序遍历
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        std::vector<TreeNode*> preOrders;
+        std::stack<TreeNode*> stack;
+        TreeNode* node = root;
+        while (node != nullptr || !stack.empty()) {
+            while (node != nullptr) {
+                preOrders.push_back(node);
+                stack.push(node);
+                node = node->left;
+            }
+
+            node = stack.top();
+            stack.pop();
+            node = node->right;
+        }
+
+        for (int i = 1; i < preOrders.size(); ++i) {
+            auto pre = preOrders.at(i - 1);
+            auto cur = preOrders.at(i);
+            pre->left = nullptr;
+            pre->right = cur;
+        }
+    }
+};
+```
+
+## [199. 二叉树的右视图](https://leetcode.cn/problems/binary-tree-right-side-view/)
+
+```cpp
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+
+// 自己写的错误的
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        std::vector<int> views;
+        if (root == nullptr) {
+            return views;
+        }
+
+        getRightViews(root, views);
+        std::vector<int> leftViews;
+        leftViews.push_back(root->val);
+        getRightViews(root->left, leftViews);
+        if (leftViews.size() > views.size()) {
+            for (int i = 0; i < views.size(); ++i) {
+                leftViews[i] = views.at(i);
+            }
+            swap(leftViews, views);
+        }
+        return views;
+    }
+
+private:
+    void getRightViews(TreeNode* root, vector<int>& views) const {
+        while (root != nullptr) {
+            views.push_back(root->val);
+            if (root->right != nullptr) {
+                root = root->right;
+            } else if (root->left != nullptr) {
+                root = root->left;
+            } else {
+                root = nullptr;
+            }
+        }
+    }
+};
+```
+
+深度优先搜索
+
+```cpp
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        std::vector<int> rightSideViews;
+        std::stack<std::pair<TreeNode*, int>> nodeDepthStack;
+        nodeDepthStack.push({root, 0});
+
+        while (!nodeDepthStack.empty()) {
+            auto nodeDepth = nodeDepthStack.top();
+            nodeDepthStack.pop();
+            auto node = nodeDepth.first;
+            auto depth = nodeDepth.second;
+
+            if (node != nullptr) {
+                if (depth + 1 > rightSideViews.size()) {
+                    rightSideViews.push_back(node->val);
+                }
+
+                nodeDepthStack.push({node->left, depth + 1});
+                nodeDepthStack.push({node->right, depth + 1});
+            }
+        }
+        return rightSideViews;
+    }
+};
+
+//
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        std::vector<int> rightSideViews;
+        dfs(root, 0, rightSideViews);
+        return rightSideViews;
+    }
+
+private:
+    void dfs(TreeNode* node, int depth, vector<int>& res) {
+        if (node == nullptr) {
+            return;
+        }
+
+        if (depth == res.size()) {
+            res.push_back(node->val);
+        }
+        dfs(node->right, depth + 1, res);
+        dfs(node->left, depth + 1, res);
+    }
+};
+```
+
+广度优先搜索
+
+```cpp
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        std::vector<int> rightSideViews;
+        std::queue<std::pair<TreeNode*, int>> nodeDepthQueue;
+        nodeDepthQueue.push({root, 0});
+
+        while (!nodeDepthQueue.empty()) {
+            auto nodeDepth = nodeDepthQueue.front();
+            nodeDepthQueue.pop();
+            auto node = nodeDepth.first;
+            auto depth = nodeDepth.second;
+
+            if (node != nullptr) {
+                if (depth + 1 > rightSideViews.size()) {
+                    rightSideViews.push_back(node->val);
+                } else {
+                    rightSideViews[depth] = node->val;
+                }
+
+                nodeDepthQueue.push({node->left, depth + 1});
+                nodeDepthQueue.push({node->right, depth + 1});
+            }
+        }
+        return rightSideViews;
+    }
+};
+
+// 记下每层个数，最后一个加入结果列表
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        std::vector<int> rightSideViews;
+        if (root == nullptr) {
+            return rightSideViews;
+        }
+
+        std::queue<TreeNode*> nodeQueue;
+        nodeQueue.push(root);
+
+        while (!nodeQueue.empty()) {
+            int size = nodeQueue.size();
+            for (int i = 0; i < size; ++i) {
+                auto node = nodeQueue.front();
+                nodeQueue.pop();
+
+                if (node->left != nullptr) {
+                    nodeQueue.push(node->left);
+                }
+                if (node->right != nullptr) {
+                    nodeQueue.push(node->right);
+                }
+
+                if (i == size - 1) {
+                    rightSideViews.push_back(node->val);
+                }
+            }
+        }
+        return rightSideViews;
+    }
+};
+```
+
+## [207. 课程表](https://leetcode.cn/problems/course-schedule/)
+
+```cpp
+#include <stack>
+#include <unordered_map>
+#include <queue>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        std::vector<int> visited(numCourses, 0);
+        std::vector<std::vector<int>> adj(numCourses, std::vector<int>());
+        for (const auto& prerequisite: prerequisites) {
+            adj[prerequisite.at(1)].push_back(prerequisite.at(0));
+        }
+
+        for (int i = 0; i < numCourses; ++i) {
+            if (visited.at(i) == TODO && !dfs(adj, visited, i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+private:
+    bool dfs(const vector<vector<int>>& adj, vector<int>& visited, int v) {
+        if (visited.at(v) == FINISHED) {
+            return true;
+        } else if (visited.at(v) == WORKING) {
+            return false;
+        }
+
+        visited.at(v) = WORKING;
+        for (const auto& u: adj.at(v)) {
+            if (!dfs(adj, visited, u)) {
+                return false;
+            }
+        }
+
+        visited.at(v) = FINISHED;
+        return true;
+    }
+
+private:
+    static const int TODO = 0;
+    static const int WORKING = 1;
+    static const int FINISHED = 2;
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<vector<int>> prerequisites = {{1, 0}};
+    EXPECT_TRUE(solution.canFinish(2, prerequisites));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<vector<int>> prerequisites = {{1, 0}, {0, 1}};
+    EXPECT_FALSE(solution.canFinish(2, prerequisites));
+}
+
+TEST_F(SolutionTest, Test3) {
+    std::vector<vector<int>> prerequisites = {{0, 1}};
+    EXPECT_TRUE(solution.canFinish(2, prerequisites));
+}
+```
+
+## [133. 克隆图](https://leetcode.cn/problems/clone-graph/)
+
+```cpp
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector<Node*> neighbors;
+    Node() {
+        val = 0;
+        neighbors = vector<Node*>();
+    }
+    Node(int _val) {
+        val = _val;
+        neighbors = vector<Node*>();
+    }
+    Node(int _val, vector<Node*> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+};
+
+/*
+时间
+详情
+4ms
+击败 85.54%使用 C++ 的用户
+内存
+详情
+8.67mb
+击败 18.97%使用 C++ 的用户
+*/
+class Solution {  //dfs
+public:
+    Node* cloneGraph(Node* node) {
+        std::unordered_map<int, Node*> visited;
+        return dfs(node, visited);
+    }
+
+private:
+    Node* dfs(Node* node, unordered_map<int, Node*>& visited) {
+        if (node == nullptr) {
+            return nullptr;
+        }
+
+        auto visitedIter = visited.find(node->val);
+        if (visitedIter != visited.end()) {
+            return (*visitedIter).second;
+        }
+
+        Node* newNode = new Node(node->val);
+        visited.emplace(node->val, newNode);
+
+        for (const auto& neighbor: node->neighbors) {
+            newNode->neighbors.push_back(dfs(neighbor, visited));
+        }
+        return newNode;
+    }
+};
+
+/*
+时间
+详情
+8ms
+击败 33.59%使用 C++ 的用户
+内存
+详情
+8.25mb
+击败 85.87%使用 C++ 的用户
+*/
+class Solution {  //bfs
+public:
+    Node* cloneGraph(Node* node) {
+        if (node == nullptr) {
+            return nullptr;
+        }
+
+        std::queue<Node*> nodeQueue;
+        nodeQueue.push(node);
+
+        Node* newNode = new Node(node->val);
+        std::unordered_map<int, Node*> visited = {{node->val, newNode}};
+        while (!nodeQueue.empty()) {
+            auto oriNode = nodeQueue.front();
+            nodeQueue.pop();
+            for (const auto& neighbor: oriNode->neighbors) {
+                if (visited.find(neighbor->val) == visited.end()) {
+                    nodeQueue.push(neighbor);
+                    visited.emplace(neighbor->val, new Node(neighbor->val));
+                }
+                visited[oriNode->val]->neighbors.push_back(visited[neighbor->val]);
+            }
+        }
+        return newNode;
+    };
+};
+```
+
+## [102. 目标和](https://leetcode.cn/problems/YaVDxD/)
+
+dfs， 比较慢：
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*
+时间
+1816 ms
+击败
+5.9%
+内存
+8.7 MB
+击败
+87.72%
+
+复杂度分析
+时间复杂度：O(2^n)
+空间复杂度：O(n)
+*/
+class Solution {  // dfs
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        dfs(nums, 0, 0, target);
+        return waysCount_;
+    }
+
+private:
+    void dfs(const vector<int>& nums, int index, int sum, int target) {
+        if (index == nums.size()) {
+            if (sum == target) {
+                ++waysCount_;
+            }
+            return;
+        }
+
+        dfs(nums, index + 1, sum + nums.at(index), target);
+        dfs(nums, index + 1, sum - nums.at(index), target);
+    }
+
+private:
+    int waysCount_ = 0;
+};
+
+// 别人优化的，减枝：https://leetcode.cn/problems/YaVDxD/solutions/1025570/jia-jian-de-mu-biao-zhi-by-leetcode-solu-be5t/
+// 对于每个位置有正负两种选择，全部探索要2^20，是会超时的； 先求总和，然后选择哪些位置变减号； 进行剪枝，如果当前结果已经小于目标了，那他后续的探索都不可能达到目标，剪掉就行了；
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        auto sum = std::accumulate(nums.begin(), nums.end(), 0);
+        dfs(nums, target, 0, sum);
+        return waysCount_;
+    }
+
+private:
+    void dfs(const vector<int>& nums, int target, int index, int sum) {
+        if (index == nums.size()) {
+            if (sum == target) {
+                ++waysCount_;
+            }
+            return;
+        }
+
+        if (sum < target) {
+            return;
+        }
+        dfs(nums, target, index + 1, sum);
+        dfs(nums, target, index + 1, sum - 2 * nums.at(index));
+    }
+
+private:
+    int waysCount_ = 0;
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {1, 1, 1, 1, 1};
+    int target = 3;
+    EXPECT_EQ(5, solution.findTargetSumWays(nums, target));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> nums = {1};
+    int target = 1;
+    EXPECT_EQ(1, solution.findTargetSumWays(nums, target));
+}
+```
+
+动态规划，https://leetcode.cn/problems/YaVDxD/solutions/1025570/jia-jian-de-mu-biao-zhi-by-leetcode-solu-be5t/
+
+```cpp
+/*
+时间
+详情
+4ms
+击败 97.01%使用 C++ 的用户
+内存
+详情
+11.55mb
+击败 28.21%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int sum = 0;
+        for (int& num : nums) {
+            sum += num;
+        }
+        int diff = sum - target;
+        if (diff < 0 || diff % 2 != 0) {
+            return 0;
+        }
+        int n = nums.size(), neg = diff / 2;
+        vector<vector<int>> dp(n + 1, vector<int>(neg + 1));
+        dp[0][0] = 1;
+        for (int i = 1; i <= n; i++) {  // 这里从1开始
+            int num = nums[i - 1];  // 这里要注意i - 1
+            for (int j = 0; j <= neg; j++) {  // 这里从0开始
+                dp[i][j] = dp[i - 1][j];
+                if (j >= num) {
+                    dp[i][j] += dp[i - 1][j - num];
+                }
+            }
+        }
+        return dp[n][neg];
+    }
+};
+
+// 优化空间
+/*
+时间
+详情
+8ms
+击败 87.39%使用 C++ 的用户
+内存
+详情
+8.76mb
+击败 67.92%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int sum = 0;
+        for (int& num : nums) {
+            sum += num;
+        }
+        int diff = sum - target;
+        if (diff < 0 || diff % 2 != 0) {
+            return 0;
+        }
+        int neg = diff / 2;
+        vector<int> dp(neg + 1);
+        dp[0] = 1;
+        for (int& num : nums) {
+            for (int j = neg; j >= num; j--) {
+                dp[j] += dp[j - num];
+            }
+        }
+        return dp[neg];
+    }
+};
+```
+
+## [841. 钥匙和房间](https://leetcode.cn/problems/keys-and-rooms/)
+
+参考：https://leetcode.cn/problems/keys-and-rooms/solutions/393524/yao-chi-he-fang-jian-by-leetcode-solution/
+
+dfs：
+
+```cpp
+#include <queue>
+#include <numeric>
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    bool canVisitAllRooms(vector<vector<int>>& rooms) {
+        std::vector<bool> visited(rooms.size(), false);
+        int visitedNums = 0;
+        dfs(rooms, 0, visitedNums, visited);
+        return visitedNums == rooms.size();
+    }
+
+private:
+    void dfs(vector<vector<int>>& rooms, int roomIndex, int& visitedNums, std::vector<bool>& visited) {
+        visited.at(roomIndex) = true;
+        ++visitedNums;
+        for (const auto& nextRoomIndex: rooms.at(roomIndex)) {
+            if (!visited.at(nextRoomIndex)) {
+                dfs(rooms, nextRoomIndex, visitedNums, visited);
+            }
+        }
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<vector<int>> rooms = {{1}, {2}, {3}, {}};
+    EXPECT_EQ(true, solution.canVisitAllRooms(rooms));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<vector<int>> rooms = {{1, 3}, {3, 0, 1}, {2}, {0}};
+    EXPECT_EQ(false, solution.canVisitAllRooms(rooms));
+}
+```
+
+bfs：
+
+```cpp
+class Solution {
+public:
+    bool canVisitAllRooms(vector<vector<int>>& rooms) {
+        int n = rooms.size(), num = 0;
+        vector<int> vis(n);
+        queue<int> que;
+        vis[0] = true;
+        que.emplace(0);
+        while (!que.empty()) {
+            int x = que.front();
+            que.pop();
+            num++;
+            for (auto& it : rooms[x]) {
+                if (!vis[it]) {
+                    vis[it] = true;
+                    que.emplace(it);
+                }
+            }
+        }
+        return num == n;
+    }
+};
+
+```
+
+
+
+# 广度优先搜索
+
+## [模板](https://leetcode.cn/leetbook/read/queue-stack/gp5a7/)
+
+```java
+/*
+ * Return true if there is a path from cur to target.
+ */
+boolean DFS(int root, int target) {
+    Set<Node> visited;
+    Stack<Node> s;
+    add root to s;
+    while (s is not empty) {
+        Node cur = the top element in s;
+        return true if cur is target;
+        for (Node next : the neighbors of cur) {
+            if (next is not in visited) {
+                add next to s;
+                add next to visited;
+            }
+        }
+        remove cur from s;
+    }
+    return false;
+}
+```
+
+
+
+## [752. 打开转盘锁](https://leetcode.cn/problems/open-the-lock/)
+
+参考：https://leetcode.cn/problems/open-the-lock/solutions/843687/da-kai-zhuan-pan-suo-by-leetcode-solutio-l0xo/
+
+广度搜索每个4位数字的后续8个状态，加入队列中
+
+```cpp
+#include <stack>
+#include <queue>
+#include <unordered_set>
+#include "gtest/gtest.h"
+
+using namespace std;
+/*
+时间
+详情
+252ms
+击败 23.79%使用 C++ 的用户
+内存
+详情
+112.75mb
+击败 5.05%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int openLock(vector<string>& deadends, string target) {
+        const std::string startStatus = "0000";
+
+        if (target == startStatus) {
+            return 0;
+        }
+
+        std::unordered_set<std::string> deadendsSet(deadends.begin(), deadends.end());
+        if (deadendsSet.find(startStatus) != deadendsSet.end()) {
+            return -1;
+        }
+
+        std::queue<std::pair<std::string, int>> statusStepQueue;
+        statusStepQueue.emplace(startStatus, 0);
+        std::unordered_set<std::string> seen = {startStatus};
+
+        while (!statusStepQueue.empty()) {
+            auto [status, step] = statusStepQueue.front();
+            statusStepQueue.pop();
+
+            const auto& nextStatusList = get(std::move(status));
+            for (const auto& nextStatus: nextStatusList) {
+                // seen在这里判断，可以减少很多对象加入queue，提高效率
+                if (seen.find(nextStatus) == seen.end() && deadendsSet.find(nextStatus) == deadendsSet.end()) {
+                    if (nextStatus == target) {
+                        return step + 1;
+                    }
+
+                    statusStepQueue.emplace(nextStatus, step + 1);
+                    seen.insert(nextStatus);
+                }
+            }
+        }
+        return -1;
+    }
+
+private:
+    std::vector<std::string> get(std::string&& status) {
+        std::vector<std::string> nextStatusList;
+        for (int i = 0; i < status.size(); ++i) {
+            char ch = status.at(i);
+
+            status.at(i) = ch == '9' ? '0' : ch + 1;
+            nextStatusList.push_back(status);
+
+            status.at(i) = ch == '0' ? '9' : ch - 1;
+            nextStatusList.push_back(status);
+
+            status.at(i) = ch;
+        }
+        return nextStatusList;
+    };
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<std::string> deadends = {"0201", "0101", "0102", "1212", "2002"};
+    std::string target = "0202";
+    EXPECT_EQ(6, solution.openLock(deadends, target));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<std::string> deadends = {"8888"};
+    std::string target = "0009";
+    EXPECT_EQ(1, solution.openLock(deadends, target));
+}
+
+TEST_F(SolutionTest, Test3) {
+    std::vector<std::string> deadends = {"8887", "8889", "8878", "8898", "8788", "8988", "7888", "9888"};
+    std::string target = "8888";
+    EXPECT_EQ(-1, solution.openLock(deadends, target));
+}
+```
+
+启发式搜索（不懂，没有看）：
+
+```cpp
+struct AStar {
+    // 计算启发函数
+    static int getH(const string& status, const string& target) {
+        int ret = 0;
+        for (int i = 0; i < 4; ++i) {
+            int dist = abs(int(status[i]) - int(target[i]));
+            ret += min(dist, 10 - dist);
+        }
+        return ret;
+    };
+
+    AStar(const string& status, const string& target, int g): status_{status}, g_{g}, h_{getH(status, target)} {
+        f_ = g_ + h_;
+    }
+
+    bool operator< (const AStar& that) const {
+        return f_ > that.f_;
+    }
+
+    string status_;
+    int f_, g_, h_;
+};
+
+/*
+时间
+详情
+72ms
+击败 82.37%使用 C++ 的用户
+内存
+详情
+29.97mb
+击败 74.47%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int openLock(vector<string>& deadends, string target) {
+        if (target == "0000") {
+            return 0;
+        }
+
+        unordered_set<string> dead(deadends.begin(), deadends.end());
+        if (dead.count("0000")) {
+            return -1;
+        }
+
+        auto num_prev = [](char x) -> char {
+            return (x == '0' ? '9' : x - 1);
+        };
+        auto num_succ = [](char x) -> char {
+            return (x == '9' ? '0' : x + 1);
+        };
+
+        auto get = [&](string& status) -> vector<string> {
+            vector<string> ret;
+            for (int i = 0; i < 4; ++i) {
+                char num = status[i];
+                status[i] = num_prev(num);
+                ret.push_back(status);
+                status[i] = num_succ(num);
+                ret.push_back(status);
+                status[i] = num;
+            }
+            return ret;
+        };
+
+        priority_queue<AStar> q;
+        q.emplace("0000", target, 0);
+        unordered_set<string> seen = {"0000"};
+
+        while (!q.empty()) {
+            AStar node = q.top();
+            q.pop();
+            for (auto&& next_status: get(node.status_)) {
+                if (!seen.count(next_status) && !dead.count(next_status)) {
+                    if (next_status == target) {
+                        return node.g_ + 1;
+                    }
+                    q.emplace(next_status, target, node.g_ + 1);
+                    seen.insert(move(next_status));
+                }
+            }
+        }
+
+        return -1;
+    }
+};
+```
+
+## [107. 01 矩阵](https://leetcode.cn/problems/2bCMpM/)
+
+```cpp
+#include <queue>
+#include <numeric>
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+private:
+    static constexpr int dirs[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+public:
+    vector<vector<int>> updateMatrix(vector<vector<int>>& matrix) {
+        int m = matrix.size(), n = matrix[0].size();
+        vector<vector<int>> dist(m, vector<int>(n, -1));
+        queue<pair<int, int>> q;
+        // 将所有的 0 添加进初始队列中
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (matrix[i][j] == 0) {
+                    q.emplace(i, j);
+                    dist[i][j] = 0;
+                }
+            }
+        }
+
+        // 广度优先搜索
+        while (!q.empty()) {
+            auto [i, j] = q.front();
+            q.pop();
+            for (int d = 0; d < 4; ++d) {
+                int ni = i + dirs[d][0];
+                int nj = j + dirs[d][1];
+                if (ni >= 0 && ni < m && nj >= 0 && nj < n && dist[ni][nj] == -1) {
+                    dist[ni][nj] = dist[i][j] + 1;
+                    q.emplace(ni, nj);
+                }
+            }
+        }
+
+        return dist;
+    }
+};
+
+// 动态规划
+// https://leetcode.cn/problems/2bCMpM/solutions/1412130/ju-zhen-zhong-de-ju-chi-by-leetcode-solu-0sxk/
+class Solution {
+public:
+    vector<vector<int>> updateMatrix(vector<vector<int>>& matrix) {
+        int m = matrix.size(), n = matrix[0].size();
+        // 初始化动态规划的数组，所有的距离值都设置为一个很大的数
+        vector<vector<int>> dist(m, vector<int>(n, INT_MAX / 2));
+        // 如果 (i, j) 的元素为 0，那么距离为 0
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (matrix[i][j] == 0) {
+                    dist[i][j] = 0;
+                }
+            }
+        }
+        // 只有 水平向左移动 和 竖直向上移动，注意动态规划的计算顺序
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (i - 1 >= 0) {
+                    dist[i][j] = min(dist[i][j], dist[i - 1][j] + 1);
+                }
+                if (j - 1 >= 0) {
+                    dist[i][j] = min(dist[i][j], dist[i][j - 1] + 1);
+                }
+            }
+        }
+        // 只有 水平向右移动 和 竖直向下移动，注意动态规划的计算顺序
+        for (int i = m - 1; i >= 0; --i) {
+            for (int j = n - 1; j >= 0; --j) {
+                if (i + 1 < m) {
+                    dist[i][j] = min(dist[i][j], dist[i + 1][j] + 1);
+                }
+                if (j + 1 < n) {
+                    dist[i][j] = min(dist[i][j], dist[i][j + 1] + 1);
+                }
+            }
+        }
+        return dist;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<vector<int>> mat = {{0, 0, 0}, {0, 1, 0}, {0, 0, 0}};
+    vector<vector<int>> expected = {{0, 0, 0}, {0, 1, 0}, {0, 0, 0}};
+    EXPECT_EQ(expected, solution.updateMatrix(mat));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<vector<int>> mat = {{0, 0, 0}, {0, 1, 0}, {1, 1, 1}};
+    vector<vector<int>> expected = {{0, 0, 0}, {0, 1, 0}, {1, 2, 1}};
+    EXPECT_EQ(expected, solution.updateMatrix(mat));
+}
+
+```
+
+
+
+# 数组
+
+## [15. 三数之和](https://leetcode-cn.com/problems/3sum/)(华为题库)
+
+自己写的，参考第1题：两数之和的方法，依次判断每个数字取反后，是否可以由其它两个数字相加获得。（超时）
+
+```java
+//
+package test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+class Solution {  // 超时
+    public List<List<Integer>> threeSum(int[] nums) {
+        Set<List<Integer>> threeSet = new HashSet<>();
+        for (int i = 0; i < nums.length; i++) {
+            twoSumForOneLoop(nums, -nums[i], i, threeSet);
+        }
+        return new ArrayList<>(threeSet);
+    }
+
+    private void twoSumForOneLoop(int[] nums, int target, int excludedIndex, Set<List<Integer>> threeSet) {
+        Map<Integer, Integer> valuePosMap = new HashMap<>();
+
+        for (int firstIndex = 0; firstIndex < nums.length; firstIndex++) {
+            if (firstIndex == excludedIndex) {
+                continue;
+            }
+
+            int firstValue = nums[firstIndex];
+            int secondValue = target - firstValue;
+            if (valuePosMap.containsKey(secondValue)) {
+                List<Integer> combination = Arrays.asList(-target, firstValue, secondValue);
+                Collections.sort(combination);
+                threeSet.add(combination);
+            } else {
+                valuePosMap.put(firstValue, firstIndex);
+            }
+        }
+    }
+}
+
+//
+package test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class SolutionTest {
+    private static final Solution SOLUTION = new Solution();
+
+    @Test
+    public void test1() {
+        int[] nums = {-1, 0, 1, 2, -1, -4};
+        List<List<Integer>> expected = Arrays.asList(Arrays.asList(-1, -1, 2), Arrays.asList(-1, 0, 1));
+        assertEquals(expected, SOLUTION.threeSum(nums));
+    }
+}
+```
+
+别人的解法<https://leetcode.com/problems/3sum/discuss/448047/My-simple-java-solution>：
+
+排序+双指针遍历 
+
+```java
+package test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+class Solution {  // 51ms
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+
+        int n = nums.length;
+        Arrays.sort(nums);
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] > 0 || i + 3 > n) {  // 如果最小值已经大于0了，或者剩余不足3个值了，则无需处理
+                return res;
+            }
+            if (i > 0 && nums[i] == nums[i - 1]) {  // 如果下一个值和前一个值相同，则无需处理，因为所有情况都由前一个i-1处理过了
+                continue;
+            }
+
+            int target = -nums[i];
+            int l = i + 1;
+            int r = n - 1;
+            while (l < r) {
+                int actual = nums[l] + nums[r];
+                if (actual == target) {
+                    res.add(Arrays.asList(nums[i], nums[l], nums[r]));
+                    do {
+                        ++l;  // 跳过所有和当前l一样的值
+                    } while (l < r && nums[l - 1] == nums[l]);
+                    do {
+                        --r;  // 跳过所有和当前r一样的值
+                    } while (l < r && nums[r + 1] == nums[r]);
+                } else if (actual < target) {  // 如果实际值小于target，则增加小值
+                    l++;
+                } else {  // 如果实际值大于target，则减少大值
+                    r--;
+                }
+            }
+        }
+        return res;
+    }
+}
+```
+
+```cpp
+#include <unordered_map>
+#include <algorithm>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        std::vector<std::vector<int>> res;
+        std::sort(nums.begin(), nums.end());
+        for (int i = 0; i < nums.size(); ++i) {
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            const auto& twoSumRes = twoSum(nums, -nums[i], i + 1, nums.size() - 1);
+            res.insert(res.end(), twoSumRes.begin(), twoSumRes.end());
+        }
+        return res;
+    }
+
+private:
+    std::vector<std::vector<int>> twoSum(const vector<int>& nums, int target, int start, int end) {
+        std::vector<std::vector<int>> res;
+        while (start < end) {
+            int sum = nums[start] + nums[end];
+            if (sum == target) {
+                res.push_back({-target, nums[start], nums[end]});
+                while (start < end && nums[start] == nums[start + 1]) {
+                    ++start;
+                }
+                ++start;
+                while (start < end && nums[end - 1] == nums[end]) {
+                    --end;
+                }
+                --end;
+            } else if (sum < target) {
+                ++start;
+            } else {
+                --end;
+            }
+        }
+        return res;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {-1,0,1,2,-1,-4};
+    std::vector<std::vector<int>> expected = {{-1,-1,2},{-1,0,1}};
+    EXPECT_EQ(expected, solution.threeSum(nums));
+}
+
+```
+
+## [79. 单词搜索](https://leetcode.cn/problems/word-search/)
+
+```c++
+#include <algorithm>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+// 超时
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        int m = board.size();
+        int n = board[0].size();
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (dfs(board, visited, i, j, word, 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+private:
+    bool dfs(const vector<vector<char>>& board, vector<vector<bool>>& visited, int i, int j, const string& word,
+             int charIndex) {
+        if (board[i][j] != word.at(charIndex)) {
+            return false;
+        }
+        if (charIndex == word.size() - 1) {
+            return true;
+        }
+
+        visited[i][j] = true;
+        std::vector<std::pair<int, int>> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        bool result = false;
+        for (const auto& direction: directions) {
+            int newI = i + direction.first;
+            int newJ = j + direction.second;
+            if (newI >= 0 && newI < board.size() && newJ >= 0 && newJ <= board[0].size()) {
+                if (visited[newI][newJ]) {
+                    continue;
+                }
+
+                if (dfs(board, visited, newI, newJ, word, charIndex + 1)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        visited[i][j] = false;
+        return result;
+    }
+};
+
+// 优化下写法，就可以通过
+class Solution {  // 380ms
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        int m = board.size();
+        int n = board[0].size();
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (dfs(board, visited, i, j, word, 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+private:
+    bool dfs(const vector<vector<char>>& board, vector<vector<bool>>& visited, int i, int j, const string& word,
+             int charIndex) {
+        if (i < 0 || i >= board.size() || j < 0 || j >= board[0].size() || visited[i][j] ||
+            board[i][j] != word.at(charIndex)) {
+            return false;
+        }
+
+        if (charIndex == word.size() - 1) {
+            return true;
+        }
+
+        visited[i][j] = true;
+        bool result = false;
+        if (dfs(board, visited, i - 1, j, word, charIndex + 1) ||
+            dfs(board, visited, i + 1, j, word, charIndex + 1) ||
+            dfs(board, visited, i, j - 1, word, charIndex + 1) ||
+            dfs(board, visited, i, j + 1, word, charIndex + 1)
+            ) {
+            result = true;
+        }
+
+        visited[i][j] = false;
+        return result;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<vector<char>> board = {{'A', 'B', 'C', 'E'}, {'S', 'F', 'C', 'S'}, {'A', 'D', 'E', 'E'}};
+    std::string word = "ABCCED";
+    EXPECT_EQ(true, solution.exist(board, word));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<vector<char>> board = {{'A', 'B', 'C', 'E'}, {'S', 'F', 'C', 'S'}, {'A', 'D', 'E', 'E'}};
+    std::string word = "SEE";
+    EXPECT_EQ(true, solution.exist(board, word));
+}
+
+TEST_F(SolutionTest, Test3) {
+    vector<vector<char>> board = {{'A', 'B', 'C', 'E'}, {'S', 'F', 'C', 'S'}, {'A', 'D', 'E', 'E'}};
+    std::string word = "ABCB";
+    EXPECT_EQ(false, solution.exist(board, word));
+}
+```
+
+## [31. 下一个排列](https://leetcode.cn/problems/next-permutation/)
+
+参考：https://leetcode.cn/problems/next-permutation/solutions/479151/xia-yi-ge-pai-lie-by-leetcode-solution/
+
+注意到下一个排列总是比当前排列要大，除非该排列已经是最大的排列。我们希望找到一种方法，能够找到一个大于当前序列的新序列，且变大的幅度尽可能小。具体地：
+
+我们需要将一个左边的「较小数」与一个右边的「较大数」交换，以能够让当前排列变大，从而得到下一个排列。
+
+同时我们要让这个「较小数」尽量靠右，而「较大数」尽可能小。当交换完成后，「较大数」右边的数需要按照升序重新排列。这样可以在保证新排列大于原来排列的情况下，使变大的幅度尽可能小。
+
+```cpp
+#include <unordered_map>
+#include <algorithm>
+#include <queue>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    void nextPermutation(vector<int>& nums) {
+        int i = nums.size() - 2;
+        while (i >= 0 && nums[i] >= nums[i + 1]) {
+            --i;
+        }
+        if (i >= 0) {
+            int j = nums.size() - 1;
+            while (j >= 0 && nums[i] > nums[j]) {
+                --j;
+            }
+            swap(nums[i], nums[j]);
+        }
+        std::reverse(nums.begin() + i + 1, nums.end());
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> nums = {1, 2, 3};
+    solution.nextPermutation(nums);
+    vector<int> expected = {1, 3, 2};
+    EXPECT_EQ(expected, nums);
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<int> nums = {3, 2, 1};
+    solution.nextPermutation(nums);
+    vector<int> expected = {1, 2, 3};
+    EXPECT_EQ(expected, nums);
+}
+
+TEST_F(SolutionTest, Test3) {
+    vector<int> nums = {4, 5, 2, 6, 3, 1};
+    solution.nextPermutation(nums);
+    vector<int> expected = {4, 5, 3, 1, 2, 6};
+    EXPECT_EQ(expected, nums);
+}
+```
+
+## [3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/)
+
+```java
+package leetcode;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * https://www.cnblogs.com/grandyang/p/4606334.html
+ * 3    Longest Substring Without Repeating Characters
+ */
+public class LongestSubstring {
+    public int lengthOfLongestSubstring(String s) {
+        int[] m = new int[256];
+        Arrays.fill(m, -1);
+        int res = 0, left = -1;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            left = Math.max(left, m[c]); //取滑窗左边位置
+            m[c] = i;
+            res = Math.max(res, i - left); //取res和当前滑窗的最大长度
+        }
+        return res;
+    }
+
+    public int lengthOfLongestSubstringWithMap(String s) {
+        Map<Character, Integer> characterPosMap = new HashMap<>();
+        int res = 0, left = -1;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            left = Math.max(left, characterPosMap.getOrDefault(c, -1)); //取滑窗左侧位置
+            characterPosMap.put(c, i);
+            res = Math.max(res, i - left); //取res和当前滑窗的最大长度
+        }
+        return res;
+    }
+
+    public int lengthOfLongestSubstringWithSet(String s) {
+        int res = 0, left = 0, right = 0;
+        Set<Character> characterSet = new HashSet<>();
+        while (right < s.length()) {
+            char c = s.charAt(right);
+            if (!characterSet.contains(c)) {
+                characterSet.add(c);
+                right++;
+                res = Math.max(res, characterSet.size());
+            } else {
+                characterSet.remove(s.charAt(left++)); //只要发现right对应的字符串在滑窗(即Set)中存在，就不断往右移滑窗左侧，直到滑窗不包含right字符
+            }
+        }
+        return res;
+    }
+}
+
+//test
+package leetcode;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class LongestSubstringTest {
+
+    private static final LongestSubstring LONGEST_SUBSTRING = new LongestSubstring();
+
+    @Test
+    public void lengthOfLongestSubstring() {
+        String s = "abcabcbb";
+        int length = 3;
+        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
+    }
+
+    @Test
+    public void lengthOfLongestSubstring2() {
+        String s = "bbbbb";
+        int length = 1;
+        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
+    }
+
+    @Test
+    public void lengthOfLongestSubstring3() {
+        String s = "pwwkew";
+        int length = 3;
+        assertEquals(length, LONGEST_SUBSTRING.lengthOfLongestSubstringWithMap(s));
+    }
+}
+```
+
+
+
+```cpp
+#include <unordered_map>
+#include <algorithm>
+#include <queue>
+#include <unordered_set>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 36ms
+public:
+    std::string getMaxUniqueSubString(const std::string& inputStr) {
+        std::unordered_set<char> uniqueChars;
+        size_t maxLength = 0;
+        std::string maxUniqueSubString;
+
+        int leftIndex = 0;
+        int rightIndex = 0;
+
+        while (rightIndex < inputStr.size()) {
+            char c = inputStr.at(rightIndex);
+            if (uniqueChars.find(c) == uniqueChars.end()) {
+                uniqueChars.insert(c);
+                ++rightIndex;
+                continue;
+            }
+
+            if (uniqueChars.size() > maxLength) {
+                maxLength = uniqueChars.size();
+                maxUniqueSubString = inputStr.substr(leftIndex, rightIndex - leftIndex);
+            }
+
+            while (inputStr.at(leftIndex) != c) {
+                uniqueChars.erase(s.at(leftIndex));
+                ++leftIndex;
+            }
+            uniqueChars.erase(inputStr.at(leftIndex));
+            ++leftIndex;
+        }
+
+        if (uniqueChars.size() > maxLength) {
+            maxLength = uniqueChars.size();
+            maxUniqueSubString = inputStr.substr(leftIndex, rightIndex - leftIndex);
+        }
+        return maxUniqueSubString;
+    }
+};
+
+// 上面算法的优化
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        unordered_set<char> uniqueChars;
+        int longestLength = 0, right = 0, left = 0;
+        int strLength = s.length();
+        while (right < strLength) {
+            char c = s.at(right);
+            if (uniqueChars.find(c) == uniqueChars.end()) {
+                uniqueChars.insert(c);
+                ++right;
+                longestLength = max<int>(longestLength, uniqueChars.size());
+            } else {
+                uniqueChars.erase(s.at(left++));
+            }
+        }
+        return longestLength;
+    }
+};
+
+class Solution {  // 8ms
+public:
+    int lengthOfLongestSubstring(string s) {
+        std::array<int, 256> charPos;  // 1个char是8位，所在最大值为2^8=256
+        charPos.fill(-1);
+
+        int maxLength = 0, left = -1;
+        for (int i = 0; i < s.size(); ++i) {
+            char c = s.at(i);
+            left = std::max(left, charPos.at(c));  // 下标-1表示这个字符第1次出现，如果不为-1，说明已经出现过，则左滑窗要移到这个位置
+            charPos.at(c) = i;  // 记录每个字符的最后出现的下标
+            maxLength = std::max(maxLength, i - left);  // 取左右滑窗的距离与最大值比较
+        }
+        return maxLength;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::string inputStr = "abcade";
+    std::string expected = "bcade";
+    EXPECT_EQ(expected, solution.getMaxUniqueSubString(inputStr));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::string inputStr = "aaaa";
+    std::string expected = "a";
+    EXPECT_EQ(expected, solution.getMaxUniqueSubString(inputStr));
+}
+
+TEST_F(SolutionTest, Test3) {
+    std::string inputStr = "aaabcdefod";
+    std::string expected = "abcdefo";
+    EXPECT_EQ(expected, solution.getMaxUniqueSubString(inputStr));
+}
+```
+
+# 贪心
+
+## [45. 跳跃游戏 II](https://leetcode.cn/problems/jump-game-ii/)
+
+参考：https://leetcode.cn/problems/jump-game-ii/solutions/230241/tiao-yue-you-xi-ii-by-leetcode-solution/
+
+每次跳跃前，都在可以跳到的位置里找到最远的位置去跳
+
+```cpp
+#include <unordered_map>
+#include <algorithm>
+#include <queue>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        int maxPos = 0, n = nums.size(), end = 0, step = 0;
+        for (int i = 0; i < n - 1; ++i) {
+            if (maxPos >= i) {  // 这里的判断可以不写，题目保证可以跳到最后 
+                maxPos = max(maxPos, i + nums[i]);
+                if (i == end) {
+                    end = maxPos;
+                    ++step;
+                }
+            }
+        }
+        return step;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<int> nums = {2,3,1,1,4};
+    EXPECT_EQ(2, solution.jump(nums));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<int> nums = {2,3,1,2,4,2,3};
+    EXPECT_EQ(3, solution.jump(nums));
+}
+```
+
+
+
+## [134. 加油站](https://leetcode.cn/problems/gas-station/)
+
+直观理解，不用公式推导。可以这样想：假设从x加油站出发经过z加油站最远能到达y加油站，那么从z加油站直接出发，不可能到达y下一个加油站。因为从x出发到z加油站时肯定还有存储的油，这都到不了y的下一站，而直接从z出发刚开始是没有存储的油的，所以更不可能到达y的下一站。
+
+```cpp
+#include <unordered_map>
+#include <algorithm>
+#include <queue>
+#include <unordered_set>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int length = gas.size();
+        int index = 0;
+        int resStartIndex = -1;
+        while (index < length) {  // 从index位置出发
+            int gasSum = 0, costSum = 0;
+            int count = 0;
+            while (count < length) {  // 找到从index出发可以到达的最远位置
+                int tmpIndex = (index + count) % length;
+                gasSum += gas.at(tmpIndex);
+                costSum += cost.at(tmpIndex);
+                if (gasSum < costSum) {
+                    break;
+                }
+                ++count;
+            }
+
+            if (count == length) {  // 判断从index出发可以走过几个加油站
+                resStartIndex = index;
+                break;
+            } else {
+                index += count + 1;
+            }
+        }
+        return resStartIndex;
+    }
+};
+
+// https://leetcode.cn/problems/gas-station/solutions/488357/jia-you-zhan-by-leetcode-solution/
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int n = gas.size();
+        int bottom = 0, sum = 0, startid = -1;//startid为起点前一个点
+        //bottom为最低点油量，sum为当前油量
+        for (int i = 0; i < n; i++) {
+            sum = sum + gas[i] - cost[i];
+            if (sum < bottom) {  // 这个bottom越小，说明消耗越大，越需要从下一个节点出发，以尽可能补充积累油
+                bottom = sum;
+                startid = i;
+            }
+        }
+        if (sum < 0) {
+            return -1;
+        }
+        return startid + 1;
+    }
+};
+
+// 
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int maxIndex = -1;
+        int max = INT_MIN;
+        int sum = 0;
+        for (int i = gas.size() - 1; i >= 0; --i) {
+            sum += gas.at(i) - cost.at(i);  // 从后遍历，哪个加油站出发可以累积最多的油，说明这里出发可以绕圈
+            if (sum > max) {
+                maxIndex = i;
+                max = sum;
+            }
+        }
+        return sum >= 0 ? maxIndex : -1;
+    }
+};
+
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> gas = {1, 2, 3, 4, 5};
+    std::vector<int> cost = {3, 4, 5, 1, 2};
+    EXPECT_EQ(3, solution.canCompleteCircuit(gas, cost));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> gas = {2, 3, 4};
+    std::vector<int> cost = {3, 4, 3};
+    EXPECT_EQ(-1, solution.canCompleteCircuit(gas, cost));
+}
+```
+
+## [179. 最大数](https://leetcode.cn/problems/largest-number/)
+
+这个算法其实就是对这些数字组成的字符串做了个倒序排序，而大小的原则就是左右两个字符串相加比右左相加更大，则最后拼接的字符串就会更大：
+
+```cpp
+#include <algorithm>
+#include <numeric>
+#include "gtest/gtest.h"
+
+using namespace std;
+/*
+时间
+详情
+4ms
+击败 93.99%使用 C++ 的用户
+内存
+详情
+11.02mb
+击败 16.33%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string largestNumber(vector<int>& nums) {
+        std::vector<std::string> numsStr;
+        std::for_each(nums.begin(), nums.end(), [&](const auto& num) {
+            numsStr.push_back(std::to_string(num));
+        });
+        /*
+         std::vector<std::string> numsStr(nums.size());
+        std::transform(nums.begin(), nums.end(), numsStr.begin(), [](const auto& num) { return std::to_string(num); });
+		*/
+
+        std::sort(numsStr.begin(), numsStr.end(), [](const auto& lhs, const auto& rhs) {
+            return lhs + rhs > rhs + lhs;
+        });
+
+        if (numsStr.at(0) == "0") {
+            return "0";
+        }
+
+        return std::accumulate(numsStr.begin(), numsStr.end(), std::string());
+    }
+};
+
+/*
+时间
+详情
+4ms
+击败 93.99%使用 C++ 的用户
+内存
+详情
+10.60mb
+击败 60.19%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string largestNumber(vector<int>& nums) {
+        sort(nums.begin(), nums.end(), [](const int& x, const int& y) {
+            unsigned long long sx = 10, sy = 10;
+            while (sx <= x) {
+                sx *= 10;
+            }
+            while (sy <= y) {
+                sy *= 10;
+            }
+            return sy * x + y > sx * y + x;
+        });
+        if (nums[0] == 0) {
+            return "0";
+        }
+        string ret;
+        for (int& x: nums) {
+            ret += to_string(x);
+        }
+        return ret;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {10, 2};
+    EXPECT_EQ("210", solution.largestNumber(nums));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> nums = {3, 30, 34, 5, 9};
+    EXPECT_EQ("9534330", solution.largestNumber(nums));
+}
+```
+
+## [316. 去除重复字母](https://leetcode.cn/problems/remove-duplicate-letters/)
+
+参考：https://leetcode.cn/problems/remove-duplicate-letters/solutions/527359/qu-chu-zhong-fu-zi-mu-by-leetcode-soluti-vuso/
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+/*
+时间
+详情
+4ms
+击败 62.10%使用 C++ 的用户
+内存
+详情
+6.12mb
+击败 94.38%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string removeDuplicateLetters(string s) {
+        std::array<bool, 26> visited;
+        visited.fill(false);  // 每个字符是否在栈中
+
+        std::array<int, 26> charsPos;
+        charsPos.fill(-1);
+        for (int i = 0; i < s.size(); ++i) {
+            charsPos.at(s.at(i) - 'a') = i;  // 记录每个字符的最后位置
+        }
+
+        std::string res;
+        for (int i = 0; i < s.size(); ++i) {
+            char c = s.at(i);
+            if (visited.at(c - 'a')) {  // 如果字符已经在栈中了，则跳过。因为已在栈中的这个字符一定不是单调递增字母的最后一个，如果是最后一个，那么之前的相同字母就已经会被出栈舍弃掉。所以这个字符之前有比它大的字符不会再出现，不能出栈舍弃。或者可以这样理解，这个字符再怎么调整，也不会出现一个更小的字母序列。
+                continue;
+            }
+			
+            // 看栈顶字符是不是在后面还有。如果有的话，要是比当前字符大，则可以出栈舍弃
+            while (!res.empty() && charsPos.at(res.back() - 'a') > i && res.back() > c) {
+                char top = res.back();
+                res.pop_back();
+                visited.at(top - 'a') = false;
+            }
+
+            res.push_back(c);
+            visited.at(s.at(i) - 'a') = true;
+        }
+        return res;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ("abc", solution.removeDuplicateLetters("bcabc"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ("acdb", solution.removeDuplicateLetters("cbacdcbc"));
+}
+```
+
+同316一样思路的：402和321
+
+## [402. 移掉 K 位数字](https://leetcode.cn/problems/remove-k-digits/)
+
+参考：https://leetcode.cn/problems/remove-duplicate-letters/solutions/1/yi-zhao-chi-bian-li-kou-si-dao-ti-ma-ma-zai-ye-b-4/
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+/*
+时间
+详情
+8ms
+击败 85.97%使用 C++ 的用户
+内存
+详情
+8.34mb
+击败 67.97%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string removeKdigits(string num, int k) {
+        std::string res;
+        int remain = num.size() - k;
+        for (const auto& ch: num) {  // 生成一个最小的升序序列
+            while (k > 0 && !res.empty() && res.back() > ch) {
+                res.pop_back();
+                --k;
+            }
+            res.push_back(ch);
+        }
+        res.erase(remain);
+        res.erase(0, res.find_first_not_of("0"));
+        return res.empty() ? "0" : res;
+    }
+};
+
+/*
+时间
+详情
+4ms
+击败 98.66%使用 C++ 的用户
+内存
+详情
+7.99mb
+击败 94.43%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string removeKdigits(string num, int k) {
+        int remain = num.size() - k;
+        std::string res(remain, '0');
+        int top = -1;
+        for (const auto& ch: num) {  // 生成一个最小的升序序列
+            while (k > 0 && top >= 0 && res.at(top) > ch) {
+                --top;
+                --k;  // 出栈则删除一个
+            }
+            if (top + 1 < remain) {
+                res.at(++top) = ch;
+            } else {
+                --k;  // 栈满则当前数字不保留，要丢弃，也删除一个
+            }
+        }
+        res.erase(0, res.find_first_not_of("0"));
+        return res.empty() ? "0" : res;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ("1219", solution.removeKdigits("1432219", 3));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ("200", solution.removeKdigits("10200", 1));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ("0", solution.removeKdigits("10", 2));
+}
+
+TEST_F(SolutionTest, Test4) {
+    EXPECT_EQ("0", solution.removeKdigits("9", 1));
+}
+```
+
+## [321. 拼接最大数](https://leetcode.cn/problems/create-maximum-number/)
+
+参考：https://leetcode.cn/problems/remove-duplicate-letters/solutions/1/yi-zhao-chi-bian-li-kou-si-dao-ti-ma-ma-zai-ye-b-4/
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*
+时间
+详情
+124ms
+击败 18.59%使用 C++ 的用户
+内存
+详情
+26.25mb
+击败 40.90%使用 C++ 的用户
+*/
+class Solution {
+public:
+    vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {
+        std::vector<int> res;
+        for (int i = 0; i <= k; ++i) {
+            if (i > nums1.size() || (k - i) > nums2.size()) {
+                continue;
+            }
+
+            std::vector<int>&& maxNum1 = pickMax(nums1, i);
+            std::vector<int>&& maxNum2 = pickMax(nums2, k - i);
+            std::vector<int>&& mergeNum = mergeMax(std::move(maxNum1), std::move(maxNum2));
+            if (mergeNum > res) {
+                res = std::move(mergeNum);
+            }
+        }
+        return res;
+    }
+
+private:
+    std::vector<int> pickMax(const std::vector<int>& nums, int pickNum) {
+        std::vector<int> res;
+        int deleteNum = nums.size() - pickNum;
+        for (const auto& num: nums) {
+            while (!res.empty() && deleteNum > 0 && res.back() < num) {
+                res.pop_back();
+                --deleteNum;
+            }
+            res.push_back(num);  // 这里慢
+        }
+        res.erase(res.begin() + pickNum, res.end());  // 这里慢
+        return res;
+    }
+
+    std::vector<int> mergeMax(std::vector<int>&& nums1, std::vector<int>&& nums2) {
+        std::vector<int> res;
+        // 这里对vector删除元素慢
+        while (!nums1.empty() || !nums2.empty()) {
+            auto& bigger = nums1 > nums2 ? nums1 : nums2;
+            res.push_back(bigger.at(0));
+            bigger.erase(bigger.begin());
+        }
+        return res;
+    }
+
+    /*std::vector<int> mergeMax(const std::vector<int>& nums1, const std::vector<int>& nums2) {
+        std::vector<int> res;
+        int i = 0, j = 0;
+        // 这里只比较了vector的第1位，没有比较后面的数字，是有问题的，并不能完整的做merge
+        for (; i < nums1.size() && j < nums2.size();) {
+            if (nums1.at(i) >= nums2.at(j)) {
+                res.push_back(nums1.at(i));
+                ++i;
+            } else {
+                res.push_back(nums2.at(j));
+                ++j;
+            }
+        }
+
+        if (i == nums1.size()) {
+            res.insert(res.end(), nums2.begin() + j, nums2.end());
+        } else if (j == nums2.size()) {
+            res.insert(res.end(), nums1.begin() + i, nums1.end());
+        }
+        return res;
+    }*/
+};
+
+// 参考官方题解：https://leetcode.cn/problems/create-maximum-number/solutions/505931/pin-jie-zui-da-shu-by-leetcode-solution/
+class Solution {
+public:
+    vector<int> maxNumber(vector<int>& nums1, vector<int>& nums2, int k) {
+        std::vector<int> maxSubsequence(k, 0);
+        int start = std::max<int>(0, k - nums2.size()), end = min<int>(k, nums1.size());
+        for (int i = start; i <= end; ++i) {
+            std::vector<int>&& maxNum1 = pickMax(nums1, i);
+            std::vector<int>&& maxNum2 = pickMax(nums2, k - i);
+            std::vector<int>&& curMaxSubsequence = merge(maxNum1, maxNum2);
+            if (compare(curMaxSubsequence, 0, maxSubsequence, 0) > 0) {
+                maxSubsequence.swap(curMaxSubsequence);
+            }
+        }
+        return maxSubsequence;
+    }
+
+private:
+    std::vector<int> pickMax(const std::vector<int>& nums, int pick) {
+        int length = nums.size();
+        // 固定要选pick个，所以预先构造好长度为pick的stack。这里已经知道长度了，就用vector+top来模拟栈。不用使用stack来入栈和出栈，是为了提高效率。
+        vector<int> stack(pick, 0);
+        int top = -1;  // 栈顶位置
+        int toDelete = length - pick;
+        for (int i = 0; i < length; i++) {
+            int num = nums[i];
+            while (top >= 0 && stack[top] < num && toDelete > 0) {
+                top--;
+                toDelete--;
+            }
+            if (top < pick - 1) {  // top为栈顶索引，top+1即为栈内个数，当个数小于要选的个数pick时，就可以入栈
+                stack[++top] = num;
+            } else {
+                toDelete--;
+            }
+        }
+        return stack;
+    }
+
+    vector<int> merge(vector<int>& subsequence1, vector<int>& subsequence2) {
+        int x = subsequence1.size(), y = subsequence2.size();
+        if (x == 0) {
+            return subsequence2;
+        }
+        if (y == 0) {
+            return subsequence1;
+        }
+        int mergeLength = x + y;
+        vector<int> merged(mergeLength);
+        int index1 = 0, index2 = 0;
+        for (int i = 0; i < mergeLength; i++) {
+            if (compare(subsequence1, index1, subsequence2, index2) > 0) {
+                merged[i] = subsequence1[index1++];
+            } else {
+                merged[i] = subsequence2[index2++];
+            }
+        }
+        return merged;
+    }
+
+    int compare(vector<int>& subsequence1, int index1, vector<int>& subsequence2, int index2) {
+        int x = subsequence1.size(), y = subsequence2.size();
+        while (index1 < x && index2 < y) {
+            int difference = subsequence1[index1] - subsequence2[index2];
+            if (difference != 0) {
+                return difference;
+            }
+            index1++;
+            index2++;
+        }
+        return (x - index1) - (y - index2);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums1 = {3, 4, 6, 5};
+    std::vector<int> nums2 = {9, 1, 2, 5, 8, 3};
+    std::vector<int> expected = {9, 8, 6, 5, 3};
+    EXPECT_EQ(expected, solution.maxNumber(nums1, nums2, 5));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> nums1 = {6, 7};
+    std::vector<int> nums2 = {6, 0, 4};
+    std::vector<int> expected = {6, 7, 6, 0, 4};
+    EXPECT_EQ(expected, solution.maxNumber(nums1, nums2, 5));
+}
+
+TEST_F(SolutionTest, Test3) {
+    std::vector<int> nums1 = {3, 9};
+    std::vector<int> nums2 = {8, 9};
+    std::vector<int> expected = {9, 8, 9};
+    EXPECT_EQ(expected, solution.maxNumber(nums1, nums2, 3));
+}
+
+TEST_F(SolutionTest, Test4) {
+    std::vector<int> nums1 = {2, 5, 6, 4, 4, 0};
+    std::vector<int> nums2 = {7, 3, 8, 0, 6, 5, 7, 6, 2};
+    std::vector<int> expected = {7, 3, 8, 2, 5, 6, 4, 4, 0, 6, 5, 7, 6, 2, 0};
+    EXPECT_EQ(expected, solution.maxNumber(nums1, nums2, 15));
+}
+```
+
+# 二叉树
+
+# 栈
+
+## [155. 最小栈](https://leetcode.cn/problems/min-stack/)
+
+1. 辅助栈：记录每个元素入栈后，当前最小值，与元素一起入栈出栈。使用额外空间O(n)。
+
+2. 不使用额外空间：参考：[155. 最小栈 - 力扣（LeetCode）](https://leetcode.cn/problems/min-stack/solutions/242190/zui-xiao-zhan-by-leetcode-solution/) 
+
+   ```python
+   【不使用辅助栈的Java解法】
+   栈中每个元素代表的是要压入元素与当前栈中最小值的差值
+   有个很重要问题：
+   在弹出时如何维护min？
+   因为每次压入新的元素时，压入的都是与当前栈中最小值的差值（还未压入当前元素），故在弹出元素时，若弹出了当前最小值，因为栈中记录了当前元素与【之前】最小值的差值，故根据这个记录可以更新弹出元素后的最小值。
+   ```
+
+```java
+class MinStack {
+    // 记录每个元素与【未压入】该元素时栈中最小元素的差值
+    LinkedList<Long> stack;
+    // 当前【已压入】栈中元素的最小值
+    private long min;
+    public MinStack() {
+        stack = new LinkedList();
+    }
+    
+    public void push(int val) {
+        // 压入第一个元素
+        if(stack.isEmpty()){
+            min = val;
+            stack.addFirst(0L);
+            return;
+        }
+        // 栈不为空时，每次压入计算与min的差值后压入结果
+        stack.push((long)val-min);
+        // 更新min
+        min = Math.min((long)val,min);
+        // 上面两个语句是不能颠倒的！一定是先压入，在更新，因为min一定是当前栈中的最小值
+    }
+    
+    public void pop() {
+        long pop = stack.removeFirst();
+        // 当弹出元素小于0时，说明弹出元素是当前栈中的最小值，要更新最小值
+        if(pop<0){
+            // 因为对于当前弹出的元素而言，计算压入栈中的值时，计算的是该元素与【未压入】该元素时
+            // 栈中元素的最小值的差值，故弹出该元素后栈中的最小值就是未压入该元素时的最小值
+            // 即当前元素的值（min）减去两者的差值
+            long lastMin = min;
+            min = lastMin - pop;
+        }
+        // 若大于等于0，不会对min有影响
+    }
+    
+    public int top() {
+        long peek = stack.peek();
+        // 若当前栈顶小于等于0，说明最小值就是栈顶元素
+        if(peek<=0) return (int)min;
+        // 否则就是min+peek
+        return (int)(min+peek);
+    }
+    
+    public int getMin() {
+        return (int)min;
+    }
+}
+```
+
+## [739. 每日温度](https://leetcode-cn.com/problems/daily-temperatures/)(华为题库)
+
+用双循环遍历，比较慢：
+
+```c++
+class Solution {  // 2312ms
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        vector<int> days;
+        for (auto tempIter = T.begin(); tempIter != T.end(); ++tempIter) {
+            auto iterGreater = find_if(tempIter + 1, T.end(), [=](int temperature) { return temperature > *tempIter; });
+            days.push_back(iterGreater == T.end() ? 0 : distance(tempIter, iterGreater));
+        }
+        return move(days);
+    }
+};
+```
+
+优化代码：
+
+<https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
+
+温度总共就30到100，把每个温度值都记录在next向量中，每来一个温度，就查找比它高的全部温度，看哪个温度的位置离它最近：
+
+```c++
+class Solution {  // 256ms
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        vector<int> ans(T.size(), 0);
+        vector<int> next(101, numeric_limits<int>::max());
+        for (int i = T.size() - 1; i >= 0; --i) {
+            int warmer_index = numeric_limits<int>::max();
+            for (int t = T[i] + 1; t <= 100; ++t) {
+                if (next[t] < warmer_index) {
+                    warmer_index = next[t];
+                }
+            }
+            if (warmer_index < numeric_limits<int>::max()) {
+                ans[i] = warmer_index - i;
+            }
+            next[T[i]] = i;
+        }
+        return move(ans);
+    }
+};
+```
+
+使用栈的方法（如果某些数据在使用后就没用了，可以考虑用栈）：
+
+<https://leetcode-cn.com/problems/daily-temperatures/solution/mei-ri-wen-du-by-leetcode/>
+
+stack里存的自顶向下递增的元素的索引，倒序每新来一个元素，就把栈里比它小的元素全部弹出（因为当前元素索引又小，值又比早入栈的元素大，所以早入栈的那些元素在之后的比较中不会起任何作用），此时栈顶的元素即是值刚刚比它大，索引又最小的元素，再把该新元素入栈：
+
+```c++
+class Solution {
+public:
+    vector<int> dailyTemperatures(vector<int>& T) {
+        vector<int> ans(T.size(), 0);
+        stack<int> stack;
+        for (int i = T.size() - 1; i >= 0; --i) {
+            while (!stack.empty() && T[i] >= T[stack.top()]) {
+                stack.pop();
+            }
+            ans[i] = stack.empty() ? 0 : stack.top() - i;
+            stack.push(i);
+        }
+
+        return move(ans);
+    }
+};
+```
+
+# [动态规划解题套路框架](https://labuladong.gitee.io/algo/1/5/)
+
+首先，虽然动态规划的核心思想就是穷举求最值，但是问题可以千变万化，穷举所有可行解其实并不是一件容易的事，需要你熟练掌握递归思维，只有列出**正确的「状态转移方程」**，才能正确地穷举。而且，你需要判断算法问题是否**具备「最优子结构」**，是否能够通过子问题的最值得到原问题的最值。另外，动态规划问题**存在「重叠子问题」**，如果暴力穷举的话效率会很低，所以需要你使用「备忘录」或者「DP table」来优化穷举过程，避免不必要的计算。
+
+以上提到的重叠子问题、最优子结构、状态转移方程就是动态规划三要素。
+
+提供总结的一个思维框架，辅助你思考状态转移方程：
+
+**明确 base case -> 明确「状态」-> 明确「选择」 -> 定义 `dp` 数组/函数的含义**。
+
+按上面的套路走，最后的解法代码就会是如下的框架：
+
+```python
+# 自顶向下递归的动态规划
+def dp(状态1, 状态2, ...):
+    for 选择 in 所有可能的选择:
+        # 此时的状态已经因为做了选择而改变
+        result = 求最值(result, dp(状态1, 状态2, ...))
+    return result
+
+# 自底向上迭代的动态规划
+# 初始化 base case
+dp[0][0][...] = base case
+# 进行状态转移
+for 状态1 in 状态1的所有取值：
+    for 状态2 in 状态2的所有取值：
+        for ...
+            dp[状态1][状态2][...] = 求最值(选择1，选择2...)
+```
+
+至此，带备忘录的递归解法的效率已经和迭代的动态规划解法一样了。实际上，这种解法和常见的动态规划解法已经差不多了，只不过这种解法是「自顶向下」进行「递归」求解，我们更常见的动态规划代码是「自底向上」进行「递推」求解。
+
+啥叫「自顶向下」？注意我们刚才画的递归树（或者说图），是从上向下延伸，都是从一个规模较大的原问题比如说 `f(20)`，向下逐渐分解规模，直到 `f(1)` 和 `f(2)` 这两个 base case，然后逐层返回答案，这就叫「自顶向下」。
+
+啥叫「自底向上」？反过来，我们直接从最底下、最简单、问题规模最小、已知结果的 `f(1)` 和 `f(2)`（base case）开始往上推，直到推到我们想要的答案 `f(20)`。这就是「递推」的思路，这也是动态规划一般都脱离了递归，而是由循环迭代完成计算的原因。
+
+**3、`dp` 数组的迭代（递推）解法**
+
+有了上一步「备忘录」的启发，我们可以把这个「备忘录」独立出来成为一张表，通常叫做 DP table，在这张表上完成「自底向上」的推算岂不美哉！
+
+```java
+int fib(int N) {
+    if (N == 0) return 0;
+    int[] dp = new int[N + 1];
+    // base case
+    dp[0] = 0; dp[1] = 1;
+    // 状态转移
+    for (int i = 2; i <= N; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+
+    return dp[N];
+}
+```
+
+[![img](https://labuladong.gitee.io/algo/images/%e5%8a%a8%e6%80%81%e8%a7%84%e5%88%92%e8%af%a6%e8%a7%a3%e8%bf%9b%e9%98%b6/4.jpg)](https://labuladong.gitee.io/algo/images/动态规划详解进阶/4.jpg)
+
+画个图就很好理解了，而且你发现这个 DP table 特别像之前那个「剪枝」后的结果，只是反过来算而已。实际上，带备忘录的递归解法中的「备忘录」，最终完成后就是这个 DP table，所以说这两种解法其实是差不多的，大部分情况下，效率也基本相同。
+
+这里，引出「状态转移方程」这个名词，实际上就是描述问题结构的数学形式：
+
+![img](https://labuladong.gitee.io/algo/images/%e5%8a%a8%e6%80%81%e8%a7%84%e5%88%92%e8%af%a6%e8%a7%a3%e8%bf%9b%e9%98%b6/fib.png)
+
+为啥叫「状态转移方程」？其实就是为了听起来高端。
+
+`f(n)` 的函数参数会不断变化，所以你把参数 `n` 想做一个状态，这个状态 `n` 是由状态 `n - 1` 和状态 `n - 2` 转移（相加）而来，这就叫状态转移，仅此而已。
+
+你会发现，上面的几种解法中的所有操作，例如 `return f(n - 1) + f(n - 2)`，`dp[i] = dp[i - 1] + dp[i - 2]`，以及对备忘录或 DP table 的初始化操作，都是围绕这个方程式的不同表现形式。
+
+可见列出「状态转移方程」的重要性，它是解决问题的核心，而且很容易发现，其实状态转移方程直接代表着暴力解法。
+
+**千万不要看不起暴力解，动态规划问题最困难的就是写出这个暴力解，即状态转移方程**。
+
+只要写出暴力解，优化方法无非是用备忘录或者 DP table，再无奥妙可言。
+
+这个例子的最后，讲一个细节优化。
+
+细心的读者会发现，根据斐波那契数列的状态转移方程，当前状态只和之前的两个状态有关，其实并不需要那么长的一个 DP table 来存储所有的状态，只要想办法存储之前的两个状态就行了。
+
+所以，可以进一步优化，把空间复杂度降为 O(1)。这也就是我们最常见的计算斐波那契数的算法：
+
+```python
+class Solution:
+    def fib(self, n):
+        if n == 0 or n == 1:
+            return n
+
+        dp_i_1, dp_i_2 = 1, 0
+        for i in range(2, n + 1):
+            dp_i = dp_i_1 + dp_i_2
+            dp_i_2, dp_i_1 = dp_i_1, dp_i
+        return dp_i
+```
+
+
+
+## 二、凑零钱问题
+
+```python
+class Solution:
+    _INT_MAX = 1 << 31
+
+    def coinChange(self, coins, amount):
+        amount_coin_count = dict()
+        return self._dp(coins, amount, amount_coin_count)
+
+    def _dp(self, coins, amount, amount_coin_count):
+        if amount == 0:
+            return 0
+        if amount <= 0:
+            return -1
+
+        coin_count = amount_coin_count.get(amount)
+        if coin_count is not None:
+            return coin_count
+
+        res = self._INT_MAX
+        for coin in coins:
+            sub_problem = self._dp(coins, amount - coin, amount_coin_count)
+            if sub_problem < 0:
+                continue
+            res = min(res, sub_problem + 1)
+
+        coin_count = -1 if res == self._INT_MAX else res
+        amount_coin_count.setdefault(amount, coin_count)
+        return coin_count
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        coins = [1, 2, 5]
+        amount = 11
+        expected_count = 3
+        self.assertEqual(expected_count, self._SOLUTION.coinChange(coins, amount))
+```
+
+自底向上：
+
+```python
+class Solution:
+    def coinChange(self, coins, amount):
+        dp = [amount + 1] * (amount + 1)
+        dp[0] = 0
+        for i in range(0, amount + 1):
+            for coin in coins:
+                if i - coin < 0:
+                    continue
+                dp[i] = min(dp[i], 1 + dp[i - coin])
+        return -1 if dp[amount] == amount + 1 else dp[amount]
+```
+
+### 三、最后总结
+
+第一个斐波那契数列的问题，解释了如何通过「备忘录」或者「dp table」的方法来优化递归树，并且明确了这两种方法本质上是一样的，只是自顶向下和自底向上的不同而已。
+
+第二个凑零钱的问题，展示了如何流程化确定「状态转移方程」，只要通过状态转移方程写出暴力递归解，剩下的也就是优化递归树，消除重叠子问题而已。
+
+如果你不太了解动态规划，还能看到这里，真得给你鼓掌，相信你已经掌握了这个算法的设计技巧。
+
+**计算机解决问题其实没有任何奇技淫巧，它唯一的解决办法就是穷举**，穷举所有可能性。算法设计无非就是先思考“如何穷举”，然后再追求“如何聪明地穷举”。
+
+列出状态转移方程，就是在解决“如何穷举”的问题。之所以说它难，一是因为很多穷举需要递归实现，二是因为有的问题本身的解空间复杂，不那么容易穷举完整。
+
+备忘录、DP table 就是在追求“如何聪明地穷举”。用空间换时间的思路，是降低时间复杂度的不二法门，除此之外，试问，还能玩出啥花活？
+
+之后我们会有一章专门讲解动态规划问题，如果有任何问题都可以随时回来重读本文，希望读者在阅读每个题目和解法时，多往「状态」和「选择」上靠，才能对这套框架产生自己的理解，运用自如。
+
+## [动态规划设计：300. 最长递增子序列](https://labuladong.gitee.io/algo/3/24/74/)
+
+### 一、动态规划解法
+
+动态规划的核心设计思想是数学归纳法。
+
+相信大家对数学归纳法都不陌生，高中就学过，而且思路很简单。比如我们想证明一个数学结论，那么**我们先假设这个结论在 `k < n` 时成立，然后根据这个假设，想办法推导证明出 `k = n` 的时候此结论也成立**。如果能够证明出来，那么就说明这个结论对于 `k` 等于任何数都成立。
+
+类似的，我们设计动态规划算法，不是需要一个 dp 数组吗？我们可以假设 `dp[0...i-1]` 都已经被算出来了，然后问自己：怎么通过这些结果算出 `dp[i]`？
+
+直接拿最长递增子序列这个问题举例你就明白了。不过，首先要定义清楚 dp 数组的含义，即 `dp[i]` 的值到底代表着什么？
+
+**我们的定义是这样的：`dp[i]` 表示以 `nums[i]` 这个数结尾的最长递增子序列的长度**。
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+from typing import List
+
+'''
+执行用时：
+3388 ms
+, 在所有 Python3 提交中击败了
+37.19%
+的用户
+内存消耗：
+15.1 MB
+, 在所有 Python3 提交中击败了
+81.77%
+的用户
+'''
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        dp = [1] * len(nums)
+        for i in range(0, len(nums)):
+            for j in range(0, i):
+                if nums[i] > nums[j]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+
+        res = 0
+        for i in range(0, len(dp)):
+            res = max(res, dp[i])
+        return res
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        nums = [10, 9, 2, 5, 3, 7, 101, 18]
+        expected_length = 4
+        self.assertEqual(expected_length, self._SOLUTION.lengthOfLIS(nums))
+
+    def test_solution2(self):
+        nums = [0, 1, 0, 3, 2, 3]
+        expected_length = 4
+        self.assertEqual(expected_length, self._SOLUTION.lengthOfLIS(nums))
+
+    def test_solution3(self):
+        nums = [7, 7, 7, 7, 7, 7, 7]
+        expected_length = 1
+        self.assertEqual(expected_length, self._SOLUTION.lengthOfLIS(nums))
+
+    def test_solution4(self):
+        nums = [6, 3, 5, 10, 11, 2, 9, 14, 13, 7, 4, 8, 12]
+        expected_length = 5
+        self.assertEqual(expected_length, self._SOLUTION.lengthOfLIS(nums))
+```
+
+### 二、二分查找解法
+
+这个解法的时间复杂度为 `O(NlogN)`，但是说实话，正常人基本想不到这种解法（也许玩过某些纸牌游戏的人可以想出来）。所以大家了解一下就好，正常情况下能够给出动态规划解法就已经很不错了。
+
+根据题目的意思，我都很难想象这个问题竟然能和二分查找扯上关系。其实最长递增子序列和一种叫做 patience game 的纸牌游戏有关，甚至有一种排序方法就叫做 patience sorting（耐心排序）。
+
+为了简单起见，后文跳过所有数学证明，通过一个简化的例子来理解一下算法思路。
+
+首先，给你一排扑克牌，我们像遍历数组那样从左到右一张一张处理这些扑克牌，最终要把这些牌分成若干堆。
+
+[![img](https://labuladong.gitee.io/algo/images/%e6%9c%80%e9%95%bf%e9%80%92%e5%a2%9e%e5%ad%90%e5%ba%8f%e5%88%97/poker1.jpeg)](https://labuladong.gitee.io/algo/images/最长递增子序列/poker1.jpeg)
+
+**处理这些扑克牌要遵循以下规则**：
+
+只能把点数小的牌压到点数比它大的牌上；如果当前牌点数较大没有可以放置的堆，则新建一个堆，把这张牌放进去；如果当前牌有多个堆可供选择，则选择最左边的那一堆放置。
+
+```python
+'''
+执行用时：
+88 ms
+, 在所有 Python3 提交中击败了
+73.27%
+的用户
+内存消耗：
+15 MB
+, 在所有 Python3 提交中击败了
+99.30%
+的用户
+'''
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        top = [0] * len(nums)
+        # 牌堆数初始化为0
+        piles = 0
+        for i in range(0, len(nums)):
+            # 要处理的扑克牌
+            poker = nums[i]
+
+            # 搜索左侧边界的二分查找
+            left, right = 0, piles
+            while left < right:
+                mid = int((left + right) / 2)
+                if top[mid] > poker:
+                    right = mid
+                elif top[mid] < poker:
+                    left = mid + 1
+                else:
+                    right = mid
+
+            # 没找到合适的牌堆，新建一堆
+            if left == piles:
+                piles += 1
+
+            # 把这张牌放到牌堆顶
+            top[left] = poker
+
+        # 牌堆数就是 LIS 长度
+        return piles
+```
+
+暴力递归
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*
+时间：O(2^n * n) 有2^n个子序列（每个数可取或不取），每个子序列遍历一次n
+*/
+class Solution {  // 超时
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        if (nums.empty()) {
+            return 0;
+        }
+
+        int lis = 1;
+        int n = nums.size();
+        for (int i = 0; i < n; ++i) {
+            lis = std::max(lis, dfs(nums, i));
+        }
+        return lis;
+    }
+
+private:
+    int dfs(const std::vector<int>& nums, int index) {
+        if (index == nums.size() - 1) {
+            return 1;
+        }
+
+        int lis = 1;
+        for (int j = index + 1; j < nums.size(); ++j) {
+            if (nums[j] > nums[index]) {  //
+                lis = std::max(lis, 1 + dfs(nums, j));
+            }
+        }
+        return lis;
+    }
+};
+
+//  带备忘录
+class Solution {  // 288 ms
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        if (nums.empty()) {
+            return 0;
+        }
+
+        int lis = 1;
+        int n = nums.size();
+        std::vector<int> memo(n, 0);
+
+        for (int i = 0; i < n; ++i) {
+            lis = std::max(lis, dfs(nums, i, memo));
+        }
+        return lis;
+    }
+
+private:
+    int dfs(const std::vector<int>& nums, int index, std::vector<int>& memo) {
+        if (index == nums.size() - 1) {
+            return 1;
+        }
+
+        if (memo[index] > 0) {
+            return memo[index];
+        }
+
+        int lis = 1;
+        for (int j = index + 1; j < nums.size(); ++j) {
+            if (nums[j] > nums[index]) {  //
+                lis = std::max(lis, 1 + dfs(nums, j, memo));
+            }
+        }
+        memo[index] = lis;
+        return lis;
+    }
+};
+
+// 动态规划
+// 时间：O(n^2)
+class Solution {  // 280ms
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        if (nums.empty()) {
+            return 0;
+        }
+
+        int lis = 1;
+        int n = nums.size();
+        std::vector<int> dp(n, 1);
+
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = i + 1; j < n; ++j) {
+                if (nums[j] > nums[i]) {
+                    dp[i] = std::max(dp[i], dp[j] + 1);
+                }
+            }
+            lis = std::max(lis, dp[i]);
+        }
+        return lis;
+    }
+};
+
+class SolutionTest1 : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest1, Test1) {
+    std::vector<int> nums = {10, 9, 2, 5, 3, 7, 101, 18};
+    EXPECT_EQ(4, solution.lengthOfLIS(nums));
+}
+```
+
+
+
+
+
+### [354. 俄罗斯套娃信封问题 - 力扣（LeetCode）](https://leetcode.cn/problems/russian-doll-envelopes/submissions/)
+
+**这道题目其实是最长递增子序列的一个变种，因为每次合法的嵌套是大的套小的，相当于在二维平面中找一个最长递增的子序列，其长度就是最多能嵌套的信封个数**。
+
+前面说的标准 LIS 算法只能在一维数组中寻找最长子序列，而我们的信封是由 `(w, h)` 这样的二维数对形式表示的，如何把 LIS 算法运用过来呢？
+
+[![img](https://labuladong.gitee.io/algo/images/%e4%bf%a1%e5%b0%81%e5%b5%8c%e5%a5%97/0.jpg)](https://labuladong.gitee.io/algo/images/信封嵌套/0.jpg)
+
+读者也许会想，通过 `w × h` 计算面积，然后对面积进行标准的 LIS 算法。但是稍加思考就会发现这样不行，比如 `1 × 10` 大于 `3 × 3`，但是显然这样的两个信封是无法互相嵌套的。
+
+这道题的解法比较巧妙：
+
+**先对宽度 `w` 进行升序排序，如果遇到 `w` 相同的情况，则按照高度 `h` 降序排序；之后把所有的 `h` 作为一个数组，在这个数组上计算 LIS 的长度就是答案**。
+
+画个图理解一下，先对这些数对进行排序：
+
+[![img](https://labuladong.gitee.io/algo/images/%e4%bf%a1%e5%b0%81%e5%b5%8c%e5%a5%97/1.jpg)](https://labuladong.gitee.io/algo/images/信封嵌套/1.jpg)
+
+然后在 `h` 上寻找最长递增子序列，这个子序列就是最优的嵌套方案：
+
+[![img](https://labuladong.gitee.io/algo/images/%e4%bf%a1%e5%b0%81%e5%b5%8c%e5%a5%97/2.jpg)](https://labuladong.gitee.io/algo/images/信封嵌套/2.jpg)
+
+为什么呢？稍微思考一下就明白了：
+
+首先，对宽度 `w` 从小到大排序，确保了 `w` 这个维度可以互相嵌套，所以我们只需要专注高度 `h` 这个维度能够互相嵌套即可。
+
+其次，两个 `w` 相同的信封不能相互包含，所以对于宽度 `w` 相同的信封，对高度 `h` 进行降序排序，保证 LIS 中不存在多个 `w` 相同的信封（因为题目说了长宽相同也无法嵌套）。
+
+下面看解法代码：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+from typing import List
+
+'''
+执行用时：
+600 ms
+, 在所有 Python3 提交中击败了
+9.58%
+的用户
+内存消耗：
+44.2 MB
+, 在所有 Python3 提交中击败了
+72.11%
+的用户
+'''
+class Solution:
+    def maxEnvelopes(self, envelopes: List[List[int]]) -> int:
+        envelopes.sort(key=lambda envelope: (envelope[0], -envelope[1]))
+        heights = list(map(lambda envelope: envelope[1], envelopes))
+        return self._lengthOfLIS(heights)
+
+    def _lengthOfLIS(self, nums: List[int]) -> int:
+        top = [0] * len(nums)
+        # 牌堆数初始化为0
+        piles = 0
+        for i in range(0, len(nums)):
+            # 要处理的扑克牌
+            poker = nums[i]
+
+            # 搜索左侧边界的二分查找
+            left, right = 0, piles
+            while left < right:
+                mid = int((left + right) / 2)
+                if top[mid] > poker:
+                    right = mid
+                elif top[mid] < poker:
+                    left = mid + 1
+                else:
+                    right = mid
+
+            # 没找到合适的牌堆，新建一堆
+            if left == piles:
+                piles += 1
+
+            # 把这张牌放到牌堆顶
+            top[left] = poker
+
+        # 牌堆数就是 LIS 长度
+        return piles
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        envelopes = [[6, 4], [6, 7], [1, 8], [2, 3], [5, 2], [5, 4]]
+        expected_length = 3
+        self.assertEqual(expected_length, self._SOLUTION.maxEnvelopes(envelopes))
+
+    def test_solution2(self):
+        nums = [[5, 4], [6, 4], [6, 7], [2, 3]]
+        expected_length = 3
+        self.assertEqual(expected_length, self._SOLUTION.maxEnvelopes(nums))
+
+    def test_solution3(self):
+        nums = [[1, 1], [1, 1], [1, 1]]
+        expected_length = 1
+        self.assertEqual(expected_length, self._SOLUTION.maxEnvelopes(nums))
+```
+
+为了清晰，我将代码分为了两个函数， 你也可以合并，这样可以节省下 `height` 数组的空间。
+
+由于增加了测试用例，这里必须使用二分搜索版的 `lengthOfLIS` 函数才能通过所有测试用例。这样的话算法的时间复杂度为 `O(NlogN)`，因为排序和计算 LIS 各需要 `O(NlogN)` 的时间，加到一起还是 `O(NlogN)`；空间复杂度为 `O(N)`，因为计算 LIS 的函数中需要一个 `top` 数组。
+
+### [53. 最大子数组和 - 力扣（LeetCode）](https://leetcode.cn/problems/maximum-subarray/)
+
+力扣第 53 题「 [最大子序和](https://leetcode.cn/problems/maximum-subarray/)」问题和前文讲过的 [经典动态规划：最长递增子序列](https://labuladong.gitee.io/algo/3/24/74/) 的套路非常相似，代表着一类比较特殊的动态规划问题的思路，题目如下：
+
+给你输入一个整数数组 `nums`，请你找在其中找一个和最大的子数组，返回这个子数组的和。函数签名如下：
+
+```java
+int maxSubArray(int[] nums);
+```
+
+比如说输入 `nums = [-3,1,3,-1,2,-4,2]`，算法返回 5，因为最大子数组 `[1,3,-1,2]` 的和为 5。
+
+其实第一次看到这道题，我首先想到的是 [滑动窗口算法](https://labuladong.gitee.io/algo/2/18/25/)，因为我们前文说过嘛，滑动窗口算法就是专门处理子串/子数组问题的，这里不就是子数组问题么？
+
+但是，稍加分析就发现，**这道题还不能用滑动窗口算法，因为数组中的数字可以是负数**。
+
+滑动窗口算法无非就是双指针形成的窗口扫描整个数组/子串，但关键是，你得清楚地知道什么时候应该移动右侧指针来扩大窗口，什么时候移动左侧指针来减小窗口。而对于这道题目，你想想，当窗口扩大的时候可能遇到负数，窗口中的值也就可能增加也可能减少，这种情况下不知道什么时机去收缩左侧窗口，也就无法求出「最大子数组和」。
+
+#### 动态规划思路
+
+解决这个问题可以用动态规划技巧解决，但是 `dp` 数组的定义比较特殊。按照我们常规的动态规划思路，一般是这样定义 `dp` 数组：
+
+**`nums[0..i]` 中的「最大的子数组和」为 `dp[i]`**。
+
+如果这样定义的话，整个 `nums` 数组的「最大子数组和」就是 `dp[n-1]`。如何找状态转移方程呢？按照数学归纳法，假设我们知道了 `dp[i-1]`，如何推导出 `dp[i]` 呢？
+
+如下图，按照我们刚才对 `dp` 数组的定义，`dp[i] = 5` ，也就是等于 `nums[0..i]` 中的最大子数组和：
+
+[![img](https://labuladong.gitee.io/algo/images/%e6%9c%80%e5%a4%a7%e5%ad%90%e6%95%b0%e7%bb%84/1.jpeg)](https://labuladong.gitee.io/algo/images/最大子数组/1.jpeg)
+
+那么在上图这种情况中，利用数学归纳法，你能用 `dp[i]` 推出 `dp[i+1]` 吗？
+
+**实际上是不行的，因为子数组一定是连续的，按照我们当前 `dp` 数组定义，并不能保证 `nums[0..i]` 中的最大子数组与 `nums[i+1]` 是相邻的**，也就没办法从 `dp[i]` 推导出 `dp[i+1]`。
+
+所以说我们这样定义 `dp` 数组是不正确的，无法得到合适的状态转移方程。对于这类子数组问题，我们就要重新定义 `dp` 数组的含义：
+
+**以 `nums[i]` 为结尾的「最大子数组和」为 `dp[i]`**。
+
+这种定义之下，想得到整个 `nums` 数组的「最大子数组和」，不能直接返回 `dp[n-1]`，而需要遍历整个 `dp` 数组：
+
+```java
+int res = Integer.MIN_VALUE;
+for (int i = 0; i < n; i++) {
+    res = Math.max(res, dp[i]);
+}
+return res;
+```
+
+依然使用数学归纳法来找状态转移关系：假设我们已经算出了 `dp[i-1]`，如何推导出 `dp[i]` 呢？
+
+可以做到，`dp[i]` 有两种「选择」，要么与前面的相邻子数组连接，形成一个和更大的子数组；要么不与前面的子数组连接，自成一派，自己作为一个子数组。
+
+如何选择？既然要求「最大子数组和」，当然选择结果更大的那个啦：
+
+```java
+// 要么自成一派，要么和前面的子数组合并
+dp[i] = Math.max(nums[i], nums[i] + dp[i - 1]);
+```
+
+综上，我们已经写出了状态转移方程，就可以直接写出解法了：
+
+```java
+int maxSubArray(int[] nums) {
+    int n = nums.length;
+    if (n == 0) return 0;
+    // 定义：dp[i] 记录以 nums[i] 为结尾的「最大子数组和」
+    int[] dp = new int[n];
+    // base case
+    // 第一个元素前面没有子数组
+    dp[0] = nums[0];
+    // 状态转移方程
+    for (int i = 1; i < n; i++) {
+        dp[i] = Math.max(nums[i], nums[i] + dp[i - 1]);
+    }
+    // 得到 nums 的最大子数组
+    int res = Integer.MIN_VALUE;
+    for (int i = 0; i < n; i++) {
+        res = Math.max(res, dp[i]);
+    }
+    return res;
+}
+```
+
+以上解法时间复杂度是 O(N)，空间复杂度也是 O(N)，较暴力解法已经很优秀了，不过**注意到 `dp[i]` 仅仅和 `dp[i-1]` 的状态有关**，那么我们可以施展前文 [动态规划的降维打击：空间压缩技巧](https://labuladong.gitee.io/algo/3/23/70/) 讲的技巧进行进一步优化，将空间复杂度降低：
+
+```java
+int maxSubArray(int[] nums) {
+    int n = nums.length;
+    if (n == 0) return 0;
+    // base case
+    int dp_0 = nums[0];
+    int dp_1 = 0, res = dp_0;
+
+    for (int i = 1; i < n; i++) {
+        // dp[i] = max(nums[i], nums[i] + dp[i-1])
+        dp_1 = Math.max(nums[i], nums[i] + dp_0);
+        dp_0 = dp_1;
+        // 顺便计算最大的结果
+        res = Math.max(res, dp_1);
+    }
+    
+    return res;
+}
+```
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+from typing import List
+
+'''
+执行用时：
+256 ms
+, 在所有 Python3 提交中击败了
+9.46%
+的用户
+内存消耗：
+26.1 MB
+, 在所有 Python3 提交中击败了
+31.03%
+的用户
+'''
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        dp = [0] * len(nums)
+        dp[0], res = nums[0], nums[0]
+        for i in range(1, len(nums)):
+            dp[i] = max(nums[i], dp[i - 1] + nums[i])
+            res = max(res, dp[i])
+        return res
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        nums = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+        expected_length = 6
+        self.assertEqual(expected_length, self._SOLUTION.maxSubArray(nums))
+
+    def test_solution2(self):
+        nums = [1]
+        expected_length = 1
+        self.assertEqual(expected_length, self._SOLUTION.maxSubArray(nums))
+
+    def test_solution3(self):
+        nums = [5, 4, -1, 7, 8]
+        expected_length = 23
+        self.assertEqual(expected_length, self._SOLUTION.maxSubArray(nums))
+```
+
+#### 前缀和思路
+
+在动态规划解法中，我们通过状态转移方程推导以 `nums[i]` 结尾的最大子数组和，其实用前文 [小而美的算法技巧：前缀和数组](https://labuladong.gitee.io/algo/2/18/22/) 讲过的前缀和数组也可以达到相同的效果。
+
+回顾一下，前缀和数组 `preSum` 就是 `nums` 元素的累加和，`preSum[i+1] - preSum[j]` 其实就是子数组 `nums[j..i]` 之和（根据 `preSum` 数组的实现，索引 0 是占位符，所以 `i` 有一位索引偏移）。
+
+**那么反过来想，以 `nums[i]` 为结尾的最大子数组之和是多少？其实就是 `preSum[i+1] - min(preSum[0..i])`**。
+
+所以，我们可以利用前缀和数组计算以每个元素结尾的子数组之和，进而得到和最大的子数组：
+
+```java
+// 前缀和技巧解题
+int maxSubArray(int[] nums) {
+    int n = nums.length;
+    int[] preSum = new int[n + 1];
+    preSum[0] = 0;
+    // 构造 nums 的前缀和数组
+    for (int i = 1; i <= n; i++) {
+        preSum[i] = preSum[i - 1] + nums[i - 1];
+    }
+    
+    int res = Integer.MIN_VALUE;
+    int minVal = Integer.MAX_VALUE;
+    for (int i = 0; i < n; i++) {
+        // 维护 minVal 是 preSum[0..i] 的最小值
+        minVal = Math.min(minVal, preSum[i]);
+        // 以 nums[i] 结尾的最大子数组和就是 preSum[i+1] - min(preSum[0..i])
+        res = Math.max(res, preSum[i + 1] - minVal);
+    }
+    return res;
+}
+```
+
+至此，前缀和解法也完成了。
+
+简单总结下动态规划解法吧，虽然说状态转移方程确实有点玄学，但大部分还是有些规律可循的，跑不出那几个套路。像子数组、子序列这类问题，你就可以尝试定义 `dp[i]` 是以 `nums[i]` 为结尾的最大子数组和/最长递增子序列，因为这样定义更容易将 `dp[i+1]` 和 `dp[i]` 建立起联系，利用数学归纳法写出状态转移方程。
+
+### [详解最长公共子序列问题，秒杀三道动态规划题目](https://mp.weixin.qq.com/s/ZhPEchewfc03xWv9VP3msg)
+
+#### [1143. 最长公共子序列](https://leetcode.cn/problems/longest-common-subsequence/)
+
+计算最长公共子序列（Longest Common Subsequence，简称 LCS）是一道经典的动态规划题目，大家应该都见过：
+
+给你输入两个字符串`s1`和`s2`，请你找出他们俩的最长公共子序列，返回这个子序列的长度。
+
+力扣第 1143 题就是这道题，函数签名如下：
+
+```
+int longestCommonSubsequence(String s1, String s2);
+```
+
+比如说输入`s1 = "zabcde", s2 = "acez"`，它俩的最长公共子序列是`lcs = "ace"`，长度为 3，所以算法返回 3。
+
+如果没有做过这道题，一个最简单的暴力算法就是，把`s1`和`s2`的所有子序列都穷举出来，然后看看有没有公共的，然后在所有公共子序列里面再寻找一个长度最大的。
+
+显然，这种思路的复杂度非常高，你要穷举出所有子序列，这个复杂度就是指数级的，肯定不实际。
+
+正确的思路是不要考虑整个字符串，而是细化到`s1`和`s2`的每个字符。前文 子序列解题模板 中总结的一个规律：
+
+**对于两个字符串求子序列的问题，都是用两个指针`i`和`j`分别在两个字符串上移动，大概率是动态规划思路**。
+
+最长公共子序列的问题也可以遵循这个规律，我们可以先写一个`dp`函数：
+
+```
+// 定义：计算 s1[i..] 和 s2[j..] 的最长公共子序列长度
+int dp(String s1, int i, String s2, int j)
+```
+
+这个`dp`函数的定义是：**`dp(s1, i, s2, j)`计算`s1[i..]`和`s2[j..]`的最长公共子序列长度**。
+
+根据这个定义，那么我们想要的答案就是`dp(s1, 0, s2, 0)`，且 base case 就是`i == len(s1)`或`j == len(s2)`时，因为这时候`s1[i..]`或`s2[j..]`就相当于空串了，最长公共子序列的长度显然是 0：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+
+'''
+执行用时：
+732 ms
+, 在所有 Python3 提交中击败了
+5.06%
+的用户
+内存消耗：
+25.5 MB
+, 在所有 Python3 提交中击败了
+6.95%
+的用户
+'''
+class Solution:
+    def __init__(self):
+        self._memo = None
+
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        self._memo = [[-1 for _ in range(0, len(text2))] for _ in range(0, len(text1))]
+        return self._dp(text1, 0, text2, 0)
+
+    def _dp(self, text1, i, text2, j):
+        if i == len(text1) or j == len(text2):
+            return 0
+
+        if self._memo[i][j] != -1:
+            return self._memo[i][j]
+
+        sub_lcs = -1
+        if text1[i] == text2[j]:
+            sub_lcs = 1 + self._dp(text1, i + 1, text2, j + 1)
+        else:
+            sub_lcs = max(self._dp(text1, i + 1, text2, j), self._dp(text1, i, text2, j + 1))
+        self._memo[i][j] = sub_lcs
+        return sub_lcs
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        text1 = "abcde"
+        text2 = "ace"
+        expected_length = 3
+        self.assertEqual(expected_length, self._SOLUTION.longestCommonSubsequence(text1, text2))
+
+    def test_solution2(self):
+        text1 = "abc"
+        text2 = "abc"
+        expected_length = 3
+        self.assertEqual(expected_length, self._SOLUTION.longestCommonSubsequence(text1, text2))
+
+    def test_solution3(self):
+        text1 = "abc"
+        text2 = "def"
+        expected_length = 0
+        self.assertEqual(expected_length, self._SOLUTION.longestCommonSubsequence(text1, text2))
+
+    def test_solution4(self):
+        text1 = "bl"
+        text2 = "yby"
+        expected_length = 1
+        self.assertEqual(expected_length, self._SOLUTION.longestCommonSubsequence(text1, text2))
+```
+
+以上思路完全就是按照我们之前的爆文 动态规划套路框架 来的，应该是很容易理解的。至于为什么要加`memo`备忘录，我们之前写过很多次，为了照顾新来的读者，这里再简单重复一下，首先抽象出我们核心`dp`函数的递归框架：
+
+```
+int dp(int i, int j) {
+    dp(i + 1, j + 1); // #1
+    dp(i, j + 1);     // #2
+    dp(i + 1, j);     // #3
+}
+```
+
+你看，假设我想从`dp(i, j)`转移到`dp(i+1, j+1)`，有不止一种方式，可以直接走`#1`，也可以走`#2 -> #3`，也可以走`#3 -> #2`。
+
+这就是重叠子问题，如果我们不用`memo`备忘录消除子问题，那么`dp(i+1, j+1)`就会被多次计算，这是没有必要的。
+
+至此，最长公共子序列问题就完全解决了，用的是自顶向下带备忘录的动态规划思路，我们当然也可以使用自底向上的迭代的动态规划思路，和我们的递归思路一样，关键是如何定义`dp`数组，我这里也写一下自底向上的解法吧：
+
+```python
+'''
+执行用时：
+360 ms
+, 在所有 Python3 提交中击败了
+60.11%
+的用户
+内存消耗：
+23.7 MB
+, 在所有 Python3 提交中击败了
+12.55%
+的用户
+'''
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        len1, len2 = len(text1), len(text2)
+        # 定义：s1[0..i-1] 和 s2[0..j-1] 的 lcs 长度为 dp[i][j]
+    	# 目标：s1[0..m-1] 和 s2[0..n-1] 的 lcs 长度，即 dp[m][n]
+    	# base case: dp[0][..] = dp[..][0] = 0
+        
+        dp = [[0 for _ in range(0, len2 + 1)] for _ in range(0, len1 + 1)]
+        for i in range(1, len1 + 1):
+            for j in range(1, len2 + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = 1 + dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[len1][len2]
+```
+
+C++实现：
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+        int n1 = text1.size();
+        int n2 = text2.size();
+        std::vector<std::vector<int>> dp(n1 + 1, std::vector<int>(n2 + 1, 0));
+        for (int i = 0; i < n1; ++i) {
+            for (int j = 0; j < n2; ++j) {
+                if (text1[i] == text2[j]) {
+                    dp[i + 1][j + 1] = dp[i][j] + 1;
+                } else {
+                    dp[i + 1][j + 1] = std::max(dp[i][j + 1], dp[i + 1][j]);
+                }
+            }
+        }
+        return dp[n1][n2];
+    }
+};
+// 使用dfs递归实现
+class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+        int n1 = text1.size();
+        int n2 = text2.size();
+        std::vector<std::vector<int>> memo(n1, std::vector<int>(n2, -1));
+
+        // 这里使用auto无法通过编译，递归调用自己的时候类型还不完整；同时注意递归函数要使用&传递
+        // http://www.manongjc.com/detail/39-hctzmvwgnjshgcu.html https://blog.csdn.net/weixin_43686836/article/details/106952856
+        std::function<int(int, int)> dfs = [&](int i, int j) {
+            if (i < 0 || j < 0) {
+                return 0;
+            }
+
+            if (memo[i][j] >= 0) {
+                return memo[i][j];
+            }
+
+            int subLcs = text1[i] == text2[j] ? dfs(i - 1, j - 1) + 1 : std::max(dfs(i - 1, j), dfs(i, j - 1));
+            memo[i][j] = subLcs;
+            return subLcs;
+        };
+
+        return dfs(n1 - 1, n2 - 1);
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    string text1 = "abcde";
+    string text2 = "ace";
+    EXPECT_EQ(3, solution.longestCommonSubsequence(text1, text2));
+}
+
+TEST_F(SolutionTest, Test2) {
+    string text1 = "abc";
+    string text2 = "abc";
+    EXPECT_EQ(3, solution.longestCommonSubsequence(text1, text2));
+}
+```
+
+
+
+#### [583. 两个字符串的删除操作](https://leetcode.cn/problems/delete-operation-for-two-strings/)
+
+这是力扣第 583 题「两个字符串的删除操作」，看下题目：
+
+![图片](https://mmbiz.qpic.cn/sz_mmbiz_png/gibkIz0MVqdFj04Aic9zfP6rnHdGicfrafh6dgl5pUnutqNCqlEVtJHCYqNnwwiae3tR8ENPRF3PBzUWPJ7Nl4RWBQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+函数签名如下：
+
+```
+int minDistance(String s1, String s2);
+```
+
+题目让我们计算将两个字符串变得相同的最少删除次数，那我们可以思考一下，最后这两个字符串会被删成什么样子？
+
+删除的结果不就是它俩的最长公共子序列嘛！
+
+那么，要计算删除的次数，就可以通过最长公共子序列的长度推导出来：
+
+
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+
+'''
+执行用时：
+232 ms
+, 在所有 Python3 提交中击败了
+81.96%
+的用户
+内存消耗：
+17.2 MB
+, 在所有 Python3 提交中击败了
+75.59%
+的用户
+'''
+class Solution:
+    def minDistance(self, word1: str, word2: str) -> int:
+        lcs = self._longestCommonSubsequence(word1, word2)
+        return len(word1) - lcs + len(word2) - lcs
+
+    def _longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        len1, len2 = len(text1), len(text2)
+        dp = [[0 for _ in range(0, len2 + 1)] for _ in range(0, len1 + 1)]
+        for i in range(1, len1 + 1):
+            for j in range(1, len2 + 1):
+                if text1[i - 1] == text2[j - 1]:
+                    dp[i][j] = 1 + dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+        return dp[len1][len2]
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        text1 = "sea"
+        text2 = "eat"
+        expected_length = 2
+        self.assertEqual(expected_length, self._SOLUTION._longestCommonSubsequence(text1, text2))
+
+    def test_solution3(self):
+        text1 = "leetcode"
+        text2 = "etco"
+        expected_length = 4
+        self.assertEqual(expected_length, self._SOLUTION._longestCommonSubsequence(text1, text2))
+```
+
+#### [712. 两个字符串的最小ASCII删除和](https://leetcode.cn/problems/minimum-ascii-delete-sum-for-two-strings/)
+
+这是力扣第 712 题，看下题目：
+
+![图片](https://mmbiz.qpic.cn/sz_mmbiz_png/gibkIz0MVqdFj04Aic9zfP6rnHdGicfrafhJl197b0zVcibXdfJNOEIAqWh9qHS9z1IjGwsXVcibKKPZI25URoWNWYA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+这道题，和上一道题非常类似，这回不问我们删除的字符个数了，问我们删除的字符的 ASCII 码加起来是多少。
+
+那就不能直接复用计算最长公共子序列的函数了，但是可以依照之前的思路，**稍微修改 base case 和状态转移部分即可直接写出解法代码**：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import unittest
+
+'''
+执行用时：
+1164 ms
+, 在所有 Python3 提交中击败了
+11.02%
+的用户
+内存消耗：
+20.1 MB
+, 在所有 Python3 提交中击败了
+13.77%
+的用户
+'''
+class Solution:
+    def __init__(self):
+        self._memo = None
+
+    def minimumDeleteSum(self, s1: str, s2: str) -> int:
+        self._memo = [[-1 for _ in range(0, len(s2) + 1)] for _ in range(0, len(s1) + 1)]
+        return self._dp(s1, 0, s2, 0)
+
+    def _dp(self, s1, i, s2, j):
+        if self._memo[i][j] != -1:
+            return self._memo[i][j]
+
+        if i == len(s1):
+            sub_min = sum(ord(c) for c in s2[j:])
+        elif j == len(s2):
+            sub_min = sum(ord(c) for c in s1[i:])
+        elif s1[i] == s2[j]:
+            sub_min = self._dp(s1, i + 1, s2, j + 1)
+        else:
+            sub_min = min(ord(s1[i]) + self._dp(s1, i + 1, s2, j), ord(s2[j]) + self._dp(s1, i, s2, j + 1))
+
+        self._memo[i][j] = sub_min
+        return sub_min
+
+
+class TestSolution(unittest.TestCase):
+    _SOLUTION = Solution()
+
+    def test_solution1(self):
+        text1 = "sea"
+        text2 = "eat"
+        expected_length = 231
+        self.assertEqual(expected_length, self._SOLUTION.minimumDeleteSum(text1, text2))
+
+    def test_solution2(self):
+        text1 = "delete"
+        text2 = "leet"
+        expected_length = 403
+        self.assertEqual(expected_length, self._SOLUTION.minimumDeleteSum(text1, text2))
+```
+
+base case 有一定区别，计算`lcs`长度时，如果一个字符串为空，那么`lcs`长度必然是 0；但是这道题如果一个字符串为空，另一个字符串必然要被全部删除，所以需要计算另一个字符串所有字符的 ASCII 码之和。
+
+关于状态转移，当`s1[i]`和`s2[j]`相同时不需要删除，不同时需要删除，所以可以利用`dp`函数计算两种情况，得出最优的结果。其他的大同小异，就不具体展开了。
+
+至此，三道子序列问题就解决完了，关键在于将问题细化到字符，根据每两个字符是否相同来判断他们是否在结果子序列中，从而避免了对所有子序列进行穷举。
+
+这也算是在两个字符串中求子序列的常用思路吧，建议好好体会，多多联系~
+
+[使用自底向上的方法](https://leetcode.cn/problems/minimum-ascii-delete-sum-for-two-strings/solution/liang-ge-zi-fu-chuan-de-zui-xiao-asciishan-chu-he-/)：
+
+```python
+'''
+执行用时：
+636 ms
+, 在所有 Python3 提交中击败了
+55.51%
+的用户
+内存消耗：
+19.5 MB
+, 在所有 Python3 提交中击败了
+74.41%
+的用户
+'''
+class Solution:
+    def minimumDeleteSum(self, s1: str, s2: str) -> int:
+        len1 = len(s1)
+        len2 = len(s2)
+        dp = [[0] * (len2 + 1) for _ in range(0, len1 + 1)]
+
+        for i in range(1, len1 + 1):
+            dp[i][0] = dp[i - 1][0] + ord(s1[i - 1])
+
+        for j in range(1, len2 + 1):
+            dp[0][j] = dp[0][j - 1] + ord(s2[j - 1])
+
+        for i in range(1, len1 + 1):
+            for j in range(1, len2 + 1):
+                if s1[i - 1] == s2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                else:
+                    dp[i][j] = min(ord(s1[i - 1]) + dp[i - 1][j], ord(s2[j - 1]) + dp[i][j - 1])
+        return dp[len1][len2]
+```
+
+官方写法更容易理解一些：
+
+我们用 dp\[i\]\[j\] 表示字符串 s1\[i:\] 和 s2\[j:\]（s1\[i:\] 表示字符串 s1 从第 ii 位到末尾的子串，s2\[j:\] 表示字符串 s2 从第 jj 位到末尾的子串，字符串下标从 0 开始）达到相等所需删除的字符的 ASCII 值的最小和，最终的答案为 dp\[0\]\[0\]。
+
+当 s1\[i:\] 和 s2\[j:\] 中的某一个字符串为空时，dp\[i\]\[j\] 的值即为另一个非空字符串的所有字符的 ASCII 值之和。例如当 s2\[j:\] 为空时，此时有 j = s2.length()，状态转移方程为
+
+dp\[i\]\[j\] = s1.asciiSumFromPos(i)
+也可以写成递推的形式，即
+
+dp\[i\]\[j\] = dp\[i + 1\]\[j\] + s1.asciiAtPos(i)
+对于其余的情况，即两个字符串都非空时，如果有 s1\[i\] == s2\[j\]，那么当前位置的两个字符相同，它们不需要被删除，状态转移方程为
+
+dp\[i\]\[j\] = dp\[i + 1\]\[j + 1\]
+如果 s1\[i\] != s2\[j\]，那么我们至少要删除 s1\[i\] 和 s2\[j\] 两个字符中的一个，因此状态转移方程为
+
+dp\[i\]\[j\] = min(dp\[i + 1\]\[j\] + s1.asciiAtPos(i), dp\[i\]\[j + 1\] + s2.asciiAtPos(j))
+
+```python
+class Solution(object):
+    def minimumDeleteSum(self, s1, s2):
+        dp = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
+
+        for i in range(len(s1) - 1, -1, -1):
+            dp[i][len(s2)] = dp[i + 1][len(s2)] + ord(s1[i])
+
+        for j in range(len(s2) - 1, -1, -1):
+            dp[len(s1)][j] = dp[len(s1)][j + 1] + ord(s2[j])
+
+        for i in range(len(s1) - 1, -1, -1):
+            for j in range(len(s2) - 1, -1, -1):
+                if s1[i] == s2[j]:
+                    dp[i][j] = dp[i + 1][j + 1]
+                else:
+                    dp[i][j] = min(dp[i + 1][j] + ord(s1[i]), dp[i][j + 1] + ord(s2[j]))
+        return dp[0][0]
+```
+
+## [279. 完全平方数](https://leetcode.cn/problems/perfect-squares/)
+
+参考：https://leetcode.cn/problems/perfect-squares/solutions/822940/wan-quan-ping-fang-shu-by-leetcode-solut-t99c/
+
+```cpp
+#include <climits>
+#include <queue>
+#include <unordered_set>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*时间
+详情 
+116ms
+击败 77.96%使用 C++ 的用户
+内存
+详情
+8.66mb
+击败 48.67%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int numSquares(int n) {
+        std::vector<int> f(n + 1, 0);
+        for (int i = 1; i <= n; ++i) {
+            int minn = INT_MAX;
+            for (int j = 1; j * j <= i; ++j) {
+                minn = std::min(minn, f.at(i - j * j));
+            }
+            f.at(i) = minn + 1;
+        }
+        return f.at(n);
+    }
+};
+
+/*
+一个数学定理可以帮助解决本题：「四平方和定理」。
+时间
+详情
+-ms
+击败 100.00%使用 C++ 的用户
+内存
+详情
+5.66mb
+击败 97.54%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int numSquares(int n) {
+        if (isPerfectSquare(n)) {
+            return 1;
+        }
+        if (checkAnswer4(n)) {
+            return 4;
+        }
+        for (int i = 1; i * i <= n; ++i) {
+            if (isPerfectSquare(n - i * i)) {
+                return 2;
+            }
+        }
+        return 3;
+    }
+
+private:
+    bool isPerfectSquare(int x) {
+        int y = std::sqrt(x);
+        return y * y == x;
+    }
+
+    bool checkAnswer4(int x) {
+        while (x % 4 == 0) {
+            x /= 4;
+        }
+        return x % 8 == 7;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(1, solution.numSquares(25));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(3, solution.numSquares(12));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ(2, solution.numSquares(13));
+}
+```
+
+
+
+# [回溯算法解题套路框架](https://labuladong.gitee.io/algo/1/6/)
+
+# 回文类问题
+
+## 516. 最长回文子序列
+
+<https://leetcode-cn.com/problems/longest-palindromic-subsequence/>
+
+状态：
+f[i][j] 表示 s 的第 i 个字符到第 j 个字符组成的子串中，最长的回文序列长度是多少。
+
+转移方程：
+如果 s 的第 i 个字符和第 j 个字符相同的话
+f[i][j] = f[i + 1][j - 1] + 2
+
+如果 s 的第 i 个字符和第 j 个字符不同的话
+f[i][j] = max(f[i + 1][j], f[i][j - 1])
+
+然后注意遍历顺序，i 从最后一个字符开始往前遍历，j 从 i + 1 开始往后遍历，这样可以保证每个子问题都已经算好了。
+
+初始化：
+f[i][i] = 1 单个字符的最长回文序列是 1
+
+结果：
+f[0][n - 1]
+
+```java
+                b    b    b    a    b
+        下标j   0    1    2    3    4
+ 下标i
+    0           1    2    3    3    4
+    1           0    1    2    2    3
+    2           0    0    1    1    3
+    3           0    0    0    1    1
+    4           0    0    0    0    1
+```
+
+```java
+//DynamicSolution.java
+package test;
+
+public class DynamicSolution {
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] f = new int[n][n];
+        for (int i = n - 1; i >= 0; i--) {
+            f[i][i] = 1;
+            for (int j = i + 1; j < n; j++) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    f[i][j] = f[i + 1][j - 1] + 2;
+                } else {
+                    f[i][j] = Math.max(f[i + 1][j], f[i][j - 1]);
+                }
+            }
+        }
+        return f[0][n - 1];
+    }
+}
+
+//DynamicSolutionTest.java
+package test;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class DynamicSolutionTest {
+    @Test
+    public void test() {
+        assertEquals(4, new DynamicSolution().longestPalindromeSubseq("bbbab"));
+    }
+}
+```
+
+另一个解法：
+原题相当于，原字符串s与倒置后所得字符串_s，计算两个字符串的最长公共子序列。
+Tip:必须用dp[1...n1][1...n2]来存储公共子序列长度，边界默认为0，否则的话在i-1和j-1关于0的边界处处理起来略复杂。
+同 [1143. 最长公共子序列](https://leetcode.cn/problems/longest-common-subsequence/)
+
+## [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)(华为题库)
+
+动态规划：
+
+![](pictures\5. 最长回访子串（方法三：动态规划）.png)
+
+```c++
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 使用lambda表达式耗时1408ms，把lambda表达式换成private方法运行超时
+public:
+    string longestPalindrome(string s) {
+        string maxPalindrome;
+        vector<bool> matrix(s.size(), false);
+        vector<vector<bool>> intsIJ(s.size(), matrix);
+
+        auto calculateMaxPalindrome = [&](int i, int j, string& maxPalindrome) {
+            if (j - i + 1 > maxPalindrome.size()) {
+                maxPalindrome = s.substr(i, j - i + 1);
+            }
+        };
+
+        for (int i = s.size() - 1; i >= 0; --i) {
+            for (int j = i; j < s.size(); ++j) {
+                if (i == j) {
+                    intsIJ.at(i).at(j) = true;
+                    calculateMaxPalindrome(i, j, maxPalindrome);
+                } else if (i + 1 == j) {
+                    if (s.at(i) == s.at(j)) {
+                        intsIJ.at(i).at(j) = true;
+                        calculateMaxPalindrome(i, j, maxPalindrome);
+                    }
+                } else {
+                    intsIJ.at(i).at(j) = intsIJ.at(i + 1).at(j - 1) && s.at(i) == s.at(j);
+                    if (intsIJ.at(i).at(j)) {
+                        calculateMaxPalindrome(i, j, maxPalindrome);
+                    }
+                }
+            }
+        }
+
+        return maxPalindrome;
+    }
+};
+
+/* 自己新写的，使用[]比使用at快，减少了范围检查
+时间
+416 ms
+击败
+19.27%
+内存
+276.4 MB
+击败
+16.52%
+*/
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        if (n == 1 || n == 0) {
+            return s;
+        }
+
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n, 1));
+
+        int minIndex = 0, maxIndex = -1;
+        for (int i = n - 2; i >= 0; --i) {
+            for (int j = i; j < n; ++j) {
+                if (i + 1 == j || i == j) {
+                    dp[i][j] = s[i] == s[j];
+                } else {
+                    dp[i][j] = s[i] == s[j] && dp[i + 1][j - 1];
+                }
+
+                if (dp[i][j] && j - i + 1 >= maxIndex - minIndex + 1) {
+                    minIndex = i;
+                    maxIndex = j;
+                }
+            }
+        }
+
+        return s.substr(minIndex, maxIndex - minIndex + 1);
+    }
+};
+
+// 优化一下判断
+/*
+时间
+详情
+328ms
+击败 29.89%使用 C++ 的用户
+内存
+详情
+269.92mb
+击败 11.32%使用 C++ 的用户
+*/
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        if (n == 1 || n == 0) {
+            return s;
+        }
+
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n, 1));
+
+        int minIndex = 0, maxIndex = 0;
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = i + 1; j < n; ++j) {
+                dp[i][j] = s[i] == s[j] && dp[i + 1][j - 1];
+
+                if (dp[i][j] && j - i + 1 >= maxIndex - minIndex + 1) {
+                    minIndex = i;
+                    maxIndex = j;
+                }
+            }
+        }
+
+        return s.substr(minIndex, maxIndex - minIndex + 1);
+    }
+};
+
+TEST(SolutionTest, Test1) {
+    string inputStr = "babad";
+    string expectedPalindrome = "aba";
+    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
+}
+
+TEST(SolutionTest, Test2) {
+    string inputStr = "cbbd";
+    string expectedPalindrome = "bb";
+    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
+}
+
+TEST(SolutionTest, Test3) {
+    string inputStr = "aaaa";
+    string expectedPalindrome = "aaaa";
+    EXPECT_EQ(expectedPalindrome, Solution().longestPalindrome(inputStr));
+}
+```
+
+[方法四：中心扩展算法](https://leetcode-cn.com/problems/longest-palindromic-substring/solution/zui-chang-hui-wen-zi-chuan-by-leetcode/)：
+
+每次以一个字符或两个相邻字符向左右扩展，查找以这一个字符或两个字符为中心的最长回文字符：
+
+```c++
+class Solution {  // 64ms
+public:
+    string longestPalindrome(string s) {
+        if (s.empty()) {
+            return "";
+        }
+
+        int start = 0, end = 0;
+        for (int i = 0; i < s.length(); i++) {
+            int len1 = expandAroundCenter(s, i, i);
+            int len2 = expandAroundCenter(s, i, i + 1);
+            int len = max(len1, len2);
+            if (len > end - start + 1) {
+                start = i - (len - 1) / 2;
+                end = i + len / 2;
+            }
+        }
+        return s.substr(start, end - start + 1);
+    }
+
+private:
+    int expandAroundCenter(string s, int left, int right) {
+        int L = left, R = right;
+        while (L >= 0 && R < s.length() && s.at(L) == s.at(R)) {
+            L--;
+            R++;
+        }
+        return R - L - 1;
+    }
+};
+```
+
+[Manacher算法的详细讲解](https://www.jianshu.com/p/116aa58b7d81)
+
+## [9. 回文数](https://leetcode.cn/problems/palindrome-number/)
+
+参考：https://leetcode.cn/problems/palindrome-number/solutions/281686/hui-wen-shu-by-leetcode-solution/
+
+```cpp
+/*
+时间
+详情
+-ms
+击败 100.00%使用 C++ 的用户
+内存
+详情
+5.62mb
+击败 67.21%使用 C++ 的用户
+*/
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    bool isPalindrome(int x) {
+        if ((x % 10 == 0 && x != 0) || x < 0) {
+            return false;
+        }
+
+        int reverseRightHalf = 0;
+        while (x > reverseRightHalf) {
+            reverseRightHalf = reverseRightHalf * 10 + x % 10;
+            x /= 10;
+        }
+
+        return x == reverseRightHalf || x == reverseRightHalf / 10;
+    }
+};
+
+// 别人的解法，把全部数字算一遍，写起来不用判断那么多，但需要对所有数字计算
+class Solution {
+public:
+    bool isPalindrome(int x) {
+        if (x < 0) {
+            return false;
+        }
+        long cur = 0;
+        int num = x;
+        while (num > 0) {
+            cur = cur * 10 + num % 10;
+            num /= 10;
+        }
+        return cur == x;
+    }
+};
+
+class Solution {
+public:
+    bool isPalindrome(int x) {
+        const auto& numStr = std::to_string(x);
+        std::string revertedNumStr(numStr);  // 4ms
+        std::reverse(revertedNumStr.begin(), revertedNumStr.end());
+//        std::string revertedNumStr;  // 12ms
+//        std::reverse_copy(numStr.begin(), numStr.end(), std::back_inserter(revertedNumStr));
+//        std::string revertedNumStr(numStr);  // 20ms
+//        std::reverse_copy(numStr.begin(), numStr.end(), revertedNumStr.begin());
+//        std::string revertedNumStr(numStr.size(), '0');  // 12ms
+//        std::reverse_copy(numStr.begin(), numStr.end(), revertedNumStr.begin());
+        return numStr == revertedNumStr;
+    }
+};
+
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(true, solution.isPalindrome(121));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(false, solution.isPalindrome(10));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ(true, solution.isPalindrome(1));
+}
+
+TEST_F(SolutionTest, Test4) {
+    EXPECT_EQ(false, solution.isPalindrome(1000));
+}
+
+TEST_F(SolutionTest, Test5) {
+    EXPECT_EQ(true, solution.isPalindrome(1001));
+}
+
+TEST_F(SolutionTest, Test6) {
+    EXPECT_EQ(true, solution.isPalindrome(0));
+}
+
+TEST_F(SolutionTest, Test7) {
+    EXPECT_EQ(false, solution.isPalindrome(INT_MAX));
+}
+```
+
+## [564. 寻找最近的回文数](https://leetcode.cn/problems/find-the-closest-palindrome/)
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+// 自己写的，转成数字，再用第9题的方法判断。2147483647超时
+class Solution {
+public:
+    string nearestPalindromic(string n) {
+        auto num = std::stoull(n);
+        decltype(num) smallerIndex = 0;
+        while (!isPalindrome(num - (++smallerIndex))) {
+        }
+
+        decltype(num) biggerIndex = 0;
+        while (!isPalindrome(num + (++biggerIndex))) {
+        }
+
+        return smallerIndex <= biggerIndex ? std::to_string(num - smallerIndex) : std::to_string(num + biggerIndex);
+    }
+
+private:
+    bool isPalindrome(int x) {
+        if ((x % 10 == 0 && x != 0) || x < 0) {
+            return false;
+        }
+
+        int reverseRightHalf = 0;
+        while (x > reverseRightHalf) {
+            reverseRightHalf = reverseRightHalf * 10 + x % 10;
+            x /= 10;
+        }
+
+        return x == reverseRightHalf || x == reverseRightHalf / 10;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ("121", solution.nearestPalindromic("123"));
+    EXPECT_EQ("1221", solution.nearestPalindromic("1234"));
+    EXPECT_EQ("12321", solution.nearestPalindromic("12345"));
+}
+
+TEST_F(SolutionTest, Test10) {
+    EXPECT_EQ("989", solution.nearestPalindromic("987"));
+    EXPECT_EQ("9889", solution.nearestPalindromic("9876"));
+    EXPECT_EQ("98789", solution.nearestPalindromic("98765"));
+}
+
+TEST_F(SolutionTest, Test7) {
+    EXPECT_EQ("22", solution.nearestPalindromic("19"));
+    EXPECT_EQ("10201", solution.nearestPalindromic("10199"));
+    EXPECT_EQ("102201", solution.nearestPalindromic("101999"));
+    EXPECT_EQ("992299", solution.nearestPalindromic("991999"));
+}
+
+TEST_F(SolutionTest, Test8) {
+    EXPECT_EQ("99899", solution.nearestPalindromic("99900"));
+    EXPECT_EQ("998899", solution.nearestPalindromic("999000"));
+    EXPECT_EQ("99799", solution.nearestPalindromic("99899"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ("0", solution.nearestPalindromic("1"));
+    EXPECT_EQ("1", solution.nearestPalindromic("2"));
+    EXPECT_EQ("8", solution.nearestPalindromic("9"));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ("2147447412", solution.nearestPalindromic("2147483647"));
+}
+
+TEST_F(SolutionTest, Test5) {
+    EXPECT_EQ("101", solution.nearestPalindromic("99"));
+    EXPECT_EQ("1001", solution.nearestPalindromic("999"));
+}
+
+TEST_F(SolutionTest, Test6) {
+    EXPECT_EQ("9", solution.nearestPalindromic("10"));
+    EXPECT_EQ("99", solution.nearestPalindromic("100"));
+    EXPECT_EQ("99", solution.nearestPalindromic("101"));
+}
+
+```
+
+```cpp
+class Solution {
+    using ULL = unsigned long long;
+public:
+    string nearestPalindromic(string n) {
+        unsigned long length = n.size();
+        int middleIndex = (length - 1) / 2;
+        std::string leftStr = n.substr(0, middleIndex + 1);
+
+        // reverse left
+        std::string candidate1(n);
+        std::reverse_copy(leftStr.begin(), leftStr.end(),
+                          length % 2 == 0 ? candidate1.begin() + middleIndex + 1 : candidate1.begin() + middleIndex);
+
+        // left + 1
+        ULL leftNum = std::stoull(leftStr);
+        std::string leftStrAddOne = std::to_string(leftNum + 1);
+        std::string candidate2(n);
+        std::reverse_copy(leftStrAddOne.begin(), leftStrAddOne.end(),
+                          length % 2 == 0 ? candidate1.begin() + middleIndex + 1 : candidate1.begin() + middleIndex);
+
+
+
+        return candidate1;
+    }
+
+private:
+};
+
+// 重构如下：
+/*
+时间
+详情
+-ms
+击败 100.00%使用 C++ 的用户
+内存
+详情
+5.96mb
+击败 83.33%使用 C++ 的用户
+时间、空间复杂度都是O(logn)
+*/
+class Solution {
+    using ULL = unsigned long long;
+public:
+    string nearestPalindromic(string n) {
+        unsigned long length = n.size();
+        ULL nNum = stoull(n);
+
+        if (length == 1) {
+            return std::to_string(nNum - 1);
+        } else if (pow(10, length) - 1 == nNum) {  // 9, 99
+            return std::to_string(nNum + 2);
+        } else if (pow(10, length - 1) == nNum) {  // 10, 100
+            return std::to_string(nNum - 1);
+        } else if (pow(10, length - 1) + 1 == nNum) {  // 11, 101
+            return std::to_string(nNum - 2);
+        }
+
+        int middleIndex = (length - 1) / 2;
+        std::string leftStr = n.substr(0, middleIndex + 1);
+
+        ULL nearestNum = ULLONG_MAX;
+        ULL delta = ULLONG_MAX;
+        const auto& leftCandidates = getLeftCandidates(leftStr);
+        for (const auto& leftCandidate: leftCandidates) {
+            std::string candidate(n);
+            std::copy(leftCandidate.begin(), leftCandidate.end(), candidate.begin());
+            std::reverse_copy(leftCandidate.begin(), leftCandidate.end(),
+                              length % 2 == 0 ? candidate.begin() + middleIndex + 1 : candidate.begin() + middleIndex);  // 可能会超长度
+
+            if (candidate == n) {
+                continue;
+            }
+
+            ULL candidateNum = std::stoull(candidate);
+            long long tmpDelta = std::abs(static_cast<long long>(nNum - candidateNum));
+            if (tmpDelta < delta || (tmpDelta == delta && candidateNum < nNum)) {
+                nearestNum = candidateNum;
+                delta = tmpDelta;
+            }
+        }
+
+        return std::to_string(nearestNum);
+    }
+
+private:
+    std::vector<std::string> getLeftCandidates(const std::string& leftStr) {
+        ULL leftNum = std::stoull(leftStr);
+        std::string leftStrAddOne = std::to_string(leftNum + 1);  // 向上增加会导致中间数字变化
+        std::string leftStrSubOne = std::to_string(leftNum - 1);  // 向下减少会导致中间数字变化
+
+        return {leftStr, leftStrAddOne, leftStrSubOne};
+    }
+};
+
+// 参考答案写的，函数功能单一，逻辑清晰：
+class Solution {
+    using ULL = unsigned long long;
+public:
+    string nearestPalindromic(string n) {
+        const auto& candidates = getCandidates(n);
+        return getNearest(n, candidates);
+    }
+
+private:
+    std::vector<ULL> getCandidates(const std::string& n) {
+        unsigned long len = n.size();
+        std::vector<ULL> candidates = {static_cast<ULL>(std::pow(10, len) + 1),
+                                       static_cast<ULL>(std::pow(10, len - 1) - 1)};
+        ULL leftNum = std::stoull(n.substr(0, (len + 1) / 2));
+        for (const auto& leftCandidateNum: {leftNum, leftNum + 1, leftNum - 1}) {
+            const auto& leftCandidateStr = std::to_string(leftCandidateNum);
+            const auto& candidateStr = leftCandidateStr +
+                                       std::string(leftCandidateStr.rbegin() + (len % 2 == 0 ? 0 : 1),
+                                                   leftCandidateStr.rend());
+            candidates.push_back(std::stoull(candidateStr));
+        }
+        return candidates;
+    }
+
+    std::string getNearest(const std::string& n, const std::vector<ULL>& candidates) {
+        ULL nNum = std::stoull(n);
+        ULL ans = -1, delta = -1;
+        for (const auto& candidate: candidates) {
+            if (candidate == nNum) {
+                continue;
+            }
+
+            ULL tmpDelta = std::abs(static_cast<long long>(candidate - nNum));
+            if (ans == -1 || tmpDelta < delta || (tmpDelta == delta && candidate < nNum)) {
+                ans = candidate;
+                delta = tmpDelta;
+            }
+        }
+        return std::to_string(ans);
+    }
+};
+
+// https://leetcode.cn/problems/find-the-closest-palindrome/solutions/1300885/xun-zhao-zui-jin-de-hui-wen-shu-by-leetc-biyt/
+using ULL = unsigned long long;
+
+class Solution {
+public:
+    string nearestPalindromic(string n) {
+        ULL selfNumber = stoull(n), ans = -1;
+        const vector<ULL>& candidates = getCandidates(n);
+        for (auto& candidate: candidates) {
+            if (candidate != selfNumber) {
+                if (ans == -1 ||
+                    llabs(candidate - selfNumber) < llabs(ans - selfNumber) ||
+                    llabs(candidate - selfNumber) == llabs(ans - selfNumber) && candidate < ans) {
+                    ans = candidate;
+                }
+            }
+        }
+        return to_string(ans);
+    }
+
+private:
+    vector<ULL> getCandidates(const string& n) {
+        int len = n.length();
+        vector<ULL> candidates = {
+            (ULL) pow(10, len - 1) - 1,
+            (ULL) pow(10, len) + 1,
+        };
+        ULL selfPrefix = stoull(n.substr(0, (len + 1) / 2));
+        for (int i: {selfPrefix - 1, selfPrefix, selfPrefix + 1}) {
+            string prefix = to_string(i);
+            string candidate = prefix + string(prefix.rbegin() + (len & 1), prefix.rend());
+            candidates.push_back(stoull(candidate));
+        }
+        return candidates;
+    }
+};
+
+```
+
+## [131. 分割回文串](https://leetcode.cn/problems/palindrome-partitioning/)
+
+参考：https://leetcode.cn/problems/palindrome-partitioning/solutions/
+
+回溯也是在遍历树，是多节点树：
+
+​						   aab
+
+​			a	     	  aa  		aab(x)
+
+​	   a	  ab(x)		b
+
+  b
+
+把所有节点连起来，就是\[a, a, b\]\[aa, b\]
+
+```cpp
+/*
+时间
+详情
+120ms
+击败 49.49%使用 C++ 的用户
+内存
+详情
+72.26mb
+击败 45.82%使用 C++ 的用户
+时间：O(n*2^n)
+空间：O(2^n)
+*/
+class Solution {
+public:
+    vector<vector<string>> partition(string s) {
+        int n = s.size();
+        dp_.assign(n, std::vector<int>(n, 1));
+
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = i + 1; j < n; ++j) {
+                dp_[i][j] = s[i] == s[j] && dp_[i + 1][j - 1];
+            }
+        }
+
+
+        dfs(s, 0);
+        return res_;
+    };
+
+private:
+    void dfs(const std::string& s, int index) {
+        if (index == s.size()) {
+            res_.push_back(ans_);
+            return;
+        }
+
+        for (int j = index; j < s.size(); ++j) {
+            if (dp_[index][j]) {
+                ans_.push_back(s.substr(index, j - index + 1));
+                dfs(s, j + 1);
+                ans_.pop_back();
+            }
+        }
+    }
+
+private:
+    std::vector<std::vector<std::string>> res_;
+    std::vector<std::string> ans_;
+    std::vector<std::vector<int>> dp_;
+};
+```
+
+## [132. 分割回文串 II](https://leetcode.cn/problems/palindrome-partitioning-ii/)
+
+```cpp
+/*
+时间
+详情
+144ms
+击败 10.46%使用 C++ 的用户
+内存
+详情
+57.14mb
+击败 5.20%使用 C++ 的用户
+时间复杂度和空间复杂度：O(n^2)
+*/
+#include <climits>
+#include <valarray>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int minCut(string s) {
+        int n = s.size();
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n, 1));
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = i + 1; j < n; ++j) {
+                dp[i][j] = s[i] == s[j] && dp[i + 1][j - 1];
+            }
+        }
+
+        std::vector<int> f(n, INT_MAX);
+        for (int i = 0; i < n; ++i) {
+            if (dp[0][i]) {
+                f[i] = 0;
+            } else {
+                for (int j = 0; j <= i; ++j) {
+                    if (dp[j][i]) {
+                        f[i] = min(f[i], f[j - 1] + 1);
+                    }
+                }
+            }
+        }
+        return f[n - 1];
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST(SolutionTest, Test1) {
+    string inputStr = "aab";
+    EXPECT_EQ(1, Solution().minCut(inputStr));
+}
+
+TEST(SolutionTest, Test2) {
+    string inputStr = "a";
+    EXPECT_EQ(0, Solution().minCut(inputStr));
+}
+
+TEST(SolutionTest, Test3) {
+    string inputStr = "ab";
+    EXPECT_EQ(1, Solution().minCut(inputStr));
+}
+```
+
+## [214. 最短回文串](https://leetcode.cn/problems/shortest-palindrome/)
+
+```cpp
+/*
+求出s从0开始的最长回访子串记为s1，则后段s2倒序拼接在s前即可
+超时
+时间空间：O(n^2)
+*/
+class Solution {
+public:
+    string shortestPalindrome(string s) {
+        if (s.empty()) {
+            return s;
+        }
+
+        int n = s.size();
+        std::vector<std::vector<bool>> dp(n, std::vector<bool>(n, true));
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = i + 1; j < n; ++j) {
+                dp[i][j] = s[i] == s[j] && dp[i + 1][j - 1];
+            }
+        }
+
+        int maxPrefixPalindrome = 0;
+        for (int j = 0; j < n; ++j) {
+            if (dp[0][j]) {
+                maxPrefixPalindrome = std::max(maxPrefixPalindrome, j);
+            }
+        }
+
+        return std::string(s.rbegin(), s.rbegin() + n - maxPrefixPalindrome - 1) + s;
+    }
+};
+
+// https://leetcode.cn/problems/shortest-palindrome/solutions/392561/zui-duan-hui-wen-chuan-by-leetcode-solution/
+/*
+方法一：字符串哈希
+时间：O(|s|)
+空间：O(1)
+*/
+class Solution { 
+public:
+    string shortestPalindrome(string s) {
+        int n = s.size();
+        int base = 131, mod = 1000000007;
+        int left = 0, right = 0, mul = 1;
+        int best = -1;
+        for (int i = 0; i < n; ++i) {
+            left = ((long long)left * base + s[i]) % mod;
+            right = (right + (long long)mul * s[i]) % mod;
+            if (left == right) {
+                best = i;
+            }
+            mul = (long long)mul * base % mod;
+        }
+        string add = (best == n - 1 ? "" : s.substr(best + 1, n));
+        reverse(add.begin(), add.end());
+        return add + s;
+    }
+};
+
+/*
+时间
+8 ms
+击败
+59.71%
+内存
+8.7 MB
+击败
+26.97%
+时间空间：O(|s|)
+*/
+class Solution {
+public:
+    string shortestPalindrome(string s) {
+        if (s.empty()) {
+            return s;
+        }
+        int n = s.size();
+        std::string reverseS(s.rbegin(), s.rend());
+        int maxPrefixPalindrome = kmpSearch(reverseS, s);
+        return std::string(s.rbegin(), s.rbegin() + n - maxPrefixPalindrome) + s;
+    }
+
+private:
+    int kmpSearch(const std::string& s, const std::string& patt) {
+        const auto& next = buildNext(patt);
+        int i = 0, j = 0;
+        while (i < s.size()) {
+            if (s[i] == patt[j]) {
+                ++i;
+                ++j;
+            } else if (j > 0) {  // 字符匹配失败，根据next跳过子串前面的一些字符
+                j = next[j - 1];
+            } else {  // 子串第1个字符就匹配失败
+                ++i;
+            }
+        }
+        return j;
+    }
+
+    std::vector<int> buildNext(const std::string& patt) {
+        std::vector<int> next(patt.size(), 0);
+        int prefixLen = 0;  // 当前共同前后缀的长度
+        int i = 1;
+        while (i < patt.size()) {
+            if (patt[prefixLen] == patt[i]) {  // 字符相同，则构成了更长的前后缀
+                next[i++] = ++prefixLen;
+            } else if (prefixLen == 0) {  // 字符不同，并且没有共同前后缀，则直接赋0
+                next[i++] = 0;
+            } else {
+                prefixLen = next[prefixLen - 1];  // 字符不同，直接查表看是否存在更短的前后缀
+            }
+        }
+        return next;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    string inputStr = "aacecaaa";
+    EXPECT_EQ("aaacecaaa", solution.shortestPalindrome(inputStr));
+}
+
+TEST_F(SolutionTest, Test2) {
+    string inputStr = "abcd";
+    EXPECT_EQ("dcbabcd", solution.shortestPalindrome(inputStr));
+}
+
+TEST_F(SolutionTest, Test3) {
+    string inputStr = "abcba";
+    EXPECT_EQ("abcba", solution.shortestPalindrome(inputStr));
+}
+
+TEST_F(SolutionTest, Test4) {
+    string inputStr = "a";
+    EXPECT_EQ("a", solution.shortestPalindrome(inputStr));
+}
+
+TEST_F(SolutionTest, Test5) {  // 运行超时
+    string inputStr = "aaa...";  // 2W个a + cd + 2W个a
+    EXPECT_EQ("xxx", solution.shortestPalindrome(inputStr));
+}
+```
+
+## [647. 回文子串](https://leetcode.cn/problems/palindromic-substrings/)
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*
+时间
+详情
+24ms
+击败 20.96%使用 C++ 的用户
+内存
+详情
+7.33mb
+击败 26.73%使用 C++ 的用户
+*/
+class Solution {
+public:
+    int countSubstrings(string s) {
+        auto n = s.size();
+        std::vector<std::vector<bool>> dp(n, std::vector<bool>(n, true));
+        int count = 0;
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = i; j < n; ++j) {
+                if (i != j) {
+                    dp[i][j] = s[i] == s[j] && dp[i + 1][j - 1];
+                }
+
+                if (dp[i][j]) {
+                    ++count;
+                }
+            }
+        }
+        return count;
+    }
+};
+
+// https://leetcode.cn/problems/palindromic-substrings/solutions/379987/hui-wen-zi-chuan-by-leetcode-solution/
+/*
+时间
+详情
+-ms
+击败 100.00%使用 C++ 的用户
+内存
+详情
+5.99mb
+击败 83.10%使用 C++ 的用户
+时间：O(n^2)
+空间：O(1)
+*/
+class Solution {
+public:
+    int countSubstrings(string s) {
+        int n = s.size(), ans = 0;
+        for (int i = 0; i < 2 * n - 1; ++i) {
+            int l = i / 2, r = i / 2 + i % 2;
+            while (l >= 0 && r < n && s[l] == s[r]) {
+                --l;
+                ++r;
+                ++ans;
+            }
+        }
+        return ans;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    string inputStr = "abc";
+    EXPECT_EQ(3, solution.countSubstrings(inputStr));
+}
+
+TEST_F(SolutionTest, Test2) {
+    string inputStr = "aaa";
+    EXPECT_EQ(6, solution.countSubstrings(inputStr));
+}
+
+TEST_F(SolutionTest, Test3) {
+    string inputStr = "";
+    EXPECT_EQ(0, solution.countSubstrings(inputStr));
+}
+
+
+```
+
+
+
+# 算法
+
+## KMP
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+// https://www.bilibili.com/video/BV1AY4y157yL/?spm_id_from=333.337.search-card.all.click&vd_source=c9f7d901dfa9fbc04fdbc2cf37bd0212
+
+std::vector<int> buildNext(const std::string& patt) {
+    std::vector<int> next(patt.size(), 0);
+    int prefixLen = 0;  // 当前共同前后缀的长度
+    int i = 1;
+    while (i < patt.size()) {
+        if (patt[prefixLen] == patt[i]) {  // 字符相同，则构成了更长的前后缀
+            next[i++] = ++prefixLen;
+        } else if (prefixLen == 0) {  // 字符不同，并且没有共同前后缀，则直接赋0
+            next[i++] = 0;
+        } else {
+            prefixLen = next[prefixLen - 1];  // 字符不同，直接查表看是否存在更短的前后缀
+        }
+    }
+    return next;
+}
+
+int kmpSearch(const std::string& s, const std::string& patt) {
+    const auto& next = buildNext(patt);
+    int i = 0, j = 0;
+    while (i < s.size()) {
+        if (s[i] == patt[j]) {
+            ++i;
+            ++j;
+        } else if (j > 0) {  // 字符匹配失败，根据next跳过子串前面的一些字符
+            j = next[j - 1];
+        } else {  // 子串第1个字符就匹配失败
+            ++i;
+        }
+
+        if (j == patt.size()) {
+            return i - j;
+        }
+    }
+    return -1;
+}
+
+TEST(KmpTest, Test1) {
+    string patt = "ABACABAB";
+    std::vector<int> next = {0, 0, 1, 0, 1, 2, 3, 2};
+    EXPECT_EQ(next, buildNext(patt));
+}
+
+TEST(KmpTest, Test2) {
+    std::string s = "ABABACABAB";
+    string patt = "ABACABAB";
+    EXPECT_EQ(2, kmpSearch(s, patt));
+}
+
+TEST(KmpTest, Test3) {
+    std::string s = "aaacecaa";
+    string patt = "aacecaaa";
+    EXPECT_EQ(-1, kmpSearch(s, patt));
+}
+
+TEST(KmpTest, Test4) {
+    std::string s = "abcdabcde";
+    string patt = "abcd";
+    EXPECT_EQ(0, kmpSearch(s, patt));
+}
+
+```
+
+# [经典150题](https://leetcode.cn/studyplan/top-interview-150/)
+
+## 数组/字符串
+
+### [169. 多数元素](https://leetcode.cn/problems/majority-element/)
+
+https://leetcode.cn/problems/majority-element/solutions/146074/duo-shu-yuan-su-by-leetcode-solution/
+
+哈希表：
+
+```cpp
+// 时间空间：O(n)
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        unordered_map<int, int> counts;
+        int majority = 0, cnt = 0;
+        for (int num: nums) {
+            ++counts[num];
+            if (counts[num] > cnt) {
+                majority = num;
+                cnt = counts[num];
+            }
+        }
+        return majority;
+    }
+};
+
+```
+
+排序：
+
+```cpp
+// 时间空间：O(nlogn)
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        return nums[nums.size() / 2];
+    }
+};
+```
+
+Boyer-Moore 投票算法
+
+```cpp
+/*
+时间：O(n)
+空间：O(1)
+*/
+class Solution {
+public:
+    int majorityElement(vector<int>& nums) {
+        int candidate = -1;
+        int count = 0;
+        for (int num : nums) {
+            if (num == candidate)
+                ++count;
+            else if (--count < 0) {
+                candidate = num;
+                count = 1;
+            }
+        }
+        return candidate;
+    }
+};
+```
+
+
+
+### [189. 轮转数组](https://leetcode.cn/problems/rotate-array/solutions/551039/xuan-zhuan-shu-zu-by-leetcode-solution-nipk/?envType=study-plan-v2&envId=top-interview-150)
+
+方法二：环状替换
+
+```cpp
+#include <numeric>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+// 时间：O(n) 空间：O(1)
+class Solution {
+public:
+    void rotate(vector<int>& nums, int k) {
+        int n = nums.size();
+        k = k % n;
+        int count = gcd(k, n);
+        for (int start = 0; start < count; ++start) {
+            int current = start;
+            int prev = nums[start];
+            do {
+                int next = (current + k) % n;
+                swap(nums[next], prev);
+                current = next;
+            } while (start != current);
+        }
+    }
+};
+
+// 理解不了最大公约数，就计数count
+class Solution {
+public:
+    void rotate(vector<int>& nums, int k) {
+        int n = nums.size();
+        k %= n;
+        int count = 0;
+        int start = 0;
+        while (count < n) {
+            int current = start;
+            int prev = nums[current];
+            do {
+                int next = (current + k) % n;
+                std::swap(nums[next], prev);
+                current = next;
+                ++count;
+            } while (current != start);
+            ++start;
+        }
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {1, 2, 3, 4, 5, 6};
+    std::vector<int> expected = {5, 6, 1, 2, 3, 4};
+    solution.rotate(nums, 2);
+    EXPECT_EQ(expected, nums);
+}
+```
+
+数组翻转
+
+```cpp
+// 时间：O(n) 空间：O(1)
+class Solution {
+public:
+    void rotate(vector<int>& nums, int k) {
+        int n = nums.size();
+        k %= n;
+        std::reverse(nums.begin(), nums.end());
+        std::reverse(nums.begin(), nums.begin() + k);
+        std::reverse(nums.begin() + k, nums.end());
+    }
+};
+```
+
+### [274. H 指数](https://leetcode.cn/problems/h-index/)
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*
+时间
+详情
+-ms
+击败 100.00%使用 C++ 的用户
+内存
+详情
+8.24mb
+击败 24.81%使用 C++ 的用户
+时间：O(nlogn)
+空间：O(logn)
+*/
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        std::sort(citations.begin(), citations.end());
+        int h = 0;
+        for (int i = citations.size() - 1; i >= 0; --i) {
+            if (citations[i] > h) {
+                ++h;
+            }
+        }
+        return h;
+    }
+};
+
+/*
+计数排序
+时间
+详情
+4ms
+击败 59.01%使用 C++ 的用户
+内存
+详情
+8.32mb
+击败 10.79%使用 C++ 的用户
+时间：O(n)
+空间：O(n)
+*/
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        int n = citations.size(), tot = 0;
+        vector<int> counter(n + 1);
+        for (int i = 0; i < n; i++) {
+            if (citations[i] >= n) {
+                counter[n]++;
+            } else {
+                counter[citations[i]]++;
+            }
+        }
+        for (int i = n; i >= 0; i--) {
+            tot += counter[i];
+            if (tot >= i) {
+                return i;
+            }
+        }
+        return 0;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> citations = {3, 0, 6, 1, 5};
+    EXPECT_EQ(3, solution.hIndex(citations));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> citations = {1, 3, 1};
+    EXPECT_EQ(1, solution.hIndex(citations));
+}
+
+```
+
+### [238. 除自身以外数组的乘积](https://leetcode.cn/problems/product-of-array-except-self/)
+
+参考：https://leetcode.cn/problems/product-of-array-except-self/solutions/272369/chu-zi-shen-yi-wai-shu-zu-de-cheng-ji-by-leetcode-/?envType=study-plan-v2&envId=top-interview-150
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+/*
+时间
+详情
+20ms
+击败 76.96%使用 C++ 的用户
+内存
+详情
+23.90mb
+击败 29.43%使用 C++ 的用户
+时间空间：O(N)
+*/
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        int length = nums.size();
+
+        // L 和 R 分别表示左右两侧的乘积列表
+        vector<int> L(length, 0), R(length, 0);
+
+        vector<int> answer(length);
+
+        // L[i] 为索引 i 左侧所有元素的乘积
+        // 对于索引为 '0' 的元素，因为左侧没有元素，所以 L[0] = 1
+        L[0] = 1;
+        for (int i = 1; i < length; i++) {
+            L[i] = nums[i - 1] * L[i - 1];
+        }
+
+        // R[i] 为索引 i 右侧所有元素的乘积
+        // 对于索引为 'length-1' 的元素，因为右侧没有元素，所以 R[length-1] = 1
+        R[length - 1] = 1;
+        for (int i = length - 2; i >= 0; i--) {
+            R[i] = nums[i + 1] * R[i + 1];
+        }
+
+        // 对于索引 i，除 nums[i] 之外其余各元素的乘积就是左侧所有元素的乘积乘以右侧所有元素的乘积
+        for (int i = 0; i < length; i++) {
+            answer[i] = L[i] * R[i];
+        }
+
+        return answer;
+    }
+};
+
+/*
+时间
+详情
+20ms
+击败 76.96%使用 C++ 的用户
+内存
+详情
+22.83mb
+击败 83.00%使用 C++ 的用户
+每个位置的数字先保存为左侧乘积或右侧乘积，再由遍历时的另一侧值来乘从而刷新成最终值
+*/
+class Solution {
+public:
+    vector<int> productExceptSelf(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> ans(n, 1);
+        int prefix = 1, suffix = 1;
+        for (int i = 0; i < n; i++) {
+            ans[i] *= prefix;
+            ans[n - i - 1] *= suffix;
+            prefix *= nums[i];
+            suffix *= nums[n - i - 1];
+        }
+        return ans;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {1, 2, 3, 4};
+    std::vector<int> expect = {24, 12, 8, 6};
+    EXPECT_EQ(expect, solution.productExceptSelf(nums));
+}
+```
+
+### [135. 分发糖果](https://leetcode.cn/problems/candy/)
+
+https://leetcode.cn/problems/candy/solutions/533150/fen-fa-tang-guo-by-leetcode-solution-f01p/
+
+两次遍历：
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int n = ratings.size();
+        vector<int> left(n);
+        for (int i = 0; i < n; i++) {
+            if (i > 0 && ratings[i] > ratings[i - 1]) {
+                left[i] = left[i - 1] + 1;
+            } else {
+                left[i] = 1;
+            }
+        }
+        int right = 0, ret = 0;
+        for (int i = n - 1; i >= 0; i--) {
+            if (i < n - 1 && ratings[i] > ratings[i + 1]) {
+                right++;
+            } else {
+                right = 1;
+            }
+            ret += max(left[i], right);
+        }
+        return ret;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> ratings = {1, 3, 5, 3, 2, 2};
+    EXPECT_EQ(10, solution.candy(ratings));
+}
+
+TEST_F(SolutionTest, Test2) {
+    std::vector<int> ratings = {1, 3, 5, 3, 2, 1};
+    EXPECT_EQ(13, solution.candy(ratings));
+}
+```
+
+方法二：常数空间遍历
+
+```cpp
+
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int n = ratings.size();
+        int ret = 1;
+        int inc = 1, dec = 0, pre = 1;
+        for (int i = 1; i < n; i++) {
+            if (ratings[i] >= ratings[i - 1]) {
+                dec = 0;
+                pre = ratings[i] == ratings[i - 1] ? 1 : pre + 1;
+                ret += pre;
+                inc = pre;
+            } else {
+                dec++;
+                if (dec == inc) {
+                    dec++;
+                }
+                ret += dec;
+                pre = 1;
+            }
+        }
+        return ret;
+    }
+};
+```
+
+### [6. N 字形变换](https://leetcode.cn/problems/zigzag-conversion/)
+
+https://leetcode.cn/problems/zigzag-conversion/solutions/1298127/z-zi-xing-bian-huan-by-leetcode-solution-4n3u/?envType=study-plan-v2&envId=top-interview-150
+
+```cpp
+#include <cmath>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        int n = s.length(), r = numRows;
+        if (r == 1 || r >= n) {
+            return s;
+        }
+        int t = r * 2 - 2;  // 每个周期有几个字符
+//        int c = (n + t - 1) / t * (r - 1);
+        int c = std::ceil((float) n / t) * (r - 1);  // n/t计算有几个周期，r - 1为每个周期有几列，算出来共有多少列
+        vector<string> mat(r, string(c, 0));
+        for (int i = 0, x = 0, y = 0; i < n; ++i) {
+            mat[x][y] = s[i];
+            if (i % t < r - 1) {
+                ++x; // 向下移动
+            } else {
+                --x;
+                ++y; // 向右上移动
+            }
+        }
+        string ans;
+        for (auto& row: mat) {
+            for (char ch: row) {
+                if (ch) {
+                    ans += ch;
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ("PAHNAPLSIIGYIR", solution.convert("PAYPALISHIRING", 3));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ("PINALSIGYAHRPI", solution.convert("PAYPALISHIRING", 4));
+}
+```
+
+压缩矩阵空间：
+
+```cpp
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        int n = s.length(), r = numRows;
+        if (r == 1 || r >= n) {
+            return s;
+        }
+        vector<string> mat(r);
+        for (int i = 0, x = 0, t = r * 2 - 2; i < n; ++i) {
+            mat[x] += s[i];
+            i % t < r - 1 ? ++x : --x;
+        }
+        string ans;
+        for (auto &row : mat) {
+            ans += row;
+        }
+        return ans;
+    }
+};
+```
+
+直接构造：
+
+```cpp
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        int n = s.length(), r = numRows;
+        if (r == 1 || r >= n) {
+            return s;
+        }
+        string ans;
+        int t = r * 2 - 2;
+        for (int i = 0; i < r; ++i) { // 枚举矩阵的行
+            for (int j = 0; j + i < n; j += t) { // 枚举每个周期的起始下标
+                ans += s[j + i]; // 当前周期的第一个字符
+                if (0 < i && i < r - 1 && j + t - i < n) {
+                    ans += s[j + t - i]; // 当前周期的第二个字符
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 双指针
+
+### [392. 判断子序列](https://leetcode.cn/problems/is-subsequence/)
+
+https://leetcode.cn/problems/is-subsequence/solutions/346539/pan-duan-zi-xu-lie-by-leetcode-solution/?envType=study-plan-v2&envId=top-interview-150
+
+暴力：
+
+```cpp
+class Solution {
+public:
+    bool isSubsequence(string s, string t) {
+        int n = s.size();
+        int m = t.size();
+        int i = 0, j = 0;
+        while (i < n && j < m) {
+            if (s[i] == t[j]) {
+                ++i;
+            }
+            ++j;
+        }
+        return i == n;
+    }
+};
+```
+
+方法二：动态规划
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    bool isSubsequence(string s, string t) {
+        int n = s.size();
+        int m = t.size();
+        std::vector<std::vector<int>> dp(m + 1, std::vector<int>(26, 0));
+        for (int i = 0; i < 26; ++i) {
+            dp[m][i] = -1;
+        }
+
+        for (int i = m - 1; i >= 0; --i) {
+            for (int j = 0; j < 26; ++j) {
+                if (t[i] == j + 'a') {
+                    dp[i][j] = i;
+                } else {
+                    dp[i][j] = dp[i + 1][j];
+                }
+            }
+        }
+
+        int start = 0;
+        for (int i = 0; i < n; ++i) {
+            start = dp[start][s[i] - 'a'];
+            if (start == -1) {
+                return false;
+            }
+            start++;
+        }
+
+        return true;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(true, solution.isSubsequence("abc", "ahbgdc"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(false, solution.isSubsequence("axc", "ahbgdc"));
+}
+```
+
+## 滑动窗口
+
+### [209. 长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum/)
+
+暴力：
+
+```cpp
+#include <climits>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {  // 超时
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) {
+            return 0;
+        }
+
+        int ans = INT_MAX;
+        for (int i = 0; i < n; ++i) {
+            int sum = 0;
+            for (int j = i; j < n; ++j) {
+                sum += nums[j];
+                if (sum >= target) {
+                    ans = std::min(ans, j - i + 1);
+                }
+            }
+        }
+        return ans == INT_MAX ? 0 : ans;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {2, 3, 1, 2, 4, 3};
+    EXPECT_EQ(2, solution.minSubArrayLen(7, nums));
+}
+```
+
+方法二：前缀和 + 二分查找
+
+```cpp
+/*
+时间
+详情
+52ms
+击败 6.57%使用 C++ 的用户
+内存
+详情
+27.86mb
+击败 5.02%使用 C++ 的用户
+时间：O(nlogn)
+空间：O(n)
+*/
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) {
+            return 0;
+        }
+
+        std::vector<int> sums(n + 1, 0);
+        for (int i = 1; i <= n; ++i) {
+            sums[i] = sums[i - 1] + nums[i - 1];
+        }
+
+        int ans = INT_MAX;
+        for (int i = 1; i <= n; ++i) {
+            int sumTarget = target + sums[i - 1];
+            auto sumIter = std::lower_bound(sums.begin(), sums.end(), sumTarget);
+            if (sumIter != sums.end()) {
+                ans = std::min(ans, (int) std::distance(sums.begin(), sumIter) - (i - 1));
+            }
+        }
+        return ans == INT_MAX ? 0 : ans;
+    }
+};
+```
+
+方法三：滑动窗口
+
+```cpp
+/*
+时间
+详情
+32ms
+击败 60.45%使用 C++ 的用户
+内存
+详情
+27.05mb
+击败 8.68%使用 C++ 的用户
+时间：O(n)
+空间：O(1)
+*/
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) {
+            return 0;
+        }
+
+        int ans = INT_MAX;
+        int start = 0, end = 0;
+        int sum = 0;
+        while (end < n) {
+            sum += nums[end];
+            while (sum >= target) {
+                ans = std::min(ans, end - start + 1);
+                sum -= nums[start++];
+            }
+            ++end;
+        }
+        return ans == INT_MAX ? 0 : ans;
+    }
+};
+```
+
+## 矩阵
+
+### [36. 有效的数独](https://leetcode.cn/problems/valid-sudoku/)
+
+```cpp
+class Solution {
+public:
+    bool isValidSudoku(vector<vector<char>>& board) {
+        std::vector<std::vector<int>> rows(9, std::vector<int>(9, 0));
+        std::vector<std::vector<int>> columns(9, std::vector<int>(9, 0));
+        std::vector<std::vector<std::vector<int>>> subBoxes(3,
+                                                            std::vector<std::vector<int>>(3, std::vector<int>(9, 0)));
+
+        for (int i = 0; i < board.size(); ++i) {
+            for (int j = 0; j < board.size(); ++j) {
+                char c = board[i][j];
+                if (c != '.') {
+                    int intValue = c - '0' - 1;
+                    ++rows[i][intValue];
+                    ++columns[j][intValue];
+                    ++subBoxes[i / 3][j / 3][intValue];
+                    if (rows[i][intValue] > 1 || columns[j][intValue] > 1 || subBoxes[i / 3][j / 3][intValue] > 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
+```
+
+### [54. 螺旋矩阵](https://leetcode.cn/problems/spiral-matrix/)
+
+参考：https://leetcode.cn/problems/spiral-matrix/solutions/275393/luo-xuan-ju-zhen-by-leetcode-solution/?envType=study-plan-v2&envId=top-interview-150
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) {
+            return {};
+        }
+
+        std::vector<int> order;
+        int top = 0, bottom = matrix.size() - 1, left = 0, right = matrix[0].size() - 1;
+        while (top <= bottom && left <= right) {
+            for (int column = left; column <= right; ++column) {
+                order.push_back(matrix[top][column]);
+            }
+            for (int row = top + 1; row <= bottom; ++row) {
+                order.push_back(matrix[row][right]);
+            }
+
+            if (top < bottom && left < right) {
+                for (int column = right - 1; column >= left; --column) {
+                    order.push_back(matrix[bottom][column]);
+                }
+                for (int row = bottom - 1; row >= top + 1; --row) {
+                    order.push_back(matrix[row][left]);
+                }
+            }
+            ++left;
+            --right;
+            ++top;
+            --bottom;
+        }
+        return order;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    vector<vector<int>> matrix = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    vector<int> expect = {1, 2, 3, 6, 9, 8, 7, 4, 5};
+    EXPECT_EQ(expect, solution.spiralOrder(matrix));
+}
+
+TEST_F(SolutionTest, Test2) {
+    vector<vector<int>> matrix = {{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
+    vector<int> expect = {1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7};
+    EXPECT_EQ(expect, solution.spiralOrder(matrix));
+}
+
+TEST_F(SolutionTest, Test3) {
+    vector<vector<int>> matrix = {{1, 2, 3, 4}};
+    vector<int> expect = {1, 2, 3, 4};
+    EXPECT_EQ(expect, solution.spiralOrder(matrix));
+}
+
+TEST_F(SolutionTest, Test4) {
+    vector<vector<int>> matrix = {{3}, {2}};
+    vector<int> expect = {3, 2};
+    EXPECT_EQ(expect, solution.spiralOrder(matrix));
+}
+```
+
+### [48. 旋转图像 - 力扣（LeetCode）](https://leetcode.cn/problems/rotate-image/solutions/526980/xuan-zhuan-tu-xiang-by-leetcode-solution-vu3m/?envType=study-plan-v2&envId=top-interview-150)
+
+参考：https://leetcode.cn/problems/rotate-image/solutions/526980/xuan-zhuan-tu-xiang-by-leetcode-solution-vu3m/?envType=study-plan-v2&envId=top-interview-150
+
+```cpp
+/*
+时间：O(N^2)
+空间：O(1)
+*/
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        int n = matrix.size();
+        for (int i = 0; i < n / 2; ++i) {
+            std::swap(matrix[i], matrix[n - i - 1]);
+        }
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < i; ++j) {
+                std::swap(matrix[i][j], matrix[j][i]);
+            }
+        }
+    }
+};
+```
+
+
+
+## 哈希表
+
+### [49. 字母异位词分组](https://leetcode.cn/problems/group-anagrams/)
+
+https://leetcode.cn/problems/group-anagrams/solutions/520469/zi-mu-yi-wei-ci-fen-zu-by-leetcode-solut-gyoc/
+
+```cpp
+/*
+时间复杂度：O(nklogk)
+空间复杂度：O(nk)
+*/
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        unordered_map<string, vector<string>> mp;
+        for (string& str: strs) {
+            string key = str;
+            sort(key.begin(), key.end());
+            mp[key].emplace_back(str);
+        }
+        vector<vector<string>> ans;
+        for (const auto& [key, value]: mp) {
+            ans.emplace_back(value);
+        }
+        return ans;
+    }
+};
+
+/*
+时间复杂度：O(n(k+|Σ|)
+空间复杂度：O(n(k+|Σ|)
+*/
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        // 自定义对 array<int, 26> 类型的哈希函数
+        auto arrayHash = [fn = hash<int>{}] (const array<int, 26>& arr) -> size_t {
+            return accumulate(arr.begin(), arr.end(), 0u, [&](size_t acc, int num) {
+                return (acc << 1) ^ fn(num);
+            });
+        };
+
+        unordered_map<array<int, 26>, vector<string>, decltype(arrayHash)> mp(0, arrayHash);
+        for (string& str: strs) {
+            array<int, 26> counts{};
+            int length = str.length();
+            for (int i = 0; i < length; ++i) {
+                counts[str[i] - 'a'] ++;
+            }
+            mp[counts].emplace_back(str);
+        }
+        vector<vector<string>> ans;
+        for (auto it = mp.begin(); it != mp.end(); ++it) {
+            ans.emplace_back(it->second);
+        }
+        return ans;
+    }
+};
+```
+
+### [128. 最长连续序列](https://leetcode.cn/problems/longest-consecutive-sequence/)
+
+```cpp
+#include <unordered_set>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        unordered_set<int> num_set;
+        for (const int& num : nums) {
+            num_set.insert(num);
+        }
+
+        int longestStreak = 0;
+
+        for (const int& num : num_set) {
+            if (!num_set.count(num - 1)) {  // 有比当前数小的，就不处理了，最后交给最小的数去计算
+                int currentNum = num;
+                int currentStreak = 1;
+
+                while (num_set.count(currentNum + 1)) {
+                    currentNum += 1;
+                    currentStreak += 1;
+                }
+
+                longestStreak = max(longestStreak, currentStreak);
+            }
+        }
+
+        return longestStreak;
+    }
+};
+
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    std::vector<int> nums = {100,4,200,1,3,2};
+    EXPECT_EQ(4, solution.longestConsecutive(nums));
+}
+```
+
+## 字典树
+
+### [208. 实现 Trie (前缀树)](https://leetcode.cn/problems/implement-trie-prefix-tree/)
+
+### [211. 添加与搜索单词 - 数据结构设计](https://leetcode.cn/problems/design-add-and-search-words-data-structure/)
+
+
+
+## 回溯
+
+### [17. 电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/)
+
+### [77. 组合](https://leetcode.cn/problems/combinations/)
+
+
+
+## Kadane算法
+
+### [918. 环形子数组的最大和](https://leetcode.cn/problems/maximum-sum-circular-subarray/)
+
+
+
+## 位运算
+
+### [137. 只出现一次的数字 II](https://leetcode.cn/problems/single-number-ii/)
+
+
+
+## 数学
+
+### [50. Pow(x, n)](https://leetcode.cn/problems/powx-n/)
+
+```cpp
+#include <iostream>
+
+double binaryCalc(double base, int exponent) {
+    if (exponent == 1) {
+        return base;
+    }
+
+    double result = binaryCalc(base, exponent / 2);
+    result *= result;
+    if (exponent % 2 == 1) {
+        result *= base;
+    }
+    return result;
+}
+
+double Power(double base, int exponent) {
+    if (exponent < 0) {
+        exponent = -exponent;
+        base = 1 / base;
+    }
+
+    double result = binaryCalc(base, exponent);
+    // for (int i = 0; i < exponent; ++i) {
+    //     result *= base;
+    // }
+
+    return result;
+}
+
+int main()
+{
+    std::pair<double, int> test_set[] = {
+        {2, 5},     // 32
+        {2, 10},    // 1024
+        {2, -3},    // 0.125
+        {2, -4},    // 0.0625
+        {2.1, 3},   // 9.261
+        {1.5, -5},  // 0.131687
+    };
+
+    for (auto &test : test_set) {
+        printf("%f ^ %d = %f\n", test.first, test.second, Power(test.first, test.second));
+    }
+
+    return 0;
+}
+```
+
+https://leetcode.cn/problems/powx-n/solutions/238559/powx-n-by-leetcode-solution/?envType=study-plan-v2&envId=top-interview-150
+
+递归：
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+/*
+时间
+详情
+-ms
+击败 100.00%使用 C++ 的用户
+内存
+详情
+5.72mb
+击败 42.62%使用 C++ 的用户
+时间空间：O(n)
+*/
+class Solution {
+public:
+    double myPow(double x, int n) {
+        long N = n;
+        return N >= 0 ? quickMul(x, N) : 1 / quickMul(x, -N);
+    }
+
+private:
+    double quickMul(double x, long N) {
+        if (N == 0) {
+            return 1.0;
+        }
+        double y = quickMul(x, N / 2);
+        return N % 2 == 0 ? y * y : y * y * x;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(1, solution.myPow(0.44528, 0));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(1, solution.myPow(1.0, -2147483648));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ(32, solution.myPow(2.0, 5));
+}
+
+TEST_F(SolutionTest, Test4) {
+    EXPECT_EQ(1024, solution.myPow(2.0, 10));
+}
+
+```
+
+迭代：
+
+```cpp
+class Solution {  // 自己写的，不太对
+public:
+    double myPow(double x, int n) {
+        long N = n;
+        return N >= 0 ? quickMul(x, N) : 1 / quickMul(x, -N);
+    }
+
+private:
+    double quickMul(double x, long N) {
+        if (N == 0) {
+            return 1.0;
+        }
+        bool isOdd = N % 2 == 1;
+        double ans = x;
+        N /= 2;
+        while (N > 0) {
+            ans *= ans;
+            N /= 2;
+        }
+        return isOdd ? ans * x : ans;
+    }
+};
+
+//计算方法参考上面链接
+class Solution {
+public:
+    double myPow(double x, int n) {
+        long N = n;
+        return N >= 0 ? quickMul(x, N) : 1 / quickMul(x, -N);
+    }
+
+private:
+    double quickMul(double x, long N) {
+        double ans = 1.0;
+        double x_contribute = x;
+        while (N > 0) {
+            if (N % 2 == 1) {
+                ans *= x_contribute;
+            }
+
+            x_contribute *= x_contribute;
+            N /= 2;
+        }
+        return ans;
+    }
+};
+```
+
+## 栈
+
+### [20. 有效的括号](https://leetcode.cn/problems/valid-parentheses/)
+
+```cpp
+#include <valarray>
+#include <stack>
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    bool isValid(string s) {
+        std::stack<char> stack;
+        std::unordered_map<char, char> bracketsMap = {{')', '('}, {']', '['}, {'}', '{'}};
+        for (char ch: s) {
+            if (bracketsMap.find(ch) != bracketsMap.end()) {
+                if (!stack.empty() && bracketsMap[ch] == stack.top()) {
+                    stack.pop();
+                } else {
+                    stack.push(ch);
+                    break;
+                }
+            } else {
+                stack.push(ch);
+            }
+        }
+        return stack.empty();
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(true, solution.isValid("()[]{}"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(false, solution.isValid("(}"));
+}
+```
+
+
+
+
+
+## 动态规划
+
+### [139. 单词拆分](https://leetcode.cn/problems/word-break/)
+
+
+
+# 其它
+
+## 抛硬币
+
+考虑一个投掷硬币问题
+背景：小P和小H分别选择一个4个硬币组成的序列（正面由U表示，反面由D表示），一枚硬币每次会公正的投掷并记录结果，先出现的序列为获胜者。
+问题：给定小 P 选择的一个序列，请为小 H 设法给出胜率最大的对应序列，并给出python代码
+实例：小P选择DDDD ，小H选择UDDD，获胜概率最大
+扩展：将4改为任意有限正整数，你会如何优化你的计算
+
+使用模拟算概率：
+
+```python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import itertools
+import random
+
+UP_STR = 'U'
+DOWN_STR = 'D'
+
+def simulate_game(seq_a, seq_b):
+    # 模拟一局游戏，给定B选择的序列，返回获胜者 'A' 或 'B'
+    game_sequence = ""
+    seq_len = len(seq_a)
+    while True:
+        game_sequence += random.choice([UP_STR, DOWN_STR])  # 模拟硬币抛掷
+        if game_sequence[-seq_len:] == seq_a:
+            return 'A'
+        elif game_sequence[-seq_len:] == seq_b:
+            return 'B'
+
+
+def calculate_win_probability(seq_a, seq_b, num_simulations):
+    # 计算给定序列下B获胜的概率
+    wins_b = 0
+    for _ in range(num_simulations):
+        winner = simulate_game(seq_a, seq_b)
+        if winner == 'B':
+            wins_b += 1
+
+    probability_b = wins_b / num_simulations
+    print(f'seq b: {seq_b}, probability: {probability_b}')
+    return probability_b
+
+
+def cal_max_probability_sequence(seq_a, num_simulations):
+    best_sequence = ""
+    best_probability = 0
+    # 遍历所有可能的序列，计算获胜概率
+    for sequence in itertools.product(UP_STR + DOWN_STR, repeat=len(seq_a)):
+        sequence_str = "".join(sequence)
+        prob_B = calculate_win_probability(seq_a, sequence_str, num_simulations)
+        if prob_B > best_probability:
+            best_probability = prob_B
+            best_sequence = sequence_str
+    print(f"最佳序列: {best_sequence}")
+    print(f"最大获胜概率: {best_probability}")
+
+
+if __name__ == "__main__":
+    num_simulations = 10000  # 模拟的次数，可以根据需要调整
+    seq_a = 'UDUUD'
+    cal_max_probability_sequence(seq_a, num_simulations)
+```
+
+[使用公式计算](https://www.163.com/dy/article/DASPKMIA05118CTM.html)：
+
+```cpp
+//coin_sequence_calculator.h
+#ifndef GTEST_PROJECT_COIN_SEQUENCE_CALCULATOR_H
+#define GTEST_PROJECT_COIN_SEQUENCE_CALCULATOR_H
+
+#include <random>
+#include <iostream>
+#include "thread_pool.h"
+
+struct SequenceInfo {
+    std::string sequence;
+    double probability;
+};
+
+class CoinSequenceCalculator {
+public:
+    enum class Type {
+        SIMULATION, FORMULA
+    };
+
+public:
+    virtual ~CoinSequenceCalculator() noexcept = default;
+
+    virtual SequenceInfo calBestProbabilitySequence(const std::string& inputSequence) = 0;
+
+    static std::unique_ptr<CoinSequenceCalculator> create(Type type, int simulationCount = 10000);
+};
+
+#endif //GTEST_PROJECT_COIN_SEQUENCE_CALCULATOR_H
+
+
+//coin_sequence_calculator.cpp
+#include "coin_sequence_calculator.h"
+
+static const char UP_STR = 'U';
+static const char DOWN_STR = 'D';
+
+class CoinSequenceCalculatorSimulationImpl : public CoinSequenceCalculator {
+public:
+    CoinSequenceCalculatorSimulationImpl(int simulateCount) : simulateCount_(simulateCount) {
+    }
+
+    virtual ~CoinSequenceCalculatorSimulationImpl() noexcept = default;
+
+    virtual SequenceInfo calBestProbabilitySequence(const std::string& inputSequence) override {
+        const auto& allSequence = getAllSequence(inputSequence.size());
+        const auto& bestSequenceInfo = getBestSequenceInfo(inputSequence, allSequence, simulateCount_);
+        return bestSequenceInfo;
+    }
+
+private:
+    enum class SimulationResult {
+        WIN_A, WIN_B
+    };
+
+private:
+    std::vector<std::string> getAllSequence(int length) {
+        std::string sequence;
+        std::vector<std::string> allSequence;
+        calAllSequence(length, sequence, allSequence);
+        return allSequence;
+    }
+
+    void calAllSequence(int length, std::string& sequence, std::vector<std::string>& allSequence) {
+        if (sequence.size() == length) {
+            allSequence.push_back(sequence);
+            return;
+        }
+
+        for (const auto& eachSide: {UP_STR, DOWN_STR}) {
+            sequence.push_back(eachSide);
+            calAllSequence(length, sequence, allSequence);
+            sequence.pop_back();
+        }
+    }
+
+    SequenceInfo getBestSequenceInfo(const std::string& sequenceA, const std::vector<std::string>& allSequence,
+                                     int simulateCount) {
+        ThreadPool threadPool;
+        threadPool.init();
+        std::vector<std::future<std::pair<std::string, double>>> allSequenceProbability;
+        for (const auto& tmpSequence: allSequence) {
+            allSequenceProbability.emplace_back(threadPool.submit(
+                std::bind(&CoinSequenceCalculatorSimulationImpl::getSimulationProbability, this, std::placeholders::_1,
+                          std::placeholders::_2, std::placeholders::_3), sequenceA, tmpSequence,
+                simulateCount));
+        }
+
+        std::string sequence;
+        double probability = 0;
+        for (auto& sequenceProbability: allSequenceProbability) {
+            const auto& [tmpSequence, tmpProbability] = sequenceProbability.get();
+            if (tmpProbability > probability) {
+                probability = tmpProbability;
+                sequence = tmpSequence;
+            }
+        }
+        threadPool.shutdown();
+
+        return {sequence, probability};
+    }
+
+    std::pair<std::string, double> getSimulationProbability(const std::string& sequenceA, const std::string& sequenceB,
+                                                            int count) {
+        int winBCount = 0;
+        for (int i = 0; i < count; ++i) {
+            if (simulateSequence(sequenceA, sequenceB) == SimulationResult::WIN_B) {
+                ++winBCount;
+            }
+        }
+        std::cout << "tmpSequence: << " << sequenceB << ", tmpProbability: "
+                  << (static_cast<double>(winBCount) / count) << std::endl;
+        return {sequenceB, static_cast<double>(winBCount) / count};
+    };
+
+    SimulationResult simulateSequence(const std::string& sequenceA, const std::string& sequenceB) {
+        std::string simulateSequence;
+        while (true) {
+            simulateSequence.push_back(getOneCoinSimulation());
+            int sequenceLength = sequenceA.size();
+            int simulateSeqLength = simulateSequence.size();
+            if (simulateSeqLength < sequenceLength) {
+                continue;
+            }
+
+            if (simulateSequence.compare(simulateSeqLength - sequenceLength, sequenceLength, sequenceA) == 0) {
+                return SimulationResult::WIN_A;
+            } else if (simulateSequence.compare(simulateSeqLength - sequenceLength, sequenceLength, sequenceB) == 0) {
+                return SimulationResult::WIN_B;
+            }
+        }
+    }
+
+    char getOneCoinSimulation() {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::binomial_distribution<> distrib;
+        return distrib(gen) == 0 ? UP_STR : DOWN_STR;
+    }
+
+private:
+    int simulateCount_;
+};
+
+class CoinSequenceCalculatorFormulaImpl : public CoinSequenceCalculator {
+public:
+    CoinSequenceCalculatorFormulaImpl() {
+    }
+
+    virtual ~CoinSequenceCalculatorFormulaImpl() noexcept = default;
+
+    virtual SequenceInfo calBestProbabilitySequence(const std::string& inputSequence) override {
+        const auto& allSequence = getTwoSequence(inputSequence);
+        const auto& bestSequenceInfo = getBestSequenceInfo(inputSequence, allSequence);
+        return bestSequenceInfo;
+    }
+
+private:
+    std::vector<std::string> getTwoSequence(const std::string& inputSequence) {
+        const std::string& prefix = inputSequence.substr(0, inputSequence.size() - 1);
+        return {UP_STR + prefix, DOWN_STR + prefix};
+    }
+
+    SequenceInfo getBestSequenceInfo(const std::string& sequenceA, const std::vector<std::string>& allSequence) {
+        std::string sequence;
+        double probability = 0;
+        for (const auto& tmpSequence: allSequence) {
+            double tmpProbability = getProbabilityByFormula(sequenceA, tmpSequence);
+            std::cout << "tmpSequence: << " << tmpSequence << ", tmpProbability: " << tmpProbability << std::endl;
+            if (tmpProbability > probability) {
+                probability = tmpProbability;
+                sequence = tmpSequence;
+            }
+        }
+        return {sequence, probability};
+    }
+
+    /*
+L(10110, 10110) = (10010)2 = 18
+L(10110, 01011) = (00001)2 = 1
+L(01011, 01011) = (10000)2 = 16
+L(01011, 10110) = (01001)2 = 9
+那么， 01 串 a 和 b 的胜率之比就是
+(L(b, b) – L(b, a)) : (L(a, a) – L(a, b))
+     */
+    double getProbabilityByFormula(const std::string& seqA, const std::string& seqB) {
+        int lbb = getLvalue(seqB, seqB);
+        int lba = getLvalue(seqB, seqA);
+        int laa = getLvalue(seqA, seqA);
+        int lab = getLvalue(seqA, seqB);
+        return static_cast<double>(laa - lab) / ((lbb - lba) + (laa - lab));
+    }
+
+    int getLvalue(const std::string& lhsSeq, const std::string& rhsSeq) {
+        int value = 0;
+        int seqLength = lhsSeq.size();
+        for (int i = 0; i < lhsSeq.size(); ++i) {
+            value <<= 1;
+            if (lhsSeq.compare(i, seqLength - i, rhsSeq, 0, seqLength - i) == 0) {
+                value += 1;
+            }
+        }
+        return value;
+    }
+};
+
+std::unique_ptr<CoinSequenceCalculator> CoinSequenceCalculator::create(Type type, int simulationCount) {
+    if (type == Type::SIMULATION) {
+        return std::make_unique<CoinSequenceCalculatorSimulationImpl>(simulationCount);
+    } else if (type == Type::FORMULA) {
+        return std::make_unique<CoinSequenceCalculatorFormulaImpl>();
+    }
+    return std::unique_ptr<CoinSequenceCalculator>();
+}
+
+//thread_pool.h
+#ifndef GTEST_PROJECT_THREAD_POOL_H
+#define GTEST_PROJECT_THREAD_POOL_H
+
+#include <queue>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
+#include <future>
+#include <functional>
+
+template<typename T>
+class SafeQueue {
+public:
+    SafeQueue() {
+    }
+
+    SafeQueue(SafeQueue&& other) {
+    }
+
+    ~SafeQueue() {
+    }
+
+    bool empty() // 返回队列是否为空
+    {
+        std::unique_lock<std::mutex> lock(mutex_); // 互斥信号变量加锁，防止m_queue被改变
+        return queue_.empty();
+    }
+
+    int size() {
+        std::unique_lock<std::mutex> lock(mutex_); // 互斥信号变量加锁，防止m_queue被改变
+        return queue_.size();
+    }
+
+    // 队列添加元素
+    void enqueue(T& t) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        queue_.emplace(t);
+    }
+
+    // 队列取出元素
+    bool dequeue(T& t) {
+        std::unique_lock<std::mutex> lock(mutex_); // 队列加锁
+        if (queue_.empty()) {
+            return false;
+        }
+        t = std::move(queue_.front()); // 取出队首元素，返回队首元素值，并进行右值引用
+        queue_.pop(); // 弹出入队的第一个元素
+        return true;
+    }
+
+private:
+    std::queue<T> queue_; //利用模板函数构造队列
+    std::mutex mutex_; // 访问互斥信号量
+};
+
+class ThreadPool {
+public:
+    // 线程池构造函数
+    ThreadPool(const int n_threads = -1)
+        : isInit_(false), isShutdown_(false),
+          threads_(n_threads > 0 ? n_threads : std::thread::hardware_concurrency()) {
+    }
+
+    ~ThreadPool() {
+        if (!isShutdown_) {
+            shutdown();
+        }
+    }
+
+    ThreadPool(const ThreadPool&) = delete;
+
+    ThreadPool(ThreadPool&&) = delete;
+
+    ThreadPool& operator=(const ThreadPool&) = delete;
+
+    ThreadPool& operator=(ThreadPool&&) = delete;
+
+    // Inits thread pool
+    bool init() {
+        if (!isInit_) {
+            for (int i = 0; i < threads_.size(); ++i) {
+                threads_.at(i) = std::thread(ThreadWorker(this, i)); // 分配工作线程
+            }
+            isInit_ = true;
+        }
+        return isInit_;
+    }
+
+    // Waits until threads finish their current task and shutdowns the pool
+    void shutdown() {
+        isShutdown_ = true;
+        conditionalLock_.notify_all(); // 通知，唤醒所有工作线程
+
+        for (int i = 0; i < threads_.size(); ++i) {
+            if (threads_.at(i).joinable()) // 判断线程是否在等待
+            {
+                threads_.at(i).join(); // 将线程加入到等待队列
+            }
+        }
+    }
+
+    // Submit a function to be executed asynchronously by the pool
+    template<typename F, typename... Args>
+    auto submit(F&& f, Args&& ...args) -> std::future<decltype(f(args...))> {
+        static bool dummyInit = init();
+        // Create a function with bounded parameter ready to execute
+        std::function<decltype(f(args...))()> func = std::bind(std::forward<F>(f),
+                                                               std::forward<Args>(args)...); // 连接函数和参数定义，特殊函数类型，避免左右值错误
+
+        // Encapsulate it into a shared pointer in order to be able to copy construct
+        auto task_ptr = std::make_shared<std::packaged_task<decltype(f(args...))() >>(func);
+
+        // Warp packaged task into void function
+        std::function<void()> warpper_func = [task_ptr]() {
+            (*task_ptr)();
+        };
+
+        // 队列通用安全封包函数，并压入安全队列
+        queue_.enqueue(warpper_func);
+        // 唤醒一个等待中的线程
+        conditionalLock_.notify_one();
+        // 返回先前注册的任务指针
+        return task_ptr->get_future();
+    }
+
+private:
+    class ThreadWorker // 内置线程工作类
+    {
+    public:
+        // 构造函数
+        ThreadWorker(ThreadPool* pool, const int id) : threadPool_(pool), id_(id) {
+        }
+
+        // 重载()操作
+        void operator()() {
+            std::function<void()> func; // 定义基础函数类func
+
+            bool dequeued; // 是否正在取出队列中元素
+            while (!threadPool_->isShutdown_) {
+                {
+                    // 为线程环境加锁，互访问工作线程的休眠和唤醒
+                    std::unique_lock<std::mutex> lock(threadPool_->conditionalMutex_);
+
+                    // 如果任务队列为空，阻塞当前线程
+                    if (threadPool_->queue_.empty()) {
+                        threadPool_->conditionalLock_.wait(lock); // 等待条件变量通知，开启线程
+                    }
+
+                    // 取出任务队列中的元素
+                    dequeued = threadPool_->queue_.dequeue(func);
+                }
+
+                // 如果成功取出，执行工作函数
+                if (dequeued) {
+                    func();
+                }
+            }
+        }
+
+    private:
+        int id_; // 工作id
+        ThreadPool* threadPool_; // 所属线程池
+    };
+
+private:
+    bool isInit_; // 线程池是否关闭
+    bool isShutdown_; // 线程池是否关闭
+    std::vector<std::thread> threads_; // 工作线程队列
+    SafeQueue<std::function<void()>> queue_; // 执行函数安全队列，即任务队列
+    std::mutex conditionalMutex_; // 线程休眠锁互斥变量
+    std::condition_variable conditionalLock_; // 线程环境锁，可以让线程处于休眠或者唤醒状态
+};
+
+#endif //GTEST_PROJECT_THREAD_POOL_H
+
+//timer.h
+#ifndef GTEST_PROJECT_TIMER_H
+#define GTEST_PROJECT_TIMER_H
+
+#include <iostream>
+#include "chrono"
+
+class Timer {
+public:
+    ~Timer() {
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> timeUsed = std::chrono::duration_cast<std::chrono::duration<double >>(
+            end - start_);
+        std::cout << "Elapse time : " << timeUsed.count() << "s" << std::endl;
+    }
+
+private:
+    std::chrono::steady_clock::time_point start_ = std::chrono::steady_clock::now();;
+};
+
+#endif //GTEST_PROJECT_TIMER_H
+
+//main.cpp
+#include <iostream>
+#include "timer.h"
+#include "coin_sequence_calculator.h"
+
+void calCoinMaxProbabilitySequence(CoinSequenceCalculator& calculator, const std::string& inputSequence) {
+    Timer timer;
+    const auto& sequenceInfo = calculator.calBestProbabilitySequence(inputSequence);
+    std::cout << "sequence: " << sequenceInfo.sequence << ", max probability: " << sequenceInfo.probability
+              << std::endl;
+}
+
+int main() {
+    const std::string inputSequence = "UDUUD";
+
+    auto simulationCalculator = CoinSequenceCalculator::create(CoinSequenceCalculator::Type::SIMULATION);
+    calCoinMaxProbabilitySequence(*simulationCalculator, inputSequence);
+
+    std::cout << "--------------------------------------------------------" << std::endl;
+
+    auto formulaCalculator = CoinSequenceCalculator::create(CoinSequenceCalculator::Type::FORMULA);
+    calCoinMaxProbabilitySequence(*formulaCalculator, inputSequence);
+
+    return 0;
+}
+```
+
+## [最大回撤][最大回撤_c++ 最大回撤-CSDN博客](https://blog.csdn.net/weixin_42806752/article/details/101565813)
+
+```python
+"""
+题目形式：有一个数组，求其中两个数x,y，满足x的索引小于y的索引，使得 x-y 最大。
+例如 arr = [3,7,2,6,4,1,9,8,5]， 最大回撤是6，对应的x=7,y=1。
+"""
+
+
+def maxRetreat(nums):
+    """
+    到了现在，我们应该对这种最大最小的最优化类的题目有一定的敏感度，知道要用动态规划。
+    由于输入是一维数组，我们可以用一个一维数组来保存子问题的状态。
+    dp[i]表示下标为i的元素的最大回撤
+    那么转移方程为：
+            dp[i+1] + nums[i] - nums[i+1], if dp[i + 1] > 0
+    dp[i] = 
+            nums[i] - nums[i+1], else
+            
+    其实这种题目我们应该做的就是使用一个例子来模拟一遍。如果我们从前往后计算每个下标的最大回撤，那
+    么会有很多重复计算的子问题，这一点类似于字符串解码的问题。而如果我们从后往前来计算每个下标的最
+    大回撤，那么就可以利用到已经计算出来的子问题的解。
+    而这个状态转移方程也是基于观察得到的。
+    
+    :param nums: 待计算最大回撤的数组
+    :return: 输入的数组的最大回撤
+    """
+    if not nums:
+        return 0
+    dp = [0] * len(nums)
+    maxRet = 0  # 可以用一个变量来保存全局最大的回撤的值，也可以不用，但是这样可以节省一次遍历
+    for i in range(len(nums) - 2, -1, -1):
+        if dp[i + 1] > 0:
+            dp[i] = dp[i + 1] + nums[i] - nums[i + 1]
+        else:
+            dp[i] = nums[i] - nums[i + 1]
+        maxRet = max(maxRet, dp[i])
+
+    return maxRet
+
+
+print(maxRetreat([3, 7, 2, 6, 4, 1, 9, 8, 5]))
+```
+
+C++写的：
+
+```cpp
+#include "gtest/gtest.h"
+
+using namespace std;
+
+const double DoubleZero = 0.0;
+
+const std::string MaxDrawDownRatioStr = "MaxDrawDownRatio";
+const std::string MaxValueDownStr = "MaxValueDown";
+const std::string FromDateStr = "FromDate";
+const std::string ToDateStr = "ToDate";
+
+class AnalyzerDrawDown {
+public:
+    ~AnalyzerDrawDown() noexcept = default;
+
+    const std::unordered_map<std::string, std::string> add(const std::vector<std::string>& date,
+                                                           const std::vector<double>& values) {
+        dates_ = date;
+        values_ = values;
+        calcMaxDrawDown();
+        setAnalysisMap();
+        return analysisMap_;
+    }
+
+    std::string getAnalysisMsg() {
+        std::ostringstream oss;
+        oss << MaxDrawDownRatioStr << ": " << analysisMap_[MaxDrawDownRatioStr] << ", "
+            << MaxValueDownStr << ": " << analysisMap_[MaxValueDownStr] << ", "
+            << FromDateStr << ": " << valueMaxDate_ << ", "
+            << ToDateStr << ": " << valueMinDate_;
+        return oss.str();
+    }
+
+private:
+    void calcMaxDrawDown() {
+        double tmpValueMin;
+        std::string tmpValueMinDate;
+
+        double maxDrawDown = DoubleZero;
+        std::vector<double> dp(values_.size(), DoubleZero);
+        for (int i = values_.size() - 2; i >= 0; --i) {
+            if (dp[i + 1] > DoubleZero) {
+                dp[i] = dp[i + 1] + values_[i] - values_[i + 1];
+            } else {
+                dp[i] = values_[i] - values_[i + 1];
+                tmpValueMin = values_[i + 1];
+                tmpValueMinDate = dates_[i + 1];
+            }
+
+            if (dp[i] > maxDrawDown) {
+                maxDrawDown = dp[i];
+                valueMax_ = values_[i];
+                valueMin_ = tmpValueMin;
+                valueMaxDate_ = dates_[i];
+                valueMinDate_ = tmpValueMinDate;
+            }
+        }
+    }
+
+    void setAnalysisMap() {
+        analysisMap_ = {
+            {MaxDrawDownRatioStr, std::to_string((valueMax_ - valueMin_) / valueMax_)},
+            {MaxValueDownStr, std::to_string(valueMax_ - valueMin_)},
+            {FromDateStr, valueMaxDate_},
+            {ToDateStr, valueMinDate_}
+        };
+    }
+
+private:
+    std::unordered_map<std::string, std::string> analysisMap_;
+    double valueMax_;
+    double valueMin_;
+    std::string valueMaxDate_;
+    std::string valueMinDate_;
+    std::vector<std::string> dates_;
+    std::vector<double> values_;
+};
+
+class AnalyzerDrawDownTest : public testing::Test {
+protected:
+    AnalyzerDrawDown analyzerDrawDown;
+};
+
+TEST_F(AnalyzerDrawDownTest, Test1) {
+    std::vector<std::string> dates = {"2017-01-01", "2017-01-02", "2017-01-03", "2017-01-04", "2017-01-05",
+                                      "2017-01-06", "2017-01-07", "2017-01-08", "2017-01-09"};
+    std::vector<double> values = {3, 7, 2, 6, 4, 1, 9, 8, 5};
+    const auto& analysisMap = analyzerDrawDown.add(dates, values);
+    std::cout << analyzerDrawDown.getAnalysisMsg() << std::endl;
+
+    // 比较结果
+    auto maxDrawDownRatio = analysisMap.at(MaxDrawDownRatioStr);
+    auto expectMaxDrawDownRatio = std::to_string(static_cast<double >(7 - 1) / 7);
+    EXPECT_EQ(maxDrawDownRatio, expectMaxDrawDownRatio);
+    EXPECT_EQ(7 - 1, std::stod(analysisMap.at(MaxValueDownStr)));
+    EXPECT_EQ("2017-01-02", analysisMap.at(FromDateStr));
+    EXPECT_EQ("2017-01-06", analysisMap.at(ToDateStr));
+}
+```
+
+## 数组元素和小于K的组合个数
+
+1. 两个整数数组p、q和一个整数K，求满足p[i]+q[j] < K的所有(i, j)组合的个数。
+
+最简单的就是双循环，时间复杂度就是O(n^2)。
+
+优化一些的话就是两个数组排序p'和q'，然后固定外层循环p'从最小的数，q'从最大往小开始找，找到满足和小于K的，这时候所有q'的元素下标前的都满足。再把p'的下标+1，q'的上一个满足的数下标往前找。
+
+2. 三个整数数组p、q、r和一个整数K，求满足p[i]+q[j]+r[s] < K的所有(i, j, s)组合的个数。
+
+还是类似刚才的算法，先排序，再固定p'，里面q'和r'的循环还是用上面的算法，这样算下来应该是类似O(n^2)的复杂度。
+
+网上的[三个数之和小于某个值的组合个数](https://blog.csdn.net/u013709270/article/details/104671747/)。
+
+[373. 查找和最小的 K 对数字 ](https://leetcode.cn/problems/find-k-pairs-with-smallest-sums/solutions/1208350/cha-zhao-he-zui-xiao-de-kdui-shu-zi-by-l-z526/)
+
+```cpp
+class Solution {
+public:
+    int countCombinations(std::vector<int>& p, std::vector<int>& q, int target) {
+        std::sort(p.begin(), p.end()); // 对数组p进行排序
+        std::sort(q.begin(), q.end()); // 对数组q进行排序
+
+        int count = 0;
+        int i = 0, j = q.size() - 1;
+
+        while (i < p.size() && j >= 0) {
+            if (p[i] + q[j] < target) {
+                count += (j + 1); // 将j的位置与j相同的元素个数加到count中
+                i++;
+            } else {
+                j--;
+            }
+        }
+
+        return count;
+    }
+
+private:
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1)
+{
+    std::vector<int> p = {1, 3, 5};
+    std::vector<int> q = {2, 4, 6};
+    int target = 7;
+
+    int result = solution.countCombinations(p, q, target);
+    EXPECT_EQ(3, result);
+}
+```
+
+
+
+
+
+## 查找搜索二叉树中与目标值距离最近的节点
+
+[数据结构——二叉搜索树详解](https://blog.csdn.net/L_T_W_Y/article/details/108407686)
+
+从搜索二叉树根节点搜索，根据节点值与目标值的大小，进行左右节点的递归查找。
+
+如果找到与目标值一样的节点，则直接返回；否则就直接遍历到叶子节点。
+
+时间复杂度O(logN)。
+
+```cpp
+#include <climits>
+#include "gtest/gtest.h"
+
+struct Node {
+    explicit Node(int value) : val(value)
+    {
+    }
+
+    Node* left = nullptr;
+    Node* right = nullptr;
+    int val;
+};
+
+class Solution {
+public:
+    std::vector<int> getMinDistance(Node* root, int target)
+    {
+        int minDistance = INT_MAX;
+        std::vector<int> ret;
+        dfs(root, target, minDistance, ret);
+        return ret;
+    }
+
+private:
+    void dfs(Node* node, int target, int& minDistance, std::vector<int>& ret)
+    {
+        if (node == nullptr) {
+            return;
+        }
+
+        int curDistance = std::abs(node->val - target);
+        if (curDistance == 0) {
+            ret.assign(1, node->val);
+            return;
+        }
+
+        if (curDistance < minDistance) {
+            ret.assign(1, node->val);
+            minDistance = curDistance;
+        } else if (curDistance == minDistance) {
+            ret.push_back(node->val);
+        }
+
+        if (node->val > target) {
+            dfs(node->left, target, minDistance, ret);
+        } else {
+            dfs(node->right, target, minDistance, ret);
+        }
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1)
+{
+    auto root = std::make_unique<Node>(14);
+    auto node7 = std::make_unique<Node>(7);
+    auto node28 = std::make_unique<Node>(28);
+    root->left = node7.get();
+    root->right = node28.get();
+
+    auto node1 = std::make_unique<Node>(1);
+    auto node10 = std::make_unique<Node>(10);
+    node7->left = node1.get();
+    node7->right = node10.get();
+
+    auto nodeNeg3 = std::make_unique<Node>(-3);
+    auto node5 = std::make_unique<Node>(5);
+    node1->left = nodeNeg3.get();
+    node1->right = node5.get();
+
+    EXPECT_EQ(std::vector<int>({1}), solution.getMinDistance(root.get(), 1));
+    EXPECT_EQ(std::vector<int>({7}), solution.getMinDistance(root.get(), 8));
+    EXPECT_EQ(std::vector<int>({1, 5}), solution.getMinDistance(root.get(), 3));
+    EXPECT_EQ(std::vector<int>({-3}), solution.getMinDistance(root.get(), -5));
+    EXPECT_EQ(std::vector<int>({28}), solution.getMinDistance(root.get(), 30));
+}
+```

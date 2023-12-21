@@ -1245,6 +1245,263 @@ Hibernate: select girl0_.id as id1_0_0_, girl0_.age as age2_0_0_, girl0_.cup_siz
 2019-03-15 23:25:02.676  INFO 8600 --- [nio-8080-exec-1] com.imooc.aspect.HttpAspect              : response=Girl{id=10, cupSize='F', age=35}
 ```
 
+#### 本地试验：
+
+记日志：<https://www.cnblogs.com/wangshen31/p/9379197.html>
+
+鉴权：<https://blog.csdn.net/luckykapok918/article/details/79287889>
+
+加入依赖：
+
+```xml
+<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+```
+
+```java
+// WebLogAspect.java
+package com.example.restproject.utils;
+
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+@Aspect
+@Component
+public class WebLogAspect {
+    private final Logger logger = LoggerFactory.getLogger(WebLogAspect.class);
+
+    @Pointcut("execution(public * com.example.restproject.controller..*.*(..))")
+    public void controllerLog() {
+    }
+
+    @Before("controllerLog()")
+    public void logBeforeController(JoinPoint joinPoint) {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();  //这个RequestContextHolder是Springmvc提供来获得请求的东西
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+
+        // 记录下请求内容
+        logger.info("URL : " + request.getRequestURL().toString());
+        logger.info("HTTP_METHOD : " + request.getMethod());
+        logger.info("IP : " + request.getRemoteAddr());
+        logger.info("THE ARGS OF THE CONTROLLER : " + Arrays.toString(joinPoint.getArgs()));
+
+        // 下面这个getSignature().getDeclaringTypeName()是获取包+类名的，然后后面的joinPoint.getSignature.getName()获取了方法名
+        logger.info("CLASS_METHOD : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
+//        logger.info("TARGET: " + joinPoint.getTarget());  //返回的是需要加强的目标类的对象
+//        logger.info("THIS: " + joinPoint.getThis());  //返回的是经过加强后的代理类的对象
+    }
+}
+
+// HelloCheckAspect.java
+package com.example.restproject.utils;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+@Aspect
+@Component
+public class HelloCheckAspect {
+    @Pointcut("execution(public * com.example.restproject.controller.HelloController.*(..))")
+    public void checkId() {
+    }
+
+    @Around("checkId()")
+    public String check(ProceedingJoinPoint joinPoint) throws Throwable {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();  //这个RequestContextHolder是Springmvc提供来获得请求的东西
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+        String id = request.getParameter("id");
+        if (Integer.valueOf(id) > 100) {
+            return String.format("Id: %s should be less than 100", id);
+        }
+
+        Object proceed = joinPoint.proceed();
+        return (String) proceed;
+    }
+}
+
+```
+
+ 注意，由于是动态代理的实现方法，所以不是所有的方法都能拦截得下来，对于JDK代理只有public的方法才能拦截得下来，对于CGLIB只有public和protected的方法才能拦截。
+
+这里我们主要介绍execution的匹配方法，因为大多数时候都会用这个来定义pointcut：
+
+```
+execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern) throws-pattern?)
+
+execution(方法修饰符(可选)  返回类型  类路径 方法名  参数  异常模式(可选)) 
+```
+
+ 除了返回类型，方法名还有参数之外，其他都是可选的
+
+ ret-type-pattern：可以为*表示任何返回值,全路径的类名等.
+
+name-pattern：指定方法名,\*代表所以,set\*,代表以set开头的所有方法.
+
+parameters pattern:指定方法参数(声明的类型),     ()匹配没有参数； (..)代表任意多个参数；  (\*)代表一个参数，但可以是任意型；  (\*,String)代表第一个参数为任何值,第二个为String类型。
+
+下面给几个例子：
+
+```
+1）execution(public * *(..))——表示匹配所有public方法
+2）execution(* set*(..))——表示所有以“set”开头的方法
+3）execution(* com.xyz.service.AccountService.*(..))——表示匹配所有AccountService接口的方法
+4）execution(* com.xyz.service.*.*(..))——表示匹配service包下所有的方法
+5）execution(* com.xyz.service..*.*(..))——表示匹配service包和它的子包下的方法
+```
+
+
+
+另一种通过Validated的方式进行校验：
+
+加入依赖：
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+
+```java
+// Student.java
+package com.example.restproject.data;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Student {
+    @Min(value = 1, message = "id必须为正整数")
+    private int id;
+    private String name;
+    @Max(value = 60, message = "age不能大于60")
+    @Min(value = 18, message = "age不能小于18")
+    private int age;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", age=" + age +
+            '}';
+    }
+}
+
+// StudentController.java
+package com.example.restproject.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.restproject.data.Student;
+
+@RestController
+@RequestMapping("/student")
+public class StudentController {
+    @PostMapping(value = "/add")
+    public String add(@RequestBody String jsonStr) {
+        return String.format("Add jsonStr: %s", jsonStr);
+    }
+
+    @PostMapping(value = "/addStudent")
+    public String addStudent(@Validated @RequestBody Student student, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> fieldErrors = bindingResult.getFieldErrors().stream().map(FieldError::getDefaultMessage).collect(Collectors.toList());
+            return String.format("Errors: %s", fieldErrors);
+        }
+
+        return String.format("Add student: %s", student);
+    }
+}
+
+// StudentCheckAspect.java 这个类这里没啥用
+package com.example.restproject.utils;
+
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class StudentCheckAspect {
+    @Pointcut("execution(public * com.example.restproject.controller.StudentController.*(..))")
+    public void checkAge() {
+    }
+
+//    @Around("checkAge()")
+//    public String check(ProceedingJoinPoint joinPoint) throws Throwable {
+//        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+//        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+//        Object proceed = joinPoint.proceed();
+//        return (String) proceed;
+//    }
+}
+
+// POST调用：http://localhost:8080/student/addStudent
+// body：{"id":"0","name":"LiLei","age":"61"}
+// 界面回显：
+Errors: [id必须为正整数, age不能大于60]
+```
+
+
+
 ### 1.2.3. 统一异常处理 <https://www.imooc.com/video/14339>
 
 * 什么是异常处理？

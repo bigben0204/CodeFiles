@@ -7483,6 +7483,15 @@ datetime.datetime(2015, 5, 18, 17, 2, 10, 871012, tzinfo=datetime.timezone(datet
 datetime表示的时间需要时区信息才能确定一个特定的时间，否则只能视为本地时间。
 
 如果要存储datetime，最佳方法是将其转换为timestamp再存储，因为timestamp的值与时区完全无关。
+
+# Python字符串日期转换为日期数据 https://blog.51cto.com/u_16175432/6710653
+例如，要将字符串日期"2022-10-31"解析为datetime对象，可以使用以下代码：
+
+import datetime
+
+date_string = "2022-10-31"
+date_format = "%Y-%m-%d"
+date = datetime.datetime.strptime(date_string, date_format)
 #-----------------------------------------------------------------------------------------
 #collections
 #https://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000/001431953239820157155d21c494e5786fce303f3018c86000
@@ -9552,19 +9561,280 @@ $ size /home/ben/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug/T
    text    data     bss     dec     hex filename
    7747     744     280    8771    2243 /home/ben/Softwares/JetBrains/CppProjects/TestProject/cmake-build-debug/TestProject
 #-----------------------------------------------------------------------------------------
+# 测试全局变量
 
+# test.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from src.constants import TEST_GLOBAL
+
+
+def test_global_int():
+    print(f'global_int in main: {TEST_GLOBAL.INT}')
+
+# constants.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+GLOBAL_INT = 10
+
+
+class TestGlobal():
+    INT = 11
+
+
+TEST_GLOBAL = TestGlobal()
+
+# main.py
+#!/usr/bin/env python3
+
+# -*- coding: utf-8 -*-
+from src.constants import TEST_GLOBAL
+from src.test import test_global_int
+
+
+def main_global_int():
+    print(f'global_int in main: {TEST_GLOBAL.INT}')
+
+
+if __name__ == '__main__':
+    main_global_int()
+    TEST_GLOBAL.INT = 12
+    test_global_int()
+# 输出：
+global_int in main: 11
+global_int in main: 12
+#-----------------------------------------------------------------------------------------
+# 通过字符串来调用函数方法和类方法及类成员 http://www.muzhuangnet.com/show/15727.html
+
+# main.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from operator import methodcaller
+
+def getDBIndex(id, product_name):
+    print(id, product_name)
+
+class Prod:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+    def getId(self):
+        return self.id
+
+    def getName(self):
+        return self.name
+
+class Test:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+    def getId(self):
+        return self.id
+
+    def getName(self):
+        return self.name
+
+if __name__ == '__main__':
+    function_name = 'getDBIndex'
+
+    prod = Prod(1, 'abc')
+    test = Test(2, 'hello')
+    # locals()[function_name](d.get('prod.id'), d.get('prod.name'))
+    # locals()[function_name](methodcaller('getId')(prod), methodcaller('getName')(prod))
+    locals()[function_name](getattr(locals()['prod'], 'getId')(), getattr(locals()['prod'], 'getName')())
+    locals()[function_name](getattr(locals()['prod'], 'id'), getattr(locals()['prod'], 'name'))
+    locals()[function_name](getattr(locals()['test'], 'id'), getattr(locals()['test'], 'name'))
+
+    print(type(getattr(prod, 'id')), isinstance(getattr(prod, 'id'), int))
+    print(type(getattr(prod, 'name')), isinstance(getattr(prod, 'name'), str))
+    print(isinstance(prod, Prod))
+
+# 输出：
+1 abc
+1 abc
+2 hello
+<class 'int'> True
+<class 'str'> True
+True
+#-----------------------------------------------------------------------------------------
+# 日志统计模块：装饰器和cProfile https://www.ycpai.cn/wenda/sq63fxsW.html
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import cProfile
+import itertools
+import random
+import time
+
+# 装饰器打印日志
+def timing_decorator(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"函数: {func.__name__}, 运行时间: {end_time - start_time}")
+        return result
+
+    return wrapper
+
+
+UP_STR = 'U'
+DOWN_STR = 'D'
+
+
+def simulate_game(seq_a, seq_b):
+    # 模拟一局游戏，给定B选择的序列，返回获胜者 'A' 或 'B'
+    game_sequence = ""
+    seq_len = len(seq_a)
+    while True:
+        game_sequence += random.choice([UP_STR, DOWN_STR])  # 模拟硬币抛掷
+        if game_sequence[-seq_len:] == seq_a:
+            return 'A'
+        elif game_sequence[-seq_len:] == seq_b:
+            return 'B'
+
+
+def calculate_win_probability(seq_a, seq_b, num_simulations):
+    # 计算给定序列下B获胜的概率
+    wins_b = 0
+    for _ in range(num_simulations):
+        winner = simulate_game(seq_a, seq_b)
+        if winner == 'B':
+            wins_b += 1
+
+    probability_b = wins_b / num_simulations
+    print(f'seq b: {seq_b}, probability: {probability_b}')
+    return probability_b
+
+
+@timing_decorator
+def cal_max_probability_sequence(seq_a, num_simulations):
+    best_sequence = ""
+    best_probability = 0
+    # 遍历所有可能的序列，计算获胜概率
+    for sequence in itertools.product(UP_STR + DOWN_STR, repeat=len(seq_a)):
+        sequence_str = "".join(sequence)
+        prob_B = calculate_win_probability(seq_a, sequence_str, num_simulations)
+        if prob_B > best_probability:
+            best_probability = prob_B
+            best_sequence = sequence_str
+    print(f"最佳序列: {best_sequence}")
+    print(f"最大获胜概率: {best_probability}")
+
+
+if __name__ == "__main__":
+    num_simulations = 10000  # 模拟的次数，可以根据需要调整
+    seq_a = 'UDUUD'
+
+    profiler = cProfile.Profile()
+    profiler.enable()
+    cal_max_probability_sequence(seq_a, num_simulations)
+    profiler.disable()
+    profiler.print_stats()
+#输出
+seq b: UUUUU, probability: 0.3884
+seq b: UUUUD, probability: 0.5595
+seq b: UUUDU, probability: 0.5997
+seq b: UUUDD, probability: 0.535
+seq b: UUDUU, probability: 0.5813
+seq b: UUDUD, probability: 0.4893
+seq b: UUDDU, probability: 0.4724
+seq b: UUDDD, probability: 0.4755
+seq b: UDUUU, probability: 0.501
+seq b: UDUUD, probability: 0.0
+seq b: UDUDU, probability: 0.5006
+seq b: UDUDD, probability: 0.5073
+seq b: UDDUU, probability: 0.4989
+seq b: UDDUD, probability: 0.4914
+seq b: UDDDU, probability: 0.4919
+seq b: UDDDD, probability: 0.5032
+seq b: DUUUU, probability: 0.535
+seq b: DUUUD, probability: 0.5308
+seq b: DUUDU, probability: 0.4126
+seq b: DUUDD, probability: 0.3476
+seq b: DUDUU, probability: 0.7065
+seq b: DUDUD, probability: 0.4685
+seq b: DUDDU, probability: 0.5017
+seq b: DUDDD, probability: 0.4927
+seq b: DDUUU, probability: 0.5264
+seq b: DDUUD, probability: 0.5231
+seq b: DDUDU, probability: 0.6078
+seq b: DDUDD, probability: 0.4673
+seq b: DDDUU, probability: 0.5311
+seq b: DDDUD, probability: 0.528
+seq b: DDDDU, probability: 0.5335
+seq b: DDDDD, probability: 0.3615
+最佳序列: DUDUU
+最大获胜概率: 0.7065
+函数: cal_max_probability_sequence, 运行时间: 11.02159833908081
+         40021000 function calls in 11.022 seconds
+
+   Ordered by: standard name
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   11.022   11.022 main.py:10(wrapper)
+   320000    3.225    0.000   10.939    0.000 main.py:24(simulate_game)
+       32    0.082    0.003   11.021    0.344 main.py:36(calculate_win_probability)
+        1    0.000    0.000   11.022   11.022 main.py:49(cal_max_probability_sequence)
+  6562975    3.338    0.000    4.760    0.000 random.py:237(_randbelow_with_getrandbits)
+  6562975    2.470    0.000    7.686    0.000 random.py:343(choice)
+  6882976    0.484    0.000    0.484    0.000 {built-in method builtins.len}
+       35    0.001    0.000    0.001    0.000 {built-in method builtins.print}
+        2    0.000    0.000    0.000    0.000 {built-in method time.time}
+  6562975    0.470    0.000    0.470    0.000 {method 'bit_length' of 'int' objects}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+ 13128995    0.953    0.000    0.953    0.000 {method 'getrandbits' of '_random.Random' objects}
+       32    0.000    0.000    0.000    0.000 {method 'join' of 'str' objects}
+#-----------------------------------------------------------------------------------------
+# dataframe数据保存恢复 https://pythonjishu.com/dataframe-to-in-2/
+# 生成csv https://blog.csdn.net/weixin_44943389/article/details/133614993
+#!/usr/bin/env python3
+import os.path
+
+import pandas as pd
+import tushare as ts
+
+
+def get_data(code='600519', starttime='2019-12-01', endtime='2020-01-01'):
+    df = load_data()
+    if df is None:
+        df = ts.get_k_data(code, start=starttime, end=endtime)
+        df.index = pd.to_datetime(df.date)
+        save_data(df)
+    return df
+
+
+def save_data(df):
+    df.to_pickle('data.pkl')
+
+
+def load_data():
+    if os.path.exists('data.pkl'):
+        return pd.read_pickle('data.pkl')
+    return None
+
+
+if __name__ == '__main__':
+    df = get_data()
+    print(df)
+    df.to_csv('a.csv')
 
 #-----------------------------------------------------------------------------------------
+# 解析parquet数据并打印
+#!/usr/bin/env python3
 
+import pandas as pd
+import pyarrow.parquet as pq
 
-#-----------------------------------------------------------------------------------------
+pd.set_option('display.max_rows', 50)
 
-
-#-----------------------------------------------------------------------------------------
-
-
-#-----------------------------------------------------------------------------------------
-
+if __name__ == '__main__':
+    table = pq.read_table(
+        'D:\Work\需求\hive验证\问题\parquet数据\part-00000-2509a0a2-4e6d-47d1-8094-220a0c6408fc-c000.snappy.parquet')
+    df = table.to_pandas()
+    print(df.to_string(max_rows=10))
 
 #-----------------------------------------------------------------------------------------
 

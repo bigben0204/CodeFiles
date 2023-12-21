@@ -1,0 +1,221 @@
+填空题，输出是什么：
+#include <iostream>
+#include <sys/unistd.h>
+
+int global_var = 0;
+int main() {
+    std::cout << getpid() << std::endl;  // 当前进程PID
+    pid_t pid = fork();
+    if (pid == 0) {  // 子进程
+        ++global_var;
+        printf("%d,%d,%d\n", getpid(), pid, global_var);
+    } else {  // 父进程
+        ++global_var;
+        printf("%d,%d,%d\n", getpid(), pid, global_var);
+    }
+}
+
+填空题，输出是什么：
+#include <iostream>
+#include <array>
+#include <climits>
+#include <emmintrin.h>
+#include <sys/unistd.h>
+
+struct A {
+    char c;
+    char c1[24];
+    char c2[15];
+    double d;
+    char c3;
+    char c4;
+    int i1;
+    int i2;
+    char c5;
+};
+struct B {
+    char c;
+    char c1[24];
+    char c2[15];
+    double d;
+    char c3;
+    char c4;
+    int i1;
+    int i2;
+    char c5;
+}__attribute__((packed));
+
+int main() {
+    printf("%ld\n", sizeof(struct A));  // 64
+    printf("%ld\n", sizeof(struct B));  // 59
+    return 0;
+}
+
+选择题：
+是关于Linux缺页中断，给个要访问的数据，问使用FIFO和LRU算法，分别会有几次缺页中断，我是参考下面这个链接的：
+https://blog.csdn.net/weixin_42323413/article/details/84564457
+
+选择题：
+关于Linux上的inode的描述错误的，我是参考下面这个链接的：
+https://blog.csdn.net/weixin_73348410/article/details/128225564
+
+
+编程题：
+// 给两个版本号，比较版本号大小。用例只过了80多，没找出来问题在哪里
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class Solution {
+public:
+    std::vector<std::string> split(const std::string& s, const std::string& delimiters) {
+        std::vector<std::string> tokens;
+        auto lastPos = s.find_first_not_of(delimiters);
+        auto pos = s.find_first_of(delimiters, lastPos);
+        while (lastPos != std::string::npos || pos != std::string::npos) {
+            std::string&& subVersion = s.substr(lastPos, pos - lastPos);
+            subVersion.erase(0, subVersion.find_first_not_of("0"));
+            if (subVersion.empty()) {
+                subVersion = "0";
+            }
+
+            tokens.push_back(subVersion);
+            lastPos = s.find_first_not_of(delimiters, pos);
+            pos = s.find_first_of(delimiters, lastPos);
+        }
+        return tokens;
+    }
+
+    int compareSubVersion(const std::string& subVersion1, const std::string& subVersion2) {
+        if (subVersion1.size() == subVersion2.size()) {
+            return subVersion1.compare(subVersion2);
+        }
+        return subVersion1.size() > subVersion2.size() ? 1 : -1;
+    }
+
+    int compareVersion(const std::string& version1, const std::string& version2) {
+        std::vector<std::string> subVersions1 = split(version1, ".");
+        std::vector<std::string> subVersions2 = split(version2, ".");
+        int maxLength = std::max(subVersions1.size(), subVersions2.size());
+        for (int i = 0; i < maxLength; ++i) {
+            const std::string& subVersion1 = i < subVersions1.size() ? subVersions1[i] : "0";
+            const std::string& subVersion2 = i < subVersions2.size() ? subVersions2[i] : "0";
+            int subResult = compareSubVersion(subVersion1, subVersion2);
+            if (subResult != 0) {
+                return subResult;
+            }
+        }
+        return 0;
+    }
+};
+
+class SolutionTest : public testing::Test {
+protected:
+    Solution solution;
+};
+
+TEST_F(SolutionTest, Test1) {
+    EXPECT_EQ(0, solution.compareVersion("1.0", "1.0.0"));
+    EXPECT_EQ(0, solution.compareVersion("0", "0"));
+    EXPECT_EQ(0, solution.compareVersion("0.0", "0.0"));
+    EXPECT_EQ(1, solution.compareVersion("1", "0"));
+    EXPECT_EQ(-1, solution.compareVersion("0", "1"));
+    EXPECT_EQ(0, solution.compareVersion(".", "."));
+    EXPECT_EQ(0, solution.compareVersion("12345678901234567890123456789012.0", "12345678901234567890123456789012.0"));
+    EXPECT_EQ(1, solution.compareVersion("12345678901234567890123456789012.0", "12345678901234567890123456789011.0"));
+    EXPECT_EQ(-1, solution.compareVersion("12345678901234567890123456789012.0", "12345678901234567890123456789013.0"));
+    EXPECT_EQ(-1, solution.compareVersion("1234567890123456789012345678901.0", "12345678901234567890123456789013.0"));
+}
+
+TEST_F(SolutionTest, Test2) {
+    EXPECT_EQ(-1, solution.compareVersion("0.1", "1.1"));
+}
+
+TEST_F(SolutionTest, Test3) {
+    EXPECT_EQ(1, solution.compareVersion("1.32", "1.1"));
+}
+
+TEST_F(SolutionTest, Test4) {
+    EXPECT_EQ(0, solution.compareVersion("0001.01", "1.001"));
+}
+
+TEST_F(SolutionTest, Test5) {
+    EXPECT_EQ(-1, solution.compareVersion("1.0", "1.01.1"));
+}
+
+TEST_F(SolutionTest, Test6) {
+    EXPECT_EQ(0, solution.compareVersion("1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1", "1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1"));
+}
+
+
+编程题：
+// 魔方计算：给个N*N的矩阵，按题目给定规则把N*N个数字填进去。用例全部通过
+#include "gtest/gtest.h"
+
+using namespace std;
+
+class MatrixCalculator {
+    using POS = std::pair<int, int>;
+    using MATRIX = std::vector<std::vector<int>>;
+public:
+    MATRIX getMatrix(int dimension) {
+        dimension_ = dimension;
+        MATRIX matrix(dimension, std::vector<int>(dimension, 0));
+        int maxNum = dimension * dimension;
+        POS pos = {0, 0};
+        for (int num = 1; num <= maxNum; ++num) {
+            pos = getNextPos(num, pos, matrix);
+            matrix[pos.first][pos.second] = num;
+        }
+        return matrix;
+    }
+
+private:
+    POS getNextPos(int num, const POS& curPos, MATRIX& matrix) {
+        int row = curPos.first, col = curPos.second;
+        POS nextPos;
+        if (num == 1) {
+            nextPos = {0, (dimension_ - 1) / 2};
+        } else if (row == 0 && col == dimension_ - 1) {
+            nextPos = {getNext(row + 1), col};
+        } else if (row == 0 && col != dimension_ - 1) {
+            nextPos = {getNext(row - 1), getNext(col + 1)};
+        } else if (row != 0 && col == dimension_ - 1) {
+            nextPos = {getNext(row - 1), 0};
+        } else {
+            nextPos = {getNext(row - 1), getNext(col + 1)};
+        }
+        if (matrix[nextPos.first][nextPos.second] != 0) {
+            nextPos = {getNext(row + 1), col};
+        }
+        return nextPos;
+    }
+
+    int getNext(int next) {
+        if (next == dimension_) {
+            return 0;
+        } else if (next == -1) {
+            return dimension_ - 1;
+        }
+        return next;
+    }
+
+private:
+    int dimension_ = 0;
+};
+
+class SolutionTest2 : public testing::Test {
+protected:
+    MatrixCalculator solution;
+};
+
+TEST_F(SolutionTest2, Test1) {
+    std::vector<std::vector<int>> expect = {{8, 1, 6}, {3, 5, 7}, {4, 9, 2}};
+    EXPECT_EQ(expect, solution.getMatrix(3));
+}
+
+TEST_F(SolutionTest2, Test2) {
+    std::vector<std::vector<int>> expect = {{17, 24, 1, 8, 15}, {23, 5, 7, 14, 16}, {4, 6, 13, 20, 22},
+                                            {10, 12, 19, 21, 3}, {11, 18, 25, 2, 9}};
+    EXPECT_EQ(expect, solution.getMatrix(5));
+}

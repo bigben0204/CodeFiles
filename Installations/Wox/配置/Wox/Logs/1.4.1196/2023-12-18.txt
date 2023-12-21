@@ -1,0 +1,107 @@
+2023-12-18 20:47:20.1826|INFO|Wox.App|OnStartup|Begin Wox startup----------------------------------------------------
+2023-12-18 20:47:22.2464|INFO|Wox.App|OnStartup|## Runtime Info
+* Command Line: "C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Wox.exe" 
+* Portable Mode: False
+* Timestamp: 12/18/2023 20:47:22
+* Wox version: 1.4.1196
+* OS Version: Microsoft Windows NT 10.0.19045.0
+* x64 OS: True
+* x64 Process: True
+* System Language: zh-CN
+* Wox Language: zh-cn
+* CLR Version: 4.0.30319.42000
+* Installed .NET Framework: 
+   * v4 Client 4.8.04084
+   * v4 Full 4.8.04084
+   * v4.0 Client 4.0.0.0
+
+2023-12-18 20:47:22.6947|ERROR|Wox.Core.Plugin.PluginsLoader|PythonPlugins|Can't find python executable in <b 
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Plugin Indicator> is <30ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Browser Bookmarks> is <72ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Wox Plugin Management> is <53ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Hello World CSharp> is <28ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Colors> is <32ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <System Commands> is <58ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <URL> is <48ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Shell> is <114ms>
+2023-12-18 20:47:23.1426|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Calculator> is <163ms>
+2023-12-18 20:47:23.1589|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Folder> is <94ms>
+2023-12-18 20:47:23.1589|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Web Searches> is <111ms>
+2023-12-18 20:47:23.1709|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Everything> is <95ms>
+2023-12-18 20:47:23.1848|INFO|Wox.Plugin.Program.Main|preloadPrograms|Preload programs cost <18ms>
+2023-12-18 20:47:23.1848|INFO|Wox.Plugin.Program.Main|preloadPrograms|Number of preload win32 programs <130>
+2023-12-18 20:47:23.1848|INFO|Wox.Plugin.Program.Main|preloadPrograms|Number of preload uwps <35>
+2023-12-18 20:47:23.1848|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Program> is <170ms>
+2023-12-18 20:47:23.2365|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Control Panel> is <147ms>
+2023-12-18 20:47:23.2365|ERROR|Wox.Core.Resource.Internationalization|LanguageFile|Language path can't be found <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.BrowserBookmark\Languages\zh-cn.xaml>
+2023-12-18 20:47:23.4110|INFO|Wox.Core.Resource.Theme|.ctor|Runtime Version 10.0.19045.0 True
+2023-12-18 20:47:23.5735|INFO|Wox.App|OnStartup|SDK Info: ## SDK Info
+* Python Path: 
+* Everything SDK Path: C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.Everything\EverythingSDK\x64\Everything.dll
+
+2023-12-18 20:47:23.5735|INFO|Wox.App|OnStartup|End Wox startup ----------------------------------------------------  
+2023-12-18 20:47:23.5735|INFO|Wox.App|OnStartup|Startup cost <3701ms>
+2023-12-18 20:47:25.2349|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-18 20:47:25.2349|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-18 20:47:25.2758|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-18 20:47:25.3436|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <148ms>
+2023-12-18 20:47:25.3785|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <184ms>
+2023-12-18 20:47:25.3785|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <136>
+2023-12-18 20:47:25.3785|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-18 21:28:13.6102|ERROR|Wox.Image.ImageLoader|Load|cannot load image async <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>|Exception begin --------------------
+  System.ArgumentException: iconPtr zero EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128
+  HResult: -2147024809
+  Data: <path> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Data: <title> -> <NVIDIA Control Panel>
+  Data: <pluginID> -> <209621585B9B4D81813913C507C058C6>
+  Data: <pluginDirectory> -> <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.ControlPanel>
+  Data: <p> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Source: Wox
+  TargetAssembly: Wox, Version=1.4.1196.0, Culture=neutral, PublicKeyToken=null
+  TargetModule: Wox.exe
+  TargetSite: System.Windows.Media.ImageSource GetImage(System.String, System.String, Int32)
+  StackTrace: --------------------
+   at Wox.Image.EmbededIcon.GetImage(String key, String path, Int32 iconSize) in C:\projects\wox\Wox\Image\EmbededIcon.cs:line 55
+   at Wox.Image.ImageLoader.<>c__DisplayClass10_0.<Load>b__0(String p) in C:\projects\wox\Wox\Image\ImageLoader.cs:line 250
+Exception end ------------------------------------------------------------
+
+
+2023-12-18 21:28:13.6271|ERROR|Wox.Image.ImageLoader|Load|cannot load image async <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>|Exception begin --------------------
+  System.ArgumentException: iconPtr zero EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128
+  HResult: -2147024809
+  Data: <path> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Data: <title> -> <NVIDIA Control Panel>
+  Data: <pluginID> -> <209621585B9B4D81813913C507C058C6>
+  Data: <pluginDirectory> -> <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.ControlPanel>
+  Data: <p> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Source: Wox
+  TargetAssembly: Wox, Version=1.4.1196.0, Culture=neutral, PublicKeyToken=null
+  TargetModule: Wox.exe
+  TargetSite: System.Windows.Media.ImageSource GetImage(System.String, System.String, Int32)
+  StackTrace: --------------------
+   at Wox.Image.EmbededIcon.GetImage(String key, String path, Int32 iconSize) in C:\projects\wox\Wox\Image\EmbededIcon.cs:line 55
+   at Wox.Image.ImageLoader.<>c__DisplayClass10_0.<Load>b__0(String p) in C:\projects\wox\Wox\Image\ImageLoader.cs:line 250
+Exception end ------------------------------------------------------------
+
+

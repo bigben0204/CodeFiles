@@ -1,0 +1,54 @@
+git和tortoisegit下载安装地址：
+参考：https://zhuanlan.zhihu.com/p/601784810
+https://git-scm.com/download/win
+https://tortoisegit.org/download/
+
+
+1. github无法打开：
+解决方案：
+参考：https://www.cnblogs.com/wanpi/p/14668174.html 或 https://zhuanlan.zhihu.com/p/339927339
+一、确定ip
+进入网址  https://github.com.ipaddress.com
+查看GitHub的ip地址。
+
+ 二、确定域名ip
+进入网址  https://fastly.net.ipaddress.com/github.global.ssl.fastly.net
+
+三、确定静态资源ip
+进入网址 https://github.com.ipaddress.com/assets-cdn.github.com
+
+四、修改hosts文件
+Windows系统：打开C:\Windows\System32\drivers\etc
+找到hosts文件
+
+可以使用notepad++打开，如果没有，右键选择打开方式为记事本即可。
+
+在底部加入前三步获得的内容，即：
+
+140.82.114.4 github.com
+199.232.69.194 github.global.ssl.fastly.net
+185.199.108.153 assets-cdn.github.com
+185.199.110.153 assets-cdn.github.com
+185.199.111.153 assets-cdn.github.com
+保存并退出即可。需要提供管理员权限！！！
+
+接着还需要刷新DNS
+windows下刷新DNS的方法：
+打开CMD
+输入   ipconfig /flushdns
+
+2. 用户邮箱配置：
+git config --global user.name "bigben0204"
+git config --global user.email "bigben0204@163.com"
+
+3. .gitignore配置
+https://blog.csdn.net/qq_41428418/article/details/132737503
+**用于匹配多级目录，如a/**/b可匹配a/b，a/x/b，a/x/y/b
+
+4. git status中文显示乱码
+参考：https://www.bilibili.com/read/cv26831113/
+配置：git config --global core.quotepath false
+
+5. 生成sshkey
+参考：http://www.mobiletrain.org/about/BBS/162416.html
+ssh-keygen -t rsa -b 4096 -C "bigben0204@163.com"

@@ -1,0 +1,16 @@
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
+
+E:\Program Files\Everything-1.4.1.1002.x64\Everything.exe
+
+E:\Program Files\QuickStart
+
+网页搜索：
+地图
+https://ditu.amap.com/search?query={q}
+map
+
+有道词典
+https://dict.youdao.com/result?word={q}&lang=en
+yd
+
+配置文件路径：C:\Users\Administrator\AppData\Roaming\Wox\

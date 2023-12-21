@@ -1,0 +1,3 @@
+1. 先执行ssh-keygen，生成/root/.ssh/id_rsa.pub
+2. 文件 password.txt，配置IP和密码，替换密码中的$为\\\$
+3. 运行文件：sh auto_ssh.sh

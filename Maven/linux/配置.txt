@@ -1,0 +1,7 @@
+修改/etc/profile文件：
+apache_maven_home=/home/ben/Softwares/apache-maven/apache-maven-3.8.3
+PATH=$apache_maven_home/bin:$PATH
+export PATH
+
+重新设置：
+source /etc/profile

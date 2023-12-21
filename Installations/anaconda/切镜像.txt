@@ -1,0 +1,24 @@
+https://blog.csdn.net/ScapeD/article/details/104699643
+https://blog.csdn.net/weixin_42797483/article/details/132048218
+
+1、切换为清华源
+
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge 
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+ 
+# 设置搜索时显示通道地址
+conda config --set show_channel_urls yes
+2、切换为中科大源
+
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/bioconda/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/menpo/
+ 
+conda config --set show_channel_urls yes
+3、切换回默认源 全部删除
+conda config --remove-key channels
+

@@ -1,0 +1,19 @@
+在Path里配置：e:\Program Files\Java\jdk1.8.0_25\bin;
+新增CLASSPATH，内容里配置：.;c:\Program Files\Java\jdk1.8.0_25\lib;
+
+下载：
+http://www.jdkdownload.com/index.html?download=openjdk-17_linux-x64_bin.tar.gz#download
+
+Java12之后版本：
+Linux:
+在/etc/profile里增加：
+export JAVA_HOME=/home/ben/Softwares/jdk
+PATH=$JAVA_HOME/bin:$PATH
+export PATH
+
+source /etc/profile
+
+Windows:
+https://my.oschina.net/u/2428630/blog/3060952
+新建一个JAVA_HOME
+Path增加一行%JAVA_HOME%\bin

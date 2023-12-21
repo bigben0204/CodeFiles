@@ -1,0 +1,175 @@
+1. ifconfig无ens，无法上网：
+参考：https://blog.csdn.net/woay2008/article/details/70477736
+切成root用户，打如下命令：
+/sbin/dhclient
+再查看ifconfig即可看到ens网络。
+
+2. Java代码无法访问到redis：
+用宿主机访问虚拟机Linux：
+说明：默认情况下，如果没有没有开防火墙（ubuntu系统是ufw，通过sudo ufw status来查看），则可以在宿主机直接访问虚拟机系统。
+但是由于redis默认只绑定了本机端口127.0.0.1 ，所以需要把配置文件redis.conf里的：bind 127.0.0.1 。该行注释掉，同时把：protected-mode yes修改为protected-mode no
+再启动redis服务：./bin/redis-server ./redis.conf
+即可正常访问。
+（参考：https://blog.csdn.net/nocol123/article/details/74356752 https://blog.csdn.net/rangf/article/details/41733533）
+
+3. SSH服务未启动，导致无法远程访问到Linux：
+https://www.linuxidc.com/Linux/2011-10/45523.htm
+sudo apt-get install openssh-server 
+sudo /etc/init.d/ssh start
+ps -e|grep ssh
+
+4. 更新软件：
+sudo apt-get update
+sudo apt-get upgrade
+
+5. 切换成root用户：
+https://www.cnblogs.com/q4002945/p/5864094.html
+sudo su
+111
+
+6. 虚拟机安装Ubuntu开机出现“piix4_smbus0000:00:07.3: Host SMBus controller not enabled!”解决方法：
+https://blog.csdn.net/wupc_fighting/article/details/9306941
+编辑文件 /etc/modprobe.d/blacklist.conf
+1）在末尾加入
+blacklist i2c_piix4
+2）重新生成引导文件/boot/initrd.img：
+sudo update-initramfs -u -k all
+3）重新启动
+reboot
+
+7.MISCONF Redis is configured to save RDB snapshots, but is currently not able to persist on disk. Commands that may modify the data set are disabled. Please check Redis logs for details about the error.
+https://www.jianshu.com/p/3aaf21dd34d6
+127.0.0.1:6379> config set stop-writes-on-bgsave-error no
+
+8.Unable to connect to Redis; nested exception is io.lettuce.core.RedisConnectionException: 解决办法
+https://blog.csdn.net/wwg18895736195/article/details/83628564
+1)application.yml的redis配置中的spring.redis.timeout中连接超时时间（毫秒）中时间设置不能为0
+2)找到redis的配置文件 redis.conf
+vim redis.conf
+修改 protected-mode  yes 改为：protected-mode no
+注释掉 #bin 127.0.0.1
+
+9. 删除无用内核：
+https://blog.csdn.net/iam333/article/details/37874683
+https://blog.csdn.net/yanzi1225627/article/details/9269279
+1）查看当前使用内核：
+uname -a
+2）查看所有内核：
+dpkg --get-selections|grep linux
+3）删除无用内核：
+sudo apt-get remove linux-image-2.6.32-22-generic
+4）安装特定版本内核：
+sudo apt-get install linux-headers-4.15.0-44-generic
+5）删除显示为deinstall的内核：
+sudo dpkg -P linux-image-3.5.0-51-generic
+使用组合命令：
+dpkg --get-selections|grep linux | grep deinstall | awk '{print $1}' | xargs -ti sudo dpkg -P {}
+
+sudo apt autoremove
+
+10. Win10无法上网
+https://jingyan.baidu.com/article/9c69d48f9de30713c8024e75.html
+编辑——虚拟网络编辑器-VMNet8恢复默认设置
+
+11. The following packages have been kept back 解决办法  
+http://gaoke0820.blog.163.com/blog/static/216649652010112524935118/
+在运行sudo apt-get install 时，提示47个没有更新，出现"The following packages have been kept back"这个问题，
+解决方法是使用sudo apt-get -u dist-upgrade 统一更新到发布的版本。
+
+12. 无法和Windows互相拷贝剪切内容：
+参考：https://blog.csdn.net/lv_victor/article/details/51374601
+1) 进入到tools的DVD盘，看到有个zip压缩包，把它解压（直接右键extract to..）到其他目录下，我这里解压到Desktop
+2) sudo ./vmware-install.pl
+重新安装vmware tools，注销再重新登录即可。
+
+13. 安装git
+https://www.linuxidc.com/Linux/2018-05/152610.htm
+sudo apt install git
+git config --global user.name "bigben0204"
+git config --global user.email "bigben0204@163.com"
+git config --list
+
+14. 安装uuid库 https://www.cnblogs.com/fengbohello/p/4179027.html
+sudo apt-get install uuid-dev
+
+15. 安装使用snap https://www.jianshu.com/p/70622b2e9c5d
+# 查看版本
+snap version
+
+# 查找软件
+snap find "media player"
+
+# 查看软件信息
+snap info vlc
+
+# 安装软件
+snap install vlc                    # 默认使用stable channel
+snap install vlc --channel=edge     # 指定 channel
+snap switch  vlc --channel=stable   # 切换channel
+
+# snap 安装软件目录在 `/snap/bin`，该目录已加入 `$PATH`，因此可以直接在命令行运行相应的程序。
+
+# 列出所有已安装的软件
+snap list
+snap list --all vlc # 列出所有已安装的版本
+
+# 更新已安装的软件
+snap refresh vlc
+
+# 回滚软件版本，snap默认会保留2各版本
+snap revert vlc
+
+# 启用/禁用软件
+snap enable/disable vlc
+
+# 删除软件
+snap remove vlc         # 有些系统会缓存31天
+snap remove vlc --purge # 彻底清除
+
+# 后台服务列表
+snap services
+
+# 启动、停止、重启后台服务
+snap restart lxd
+snap restart lxd.daemon
+
+snap start lxd.daemon
+snap start --enable lxd.daemon
+
+snap stop lxd.daemon
+snap stop --disable lxd.daemon
+
+# 查看后台服务日志
+snap logs lxd
+snap logs lxd -f # 持续监控
+
+16. kubectl安装：https://kubernetes.io/zh/docs/tasks/tools/install-kubectl-linux/
+下载：
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+安装：
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+17. 运行docker命令报错：
+docker images
+Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/images/json": dial unix /var/run/docker.sock: connect: permission denied
+解决方案：
+参考：https://blog.csdn.net/ustczhng2012/article/details/111501696
+执行如下命令：
+# 添加当前用户到docker用户组  ${USER}指用户名
+sudo gpasswd -a ${USER} docker
+# 查看用户组下用户，检查添加是否成功
+cat /etc/group | grep docker
+# 重启docker服务
+sudo service docker restart
+# 切换当前会话到新组【group】或重启会话
+newgrp - docker
+# 更改文件权限
+sudo chmod 666 /var/run/docker.sock
+
+18. 安装报错setup failed to generate the ssl keys necessary to run vmware server
+解决方案
+经排查，VMware Workstation 15.5的安装程序会自动安装Microsoft Visual C++ 2015-2019 Redistributable，但似乎存在问题，可以先从 [控制面板] > [程序和功能] 页面删除Microsoft Visual C++ 2015-2019 Redistributable (x86)和Microsoft Visual C++ 2015-2019 Redistributable (x64)，然后从 Microsoft下载中心下载Microsoft Visual C++ 2015 Redistributable Update 3 (x86)和Microsoft Visual C++ 2015 Redistributable Update 3 (x64)并安装。随后，重新执行VMware Workstation安装程序，问题解决。
+到页面下载：
+https://www.microsoft.com/zh-cn/download/details.aspx?id=53840
+vc_redist.x64.exe
+vc_redist.x86.exe

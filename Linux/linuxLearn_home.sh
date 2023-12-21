@@ -837,9 +837,150 @@ sudo mount -t overlay overlay -o lowerdir=/home/ben/Study/lower1:/home/ben/Study
 # 卸载挂载盘
 sudo umount /home/ben/Study/merged
 #--------------------------------------------------------------------------------------------------------------------------
-
+# 根据关键字查找并杀掉进程
+ps -ef | grep -i idea | grep -v grep | awk -F ' ' '{print $2}' | xargs -ti kill -9 {}
 #--------------------------------------------------------------------------------------------------------------------------
+# ProxySql配置
+#!/bin/bash
 
+proxy_sql_ip=$1
+if [[ "$proxy_sql_ip" = "" ]]; then
+    proxy_sql_ip="127.0.0.1"
+fi
+
+sudo systemctl stop proxysql
+sudo rm -rf /var/lib/proxysql/proxysql.db
+sudo systemctl start proxysql
+
+sleep 3s
+mysql -uadmin -padmin -P6032 -h${proxy_sql_ip} --comments <"proxy.sql"
+#mysql -uadmin -padmin -P6032 -h${proxy_sql_ip} -e "select hostgroup_id,hostname,port,status,weight from mysql_servers;"
+mysql -udoris -pP@ssword1! -P6033 -h${proxy_sql_ip}  -e "use tpch; select count(1) from nation;"
+
+# proxy.sql
+insert into mysql_servers(hostgroup_id,hostname,port) values(10,'172.16.20.53',9030);
+insert into mysql_servers(hostgroup_id,hostname,port) values(10,'172.16.20.54',9030);
+insert into mysql_servers(hostgroup_id,hostname,port) values(10,'172.16.20.55',9030);
+
+set mysql-monitor_username='monitor';
+set mysql-monitor_password='P@ssword1!';
+load mysql variables to runtime;
+save mysql variables to disk;
+
+select * from mysql_server_connect_log;
+select * from mysql_server_ping_log;
+select * from mysql_server_read_only_log;
+load mysql servers to runtime;
+save mysql servers to disk;
+
+select hostgroup_id,hostname,port,status,weight from mysql_servers;
+
+insert into mysql_users(username,password,default_hostgroup) values('root','',10);
+insert into mysql_users(username,password,default_hostgroup) values('doris','P@ssword1!',10);
+load mysql users to runtime;
+save mysql users to disk;
+
+select * from mysql_users\G
+
+UPDATE global_variables SET variable_value='true' WHERE variable_name='mysql-forward_autocommit';
+UPDATE global_variables SET variable_value='true' WHERE variable_name='mysql-autocommit_false_is_transaction';
+LOAD MYSQL VARIABLES TO RUNTIME;
+SAVE MYSQL VARIABLES TO DISK;
+
+# test.sh
+#!/bin/bash
+
+# sh test.sh test_nation.sql "from nation" 172.16.20.53 tpch 5
+# sh test.sh test_q5.sql "select n_name" 172.16.20.53 tpch 1
+
+sql_file=$1
+log_key_str=$2
+ip=$3
+db=$4
+loop_count=$5
+
+for ((i=0; i < $loop_count; i++)); do
+    mysql -udoris -pP@ssword1! -P6033 -h"${ip}" -D"${db}" --comments <"$sql_file"
+done
+
+ansible -i /data01/dingben/ansible_conf/ip_list.conf dev_doris_fe -m shell -a "grep \"$log_key_str\" /var/log/doris/fe/fe.log | tail -n 30"
+
+# test_concurrent.sh
+#!/bin/bash
+
+# sh test_concurrent.sh test_nation.sql "from nation" 12 4 nginx_db.conf
+# sh test_concurrent.sh test_q5.sql "select n_name" 12 4 nginx_db.conf
+set -e
+
+current_dir=$(
+  cd $(dirname $0)
+  pwd
+)
+
+sql_file=$1
+log_key_str=$2
+loop_count=$3
+concurrent=$4
+db_conf_path=$5
+
+source "$current_dir/$db_conf_path"
+echo "
+HOST=$HOST
+PORT=$PORT
+USER=$USER
+PASSWORD=$PASSWORD
+DB=$DB
+"
+
+rm -rf mylist
+mkfifo mylist
+exec 4<>mylist
+for ((i=0; i < 4; i++)); do
+    echo >mylist
+done
+
+for loop in $(seq 1 $loop_count);do
+        read <mylist
+        {
+        echo "开始：$loop"
+        mysql -u"${USER}" -p"${PASSWORD}" -P"${PORT}" -h"${HOST}" -D"${DB}" --comments <"$sql_file"
+        echo "结束：$loop"
+        echo >mylist
+       }&
+done
+wait
+echo "运行完成..."
+
+# 全部结束后解绑文件描述符并删除管道
+exec 4<&-
+exec 4>&-
+rm -f mylist
+
+ansible -i /data01/dingben/ansible_conf/ip_list.conf dev_doris_fe -m shell -a "grep \"$log_key_str\" /var/log/doris/fe/fe.log | tail -n 30"
+
+# nginx_db.conf
+# Any of FE host
+export HOST='xxx'
+# http_port in fe.conf
+export PORT=6030
+# query_port in fe.conf
+# Doris username
+export USER='root'
+# Doris password
+export PASSWORD='xxx'
+# The database where TPC-H tables located
+export DB='tpch'
+
+# 全部结束后解绑文件描述符并删除管道
+exec 4<&-
+exec 4>&-
+rm -f mylist
+
+ansible -i /data01/dingben/ansible_conf/ip_list.conf dev_doris_fe -m shell -a "grep \"$log_key_str\" /var/log/doris/fe/fe.log | tail -n 30"
+
+# test_nation.sql
+use tpch; 
+select count(1) from nation;
 #--------------------------------------------------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------------------------------------------------

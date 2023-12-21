@@ -1,0 +1,15 @@
+1. 创建快捷方式失败：
+选默认安装目录，无法创建快捷方式，只能在D盘根目录下安装，就可以了
+
+2. 创建env环境后运行报错：
+ImportError: DLL load failed while importing _ssl: 找不到指定的模块
+参考：https://blog.csdn.net/weixin_43858843/article/details/123938904
+在系统环境变量PATH中加入如下4个路径即可：
+D:\Anaconda3;D:\Anaconda3\Scripts;D:\Anaconda3\Library\bin;D:\Anaconda3\Library\mingw-w64\bin;
+
+3. anaconda pip路径：
+C:\Users\Ben\AppData\Roaming\pip\pip.ini
+内容：
+[global]
+index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+

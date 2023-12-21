@@ -1,0 +1,448 @@
+2023-12-17 00:05:08.4298|ERROR|Wox.Image.ImageLoader|Load|cannot load image async <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>|Exception begin --------------------
+  System.ArgumentException: iconPtr zero EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128
+  HResult: -2147024809
+  Data: <path> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Data: <title> -> <NVIDIA Control Panel>
+  Data: <pluginID> -> <209621585B9B4D81813913C507C058C6>
+  Data: <pluginDirectory> -> <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.ControlPanel>
+  Data: <p> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Source: Wox
+  TargetAssembly: Wox, Version=1.4.1196.0, Culture=neutral, PublicKeyToken=null
+  TargetModule: Wox.exe
+  TargetSite: System.Windows.Media.ImageSource GetImage(System.String, System.String, Int32)
+  StackTrace: --------------------
+   at Wox.Image.EmbededIcon.GetImage(String key, String path, Int32 iconSize) in C:\projects\wox\Wox\Image\EmbededIcon.cs:line 55
+   at Wox.Image.ImageLoader.<>c__DisplayClass10_0.<Load>b__0(String p) in C:\projects\wox\Wox\Image\ImageLoader.cs:line 250
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 00:05:08.6738|ERROR|Wox.Image.ImageLoader|Load|cannot load image async <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>|Exception begin --------------------
+  System.ArgumentException: iconPtr zero EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128
+  HResult: -2147024809
+  Data: <path> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Data: <title> -> <NVIDIA Control Panel>
+  Data: <pluginID> -> <209621585B9B4D81813913C507C058C6>
+  Data: <pluginDirectory> -> <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.ControlPanel>
+  Data: <p> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Source: Wox
+  TargetAssembly: Wox, Version=1.4.1196.0, Culture=neutral, PublicKeyToken=null
+  TargetModule: Wox.exe
+  TargetSite: System.Windows.Media.ImageSource GetImage(System.String, System.String, Int32)
+  StackTrace: --------------------
+   at Wox.Image.EmbededIcon.GetImage(String key, String path, Int32 iconSize) in C:\projects\wox\Wox\Image\EmbededIcon.cs:line 55
+   at Wox.Image.ImageLoader.<>c__DisplayClass10_0.<Load>b__0(String p) in C:\projects\wox\Wox\Image\ImageLoader.cs:line 250
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 00:05:08.8653|ERROR|Wox.Image.ImageLoader|Load|cannot load image async <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>|Exception begin --------------------
+  System.ArgumentException: iconPtr zero EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128
+  HResult: -2147024809
+  Data: <path> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Data: <title> -> <NVIDIA Control Panel>
+  Data: <pluginID> -> <209621585B9B4D81813913C507C058C6>
+  Data: <pluginDirectory> -> <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.ControlPanel>
+  Data: <p> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Source: Wox
+  TargetAssembly: Wox, Version=1.4.1196.0, Culture=neutral, PublicKeyToken=null
+  TargetModule: Wox.exe
+  TargetSite: System.Windows.Media.ImageSource GetImage(System.String, System.String, Int32)
+  StackTrace: --------------------
+   at Wox.Image.EmbededIcon.GetImage(String key, String path, Int32 iconSize) in C:\projects\wox\Wox\Image\EmbededIcon.cs:line 55
+   at Wox.Image.ImageLoader.<>c__DisplayClass10_0.<Load>b__0(String p) in C:\projects\wox\Wox\Image\ImageLoader.cs:line 250
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 00:48:07.6916|INFO|Wox.App|Dispose|Wox Start Displose
+2023-12-17 18:15:13.4438|INFO|Wox.App|OnStartup|Begin Wox startup----------------------------------------------------
+2023-12-17 18:15:14.7626|INFO|Wox.App|OnStartup|## Runtime Info
+* Command Line: "C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Wox.exe" 
+* Portable Mode: False
+* Timestamp: 12/17/2023 18:15:14
+* Wox version: 1.4.1196
+* OS Version: Microsoft Windows NT 10.0.19045.0
+* x64 OS: True
+* x64 Process: True
+* System Language: zh-CN
+* Wox Language: zh-cn
+* CLR Version: 4.0.30319.42000
+* Installed .NET Framework: 
+   * v4 Client 4.8.04084
+   * v4 Full 4.8.04084
+   * v4.0 Client 4.0.0.0
+
+2023-12-17 18:15:15.1258|ERROR|Wox.Core.Plugin.PluginsLoader|PythonPlugins|Can't find python executable in <b 
+2023-12-17 18:15:15.6114|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Hello World CSharp> is <50ms>
+2023-12-17 18:15:15.6114|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Wox Plugin Management> is <51ms>
+2023-12-17 18:15:15.6114|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Colors> is <47ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <System Commands> is <50ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <URL> is <41ms>
+2023-12-17 18:15:15.6114|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Plugin Indicator> is <28ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Folder> is <68ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Shell> is <100ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Calculator> is <147ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Browser Bookmarks> is <59ms>
+2023-12-17 18:15:15.6271|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Web Searches> is <93ms>
+2023-12-17 18:15:15.6492|INFO|Wox.Plugin.Program.Main|preloadPrograms|Preload programs cost <13ms>
+2023-12-17 18:15:15.6492|INFO|Wox.Plugin.Program.Main|preloadPrograms|Number of preload win32 programs <96>
+2023-12-17 18:15:15.6492|INFO|Wox.Plugin.Program.Main|preloadPrograms|Number of preload uwps <35>
+2023-12-17 18:15:15.6492|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Program> is <166ms>
+2023-12-17 18:15:15.6492|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Everything> is <82ms>
+2023-12-17 18:15:16.4446|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Control Panel> is <871ms>
+2023-12-17 18:15:16.4446|ERROR|Wox.Core.Resource.Internationalization|LanguageFile|Language path can't be found <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.BrowserBookmark\Languages\zh-cn.xaml>
+2023-12-17 18:15:16.5826|INFO|Wox.Core.Resource.Theme|.ctor|Runtime Version 10.0.19045.0 True
+2023-12-17 18:15:16.7518|INFO|Wox.App|OnStartup|SDK Info: ## SDK Info
+* Python Path: 
+* Everything SDK Path: C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.Everything\EverythingSDK\x64\Everything.dll
+
+2023-12-17 18:15:16.7518|INFO|Wox.App|OnStartup|End Wox startup ----------------------------------------------------  
+2023-12-17 18:15:16.7518|INFO|Wox.App|OnStartup|Startup cost <3564ms>
+2023-12-17 18:15:17.7010|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 18:15:17.7010|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 18:15:17.7731|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <102ms>
+2023-12-17 18:15:17.8078|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 18:15:17.9300|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <260ms>
+2023-12-17 18:15:17.9300|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <121>
+2023-12-17 18:15:17.9300|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 18:19:33.3289|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 18:21:04.6032|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 20:14:45.1432|INFO|Wox.App|OnStartup|Begin Wox startup----------------------------------------------------
+2023-12-17 20:14:46.3773|INFO|Wox.App|OnStartup|## Runtime Info
+* Command Line: "C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Wox.exe" 
+* Portable Mode: False
+* Timestamp: 12/17/2023 20:14:46
+* Wox version: 1.4.1196
+* OS Version: Microsoft Windows NT 10.0.19045.0
+* x64 OS: True
+* x64 Process: True
+* System Language: zh-CN
+* Wox Language: zh-cn
+* CLR Version: 4.0.30319.42000
+* Installed .NET Framework: 
+   * v4 Client 4.8.04084
+   * v4 Full 4.8.04084
+   * v4.0 Client 4.0.0.0
+
+2023-12-17 20:14:46.7365|ERROR|Wox.Core.Plugin.PluginsLoader|PythonPlugins|Can't find python executable in <b 
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Hello World CSharp> is <44ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Wox Plugin Management> is <44ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Colors> is <41ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <System Commands> is <49ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <URL> is <46ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Plugin Indicator> is <28ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Browser Bookmarks> is <63ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Folder> is <76ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Shell> is <98ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Web Searches> is <88ms>
+2023-12-17 20:14:47.3770|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Calculator> is <150ms>
+2023-12-17 20:14:47.3926|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Everything> is <61ms>
+2023-12-17 20:14:47.4083|INFO|Wox.Plugin.Program.Main|preloadPrograms|Preload programs cost <18ms>
+2023-12-17 20:14:47.4083|INFO|Wox.Plugin.Program.Main|preloadPrograms|Number of preload win32 programs <121>
+2023-12-17 20:14:47.4083|INFO|Wox.Plugin.Program.Main|preloadPrograms|Number of preload uwps <35>
+2023-12-17 20:14:47.4083|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Program> is <155ms>
+2023-12-17 20:14:48.5018|INFO|Wox.Core.Plugin.PluginManager|InitializePlugins|Total init cost for <Control Panel> is <1164ms>
+2023-12-17 20:14:48.5018|ERROR|Wox.Core.Resource.Internationalization|LanguageFile|Language path can't be found <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.BrowserBookmark\Languages\zh-cn.xaml>
+2023-12-17 20:14:48.6580|INFO|Wox.Core.Resource.Theme|.ctor|Runtime Version 10.0.19045.0 True
+2023-12-17 20:14:48.8767|INFO|Wox.App|OnStartup|SDK Info: ## SDK Info
+* Python Path: 
+* Everything SDK Path: C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.Everything\EverythingSDK\x64\Everything.dll
+
+2023-12-17 20:14:48.8767|INFO|Wox.App|OnStartup|End Wox startup ----------------------------------------------------  
+2023-12-17 20:14:48.8767|INFO|Wox.App|OnStartup|Startup cost <3990ms>
+2023-12-17 20:14:49.4456|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 20:14:49.4495|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 20:14:49.5612|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 20:14:49.6240|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <199ms>
+2023-12-17 20:14:49.6689|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <244ms>
+2023-12-17 20:14:49.6689|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <121>
+2023-12-17 20:14:49.6689|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 20:34:08.7598|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 20:53:26.5669|ERROR|Wox.Image.ImageLoader|Load|cannot load image async <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>|Exception begin --------------------
+  System.ArgumentException: iconPtr zero EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128
+  HResult: -2147024809
+  Data: <path> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Data: <title> -> <NVIDIA Control Panel>
+  Data: <pluginID> -> <209621585B9B4D81813913C507C058C6>
+  Data: <pluginDirectory> -> <C:\Users\Administrator\AppData\Local\Wox\app-1.4.1196\Plugins\Wox.Plugin.ControlPanel>
+  Data: <p> -> <EmbededIcon:C:\Program Files\NVIDIA Corporation\Control Panel Client\nvcplui.exe,-128>
+  Source: Wox
+  TargetAssembly: Wox, Version=1.4.1196.0, Culture=neutral, PublicKeyToken=null
+  TargetModule: Wox.exe
+  TargetSite: System.Windows.Media.ImageSource GetImage(System.String, System.String, Int32)
+  StackTrace: --------------------
+   at Wox.Image.EmbededIcon.GetImage(String key, String path, Int32 iconSize) in C:\projects\wox\Wox\Image\EmbededIcon.cs:line 55
+   at Wox.Image.ImageLoader.<>c__DisplayClass10_0.<Load>b__0(String p) in C:\projects\wox\Wox\Image\ImageLoader.cs:line 250
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 21:55:00.4328|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 21:55:25.3495|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 21:55:25.3555|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 21:55:25.3555|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <16ms>
+2023-12-17 21:55:25.4174|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 21:55:25.4174|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <76ms>
+2023-12-17 21:55:25.4174|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <125>
+2023-12-17 21:55:25.4174|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 21:55:30.4395|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 21:55:30.4514|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 21:55:30.4514|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <15ms>
+2023-12-17 21:55:30.4514|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 21:55:30.4684|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <30ms>
+2023-12-17 21:55:30.4684|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <125>
+2023-12-17 21:55:30.4684|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 21:55:31.1815|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 21:55:31.1845|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 21:55:31.1845|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <14ms>
+2023-12-17 21:55:31.1845|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 21:55:31.2065|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <26ms>
+2023-12-17 21:55:31.2065|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <125>
+2023-12-17 21:55:31.2065|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 21:55:43.9582|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 21:55:43.9582|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 21:55:43.9712|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 21:55:43.9712|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <18ms>
+2023-12-17 21:55:43.9861|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <30ms>
+2023-12-17 21:55:43.9861|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <125>
+2023-12-17 21:55:43.9861|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 21:55:51.7445|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 22:01:07.4158|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 22:09:39.9914|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 22:09:39.9914|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 22:09:40.0054|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 22:09:40.0054|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <19ms>
+2023-12-17 22:09:40.0243|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <34ms>
+2023-12-17 22:09:40.0243|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <129>
+2023-12-17 22:09:40.0243|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 22:09:44.5737|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 22:09:44.5737|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 22:09:44.5737|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 22:09:44.5737|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <10ms>
+2023-12-17 22:09:44.6026|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <30ms>
+2023-12-17 22:09:44.6026|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <129>
+2023-12-17 22:09:44.6026|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 22:23:31.8927|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 22:23:31.8927|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 22:23:31.8927|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <7ms>
+2023-12-17 22:23:31.9037|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 22:23:31.9286|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <38ms>
+2023-12-17 22:23:31.9286|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <130>
+2023-12-17 22:23:31.9286|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 22:28:40.5618|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 22:30:14.5892|ERROR|Wox.Plugin.Program.Programs.UWP|ImageFromPath||Unable to get logo for Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge from C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\Assets\MicrosoftEdgeSquare44x44.scale-125.png and located in C:\Windows\SystemApps\Microsoft.MicrosoftEdge_8wekyb3d8bbwe
+2023-12-17 22:31:26.4372|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu
+2023-12-17 22:31:26.4372|ERROR|Wox.Plugin.Program.Programs.UWP|All|Cannot parse UWP C:\Program Files (x86)\Microsoft\Edge\Application|Exception begin --------------------
+  System.IO.FileNotFoundException: Could not find file 'C:\Program Files (x86)\Microsoft\Edge\Application\AppxManifest.xml'.
+  HResult: -2147024894
+  Data: <FullName> -> <Microsoft.MicrosoftEdge.Stable_120.0.2210.77_neutral__8wekyb3d8bbwe>
+  Data: <Location> -> <C:\Program Files (x86)\Microsoft\Edge\Application>
+  Source: mscorlib
+  TargetAssembly: mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+  TargetModule: CommonLanguageRuntimeLibrary
+  TargetSite: Void WinIOError(Int32, System.String)
+  StackTrace: --------------------
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize)
+   at System.Xml.XmlDownloadManager.GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+   at System.Xml.XmlUrlResolver.GetEntity(Uri absoluteUri, String role, Type ofObjectToReturn)
+   at System.Xml.XmlTextReaderImpl.FinishInitUriString()
+   at System.Xml.XmlReaderSettings.CreateReader(String inputUri, XmlParserContext inputContext)
+   at Wox.Plugin.Program.Programs.UWP.InitializeAppInfo() in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 51
+   at Wox.Plugin.Program.Programs.UWP.<>c__DisplayClass25_0.<All>b__0(UWP package, ParallelLoopState state) in C:\projects\wox\Plugins\Wox.Plugin.Program\Programs\UWP.cs:line 151
+Exception end ------------------------------------------------------------
+
+
+2023-12-17 22:31:26.4372|ERROR|Wox.Plugin.Program.Programs.Win32|ProgramPaths|Permission denied C:\ProgramData\Microsoft\Windows\Start Menu
+2023-12-17 22:31:26.4571|INFO|Wox.Plugin.Program.Main|IndexPrograms|Win32 index cost <21ms>
+2023-12-17 22:31:26.4711|INFO|Wox.Plugin.Program.Main|IndexPrograms|UWP index cost <35ms>
+2023-12-17 22:31:26.4711|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed win32 programs <130>
+2023-12-17 22:31:26.4711|INFO|Wox.Plugin.Program.Main|IndexPrograms|Number of indexed uwps <35>
+2023-12-17 23:51:31.0892|INFO|Wox.App|Dispose|Wox Start Displose

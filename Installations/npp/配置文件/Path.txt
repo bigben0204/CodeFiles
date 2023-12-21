@@ -1,0 +1,12 @@
+放置路径：
+C:\Users\Ben\AppData\Roaming\Notepad++
+
+
+
+如何安装插件：
+1. 插件下载路径：
+http://docs.notepad-plus-plus.org/index.php/Plugin_Central
+
+2. 将XXX.dll文件放入目录：E:\Program Files\Notepad++\plugins
+
+3. 打开Notepad++，如果插件中没有，选择：设置 -> 导入 -> 导入插件，将第2步中的XXX.dll文件选择导入，重启即可。

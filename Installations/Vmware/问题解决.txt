@@ -1,0 +1,58 @@
+1. 镜像下载：
+https://mirrors.tuna.tsinghua.edu.cn/centos/7.9.2009/isos/x86_64/
+
+2. 无法上网
+解决方案：https://blog.51cto.com/u_15861563/5823470?u_atoken=9b23ac13-5aab-4db1-9d23-6a87d3e1c234&u_asession=01TITOhY26p_lXKfKg4HlI7K-WvDMt4UYWJpc482SFijqpBH0QTgJBinH7rSEjWZtpX0KNBwm7Lovlpxjd_P_q4JsKWYrT3W_NKPr8w6oU7K-Ilj8JlqJ9dy7c75v0GMzuGALgmy0OhKJ6h8uIjom8j2BkFo3NEHBv0PZUm6pbxQU&u_asig=05FQvs5UmHGbol_txQ1CvOHOMQpIX34uxDSiAoaOQTl67B0KfIyaYyBq_HK5HHOj359Ld_VhdDCzp06LGTRkT9mxbeVoZHHFDvPPkFGUeI81Rwhq_6DamqXOuigbvxAApGTyk35yoQzuPOwpkGGNbhUJ2ENfcwOyZhRBX_3GcqfuL9JS7q8ZD7Xtz2Ly-b0kmuyAKRFSVJkkdwVUnyHAIJzfUSoFxjUqpkyJqAuiHOC_T-eqvQyqeM5AFkHkGEAxIiBMZyRAui7XvSM8Ig_GQPYO3h9VXwMyh6PgyDIVSG1W_uNL91wYXu2TBFYADtvIjHtdQcavBnR-VzaKpyQBss9ugObGhKSPrrk_2aJxvvY7hluuIGvjQU_15vw7_pZb4QmWspDxyAEEo4kbsryBKb9Q&u_aref=NtY0SKNUPoH21hAobwMgNE4xDUM%3D
+解决办法：
+/etc/sysconfig/network-scripts/ifcfg-ens33  (这里的enp0s3不是固定的，看你具体情况，但是基本是en开头的）
+将 ONBOOT=no 改为 ONBOOT=yes
+重启网卡： service network restart
+
+3. 安装centos参考：
+http://www.lotpc.com/zjjc/8936_2.html
+https://blog.csdn.net/weixin_44175418/article/details/123592684
+
+4. 磁盘扩容
+https://www.cnblogs.com/friendwang1001/p/15725732.html
+
+5. windows无法访问vmware中的服务：
+解决方案：https://www.codeleading.com/article/92171079056/
+关闭防火墙：
+systemctl stop firewalld.service
+
+6. 增加sudoers权限：
+https://zhuanlan.zhihu.com/p/551021309
+vim /etc/sudoers
+root ALL=(ALL) ALL
+ben ALL=(ALL) ALL
+
+7. 修改系统时间
+https://blog.csdn.net/afei8856/article/details/52812993
+设置系统时间：
+date -s '2021-06-02 09:50'
+系统时间同步硬件时间：
+hwclock --systohc
+强制把系统时间写入CMOS：
+clock -w
+
+8.时钟同步：参考https://www.bbsmax.com/A/nAJv4op8dr/
+服务端/etc/ntp.conf：
+driftfile /var/lib/ntp/drift
+restrict default nomodify notrap nopeer noquery
+restrict 127.0.0.1
+restrict ::1
+includefile /etc/ntp/crypto/pw
+keys /etc/ntp/keys
+disable monitor
+server 127.127.1.0 prefer
+restrict xxx mask 255.255.0.0 nomodify
+
+客户端/etc/ntp.conf：
+driftfile /var/lib/ntp/drift
+restrict default nomodify notrap nopeer noquery
+restrict 127.0.0.1
+restrict ::1
+includefile /etc/ntp/crypto/pw
+keys /etc/ntp/keys
+disable monitor
+server xxx prefer

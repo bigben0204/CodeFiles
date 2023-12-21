@@ -1,0 +1,128 @@
+# This file will be deleted when harbor.ctyuncdn.cn/bdyun/basic-image/amd-centos:v1.0.0 is provided by liulian
+# docker build --build-arg from_image=centos:7 -t harbor.ctyuncdn.cn/bdyun/basic-image/amd-centos-doris:v1.0.0 -f Dockerfile_centos .
+
+ARG from_image
+FROM ${from_image} AS builder
+
+ARG arch
+ARG image_os
+
+# install dependencies
+RUN yum install -y byacc patch automake libtool make which file ncurses-devel gettext-devel unzip bzip2 zip util-linux wget git python2
+RUN yum install -y hostname sudo
+RUN yum install -y python3
+RUN if [[ "${arch}" = "x86" ]] && [[ "${image_os}" = "centos" ]]; then \
+    yum install -y mysql; \
+else \
+    yum install -y mysql5; \
+fi
+
+RUN mkdir -p /etc/my.cnf.d
+
+# clean cache
+RUN yum clean all
+
+ENV TOOLS_DIR="/tmp/tools"
+COPY tools $TOOLS_DIR
+# install bisheng jdk
+RUN mkdir -p /usr/local/jdk && \
+    wget -q -O /tmp/bisheng-jdk.tar.gz https://mirrors.huaweicloud.com/kunpeng/archive/compiler/bisheng_jdk/bisheng-jdk-8u352-linux-x64.tar.gz && \
+    tar -xzf /tmp/bisheng-jdk.tar.gz -C /usr/local/jdk && \
+    mv /usr/local/jdk/bisheng-jdk1.8.0_352 /usr/local/jdk/bisheng-jdk && \
+    rm -f /tmp/bisheng-jdk.tar.gz
+#RUN mkdir -p /usr/local/jdk && \
+#    tar -xzf $TOOLS_DIR/bisheng-jdk-8u352-linux-aarch64.tar.gz -C /usr/local/jdk && \
+#    mv /usr/local/jdk/bisheng-jdk1.8.0_352 /usr/local/jdk/bisheng-jdk
+
+# install maven 3.6.3
+RUN mkdir -p /usr/share/maven /usr/share/maven/ref && \
+    wget -q -O /tmp/apache-maven.tar.gz https://doris-thirdparty-repo.bj.bcebos.com/thirdparty/apache-maven-3.6.3-bin.tar.gz && \
+    tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 && \
+    rm -f /tmp/apache-maven.tar.gz && \
+    ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+RUN mv $TOOLS_DIR/settings.xml /usr/share/maven/conf/settings.xml
+#RUN mkdir -p /usr/share/maven /usr/share/maven/ref && \
+#    tar -xzf $TOOLS_DIR/apache-maven-3.6.3-bin.tar.gz -C /usr/share/maven --strip-components=1 && \
+#    ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
+#RUN mv $TOOLS_DIR/settings.xml /usr/local/maven/conf/settings.xml
+
+# install nodejs
+RUN wget https://doris-thirdparty-repo.bj.bcebos.com/thirdparty/node-v12.13.0-linux-x64.tar.gz \
+    -q -O /tmp/node.tar.gz \
+    && cd /tmp/ && tar -xzf node.tar.gz \
+    && cp -r node-v12.13.0-linux-x64/* /usr/local/ \
+    && rm /tmp/node.tar.gz && rm -rf node-v12.13.0-linux-x64
+#RUN cd $TOOLS_DIR && tar -xf node-v12.13.0-linux-x64.tar.xz \
+#    && cp -r node-v12.13.0-linux-x64/* /usr/local/
+
+# install ldb-toolchain
+RUN wget --secure-protocol tlsv1 https://doris-community-bj-1308700295.cos.ap-beijing.myqcloud.com/tools/ldb_toolchain_gen.sh \
+    -q -O /tmp/ldb_toolchain_gen.sh \
+    && sh /tmp/ldb_toolchain_gen.sh /var/local/ldb-toolchain/ \
+    && rm /tmp/ldb_toolchain_gen.sh
+#RUN sh $TOOLS_DIR/ldb_toolchain_gen.sh /var/local/ldb-toolchain/
+
+# copy doris_validation_project to validate tars
+RUN rm -rf $TOOLS_DIR/doris_validation/.git && mv $TOOLS_DIR/doris_validation /var/local
+
+RUN rm -rf $TOOLS_DIR
+
+COPY jdbc /var/local/jdbc
+
+# there is a repo which is included all of thirdparty
+ENV JAVA_HOME="/usr/local/jdk/bisheng-jdk"
+ENV REPOSITORY_URL="https://doris-thirdparty-repo.bj.bcebos.com/thirdparty/" \
+    DEFAULT_DIR="/var/local" \
+    PATH="/var/local/ldb-toolchain/bin/:$JAVA_HOME/bin:$PATH"
+#ENV REPOSITORY_URL="https://doris-thirdparty-hk-1308700295.cos.ap-hongkong.myqcloud.com/thirdparty" \
+#    DEFAULT_DIR="/var/local" \
+#    PATH="/var/local/ldb-toolchain/bin/:/var/local/thirdparty/installed/bin/:$PATH" \
+#    DORIS_THIRDPARTY="/var/local/thirdparty"
+
+# disable auto enable ccache
+RUN rm -f /etc/profile.d/ccache.*
+
+# clone lastest source code, download and build third party
+COPY doris ${DEFAULT_DIR}/doris
+# thirdparty packages is best to be downloaded in case of long time downloading in docker
+COPY thirdparty_src ${DEFAULT_DIR}/doris/thirdparty/src
+# copy jars for doris-thirdparty-hadoop-3.3.4.5-for-doris
+RUN mkdir -p /root/.m2
+COPY repository /root/.m2/repository
+# curl: (77) if not set --insecure
+RUN echo "--insecure" > /root/.curlrc
+# temporary in x86 docker container, wget must add '--secure-protocol tlsv1', or an error occurs: 'GnuTLS: The request is invalid. Unable to establish SSL connection.'
+RUN if [[ "${arch}" = "x86" ]] && [[ "${image_os}" = "ctyunos" ]]; then \
+    # 当前刘莲提供的x86_ctyunos镜像必须给wget设置--secure-protocol tlsv1参数，否则会下载失败
+    sed -i "s/ wget / wget --secure-protocol tlsv1 /g" ${DEFAULT_DIR}/doris/thirdparty/download-thirdparty.sh; \
+fi
+
+RUN cd ${DEFAULT_DIR}/doris && /bin/bash thirdparty/build-thirdparty.sh \
+    && rm -rf ${DEFAULT_DIR}/doris/thirdparty/src \
+    && rm -rf ${DEFAULT_DIR}/doris-thirdparty.tar.gz \
+    && rm -rf ${DEFAULT_DIR}/doris-thirdparty \
+    && mkdir -p ${DEFAULT_DIR}/thirdparty \
+    && mv ${DEFAULT_DIR}/doris/thirdparty/installed ${DEFAULT_DIR}/thirdparty/ \
+    && rm -rf ${DEFAULT_DIR}/doris
+#COPY thirdpary installed dir in case of long time compiling in docker
+#COPY thirdparty/installed ${DEFAULT_DIR}/thirdparty/installed
+
+# delete jars downloaded by build-thirdparty
+RUN rm -rf /root/.m2/repository
+
+# squash all layers to reduce the image size
+FROM scratch
+COPY --from=builder / /
+ENV JAVA_HOME="/usr/local/jdk/bisheng-jdk" \
+    MAVEN_HOME="/usr/share/maven"
+ENV REPOSITORY_URL="https://doris-thirdparty-repo.bj.bcebos.com/thirdparty" \
+    DEFAULT_DIR="/var/local" \
+    PATH="/var/local/ldb-toolchain/bin/:/var/local/thirdparty/installed/bin/:$JAVA_HOME/bin:$MAVEN_HOME/bin:$PATH" \
+    DORIS_THIRDPARTY="/var/local/thirdparty"
+#ENV REPOSITORY_URL="https://doris-thirdparty-repo.bj.bcebos.com/thirdparty" \
+#    DEFAULT_DIR="/var/local" \
+#    PATH="/var/local/ldb-toolchain/bin/:/var/local/thirdparty/installed/bin/:$PATH" \
+#    DORIS_THIRDPARTY="/var/local/thirdparty"
+WORKDIR /root
+
+CMD ["/bin/bash"]
